@@ -47,6 +47,7 @@ Layer 6
 6.2B-1 Walk-Forward Adaptive Confluence Calibration  CLOSED V1.1
 Binance Source Adapter V1 (Binance Spot sources)    CLOSED V1
 Exact Performance V2 + Test-Suite Acceleration (unified) CLOSED
+MUF V1 S0 Core Contracts Foundation               CLOSED
 ```
 
 Module 0.1 certification scope remains primary DataFrame output only.
@@ -212,5 +213,53 @@ No semantic/causal/contract change was introduced or is claimed by this closure.
 ```text
 EXACT PERFORMANCE V2 + TEST-SUITE ACCELERATION (unified)
     IMPLEMENTED — PENDING AUDIT; independent unified re-audit: ACCEPTED FOR CLOSURE
+    CLOSED
+```
+
+## MUF V1 S0 closure
+
+CLOSED (core contracts foundation). Independent audit history: original
+implementation audit — PATCH REQUIRED (P1); P1 (deep immutability + complexity)
+— PATCHED, independent P1 re-audit — PATCH REQUIRED (P2); P2 (true immutable
+payload storage + ledger consistency) — PATCHED; final independent P2 re-audit:
+**ACCEPTED FOR CLOSURE**. Product Owner explicitly authorized closure
+(OWNER AUTHORIZATION — CLOSURE ONLY). Closure changed documentation, status,
+release files, and `MANIFEST.sha256` only; production (`src/`) and tests
+(`tests/`) were not modified during closure.
+
+Certified baseline: S0 dedicated **67/67**; full project **1139/1139** (exit
+code 0). External tool suite (field_runner `runner_tests`, outside this
+repository), pre-closure: 36 passed. The external baseline guard still pins the
+pre-S0 clean manifest baseline (185 lines / `12c66abe…`); advancing the official
+MANIFEST during closure legitimately invalidates that external pin and requires
+a separately authorized re-pin (the external guard is never modified during S0
+closure).
+
+Closure certifies within tested scope: the **immutable payload guarantee**
+(structural immutable storage — key-sorted immutable tuple pairs, no
+dict/list/set backing store, base-class mutation attacks impossible by type,
+fail-closed value domain, canonical-hash compatibility via deterministic
+`payload_canonical_view` with `canonical_sha256` as the only hash authority,
+insertion-order-independent identity); the **append-only ledger** (O(n)
+cumulative construction, O(1) amortized duplicate detection, rollback-verified
+append transaction with injected-failure proofs); **earliest lawful
+availability O(R+S)** (permutation invariant, fail-closed incomparable keys, no
+fabricated ordering); InformationKey bindings; information-batch foundations;
+canonical identity contracts; WaveProcess identity schema only; typed
+causal-reference foundations; typed missing-state foundations; S0
+error/schema-version contracts.
+
+Closure does NOT certify wave detection, turning-point quality, hierarchy
+usefulness, α/β/γ/δ superiority, predictive support, statistical independence,
+edge, profitability, Model, Strategy, Signal, PnL, or human-like understanding.
+`RESEARCH-DEBT-020` through `RESEARCH-DEBT-025` remain open. No S1 started.
+
+### MUF V1 S0 exact closure history
+
+```text
+MUF V1 S0 Core Contracts Foundation
+    IMPLEMENTED — PENDING AUDIT; independent original audit: PATCH REQUIRED (P1)
+P1  PATCHED — PENDING RE-AUDIT; independent P1 re-audit: PATCH REQUIRED (P2)
+P2  PATCHED — PENDING RE-AUDIT; final independent P2 re-audit: ACCEPTED FOR CLOSURE
     CLOSED
 ```

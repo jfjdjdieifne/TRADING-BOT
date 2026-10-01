@@ -96,6 +96,7 @@ Module 6.2B-0 V1.2: CLOSED
 Module 6.2B-1 V1.1: CLOSED
 Binance Source Adapter V1: CLOSED
 EXACT PERFORMANCE V2 + TEST-SUITE ACCELERATION (unified): CLOSED
+MUF V1 S0 Core Contracts Foundation: CLOSED
 6.2A-4 Stage 4C-2 HTF structure / MTF confluence: NOT STARTED
 6.2C geometry / 6.2D execution / model / scorer / signals: NOT STARTED
 QualificationObjective: NOT DEFINED
@@ -505,6 +506,62 @@ TEST-SUITE ACCELERATION):
 
 Closure does NOT certify: predictive support; edge; profitability; MUF correctness; Model;
 Strategy; Signal; PnL. RESEARCH-DEBT-020..025 remain open.
+
+## MUF V1 S0 closure boundary
+
+Closure certifies within tested scope (core contracts foundation):
+
+1. **immutable payload guarantee** — published record/event payloads are
+   recursively canonically frozen into structural immutable storage
+   (`FrozenPayloadMapping`: key-sorted immutable tuple pairs; no dict/list/set
+   backing object reachable in the semantic graph; base-class mutation attacks
+   impossible by type; attribute rebinding refused); closed fail-closed value
+   domain (str/bool/int/float/None, approved Enum members, InformationKey,
+   SchemaIdentity, str-keyed mappings, sequences as tuples; sets/frozensets,
+   non-str keys, arbitrary and execution objects raise `SchemaViolation`; no
+   blind deepcopy); canonical-hash compatibility via deterministic
+   `payload_canonical_view` with `canonical_sha256` as the only hash authority;
+   mapping insertion order never alters identity; list/tuple canonical
+   equivalence preserved; copy/deepcopy/pickle fail closed;
+2. **append-only ledger** — ordered event history, O(n) cumulative construction,
+   O(1) amortized duplicate detection (identity index; no history uniqueness
+   scan; no max-history threshold); documented append transaction (validate ->
+   duplicate check -> history -> index) with rollback + invariant verification
+   on stage failure and loud `ImmutabilityViolation` if rollback itself fails;
+   injected-failure proofs cover history failure, index failure, duplicate
+   rejection, invalid event, and retry-after-failure;
+3. **earliest lawful availability** — O(R+S) single-scan computation using only
+   the public CLOSED InformationKey comparison semantics; permutation
+   invariant; fail-closed on incomparable keys
+   (`IncomparableInformationKeys` / `NOT_COMPARABLE`); no fabricated ordering;
+4. InformationKey bindings, information-batch foundations, canonical identity
+   contracts, WaveProcess identity schema only, typed causal-reference
+   foundations, typed missing-state foundations, and S0 error/schema-version
+   contracts within tested scope (`TIE_ORDER_CONTRACT = NOT_PROVEN` remains);
+5. certified baseline: **67 S0 dedicated / 67 passed**; **1139 collected /
+   1139 passed** for the full suite; exit code 0;
+6. external tool suite (field_runner `runner_tests`; outside this repository):
+   36 passed pre-closure — context for the acceptance only. The external
+   baseline guard pins the pre-S0 clean manifest baseline (185 lines /
+   `12c66abe6f18300f2e00cb5c4befeafe1e3dc67c2ca50bc71db74db9ba8b367d`);
+   this closure legitimately advances the official MANIFEST, so that external
+   pin requires a separately authorized re-pin. The external guard was NOT
+   modified during S0 closure;
+7. pre-closure manifest identity: 185 lines,
+   sha256 `12c66abe6f18300f2e00cb5c4befeafe1e3dc67c2ca50bc71db74db9ba8b367d`,
+   185 OK / 0 stale / 0 missing; the 9 accepted S0 artifacts were unmanifested
+   build artifacts (not replacements of existing MANIFEST paths) and are added
+   with their accepted digests; accepted fingerprints (9 files: 5 source + 4
+   tests) sealed in
+   `docs/releases/MODULE_MUF_V1_S0_ACCEPTED_SRC_TESTS.sha256`;
+8. independent implementation audit history: original audit (PATCH REQUIRED —
+   P1) -> P1 (PATCHED) -> independent P1 re-audit (PATCH REQUIRED — P2) -> P2
+   (PATCHED) -> final independent P2 re-audit **ACCEPTED FOR CLOSURE**.
+
+Closure does NOT certify: wave detection; turning-point quality; hierarchy
+usefulness; α/β/γ/δ superiority; predictive support; statistical independence;
+edge; profitability; Model; Strategy; Signal; PnL; human-like understanding.
+RESEARCH-DEBT-020..025 remain open. No S1 work is started or implied.
 
 ## Important identity boundary
 
