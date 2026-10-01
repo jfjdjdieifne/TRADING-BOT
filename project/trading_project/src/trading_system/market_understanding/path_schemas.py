@@ -23,7 +23,7 @@ completion authority name reused by S1 (RC1 name-law). Episode anchors,
 membership, turning points, waves and segments are out of S1 scope entirely:
 S1 defines schema foundations only.
 """
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import math
 from typing import Any, Dict, Final, FrozenSet, Mapping, Optional, Tuple, Union
 
@@ -37,7 +37,10 @@ from trading_system.research.trajectory.trajectory_stage4c import (
     OFF_GRID_OBSERVATIONS_PRESENT,
 )
 
-from trading_system.market_understanding.availability import InformationAxis
+from trading_system.market_understanding.availability import (
+    InformationAxis,
+    require_visible_at,
+)
 from trading_system.market_understanding.contracts import (
     SchemaIdentity,
     SchemaViolation,
@@ -90,7 +93,13 @@ from trading_system.market_understanding.price_path import (
     pair_metrics,
     safe_ratio,
 )
-from trading_system.market_understanding.records import PublishedRecord
+from trading_system.market_understanding.records import (
+    EventKind,
+    EventRecord,
+    PublishedRecord,
+    freeze_payload,
+    payload_canonical_view,
+)
 
 # ---------------------------------------------------------------------------
 # S1 path-schema identity + reused Stage 4C-1 tokens (one authority name)
@@ -722,3 +731,539 @@ def observed_grid_keys_record(
             "observed_count": len(observed),
         },
     )
+
+
+# ===========================================================================
+# S1 schema foundations (PATCH P1) — DEFINE SCHEMAS ONLY; never populated.
+#
+# Accepted contract: S1 DEFINES these four schema foundations and DOES NOT
+# populate market episodes or narratives. Episode anchor identity is structurally
+# separate from membership (EpisodeAnchorIdentity != EpisodeMembershipEvent).
+# No episode population engine exists. No independence claim exists.
+# RESEARCH-DEBT-024 remains OPEN.
+# ===========================================================================
+
+CAUSAL_EPISODE_RECORD_TYPE: Final[str] = "S1_CAUSAL_EPISODE_RECORD"
+EPISODE_MEMBERSHIP_EVENT_TYPE: Final[str] = "S1_EPISODE_MEMBERSHIP_EVENT"
+MARKET_STATE_TRANSITION_RECORD_TYPE: Final[str] = "S1_MARKET_STATE_TRANSITION_RECORD"
+EXPLANATION_RECORD_TYPE: Final[str] = "S1_EXPLANATION_RECORD"
+
+# Schema 3 state kinds: literal factual states or descriptor deltas ONLY.
+STATE_KIND_LITERAL_FACTUAL: Final[str] = "LITERAL_FACTUAL_STATE"
+STATE_KIND_DESCRIPTOR_DELTA: Final[str] = "DESCRIPTOR_DELTA"
+TRANSITION_STATE_KINDS: Final[Tuple[str, ...]] = (
+    STATE_KIND_LITERAL_FACTUAL,
+    STATE_KIND_DESCRIPTOR_DELTA,
+)
+POLICY_ARTIFACT_NOT_CONFIGURED: Final[TypedState] = TypedState.NOT_CONFIGURED
+
+# Schema 4: allowed explanation states (closed set; exactly these four).
+EXPLANATION_STATE_MONITORING: Final[str] = "MONITORING"
+EXPLANATION_STATE_PATTERN_REQUIREMENTS_SATISFIED: Final[str] = "PATTERN_REQUIREMENTS_SATISFIED"
+EXPLANATION_STATE_CONTRADICTED: Final[str] = "CONTRADICTED"
+EXPLANATION_STATE_SUPERSEDED: Final[str] = "SUPERSEDED"
+EXPLANATION_STATES: Final[Tuple[str, ...]] = (
+    EXPLANATION_STATE_MONITORING,
+    EXPLANATION_STATE_PATTERN_REQUIREMENTS_SATISFIED,
+    EXPLANATION_STATE_CONTRADICTED,
+    EXPLANATION_STATE_SUPERSEDED,
+)
+S1_REJECTED_EXPLANATION_STATES: Final[Tuple[str, ...]] = (
+    "PROBABLE",
+    "LIKELY",
+    "SUPPORTED",
+    "WINNING_EXPLANATION",
+)
+
+# Forbidden schema fields across all four foundations (fail closed).
+FORBIDDEN_SCHEMA_FIELDS: Final[FrozenSet[str]] = frozenset(
+    {
+        "membership_refs",
+        "probability",
+        "weight",
+        "score",
+        "likelihood",
+        "predictive_support",
+        "winner",
+        "threshold",
+        "regime",
+        "policy_inference",
+    }
+)
+
+# Market-interpretation / threshold-regime tokens: forbidden in schema-3 states.
+_STATE_TOKEN_BANNED: Final[FrozenSet[str]] = frozenset(
+    {
+        "REGIME",
+        "THRESHOLD",
+        "POLICY",
+        "PROB",
+        "LIKELI",
+        "SCORE",
+        "WEIGHT",
+        "PREDICT",
+        "WINNER",
+        "BULL",
+        "BEAR",
+        "TREND",
+        "SIGNAL",
+    }
+)
+
+_EPISODE_ALLOWED_FIELDS: Final[FrozenSet[str]] = frozenset(
+    {
+        "schema_identity",
+        "timeline_id",
+        "axis",
+        "anchor_information_key",
+        "anchor_rule_version",
+        "anchor_fact_ref",
+        "provenance",
+        "availability_information_key",
+    }
+)
+_MEMBERSHIP_ALLOWED_FIELDS: Final[FrozenSet[str]] = frozenset(
+    {
+        "schema_identity",
+        "episode_id",
+        "member_fact_ref",
+        "member_fact_availability_key",
+        "membership_information_key",
+        "provenance",
+    }
+)
+_TRANSITION_ALLOWED_FIELDS: Final[FrozenSet[str]] = frozenset(
+    {
+        "schema_identity",
+        "timeline_id",
+        "from_state",
+        "to_state",
+        "state_kind",
+        "descriptor_deltas",
+        "policy_artifact_ref",
+        "availability_information_key",
+        "provenance",
+    }
+)
+_EXPLANATION_ALLOWED_FIELDS: Final[FrozenSet[str]] = frozenset(
+    {
+        "schema_identity",
+        "timeline_id",
+        "state",
+        "fact_refs",
+        "availability_information_key",
+        "provenance",
+    }
+)
+
+_EPISODE_IDENTITY_SCHEMA: Final[ArtifactIdentitySchema] = ArtifactIdentitySchema(
+    artifact_type="MUF_S1_CAUSAL_EPISODE",
+    schema_identity=S1_SCHEMA_IDENTITY,
+    identity_defining_fields=(
+        "timeline_id",
+        "anchor_fact_ref",
+        "anchor_rule_version",
+        "anchor_information_key",
+    ),
+)
+_MEMBERSHIP_IDENTITY_SCHEMA: Final[ArtifactIdentitySchema] = ArtifactIdentitySchema(
+    artifact_type="MUF_S1_EPISODE_MEMBERSHIP_EVENT",
+    schema_identity=S1_SCHEMA_IDENTITY,
+    identity_defining_fields=("episode_id", "member_fact_ref", "membership_information_key"),
+)
+_TRANSITION_IDENTITY_SCHEMA: Final[ArtifactIdentitySchema] = ArtifactIdentitySchema(
+    artifact_type="MUF_S1_MARKET_STATE_TRANSITION",
+    schema_identity=S1_SCHEMA_IDENTITY,
+    identity_defining_fields=(
+        "timeline_id",
+        "from_state",
+        "to_state",
+        "state_kind",
+        "availability_information_key",
+    ),
+)
+_EXPLANATION_IDENTITY_SCHEMA: Final[ArtifactIdentitySchema] = ArtifactIdentitySchema(
+    artifact_type="MUF_S1_EXPLANATION",
+    schema_identity=S1_SCHEMA_IDENTITY,
+    identity_defining_fields=("timeline_id", "state", "fact_refs", "availability_information_key"),
+)
+
+
+def _strict_fields(
+    schema_name: str, allowed: FrozenSet[str], provided: Mapping[str, Any]
+) -> Dict[str, Any]:
+    """Fail closed on any unknown or forbidden schema field."""
+    data = dict(provided)
+    for name in data:
+        if name == "membership_refs":
+            raise SchemaViolation(
+                f"{schema_name}: membership_refs is structurally forbidden "
+                "(episode anchor facts never carry membership)"
+            )
+        if name not in allowed or name in FORBIDDEN_SCHEMA_FIELDS:
+            raise SchemaViolation(f"{schema_name}: unknown/forbidden field {name!r}")
+    return data
+
+
+def _require_literal_state_token(value: str, field_name: str) -> None:
+    """Schema-3 states must be literal factual tokens; no threshold/regime language."""
+    require_string(value, field_name)
+    upper = value.upper()
+    for token in _STATE_TOKEN_BANNED:
+        if token in upper:
+            raise SchemaViolation(
+                f"{field_name} {value!r}: threshold/regime/policy/interpretation tokens "
+                "require a PolicyArtifact and remain NOT_CONFIGURED at S1"
+            )
+
+
+@dataclass(frozen=True)
+class CausalEpisodeRecord:
+    """Schema foundation 1: episode ANCHOR/creation facts only.
+
+    Contains anchor/creation facts only. NEVER contains membership_refs.
+    ``episode_identity`` is derived from anchor facts alone and structurally
+    cannot depend on future membership. Schema definition only: no episode
+    population engine, no independence claim (RESEARCH-DEBT-024 OPEN).
+    """
+
+    schema_identity: SchemaIdentity
+    timeline_id: str
+    axis: InformationAxis
+    anchor_information_key: InformationKey
+    anchor_rule_version: str
+    anchor_fact_ref: str
+    provenance: Mapping[str, Any]
+    availability_information_key: InformationKey
+    episode_identity: str
+
+    def __post_init__(self) -> None:
+        require_s1_schema_version(self.schema_identity)
+        require_string(self.timeline_id, "timeline_id")
+        if not isinstance(self.axis, InformationAxis):
+            raise SchemaViolation("axis must be an InformationAxis")
+        if not isinstance(self.anchor_information_key, InformationKey):
+            raise SchemaViolation("anchor_information_key must be an InformationKey")
+        if not isinstance(self.availability_information_key, InformationKey):
+            raise SchemaViolation("availability_information_key must be an InformationKey")
+        if self.anchor_information_key.timeline_id != self.timeline_id:
+            raise SchemaViolation("anchor key timeline must match timeline_id")
+        if self.availability_information_key.timeline_id != self.timeline_id:
+            raise SchemaViolation("availability key timeline must match timeline_id")
+        if key_axis(self.anchor_information_key) is not self.axis:
+            raise SchemaViolation("axis binding must match the anchor key axis")
+        require_string(self.anchor_rule_version, "anchor_rule_version")
+        require_string(self.anchor_fact_ref, "anchor_fact_ref")
+        object.__setattr__(self, "provenance", freeze_payload(dict(self.provenance), field_name="provenance"))
+        require_visible_at(
+            fact_key=self.anchor_information_key,
+            at_key=self.availability_information_key,
+        )
+        expected = canonical_artifact_identity(
+            _EPISODE_IDENTITY_SCHEMA,
+            identity_payload={
+                "timeline_id": self.timeline_id,
+                "anchor_fact_ref": self.anchor_fact_ref,
+                "anchor_rule_version": self.anchor_rule_version,
+                "anchor_information_key": "|".join(key_serialization(self.anchor_information_key)),
+            },
+        )
+        if self.episode_identity != expected:
+            raise SchemaViolation(
+                "episode_identity must be the anchor-derived canonical identity "
+                "(membership can never change it)"
+            )
+
+    @classmethod
+    def create(cls, **fields: Any) -> "CausalEpisodeRecord":
+        """Strict factory: unknown fields fail closed; identity derives from anchor."""
+        data = _strict_fields("CausalEpisodeRecord", _EPISODE_ALLOWED_FIELDS, fields)
+        episode_identity = canonical_artifact_identity(
+            _EPISODE_IDENTITY_SCHEMA,
+            identity_payload={
+                "timeline_id": data["timeline_id"],
+                "anchor_fact_ref": data["anchor_fact_ref"],
+                "anchor_rule_version": data["anchor_rule_version"],
+                "anchor_information_key": "|".join(
+                    key_serialization(data["anchor_information_key"])
+                ),
+            },
+        )
+        return cls(episode_identity=episode_identity, **data)
+
+    def as_record(self) -> PublishedRecord:
+        """Immutable S0 published record (anchor facts only; no membership key exists)."""
+        return PublishedRecord(
+            record_identity=self.episode_identity,
+            record_type=CAUSAL_EPISODE_RECORD_TYPE,
+            schema_identity=S1_SCHEMA_IDENTITY,
+            timeline_id=self.timeline_id,
+            availability_key=self.availability_information_key,
+            content={
+                "episode_identity": self.episode_identity,
+                "schema_identity": self.schema_identity.as_payload(),
+                "timeline_id": self.timeline_id,
+                "axis": self.axis,
+                "anchor_information_key": self.anchor_information_key,
+                "anchor_rule_version": self.anchor_rule_version,
+                "anchor_fact_ref": self.anchor_fact_ref,
+                "provenance": self.provenance,
+                "availability_information_key": self.availability_information_key,
+            },
+        )
+
+
+@dataclass(frozen=True)
+class EpisodeMembershipEvent:
+    """Schema foundation 2: separate append-only membership event.
+
+    Adding membership NEVER changes ``episode_id``. Membership availability uses
+    earliest-lawful InformationKey semantics (the membership key may never
+    precede the member fact's availability). Historical membership events are
+    immutable: lifecycle change == new event. No automatic market episode
+    creation exists here.
+    """
+
+    schema_identity: SchemaIdentity
+    episode_id: str
+    member_fact_ref: str
+    member_fact_availability_key: InformationKey
+    membership_information_key: InformationKey
+    provenance: Mapping[str, Any]
+    event_identity: str
+
+    def __post_init__(self) -> None:
+        require_s1_schema_version(self.schema_identity)
+        require_string(self.episode_id, "episode_id")
+        require_string(self.member_fact_ref, "member_fact_ref")
+        if not isinstance(self.member_fact_availability_key, InformationKey):
+            raise SchemaViolation("member_fact_availability_key must be an InformationKey")
+        if not isinstance(self.membership_information_key, InformationKey):
+            raise SchemaViolation("membership_information_key must be an InformationKey")
+        object.__setattr__(self, "provenance", freeze_payload(dict(self.provenance), field_name="provenance"))
+        require_visible_at(
+            fact_key=self.member_fact_availability_key,
+            at_key=self.membership_information_key,
+        )
+        expected = canonical_artifact_identity(
+            _MEMBERSHIP_IDENTITY_SCHEMA,
+            identity_payload={
+                "episode_id": self.episode_id,
+                "member_fact_ref": self.member_fact_ref,
+                "membership_information_key": "|".join(
+                    key_serialization(self.membership_information_key)
+                ),
+            },
+        )
+        if self.event_identity != expected:
+            raise SchemaViolation("event_identity must be the canonical membership-event identity")
+
+    @classmethod
+    def create(cls, **fields: Any) -> "EpisodeMembershipEvent":
+        """Strict factory for one append-only membership event."""
+        data = _strict_fields("EpisodeMembershipEvent", _MEMBERSHIP_ALLOWED_FIELDS, fields)
+        event_identity = canonical_artifact_identity(
+            _MEMBERSHIP_IDENTITY_SCHEMA,
+            identity_payload={
+                "episode_id": data["episode_id"],
+                "member_fact_ref": data["member_fact_ref"],
+                "membership_information_key": "|".join(
+                    key_serialization(data["membership_information_key"])
+                ),
+            },
+        )
+        return cls(event_identity=event_identity, **data)
+
+    def as_event_record(self) -> EventRecord:
+        """Immutable S0 event record (EventKind.MEMBERSHIP_EVENT; append-only)."""
+        return EventRecord(
+            event_identity=self.event_identity,
+            event_kind=EventKind.MEMBERSHIP_EVENT,
+            subject_record_identity=self.episode_id,
+            event_key=self.membership_information_key,
+            event_payload={
+                "schema_identity": self.schema_identity.as_payload(),
+                "episode_id": self.episode_id,
+                "member_fact_ref": self.member_fact_ref,
+                "member_fact_availability_key": self.member_fact_availability_key,
+                "membership_information_key": self.membership_information_key,
+                "provenance": self.provenance,
+                "event_identity": self.event_identity,
+            },
+        )
+
+
+@dataclass(frozen=True)
+class MarketStateTransitionRecord:
+    """Schema foundation 3: literal factual states or descriptor deltas ONLY.
+
+    No regime threshold. No policy inference. No probability. No market
+    interpretation. Any threshold-derived regime requires a PolicyArtifact and
+    remains ``NOT_CONFIGURED`` at S1.
+    """
+
+    schema_identity: SchemaIdentity
+    timeline_id: str
+    from_state: str
+    to_state: str
+    state_kind: str
+    policy_artifact_ref: Union[str, TypedState]
+    availability_information_key: InformationKey
+    provenance: Mapping[str, Any]
+    descriptor_deltas: Mapping[str, Any] = field(default_factory=dict)
+    transition_identity: str = ""
+
+    def __post_init__(self) -> None:
+        require_s1_schema_version(self.schema_identity)
+        require_string(self.timeline_id, "timeline_id")
+        _require_literal_state_token(self.from_state, "from_state")
+        _require_literal_state_token(self.to_state, "to_state")
+        if self.state_kind not in TRANSITION_STATE_KINDS:
+            raise SchemaViolation(
+                f"state_kind {self.state_kind!r}: threshold-derived regimes require a "
+                "PolicyArtifact and remain NOT_CONFIGURED at S1"
+            )
+        if not isinstance(self.availability_information_key, InformationKey):
+            raise SchemaViolation("availability_information_key must be an InformationKey")
+        if self.availability_information_key.timeline_id != self.timeline_id:
+            raise SchemaViolation("availability key timeline must match timeline_id")
+        if not isinstance(self.policy_artifact_ref, (str, TypedState)):
+            raise SchemaViolation("policy_artifact_ref must be a string or TypedState")
+        if self.policy_artifact_ref is not TypedState.NOT_CONFIGURED:
+            raise SchemaViolation(
+                "policy binding requires a PolicyArtifact and remains NOT_CONFIGURED at S1"
+            )
+        deltas = dict(self.descriptor_deltas)
+        if self.state_kind == STATE_KIND_LITERAL_FACTUAL and deltas:
+            raise SchemaViolation("literal factual transitions carry no descriptor deltas")
+        for name in deltas:
+            require_string(name, "descriptor delta name")
+            value = deltas[name]
+            if isinstance(value, bool) or not isinstance(value, (int, float, str, TypedState)):
+                raise SchemaViolation("descriptor deltas must be numeric, textual or TypedState")
+            if isinstance(value, float) and not math.isfinite(value):
+                raise SchemaViolation("descriptor deltas must be finite")
+        object.__setattr__(self, "descriptor_deltas", freeze_payload(deltas, field_name="descriptor_deltas"))
+        object.__setattr__(self, "provenance", freeze_payload(dict(self.provenance), field_name="provenance"))
+        expected = canonical_artifact_identity(
+            _TRANSITION_IDENTITY_SCHEMA,
+            identity_payload={
+                "timeline_id": self.timeline_id,
+                "from_state": self.from_state,
+                "to_state": self.to_state,
+                "state_kind": self.state_kind,
+                "availability_information_key": "|".join(
+                    key_serialization(self.availability_information_key)
+                ),
+            },
+        )
+        if not self.transition_identity:
+            object.__setattr__(self, "transition_identity", expected)
+        elif self.transition_identity != expected:
+            raise SchemaViolation("transition_identity must be the canonical transition identity")
+
+    @classmethod
+    def create(cls, **fields: Any) -> "MarketStateTransitionRecord":
+        """Strict factory: unknown fields fail closed; no policy inputs exist."""
+        data = _strict_fields("MarketStateTransitionRecord", _TRANSITION_ALLOWED_FIELDS, fields)
+        return cls(**data)
+
+    def as_record(self) -> PublishedRecord:
+        """Immutable S0 published record for the transition foundation."""
+        return PublishedRecord(
+            record_identity=self.transition_identity,
+            record_type=MARKET_STATE_TRANSITION_RECORD_TYPE,
+            schema_identity=S1_SCHEMA_IDENTITY,
+            timeline_id=self.timeline_id,
+            availability_key=self.availability_information_key,
+            content={
+                "transition_identity": self.transition_identity,
+                "schema_identity": self.schema_identity.as_payload(),
+                "timeline_id": self.timeline_id,
+                "from_state": self.from_state,
+                "to_state": self.to_state,
+                "state_kind": self.state_kind,
+                "descriptor_deltas": self.descriptor_deltas,
+                "policy_artifact_ref": self.policy_artifact_ref,
+                "availability_information_key": self.availability_information_key,
+                "provenance": self.provenance,
+            },
+        )
+
+
+@dataclass(frozen=True)
+class ExplanationRecord:
+    """Schema foundation 4: explanation states referencing FACTS ONLY.
+
+    Allowed states exactly: MONITORING / PATTERN_REQUIREMENTS_SATISFIED /
+    CONTRADICTED / SUPERSEDED. No probability, weight, score, predictive
+    support, winner or likelihood. Schema definition only: no narrative
+    population engine exists.
+    """
+
+    schema_identity: SchemaIdentity
+    timeline_id: str
+    state: str
+    fact_refs: Tuple[str, ...]
+    availability_information_key: InformationKey
+    provenance: Mapping[str, Any]
+    explanation_identity: str = ""
+
+    def __post_init__(self) -> None:
+        require_s1_schema_version(self.schema_identity)
+        require_string(self.timeline_id, "timeline_id")
+        if self.state not in EXPLANATION_STATES:
+            raise SchemaViolation(
+                f"explanation state {self.state!r} forbidden: allowed states are exactly "
+                "MONITORING / PATTERN_REQUIREMENTS_SATISFIED / CONTRADICTED / SUPERSEDED "
+                "(no probability, weight, score, predictive support, winner or likelihood)"
+            )
+        if not self.fact_refs or not isinstance(self.fact_refs, tuple):
+            raise SchemaViolation("fact_refs must be a nonempty tuple of fact references")
+        for ref in self.fact_refs:
+            require_string(ref, "fact ref")
+        if not isinstance(self.availability_information_key, InformationKey):
+            raise SchemaViolation("availability_information_key must be an InformationKey")
+        if self.availability_information_key.timeline_id != self.timeline_id:
+            raise SchemaViolation("availability key timeline must match timeline_id")
+        object.__setattr__(self, "provenance", freeze_payload(dict(self.provenance), field_name="provenance"))
+        expected = canonical_artifact_identity(
+            _EXPLANATION_IDENTITY_SCHEMA,
+            identity_payload={
+                "timeline_id": self.timeline_id,
+                "state": self.state,
+                "fact_refs": "|".join(self.fact_refs),
+                "availability_information_key": "|".join(
+                    key_serialization(self.availability_information_key)
+                ),
+            },
+        )
+        if not self.explanation_identity:
+            object.__setattr__(self, "explanation_identity", expected)
+        elif self.explanation_identity != expected:
+            raise SchemaViolation("explanation_identity must be the canonical explanation identity")
+
+    @classmethod
+    def create(cls, **fields: Any) -> "ExplanationRecord":
+        """Strict factory: probability/weight/score/... fields fail closed."""
+        data = _strict_fields("ExplanationRecord", _EXPLANATION_ALLOWED_FIELDS, fields)
+        return cls(**data)
+
+    def as_record(self) -> PublishedRecord:
+        """Immutable S0 published record referencing facts only."""
+        return PublishedRecord(
+            record_identity=self.explanation_identity,
+            record_type=EXPLANATION_RECORD_TYPE,
+            schema_identity=S1_SCHEMA_IDENTITY,
+            timeline_id=self.timeline_id,
+            availability_key=self.availability_information_key,
+            content={
+                "explanation_identity": self.explanation_identity,
+                "schema_identity": self.schema_identity.as_payload(),
+                "timeline_id": self.timeline_id,
+                "state": self.state,
+                "fact_refs": self.fact_refs,
+                "availability_information_key": self.availability_information_key,
+                "provenance": self.provenance,
+            },
+        )

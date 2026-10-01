@@ -19,15 +19,18 @@ from trading_system.research.information_time import (
 from trading_system.research.trajectory import trajectory_stage4c
 
 from trading_system.market_understanding.availability import (
+    IllegalCausalReference,
     InformationAxis,
     InformationBatchKey,
     SourceBatchIdentity,
 )
 from trading_system.market_understanding.contracts import (
+    ImmutabilityViolation,
     SchemaIdentity,
     SchemaViolation,
     TypedState,
 )
+from trading_system.market_understanding.records import EventKind, payload_canonical_view
 from trading_system.market_understanding import path_schemas, price_path
 from trading_system.market_understanding.price_path import (
     ADJACENCY_GRID_CONTIGUOUS,
@@ -733,3 +736,237 @@ def test_muf_s1_mut_n_grid_path_length_excludes_off_grid_steps():
 
 def test_muf_s1_mut_o_direction_flat_at_zero_delta():
     assert pair_direction(bar(1, c=11.0), bar(2, c=11.0)) == "FLAT"
+
+
+# ===========================================================================
+# PATCH P1 — MANDATORY SCHEMA-FOUNDATION TESTS (1-12) + LB GATE (13)
+# ===========================================================================
+
+
+def _anchor_episode(**overrides):
+    fields = dict(
+        schema_identity=path_schemas.S1_SCHEMA_IDENTITY,
+        timeline_id=TIMELINE,
+        axis=InformationAxis.POSITIONAL,
+        anchor_information_key=k(1),
+        anchor_rule_version="MUF_ANCHOR_RULE_V1",
+        anchor_fact_ref="anchor-fact#1",
+        provenance={"source_identity": SOURCE.as_payload(), "dataset_identity": DATASET},
+        availability_information_key=k(1),
+    )
+    fields.update(overrides)
+    return path_schemas.CausalEpisodeRecord.create(**fields)
+
+
+def _membership(episode_id, ref, member_key, membership_key):
+    return path_schemas.EpisodeMembershipEvent.create(
+        schema_identity=path_schemas.S1_SCHEMA_IDENTITY,
+        episode_id=episode_id,
+        member_fact_ref=ref,
+        member_fact_availability_key=member_key,
+        membership_information_key=membership_key,
+        provenance={"dataset_identity": DATASET},
+    )
+
+
+def test_muf_s1_patch_p1_01_episode_record_legal_anchor_passes():
+    for name in (
+        "CausalEpisodeRecord",
+        "EpisodeMembershipEvent",
+        "MarketStateTransitionRecord",
+        "ExplanationRecord",
+    ):
+        assert hasattr(path_schemas, name)  # the four schema foundations exist
+    episode = _anchor_episode()
+    assert episode.episode_identity
+    assert episode.anchor_rule_version == "MUF_ANCHOR_RULE_V1"
+    record = episode.as_record()
+    assert record.record_type == path_schemas.CAUSAL_EPISODE_RECORD_TYPE
+    assert record.record_identity == episode.episode_identity
+
+
+def test_muf_s1_patch_p1_02_membership_refs_rejected():
+    with pytest.raises(SchemaViolation) as caught:
+        path_schemas.CausalEpisodeRecord.create(
+            schema_identity=path_schemas.S1_SCHEMA_IDENTITY,
+            timeline_id=TIMELINE,
+            axis=InformationAxis.POSITIONAL,
+            anchor_information_key=k(1),
+            anchor_rule_version="MUF_ANCHOR_RULE_V1",
+            anchor_fact_ref="anchor-fact#1",
+            provenance={"dataset_identity": DATASET},
+            availability_information_key=k(1),
+            membership_refs=(),
+        )
+    assert "membership_refs" in str(caught.value)
+    episode = _anchor_episode()
+    assert "membership_refs" not in episode.as_record().content
+
+
+def test_muf_s1_patch_p1_03_membership_never_changes_episode_id():
+    episode = _anchor_episode()
+    before = episode.episode_identity
+    first = _membership(before, "member-A", k(1), k(2))
+    second = _membership(before, "member-B", k(1), k(3))
+    assert episode.episode_identity == before
+    assert first.episode_id == second.episode_id == before
+    assert first.event_identity != second.event_identity
+    assert first.as_event_record().event_kind is EventKind.MEMBERSHIP_EVENT
+
+
+def test_muf_s1_patch_p1_04_future_membership_cannot_change_history():
+    episode = _anchor_episode()
+    record_before = episode.as_record()
+    identity_before = record_before.record_identity
+    view_before = payload_canonical_view(record_before.content)
+    _membership(episode.episode_identity, "member-A", k(1), k(2))
+    _membership(episode.episode_identity, "member-B", k(1), k(3))
+    record_after = episode.as_record()
+    assert record_after.record_identity == identity_before
+    assert payload_canonical_view(record_after.content) == view_before
+
+
+def test_muf_s1_patch_p1_05_membership_key_earlier_than_fact_rejected():
+    episode = _anchor_episode()
+    with pytest.raises(IllegalCausalReference):
+        _membership(episode.episode_identity, "member-A", k(5), k(1))  # k(1) < k(5)
+
+
+def test_muf_s1_patch_p1_06_literal_factual_transition_passes():
+    transition = path_schemas.MarketStateTransitionRecord.create(
+        schema_identity=path_schemas.S1_SCHEMA_IDENTITY,
+        timeline_id=TIMELINE,
+        from_state="OBSERVED_CLOSE_DISPLACEMENT_UP",
+        to_state="OBSERVED_CLOSE_DISPLACEMENT_DOWN",
+        state_kind=path_schemas.STATE_KIND_LITERAL_FACTUAL,
+        policy_artifact_ref=path_schemas.POLICY_ARTIFACT_NOT_CONFIGURED,
+        availability_information_key=k(2),
+        provenance={"dataset_identity": DATASET},
+    )
+    record = transition.as_record()
+    assert record.record_type == path_schemas.MARKET_STATE_TRANSITION_RECORD_TYPE
+    delta = path_schemas.MarketStateTransitionRecord.create(
+        schema_identity=path_schemas.S1_SCHEMA_IDENTITY,
+        timeline_id=TIMELINE,
+        from_state="RUNNING_HIGH_SO_FAR",
+        to_state="RUNNING_HIGH_SO_FAR",
+        state_kind=path_schemas.STATE_KIND_DESCRIPTOR_DELTA,
+        descriptor_deltas={"running_high_so_far": 2.5},
+        policy_artifact_ref=path_schemas.POLICY_ARTIFACT_NOT_CONFIGURED,
+        availability_information_key=k(3),
+        provenance={"dataset_identity": DATASET},
+    )
+    assert delta.as_record().content["descriptor_deltas"]["running_high_so_far"] == 2.5
+
+
+def test_muf_s1_patch_p1_07_threshold_regime_without_policy_rejected():
+    base = dict(
+        schema_identity=path_schemas.S1_SCHEMA_IDENTITY,
+        timeline_id=TIMELINE,
+        from_state="STATE_BEFORE",
+        to_state="STATE_AFTER",
+        state_kind=path_schemas.STATE_KIND_LITERAL_FACTUAL,
+        policy_artifact_ref=path_schemas.POLICY_ARTIFACT_NOT_CONFIGURED,
+        availability_information_key=k(2),
+        provenance={"dataset_identity": DATASET},
+    )
+    with pytest.raises(SchemaViolation):
+        path_schemas.MarketStateTransitionRecord.create(**base, threshold=0.5)
+    with pytest.raises(SchemaViolation):
+        path_schemas.MarketStateTransitionRecord.create(**base, regime="risk_on")
+    with pytest.raises(SchemaViolation) as caught:
+        path_schemas.MarketStateTransitionRecord.create(
+            **{**base, "state_kind": "THRESHOLD_REGIME"}
+        )
+    assert "NOT_CONFIGURED" in str(caught.value)
+    with pytest.raises(SchemaViolation):
+        path_schemas.MarketStateTransitionRecord.create(
+            **{**base, "from_state": "RISK_THRESHOLD_STATE"}
+        )
+    with pytest.raises(SchemaViolation) as caught:
+        path_schemas.MarketStateTransitionRecord.create(
+            **{**base, "policy_artifact_ref": "policy-v1"}
+        )
+    assert "PolicyArtifact" in str(caught.value)
+
+
+def test_muf_s1_patch_p1_08_explanation_four_legal_states_pass():
+    for state in (
+        "MONITORING",
+        "PATTERN_REQUIREMENTS_SATISFIED",
+        "CONTRADICTED",
+        "SUPERSEDED",
+    ):
+        explanation = path_schemas.ExplanationRecord.create(
+            schema_identity=path_schemas.S1_SCHEMA_IDENTITY,
+            timeline_id=TIMELINE,
+            state=state,
+            fact_refs=("fixture-bar#1",),
+            availability_information_key=k(2),
+            provenance={"dataset_identity": DATASET},
+        )
+        record = explanation.as_record()
+        assert record.record_type == path_schemas.EXPLANATION_RECORD_TYPE
+        assert record.content["state"] == state
+
+
+def test_muf_s1_patch_p1_09_forbidden_explanation_states_rejected():
+    for state in ("PROBABLE", "LIKELY", "SUPPORTED", "WINNING_EXPLANATION"):
+        with pytest.raises(SchemaViolation):
+            path_schemas.ExplanationRecord.create(
+                schema_identity=path_schemas.S1_SCHEMA_IDENTITY,
+                timeline_id=TIMELINE,
+                state=state,
+                fact_refs=("fixture-bar#1",),
+                availability_information_key=k(2),
+                provenance={"dataset_identity": DATASET},
+            )
+
+
+def test_muf_s1_patch_p1_10_probability_weight_score_fields_rejected():
+    base = dict(
+        schema_identity=path_schemas.S1_SCHEMA_IDENTITY,
+        timeline_id=TIMELINE,
+        state="MONITORING",
+        fact_refs=("fixture-bar#1",),
+        availability_information_key=k(2),
+        provenance={"dataset_identity": DATASET},
+    )
+    for name in ("probability", "weight", "score"):
+        with pytest.raises(SchemaViolation) as caught:
+            path_schemas.ExplanationRecord.create(**base, **{name: 0.5})
+        assert name in str(caught.value)
+
+
+def test_muf_s1_patch_p1_11_payload_mutation_impossible():
+    episode = _anchor_episode()
+    record = episode.as_record()
+    with pytest.raises((ImmutabilityViolation, TypeError, AttributeError)):
+        record.content["anchor_fact_ref"] = "mutated"
+    event = _membership(episode.episode_identity, "member-A", k(1), k(2)).as_event_record()
+    with pytest.raises((ImmutabilityViolation, TypeError, AttributeError)):
+        event.event_payload["member_fact_ref"] = "mutated"
+    with pytest.raises((ImmutabilityViolation, AttributeError, TypeError)):
+        episode.episode_identity = "mutated"
+    with pytest.raises((ImmutabilityViolation, AttributeError, TypeError)):
+        event.event_kind = None
+
+
+def test_muf_s1_patch_p1_12_ast_no_population_engine():
+    import ast as _ast
+
+    banned_stems = ("populate", "engine", "discover", "detect", "infer", "generate")
+    for module in (price_path, path_schemas):
+        tree = _ast.parse(open(module.__file__).read())
+        for node in _ast.walk(tree):
+            if isinstance(node, (_ast.FunctionDef, _ast.AsyncFunctionDef, _ast.ClassDef)):
+                lowered = node.name.lower()
+                for stem in banned_stems:
+                    assert stem not in lowered, (module.__name__, node.name)
+
+
+def test_muf_s1_patch_p1_13_lb_consistency_gate_actuals():
+    metrics = intrabar_path_metrics(bar(1, o=10.0, h=12.0, low=8.0, c=11.0))
+    assert metrics["intrabar_path_length_lower_bound"].value == 7.0
+    metrics = intrabar_path_metrics(bar(1, o=10.0, h=15.0, low=5.0, c=12.0))
+    assert metrics["intrabar_path_length_lower_bound"].value == 18.0
