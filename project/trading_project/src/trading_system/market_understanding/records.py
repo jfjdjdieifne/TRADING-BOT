@@ -9,32 +9,49 @@ timeline/phase compatibility, and expected schema/type.
 No market-specific S1+ semantics (status/supersession/relation/membership
 event kinds are generic foundations only).
 
-DEEP IMMUTABILITY (I-DEEP-1..5): persisted record/event payloads are
-recursively canonically frozen at construction (``freeze_payload``). Caller-
-owned mutable containers are never aliased; nested mutation is impossible;
-freeze is deterministic. Payload content does NOT enter any canonical
-identity hash at S0 (identity-defining fields are separate); where a frozen
-payload is hashed through the approved public CLOSED hashing, the canonical
-hash equals the hash of the equivalent raw structure (freeze preserves hash
-semantics).
+DEEP IMMUTABILITY (I-DEEP-1..5, P2 TRUE IMMUTABLE STORAGE): persisted
+record/event payloads are recursively canonically frozen at construction
+(``freeze_payload``) into ``FrozenPayloadMapping`` — structural immutable
+storage: an immutable, key-sorted tuple of ``(str_key, frozen_value)`` pairs.
+There is NO dict/list/set backing object in the reachable semantic graph; the
+storage container is immutable by type. Caller-owned mutable containers are
+never aliased; nested mutation is impossible; freeze is deterministic and
+insertion-order independent. Payload content does NOT enter any canonical
+identity hash at S0 (identity-defining fields are separate); for
+hashing/comparison against the approved public CLOSED hashing, use the
+deterministic ``payload_canonical_view`` (records.py) which maps the immutable
+structure onto the accepted canonical public payload domain. ``canonical_sha256``
+remains the ONLY hash authority (no parallel hashing algorithm); the canonical
+hash of the view equals the canonical hash of the equivalent raw structure.
 
 Value-domain contract for frozen payloads (fail closed otherwise):
 - str / bool / int / float / None            -> preserved as-is
 - Enum members (TypedState, EventKind, ...)  -> preserved as-is
 - InformationKey / SchemaIdentity            -> preserved as-is (frozen objects)
-- Mapping with str keys                      -> recursively frozen canonical dict
+- Mapping with str keys                      -> recursively frozen FrozenPayloadMapping
 - list / tuple                               -> recursively frozen tuple
 - set / frozenset                            -> SchemaViolation (unordered
   collections are not permitted by the S0 semantic contract)
 - any other mutable/custom object            -> SchemaViolation (never blindly
   deep-copied; no semantics invented)
 
+copy / deepcopy / pickle of a frozen payload FAIL CLOSED (SchemaViolation): no
+operation may return a mutable representation masquerading as the published
+immutable contract.
+
 Complexity: record/event construction O(payload_size) (deep freeze, honest —
-not O(1)). Ledger append amortized O(1) (private identity index; ordered
-immutable event history remains the projection source). Iteration/projection
-O(|events|) when explicitly requested. Reference validation O(1).
-No market-history access.
+not O(1)). Frozen payload lookup O(number of keys) over the immutable pairs
+(honest; payloads are small semantic structures). Ledger append amortized O(1)
+(private identity index; ordered event history remains the projection source);
+append is a validate -> duplicate-check -> history -> index transaction with
+rollback on stage failure (I-LEDGER-A1..A6). Iteration/projection O(|events|)
+when explicitly requested. Reference validation O(1). No market-history access.
+
+SEMANTIC immutability is not a hostile-runtime security boundary: sufficiently
+hostile reflection (object.__setattr__, interpreter-level tricks) can reach
+private slots; that is explicitly out of contract scope.
 """
+from collections.abc import Mapping as MappingABC
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Final, Mapping, Tuple, Union
@@ -55,11 +72,69 @@ from trading_system.market_understanding.contracts import (
 RECORDS_SCHEMA_VERSION: Final[str] = "MUF_S0_RECORDS_V1"
 
 
-class FrozenPayloadDict(dict):
-    """Canonical immutable dict representation (hash-compatible, mutation-rejecting)."""
+class FrozenPayloadMapping(MappingABC):
+    """TRUE immutable payload mapping: structural immutable storage (P2).
 
-    __slots__ = ()
+    The semantic storage is an immutable tuple of ``(str_key, frozen_value)``
+    pairs, key-sorted (deterministic canonical structure). No dict/list/set
+    backing object exists anywhere in the reachable semantic graph — the
+    storage container itself is immutable by type. Read access implements
+    ``collections.abc.Mapping``.
 
+    Explicit mutator methods raise ImmutabilityViolation for clear failure
+    semantics, but the immutability guarantee does NOT rely on blocking them:
+    even ``dict.__setitem__(frozen, ...)`` and friends are impossible by type
+    (this is not a dict), and the tuple storage cannot be mutated by any
+    ordinary or base-class operation. Attribute rebinding is refused.
+
+    This is a SEMANTIC immutability contract, not a hostile-runtime security
+    boundary (see module docstring).
+    """
+
+    __slots__ = ("_pairs",)
+
+    def __new__(cls, pairs):
+        self = super().__new__(cls)
+        object.__setattr__(self, "_pairs", tuple(pairs))
+        return self
+
+    def __init__(self, pairs=()) -> None:
+        # Storage is sealed structurally in __new__ (immutable tuple).
+        pass
+
+    # ---- read access (Mapping semantics; keys are key-sorted) ----
+    def __getitem__(self, key: str) -> Any:
+        for item_key, item_value in self._pairs:
+            if item_key == key:
+                return item_value
+        raise KeyError(key)
+
+    def __iter__(self):
+        return (item_key for item_key, _ in self._pairs)
+
+    def __len__(self) -> int:
+        return len(self._pairs)
+
+    # ---- structural equality (mapping semantics; order-independent) ----
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, FrozenPayloadMapping):
+            return self._pairs == other._pairs
+        if isinstance(other, MappingABC):
+            if len(self) != len(other):
+                return False
+            try:
+                return all(other[key] == value for key, value in self._pairs)
+            except KeyError:
+                return False
+        return NotImplemented
+
+    def __ne__(self, other: object) -> bool:
+        result = self.__eq__(other)
+        return result if result is NotImplemented else (not result)
+
+    __hash__ = None  # mapping equality: deliberately unhashable (P1 parity)
+
+    # ---- explicit mutators: fail loudly (immutability does not rely on them) ----
     def _deny(self, *args, **kwargs):
         raise ImmutabilityViolation(
             "frozen payload mapping is immutable; lifecycle change requires a new record/event"
@@ -74,11 +149,31 @@ class FrozenPayloadDict(dict):
     update = _deny
     __ior__ = _deny
 
+    def __setattr__(self, name, value):
+        raise ImmutabilityViolation("frozen payload storage cannot be rebound")
+
+    def __delattr__(self, name):
+        raise ImmutabilityViolation("frozen payload storage cannot be rebound")
+
+    # ---- copy/deepcopy/pickle fail closed ----
+    def __copy__(self):
+        raise SchemaViolation("frozen payload copy is unsupported: fail closed")
+
+    def __deepcopy__(self, memo):
+        raise SchemaViolation("frozen payload deepcopy is unsupported: fail closed")
+
+    def __reduce__(self):
+        raise SchemaViolation("frozen payload pickling is unsupported: fail closed")
+
+    def __repr__(self) -> str:
+        return f"FrozenPayloadMapping({dict(self._pairs)!r})"
+
 
 def freeze_payload(value: Any, *, field_name: str = "payload") -> Any:
-    """Recursively canonical-freeze an S0 payload structure (I-DEEP-1..5).
+    """Recursively canonical-freeze an S0 payload structure (I-DEEP-1..5, P2).
 
-    Deterministic. Caller-owned containers are copied structurally; nested
+    Deterministic and insertion-order independent (mapping pairs are stored
+    key-sorted). Caller-owned containers are copied structurally; nested
     mutable structures cannot permit post-construction mutation. Unsupported
     objects fail closed with SchemaViolation (no invented semantics).
     """
@@ -89,14 +184,17 @@ def freeze_payload(value: Any, *, field_name: str = "payload") -> Any:
     if isinstance(value, (InformationKey, SchemaIdentity)):
         return value
     if isinstance(value, Mapping):
-        items = {}
+        pairs = []
         for key in value:
             if not isinstance(key, str):
                 raise SchemaViolation(
                     f"{field_name} mapping keys must be strings; got {type(key)!r}"
                 )
-            items[key] = freeze_payload(value[key], field_name=f"{field_name}[{key!r}]")
-        return FrozenPayloadDict(items)
+            pairs.append(
+                (key, freeze_payload(value[key], field_name=f"{field_name}[{key!r}]"))
+            )
+        pairs.sort(key=lambda pair: pair[0])
+        return FrozenPayloadMapping(pairs)
     if isinstance(value, (list, tuple)):
         return tuple(freeze_payload(item, field_name=field_name) for item in value)
     if isinstance(value, (set, frozenset)):
@@ -107,6 +205,26 @@ def freeze_payload(value: Any, *, field_name: str = "payload") -> Any:
         f"{field_name} contains an unsupported value of type {type(value)!r}; "
         "fail closed (no semantics invented for unsupported objects)"
     )
+
+
+def payload_canonical_view(value: Any) -> Any:
+    """Deterministic canonical view of a frozen payload for HASHING/COMPARISON.
+
+    The approved public ``canonical_sha256`` accepts only its own canonical
+    payload domain (dict / sequence / scalars). This view maps the immutable
+    structural storage onto that accepted domain; the published record itself
+    stays immutable and ``canonical_sha256`` remains the ONLY hash authority
+    (no parallel hashing algorithm). Deterministic: frozen storage is
+    key-sorted and the public canonical hash sorts mapping keys, so mapping
+    insertion order never alters identity. Sequences map to sequences — the
+    public canonical hashing already treats list/tuple identically, so the P1
+    list->tuple semantic equivalence is preserved exactly.
+    """
+    if isinstance(value, FrozenPayloadMapping):
+        return {key: payload_canonical_view(item) for key, item in value._pairs}
+    if isinstance(value, tuple):
+        return [payload_canonical_view(item) for item in value]
+    return value
 
 
 class ImmutableRecord:
@@ -210,24 +328,95 @@ class EventRecord(ImmutableRecord):
 class AppendOnlyEventLedger:
     """Append-only event ledger; current state derives from events only.
 
-    Duplicate detection uses a private identity index (internal bookkeeping
-    only) so append is amortized O(1); the ordered immutable event history in
-    ``self._events`` remains the sole source of projection semantics.
+    Duplicate detection uses an identity index (internal bookkeeping only):
+    amortized O(1) per append, O(n) cumulative for n unique events. The ordered
+    event history remains the sole source of projection semantics.
+
+    Append is a two-stage transaction with documented mutation order
+    (I-LEDGER-A1..A6):
+
+    1. validate (invalid event rejected before any mutation);
+    2. duplicate check (duplicate rejected before any mutation);
+    3. stage 1: append event to history;
+    4. stage 2: add identity to index;
+    5. on stage-2 failure: roll stage 1 back (remove the staged event,
+       restore index consistency), verify the invariant, then re-raise the
+       original error.
+
+    Stage-1 failure leaves state unchanged (list append is atomic). A rollback
+    that cannot restore the invariant raises ImmutabilityViolation loudly —
+    the ledger never continues silently with corrupted state. A retry of an
+    event whose prior append failed is never falsely rejected (no poisoned
+    index).
+
+    Storage exposure: history and identity index live in name-mangled slots
+    (no ``__dict__``); ordinary rebinding (``ledger._events = ...``) is
+    impossible/refused and ``events()`` returns an immutable snapshot tuple.
+    This is a SEMANTIC immutability/consistency contract, NOT a hostile-runtime
+    security boundary: sufficiently hostile reflection can still reach slots.
     """
 
+    __slots__ = ("__history", "__identity_index")
+
     def __init__(self) -> None:
-        self._events = []
-        self.__identity_index = set()
+        object.__setattr__(self, "_AppendOnlyEventLedger__history", [])
+        object.__setattr__(self, "_AppendOnlyEventLedger__identity_index", set())
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        raise ImmutabilityViolation(
+            "ledger internals cannot be rebound (semantic contract, not a sandbox)"
+        )
+
+    def __delattr__(self, name: str) -> None:
+        raise ImmutabilityViolation("ledger internals cannot be rebound")
+
+    # ---- append-transaction stages (internal failure-injection seams) ----
+    def _history_append(self, event: "EventRecord") -> None:
+        """Stage 1 of the append transaction (failure-injection seam)."""
+        self.__history.append(event)
+
+    def _index_add(self, identity: str) -> None:
+        """Stage 2 of the append transaction (failure-injection seam)."""
+        self.__identity_index.add(identity)
+
+    def _index_contains(self, identity: str) -> bool:
+        return identity in self.__identity_index
+
+    def _append_rollback(self, event, identity: str, depth: int) -> None:
+        """Roll stage 1 back after a failed stage 2 (I-LEDGER-A4/A5)."""
+        if len(self.__history) != depth + 1 or self.__history[-1] is not event:
+            raise ImmutabilityViolation(
+                "append rollback cannot locate the staged event: fail loudly"
+            )
+        self.__history.pop()
+        self.__identity_index.discard(identity)
+        if len(self.__history) != depth or identity in self.__identity_index:
+            raise ImmutabilityViolation(
+                "append rollback left inconsistent ledger state: fail loudly"
+            )
 
     def append(self, event: EventRecord) -> None:
+        """Append transaction: validate -> duplicate check -> history -> index."""
         if not isinstance(event, EventRecord):
             raise SchemaViolation("only EventRecord instances can be appended")
-        if event.event_identity in self.__identity_index:
+        identity = event.event_identity
+        if self._index_contains(identity):
             raise SchemaViolation(
                 "duplicate event_identity: events are append-only and unique"
             )
-        self.__identity_index.add(event.event_identity)
-        self._events.append(event)
+        depth = len(self.__history)
+        self._history_append(event)
+        try:
+            self._index_add(identity)
+        except BaseException:
+            try:
+                self._append_rollback(event, identity, depth)
+            except BaseException as rollback_error:
+                raise ImmutabilityViolation(
+                    "append rollback failed: ledger state may be inconsistent; "
+                    "fail loudly"
+                ) from rollback_error
+            raise
 
     def overwrite(self, record_identity: str, replacement: PublishedRecord) -> None:
         """Overwrite is forbidden: lifecycle change requires a new event."""
@@ -236,13 +425,13 @@ class AppendOnlyEventLedger:
         )
 
     def events(self) -> Tuple[EventRecord, ...]:
-        return tuple(self._events)
+        return tuple(self.__history)
 
     def project_status(self, record_identity: str) -> Union[str, TypedState]:
         """Derive current status from events only; UNDEFINED when no event."""
         require_string(record_identity, "record_identity")
         status = TypedState.UNDEFINED
-        for event in self._events:
+        for event in self.__history:
             if (
                 event.subject_record_identity == record_identity
                 and event.event_kind is EventKind.STATUS_EVENT
@@ -255,7 +444,7 @@ class AppendOnlyEventLedger:
         """Derive supersession from events only; NOT_APPLICABLE when none."""
         require_string(record_identity, "record_identity")
         superseded_by = TypedState.NOT_APPLICABLE
-        for event in self._events:
+        for event in self.__history:
             if (
                 event.subject_record_identity == record_identity
                 and event.event_kind is EventKind.SUPERSESSION_EVENT
