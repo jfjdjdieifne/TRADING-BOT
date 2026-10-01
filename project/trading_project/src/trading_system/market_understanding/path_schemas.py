@@ -39,6 +39,7 @@ from trading_system.research.trajectory.trajectory_stage4c import (
 
 from trading_system.market_understanding.availability import (
     InformationAxis,
+    NonEarliestAvailability,
     require_visible_at,
 )
 from trading_system.market_understanding.contracts import (
@@ -917,6 +918,42 @@ def _require_literal_state_token(value: str, field_name: str) -> None:
             )
 
 
+# S1 V1 exact membership timing rule (no delay rule exists at S1).
+NON_EARLIEST_AVAILABILITY: Final[str] = "NON_EARLIEST_AVAILABILITY"
+S1_MEMBERSHIP_TIMING_RULE: Final[str] = (
+    "membership_information_key MUST EQUAL member_fact_availability_key "
+    "(earliest lawful key under the only membership basis S1 knows)"
+)
+
+
+def _require_earliest_lawful_membership_key(
+    member_fact_availability_key: InformationKey,
+    membership_information_key: InformationKey,
+) -> None:
+    """Enforce the S1 V1 exact timing rule (earliest lawful membership key).
+
+    S1 is SCHEMA FOUNDATION ONLY and possesses NO membership rule that can
+    delay membership beyond the member fact's own availability. Therefore
+    ``membership_information_key`` MUST equal ``member_fact_availability_key``
+    under the lawful InformationKey equality contract: that key is the earliest
+    lawful key under the only membership basis S1 knows. A delayed key (T+k)
+    raises the S0 ``NonEarliestAvailability`` contract error with the
+    machine-distinguishable ``NON_EARLIEST_AVAILABILITY`` token. No
+    membership_rule_version, no arbitrary satisfaction key, no arbitrary T+k
+    delay, no policy semantics and no future evidence exist at S1. A later
+    stage with a real authorized membership rule may define additional basis
+    facts and use the S0 AvailabilityRule / determine_fact_information_key
+    machinery under a SEPARATE contract; S1 V1 must not pretend such a rule
+    exists.
+    """
+    if membership_information_key != member_fact_availability_key:
+        raise NonEarliestAvailability(
+            f"{NON_EARLIEST_AVAILABILITY}: S1 V1 membership basis is the member "
+            "fact's own availability; membership_information_key must equal "
+            "member_fact_availability_key (no delayed satisfaction key exists at S1)"
+        )
+
+
 @dataclass(frozen=True)
 class CausalEpisodeRecord:
     """Schema foundation 1: episode ANCHOR/creation facts only.
@@ -1017,11 +1054,14 @@ class CausalEpisodeRecord:
 class EpisodeMembershipEvent:
     """Schema foundation 2: separate append-only membership event.
 
-    Adding membership NEVER changes ``episode_id``. Membership availability uses
-    earliest-lawful InformationKey semantics (the membership key may never
-    precede the member fact's availability). Historical membership events are
-    immutable: lifecycle change == new event. No automatic market episode
-    creation exists here.
+    Adding membership NEVER changes ``episode_id``. Exact timing rule (S1 V1):
+    ``membership_information_key`` MUST equal ``member_fact_availability_key``
+    under the lawful InformationKey equality contract — the earliest lawful key
+    under the only membership basis S1 knows. S1 possesses no membership rule
+    that can delay membership (no membership_rule_version, no satisfaction key,
+    no T+k, no policy semantics, no future evidence). Historical membership
+    events are immutable: lifecycle change == new event. No automatic market
+    episode creation exists here.
     """
 
     schema_identity: SchemaIdentity
@@ -1044,6 +1084,10 @@ class EpisodeMembershipEvent:
         require_visible_at(
             fact_key=self.member_fact_availability_key,
             at_key=self.membership_information_key,
+        )
+        _require_earliest_lawful_membership_key(
+            self.member_fact_availability_key,
+            self.membership_information_key,
         )
         expected = canonical_artifact_identity(
             _MEMBERSHIP_IDENTITY_SCHEMA,

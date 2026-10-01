@@ -21,11 +21,13 @@ from trading_system.research.trajectory import trajectory_stage4c
 from trading_system.market_understanding.availability import (
     IllegalCausalReference,
     InformationAxis,
+    NonEarliestAvailability,
     InformationBatchKey,
     SourceBatchIdentity,
 )
 from trading_system.market_understanding.contracts import (
     ImmutabilityViolation,
+    IncomparableInformationKeys,
     SchemaIdentity,
     SchemaViolation,
     TypedState,
@@ -806,8 +808,8 @@ def test_muf_s1_patch_p1_02_membership_refs_rejected():
 def test_muf_s1_patch_p1_03_membership_never_changes_episode_id():
     episode = _anchor_episode()
     before = episode.episode_identity
-    first = _membership(before, "member-A", k(1), k(2))
-    second = _membership(before, "member-B", k(1), k(3))
+    first = _membership(before, "member-A", k(2), k(2))
+    second = _membership(before, "member-B", k(3), k(3))
     assert episode.episode_identity == before
     assert first.episode_id == second.episode_id == before
     assert first.event_identity != second.event_identity
@@ -819,8 +821,8 @@ def test_muf_s1_patch_p1_04_future_membership_cannot_change_history():
     record_before = episode.as_record()
     identity_before = record_before.record_identity
     view_before = payload_canonical_view(record_before.content)
-    _membership(episode.episode_identity, "member-A", k(1), k(2))
-    _membership(episode.episode_identity, "member-B", k(1), k(3))
+    _membership(episode.episode_identity, "member-A", k(2), k(2))
+    _membership(episode.episode_identity, "member-B", k(3), k(3))
     record_after = episode.as_record()
     assert record_after.record_identity == identity_before
     assert payload_canonical_view(record_after.content) == view_before
@@ -943,7 +945,7 @@ def test_muf_s1_patch_p1_11_payload_mutation_impossible():
     record = episode.as_record()
     with pytest.raises((ImmutabilityViolation, TypeError, AttributeError)):
         record.content["anchor_fact_ref"] = "mutated"
-    event = _membership(episode.episode_identity, "member-A", k(1), k(2)).as_event_record()
+    event = _membership(episode.episode_identity, "member-A", k(2), k(2)).as_event_record()
     with pytest.raises((ImmutabilityViolation, TypeError, AttributeError)):
         event.event_payload["member_fact_ref"] = "mutated"
     with pytest.raises((ImmutabilityViolation, AttributeError, TypeError)):
@@ -970,3 +972,90 @@ def test_muf_s1_patch_p1_13_lb_consistency_gate_actuals():
     assert metrics["intrabar_path_length_lower_bound"].value == 7.0
     metrics = intrabar_path_metrics(bar(1, o=10.0, h=15.0, low=5.0, c=12.0))
     assert metrics["intrabar_path_length_lower_bound"].value == 18.0
+
+
+# ===========================================================================
+# PATCH P2 — MANDATORY TESTS (1-8): membership earliest-lawful availability
+# ===========================================================================
+
+
+def test_muf_s1_patch_p2_01_equal_keys_accepted():
+    episode = _anchor_episode()
+    member = _membership(episode.episode_identity, "member-A", k(5), k(5))
+    assert member.membership_information_key == member.member_fact_availability_key
+    record = member.as_event_record()
+    assert record.event_kind is EventKind.MEMBERSHIP_EVENT
+
+
+def test_muf_s1_patch_p2_02_delayed_membership_rejected_non_earliest():
+    # exact auditor fixture: same timeline, member_fact bar_position=5,
+    # membership bar_position=10 -> T+k must be rejected machine-distinguishably
+    episode = _anchor_episode()
+    with pytest.raises(NonEarliestAvailability) as caught:
+        _membership(episode.episode_identity, "member-A", k(5), k(10))
+    assert path_schemas.NON_EARLIEST_AVAILABILITY in str(caught.value)
+    assert isinstance(caught.value, NonEarliestAvailability)  # S0 contract class
+
+
+def test_muf_s1_patch_p2_03_premature_membership_rejected():
+    episode = _anchor_episode()
+    with pytest.raises(IllegalCausalReference):
+        _membership(episode.episode_identity, "member-A", k(5), k(3))  # T-k premature
+
+
+def test_muf_s1_patch_p2_04_cross_timeline_rejected():
+    episode = _anchor_episode()
+    with pytest.raises(IllegalCausalReference):
+        _membership(
+            episode.episode_identity,
+            "member-A",
+            k(5),
+            k(5, timeline="OTHER|1d"),
+        )
+
+
+def test_muf_s1_patch_p2_05_incomparable_timestamp_provenance_fails_closed():
+    episode = _anchor_episode()
+    left = k(5, ts=pd.Timestamp("2026-05-01 00:00", tz="UTC"))
+    right = k(5, ts=pd.Timestamp("2026-05-02 00:00", tz="UTC"))
+    with pytest.raises(IncomparableInformationKeys):
+        _membership(episode.episode_identity, "member-A", left, right)
+
+
+def test_muf_s1_patch_p2_06_two_members_distinct_events_same_episode():
+    episode = _anchor_episode()
+    first = _membership(episode.episode_identity, "member-A", k(2), k(2))
+    second = _membership(episode.episode_identity, "member-B", k(3), k(3))
+    assert first.episode_id == second.episode_id == episode.episode_identity
+    assert first.event_identity != second.event_identity
+    # deterministic identity: same member fact + same episode + same key -> same event
+    again = _membership(episode.episode_identity, "member-A", k(2), k(2))
+    assert again.event_identity == first.event_identity
+
+
+def test_muf_s1_patch_p2_07_future_member_never_alters_episode():
+    episode = _anchor_episode()
+    record_before = episode.as_record()
+    identity_before = record_before.record_identity
+    view_before = payload_canonical_view(record_before.content)
+    _membership(episode.episode_identity, "member-A", k(2), k(2))
+    _membership(episode.episode_identity, "member-B", k(3), k(3))
+    record_after = episode.as_record()
+    assert record_after.record_identity == identity_before
+    assert payload_canonical_view(record_after.content) == view_before
+
+
+def test_muf_s1_patch_p2_08_mutation_proof_revert_to_visibility_only(monkeypatch):
+    episode = _anchor_episode()
+    # baseline: enforcement active -> auditor fixture rejected (test #2 semantics)
+    with pytest.raises(NonEarliestAvailability):
+        _membership(episode.episode_identity, "member-A", k(5), k(10))
+    # mutation: remove equality/earliest enforcement (revert to require_visible_at-only)
+    monkeypatch.setattr(
+        path_schemas,
+        "_require_earliest_lawful_membership_key",
+        lambda member_fact_availability_key, membership_information_key: None,
+    )
+    mutated = _membership(episode.episode_identity, "member-A", k(5), k(10))
+    # with enforcement removed the T+k fixture is ACCEPTED => test #2 must fail
+    assert mutated.membership_information_key == k(10)
