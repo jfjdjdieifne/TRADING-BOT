@@ -252,7 +252,9 @@ error/schema-version contracts.
 Closure does NOT certify wave detection, turning-point quality, hierarchy
 usefulness, α/β/γ/δ superiority, predictive support, statistical independence,
 edge, profitability, Model, Strategy, Signal, PnL, or human-like understanding.
-`RESEARCH-DEBT-020` through `RESEARCH-DEBT-025` remain open. No S1 started.
+`RESEARCH-DEBT-020` through `RESEARCH-DEBT-025` remain open. (At S0 closure
+time S1 was not started; S1 has since been completed and CLOSED — see the
+MUF V1 S1 closure section below.)
 
 ### MUF V1 S0 exact closure history
 
@@ -263,3 +265,32 @@ P1  PATCHED — PENDING RE-AUDIT; independent P1 re-audit: PATCH REQUIRED (P2)
 P2  PATCHED — PENDING RE-AUDIT; final independent P2 re-audit: ACCEPTED FOR CLOSURE
     CLOSED
 ```
+
+
+### MUF V1 S1 closure (Price Path Primitives)
+
+```text
+MUF V1 S1 (price_path.py + path_schemas.py + 2 test files)
+    IMPLEMENTED — PENDING AUDIT; implementation audit: ACCEPTED
+PATCH P1  4 schema foundations + LB gate
+    PATCHED — PENDING RE-AUDIT; P1 re-audit: PATCH REQUIRED (P2)
+PATCH P2  membership earliest-lawful availability
+    PATCHED — PENDING RE-AUDIT; final re-audit: ACCEPTED FOR CLOSURE
+    CLOSED
+```
+
+- **MUF S1 = CLOSED.**
+- Final accepted artifacts:
+
+```text
+2ab56ad35c4a68e89ee6134b3d20f8968b0aad872abade49d121dd99d025f990  src/trading_system/market_understanding/price_path.py
+707a1b7ba17b1bf370317c2634aa4c6a6c8b8cd6f1d1b21e8c29efa69e8b6aa6  src/trading_system/market_understanding/path_schemas.py
+836240cf552ff0fdf7c447b983335281bcca166e740273f32de7462f661b3259  tests/test_muf_s1_price_path.py
+f9908b04feff7ce0527085d640a9bd7f5198fc032558d5cbaf5d21a957b3387c  tests/test_muf_s1_path_schemas.py
+```
+
+- Gates at closure: **S1 89/89 · S0 67/67 · full 1228/1228 · field_runner 36/36 (pre-closure)**.
+- Design chain: **FINAL DESIGN → H1 → RC1**.
+- Certification boundary: S1 proves **only factual causal price-path
+  representation**. It does NOT prove: turning-point quality, waves, hierarchy,
+  predictive support, edge, profitability, Model, Strategy, Signal, PnL.

@@ -586,3 +586,34 @@ RESEARCH-DEBT-025 — Reference-Price and Market-Time Alignment
 ```
 
 No debt above is claimed solved by closure.
+
+
+## MUF V1 S1 closure boundary (Price Path Primitives)
+
+Owner authorization: CLOSURE AUTHORIZED for MUF V1 S1 only; S1 = ACCEPTED FOR
+CLOSURE. No S2 authorized.
+
+Design chain: FINAL DESIGN → H1 → RC1. Implementation audit accepted; P1 patch
+(4 schema foundations + LB gate) and P2 patch (membership earliest-lawful
+availability) each re-audited — final state ACCEPTED FOR CLOSURE.
+
+Final accepted S1 artifacts (see `docs/releases/MODULE_MUF_V1_S1_ACCEPTED_SRC_TESTS.sha256`):
+
+```text
+2ab56ad35c4a68e89ee6134b3d20f8968b0aad872abade49d121dd99d025f990  src/trading_system/market_understanding/price_path.py
+707a1b7ba17b1bf370317c2634aa4c6a6c8b8cd6f1d1b21e8c29efa69e8b6aa6  src/trading_system/market_understanding/path_schemas.py
+836240cf552ff0fdf7c447b983335281bcca166e740273f32de7462f661b3259  tests/test_muf_s1_price_path.py
+f9908b04feff7ce0527085d640a9bd7f5198fc032558d5cbaf5d21a957b3387c  tests/test_muf_s1_path_schemas.py
+```
+
+Gate record (actual counts): S1 89/89 · S0 67/67 · full 1228/1228 · field_runner
+36/36 (pre-closure). Closure touched documentation, release files and
+`MANIFEST.sha256` only — no `src/` or `tests/` modification.
+
+Certification boundary (mandatory): MUF V1 S1 proves **only factual causal
+price-path representation**. It does NOT prove: turning-point quality, waves,
+hierarchy, predictive support, edge, profitability, Model, Strategy, Signal,
+PnL. `TIE_ORDER_CONTRACT = NOT_PROVEN`; PROXY is never ACTUAL; RESEARCH-DEBT-020
+through RESEARCH-DEBT-025 remain OPEN (no independence claim in S1).
+
+**MUF S1 = CLOSED.**
