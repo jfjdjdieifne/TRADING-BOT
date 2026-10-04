@@ -617,3 +617,221 @@ PnL. `TIE_ORDER_CONTRACT = NOT_PROVEN`; PROXY is never ACTUAL; RESEARCH-DEBT-020
 through RESEARCH-DEBT-025 remain OPEN (no independence claim in S1).
 
 **MUF S1 = CLOSED.**
+
+
+## MUF V1 S2 closure boundary (Detector Witness Adapter)
+
+Owner authorization: CLOSURE AUTHORIZED for MUF V1 S2 (Detector Witness Adapter
+ONLY); S2 = ACCEPTED FOR CLOSURE.
+
+Final accepted S2 artifacts (see `docs/releases/MODULE_MUF_V1_S2_ACCEPTED_SRC_TESTS.sha256`):
+
+```text
+b6b09db548e78cf7ea551b2e37f4592500d24935fcea34dae67c8437262fd9f6  src/trading_system/market_understanding/detector_witness.py
+35dcacbffd5fa3bcff04e2e2f136dfacf8a2658f4f4d91a2c125a4798949406b  tests/test_muf_s2_detector_witness.py
+```
+
+Gate record (actual counts): S2 30/30 · S1 89/89 · S0 67/67 · full 1258/1258 ·
+field_runner 36/36 · mutation battery 8/8 KILLED.
+
+Certification boundary (mandatory): MUF V1 S2 proves **only causal Detector
+Witness Adaptation over Closed Module 2.1A (`Origin != Availability`,
+`WITNESS_ONLY_NOT_MUF_AUTHORITATIVE`, `I-PAUTH-1..4` promotion blocking)**. It
+does NOT prove: authoritative turning points, `PolicyArtifact` calibration,
+waves, hierarchy, predictive support, edge, profitability, Model, Strategy,
+Signal, PnL. `TIE_ORDER_CONTRACT = NOT_PROVEN`; PROXY is never ACTUAL;
+RESEARCH-DEBT-020 through RESEARCH-DEBT-025 remain OPEN.
+
+**MUF S2 = CLOSED.**
+
+
+## MUF V1 S3 closure boundary (Research-Governance Infrastructure & Gate G0)
+
+Owner authorization: CLOSURE AUTHORIZED for MUF V1 S3 (Research-Governance
+Infrastructure & Authority Gate G0 ONLY); S3 = ACCEPTED FOR CLOSURE.
+
+Final accepted S3 artifacts (see `docs/releases/MODULE_MUF_V1_S3_ACCEPTED_SRC_TESTS.sha256`):
+
+```text
+1564eca58b971ffc5bfa2ae1e1c4ad2944d630d264db9a468f910f608a33fc3b  src/trading_system/market_understanding/policy_governance.py
+fee189f4689010fd1cedca37011729bcb22206c4a13fcef0ac940ca0af1d003f  tests/test_muf_s3_policy_governance.py
+```
+
+Gate record (actual counts): S3 30/30 · S2 30/30 · S1 89/89 · S0 67/67 ·
+full 1288/1288 · field_runner 36/36 · mutation battery 8/8 KILLED.
+
+Certification boundary (mandatory): MUF V1 S3 proves **only Research-Governance
+Infrastructure (`ObjectiveArtifact`, `DatasetIdentityArtifact`,
+`DatasetRoleArtifact`, `FoldProtocolArtifact`, `HumanReviewRecord`,
+`RepresentationExperimentRecord`, `ExperimentRegistry`, `PolicyArtifact`,
+`AuthoritativeTurningPointRecord` promotion contract) and Authority Gate `G0`
+(`evaluate_g0_calibration_gate`)**. `QualificationObjective` remains
+`TypedState.UNDEFINED` until an authorized `ObjectiveArtifact` is supplied. It
+does NOT prove: calibrated detector policies (`S4`), waves (`S5`), hierarchy
+(`S6`), predictive support (`S8`), edge, profitability, Model, Strategy, Signal,
+PnL. `TIE_ORDER_CONTRACT = NOT_PROVEN`; PROXY is never ACTUAL; RESEARCH-DEBT-020
+through RESEARCH-DEBT-025 remain OPEN.
+
+**MUF S3 = CLOSED.**
+
+
+## MUF V1 S4 closure boundary (Development Policy Calibration Harness)
+
+Owner authorization: CLOSURE AUTHORIZED for MUF V1 S4 (Development Policy
+Calibration Harness ONLY); S4 = ACCEPTED FOR CLOSURE.
+
+Final accepted S4 artifacts (see `docs/releases/MODULE_MUF_V1_S4_ACCEPTED_SRC_TESTS.sha256`):
+
+```text
+0c765a6c261838cb36d4f096b764e9762541ffbb4b2e33ebf994a5fe96b07204  src/trading_system/market_understanding/policy_calibration.py
+1549449b8531230da6afec0953c9fba47b1a17c6a422481c20acf52b34d9b46d  tests/test_muf_s4_policy_calibration.py
+```
+
+Gate record (actual counts): S4 20/20 · S3 30/30 · S2 30/30 · S1 89/89 ·
+S0 67/67 · full 1308/1308 · field_runner 36/36 · mutation battery 8/8 KILLED.
+
+Certification boundary (mandatory): MUF V1 S4 proves **only the G0-gated
+Development Policy Calibration Harness (`PolicyCandidateScoreCard`,
+`PolicyCalibrationRecipe`, `PolicyCalibrationReceipt`,
+`validate_development_fit_bar_stream`, `calibrate_development_policy_artifact`,
+`reproduce_and_verify_calibrated_policy`) on `DEVELOPMENT_FIT` datasets**. It
+invents zero numerical parameters or objectives, preserves tied candidates
+without inventing a winner, and does NOT prove: wave construction (`S5`),
+structural qualification (`G1`), hierarchy, predictive support, edge,
+profitability, Model, Strategy, Signal, PnL. `TIE_ORDER_CONTRACT = NOT_PROVEN`;
+PROXY is never ACTUAL; RESEARCH-DEBT-020 through RESEARCH-DEBT-025 remain OPEN.
+
+**MUF S4 = CLOSED.**
+
+
+## MUF V1 S5 closure boundary (Candidate Wave Representation Construction & Gate G1)
+
+Owner authorization: CLOSURE AUTHORIZED for MUF V1 S5 (Candidate Wave
+Representation Construction & Structural Qualification Gate G1 ONLY);
+S5 = ACCEPTED FOR CLOSURE.
+
+Final accepted S5 artifacts (see `docs/releases/MODULE_MUF_V1_S5_ACCEPTED_SRC_TESTS.sha256`):
+
+```text
+851ce362b066ad4c0b1a85f2969ac0f7f3acb0476fa893e0512bfa09af4ff881  src/trading_system/market_understanding/wave_representation.py
+695d340e8a2d0f8c01d2eec56eef41d846fd04ae5a9a59a638b5fb011b974772  tests/test_muf_s5_wave_representation.py
+```
+
+Gate record (actual counts): S5 20/20 · S4 20/20 · S3 30/30 · S2 30/30 ·
+S1 89/89 · S0 67/67 · full 1328/1328 · field_runner 36/36 · mutation battery
+8/8 KILLED.
+
+Certification boundary (mandatory): MUF V1 S5 proves **only causal Candidate
+Wave Representation Construction (`CandidateWaveRepresentationSpec`,
+`WaveIdentityRecord`, `RunningWaveObservationRecord`,
+`FinalizedWaveGeometryRecord`, `WaveStatusEventRecord`,
+`CandidateWaveRepresentationBundle`, `query_wave_representation_as_of`,
+`verify_wave_prefix_invariance`) on DEVELOPMENT datasets (`DEVELOPMENT_FIT` /
+`DEVELOPMENT_SELECTION`) and Gate `G1` Structural Qualification
+(`evaluate_g1_structural_qualification`: `ELIGIBLE / INELIGIBLE`, never a
+predictive winner)**. It does NOT prove: state catalog / hierarchy (`S6`),
+dependence accounting (`S7`), estimands (`S8`), predictive information
+selection (`S9 + G2`), edge, profitability, Model, Strategy, Signal, PnL.
+`TIE_ORDER_CONTRACT = NOT_PROVEN`; PROXY is never ACTUAL; RESEARCH-DEBT-020
+through RESEARCH-DEBT-025 remain OPEN.
+
+**MUF S5 = CLOSED.**
+
+
+## MUF V1 S6 closure boundary (Descriptor Registry, StateCatalogArtifact, and GenericFactualStateGraphSpec)
+
+Final accepted S6 artifacts (see `docs/releases/MODULE_MUF_V1_S6_ACCEPTED_SRC_TESTS.sha256`):
+
+```text
+9636529b60a9ab9ce2339319da1290417bfd93279b813ec7edaaac1a7a5a8e56  src/trading_system/market_understanding/state_graph.py
+cb06fa6d4f283434643a446272baa3599419b68cabfc6f500b425eb9d46df49f  tests/test_muf_s6_state_graph.py
+```
+
+Gate record: S6 20/20 · full 1348/1348 · mutation battery 8/8 KILLED.
+**MUF S6 = CLOSED.**
+
+
+## MUF V1 S7 closure boundary (Dependence Accounting Contracts & Causal Episode Ledger)
+
+Final accepted S7 artifacts (see `docs/releases/MODULE_MUF_V1_S7_ACCEPTED_SRC_TESTS.sha256`):
+
+```text
+376233810d980c38625b4b5db5bb79bfd9b792324f57d9a076724d41ce48bf24  src/trading_system/market_understanding/dependence_accounting.py
+4a916832b3eb60e9250766fae20f391a02b06095b718600be6e260158f1fcd0a  tests/test_muf_s7_dependence_accounting.py
+```
+
+Gate record: S7 20/20 · full 1368/1368 · mutation battery 8/8 KILLED. `RESEARCH-DEBT-024` remains `OPEN`.
+**MUF S7 = CLOSED.**
+
+
+## MUF V1 S8 & S8.5 closure boundary (Estimand Catalog, FeatureViewSpec, and DevelopmentEvaluationProtocol)
+
+Final accepted S8 & S8.5 artifacts (see `docs/releases/MODULE_MUF_V1_S8_ACCEPTED_SRC_TESTS.sha256`):
+
+```text
+8813ecf9d55da861a650016d8cb2e91a4e792a2f708f8a32d38af79d63a3a967  src/trading_system/market_understanding/estimand_catalog.py
+5b8eaa3a18c5e75a90e6b7f66884d395b7fb8eab3e06b25ec02a3792531b6b3d  tests/test_muf_s8_estimand_catalog.py
+```
+
+Gate record: S8 20/20 · full 1388/1388 · mutation battery 8/8 KILLED.
+**MUF S8 & S8.5 = CLOSED.**
+
+
+## MUF V1 S9 & Gate G2 closure boundary (Development Information Selection)
+
+Final accepted S9 & Gate G2 artifacts (see `docs/releases/MODULE_MUF_V1_S9_ACCEPTED_SRC_TESTS.sha256`):
+
+```text
+fc53d2990086e3b48c2d9a73e6ca62193edc4d38c8e1297d7fe1c1670354bf86  src/trading_system/market_understanding/information_selection.py
+01b65b0dd7da0f7516dfc58b961ecc7c3bd04702813420f33f1a257832835435  tests/test_muf_s9_information_selection.py
+```
+
+Gate record: S9 20/20 · full 1408/1408 · mutation battery 8/8 KILLED.
+**MUF S9 & Gate G2 = CLOSED.**
+
+
+## MUF V1 S10–S12 & Gate G3 closure boundary (FrozenRepresentationBundle, EvaluationProtocolArtifact, PreFinalReadinessRecord, Comparability & Equivalence)
+
+Final accepted S10–S12 & Gate G3 artifacts (see `docs/releases/MODULE_MUF_V1_S10_S12_ACCEPTED_SRC_TESTS.sha256`):
+
+```text
+532637ea86605176bc101990d432922c517a0c241a30349d38bb069d3789221b  src/trading_system/market_understanding/freeze_and_readiness.py
+2d2985923c2e3114215949ba5ae210c9140fc80268c94dbcf99e2a72f7cda64b  tests/test_muf_s10_s12_freeze_and_readiness.py
+```
+
+Gate record: S10–S12 20/20 · full 1428/1428 · mutation battery 8/8 KILLED.
+**MUF S10–S12 & Gate G3 = CLOSED.**
+
+
+## MUF V1 S13–S15 closure boundary (Final Evaluation Execution, Exposure Ledger, and Reality / Causal Market Understanding Surface)
+
+Final accepted S13–S15 artifacts (see `docs/releases/MODULE_MUF_V1_S13_S15_ACCEPTED_SRC_TESTS.sha256`):
+
+```text
+bce55a3846165277d00d0f713f10421266be00e0f7235c0d2cffa7ad8fe35947  src/trading_system/market_understanding/final_evaluation_and_reality.py
+879372788481531d822ab27d0446834aae832404ff69270933401eac844d426d  tests/test_muf_s13_s15_final_evaluation_and_reality.py
+```
+
+Gate record: S13–S15 20/20 · full 1448/1448 · field_runner 36/36 · mutation battery 8/8 KILLED.
+Certification boundary (D1-23 / D2-23): MUF V1 S0–S15 + G0–G3 proves causal structured market representation under the defined contracts with auditable provenance, availability, and selection boundaries. It does NOT prove predictive edge, statistical independence (`RESEARCH-DEBT-020`..`025` OPEN), profitability, Model, Strategy, Signal, or PnL.
+**MUF S13–S15 = CLOSED.**
+
+
+## Module 7.0 closure boundary (Causal Multi-Timeframe ICT Recommendation & Dynamic Trade Lifecycle Engine)
+
+Final accepted Module 7.0 artifacts (see `docs/releases/MODULE_CAUSAL_ICT_LIFECYCLE_V1_ACCEPTED_SRC_TESTS.sha256`):
+
+```text
+dfe894070bdb0b2e016d5fabc61979209e7f605dc546567c179d9eeb1f8f56e6  src/trading_system/recommendation/__init__.py
+ee91180d68e6229225848efed31070a2c8b955b38317fb7a01f9149c26ddc98f  src/trading_system/recommendation/causal_ict_lifecycle.py
+a5edbd23b23cda64d2ce0c2c1939d0a7d6cae8deb178da3f4c02c674b3dd0c03  tests/test_causal_ict_lifecycle.py
+```
+
+Gate record: Module 7.0 20/20 · full 1468/1468 · field_runner 36/36 · mutation battery 8/8 KILLED.
+**Module 7.0 = CLOSED.**
+
+
+
+
+
+

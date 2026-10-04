@@ -61,22 +61,26 @@ def test_ast_guard_engines_imported_from_closed_package_only():
 def test_closed_project_manifest_untouched():
     """FAIL-CLOSED manifest gate pinning the CLEAN POST-CLOSURE baseline.
 
-    Owner-authorized MUF S0 post-closure re-pin (PATCH ONLY) legitimately
-    superseded the previous clean baseline (185 lines / 185 OK /
+    Owner-authorized MUF S2 post-closure re-pin (PATCH ONLY) legitimately
+    superseded the previous MUF S1 baseline (202 lines / 202 OK /
+    f6d0d00446c70a997d357db66a82db6237a3254fdcea3a8674a7670d5d58e3a6), the
+    MUF S0 baseline (196 lines / 196 OK /
+    899febb4a33c984b48176be6a972405fe6be3301faf660d54d53718216090e84), and the
+    earlier clean baseline (185 lines / 185 OK /
     12c66abe6f18300f2e00cb5c4befeafe1e3dc67c2ca50bc71db74db9ba8b367d).
-    The guard now certifies the official MUF V1 S0 CLOSED baseline and allows
+    The guard now certifies the official MUF V1 S2 CLOSED baseline and allows
     NO stale exceptions:
 
       A) MANIFEST.sha256 digest must equal the pinned post-closure digest;
-      B) every MANIFEST entry must validate: 196 OK / 0 stale / 0 missing;
+      B) every MANIFEST entry must validate: 218 OK / 0 stale / 0 missing;
       C) the 10 accepted performance artifacts remain independently pinned
          with their accepted digests — historical evidence kept as extra
          protection, never as a permitted-stale allowance.
 
     The former `patched_seal` stale permission is retired. The previous
-    185-line baseline has NO live acceptance path. If any of the ten files
-    (or any other MANIFEST entry) becomes stale again, this gate fails
-    closed.
+    214-line, 210-line, 206-line, 202-line, 196-line, and 185-line baselines have NO live
+    acceptance path. If any of the ten files (or any other MANIFEST entry)
+    becomes stale again, this gate fails closed.
     """
     from field_runner.runner_btc_may_2026 import verify_manifest, _sha256_file
 
@@ -89,7 +93,7 @@ def test_closed_project_manifest_untouched():
     assert project_root is not None, "trading_project not found"
 
     closed_manifest_sha256 = (
-        "899febb4a33c984b48176be6a972405fe6be3301faf660d54d53718216090e84"
+        "02592e5a9b7623e1e2b1bf0656b5b4167f9cf0a4e5de30b04c557975a9da1471"
     )
     accepted_artifact_seal = {
         "src/trading_system/core/causal_percentile.py":
@@ -120,10 +124,10 @@ def test_closed_project_manifest_untouched():
 
     # B) manifest state: ALL entries must validate; no stale allowance.
     result = verify_manifest(project_root)
-    assert result["manifest_lines"] == 196
+    assert result["manifest_lines"] == 247
     assert result["bad_paths"] == [], result["bad_paths"]
     assert result["bad"] == 0, result["bad_paths"]
-    assert result["ok"] == 196
+    assert result["ok"] == 247
 
     # C) accepted performance artifacts: independent digest pins.
     for rel, want in accepted_artifact_seal.items():

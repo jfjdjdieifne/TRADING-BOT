@@ -48,6 +48,18 @@ Layer 6
 Binance Source Adapter V1 (Binance Spot sources)    CLOSED V1
 Exact Performance V2 + Test-Suite Acceleration (unified) CLOSED
 MUF V1 S0 Core Contracts Foundation               CLOSED
+MUF V1 S1 Price Path Primitives                   CLOSED
+MUF V1 S2 Detector Witness Adapter                CLOSED
+MUF V1 S3 Research-Governance Infra & Gate G0     CLOSED
+MUF V1 S4 Development Policy Calibration Harness  CLOSED
+MUF V1 S5 Candidate Wave Representation & Gate G1 CLOSED
+MUF V1 S6 Descriptor Registry & State Graph       CLOSED
+MUF V1 S7 Dependence Accounting & Episode Ledger  CLOSED
+MUF V1 S8 & S8.5 Estimand Catalog & FeatureView   CLOSED
+MUF V1 S9 & Gate G2 Development Info Selection    CLOSED
+MUF V1 S10-S12 & Gate G3 Freeze/Protocol/Readiness CLOSED
+MUF V1 S13-S15 Final Evaluation & Reality Surface CLOSED
+7.0 Causal ICT Recommendation & Dynamic Lifecycle CLOSED V1
 ```
 
 Module 0.1 certification scope remains primary DataFrame output only.
@@ -294,3 +306,199 @@ f9908b04feff7ce0527085d640a9bd7f5198fc032558d5cbaf5d21a957b3387c  tests/test_muf
 - Certification boundary: S1 proves **only factual causal price-path
   representation**. It does NOT prove: turning-point quality, waves, hierarchy,
   predictive support, edge, profitability, Model, Strategy, Signal, PnL.
+
+
+### MUF V1 S2 closure (Detector Witness Adapter)
+
+```text
+MUF V1 S2 (detector_witness.py + test_muf_s2_detector_witness.py)
+    IMPLEMENTED — ADVERSARIALLY AUDITED (8/8 mutations killed) — ACCEPTED FOR CLOSURE
+    CLOSED
+```
+
+- **MUF S2 = CLOSED.**
+- Final accepted artifacts:
+
+```text
+b6b09db548e78cf7ea551b2e37f4592500d24935fcea34dae67c8437262fd9f6  src/trading_system/market_understanding/detector_witness.py
+35dcacbffd5fa3bcff04e2e2f136dfacf8a2658f4f4d91a2c125a4798949406b  tests/test_muf_s2_detector_witness.py
+```
+
+- Gates at closure: **S2 30/30 · S1 89/89 · S0 67/67 · full 1258/1258 · field_runner 36/36**.
+- Certification boundary: S2 proves **only causal Detector Witness Adaptation over Closed Module 2.1A (`Origin != Availability`, `WITNESS_ONLY_NOT_MUF_AUTHORITATIVE`, `I-PAUTH-1..4` promotion firewall)**. It does NOT prove: authoritative turning points, `PolicyArtifact` calibration, waves, hierarchy, predictive support, statistical independence (`RESEARCH-DEBT-024` OPEN), edge, profitability, Model, Strategy, Signal, PnL.
+
+```text
+MUF V1 S3 (policy_governance.py + test_muf_s3_policy_governance.py)
+    IMPLEMENTED — ADVERSARIALLY AUDITED (8/8 mutations killed) — ACCEPTED FOR CLOSURE
+    CLOSED
+```
+
+- **MUF S3 = CLOSED.**
+- Final accepted artifacts:
+
+```text
+1564eca58b971ffc5bfa2ae1e1c4ad2944d630d264db9a468f910f608a33fc3b  src/trading_system/market_understanding/policy_governance.py
+fee189f4689010fd1cedca37011729bcb22206c4a13fcef0ac940ca0af1d003f  tests/test_muf_s3_policy_governance.py
+```
+
+- Gates at closure: **S3 30/30 · S2 30/30 · S1 89/89 · S0 67/67 · full 1288/1288 · field_runner 36/36**.
+- Certification boundary: S3 proves **only Research-Governance Infrastructure (`ObjectiveArtifact`, `DatasetIdentityArtifact`, `DatasetRoleArtifact`, `FoldProtocolArtifact`, `HumanReviewRecord`, `ExperimentRegistry`, `PolicyArtifact`, `AuthoritativeTurningPointRecord` promotion contract) and Authority Gate `G0` (`evaluate_g0_calibration_gate`)**. `QualificationObjective` remains `TypedState.UNDEFINED` until an authorized `ObjectiveArtifact` is supplied. S3 does NOT perform parameter fitting (`S4`), wave construction (`S5`), hierarchy (`S6`), estimand support (`S8`), or claim edge, profitability, Model, Strategy, Signal, PnL.
+
+```text
+MUF V1 S4 (policy_calibration.py + test_muf_s4_policy_calibration.py)
+    IMPLEMENTED — ADVERSARIALLY AUDITED (8/8 mutations killed) — ACCEPTED FOR CLOSURE
+    CLOSED
+```
+
+- **MUF S4 = CLOSED.**
+- Final accepted artifacts:
+
+```text
+0c765a6c261838cb36d4f096b764e9762541ffbb4b2e33ebf994a5fe96b07204  src/trading_system/market_understanding/policy_calibration.py
+1549449b8531230da6afec0953c9fba47b1a17c6a422481c20acf52b34d9b46d  tests/test_muf_s4_policy_calibration.py
+```
+
+- Gates at closure: **S4 20/20 · S3 30/30 · S2 30/30 · S1 89/89 · S0 67/67 · full 1308/1308 · field_runner 36/36**.
+- Certification boundary: S4 proves **only the G0-gated Development Policy Calibration Harness (`PolicyCandidateScoreCard`, `PolicyCalibrationRecipe`, `PolicyCalibrationReceipt`, `validate_development_fit_bar_stream`, `calibrate_development_policy_artifact`, `reproduce_and_verify_calibrated_policy`) on `DEVELOPMENT_FIT` datasets**. S4 invents zero numerical parameters or objectives, preserves tied candidates without inventing a winner, and does NOT prove: wave construction (`S5`), structural qualification (`G1`), hierarchy, predictive support, edge, profitability, Model, Strategy, Signal, PnL.
+
+```text
+MUF V1 S5 (wave_representation.py + test_muf_s5_wave_representation.py)
+    IMPLEMENTED — ADVERSARIALLY AUDITED (8/8 mutations killed) — ACCEPTED FOR CLOSURE
+    CLOSED
+```
+
+- **MUF S5 = CLOSED.**
+- Final accepted artifacts:
+
+```text
+851ce362b066ad4c0b1a85f2969ac0f7f3acb0476fa893e0512bfa09af4ff881  src/trading_system/market_understanding/wave_representation.py
+695d340e8a2d0f8c01d2eec56eef41d846fd04ae5a9a59a638b5fb011b974772  tests/test_muf_s5_wave_representation.py
+```
+
+- Gates at closure: **S5 20/20 · S4 20/20 · S3 30/30 · S2 30/30 · S1 89/89 · S0 67/67 · full 1328/1328 · field_runner 36/36**.
+- Certification boundary: S5 proves **only causal Candidate Wave Representation Construction (`CandidateWaveRepresentationSpec`, `WaveIdentityRecord`, `RunningWaveObservationRecord`, `FinalizedWaveGeometryRecord`, `WaveStatusEventRecord`, `CandidateWaveRepresentationBundle`, `query_wave_representation_as_of`, `verify_wave_prefix_invariance`) on DEVELOPMENT datasets (`DEVELOPMENT_FIT` / `DEVELOPMENT_SELECTION`) and Gate `G1` Structural Qualification (`evaluate_g1_structural_qualification`: `ELIGIBLE / INELIGIBLE`, never a predictive winner)**. S5 does NOT prove: state catalog / hierarchy (`S6`), dependence accounting (`S7`), estimands (`S8`), predictive information selection (`S9 + G2`), edge, profitability, Model, Strategy, Signal, PnL.
+
+```text
+MUF V1 S6 (state_graph.py + test_muf_s6_state_graph.py)
+    IMPLEMENTED — ADVERSARIALLY AUDITED (8/8 mutations killed) — ACCEPTED FOR CLOSURE
+    CLOSED
+```
+
+- **MUF S6 = CLOSED.**
+- Final accepted artifacts:
+
+```text
+9636529b60a9ab9ce2339319da1290417bfd93279b813ec7edaaac1a7a5a8e56  src/trading_system/market_understanding/state_graph.py
+cb06fa6d4f283434643a446272baa3599419b68cabfc6f500b425eb9d46df49f  tests/test_muf_s6_state_graph.py
+```
+
+- Gates at closure: **S6 20/20 · S5 20/20 · S4 20/20 · S3 30/30 · S2 30/30 · S1 89/89 · S0 67/67 · full 1348/1348 · field_runner 36/36**.
+- Certification boundary: S6 proves **only `DescriptorRegistry`, `StateCatalogArtifact`, `GenericFactualStateGraphSpec`, cycle-safe causal graph closure (`compute_cycle_safe_graph_closure`), and `query_state_graph_as_of` (`I-GSG-1..4`, `I-SCAT-1..3`, `I-DESC-1..4`, `I-CLOS-1..3`, `I-DELTA-1..4`)**.
+
+```text
+MUF V1 S7 (dependence_accounting.py + test_muf_s7_dependence_accounting.py)
+    IMPLEMENTED — ADVERSARIALLY AUDITED (8/8 mutations killed) — ACCEPTED FOR CLOSURE
+    CLOSED
+```
+
+- **MUF S7 = CLOSED.**
+- Final accepted artifacts:
+
+```text
+376233810d980c38625b4b5db5bb79bfd9b792324f57d9a076724d41ce48bf24  src/trading_system/market_understanding/dependence_accounting.py
+4a916832b3eb60e9250766fae20f391a02b06095b718600be6e260158f1fcd0a  tests/test_muf_s7_dependence_accounting.py
+```
+
+- Gates at closure: **S7 20/20 · S6 20/20 · S5 20/20 · S4 20/20 · S3 30/30 · S2 30/30 · S1 89/89 · S0 67/67 · full 1368/1368 · field_runner 36/36**.
+- Certification boundary: S7 proves **only `DependenceAccountingContract`, `EpisodeAnchorIdentityRecord`, append-only `CausalEpisodeLedger`, and `DependenceAccountingBundle` (`I-EP-1..3`, `RESEARCH-DEBT-024` remains `OPEN`)**.
+
+```text
+MUF V1 S8 & S8.5 (estimand_catalog.py + test_muf_s8_estimand_catalog.py)
+    IMPLEMENTED — ADVERSARIALLY AUDITED (8/8 mutations killed) — ACCEPTED FOR CLOSURE
+    CLOSED
+```
+
+- **MUF S8 & S8.5 = CLOSED.**
+- Final accepted artifacts:
+
+```text
+8813ecf9d55da861a650016d8cb2e91a4e792a2f708f8a32d38af79d63a3a967  src/trading_system/market_understanding/estimand_catalog.py
+5b8eaa3a18c5e75a90e6b7f66884d395b7fb8eab3e06b25ec02a3792531b6b3d  tests/test_muf_s8_estimand_catalog.py
+```
+
+- Gates at closure: **S8 20/20 · S7 20/20 · S6 20/20 · S5 20/20 · S4 20/20 · S3 30/30 · S2 30/30 · S1 89/89 · S0 67/67 · full 1388/1388 · field_runner 36/36**.
+- Certification boundary: S8 & S8.5 prove **only `EstimandArtifact`, `EstimandCatalog`, `FeatureViewSpec`, `DevelopmentEvaluationProtocol`, and competing-risk/continuation realization evaluation with explicit right-censoring (`I-EST-1`, `I-SCAT-1..3`, `I-FVIEW-1..5`, `I-SG-1A`)**.
+
+```text
+MUF V1 S9 & Gate G2 (information_selection.py + test_muf_s9_information_selection.py)
+    IMPLEMENTED — ADVERSARIALLY AUDITED (8/8 mutations killed) — ACCEPTED FOR CLOSURE
+    CLOSED
+```
+
+- **MUF S9 & Gate G2 = CLOSED.**
+- Final accepted artifacts:
+
+```text
+fc53d2990086e3b48c2d9a73e6ca62193edc4d38c8e1297d7fe1c1670354bf86  src/trading_system/market_understanding/information_selection.py
+01b65b0dd7da0f7516dfc58b961ecc7c3bd04702813420f33f1a257832835435  tests/test_muf_s9_information_selection.py
+```
+
+- Gates at closure: **S9 20/20 · S8 20/20 · S7 20/20 · S6 20/20 · S5 20/20 · S4 20/20 · S3 30/30 · S2 30/30 · S1 89/89 · S0 67/67 · full 1408/1408 · field_runner 36/36**.
+- Certification boundary: S9 & Gate G2 prove **only `CandidateInformationEvaluationRecord`, `GateG2InformationSelectionDecision`, and `run_gate_g2_information_selection` (`I-SEL-1..5`, `D2-17`)**.
+
+```text
+MUF V1 S10-S12 & Gate G3 (freeze_and_readiness.py + test_muf_s10_s12_freeze_and_readiness.py)
+    IMPLEMENTED — ADVERSARIALLY AUDITED (8/8 mutations killed) — ACCEPTED FOR CLOSURE
+    CLOSED
+```
+
+- **MUF S10–S12 & Gate G3 = CLOSED.**
+- Final accepted artifacts:
+
+```text
+532637ea86605176bc101990d432922c517a0c241a30349d38bb069d3789221b  src/trading_system/market_understanding/freeze_and_readiness.py
+2d2985923c2e3114215949ba5ae210c9140fc80268c94dbcf99e2a72f7cda64b  tests/test_muf_s10_s12_freeze_and_readiness.py
+```
+
+- Gates at closure: **S10–S12 20/20 · S9 20/20 · S8 20/20 · S7 20/20 · S6 20/20 · S5 20/20 · S4 20/20 · S3 30/30 · S2 30/30 · S1 89/89 · S0 67/67 · full 1428/1428 · field_runner 36/36**.
+- Certification boundary: S10–S12 & Gate G3 prove **only `FrozenRepresentationBundle`, immutable `EvaluationProtocolArtifact` + `EvaluationProtocolEventLedger`, `PreFinalReadinessRecord`, `EquivalenceClaimArtifact`, three-level `ComparabilityCheckResult`, and `Gate G3` (`I-FREEZE-1..4`, `I-EVP-1..3`, `I-EVAL-1..6`, `I-RES-1..2`, `I-SG-1B`, `I-PFR-1..3`, `I-EQ-1..4`, `I-CMP-1..2`, `I-CMPL-1..3`, `I-MSN-1`)**.
+
+```text
+MUF V1 S13-S15 (final_evaluation_and_reality.py + test_muf_s13_s15_final_evaluation_and_reality.py)
+    IMPLEMENTED — ADVERSARIALLY AUDITED (8/8 mutations killed) — ACCEPTED FOR CLOSURE
+    CLOSED
+```
+
+- **MUF S13–S15 = CLOSED.**
+- Final accepted artifacts:
+
+```text
+bce55a3846165277d00d0f713f10421266be00e0f7235c0d2cffa7ad8fe35947  src/trading_system/market_understanding/final_evaluation_and_reality.py
+879372788481531d822ab27d0446834aae832404ff69270933401eac844d426d  tests/test_muf_s13_s15_final_evaluation_and_reality.py
+```
+
+- Gates at closure: **S13–S15 20/20 · S10–S12 20/20 · S9 20/20 · S8 20/20 · S7 20/20 · S6 20/20 · S5 20/20 · S4 20/20 · S3 30/30 · S2 30/30 · S1 89/89 · S0 67/67 · full 1448/1448 · field_runner 36/36**.
+- Certification boundary: S13–S15 prove **only `open_and_run_final_evaluation_once`, `FinalEvaluationOutcomeRecord`, `FinalEvaluationExposureRegistry`, `ExplanationStateRecord`, `RealityAuditSurfaceRecord`, and `analyze_causal_market_state_as_of` (`I-EVAL-1..6`, `I-FE-1..2`, `I-EXPL-1`, `I-HR-1..2`, `I-DR-3`, `D1-23`, `D2-23`)**. It does NOT prove predictive edge, statistical independence (`RESEARCH-DEBT-024` OPEN), profitability, Model, Strategy, Signal, or PnL.
+
+```text
+Module 7.0 (causal_ict_lifecycle.py + test_causal_ict_lifecycle.py)
+    IMPLEMENTED — ADVERSARIALLY AUDITED (8/8 mutations killed) — ACCEPTED FOR CLOSURE
+    CLOSED
+```
+
+- **Module 7.0 Causal ICT Recommendation & Dynamic Lifecycle = CLOSED.**
+- Final accepted artifacts:
+
+```text
+dfe894070bdb0b2e016d5fabc61979209e7f605dc546567c179d9eeb1f8f56e6  src/trading_system/recommendation/__init__.py
+ee91180d68e6229225848efed31070a2c8b955b38317fb7a01f9149c26ddc98f  src/trading_system/recommendation/causal_ict_lifecycle.py
+a5edbd23b23cda64d2ce0c2c1939d0a7d6cae8deb178da3f4c02c674b3dd0c03  tests/test_causal_ict_lifecycle.py
+```
+
+- Gates at closure: **Module 7.0 20/20 · full 1468/1468 · field_runner 36/36 · mutation battery 8/8 KILLED**.
+
+
+
+
+
+
