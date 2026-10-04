@@ -1,0 +1,15 @@
+{
+  "_comment": "إعدادات تشغيل محرك التوصيات البنيوية وإدارة الصفقة الديناميكية (من 3 أضعاف حتى 10+ أضعاف)",
+  "account_equity": 10000.0,
+  "capital_risk_fraction": 0.01,
+  "min_qualification_rr": 3.0,
+  "transaction_cost_in_r": 0.05,
+  "impulse_expansion_min_causal_rank": 0.70,
+  "exhaustion_max_causal_rank": 0.30,
+  "calibration_warmup_bars": 300,
+  "htf_durations": ["15min", "1h", "4h"],
+  "symbol": "BTCUSDT",
+  "year_month": "2026-05",
+  "period_start_utc": "2026-05-01T00:00:00Z",
+  "period_end_utc": "2026-06-01T00:00:00Z"
+}
