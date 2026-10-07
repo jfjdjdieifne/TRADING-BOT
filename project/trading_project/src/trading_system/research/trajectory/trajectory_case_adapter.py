@@ -38,6 +38,8 @@ from trading_system.research.trajectory import trajectory_stage4b2 as s4b2
 from trading_system.research.trajectory.trajectory_stage4b2_consistency import (
     LOCAL_VERIFICATION_SCOPE,
     Stage4B2ConsistencyError,
+    capture_stage4b2_market_source_column_hashes,
+    required_stage4b2_market_source_columns,
     verify_stage4b2_consistency,
 )
 from trading_system.research.trajectory import trajectory_stage4c as s4c
@@ -352,6 +354,7 @@ class CaseSourceProvenance:
     source_artifact_reference: TimelineArtifactReference | None
     surface_versions: tuple[SurfaceVersionReference, ...]
     provenance_binding_hash: str
+    market_source_column_hashes: tuple[tuple[str, tuple[str, ...]], ...] = ()
 
     def __post_init__(self) -> None:
         _require_sha256(self.timeline_hash, "timeline_hash")
@@ -369,11 +372,31 @@ class CaseSourceProvenance:
             raise TrajectoryCaseError("duplicate source surface version reference")
         if any(item.source_timeline_hash != self.timeline_hash for item in self.surface_versions):
             raise TrajectoryCaseError("surface source timeline hash differs from provenance timeline")
+        if not isinstance(self.market_source_column_hashes, tuple) or any(
+            not isinstance(item, tuple)
+            or len(item) != 2
+            or not isinstance(item[0], str)
+            or not item[0]
+            or not isinstance(item[1], tuple)
+            or any(
+                not isinstance(digest, str)
+                or _SHA256_RE.fullmatch(digest) is None
+                for digest in item[1]
+            )
+            for item in self.market_source_column_hashes
+        ):
+            raise TrajectoryCaseError("market source column hashes must be immutable column/hash tuples")
+        source_columns = tuple(column for column, _ in self.market_source_column_hashes)
+        if tuple(sorted(set(source_columns))) != source_columns:
+            raise TrajectoryCaseError("market source columns must be unique and canonically ordered")
+        if len({len(hashes) for _, hashes in self.market_source_column_hashes}) > 1:
+            raise TrajectoryCaseError("market source columns have inconsistent captured row counts")
         _require_sha256(self.provenance_binding_hash, "provenance_binding_hash")
         expected = _provenance_hash(
             timeline_hash=self.timeline_hash,
             source_artifact_reference=self.source_artifact_reference,
             surface_versions=self.surface_versions,
+            market_source_column_hashes=self.market_source_column_hashes,
         )
         if self.provenance_binding_hash != expected:
             raise TrajectoryCaseError("source provenance binding hash mismatch")
@@ -395,6 +418,7 @@ def _provenance_hash(
     timeline_hash: str,
     source_artifact_reference: TimelineArtifactReference | None,
     surface_versions: tuple[SurfaceVersionReference, ...],
+    market_source_column_hashes: tuple[tuple[str, tuple[str, ...]], ...] = (),
 ) -> str:
     reference = None
     if source_artifact_reference is not None:
@@ -406,13 +430,19 @@ def _provenance_hash(
             "timeline_id": source_artifact_reference.timeline_id,
             "timeline_hash": source_artifact_reference.timeline_hash,
         }
+    payload = {
+        "timeline_hash": timeline_hash,
+        "source_artifact_reference": reference,
+        "surface_versions": [_surface_version_payload(item) for item in surface_versions],
+    }
+    if market_source_column_hashes:
+        payload["market_source_column_hashes"] = [
+            {"column": column, "row_hashes": list(hashes)}
+            for column, hashes in market_source_column_hashes
+        ]
     return canonical_sha256(
         domain="TRAJECTORY_CASE_SOURCE_PROVENANCE_V1",
-        payload={
-            "timeline_hash": timeline_hash,
-            "source_artifact_reference": reference,
-            "surface_versions": [_surface_version_payload(item) for item in surface_versions],
-        },
+        payload=payload,
     )
 
 
@@ -511,6 +541,33 @@ class TrajectoryDecisionCase:
             raise TrajectoryCaseError("parent snapshot attachment is disabled in V1")
         if not isinstance(self.source_provenance, CaseSourceProvenance):
             raise TrajectoryCaseError("source_provenance is required")
+        b2_domains = {
+            binding.domain
+            for binding in self.surface_prefix_bindings
+            if binding.surface_family == "STAGE4B2"
+        }
+        source_hash_columns = {
+            column for column, _ in self.source_provenance.market_source_column_hashes
+        }
+        if b2_domains:
+            try:
+                required_source_columns = {
+                    column
+                    for domain in b2_domains
+                    for column in required_stage4b2_market_source_columns(domain)
+                }
+            except Stage4B2ConsistencyError as exc:
+                raise TrajectoryCaseError(str(exc)) from exc
+            if not required_source_columns.issubset(source_hash_columns):
+                missing = sorted(required_source_columns - source_hash_columns)
+                raise TrajectoryCaseError(f"Stage4B2 case lacks market source evidence for {missing}")
+            if any(
+                len(hashes) <= self.decision_key.bar_position
+                for _, hashes in self.source_provenance.market_source_column_hashes
+            ):
+                raise TrajectoryCaseError("Stage4B2 market source evidence does not reach the decision boundary")
+        elif self.source_provenance.market_source_column_hashes:
+            raise TrajectoryCaseError("market source hashes require a Stage4B2 surface binding")
         artifact_reference = self.source_provenance.source_artifact_reference
         if artifact_reference is not None:
             if artifact_reference.timeline_id != self.timeline_id:
@@ -555,7 +612,12 @@ class TrajectoryDecisionCase:
 
 
 def _make_surface_prefix_binding(
-    surface: object, boundary_key: InformationKey
+    surface: object,
+    boundary_key: InformationKey,
+    *,
+    market_history: pd.DataFrame | None = None,
+    market_source_column_hashes: tuple[tuple[str, tuple[str, ...]], ...] | None = None,
+    source_through_position: int | None = None,
 ) -> SurfacePrefixBinding:
     """Verify and bind one supported public Stage 4 surface prefix."""
     verification_scope = None
@@ -596,7 +658,12 @@ def _make_surface_prefix_binding(
         ),
     ):
         try:
-            consistency = verify_stage4b2_consistency(surface)
+            consistency = verify_stage4b2_consistency(
+                surface,
+                market_history=market_history,
+                market_source_column_hashes=market_source_column_hashes,
+                source_through_position=source_through_position,
+            )
         except Stage4B2ConsistencyError as exc:
             raise TrajectoryCaseError(str(exc)) from exc
         verification_scope = consistency.verification_scope
@@ -729,10 +796,21 @@ def _verify_surface_prefix_snapshot(
     *,
     case: TrajectoryDecisionCase,
     surface_snapshot: object,
+    source_through_position: int | None = None,
 ) -> SurfacePrefixBinding:
     if not isinstance(case, TrajectoryDecisionCase):
         raise TypeError("case must be a TrajectoryDecisionCase")
-    binding = _make_surface_prefix_binding(surface_snapshot, case.decision_key)
+    checked_through = (
+        case.decision_key.bar_position
+        if source_through_position is None
+        else source_through_position
+    )
+    binding = _make_surface_prefix_binding(
+        surface_snapshot,
+        case.decision_key,
+        market_source_column_hashes=case.source_provenance.market_source_column_hashes,
+        source_through_position=checked_through,
+    )
     matches = [
         prior
         for prior in case.surface_prefix_bindings
@@ -804,6 +882,13 @@ def create_trajectory_decision_case(
     except Exception as exc:
         raise TrajectoryCaseError(f"decision key is unavailable on supplied timeline: {exc}") from exc
 
+    try:
+        market_source_column_hashes = capture_stage4b2_market_source_column_hashes(
+            market_snapshot, surface_inputs
+        )
+    except Stage4B2ConsistencyError as exc:
+        raise TrajectoryCaseError(str(exc)) from exc
+
     decision_prefix_hash = _decision_prefix_hash(
         timeline=timeline,
         adapter=adapter,
@@ -821,7 +906,12 @@ def create_trajectory_decision_case(
 
     bindings = tuple(
         sorted(
-            (_make_surface_prefix_binding(surface, decision_key) for surface in surface_inputs),
+            (
+                _make_surface_prefix_binding(
+                    surface, decision_key, market_history=market_snapshot
+                )
+                for surface in surface_inputs
+            ),
             key=lambda item: item.stable_binding_hash,
         )
     )
@@ -842,12 +932,14 @@ def create_trajectory_decision_case(
         timeline_hash=timeline.timeline_hash,
         source_artifact_reference=artifact_reference,
         surface_versions=surface_versions,
+        market_source_column_hashes=market_source_column_hashes,
     )
     provenance = CaseSourceProvenance(
         timeline_hash=timeline.timeline_hash,
         source_artifact_reference=artifact_reference,
         surface_versions=surface_versions,
         provenance_binding_hash=provenance_hash,
+        market_source_column_hashes=market_source_column_hashes,
     )
 
     identity = _case_identity_payload(

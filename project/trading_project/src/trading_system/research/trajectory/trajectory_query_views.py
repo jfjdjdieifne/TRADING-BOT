@@ -519,6 +519,7 @@ def create_asof_surface_view(
             decision_binding = _verify_surface_prefix_snapshot(
                 case=case,
                 surface_snapshot=surface,
+                source_through_position=as_of_key.bar_position,
             )
         except TrajectoryCaseError as exc:
             raise TrajectoryQueryError(str(exc)) from exc

@@ -9,8 +9,9 @@ check and the cross-table/source-witness checks below.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from decimal import Decimal, InvalidOperation
 import math
-from typing import Any
+from typing import Any, Iterable
 
 import numpy as np
 import pandas as pd
@@ -64,9 +65,280 @@ _CREATION_EVENT = {
     "FVG": "FVG_CREATED",
 }
 
+# Exact market columns consumed by each CLOSED Stage4B2 producer contract.
+_MARKET_SOURCE_COLUMNS_BY_DOMAIN = {
+    "LIQUIDITY": ("high", "low", "close"),
+    "ORDER_BLOCK": ("open", "high", "low", "close"),
+    "FVG": ("open", "high", "low", "close"),
+    "DEALING_RANGE": ("close",),
+}
+
+# Producer-initialized absence values for fields populated only on a creation
+# row. None means a pandas missing value (nullable integer or NaN float); string
+# sentinels and zero-valued integer counters remain literal producer defaults.
+_CREATION_ABSENCE_DEFAULTS = {
+    "LIQUIDITY": {
+        "created_level_id": None,
+        "created_level_side": "NONE",
+        "created_level_price": None,
+        "created_level_origin_position": None,
+        "created_level_confirmation_position": None,
+        "created_level_source_class": "NONE",
+        "nearest_prior_same_side_level_id": None,
+        "nearest_same_side_distance_fraction": None,
+        "nearest_distance_percentile": None,
+        "nearest_distance_reference_history_count": 0,
+    },
+    "ORDER_BLOCK": {
+        "created_ob_zone_id": None,
+        "created_ob_direction": "NONE",
+        "created_ob_origin_position": None,
+        "created_ob_creation_position": None,
+        "created_ob_full_zone_low": None,
+        "created_ob_full_zone_high": None,
+        "created_ob_body_low": None,
+        "created_ob_body_high": None,
+        "created_ob_source_break_event": "NONE",
+        "created_ob_origin_prior_use_count": 0,
+        "created_ob_displacement_fraction": None,
+        "created_ob_displacement_percentile": None,
+        "created_ob_displacement_history_count": 0,
+        "created_ob_search_boundary_position": None,
+        "created_ob_opposite_candle_count_in_leg": 0,
+    },
+    "FVG": {
+        "created_fvg_id": None,
+        "created_fvg_direction": "NONE",
+        "created_fvg_origin_position": None,
+        "created_fvg_middle_position": None,
+        "created_fvg_creation_position": None,
+        "created_fvg_zone_low": None,
+        "created_fvg_zone_high": None,
+        "created_fvg_midpoint": None,
+        "created_fvg_gap_width": None,
+        "created_fvg_gap_width_fraction": None,
+        "created_fvg_gap_width_percentile": None,
+        "created_fvg_gap_width_history_count": 0,
+        "created_fvg_middle_body_fraction": None,
+        "created_fvg_middle_signed_body_fraction": None,
+    },
+    "DEALING_RANGE": {
+        "created_range_id": None,
+        "created_range_direction": "NONE",
+        "created_range_creation_position": None,
+        "created_range_low": None,
+        "created_range_high": None,
+        "created_range_width": None,
+        "created_range_midpoint": None,
+        "created_range_first_endpoint_side": "NONE",
+        "created_range_first_endpoint_origin_position": None,
+        "created_range_first_endpoint_confirmation_position": None,
+        "created_range_first_endpoint_price": None,
+        "created_range_first_endpoint_class": "NONE",
+        "created_range_second_endpoint_side": "NONE",
+        "created_range_second_endpoint_origin_position": None,
+        "created_range_second_endpoint_confirmation_position": None,
+        "created_range_second_endpoint_price": None,
+        "created_range_second_endpoint_class": "NONE",
+    },
+}
+
+_LIQUIDITY_EVENT_COUNT_COLUMNS = {
+    ("HIGH_SIDE", "FIRST_TOUCH"): "high_side_first_touch_count",
+    ("LOW_SIDE", "FIRST_TOUCH"): "low_side_first_touch_count",
+    ("HIGH_SIDE", "FIRST_WICK_BREACH"): "high_side_first_wick_breach_count",
+    ("LOW_SIDE", "FIRST_WICK_BREACH"): "low_side_first_wick_breach_count",
+    ("HIGH_SIDE", "FIRST_WICK_ONLY_EXCURSION"): "high_side_first_wick_only_count",
+    ("LOW_SIDE", "FIRST_WICK_ONLY_EXCURSION"): "low_side_first_wick_only_count",
+    ("HIGH_SIDE", "FIRST_CLOSE_BREACH"): "high_side_first_close_breach_count",
+    ("LOW_SIDE", "FIRST_CLOSE_BREACH"): "low_side_first_close_breach_count",
+    ("HIGH_SIDE", "FIRST_RECLAIM_AFTER_CLOSE_BREACH"): "high_side_first_reclaim_count",
+    ("LOW_SIDE", "FIRST_RECLAIM_AFTER_CLOSE_BREACH"): "low_side_first_reclaim_count",
+}
+
+
+def required_stage4b2_market_source_columns(domain: str) -> tuple[str, ...]:
+    """Return the exact captured-market columns consumed by one producer domain."""
+    try:
+        return _MARKET_SOURCE_COLUMNS_BY_DOMAIN[domain]
+    except (KeyError, TypeError) as exc:
+        raise Stage4B2ConsistencyError(f"unsupported Stage4B2 market-source domain: {domain!r}") from exc
+
 
 def _fail(domain: str, detail: str) -> None:
     raise Stage4B2ConsistencyError(f"{domain} cross-table consistency: {detail}")
+
+
+def _source_index_token(value: Any) -> dict[str, Any]:
+    if isinstance(value, np.generic):
+        value = value.item()
+    if isinstance(value, pd.Timestamp):
+        return {"type": "timestamp", "value": value.isoformat()}
+    if isinstance(value, pd.Timedelta):
+        return {"type": "timedelta_ns", "value": int(value.value)}
+    if isinstance(value, bool):
+        return {"type": "bool", "value": value}
+    if isinstance(value, int):
+        return {"type": "int", "value": value}
+    if isinstance(value, float):
+        return {"type": "float_hex", "value": value.hex()}
+    if isinstance(value, str):
+        return {"type": "str", "value": value}
+    return {"type": type(value).__qualname__, "value": str(value)}
+
+
+def _source_number_token(value: Any, *, domain: str, column: str, position: int) -> dict[str, str]:
+    if isinstance(value, np.generic):
+        value = value.item()
+    if _is_missing(value) or isinstance(value, bool):
+        _fail(domain, f"market source {column}[{position}] must be a finite numeric observation")
+    try:
+        number = Decimal(str(value))
+    except (InvalidOperation, TypeError, ValueError) as exc:
+        raise Stage4B2ConsistencyError(
+            f"{domain} cross-table consistency: market source {column}[{position}] is not numeric"
+        ) from exc
+    if not number.is_finite():
+        _fail(domain, f"market source {column}[{position}] must be finite")
+    if number == 0:
+        try:
+            negative = math.copysign(1.0, float(value)) < 0.0
+        except (TypeError, ValueError, OverflowError):
+            negative = str(value).startswith("-")
+        literal = "-0" if negative else "0"
+    else:
+        literal = format(number.normalize(), "f")
+    return {"state": "NUMBER", "value": literal}
+
+
+def _source_column_row_hashes(
+    frame: pd.DataFrame, column: str, *, domain: str
+) -> tuple[str, ...]:
+    if not isinstance(frame, pd.DataFrame) or frame.columns.has_duplicates or column not in frame.columns:
+        _fail(domain, f"required market source column {column!r} is unavailable")
+    hashes = []
+    for position, (index_value, value) in enumerate(zip(frame.index.tolist(), frame[column].tolist())):
+        hashes.append(
+            canonical_sha256(
+                domain="STAGE4B2_MARKET_SOURCE_COLUMN_ROW_V1",
+                payload={
+                    "bar_position": position,
+                    "index": _source_index_token(index_value),
+                    "column": column,
+                    "value": _source_number_token(
+                        value, domain=domain, column=column, position=position
+                    ),
+                },
+            )
+        )
+    return tuple(hashes)
+
+
+def capture_stage4b2_market_source_column_hashes(
+    market_history: pd.DataFrame, surfaces: Iterable[object]
+) -> tuple[tuple[str, tuple[str, ...]], ...]:
+    """Capture local row hashes of only the source columns used by supplied B2 surfaces.
+
+    This is provenance evidence for later as-of consumers, not a signature,
+    producer authentication, or market-feed authenticity claim.
+    """
+    if not isinstance(market_history, pd.DataFrame) or market_history.columns.has_duplicates:
+        _fail("MARKET_SOURCE", "captured market history must be a unique-column DataFrame")
+    domains = set()
+    for surface in tuple(surfaces):
+        domain = next(
+            (candidate for surface_class, candidate in _DOMAIN_BY_CLASS.items() if isinstance(surface, surface_class)),
+            None,
+        )
+        if domain is not None:
+            domains.add(domain)
+    columns = tuple(sorted({
+        column
+        for domain in domains
+        for column in required_stage4b2_market_source_columns(domain)
+    }))
+    return tuple(
+        (column, _source_column_row_hashes(market_history, column, domain="MARKET_SOURCE"))
+        for column in columns
+    )
+
+
+def _verify_market_source_snapshot(surface: Any, domain: str, market_history: pd.DataFrame) -> None:
+    if not isinstance(market_history, pd.DataFrame) or market_history.columns.has_duplicates:
+        _fail(domain, "captured market source must be a unique-column DataFrame")
+    bar = surface.bar_frame
+    if len(market_history) != len(bar):
+        _fail(domain, "captured market source row count differs from the Stage4B2 snapshot")
+    if not market_history.index.equals(bar.index):
+        _fail(domain, "captured market source index differs from the Stage4B2 snapshot")
+    for column in required_stage4b2_market_source_columns(domain):
+        expected = _source_column_row_hashes(market_history, column, domain=domain)
+        actual = _source_column_row_hashes(bar, column, domain=domain)
+        if actual != expected:
+            position = next(
+                index for index, (left, right) in enumerate(zip(actual, expected)) if left != right
+            )
+            _fail(
+                domain,
+                f"bar.{column}[{position}] differs from the exact captured market source observation",
+            )
+
+
+def _verify_market_source_column_hashes(
+    surface: Any,
+    domain: str,
+    *,
+    market_source_column_hashes: tuple[tuple[str, tuple[str, ...]], ...],
+    source_through_position: int,
+) -> None:
+    if isinstance(source_through_position, bool) or not isinstance(source_through_position, int) or source_through_position < 0:
+        _fail(domain, "source verification boundary must be a nonnegative integer position")
+    if not isinstance(market_source_column_hashes, tuple):
+        _fail(domain, "captured market source evidence must be an immutable tuple")
+    by_column: dict[str, tuple[str, ...]] = {}
+    for item in market_source_column_hashes:
+        if not isinstance(item, tuple) or len(item) != 2:
+            _fail(domain, "captured market source evidence has an invalid column entry")
+        column, hashes = item
+        if not isinstance(column, str) or not column or column in by_column:
+            _fail(domain, "captured market source evidence has duplicate/invalid columns")
+        if not isinstance(hashes, tuple) or any(
+            not isinstance(digest, str)
+            or len(digest) != 64
+            or any(character not in "0123456789abcdef" for character in digest)
+            for digest in hashes
+        ):
+            _fail(domain, f"captured market source row hashes for {column!r} are invalid")
+        by_column[column] = hashes
+    if tuple(sorted(by_column)) != tuple(by_column):
+        _fail(domain, "captured market source columns are not canonically ordered")
+    lengths = {len(hashes) for hashes in by_column.values()}
+    if len(lengths) > 1:
+        _fail(domain, "captured market source columns have inconsistent row counts")
+    row_count = len(surface.bar_frame)
+    if source_through_position >= row_count:
+        _fail(domain, "as-of source boundary is unavailable in the captured Stage4B2 bar frame")
+    for column in required_stage4b2_market_source_columns(domain):
+        expected = by_column.get(column)
+        if expected is None:
+            _fail(domain, f"captured market source evidence is unavailable for required column {column!r}")
+        if source_through_position >= len(expected):
+            _fail(domain, f"captured market source evidence does not reach as-of position {source_through_position}")
+        actual = _source_column_row_hashes(surface.bar_frame, column, domain=domain)
+        # Verify the complete historical overlap, not just the projected row.
+        # A valid future append may extend past the case's source evidence; such
+        # future-only rows are not decision-time features, and an as-of request
+        # beyond the evidence still fails closed above.
+        compared = min(len(actual), len(expected))
+        mismatch = next(
+            (index for index in range(compared) if actual[index] != expected[index]),
+            None,
+        )
+        if mismatch is not None:
+            _fail(
+                domain,
+                f"bar.{column}[{mismatch}] differs from the captured market source prefix",
+            )
 
 
 def _is_missing(value: Any) -> bool:
@@ -260,6 +532,35 @@ def _creation_bar_mirrors(
     return by_position
 
 
+def _check_creation_absence_values(surface: Any, *, domain: str, flag_column: str) -> None:
+    bar = surface.bar_frame
+    defaults = _CREATION_ABSENCE_DEFAULTS[domain]
+    _require_columns(bar, tuple(defaults), domain, "bar_frame")
+    flags = bar[flag_column].tolist()
+    for position, created in enumerate(flags):
+        if bool(created):
+            continue
+        for column, expected in defaults.items():
+            actual = _bar_value(surface, column, position, domain)
+            if expected is None:
+                if not _is_missing(actual):
+                    _fail(
+                        domain,
+                        f"noncreation field {column} must be missing at position {position}",
+                    )
+            elif isinstance(expected, str):
+                if not isinstance(actual, str) or actual != expected:
+                    _fail(
+                        domain,
+                        f"noncreation field {column} must equal producer absence value {expected!r} at position {position}",
+                    )
+            elif _integer(actual, domain, f"{column}[{position}]") != expected:
+                _fail(
+                    domain,
+                    f"noncreation field {column} must equal producer absence value {expected} at position {position}",
+                )
+
+
 def _event_frame_common(
     surface: Any,
     *,
@@ -340,6 +641,123 @@ def _event_frame_common(
     return creation_rows, events_by_id
 
 
+def _check_first_touch_semantics(
+    surface: Any,
+    *,
+    domain: str,
+    entity_by_id: dict[int, dict[str, Any]],
+    events_by_id: dict[int, dict[str, int]],
+    id_column: str,
+    availability_column: str,
+    qualifies,
+    verify_fvg_coverage: bool = False,
+) -> None:
+    """Check only the literal CLOSED FIRST_TOUCH predicate and first occurrence."""
+    row_count = len(surface.bar_frame)
+    touch_events = {
+        _integer(event[id_column], domain, f"event.{id_column}"): event
+        for event in surface.event_frame.to_dict(orient="records")
+        if event.get("event_type") == "FIRST_TOUCH"
+    }
+    for identity, entity in entity_by_id.items():
+        available = _position(
+            entity[availability_column],
+            domain=domain,
+            detail=availability_column,
+            row_count=row_count,
+        )
+        expected = next(
+            (position for position in range(available + 1, row_count) if qualifies(entity, position)),
+            None,
+        )
+        actual = events_by_id[identity].get("FIRST_TOUCH")
+        if actual != expected:
+            _fail(
+                domain,
+                f"{id_column}={identity} FIRST_TOUCH does not match the exact earliest producer predicate position (expected {expected}, got {actual})",
+            )
+        if verify_fvg_coverage and expected is not None:
+            event = touch_events.get(identity)
+            if event is None:
+                _fail(domain, f"fvg_id={identity} FIRST_TOUCH event record is missing")
+            low = _number(entity["zone_low"], domain, "zone_low")
+            high = _number(entity["zone_high"], domain, "zone_high")
+            width = high - low
+            event_high = _number(_bar_value(surface, "high", expected, domain), domain, "touch high")
+            event_low = _number(_bar_value(surface, "low", expected, domain), domain, "touch low")
+            coverage = (min(event_high, high) - max(event_low, low)) / width
+            _near(
+                domain,
+                event.get("zone_range_coverage_fraction"),
+                coverage,
+                f"fvg_id={identity}.FIRST_TOUCH.zone_range_coverage_fraction",
+            )
+
+
+def _check_liquidity_aggregates(
+    surface: Any, *, entity_by_id: dict[int, dict[str, Any]]
+) -> None:
+    domain = "LIQUIDITY"
+    row_count = len(surface.bar_frame)
+    counts = {column: [0] * row_count for column in _LIQUIDITY_EVENT_COUNT_COLUMNS.values()}
+    for event in surface.event_frame.to_dict(orient="records"):
+        if event.get("event_type") == "LEVEL_CREATED":
+            continue
+        key = (event.get("side"), event.get("event_type"))
+        column = _LIQUIDITY_EVENT_COUNT_COLUMNS.get(key)
+        if column is None:
+            _fail(domain, f"cannot map producer lifecycle event count for {key!r}")
+        position = _position(
+            event["event_position"],
+            domain=domain,
+            detail="event_position",
+            row_count=row_count,
+        )
+        counts[column][position] += 1
+
+    for column, expected_by_position in counts.items():
+        for position, expected in enumerate(expected_by_position):
+            actual = _integer(_bar_value(surface, column, position, domain), domain, f"{column}[{position}]")
+            if actual != expected:
+                _fail(
+                    domain,
+                    f"per-bar producer event count {column}[{position}] is {actual}, expected {expected}",
+                )
+
+    high_created_at = [0] * row_count
+    low_created_at = [0] * row_count
+    for row in entity_by_id.values():
+        confirmation = _position(
+            row["source_confirmation_position"],
+            domain=domain,
+            detail="source_confirmation_position",
+            row_count=row_count,
+        )
+        if row["side"] == "HIGH_SIDE":
+            high_created_at[confirmation] += 1
+        else:
+            low_created_at[confirmation] += 1
+    known_high = known_low = 0
+    for position in range(row_count):
+        known_high += high_created_at[position]
+        known_low += low_created_at[position]
+        actual_high = _integer(
+            _bar_value(surface, "known_high_side_level_count", position, domain),
+            domain,
+            f"known_high_side_level_count[{position}]",
+        )
+        actual_low = _integer(
+            _bar_value(surface, "known_low_side_level_count", position, domain),
+            domain,
+            f"known_low_side_level_count[{position}]",
+        )
+        if actual_high != known_high or actual_low != known_low:
+            _fail(
+                domain,
+                f"cumulative known-level counts disagree with creation confirmations at position {position}",
+            )
+
+
 def _check_liquidity(surface: Any) -> tuple[str, ...]:
     domain = "LIQUIDITY"
     bar = surface.bar_frame
@@ -371,6 +789,9 @@ def _check_liquidity(surface: Any) -> tuple[str, ...]:
             ("source_class", "created_level_source_class"),
         ),
         domain=domain,
+    )
+    _check_creation_absence_values(
+        surface, domain=domain, flag_column="liquidity_level_created"
     )
     for identity, row in entity_by_id.items():
         position = _row_position(row, "source_confirmation_position", domain=domain, row_count=len(bar))
@@ -465,10 +886,29 @@ def _check_liquidity(surface: Any) -> tuple[str, ...]:
                 entity_by_id[identity]["source_confirmation_position"], domain, "level confirmation"
             ):
                 _fail(domain, f"level_id={identity} nearest-prior reference is not prior")
+
+    def liquidity_touch_qualifies(entity: dict[str, Any], position: int) -> bool:
+        price = _number(entity["immutable_level_price"], domain, "immutable_level_price")
+        if entity["side"] == "HIGH_SIDE":
+            return _number(_bar_value(surface, "high", position, domain), domain, "high") >= price
+        return _number(_bar_value(surface, "low", position, domain), domain, "low") <= price
+
+    _check_first_touch_semantics(
+        surface,
+        domain=domain,
+        entity_by_id=entity_by_id,
+        events_by_id=event_positions,
+        id_column="level_id",
+        availability_column="source_confirmation_position",
+        qualifies=liquidity_touch_qualifies,
+    )
+    _check_liquidity_aggregates(surface, entity_by_id=entity_by_id)
     return (
-        "entity_projection", "unique_ids", "creation_bar_mirrors", "swing_source_witnesses",
-        "lifecycle_references", "stable_lifecycle_attributes", "event_bar_ohlc", "event_price_bar_witnesses",
-        "availability_and_age",
+        "entity_projection", "unique_ids", "creation_bar_mirrors", "creation_absence_defaults",
+        "swing_source_witnesses", "lifecycle_references", "stable_lifecycle_attributes",
+        "event_bar_ohlc", "event_price_bar_witnesses", "availability_and_age",
+        "exact_first_touch_predicate_and_earliest_event", "per_bar_producer_event_counts",
+        "cumulative_known_entity_counts",
     )
 
 
@@ -509,6 +949,9 @@ def _check_order_block(surface: Any) -> tuple[str, ...]:
         ),
         domain=domain,
     )
+    _check_creation_absence_values(
+        surface, domain=domain, flag_column="ob_candidate_created"
+    )
     for identity, row in entity_by_id.items():
         creation = _row_position(row, "creation_position", domain=domain, row_count=len(bar))
         origin = _position(row["origin_position"], domain=domain, detail="origin_position", row_count=len(bar))
@@ -535,7 +978,29 @@ def _check_order_block(surface: Any) -> tuple[str, ...]:
         if not origin_low <= _number(row["full_zone_low"], domain, "full_zone_low") <= _number(row["full_zone_high"], domain, "full_zone_high") <= origin_high:
             _fail(domain, f"zone_id={identity} zone bounds are invalid")
 
-    _event_frame_common(
+        # CLOSED producer field: count opposite-colour candles in [search boundary, creation).
+        bullish = row["direction"] == "BULLISH_OB_CANDIDATE"
+        expected_opposite_count = sum(
+            (
+                _number(_bar_value(surface, "close", position, domain), domain, "close")
+                < _number(_bar_value(surface, "open", position, domain), domain, "open")
+            )
+            if bullish
+            else (
+                _number(_bar_value(surface, "close", position, domain), domain, "close")
+                > _number(_bar_value(surface, "open", position, domain), domain, "open")
+            )
+            for position in range(boundary, creation)
+        )
+        actual_opposite_count = _integer(
+            _bar_value(surface, "created_ob_opposite_candle_count_in_leg", creation, domain),
+            domain,
+            f"created_ob_opposite_candle_count_in_leg[{creation}]",
+        )
+        if actual_opposite_count != expected_opposite_count:
+            _fail(domain, f"zone_id={identity} creation opposite-candle count disagrees with the literal producer predicate")
+
+    _, event_positions = _event_frame_common(
         surface,
         domain=domain,
         entity_by_id=entity_by_id,
@@ -551,6 +1016,23 @@ def _check_order_block(surface: Any) -> tuple[str, ...]:
         stable_columns=tuple(column for column in surface.normalized_entity_frame.columns if column != "zone_id"),
         ohlc_columns=(("event_high", "high"), ("event_low", "low"), ("event_close", "close")),
     )
+
+    def order_block_touch_qualifies(entity: dict[str, Any], position: int) -> bool:
+        zone_low = _number(entity["full_zone_low"], domain, "full_zone_low")
+        zone_high = _number(entity["full_zone_high"], domain, "full_zone_high")
+        high = _number(_bar_value(surface, "high", position, domain), domain, "high")
+        low = _number(_bar_value(surface, "low", position, domain), domain, "low")
+        return high >= zone_low and low <= zone_high
+
+    _check_first_touch_semantics(
+        surface,
+        domain=domain,
+        entity_by_id=entity_by_id,
+        events_by_id=event_positions,
+        id_column="zone_id",
+        availability_column="creation_position",
+        qualifies=order_block_touch_qualifies,
+    )
     events_by_id: dict[int, dict[str, int]] = {}
     for event in surface.event_frame.to_dict(orient="records"):
         identity = _integer(event["zone_id"], domain, "event.zone_id")
@@ -563,8 +1045,10 @@ def _check_order_block(surface: Any) -> tuple[str, ...]:
         if reclaim is not None and (close is None or reclaim <= close):
             _fail(domain, f"zone_id={identity} reclaim lacks a preceding close breach")
     return (
-        "entity_projection", "unique_ids", "creation_bar_mirrors", "source_break_and_positions",
-        "origin_ohlc_bounds", "lifecycle_references", "stable_lifecycle_attributes", "event_bar_ohlc",
+        "entity_projection", "unique_ids", "creation_bar_mirrors", "creation_absence_defaults",
+        "source_break_and_positions", "origin_ohlc_bounds", "producer_opposite_candle_count",
+        "lifecycle_references", "stable_lifecycle_attributes", "event_bar_ohlc",
+        "exact_first_touch_predicate_and_earliest_event",
     )
 
 
@@ -595,6 +1079,9 @@ def _check_fvg(surface: Any) -> tuple[str, ...]:
             ("middle_signed_body_fraction", "created_fvg_middle_signed_body_fraction"),
         ),
         domain=domain,
+    )
+    _check_creation_absence_values(
+        surface, domain=domain, flag_column="fvg_candidate_created"
     )
     for identity, row in entity_by_id.items():
         creation = _row_position(row, "creation_position", domain=domain, row_count=len(bar))
@@ -645,7 +1132,7 @@ def _check_fvg(surface: Any) -> tuple[str, ...]:
             _near(domain, row["middle_signed_body_fraction"], (middle_close - middle_open) / middle_range,
                   f"fvg_id={identity}.middle_signed_body_fraction")
 
-    _event_frame_common(
+    _, event_positions = _event_frame_common(
         surface,
         domain=domain,
         entity_by_id=entity_by_id,
@@ -662,6 +1149,24 @@ def _check_fvg(surface: Any) -> tuple[str, ...]:
         stable_columns=tuple(column for column in surface.normalized_entity_frame.columns if column != "fvg_id"),
         ohlc_columns=(("event_high", "high"), ("event_low", "low"), ("event_close", "close")),
     )
+
+    def fvg_touch_qualifies(entity: dict[str, Any], position: int) -> bool:
+        zone_low = _number(entity["zone_low"], domain, "zone_low")
+        zone_high = _number(entity["zone_high"], domain, "zone_high")
+        high = _number(_bar_value(surface, "high", position, domain), domain, "high")
+        low = _number(_bar_value(surface, "low", position, domain), domain, "low")
+        return high >= zone_low and low <= zone_high
+
+    _check_first_touch_semantics(
+        surface,
+        domain=domain,
+        entity_by_id=entity_by_id,
+        events_by_id=event_positions,
+        id_column="fvg_id",
+        availability_column="creation_position",
+        qualifies=fvg_touch_qualifies,
+        verify_fvg_coverage=True,
+    )
     events_by_id: dict[int, dict[str, int]] = {}
     for event in surface.event_frame.to_dict(orient="records"):
         identity = _integer(event["fvg_id"], domain, "event.fvg_id")
@@ -674,8 +1179,10 @@ def _check_fvg(surface: Any) -> tuple[str, ...]:
         if reclaim is not None and (close is None or reclaim <= close):
             _fail(domain, f"fvg_id={identity} reclaim lacks a preceding close breach")
     return (
-        "entity_projection", "unique_ids", "creation_bar_mirrors", "source_bar_fvg_geometry",
-        "lifecycle_references", "stable_lifecycle_attributes", "event_bar_ohlc", "availability_and_age",
+        "entity_projection", "unique_ids", "creation_bar_mirrors", "creation_absence_defaults",
+        "source_bar_fvg_geometry", "lifecycle_references", "stable_lifecycle_attributes",
+        "event_bar_ohlc", "availability_and_age", "exact_first_touch_predicate_and_earliest_event",
+        "producer_touch_coverage_fraction",
     )
 
 
@@ -750,6 +1257,9 @@ def _check_dealing_range(surface: Any) -> tuple[str, ...]:
         ),
         domain=domain,
     )
+    _check_creation_absence_values(
+        surface, domain=domain, flag_column="dealing_range_created"
+    )
     ordered_ranges = sorted(rows, key=lambda row: _integer(row["creation_position"], domain, "creation_position"))
     previous_creation = -1
     for identity, row in range_by_id.items():
@@ -769,8 +1279,11 @@ def _check_dealing_range(surface: Any) -> tuple[str, ...]:
                                  detail="first_endpoint_origin_position", row_count=len(bar))
         second_origin = _position(row["second_endpoint_origin_position"], domain=domain,
                                   detail="second_endpoint_origin_position", row_count=len(bar))
-        if not first_origin <= first_confirmation < second_confirmation == creation:
-            _fail(domain, f"range_id={identity} endpoint availability/position ordering is invalid")
+        if not (
+            first_origin <= first_confirmation < second_confirmation == creation
+            and second_origin <= second_confirmation
+        ):
+            _fail(domain, f"range_id={identity} endpoint origin/confirmation availability ordering is invalid")
         first_side, second_side = row["first_endpoint_side"], row["second_endpoint_side"]
         if first_side == second_side or {first_side, second_side} != {"HIGH", "LOW"}:
             _fail(domain, f"range_id={identity} endpoints are not opposite swing sides")
@@ -847,18 +1360,25 @@ def _check_dealing_range(surface: Any) -> tuple[str, ...]:
         _near(domain, _bar_value(surface, "current_premium_depth", position, domain), max(displacement, 0.0),
               f"current_premium_depth[{position}]")
     return (
-        "range_table_projection", "unique_ids", "creation_bar_mirrors", "endpoint_swing_witnesses",
-        "endpoint_availability_and_geometry", "current_range_bar_witnesses",
+        "range_table_projection", "unique_ids", "creation_bar_mirrors", "creation_absence_defaults",
+        "endpoint_swing_witnesses", "endpoint_origin_confirmation_order_and_geometry",
+        "current_range_bar_witnesses",
     )
 
 
-def verify_stage4b2_consistency(surface_snapshot: Any) -> Stage4B2ConsistencyResult:
+def verify_stage4b2_consistency(
+    surface_snapshot: Any,
+    *,
+    market_history: pd.DataFrame | None = None,
+    market_source_column_hashes: tuple[tuple[str, tuple[str, ...]], ...] | None = None,
+    source_through_position: int | None = None,
+) -> Stage4B2ConsistencyResult:
     """Verify one privately captured public Stage4B2 snapshot; never call producers.
 
-    Consumers must first capture the surface using their existing trusted-local
-    snapshot path. This function runs Stage4B2's existing integrity verifier,
-    then independent consistency checks, and returns a local-only verification
-    label only after every check has passed.
+    A success label requires enforceable local source evidence: either the exact
+    captured market frame at case creation, or row hashes retained in the case's
+    provenance sidecar for later as-of/observed-entity consumers. Row hashes do
+    not authenticate producers or assert market-feed authenticity.
     """
     surface_class = next(
         (candidate for candidate in _DOMAIN_BY_CLASS if isinstance(surface_snapshot, candidate)),
@@ -875,6 +1395,19 @@ def verify_stage4b2_consistency(surface_snapshot: Any) -> Stage4B2ConsistencyRes
         raise Stage4B2ConsistencyError(f"{domain} existing integrity check failed: {exc}") from exc
 
     try:
+        if market_history is not None:
+            if market_source_column_hashes is not None or source_through_position is not None:
+                _fail(domain, "supply either the exact market frame or captured source hashes, not both")
+            _verify_market_source_snapshot(surface_snapshot, domain, market_history)
+        else:
+            if market_source_column_hashes is None or source_through_position is None:
+                _fail(domain, "required captured market source evidence is unavailable")
+            _verify_market_source_column_hashes(
+                surface_snapshot,
+                domain,
+                market_source_column_hashes=market_source_column_hashes,
+                source_through_position=source_through_position,
+            )
         _check_reconstruction_binding(surface_snapshot, domain)
         _expected_normalized_tables(surface_snapshot, domain)
         if domain == "LIQUIDITY":
@@ -895,5 +1428,9 @@ def verify_stage4b2_consistency(surface_snapshot: Any) -> Stage4B2ConsistencyRes
         domain=domain,
         surface_id=surface_snapshot.surface_id,
         verification_scope=LOCAL_VERIFICATION_SCOPE,
-        checks=("existing_surface_integrity", "reconstruction_input_binding") + checks,
+        checks=(
+            "existing_surface_integrity",
+            "captured_market_source_binding",
+            "reconstruction_input_binding",
+        ) + checks,
     )
