@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from dataclasses import FrozenInstanceError, replace
+from dataclasses import FrozenInstanceError, fields, replace
 import inspect
 
 import pandas as pd
 import pytest
 
+from trading_system.research.hashing import canonical_sha256
 from trading_system.research.information_time import (
     INFORMATION_KEY_VERSION,
     InformationKey,
@@ -27,19 +28,28 @@ from trading_system.research.trajectory.trajectory_query_views import (
     CensoringState,
     DecisionCloseObservation,
     DerivedViewStatus,
+    ExcursionReference,
+    ExcursionReferenceKind,
+    HorizonCompletionState,
     HorizonPolicyIdentity,
     HorizonRequest,
     InteractionStatus,
+    ObservedEntityLocator,
     ObservedTargetReference,
     PairOrderStatus,
+    QueryProtocolIdentity,
+    QueryResolutionState,
     ProjectedInvalidationReference,
     ProjectedTargetReference,
+    SamplingAlgorithmIdentity,
     SamplingMembershipState,
     SamplingPolicyIdentity,
+    SUPPORTED_OBSERVED_PRODUCER_DOMAINS,
     TrajectoryQueryError,
     TrajectoryWindow,
     bind_sampling_membership,
     build_trajectory_window,
+    decision_close_excursion_reference,
     create_asof_surface_view,
     create_trajectory_query_reference,
     decision_surface_view,
@@ -49,12 +59,14 @@ from trading_system.research.trajectory.trajectory_query_views import (
     derive_projected_target_interaction,
     derive_target_invalidation_view,
     derive_timing_view,
+    resolve_observed_entity,
     verify_trajectory_window_source,
 )
 from trading_system.research.trajectory import trajectory_stage4a as s4a
 from trading_system.research.trajectory import trajectory_stage4b1 as s4b1
 from trading_system.research.trajectory import trajectory_stage4b2 as s4b2
 from trading_system.research.trajectory import trajectory_stage4c as s4c
+from trading_system.structure.swing_detector import EmpiricalConfirmationPolicy
 
 
 def _market(n: int, *, index: pd.Index | None = None, highs=None, lows=None, closes=None) -> pd.DataFrame:
@@ -135,6 +147,129 @@ def _coverage(expected_step: pd.Timedelta | None):
         contract_sha256="c" * 64,
         expected_step=expected_step,
     )
+
+
+def _b2_market(n: int = 90) -> pd.DataFrame:
+    open_values, high_values, low_values, close_values = [], [], [], []
+    level = 100.0
+    for position in range(n):
+        if position < 65:
+            if position % 7 < 4:
+                open_values.append(level)
+                close_values.append(level + 5.0)
+                level = close_values[-1]
+            else:
+                open_values.append(level)
+                close_values.append(level - 3.0)
+                level = close_values[-1]
+        else:
+            open_values.append(level)
+            close_values.append(level - 6.0)
+            level = close_values[-1]
+        high_values.append(max(open_values[-1], close_values[-1]) + 1.0)
+        low_values.append(min(open_values[-1], close_values[-1]) - 1.0)
+    return pd.DataFrame(
+        {"open": open_values, "high": high_values, "low": low_values, "close": close_values},
+        index=pd.RangeIndex(n),
+        dtype=float,
+    )
+
+
+def _b2_policy():
+    return EmpiricalConfirmationPolicy(
+        quantile=0.1,
+        prior_continuation_reversals=tuple(0.01 * index for index in range(1, 50)),
+    )
+
+
+@pytest.fixture(scope="module")
+def _b2_sources():
+    market = _b2_market()
+    adapter = PositionalTimelineAdapter("trajectory-b2-entity-fixture")
+    timeline = MarketObservationTimeline.seal(adapter=adapter, market_history=market)
+    structure = s4b1.build_structure_surface(
+        timeline=timeline,
+        adapter=adapter,
+        market_history=market,
+        swing_policy=_b2_policy(),
+    )
+    surfaces = {
+        "LIQUIDITY": s4b2.build_liquidity_surface(
+            timeline=timeline,
+            adapter=adapter,
+            market_history=market,
+            structure_surface=structure,
+        ),
+        "ORDER_BLOCK": s4b2.build_order_block_surface(
+            timeline=timeline,
+            adapter=adapter,
+            market_history=market,
+            structure_surface=structure,
+        ),
+        "FVG": s4b2.build_fvg_surface(timeline=timeline, adapter=adapter, market_history=market),
+        "DEALING_RANGE": s4b2.build_dealing_range_surface(
+            timeline=timeline,
+            adapter=adapter,
+            market_history=market,
+            structure_surface=structure,
+        ),
+    }
+    return market, adapter, timeline, structure, surfaces
+
+
+def _b2_case(sources, *, decision_position: int = 7, surfaces_override=None):
+    market, adapter, timeline, _, surfaces = sources
+    decision_key = adapter.key_for_position(
+        market.index,
+        decision_position,
+        InformationPhase.COMPLETED_ROW_AVAILABLE,
+    )
+    case = create_trajectory_decision_case(
+        timeline=timeline,
+        adapter=adapter,
+        market_history=market,
+        decision_key=decision_key,
+        surfaces=tuple(surfaces.values()) if surfaces_override is None else tuple(surfaces_override),
+        parent_snapshot=None,
+    )
+    return case, decision_key
+
+
+def _protocol_identity(**overrides):
+    values = {
+        "query_contract_type": "OBSERVED_ENTITY_CONTACT",
+        "query_contract_version": "1",
+        "protocol_id": "inclusive-ohlc-contact",
+        "protocol_version": "1",
+        "protocol_sha256": "a" * 64,
+        "canonical_parameters": (("bar_set", "post-decision"), ("boundary", "inclusive")),
+    }
+    values.update(overrides)
+    return QueryProtocolIdentity(**values)
+
+
+def _sampling_membership(case, **overrides):
+    adapter_key = PositionalTimelineAdapter(case.timeline_id).key_for_position(
+        pd.RangeIndex(90), 0, InformationPhase.COMPLETED_ROW_AVAILABLE
+    )
+    values = {
+        "case": case,
+        "policy_identity": SamplingPolicyIdentity("sampling-protocol", "1", "1" * 64),
+        "candidate_universe_id": "universe-A",
+        "candidate_universe_sha256": "2" * 64,
+        "selection_run_id": "run-A",
+        "membership_id": "membership-A",
+        "membership_role": "primary",
+        "selection_key": adapter_key,
+        "state": SamplingMembershipState.INCLUDED,
+        "rationale_reference": "audit://selection/rationale-A",
+        "deterministic_seed": 11,
+        "algorithm_identity": SamplingAlgorithmIdentity("fixed-order", "1", "3" * 64),
+        "paired_control_reference": "control-A",
+        "attrition_rejection_reference": "attrition-A",
+    }
+    values.update(overrides)
+    return bind_sampling_membership(**values)
 
 
 def _pair(case, *, target_price=105.0, invalidation_price=95.0, pair_id="pair-1"):
@@ -444,7 +579,8 @@ def test_right_censoring_at_decision_row_preserves_an_empty_path():
     assert window.reference.censoring_state is CensoringState.RIGHT_CENSORED
     pair = _pair(case, target_price=250.0, invalidation_price=300.0)
     assert derive_target_invalidation_view(window=window, candidate_pair=pair).ordering is PairOrderStatus.NO_OBSERVED_TOUCH_RIGHT_CENSORED
-    assert derive_excursion_view(window=window).status is DerivedViewStatus.NO_POST_DECISION_ROWS
+    empty_reference = decision_close_excursion_reference(window)
+    assert derive_excursion_view(window=window, reference=empty_reference).status is DerivedViewStatus.NO_POST_DECISION_ROWS
     assert derive_timing_view(window=window, target_reference=pair.projected_target).interaction_status is InteractionStatus.RIGHT_CENSORED_NO_POST_DECISION_ROWS
     verify_trajectory_window_source(
         window=window,
@@ -522,10 +658,10 @@ def test_internal_time_gap_is_retained_as_coverage_condition_and_blocks_order_cl
     assert result.ordering is PairOrderStatus.ORDER_UNDETERMINED_COVERAGE
 
 
-def test_observed_target_and_projected_target_are_distinct_types_and_hash_domains():
-    market = _market(5, highs=[101, 101, 110, 101, 101], lows=[99, 99, 99, 99, 99])
-    case, timeline, adapter, _ = _case(market, timeline_id="target-types")
-    end = adapter.key_for_position(market.index, 4, InformationPhase.COMPLETED_ROW_AVAILABLE)
+def test_observed_entity_resolves_verified_stage4b2_row_and_stays_distinct_from_projection(_b2_sources):
+    market, adapter, timeline, _, surfaces = _b2_sources
+    case, _ = _b2_case(_b2_sources, decision_position=7)
+    end = adapter.key_for_position(market.index, 14, InformationPhase.COMPLETED_ROW_AVAILABLE)
     window = build_trajectory_window(
         case=case,
         timeline=timeline,
@@ -534,40 +670,124 @@ def test_observed_target_and_projected_target_are_distinct_types_and_hash_domain
         horizon_request=_horizon(end),
         coverage_contract=_coverage(None),
     )
-    projected = _pair(case, target_price=105.0).projected_target
-    observed = ObservedTargetReference(
-        observation_id="observed-level-1",
-        source_domain="MARKET_TIMELINE",
-        source_binding_sha256=case.decision_prefix_hash,
-        observed_price=105.0,
-        observed_at=case.decision_key,
+    liquidity_binding = next(
+        binding for binding in case.surface_prefix_bindings if binding.domain == "LIQUIDITY"
     )
-    unbound_observed = ObservedTargetReference(
-        observation_id="unbound-level-1",
-        source_domain="UNBOUND_FIXTURE",
-        source_binding_sha256="b" * 64,
-        observed_price=105.0,
-        observed_at=case.decision_key,
+    observed = ObservedEntityLocator(
+        producer_domain="LIQUIDITY",
+        stable_binding_hash=liquidity_binding.stable_binding_hash,
+        canonical_entity_id="0",
     )
-    with pytest.raises(TrajectoryQueryError, match="not bound to the decision case"):
-        derive_observed_target_interaction(window=window, observed_target=unbound_observed)
+    resolved = resolve_observed_entity(
+        case=case,
+        surfaces=tuple(surfaces.values()),
+        locator=observed,
+    )
+    assert resolved.canonical_price == 121.0
+    assert resolved.side_or_direction == "HIGH_SIDE"
+    assert resolved.origin_positions == (3,)
+    assert resolved.confirmation_positions == (5,)
+    assert resolved.availability_position == 5
+    assert "observed_price" not in {field.name for field in fields(ObservedEntityLocator)}
+    with pytest.raises(TypeError):
+        ObservedEntityLocator(
+            producer_domain="LIQUIDITY",
+            stable_binding_hash=liquidity_binding.stable_binding_hash,
+            canonical_entity_id="0",
+            observed_price=999999.0,
+        )  # type: ignore[call-arg]
+    with pytest.raises(TrajectoryQueryError, match="MARKET_TIMELINE"):
+        ObservedEntityLocator(
+            producer_domain="MARKET_TIMELINE",
+            stable_binding_hash=case.decision_prefix_hash,
+            canonical_entity_id="0",
+        )
+
+    projected = _pair(case, target_price=121.0).projected_target
     projected_view = derive_projected_target_interaction(window=window, projected_target=projected)
-    observed_view = derive_observed_target_interaction(window=window, observed_target=observed)
-    assert projected.identity_hash != observed.identity_hash
+    observed_view = derive_observed_target_interaction(
+        window=window,
+        case=case,
+        surfaces=tuple(surfaces.values()),
+        observed_target=observed,
+    )
+    assert projected.identity_hash != resolved.identity_hash
     assert projected_view.view_hash != observed_view.view_hash
-    assert projected_view.touch_positions == observed_view.touch_positions == (2,)
+    assert projected_view.touch_positions == observed_view.touch_positions
+    assert observed_view.touch_positions
+    assert observed_view.observed_target_identity == resolved.identity_hash
+    assert observed_view.query_resolution is QueryResolutionState.RESOLVED
+    query_with_entity = create_trajectory_query_reference(
+        case=case,
+        protocol_identity=_protocol_identity(),
+        horizon_request=_horizon(end),
+        candidate_pair=None,
+        sampling_membership=None,
+        observed_entity=observed,
+    )
+    query_without_entity = create_trajectory_query_reference(
+        case=case,
+        protocol_identity=_protocol_identity(),
+        horizon_request=_horizon(end),
+        candidate_pair=None,
+        sampling_membership=None,
+    )
+    assert query_with_entity.query_id != query_without_entity.query_id
+    assert query_with_entity.case_id == query_without_entity.case_id == case.case_id
+    assert observed_view.horizon_completion is HorizonCompletionState.COMPLETE
+    assert observed_view.source_censoring is CensoringState.OBSERVED_TO_REQUESTED_END
     with pytest.raises(TypeError, match="different type"):
-        derive_observed_target_interaction(window=window, observed_target=projected)  # type: ignore[arg-type]
+        derive_observed_target_interaction(
+            window=window,
+            case=case,
+            surfaces=tuple(surfaces.values()),
+            observed_target=projected,  # type: ignore[arg-type]
+        )
     with pytest.raises(TypeError, match="different type"):
-        derive_projected_target_interaction(window=window, projected_target=observed)  # type: ignore[arg-type]
-    assert derive_timing_view(window=window, target_reference=projected).observed_bar_offset == 1
-    invalidation = _pair(case, invalidation_price=99.0).projected_invalidation
-    assert derive_timing_view(window=window, target_reference=invalidation).observed_bar_offset == 1
-    excursion = derive_excursion_view(window=window)
-    assert excursion.observed_max_high == 110.0
-    assert excursion.observed_min_low == 99.0
-    assert excursion.observed_high_delta_from_decision_close == 10.0
-    assert excursion.observed_low_delta_from_decision_close == -1.0
+        derive_projected_target_interaction(
+            window=window,
+            projected_target=observed,  # type: ignore[arg-type]
+        )
+    with pytest.raises(TrajectoryQueryError, match="projected target reference"):
+        CandidatePricePair(
+            candidate_pair_id="invalid-observed-invalidation",
+            projected_target=observed,  # type: ignore[arg-type]
+            projected_invalidation=_pair(case).projected_invalidation,
+        )
+    assert derive_timing_view(window=window, target_reference=projected).observed_bar_offset is not None
+    timing = derive_timing_view(
+        window=window,
+        target_reference=observed,
+        case=case,
+        surfaces=tuple(surfaces.values()),
+    )
+    assert timing.reference_identity == resolved.identity_hash
+    invalidation = _pair(case, invalidation_price=121.0).projected_invalidation
+    assert derive_timing_view(window=window, target_reference=invalidation).observed_bar_offset is not None
+    excursion_reference = decision_close_excursion_reference(window)
+    excursion = derive_excursion_view(window=window, reference=excursion_reference)
+    assert excursion.reference_kind is ExcursionReferenceKind.MARKET_MARK
+    assert excursion.observed_max_high == max(bar.high for bar in window.bars)
+    assert excursion.observed_min_low == min(bar.low for bar in window.bars)
+    assert excursion.observed_high_delta_from_reference == excursion.observed_max_high - window.decision_close_observation.value
+    assert excursion.observed_low_delta_from_reference == excursion.observed_min_low - window.decision_close_observation.value
+    with pytest.raises(TrajectoryQueryError, match="close"):
+        ExcursionReference(
+            kind=ExcursionReferenceKind.MARKET_MARK,
+            information_key=case.decision_key,
+            value=999999.0,
+            source_binding_sha256=excursion_reference.source_binding_sha256,
+            source_field="execution_fill",
+        )
+    forged_mark = ExcursionReference(
+        kind=ExcursionReferenceKind.MARKET_MARK,
+        information_key=case.decision_key,
+        value=999999.0,
+        source_binding_sha256=excursion_reference.source_binding_sha256,
+        source_field="close",
+    )
+    with pytest.raises(TrajectoryQueryError, match="verified decision MARKET_MARK"):
+        derive_excursion_view(window=window, reference=forged_mark)
 
 
 def test_no_touch_states_distinguish_complete_window_from_coverage_unknown():
@@ -642,38 +862,26 @@ def test_future_row_tamper_is_detected_but_never_changes_frozen_case_identity():
         )
 
 
-def test_horizon_sampling_candidate_and_query_identities_are_separate_from_case():
+def test_query_protocol_sampling_candidate_and_horizon_identities_do_not_change_case():
     market = _market(7)
     case, _, adapter, _ = _case(market, timeline_id="identity-separation")
     end = adapter.key_for_position(market.index, 5, InformationPhase.COMPLETED_ROW_AVAILABLE)
     horizon_a = _horizon(end, "horizon-A")
     horizon_b = _horizon(end, "horizon-B")
-    sampling_policy = SamplingPolicyIdentity("sample-X", "v1", "9" * 64)
-    earlier_key = adapter.key_for_position(market.index, 0, InformationPhase.COMPLETED_ROW_AVAILABLE)
-    included = bind_sampling_membership(
-        case=case,
-        policy_identity=sampling_policy,
-        membership_id="membership-included",
-        membership_key=earlier_key,
-        state=SamplingMembershipState.INCLUDED,
-    )
-    excluded = bind_sampling_membership(
-        case=case,
-        policy_identity=sampling_policy,
-        membership_id="membership-excluded",
-        membership_key=earlier_key,
-        state=SamplingMembershipState.EXCLUDED,
-    )
+    included = _sampling_membership(case)
+    excluded = _sampling_membership(case, membership_id="membership-B", state=SamplingMembershipState.EXCLUDED)
     pair_a = _pair(case, pair_id="pair-a")
     pair_b = _pair(case, pair_id="pair-b", target_price=106.0)
     query_a = create_trajectory_query_reference(
         case=case,
+        protocol_identity=_protocol_identity(),
         horizon_request=horizon_a,
         candidate_pair=pair_a,
         sampling_membership=included,
     )
     query_b = create_trajectory_query_reference(
         case=case,
+        protocol_identity=_protocol_identity(protocol_id="different-protocol"),
         horizon_request=horizon_b,
         candidate_pair=pair_b,
         sampling_membership=excluded,
@@ -685,9 +893,102 @@ def test_horizon_sampling_candidate_and_query_identities_are_separate_from_case(
     assert included.identity_hash != excluded.identity_hash
 
     signature = inspect.signature(bind_sampling_membership)
-    assert not {"window", "trajectory", "market_history", "future_rows"}.intersection(signature.parameters)
+    assert not {
+        "window", "trajectory", "market_history", "future_rows", "outcome", "future_outcome"
+    }.intersection(signature.parameters)
+    with pytest.raises(TypeError, match="QueryProtocolIdentity"):
+        create_trajectory_query_reference(
+            case=case,
+            protocol_identity=None,  # type: ignore[arg-type]
+            horizon_request=horizon_a,
+            candidate_pair=None,
+            sampling_membership=None,
+        )
     with pytest.raises(TrajectoryQueryError, match="HorizonPolicyIdentity"):
-        HorizonRequest(policy_identity=sampling_policy, requested_end_key=end)  # type: ignore[arg-type]
+        HorizonRequest(policy_identity=SamplingPolicyIdentity("sample-X", "1", "9" * 64), requested_end_key=end)  # type: ignore[arg-type]
+
+
+def test_each_query_protocol_field_and_study_identity_changes_query_id_without_changing_case():
+    market = _market(7)
+    case, _, adapter, _ = _case(market, timeline_id="protocol-id-fields")
+    end = adapter.key_for_position(market.index, 5, InformationPhase.COMPLETED_ROW_AVAILABLE)
+    horizon = _horizon(end)
+    base_protocol = _protocol_identity()
+    baseline = create_trajectory_query_reference(
+        case=case,
+        protocol_identity=base_protocol,
+        horizon_request=horizon,
+        candidate_pair=None,
+        sampling_membership=None,
+    )
+    changed_protocols = (
+        _protocol_identity(query_contract_type="OTHER_QUERY"),
+        _protocol_identity(query_contract_version="2"),
+        _protocol_identity(protocol_id="other-protocol"),
+        _protocol_identity(protocol_version="2"),
+        _protocol_identity(protocol_sha256="b" * 64),
+        _protocol_identity(canonical_parameters=(("bar_set", "post-decision"), ("boundary", "exclusive"))),
+    )
+    changed_ids = {
+        create_trajectory_query_reference(
+            case=case,
+            protocol_identity=protocol,
+            horizon_request=horizon,
+            candidate_pair=None,
+            sampling_membership=None,
+        ).query_id
+        for protocol in changed_protocols
+    }
+    assert baseline.query_id not in changed_ids
+    assert len(changed_ids) == len(changed_protocols)
+    with_study = create_trajectory_query_reference(
+        case=case,
+        protocol_identity=base_protocol,
+        horizon_request=horizon,
+        candidate_pair=None,
+        sampling_membership=None,
+        study_identity="4" * 64,
+    )
+    assert with_study.query_id != baseline.query_id
+    assert baseline.case_id == with_study.case_id == case.case_id
+    assert not {"outcome", "future_answer", "result"}.intersection(
+        inspect.signature(create_trajectory_query_reference).parameters
+    )
+
+
+def test_every_sampling_audit_identity_field_participates_and_is_path_free():
+    market = _market(7)
+    case, _, adapter, _ = _case(market, timeline_id="sampling-audit-fields")
+    base = _sampling_membership(case)
+    alternate_key = adapter.key_for_position(market.index, 1, InformationPhase.COMPLETED_ROW_AVAILABLE)
+    changes = (
+        {"policy_identity": SamplingPolicyIdentity("sampling-protocol-2", "1", "1" * 64)},
+        {"policy_identity": SamplingPolicyIdentity("sampling-protocol", "2", "1" * 64)},
+        {"policy_identity": SamplingPolicyIdentity("sampling-protocol", "1", "5" * 64)},
+        {"candidate_universe_id": "universe-B"},
+        {"candidate_universe_sha256": "6" * 64},
+        {"selection_run_id": "run-B"},
+        {"membership_id": "membership-B"},
+        {"membership_role": "control"},
+        {"selection_key": alternate_key},
+        {"state": SamplingMembershipState.EXCLUDED},
+        {"rationale_reference": "audit://selection/rationale-B"},
+        {"deterministic_seed": 12},
+        {"algorithm_identity": SamplingAlgorithmIdentity("other-order", "1", "7" * 64)},
+        {"paired_control_reference": "control-B"},
+        {"attrition_rejection_reference": "attrition-B"},
+    )
+    identities = {base.identity_hash}
+    for change in changes:
+        identities.add(_sampling_membership(case, **change).identity_hash)
+    assert len(identities) == len(changes) + 1
+
+    later_case, _, _, _ = _case(market, timeline_id="sampling-audit-fields", decision_position=2)
+    assert _sampling_membership(later_case).identity_hash != base.identity_hash
+    signature = inspect.signature(bind_sampling_membership)
+    assert not {
+        "window", "trajectory", "future_rows", "outcome", "future_outcome", "path"
+    }.intersection(signature.parameters)
 
 
 def test_time_indexed_future_end_requires_explicit_future_timestamp_and_right_censors():
@@ -718,3 +1019,367 @@ def test_time_indexed_future_end_requires_explicit_future_timestamp_and_right_ce
             horizon_request=bad,
             coverage_contract=_coverage(pd.Timedelta(minutes=1)),
         )
+
+
+def test_all_supported_stage4b2_domains_resolve_frozen_producer_rows(_b2_sources):
+    market, _, _, _, surfaces = _b2_sources
+    case, _ = _b2_case(_b2_sources, decision_position=20)
+    assert set(SUPPORTED_OBSERVED_PRODUCER_DOMAINS) == {
+        "LIQUIDITY", "ORDER_BLOCK", "FVG", "DEALING_RANGE"
+    }
+    id_columns = {
+        "LIQUIDITY": "level_id",
+        "ORDER_BLOCK": "zone_id",
+        "FVG": "fvg_id",
+        "DEALING_RANGE": "range_id",
+    }
+    availability_columns = {
+        "LIQUIDITY": "source_confirmation_position",
+        "ORDER_BLOCK": "creation_position",
+        "FVG": "creation_position",
+        "DEALING_RANGE": "creation_position",
+    }
+    for domain in SUPPORTED_OBSERVED_PRODUCER_DOMAINS:
+        frame = surfaces[domain].normalized_entity_frame
+        visible = frame.loc[frame[availability_columns[domain]] <= case.decision_key.bar_position]
+        assert not visible.empty
+        canonical_id = str(visible.iloc[0][id_columns[domain]])
+        binding = next(item for item in case.surface_prefix_bindings if item.domain == domain)
+        resolved = resolve_observed_entity(
+            case=case,
+            surfaces=tuple(surfaces.values()),
+            locator=ObservedEntityLocator(domain, binding.stable_binding_hash, canonical_id),
+        )
+        assert resolved.locator.canonical_entity_id == canonical_id
+        assert resolved.availability_position <= case.decision_key.bar_position
+        assert resolved.row and resolved.canonical_row_sha256
+        assert resolved.canonical_price is not None or (
+            resolved.lower_bound is not None and resolved.upper_bound is not None
+        )
+
+
+def test_unknown_duplicate_and_future_unavailable_entity_ids_fail_closed(_b2_sources):
+    market, adapter, timeline, _, surfaces = _b2_sources
+    early_case, _ = _b2_case(_b2_sources, decision_position=4)
+    early_binding = next(item for item in early_case.surface_prefix_bindings if item.domain == "LIQUIDITY")
+    unavailable_origin_first = ObservedEntityLocator(
+        "LIQUIDITY", early_binding.stable_binding_hash, "0"
+    )
+    with pytest.raises(TrajectoryQueryError, match="exactly one decision-visible row"):
+        resolve_observed_entity(
+            case=early_case,
+            surfaces=tuple(surfaces.values()),
+            locator=unavailable_origin_first,
+        )
+
+    available_case, _ = _b2_case(_b2_sources, decision_position=5)
+    available_binding = next(item for item in available_case.surface_prefix_bindings if item.domain == "LIQUIDITY")
+    liquidity = resolve_observed_entity(
+        case=available_case,
+        surfaces=tuple(surfaces.values()),
+        locator=ObservedEntityLocator("LIQUIDITY", available_binding.stable_binding_hash, "0"),
+    )
+    assert liquidity.origin_positions == (3,)
+    assert liquidity.confirmation_positions == (5,)
+    assert liquidity.availability_position == 5
+    assert liquidity.origin_positions[0] < liquidity.availability_position
+
+    unknown = ObservedEntityLocator("LIQUIDITY", available_binding.stable_binding_hash, "999999")
+    with pytest.raises(TrajectoryQueryError, match="exactly one decision-visible row"):
+        resolve_observed_entity(case=available_case, surfaces=tuple(surfaces.values()), locator=unknown)
+
+    fvg_early_case, _ = _b2_case(_b2_sources, decision_position=1)
+    fvg_early_binding = next(item for item in fvg_early_case.surface_prefix_bindings if item.domain == "FVG")
+    with pytest.raises(TrajectoryQueryError, match="exactly one decision-visible row"):
+        resolve_observed_entity(
+            case=fvg_early_case,
+            surfaces=tuple(surfaces.values()),
+            locator=ObservedEntityLocator("FVG", fvg_early_binding.stable_binding_hash, "0"),
+        )
+    fvg_case, _ = _b2_case(_b2_sources, decision_position=2)
+    fvg_binding = next(item for item in fvg_case.surface_prefix_bindings if item.domain == "FVG")
+    fvg = resolve_observed_entity(
+        case=fvg_case,
+        surfaces=tuple(surfaces.values()),
+        locator=ObservedEntityLocator("FVG", fvg_binding.stable_binding_hash, "0"),
+    )
+    assert fvg.origin_positions == (0,)
+    assert fvg.creation_position == fvg.availability_position == 2
+
+    # Create a self-consistent Stage4B2 surface containing a duplicate canonical
+    # ID so the exact-one-match check is exercised after public integrity checks.
+    original = surfaces["LIQUIDITY"]
+    duplicated_rows = pd.concat(
+        [original.normalized_entity_frame, original.normalized_entity_frame.iloc[[0]]],
+        ignore_index=True,
+    )
+    entity_hash = canonical_sha256(
+        domain="STAGE4B2_NORMALIZED_ENTITY_V1", payload=duplicated_rows
+    )
+    duplicate_surface_id = canonical_sha256(
+        domain="STAGE4B2_SURFACE_IDENTITY_V1",
+        payload={
+            "surface_class": original.__class__.__name__,
+            "domain": "LIQUIDITY",
+            "contract_version": s4b2.CONTRACT_LIQUIDITY,
+            "timeline_id": original.timeline_id,
+            "timeline_hash": original.timeline_hash,
+            "adapter_kind": original.adapter_kind,
+            "structure_surface_id": original.structure_surface_id,
+            "reconstruction_input_hash": original.reconstruction_input_hash,
+            "complete_result_hash": original.complete_result_hash,
+            "normalized_entity_hash": entity_hash,
+            "normalized_event_hash": original.normalized_event_hash,
+        },
+    )
+    duplicate_surface = replace(
+        original,
+        normalized_entity_frame=duplicated_rows,
+        normalized_entity_hash=entity_hash,
+        surface_id=duplicate_surface_id,
+    )
+    duplicate_surfaces = (duplicate_surface,) + tuple(
+        surface for domain, surface in surfaces.items() if domain != "LIQUIDITY"
+    )
+    duplicate_case, _ = _b2_case(
+        _b2_sources,
+        decision_position=20,
+        surfaces_override=duplicate_surfaces,
+    )
+    duplicate_binding = next(item for item in duplicate_case.surface_prefix_bindings if item.domain == "LIQUIDITY")
+    with pytest.raises(TrajectoryQueryError, match="exactly one decision-visible row"):
+        resolve_observed_entity(
+            case=duplicate_case,
+            surfaces=duplicate_surfaces,
+            locator=ObservedEntityLocator("LIQUIDITY", duplicate_binding.stable_binding_hash, "0"),
+        )
+
+
+def test_observed_resolution_never_replays_stage4_producer_engines(monkeypatch, _b2_sources):
+    case, _ = _b2_case(_b2_sources, decision_position=20)
+    surfaces = _b2_sources[4]
+    binding = next(item for item in case.surface_prefix_bindings if item.domain == "LIQUIDITY")
+    locator = ObservedEntityLocator("LIQUIDITY", binding.stable_binding_hash, "0")
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("producer engine replay is forbidden during entity resolution")
+
+    monkeypatch.setattr(s4b2, "build_liquidity_surface", forbidden)
+    monkeypatch.setattr(s4b1, "build_structure_surface", forbidden)
+    resolved = resolve_observed_entity(
+        case=case,
+        surfaces=tuple(surfaces.values()),
+        locator=locator,
+    )
+    assert resolved.canonical_price == 121.0
+
+
+def test_full_surface_id_stays_provenance_only_under_future_append():
+    short_market = _b2_market(70)
+    long_market = _b2_market(90)
+    short_adapter = PositionalTimelineAdapter("future-surface-identity")
+    long_adapter = PositionalTimelineAdapter("future-surface-identity")
+    short_timeline = MarketObservationTimeline.seal(adapter=short_adapter, market_history=short_market)
+    long_timeline = MarketObservationTimeline.seal(adapter=long_adapter, market_history=long_market)
+    short_structure = s4b1.build_structure_surface(
+        timeline=short_timeline,
+        adapter=short_adapter,
+        market_history=short_market,
+        swing_policy=_b2_policy(),
+    )
+    long_structure = s4b1.build_structure_surface(
+        timeline=long_timeline,
+        adapter=long_adapter,
+        market_history=long_market,
+        swing_policy=_b2_policy(),
+    )
+    short_surface = s4b2.build_liquidity_surface(
+        timeline=short_timeline,
+        adapter=short_adapter,
+        market_history=short_market,
+        structure_surface=short_structure,
+    )
+    long_surface = s4b2.build_liquidity_surface(
+        timeline=long_timeline,
+        adapter=long_adapter,
+        market_history=long_market,
+        structure_surface=long_structure,
+    )
+    decision = short_adapter.key_for_position(
+        short_market.index, 60, InformationPhase.COMPLETED_ROW_AVAILABLE
+    )
+    short_case = create_trajectory_decision_case(
+        timeline=short_timeline,
+        adapter=short_adapter,
+        market_history=short_market,
+        decision_key=decision,
+        surfaces=(short_surface,),
+        parent_snapshot=None,
+    )
+    long_case = create_trajectory_decision_case(
+        timeline=long_timeline,
+        adapter=long_adapter,
+        market_history=long_market,
+        decision_key=decision,
+        surfaces=(long_surface,),
+        parent_snapshot=None,
+    )
+    assert short_surface.surface_id != long_surface.surface_id
+    assert short_case.case_id == long_case.case_id
+    assert short_case.surface_prefix_bindings[0].stable_binding_hash == long_case.surface_prefix_bindings[0].stable_binding_hash
+    assert short_case.source_provenance.provenance_binding_hash != long_case.source_provenance.provenance_binding_hash
+    locator = ObservedEntityLocator(
+        "LIQUIDITY", short_case.surface_prefix_bindings[0].stable_binding_hash, "0"
+    )
+    short_entity = resolve_observed_entity(case=short_case, surfaces=(short_surface,), locator=locator)
+    long_entity = resolve_observed_entity(case=short_case, surfaces=(long_surface,), locator=locator)
+    assert short_entity.identity_hash == long_entity.identity_hash
+    assert short_entity.canonical_row_sha256 == long_entity.canonical_row_sha256
+
+
+def test_market_mutation_after_verification_does_not_change_window_snapshot(monkeypatch):
+    market = _market(6)
+    baseline_high = float(market.loc[2, "high"])
+    case, timeline, adapter, _ = _case(market, timeline_id="market-toctou")
+    end = adapter.key_for_position(market.index, 5, InformationPhase.COMPLETED_ROW_AVAILABLE)
+    original_verify = MarketObservationTimeline.verify
+
+    def verify_then_mutate_original(self, *, adapter, market_history):
+        result = original_verify(self, adapter=adapter, market_history=market_history)
+        if self.timeline_id == "market-toctou":
+            market.loc[2, "high"] = 999999.0
+        return result
+
+    monkeypatch.setattr(MarketObservationTimeline, "verify", verify_then_mutate_original)
+    window = build_trajectory_window(
+        case=case,
+        timeline=timeline,
+        adapter=adapter,
+        market_history=market,
+        horizon_request=_horizon(end),
+        coverage_contract=_coverage(None),
+    )
+    assert market.loc[2, "high"] == 999999.0
+    assert next(bar for bar in window.bars if bar.position == 2).high == baseline_high
+
+
+def test_stage4_mutation_after_prefix_projection_cannot_change_frozen_view(monkeypatch, _b2_sources):
+    market, adapter, timeline, _, source_surfaces = _b2_sources
+    local_liquidity = replace(
+        source_surfaces["LIQUIDITY"],
+        normalized_entity_frame=source_surfaces["LIQUIDITY"].normalized_entity_frame.copy(deep=True),
+    )
+    surfaces = (local_liquidity,) + tuple(
+        surface for domain, surface in source_surfaces.items() if domain != "LIQUIDITY"
+    )
+    case, decision = _b2_case(_b2_sources, decision_position=20, surfaces_override=surfaces)
+    expected_price = float(local_liquidity.normalized_entity_frame.iloc[0]["immutable_level_price"])
+    original_project = s4b2.project_domain_prefix
+
+    def project_then_mutate_caller_surface(*, surface, boundary_key):
+        result = original_project(surface=surface, boundary_key=boundary_key)
+        local_liquidity.normalized_entity_frame.loc[0, "immutable_level_price"] = 999999.0
+        return result
+
+    monkeypatch.setattr(s4b2, "project_domain_prefix", project_then_mutate_caller_surface)
+    view = decision_surface_view(case=case, surfaces=surfaces)
+    liquidity_instance = next(item for item in view.surfaces if item.domain == "LIQUIDITY")
+    entity_table = liquidity_instance.tables[2]
+    price_index = entity_table.columns.index("immutable_level_price")
+    assert float(entity_table.rows[0][price_index].value) == expected_price
+    assert float(local_liquidity.normalized_entity_frame.iloc[0]["immutable_level_price"]) == 999999.0
+    assert view.as_of_key == decision
+
+
+def test_nested_mutable_surface_cells_fail_closed(_b2_sources):
+    case, decision = _b2_case(_b2_sources, decision_position=20)
+    surfaces = _b2_sources[4]
+    original = surfaces["LIQUIDITY"]
+    frame = original.normalized_entity_frame.copy(deep=True)
+    frame["level_id"] = frame["level_id"].astype(object)
+    frame.at[0, "level_id"] = {"forged": "nested"}
+    unsafe = replace(original, normalized_entity_frame=frame)
+    unsafe_surfaces = (unsafe,) + tuple(
+        surface for domain, surface in surfaces.items() if domain != "LIQUIDITY"
+    )
+    with pytest.raises(TrajectoryQueryError, match="unsupported mutable"):
+        decision_surface_view(case=case, surfaces=unsafe_surfaces)
+
+
+def test_standalone_views_preserve_gap_and_right_censoring_independently():
+    index = pd.DatetimeIndex(
+        [
+            pd.Timestamp("2024-01-01 00:00", tz="UTC"),
+            pd.Timestamp("2024-01-01 00:01", tz="UTC"),
+            pd.Timestamp("2024-01-01 00:03", tz="UTC"),
+            pd.Timestamp("2024-01-01 00:04", tz="UTC"),
+        ]
+    )
+    market = _market(4, index=index)
+    case, timeline, adapter, _ = _case(market, timeline_id="gap-right-censor", time_indexed=True)
+    requested = _future_key(
+        adapter,
+        market,
+        6,
+        time_after_data=index[-1] + pd.Timedelta(minutes=2),
+    )
+    window = build_trajectory_window(
+        case=case,
+        timeline=timeline,
+        adapter=adapter,
+        market_history=market,
+        horizon_request=_horizon(requested),
+        coverage_contract=_coverage(pd.Timedelta(minutes=1)),
+    )
+    target = _pair(case, target_price=500.0).projected_target
+    interaction = derive_projected_target_interaction(window=window, projected_target=target)
+    timing = derive_timing_view(window=window, target_reference=target)
+    pair_view = derive_target_invalidation_view(
+        window=window,
+        candidate_pair=_pair(case, target_price=500.0, invalidation_price=600.0),
+    )
+    assert pair_view.ordering is PairOrderStatus.NO_OBSERVED_TOUCH_RIGHT_CENSORED_WITH_COVERAGE_GAPS
+    assert pair_view.horizon_completion is HorizonCompletionState.INCOMPLETE
+    assert pair_view.coverage_assessment is CoverageAssessment.GAPS_OR_CADENCE_DEVIATION
+    assert pair_view.coverage_issues and pair_view.censoring_state is CensoringState.RIGHT_CENSORED
+    assert pair_view.query_resolution is QueryResolutionState.RESOLVED
+    assert interaction.status is InteractionStatus.NOT_OBSERVED_RIGHT_CENSORED_WITH_COVERAGE_GAPS
+    assert interaction.horizon_completion is HorizonCompletionState.INCOMPLETE
+    assert interaction.source_censoring is CensoringState.RIGHT_CENSORED
+    assert interaction.coverage_assessment is CoverageAssessment.GAPS_OR_CADENCE_DEVIATION
+    assert interaction.coverage_issues
+    assert interaction.query_resolution is QueryResolutionState.RESOLVED
+    assert timing.source_censoring is interaction.source_censoring
+    assert timing.coverage_assessment is interaction.coverage_assessment
+    assert timing.coverage_issues == interaction.coverage_issues
+    assert timing.horizon_completion is interaction.horizon_completion
+    assert timing.interaction_status is not InteractionStatus.NOT_OBSERVED_RIGHT_CENSORED
+
+
+def test_horizon_completion_is_independent_from_source_end_censoring():
+    market = _market(5)
+    case, timeline, adapter, _ = _case(market, timeline_id="complete-at-source-end")
+    last_key = adapter.key_for_position(market.index, 4, InformationPhase.COMPLETED_ROW_AVAILABLE)
+    window = build_trajectory_window(
+        case=case,
+        timeline=timeline,
+        adapter=adapter,
+        market_history=market,
+        horizon_request=_horizon(last_key),
+        coverage_contract=_coverage(None),
+    )
+    interaction = derive_projected_target_interaction(
+        window=window,
+        projected_target=_pair(case, target_price=500.0).projected_target,
+    )
+    assert interaction.horizon_completion is HorizonCompletionState.COMPLETE
+    assert interaction.source_censoring is CensoringState.RIGHT_CENSORED
+
+
+def test_invalid_or_unresolved_entity_query_never_becomes_no_touch(_b2_sources):
+    case, _ = _b2_case(_b2_sources, decision_position=20)
+    surfaces = tuple(_b2_sources[4].values())
+    binding = next(item for item in case.surface_prefix_bindings if item.domain == "LIQUIDITY")
+    unknown = ObservedEntityLocator("LIQUIDITY", binding.stable_binding_hash, "999999")
+    with pytest.raises(TrajectoryQueryError, match="exactly one decision-visible row"):
+        resolve_observed_entity(case=case, surfaces=surfaces, locator=unknown)

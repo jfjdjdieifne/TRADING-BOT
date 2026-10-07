@@ -30,9 +30,12 @@ from trading_system.research.trajectory.trajectory_timeline_resolver import (
     TimelineArtifactReference,
 )
 from trading_system.research.trajectory.trajectory_case_adapter import (
+    TrajectoryCaseError,
     TrajectoryDecisionCase,
-    verify_case_source_prefix,
-    verify_surface_prefix_compatibility,
+    _verify_case_source_prefix_snapshot,
+    _verify_surface_prefix_snapshot,
+    snapshot_market_history,
+    snapshot_stage4_surface,
 )
 from trading_system.research.trajectory import trajectory_stage4a as s4a
 from trading_system.research.trajectory import trajectory_stage4b1 as s4b1
@@ -70,6 +73,19 @@ class CensoringState(Enum):
     RIGHT_CENSORED = "RIGHT_CENSORED"
 
 
+class HorizonCompletionState(Enum):
+    COMPLETE = "COMPLETE"
+    INCOMPLETE = "INCOMPLETE"
+
+
+class QueryResolutionState(Enum):
+    RESOLVED = "RESOLVED"
+
+
+class ExcursionReferenceKind(Enum):
+    MARKET_MARK = "MARKET_MARK"
+
+
 class CoverageAssessment(Enum):
     UNASSESSED = "UNASSESSED"
     CONTIGUOUS = "CONTIGUOUS_UNDER_DECLARED_STEP"
@@ -84,6 +100,7 @@ class InteractionStatus(Enum):
     OBSERVED_TOUCH = "OBSERVED_TOUCH"
     NOT_OBSERVED_COMPLETE_WINDOW = "NOT_OBSERVED_COMPLETE_WINDOW"
     NOT_OBSERVED_RIGHT_CENSORED = "NOT_OBSERVED_RIGHT_CENSORED"
+    NOT_OBSERVED_RIGHT_CENSORED_WITH_COVERAGE_GAPS = "NOT_OBSERVED_RIGHT_CENSORED_WITH_COVERAGE_GAPS"
     NOT_OBSERVED_COVERAGE_GAPS = "NOT_OBSERVED_COVERAGE_GAPS"
     NOT_OBSERVED_COVERAGE_UNASSESSED = "NOT_OBSERVED_COVERAGE_UNASSESSED"
     NO_POST_DECISION_ROWS_TO_REQUESTED_END = "NO_POST_DECISION_ROWS_TO_REQUESTED_END"
@@ -98,6 +115,7 @@ class PairOrderStatus(Enum):
     ORDER_UNDETERMINED_COVERAGE = "ORDER_UNDETERMINED_COVERAGE"
     NO_OBSERVED_TOUCH_COMPLETE_WINDOW = "NO_OBSERVED_TOUCH_COMPLETE_WINDOW"
     NO_OBSERVED_TOUCH_RIGHT_CENSORED = "NO_OBSERVED_TOUCH_RIGHT_CENSORED"
+    NO_OBSERVED_TOUCH_RIGHT_CENSORED_WITH_COVERAGE_GAPS = "NO_OBSERVED_TOUCH_RIGHT_CENSORED_WITH_COVERAGE_GAPS"
     NO_OBSERVED_TOUCH_COVERAGE_GAPS = "NO_OBSERVED_TOUCH_COVERAGE_GAPS"
     NO_OBSERVED_TOUCH_COVERAGE_UNASSESSED = "NO_OBSERVED_TOUCH_COVERAGE_UNASSESSED"
 
@@ -484,14 +502,26 @@ def create_asof_surface_view(
         raise TrajectoryQueryError("as-of surface view requires a completed-row boundary")
     if as_of_key < case.decision_key:
         raise TrajectoryQueryError("a frozen decision case cannot be projected backward before its boundary")
-    supplied = tuple(surfaces)
+    supplied_inputs = tuple(surfaces)
+    # Capture all surfaces before running any public verifier/projector. Every
+    # subsequent operation uses only these private snapshots.
+    try:
+        supplied = tuple(snapshot_stage4_surface(surface) for surface in supplied_inputs)
+    except TrajectoryCaseError as exc:
+        raise TrajectoryQueryError(f"cannot capture Stage 4 surface snapshot: {exc}") from exc
     if not supplied and as_of_key != case.decision_key:
         raise TrajectoryQueryError("cannot verify a non-decision as-of key without a bound surface")
 
     case_bindings = {binding.stable_binding_hash: binding for binding in case.surface_prefix_bindings}
     matched: dict[str, tuple[object, SurfacePrefixBinding]] = {}
     for surface in supplied:
-        decision_binding = verify_surface_prefix_compatibility(case=case, surface=surface)
+        try:
+            decision_binding = _verify_surface_prefix_snapshot(
+                case=case,
+                surface_snapshot=surface,
+            )
+        except TrajectoryCaseError as exc:
+            raise TrajectoryQueryError(str(exc)) from exc
         stable_hash = decision_binding.stable_binding_hash
         if stable_hash not in case_bindings:
             raise TrajectoryQueryError("unbound surface cannot be added to a frozen case view")
@@ -505,6 +535,8 @@ def create_asof_surface_view(
     for stable_hash in sorted(matched):
         surface, binding = matched[stable_hash]
         prefix_hash, frames = _surface_tables_at(surface, as_of_key)
+        if as_of_key == case.decision_key and prefix_hash != binding.prefix_hash:
+            raise TrajectoryQueryError("decision prefix projection changed within captured Stage 4 snapshot")
         frozen_tables = tuple(
             _freeze_table(f"{binding.domain}:{index}", frame)
             for index, frame in enumerate(frames)
@@ -627,36 +659,137 @@ class HorizonRequest:
         )
 
 
+@dataclass(frozen=True)
+class QueryProtocolIdentity:
+    query_contract_type: str
+    query_contract_version: str
+    protocol_id: str
+    protocol_version: str
+    protocol_sha256: str
+    canonical_parameters: tuple[tuple[str, str], ...]
+
+    def __post_init__(self) -> None:
+        for field in (
+            "query_contract_type",
+            "query_contract_version",
+            "protocol_id",
+            "protocol_version",
+        ):
+            _require_text(getattr(self, field), field)
+        _require_hash(self.protocol_sha256, "protocol_sha256")
+        if not isinstance(self.canonical_parameters, tuple) or any(
+            not isinstance(item, tuple)
+            or len(item) != 2
+            or not isinstance(item[0], str)
+            or not item[0]
+            or not isinstance(item[1], str)
+            for item in self.canonical_parameters
+        ):
+            raise TrajectoryQueryError("canonical_parameters must be immutable name/value string pairs")
+        if tuple(sorted(self.canonical_parameters)) != self.canonical_parameters:
+            raise TrajectoryQueryError("canonical_parameters must be sorted by parameter name")
+        if len({name for name, _ in self.canonical_parameters}) != len(self.canonical_parameters):
+            raise TrajectoryQueryError("canonical_parameters contain duplicate names")
+
+    @property
+    def identity_hash(self) -> str:
+        return canonical_sha256(
+            domain="TRAJECTORY_QUERY_PROTOCOL_ID_V1",
+            payload={
+                "query_contract_type": self.query_contract_type,
+                "query_contract_version": self.query_contract_version,
+                "protocol_id": self.protocol_id,
+                "protocol_version": self.protocol_version,
+                "protocol_sha256": self.protocol_sha256,
+                "canonical_parameters": [list(item) for item in self.canonical_parameters],
+            },
+        )
+
+
 class SamplingMembershipState(Enum):
     INCLUDED = "INCLUDED"
     EXCLUDED = "EXCLUDED"
 
 
 @dataclass(frozen=True)
+class SamplingAlgorithmIdentity:
+    algorithm_id: str
+    algorithm_version: str
+    algorithm_sha256: str
+
+    def __post_init__(self) -> None:
+        _require_text(self.algorithm_id, "sampling algorithm_id")
+        _require_text(self.algorithm_version, "sampling algorithm_version")
+        _require_hash(self.algorithm_sha256, "sampling algorithm_sha256")
+
+
+@dataclass(frozen=True)
 class SamplingMembershipReference:
     case_id: str
     policy_identity: SamplingPolicyIdentity
+    candidate_universe_id: str
+    candidate_universe_sha256: str
+    selection_run_id: str
     membership_id: str
-    membership_key: InformationKey
+    membership_role: str
+    selection_key: InformationKey
     state: SamplingMembershipState
+    rationale_reference: str
+    deterministic_seed: str | int | None
+    algorithm_identity: SamplingAlgorithmIdentity | None
+    paired_control_reference: str | None
+    attrition_rejection_reference: str | None
     identity_hash: str
+
+    @property
+    def membership_key(self) -> InformationKey:
+        """Compatibility spelling for the recorded selection key."""
+        return self.selection_key
 
     def __post_init__(self) -> None:
         _require_hash(self.case_id, "sampling case_id")
         if not isinstance(self.policy_identity, SamplingPolicyIdentity):
-            raise TrajectoryQueryError("sampling policy identity required")
+            raise TrajectoryQueryError("sampling protocol identity required")
+        _require_text(self.candidate_universe_id, "candidate_universe_id")
+        _require_hash(self.candidate_universe_sha256, "candidate_universe_sha256")
+        _require_text(self.selection_run_id, "selection_run_id")
         _require_text(self.membership_id, "membership_id")
-        if not isinstance(self.membership_key, InformationKey):
-            raise TrajectoryQueryError("membership_key is required")
+        _require_text(self.membership_role, "membership_role")
+        if not isinstance(self.selection_key, InformationKey):
+            raise TrajectoryQueryError("selection_key is required")
         if not isinstance(self.state, SamplingMembershipState):
             raise TrajectoryQueryError("sampling membership state is required")
+        _require_text(self.rationale_reference, "rationale_reference")
+        if isinstance(self.deterministic_seed, bool) or not isinstance(
+            self.deterministic_seed, (str, int, type(None))
+        ):
+            raise TrajectoryQueryError("deterministic_seed must be a string, integer, or None")
+        if self.deterministic_seed == "":
+            raise TrajectoryQueryError("deterministic_seed must be nonempty when supplied")
+        if self.algorithm_identity is not None and not isinstance(
+            self.algorithm_identity, SamplingAlgorithmIdentity
+        ):
+            raise TrajectoryQueryError("algorithm_identity must be SamplingAlgorithmIdentity or None")
+        for field in ("paired_control_reference", "attrition_rejection_reference"):
+            value = getattr(self, field)
+            if value is not None:
+                _require_text(value, field)
         _require_hash(self.identity_hash, "sampling membership identity_hash")
         expected = _sampling_membership_hash(
             case_id=self.case_id,
             policy_identity=self.policy_identity,
+            candidate_universe_id=self.candidate_universe_id,
+            candidate_universe_sha256=self.candidate_universe_sha256,
+            selection_run_id=self.selection_run_id,
             membership_id=self.membership_id,
-            membership_key=self.membership_key,
+            membership_role=self.membership_role,
+            selection_key=self.selection_key,
             state=self.state,
+            rationale_reference=self.rationale_reference,
+            deterministic_seed=self.deterministic_seed,
+            algorithm_identity=self.algorithm_identity,
+            paired_control_reference=self.paired_control_reference,
+            attrition_rejection_reference=self.attrition_rejection_reference,
         )
         if self.identity_hash != expected:
             raise TrajectoryQueryError("sampling membership identity mismatch")
@@ -666,18 +799,44 @@ def _sampling_membership_hash(
     *,
     case_id: str,
     policy_identity: SamplingPolicyIdentity,
+    candidate_universe_id: str,
+    candidate_universe_sha256: str,
+    selection_run_id: str,
     membership_id: str,
-    membership_key: InformationKey,
+    membership_role: str,
+    selection_key: InformationKey,
     state: SamplingMembershipState,
+    rationale_reference: str,
+    deterministic_seed: str | int | None,
+    algorithm_identity: SamplingAlgorithmIdentity | None,
+    paired_control_reference: str | None,
+    attrition_rejection_reference: str | None,
 ) -> str:
     return canonical_sha256(
-        domain="TRAJECTORY_SAMPLING_MEMBERSHIP_REF_V1",
+        domain="TRAJECTORY_SAMPLING_MEMBERSHIP_REF_V2",
         payload={
             "case_id": case_id,
-            "policy_identity": _policy_payload(policy_identity),
+            "sampling_protocol": _policy_payload(policy_identity),
+            "candidate_universe_id": candidate_universe_id,
+            "candidate_universe_sha256": candidate_universe_sha256,
+            "selection_run_id": selection_run_id,
             "membership_id": membership_id,
-            "membership_key": membership_key,
+            "membership_role": membership_role,
+            "selection_key": selection_key,
             "state": state.value,
+            "rationale_reference": rationale_reference,
+            "deterministic_seed": deterministic_seed,
+            "algorithm_identity": (
+                None
+                if algorithm_identity is None
+                else {
+                    "algorithm_id": algorithm_identity.algorithm_id,
+                    "algorithm_version": algorithm_identity.algorithm_version,
+                    "algorithm_sha256": algorithm_identity.algorithm_sha256,
+                }
+            ),
+            "paired_control_reference": paired_control_reference,
+            "attrition_rejection_reference": attrition_rejection_reference,
         },
     )
 
@@ -686,38 +845,54 @@ def bind_sampling_membership(
     *,
     case: TrajectoryDecisionCase,
     policy_identity: SamplingPolicyIdentity,
+    candidate_universe_id: str,
+    candidate_universe_sha256: str,
+    selection_run_id: str,
     membership_id: str,
-    membership_key: InformationKey,
+    membership_role: str,
+    selection_key: InformationKey,
     state: SamplingMembershipState,
+    rationale_reference: str,
+    deterministic_seed: str | int | None = None,
+    algorithm_identity: SamplingAlgorithmIdentity | None = None,
+    paired_control_reference: str | None = None,
+    attrition_rejection_reference: str | None = None,
 ) -> SamplingMembershipReference:
-    """Record an externally determined membership; this API accepts no path."""
+    """Record externally determined membership metadata; no path/outcome is accepted.
+
+    These references support auditing but do not prove future-blind selection or
+    absence of selection bias.
+    """
     if not isinstance(case, TrajectoryDecisionCase):
         raise TypeError("case must be a TrajectoryDecisionCase")
     if not isinstance(policy_identity, SamplingPolicyIdentity):
         raise TypeError("policy_identity must be a SamplingPolicyIdentity")
-    if not isinstance(membership_key, InformationKey):
-        raise TypeError("membership_key must be an InformationKey")
+    if not isinstance(selection_key, InformationKey):
+        raise TypeError("selection_key must be an InformationKey")
     if not isinstance(state, SamplingMembershipState):
         raise TypeError("state must be a SamplingMembershipState")
-    if membership_key.timeline_id != case.timeline_id:
+    if selection_key.timeline_id != case.timeline_id:
         raise TrajectoryQueryError("sampling membership timeline mismatch")
-    if membership_key > case.decision_key:
+    if selection_key > case.decision_key:
         raise TrajectoryQueryError("sampling membership was not available by the decision key")
-    identity = _sampling_membership_hash(
-        case_id=case.case_id,
-        policy_identity=policy_identity,
-        membership_id=membership_id,
-        membership_key=membership_key,
-        state=state,
-    )
-    return SamplingMembershipReference(
-        case_id=case.case_id,
-        policy_identity=policy_identity,
-        membership_id=membership_id,
-        membership_key=membership_key,
-        state=state,
-        identity_hash=identity,
-    )
+    identity_fields = {
+        "case_id": case.case_id,
+        "policy_identity": policy_identity,
+        "candidate_universe_id": candidate_universe_id,
+        "candidate_universe_sha256": candidate_universe_sha256,
+        "selection_run_id": selection_run_id,
+        "membership_id": membership_id,
+        "membership_role": membership_role,
+        "selection_key": selection_key,
+        "state": state,
+        "rationale_reference": rationale_reference,
+        "deterministic_seed": deterministic_seed,
+        "algorithm_identity": algorithm_identity,
+        "paired_control_reference": paired_control_reference,
+        "attrition_rejection_reference": attrition_rejection_reference,
+    }
+    identity = _sampling_membership_hash(**identity_fields)
+    return SamplingMembershipReference(identity_hash=identity, **identity_fields)
 
 
 @dataclass(frozen=True)
@@ -781,40 +956,326 @@ class ProjectedInvalidationReference:
 
 
 @dataclass(frozen=True)
-class ObservedTargetReference:
-    """Caller-supplied as-of price reference, not a durable retrieval result.
+class ObservedEntityLocator:
+    """Caller locator only; all factual attributes are resolved from Stage4B2."""
 
-    The source domain and binding must match a decision-time binding carried by
-    the path. That linkage does not resolve or independently verify the price;
-    it preserves caller attribution without treating a hash as retrieval.
-    """
-
-    observation_id: str
-    source_domain: str
-    source_binding_sha256: str
-    observed_price: float
-    observed_at: InformationKey
+    producer_domain: str
+    stable_binding_hash: str
+    canonical_entity_id: str
 
     def __post_init__(self) -> None:
-        _require_text(self.observation_id, "observed target observation_id")
-        _require_text(self.source_domain, "observed target source_domain")
-        _require_hash(self.source_binding_sha256, "observed target source_binding_sha256")
-        object.__setattr__(self, "observed_price", _finite_price(self.observed_price, "observed_price"))
-        if not isinstance(self.observed_at, InformationKey):
-            raise TrajectoryQueryError("observed target availability key required")
+        _require_text(self.producer_domain, "producer_domain")
+        _require_hash(self.stable_binding_hash, "stable_binding_hash")
+        _require_text(self.canonical_entity_id, "canonical_entity_id")
+        if self.producer_domain == "MARKET_TIMELINE":
+            raise TrajectoryQueryError("MARKET_TIMELINE is not an observed producer-entity domain")
 
     @property
     def identity_hash(self) -> str:
         return canonical_sha256(
-            domain="OBSERVED_TARGET_REFERENCE_V1",
+            domain="TRAJECTORY_OBSERVED_ENTITY_LOCATOR_V1",
             payload={
-                "observation_id": self.observation_id,
-                "source_domain": self.source_domain,
-                "source_binding_sha256": self.source_binding_sha256,
-                "observed_price": self.observed_price,
-                "observed_at": self.observed_at,
+                "producer_domain": self.producer_domain,
+                "stable_binding_hash": self.stable_binding_hash,
+                "canonical_entity_id": self.canonical_entity_id,
             },
         )
+
+
+# The previous public spelling now names a locator only; it accepts no price or
+# availability assertions from the caller.
+ObservedTargetReference = ObservedEntityLocator
+
+
+@dataclass(frozen=True)
+class ResolvedProducerEntity:
+    locator: ObservedEntityLocator
+    contract_version: str
+    row_columns: tuple[str, ...]
+    row: tuple[FrozenCell, ...]
+    canonical_row_sha256: str
+    identity_hash: str
+    canonical_price: float | None
+    lower_bound: float | None
+    upper_bound: float | None
+    side_or_direction: str
+    origin_positions: tuple[int, ...]
+    creation_position: int | None
+    confirmation_positions: tuple[int, ...]
+    availability_position: int
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.locator, ObservedEntityLocator):
+            raise TrajectoryQueryError("resolved producer entity locator required")
+        _require_text(self.contract_version, "resolved entity contract_version")
+        _require_hash(self.canonical_row_sha256, "canonical_row_sha256")
+        _require_hash(self.identity_hash, "resolved entity identity_hash")
+        if not isinstance(self.row_columns, tuple) or any(not isinstance(c, str) for c in self.row_columns):
+            raise TrajectoryQueryError("resolved producer row columns must be immutable")
+        if not isinstance(self.row, tuple) or len(self.row) != len(self.row_columns) or any(
+            not isinstance(cell, FrozenCell) for cell in self.row
+        ):
+            raise TrajectoryQueryError("resolved producer row must be frozen and schema-aligned")
+        _require_text(self.side_or_direction, "side_or_direction")
+        if not isinstance(self.origin_positions, tuple) or any(
+            isinstance(position, bool) or not isinstance(position, int) or position < 0
+            for position in self.origin_positions
+        ):
+            raise TrajectoryQueryError("origin_positions must be immutable nonnegative positions")
+        if not isinstance(self.confirmation_positions, tuple) or any(
+            isinstance(position, bool) or not isinstance(position, int) or position < 0
+            for position in self.confirmation_positions
+        ):
+            raise TrajectoryQueryError("confirmation_positions must be immutable nonnegative positions")
+        for field in ("creation_position", "availability_position"):
+            position = getattr(self, field)
+            if field == "creation_position" and position is None:
+                continue
+            if isinstance(position, bool) or not isinstance(position, int) or position < 0:
+                raise TrajectoryQueryError(f"{field} must be a nonnegative position")
+        for field in ("canonical_price", "lower_bound", "upper_bound"):
+            value = getattr(self, field)
+            if value is not None:
+                object.__setattr__(self, field, _finite_price(value, field))
+        if (self.canonical_price is None) == (self.lower_bound is None or self.upper_bound is None):
+            raise TrajectoryQueryError("resolved entity must have exactly a point price or a bounds pair")
+        if self.lower_bound is not None and self.upper_bound is not None and self.lower_bound > self.upper_bound:
+            raise TrajectoryQueryError("resolved entity bounds are inverted")
+        expected_row_hash = canonical_sha256(
+            domain="TRAJECTORY_STAGE4B2_RESOLVED_ENTITY_ROW_V1",
+            payload={
+                "stable_binding_hash": self.locator.stable_binding_hash,
+                "producer_domain": self.locator.producer_domain,
+                "canonical_entity_id": self.locator.canonical_entity_id,
+                "columns": list(self.row_columns),
+                "row": [_cell_payload(cell) for cell in self.row],
+            },
+        )
+        if self.canonical_row_sha256 != expected_row_hash:
+            raise TrajectoryQueryError("resolved producer row hash mismatch")
+        expected_identity = canonical_sha256(
+            domain="TRAJECTORY_RESOLVED_PRODUCER_ENTITY_ID_V1",
+            payload={
+                "stable_binding_hash": self.locator.stable_binding_hash,
+                "producer_domain": self.locator.producer_domain,
+                "canonical_entity_id": self.locator.canonical_entity_id,
+                "canonical_row_sha256": self.canonical_row_sha256,
+            },
+        )
+        if self.identity_hash != expected_identity:
+            raise TrajectoryQueryError("resolved producer entity identity mismatch")
+
+
+def _frozen_cell_number(cell: FrozenCell, *, field: str) -> float:
+    if cell.kind is not FrozenCellKind.NUMBER or not isinstance(cell.value, str):
+        raise TrajectoryQueryError(f"producer entity {field} is not a numeric fact")
+    try:
+        value = float(Decimal(cell.value))
+    except (InvalidOperation, ValueError, TypeError) as exc:
+        raise TrajectoryQueryError(f"producer entity {field} is not a valid number") from exc
+    return _finite_price(value, field)
+
+
+def _frozen_cell_position(cell: FrozenCell, *, field: str) -> int:
+    value = _frozen_cell_number(cell, field=field)
+    if not value.is_integer() or value < 0:
+        raise TrajectoryQueryError(f"producer entity {field} is not a nonnegative integer position")
+    return int(value)
+
+
+_OBSERVED_ENTITY_CONTRACTS = {
+    "LIQUIDITY": {
+        "id_column": "level_id",
+        "availability_column": "source_confirmation_position",
+        "point_price_column": "immutable_level_price",
+        "bounds_columns": None,
+        "side_column": "side",
+        "origin_columns": ("source_origin_position",),
+        "creation_column": None,
+        "confirmation_columns": ("source_confirmation_position",),
+    },
+    "ORDER_BLOCK": {
+        "id_column": "zone_id",
+        "availability_column": "creation_position",
+        "point_price_column": None,
+        "bounds_columns": ("full_zone_low", "full_zone_high"),
+        "side_column": "direction",
+        "origin_columns": ("origin_position",),
+        "creation_column": "creation_position",
+        "confirmation_columns": (),
+    },
+    "FVG": {
+        "id_column": "fvg_id",
+        "availability_column": "creation_position",
+        "point_price_column": None,
+        "bounds_columns": ("zone_low", "zone_high"),
+        "side_column": "direction",
+        "origin_columns": ("origin_position",),
+        "creation_column": "creation_position",
+        "confirmation_columns": (),
+    },
+    "DEALING_RANGE": {
+        "id_column": "range_id",
+        "availability_column": "creation_position",
+        "point_price_column": None,
+        "bounds_columns": ("range_low", "range_high"),
+        "side_column": "direction",
+        "origin_columns": ("first_endpoint_origin_position", "second_endpoint_origin_position"),
+        "creation_column": "creation_position",
+        "confirmation_columns": (
+            "first_endpoint_confirmation_position",
+            "second_endpoint_confirmation_position",
+        ),
+    },
+}
+
+
+SUPPORTED_OBSERVED_PRODUCER_DOMAINS = tuple(_OBSERVED_ENTITY_CONTRACTS)
+
+
+def resolve_observed_entity(
+    *,
+    case: TrajectoryDecisionCase,
+    surfaces: Iterable[object],
+    locator: ObservedEntityLocator,
+) -> ResolvedProducerEntity:
+    """Resolve only from the frozen, verified Stage4B2 decision-prefix rows."""
+    if not isinstance(case, TrajectoryDecisionCase):
+        raise TypeError("case must be a TrajectoryDecisionCase")
+    if not isinstance(locator, ObservedEntityLocator):
+        raise TypeError("ObservedEntityLocator required")
+    contract = _OBSERVED_ENTITY_CONTRACTS.get(locator.producer_domain)
+    if contract is None:
+        raise TrajectoryQueryError(
+            f"unsupported observed producer domain: {locator.producer_domain}"
+        )
+    matching_bindings = [
+        binding
+        for binding in case.surface_prefix_bindings
+        if binding.domain == locator.producer_domain
+        and binding.stable_binding_hash == locator.stable_binding_hash
+    ]
+    if len(matching_bindings) != 1:
+        raise TrajectoryQueryError("entity locator is not bound to exactly one case decision prefix")
+
+    # decision_surface_view captures Stage4 inputs before verification and freezes
+    # the exact rows used by the public Stage4 prefix projector.
+    view = decision_surface_view(case=case, surfaces=surfaces)
+    instances = [
+        instance
+        for instance in view.surfaces
+        if instance.domain == locator.producer_domain
+        and instance.stable_binding_hash == locator.stable_binding_hash
+    ]
+    if len(instances) != 1:
+        raise TrajectoryQueryError("verified Stage4B2 surface is unavailable or ambiguous")
+    instance = instances[0]
+    if instance.surface_family != "STAGE4B2" or len(instance.tables) < 3:
+        raise TrajectoryQueryError("observed entity source is not a Stage4B2 entity surface")
+    entity_table = instance.tables[2]
+    if entity_table.table_name != f"{locator.producer_domain}:2":
+        raise TrajectoryQueryError("verified Stage4B2 normalized entity table is missing")
+    column_index = {name: index for index, name in enumerate(entity_table.columns)}
+    required_columns = {
+        contract["id_column"],
+        contract["availability_column"],
+        contract["side_column"],
+        *contract["origin_columns"],
+        *contract["confirmation_columns"],
+    }
+    if contract["point_price_column"] is not None:
+        required_columns.add(contract["point_price_column"])
+    if contract["creation_column"] is not None:
+        required_columns.add(contract["creation_column"])
+    if contract["bounds_columns"] is not None:
+        required_columns.update(contract["bounds_columns"])
+    if not required_columns.issubset(column_index):
+        raise TrajectoryQueryError("verified producer entity row does not satisfy its fixed domain schema")
+
+    id_index = column_index[contract["id_column"]]
+    matches = [
+        row
+        for row in entity_table.rows
+        if row[id_index].kind in (FrozenCellKind.STRING, FrozenCellKind.NUMBER)
+        and row[id_index].value == locator.canonical_entity_id
+    ]
+    if len(matches) != 1:
+        raise TrajectoryQueryError(
+            "canonical producer entity ID must resolve to exactly one decision-visible row"
+        )
+    row = matches[0]
+    availability_position = _frozen_cell_position(
+        row[column_index[contract["availability_column"]]],
+        field=contract["availability_column"],
+    )
+    if availability_position > case.decision_key.bar_position:
+        raise TrajectoryQueryError("producer entity was unavailable at the decision boundary")
+
+    side_cell = row[column_index[contract["side_column"]]]
+    if side_cell.kind is not FrozenCellKind.STRING or not isinstance(side_cell.value, str):
+        raise TrajectoryQueryError("producer side/direction is not a resolved string fact")
+    origin_positions = tuple(
+        _frozen_cell_position(row[column_index[name]], field=name)
+        for name in contract["origin_columns"]
+    )
+    creation_position = (
+        None
+        if contract["creation_column"] is None
+        else _frozen_cell_position(row[column_index[contract["creation_column"]]], field=contract["creation_column"])
+    )
+    confirmation_positions = tuple(
+        _frozen_cell_position(row[column_index[name]], field=name)
+        for name in contract["confirmation_columns"]
+    )
+    canonical_price = None
+    lower_bound = upper_bound = None
+    if contract["point_price_column"] is not None:
+        canonical_price = _frozen_cell_number(
+            row[column_index[contract["point_price_column"]]],
+            field=contract["point_price_column"],
+        )
+    else:
+        low_column, high_column = contract["bounds_columns"]
+        lower_bound = _frozen_cell_number(row[column_index[low_column]], field=low_column)
+        upper_bound = _frozen_cell_number(row[column_index[high_column]], field=high_column)
+        if lower_bound > upper_bound:
+            raise TrajectoryQueryError("producer entity bounds are inverted")
+
+    row_hash = canonical_sha256(
+        domain="TRAJECTORY_STAGE4B2_RESOLVED_ENTITY_ROW_V1",
+        payload={
+            "stable_binding_hash": locator.stable_binding_hash,
+            "producer_domain": locator.producer_domain,
+            "canonical_entity_id": locator.canonical_entity_id,
+            "columns": list(entity_table.columns),
+            "row": [_cell_payload(cell) for cell in row],
+        },
+    )
+    identity_hash = canonical_sha256(
+        domain="TRAJECTORY_RESOLVED_PRODUCER_ENTITY_ID_V1",
+        payload={
+            "stable_binding_hash": locator.stable_binding_hash,
+            "producer_domain": locator.producer_domain,
+            "canonical_entity_id": locator.canonical_entity_id,
+            "canonical_row_sha256": row_hash,
+        },
+    )
+    return ResolvedProducerEntity(
+        locator=locator,
+        contract_version=instance.contract_version,
+        row_columns=entity_table.columns,
+        row=row,
+        canonical_row_sha256=row_hash,
+        identity_hash=identity_hash,
+        canonical_price=canonical_price,
+        lower_bound=lower_bound,
+        upper_bound=upper_bound,
+        side_or_direction=side_cell.value,
+        origin_positions=origin_positions,
+        creation_position=creation_position,
+        confirmation_positions=confirmation_positions,
+        availability_position=availability_position,
+    )
 
 
 def _finite_price(value: object, field: str) -> float:
@@ -859,43 +1320,63 @@ class CandidatePricePair:
 @dataclass(frozen=True)
 class TrajectoryQueryReference:
     case_id: str
+    protocol_identity: QueryProtocolIdentity
     horizon_request: HorizonRequest
     candidate_pair_identity: str | None
     sampling_membership_identity: str | None
+    study_identity: str | None
+    observed_entity_identity: str | None
     query_id: str
 
     def __post_init__(self) -> None:
         _require_hash(self.case_id, "query case_id")
+        if not isinstance(self.protocol_identity, QueryProtocolIdentity):
+            raise TrajectoryQueryError("explicit QueryProtocolIdentity required")
         if not isinstance(self.horizon_request, HorizonRequest):
             raise TrajectoryQueryError("explicit HorizonRequest required")
-        if self.candidate_pair_identity is not None:
-            _require_hash(self.candidate_pair_identity, "candidate_pair_identity")
-        if self.sampling_membership_identity is not None:
-            _require_hash(self.sampling_membership_identity, "sampling_membership_identity")
+        for field in (
+            "candidate_pair_identity",
+            "sampling_membership_identity",
+            "study_identity",
+            "observed_entity_identity",
+        ):
+            value = getattr(self, field)
+            if value is not None:
+                _require_hash(value, field)
         _require_hash(self.query_id, "query_id")
         expected = _query_id(
-            self.case_id,
-            self.horizon_request,
-            self.candidate_pair_identity,
-            self.sampling_membership_identity,
+            case_id=self.case_id,
+            protocol_identity=self.protocol_identity,
+            horizon_request=self.horizon_request,
+            candidate_pair_identity=self.candidate_pair_identity,
+            sampling_membership_identity=self.sampling_membership_identity,
+            study_identity=self.study_identity,
+            observed_entity_identity=self.observed_entity_identity,
         )
         if self.query_id != expected:
             raise TrajectoryQueryError("query identity mismatch")
 
 
 def _query_id(
+    *,
     case_id: str,
+    protocol_identity: QueryProtocolIdentity,
     horizon_request: HorizonRequest,
     candidate_pair_identity: str | None,
     sampling_membership_identity: str | None,
+    study_identity: str | None,
+    observed_entity_identity: str | None,
 ) -> str:
     return canonical_sha256(
-        domain="TRAJECTORY_QUERY_ID_V1",
+        domain="TRAJECTORY_QUERY_ID_V2",
         payload={
             "case_id": case_id,
+            "query_protocol_identity": protocol_identity.identity_hash,
             "horizon_request_identity": horizon_request.identity_hash,
             "candidate_pair_identity": candidate_pair_identity,
             "sampling_membership_identity": sampling_membership_identity,
+            "study_identity": study_identity,
+            "observed_entity_identity": observed_entity_identity,
         },
     )
 
@@ -903,15 +1384,29 @@ def _query_id(
 def create_trajectory_query_reference(
     *,
     case: TrajectoryDecisionCase,
+    protocol_identity: QueryProtocolIdentity,
     horizon_request: HorizonRequest,
     candidate_pair: CandidatePricePair | None,
     sampling_membership: SamplingMembershipReference | None,
+    study_identity: str | None = None,
+    observed_entity: ObservedEntityLocator | None = None,
 ) -> TrajectoryQueryReference:
-    """Bind independent query identities without observing any future rows."""
+    """Bind question-defining identities without observing a future answer."""
     if not isinstance(case, TrajectoryDecisionCase):
         raise TypeError("case must be a TrajectoryDecisionCase")
-    if not isinstance(horizon_request, HorizonRequest):
-        raise TypeError("horizon_request must be a HorizonRequest")
+    if not isinstance(protocol_identity, QueryProtocolIdentity):
+        raise TypeError("protocol_identity must be a QueryProtocolIdentity")
+    if study_identity is not None:
+        _require_hash(study_identity, "study_identity")
+    if observed_entity is not None:
+        if not isinstance(observed_entity, ObservedEntityLocator):
+            raise TypeError("observed_entity must be an ObservedEntityLocator or None")
+        if not any(
+            binding.domain == observed_entity.producer_domain
+            and binding.stable_binding_hash == observed_entity.stable_binding_hash
+            for binding in case.surface_prefix_bindings
+        ):
+            raise TrajectoryQueryError("observed entity locator is not bound to this case")
     end_key = horizon_request.requested_end_key
     if end_key.timeline_id != case.timeline_id:
         raise TrajectoryQueryError("horizon end belongs to another timeline")
@@ -937,12 +1432,24 @@ def create_trajectory_query_reference(
             raise TrajectoryQueryError("sampling membership was not available by the decision key")
     pair_hash = None if candidate_pair is None else candidate_pair.identity_hash
     membership_hash = None if sampling_membership is None else sampling_membership.identity_hash
-    query_id = _query_id(case.case_id, horizon_request, pair_hash, membership_hash)
-    return TrajectoryQueryReference(
+    entity_hash = None if observed_entity is None else observed_entity.identity_hash
+    query_id = _query_id(
         case_id=case.case_id,
+        protocol_identity=protocol_identity,
         horizon_request=horizon_request,
         candidate_pair_identity=pair_hash,
         sampling_membership_identity=membership_hash,
+        study_identity=study_identity,
+        observed_entity_identity=entity_hash,
+    )
+    return TrajectoryQueryReference(
+        case_id=case.case_id,
+        protocol_identity=protocol_identity,
+        horizon_request=horizon_request,
+        candidate_pair_identity=pair_hash,
+        sampling_membership_identity=membership_hash,
+        study_identity=study_identity,
+        observed_entity_identity=entity_hash,
         query_id=query_id,
     )
 
@@ -1358,12 +1865,21 @@ def build_trajectory_window(
         raise TypeError("explicit HorizonRequest required")
     if not isinstance(coverage_contract, CoverageContract):
         raise TypeError("explicit CoverageContract required")
-    verify_case_source_prefix(
-        case=case,
-        timeline=timeline,
-        adapter=adapter,
-        market_history=market_history,
-    )
+    try:
+        market_snapshot = snapshot_market_history(market_history)
+    except TrajectoryCaseError as exc:
+        raise TrajectoryQueryError(f"cannot capture market snapshot: {exc}") from exc
+    # From this point onward the caller's original frame is never read again.
+    market_history = market_snapshot
+    try:
+        _verify_case_source_prefix_snapshot(
+            case=case,
+            timeline=timeline,
+            adapter=adapter,
+            market_snapshot=market_snapshot,
+        )
+    except TrajectoryCaseError as exc:
+        raise TrajectoryQueryError(str(exc)) from exc
     requested_end = horizon_request.requested_end_key
     if requested_end.timeline_id != case.timeline_id:
         raise TrajectoryQueryError("requested end belongs to another timeline")
@@ -1495,12 +2011,20 @@ def verify_trajectory_window_source(
         raise TypeError("window must be a TrajectoryWindow")
     if window.reference.case_id != case.case_id:
         raise TrajectoryQueryError("trajectory window belongs to another case")
-    verify_case_source_prefix(
-        case=case,
-        timeline=timeline,
-        adapter=adapter,
-        market_history=market_history,
-    )
+    try:
+        market_snapshot = snapshot_market_history(market_history)
+    except TrajectoryCaseError as exc:
+        raise TrajectoryQueryError(f"cannot capture market snapshot: {exc}") from exc
+    market_history = market_snapshot
+    try:
+        _verify_case_source_prefix_snapshot(
+            case=case,
+            timeline=timeline,
+            adapter=adapter,
+            market_snapshot=market_snapshot,
+        )
+    except TrajectoryCaseError as exc:
+        raise TrajectoryQueryError(str(exc)) from exc
     if timeline.timeline_hash != window.reference.source_timeline_hash:
         raise TrajectoryQueryError("trajectory source timeline hash mismatch")
     requested_end = window.reference.requested_end_key
@@ -1586,6 +2110,21 @@ def _touch_positions(window: TrajectoryWindow, price: float) -> tuple[int, ...]:
     return tuple(bar.position for bar in window.bars if bar.low <= price <= bar.high)
 
 
+def _entity_touch_positions(
+    window: TrajectoryWindow,
+    entity: ResolvedProducerEntity,
+) -> tuple[int, ...]:
+    if entity.canonical_price is not None:
+        return _touch_positions(window, entity.canonical_price)
+    if entity.lower_bound is None or entity.upper_bound is None:
+        raise TrajectoryQueryError("resolved producer entity has no contact price or bounds")
+    return tuple(
+        bar.position
+        for bar in window.bars
+        if bar.low <= entity.upper_bound and bar.high >= entity.lower_bound
+    )
+
+
 def _key_for_bar(window: TrajectoryWindow, position: int) -> InformationKey:
     bar = next(bar for bar in window.bars if bar.position == position)
     return InformationKey(
@@ -1595,6 +2134,16 @@ def _key_for_bar(window: TrajectoryWindow, position: int) -> InformationKey:
         event_time_utc=bar.event_time_utc,
         information_phase=InformationPhase.COMPLETED_ROW_AVAILABLE,
         deterministic_sequence=0,
+    )
+
+
+def _horizon_completion(window: TrajectoryWindow) -> HorizonCompletionState:
+    actual = window.reference.actual_end_key
+    requested = window.reference.requested_end_key
+    return (
+        HorizonCompletionState.COMPLETE
+        if actual is not None and actual.bar_position == requested.bar_position
+        else HorizonCompletionState.INCOMPLETE
     )
 
 
@@ -1608,6 +2157,8 @@ def _interaction_status(window: TrajectoryWindow, touched: tuple[int, ...]) -> I
             return InteractionStatus.NO_POST_DECISION_ROWS_COVERAGE_UNASSESSED
         return InteractionStatus.NO_POST_DECISION_ROWS_TO_REQUESTED_END
     if window.reference.censoring_state is CensoringState.RIGHT_CENSORED:
+        if window.reference.coverage_assessment is CoverageAssessment.GAPS_OR_CADENCE_DEVIATION:
+            return InteractionStatus.NOT_OBSERVED_RIGHT_CENSORED_WITH_COVERAGE_GAPS
         return InteractionStatus.NOT_OBSERVED_RIGHT_CENSORED
     if window.reference.coverage_assessment is CoverageAssessment.GAPS_OR_CADENCE_DEVIATION:
         return InteractionStatus.NOT_OBSERVED_COVERAGE_GAPS
@@ -1623,6 +2174,11 @@ def _touch_view_hash(
     reference_hash: str,
     positions: tuple[int, ...],
     status: InteractionStatus,
+    horizon_completion: HorizonCompletionState,
+    source_censoring: CensoringState,
+    coverage_assessment: CoverageAssessment,
+    coverage_issues: tuple[CoverageIssue, ...],
+    query_resolution: QueryResolutionState,
 ) -> str:
     return canonical_sha256(
         domain=domain,
@@ -1631,6 +2187,14 @@ def _touch_view_hash(
             "reference_hash": reference_hash,
             "touch_positions": list(positions),
             "status": status.value,
+            "horizon_completion": horizon_completion.value,
+            "source_censoring": source_censoring.value,
+            "coverage_assessment": coverage_assessment.value,
+            "coverage_issues": [
+                (issue.left_position, issue.right_position, issue.observed_delta_ns, issue.expected_delta_ns)
+                for issue in coverage_issues
+            ],
+            "query_resolution": query_resolution.value,
         },
     )
 
@@ -1642,6 +2206,11 @@ class ObservedTargetInteractionView:
     touch_positions: tuple[int, ...]
     first_observed_touch_key: InformationKey | None
     status: InteractionStatus
+    horizon_completion: HorizonCompletionState
+    source_censoring: CensoringState
+    coverage_assessment: CoverageAssessment
+    coverage_issues: tuple[CoverageIssue, ...]
+    query_resolution: QueryResolutionState
     view_hash: str
 
     def __post_init__(self) -> None:
@@ -1653,6 +2222,14 @@ class ObservedTargetInteractionView:
             raise TrajectoryQueryError("observed target first-touch key mismatch")
         if not isinstance(self.status, InteractionStatus):
             raise TrajectoryQueryError("invalid observed target status")
+        if not isinstance(self.horizon_completion, HorizonCompletionState):
+            raise TrajectoryQueryError("observed target horizon completion is required")
+        if not isinstance(self.source_censoring, CensoringState):
+            raise TrajectoryQueryError("observed target source censoring is required")
+        if not isinstance(self.coverage_assessment, CoverageAssessment):
+            raise TrajectoryQueryError("observed target coverage assessment is required")
+        if not isinstance(self.query_resolution, QueryResolutionState):
+            raise TrajectoryQueryError("observed target query resolution is required")
 
 
 @dataclass(frozen=True)
@@ -1662,6 +2239,11 @@ class ProjectedTargetInteractionView:
     touch_positions: tuple[int, ...]
     first_observed_touch_key: InformationKey | None
     status: InteractionStatus
+    horizon_completion: HorizonCompletionState
+    source_censoring: CensoringState
+    coverage_assessment: CoverageAssessment
+    coverage_issues: tuple[CoverageIssue, ...]
+    query_resolution: QueryResolutionState
     view_hash: str
 
     def __post_init__(self) -> None:
@@ -1673,6 +2255,14 @@ class ProjectedTargetInteractionView:
             raise TrajectoryQueryError("projected target first-touch key mismatch")
         if not isinstance(self.status, InteractionStatus):
             raise TrajectoryQueryError("invalid projected target status")
+        if not isinstance(self.horizon_completion, HorizonCompletionState):
+            raise TrajectoryQueryError("projected target horizon completion is required")
+        if not isinstance(self.source_censoring, CensoringState):
+            raise TrajectoryQueryError("projected target source censoring is required")
+        if not isinstance(self.coverage_assessment, CoverageAssessment):
+            raise TrajectoryQueryError("projected target coverage assessment is required")
+        if not isinstance(self.query_resolution, QueryResolutionState):
+            raise TrajectoryQueryError("projected target query resolution is required")
 
 
 @dataclass(frozen=True)
@@ -1682,6 +2272,11 @@ class ProjectedInvalidationInteractionView:
     touch_positions: tuple[int, ...]
     first_observed_touch_key: InformationKey | None
     status: InteractionStatus
+    horizon_completion: HorizonCompletionState
+    source_censoring: CensoringState
+    coverage_assessment: CoverageAssessment
+    coverage_issues: tuple[CoverageIssue, ...]
+    query_resolution: QueryResolutionState
     view_hash: str
 
     def __post_init__(self) -> None:
@@ -1693,37 +2288,72 @@ class ProjectedInvalidationInteractionView:
             raise TrajectoryQueryError("projected invalidation first-touch key mismatch")
         if not isinstance(self.status, InteractionStatus):
             raise TrajectoryQueryError("invalid projected invalidation status")
+        if not isinstance(self.horizon_completion, HorizonCompletionState):
+            raise TrajectoryQueryError("projected invalidation horizon completion is required")
+        if not isinstance(self.source_censoring, CensoringState):
+            raise TrajectoryQueryError("projected invalidation source censoring is required")
+        if not isinstance(self.coverage_assessment, CoverageAssessment):
+            raise TrajectoryQueryError("projected invalidation coverage assessment is required")
+        if not isinstance(self.query_resolution, QueryResolutionState):
+            raise TrajectoryQueryError("projected invalidation query resolution is required")
 
 
 def derive_observed_target_interaction(
-    *, window: TrajectoryWindow, observed_target: ObservedTargetReference
+    *,
+    window: TrajectoryWindow,
+    case: TrajectoryDecisionCase,
+    surfaces: Iterable[object],
+    observed_target: ObservedEntityLocator,
 ) -> ObservedTargetInteractionView:
+    """Resolve an observed Stage4B2 entity; caller-supplied prices are impossible."""
     if not isinstance(window, TrajectoryWindow):
         raise TypeError("window must be a TrajectoryWindow")
-    if not isinstance(observed_target, ObservedTargetReference):
-        raise TypeError("ObservedTargetReference required; projected targets are a different type")
-    if observed_target.observed_at.timeline_id != window.reference.timeline_id:
-        raise TrajectoryQueryError("observed target timeline mismatch")
-    if observed_target.observed_at > window.reference.decision_key:
-        raise TrajectoryQueryError("observed target was not available at decision")
-    if (observed_target.source_domain, observed_target.source_binding_sha256) not in window.reference.decision_source_bindings:
-        raise TrajectoryQueryError("observed target source is not bound to the decision case")
-    positions = _touch_positions(window, observed_target.observed_price)
+    if not isinstance(case, TrajectoryDecisionCase):
+        raise TypeError("case must be a TrajectoryDecisionCase")
+    if not isinstance(observed_target, ObservedEntityLocator):
+        raise TypeError("ObservedEntityLocator required; projected targets are a different type")
+    if window.reference.case_id != case.case_id:
+        raise TrajectoryQueryError("trajectory window belongs to another decision case")
+    if (
+        observed_target.producer_domain,
+        observed_target.stable_binding_hash,
+    ) not in window.reference.decision_source_bindings:
+        raise TrajectoryQueryError("observed producer entity is not bound to the path decision case")
+    resolved = resolve_observed_entity(
+        case=case,
+        surfaces=surfaces,
+        locator=observed_target,
+    )
+    positions = _entity_touch_positions(window, resolved)
     status = _interaction_status(window, positions)
     first_key = None if not positions else _key_for_bar(window, positions[0])
+    completion = _horizon_completion(window)
+    censoring = window.reference.censoring_state
+    coverage = window.reference.coverage_assessment
+    query_resolution = QueryResolutionState.RESOLVED
     digest = _touch_view_hash(
-        domain="OBSERVED_TARGET_INTERACTION_VIEW_V1",
+        domain="OBSERVED_TARGET_INTERACTION_VIEW_V2",
         path_id=window.reference.path_id,
-        reference_hash=observed_target.identity_hash,
+        reference_hash=resolved.identity_hash,
         positions=positions,
         status=status,
+        horizon_completion=completion,
+        source_censoring=censoring,
+        coverage_assessment=coverage,
+        coverage_issues=window.reference.coverage_issues,
+        query_resolution=query_resolution,
     )
     return ObservedTargetInteractionView(
         path_id=window.reference.path_id,
-        observed_target_identity=observed_target.identity_hash,
+        observed_target_identity=resolved.identity_hash,
         touch_positions=positions,
         first_observed_touch_key=first_key,
         status=status,
+        horizon_completion=completion,
+        source_censoring=censoring,
+        coverage_assessment=coverage,
+        coverage_issues=window.reference.coverage_issues,
+        query_resolution=query_resolution,
         view_hash=digest,
     )
 
@@ -1742,12 +2372,21 @@ def derive_projected_target_interaction(
     positions = _touch_positions(window, projected_target.projected_price)
     status = _interaction_status(window, positions)
     first_key = None if not positions else _key_for_bar(window, positions[0])
+    completion = _horizon_completion(window)
+    censoring = window.reference.censoring_state
+    coverage = window.reference.coverage_assessment
+    query_resolution = QueryResolutionState.RESOLVED
     digest = _touch_view_hash(
-        domain="PROJECTED_TARGET_INTERACTION_VIEW_V1",
+        domain="PROJECTED_TARGET_INTERACTION_VIEW_V2",
         path_id=window.reference.path_id,
         reference_hash=projected_target.identity_hash,
         positions=positions,
         status=status,
+        horizon_completion=completion,
+        source_censoring=censoring,
+        coverage_assessment=coverage,
+        coverage_issues=window.reference.coverage_issues,
+        query_resolution=query_resolution,
     )
     return ProjectedTargetInteractionView(
         path_id=window.reference.path_id,
@@ -1755,6 +2394,11 @@ def derive_projected_target_interaction(
         touch_positions=positions,
         first_observed_touch_key=first_key,
         status=status,
+        horizon_completion=completion,
+        source_censoring=censoring,
+        coverage_assessment=coverage,
+        coverage_issues=window.reference.coverage_issues,
+        query_resolution=query_resolution,
         view_hash=digest,
     )
 
@@ -1773,12 +2417,21 @@ def derive_projected_invalidation_interaction(
     positions = _touch_positions(window, projected_invalidation.projected_price)
     status = _interaction_status(window, positions)
     first_key = None if not positions else _key_for_bar(window, positions[0])
+    completion = _horizon_completion(window)
+    censoring = window.reference.censoring_state
+    coverage = window.reference.coverage_assessment
+    query_resolution = QueryResolutionState.RESOLVED
     digest = _touch_view_hash(
-        domain="PROJECTED_INVALIDATION_INTERACTION_VIEW_V1",
+        domain="PROJECTED_INVALIDATION_INTERACTION_VIEW_V2",
         path_id=window.reference.path_id,
         reference_hash=projected_invalidation.identity_hash,
         positions=positions,
         status=status,
+        horizon_completion=completion,
+        source_censoring=censoring,
+        coverage_assessment=coverage,
+        coverage_issues=window.reference.coverage_issues,
+        query_resolution=query_resolution,
     )
     return ProjectedInvalidationInteractionView(
         path_id=window.reference.path_id,
@@ -1786,6 +2439,11 @@ def derive_projected_invalidation_interaction(
         touch_positions=positions,
         first_observed_touch_key=first_key,
         status=status,
+        horizon_completion=completion,
+        source_censoring=censoring,
+        coverage_assessment=coverage,
+        coverage_issues=window.reference.coverage_issues,
+        query_resolution=query_resolution,
         view_hash=digest,
     )
 
@@ -1807,8 +2465,11 @@ class TargetInvalidationInteractionView:
     target_touch_positions: tuple[int, ...]
     invalidation_touch_positions: tuple[int, ...]
     ordering: PairOrderStatus
+    horizon_completion: HorizonCompletionState
     coverage_assessment: CoverageAssessment
+    coverage_issues: tuple[CoverageIssue, ...]
     censoring_state: CensoringState
+    query_resolution: QueryResolutionState
     view_hash: str
 
     def __post_init__(self) -> None:
@@ -1817,10 +2478,18 @@ class TargetInvalidationInteractionView:
         _require_text(self.candidate_pair_id, "candidate_pair_id")
         if not isinstance(self.ordering, PairOrderStatus):
             raise TrajectoryQueryError("invalid target/invalidation ordering")
+        if not isinstance(self.horizon_completion, HorizonCompletionState):
+            raise TrajectoryQueryError("horizon completion required")
         if not isinstance(self.coverage_assessment, CoverageAssessment):
             raise TrajectoryQueryError("coverage assessment required")
+        if not isinstance(self.coverage_issues, tuple) or any(
+            not isinstance(issue, CoverageIssue) for issue in self.coverage_issues
+        ):
+            raise TrajectoryQueryError("coverage issues must be immutable")
         if not isinstance(self.censoring_state, CensoringState):
             raise TrajectoryQueryError("censoring state required")
+        if not isinstance(self.query_resolution, QueryResolutionState):
+            raise TrajectoryQueryError("query resolution required")
 
 
 def derive_target_invalidation_view(
@@ -1845,7 +2514,12 @@ def derive_target_invalidation_view(
     if target_first is not None and invalidation_first is not None and target_first == invalidation_first:
         ordering = PairOrderStatus.BOTH_SAME_BAR_ORDER_UNKNOWN
     elif target_first is None and invalidation_first is None:
-        if window.reference.censoring_state is CensoringState.RIGHT_CENSORED:
+        if (
+            window.reference.censoring_state is CensoringState.RIGHT_CENSORED
+            and window.reference.coverage_assessment is CoverageAssessment.GAPS_OR_CADENCE_DEVIATION
+        ):
+            ordering = PairOrderStatus.NO_OBSERVED_TOUCH_RIGHT_CENSORED_WITH_COVERAGE_GAPS
+        elif window.reference.censoring_state is CensoringState.RIGHT_CENSORED:
             ordering = PairOrderStatus.NO_OBSERVED_TOUCH_RIGHT_CENSORED
         elif window.reference.coverage_assessment is CoverageAssessment.GAPS_OR_CADENCE_DEVIATION:
             ordering = PairOrderStatus.NO_OBSERVED_TOUCH_COVERAGE_GAPS
@@ -1875,12 +2549,14 @@ def derive_target_invalidation_view(
             "target_touch_positions": list(target_positions),
             "invalidation_touch_positions": list(invalidation_positions),
             "ordering": ordering.value,
+            "horizon_completion": _horizon_completion(window).value,
             "coverage_assessment": window.reference.coverage_assessment.value,
             "coverage_issues": [
                 (issue.left_position, issue.right_position, issue.observed_delta_ns, issue.expected_delta_ns)
                 for issue in window.reference.coverage_issues
             ],
             "censoring_state": window.reference.censoring_state.value,
+            "query_resolution": QueryResolutionState.RESOLVED.value,
         },
     )
     return TargetInvalidationInteractionView(
@@ -1890,36 +2566,107 @@ def derive_target_invalidation_view(
         target_touch_positions=target_positions,
         invalidation_touch_positions=invalidation_positions,
         ordering=ordering,
+        horizon_completion=_horizon_completion(window),
         coverage_assessment=window.reference.coverage_assessment,
+        coverage_issues=window.reference.coverage_issues,
         censoring_state=window.reference.censoring_state,
+        query_resolution=QueryResolutionState.RESOLVED,
         view_hash=digest,
+    )
+
+
+@dataclass(frozen=True)
+class ExcursionReference:
+    kind: ExcursionReferenceKind
+    information_key: InformationKey
+    value: float
+    source_binding_sha256: str
+    source_field: str
+
+    def __post_init__(self) -> None:
+        if self.kind is not ExcursionReferenceKind.MARKET_MARK:
+            raise TrajectoryQueryError("only a verified MARKET_MARK excursion reference is supported")
+        if not isinstance(self.information_key, InformationKey):
+            raise TrajectoryQueryError("excursion reference information key required")
+        _require_hash(self.source_binding_sha256, "excursion source binding")
+        if self.source_field != "close":
+            raise TrajectoryQueryError("MARKET_MARK reference must name the captured market close")
+        object.__setattr__(self, "value", _finite_price(self.value, "excursion reference value"))
+
+    @property
+    def identity_hash(self) -> str:
+        return canonical_sha256(
+            domain="TRAJECTORY_EXCURSION_REFERENCE_V1",
+            payload={
+                "kind": self.kind.value,
+                "information_key": self.information_key,
+                "value_hex": float(self.value).hex(),
+                "source_binding_sha256": self.source_binding_sha256,
+                "source_field": self.source_field,
+            },
+        )
+
+
+def decision_close_excursion_reference(window: TrajectoryWindow) -> ExcursionReference:
+    """Name the captured decision close explicitly as a MARKET_MARK reference."""
+    if not isinstance(window, TrajectoryWindow):
+        raise TypeError("window must be a TrajectoryWindow")
+    bindings = [
+        binding_hash
+        for domain, binding_hash in window.reference.decision_source_bindings
+        if domain == "MARKET_TIMELINE"
+    ]
+    if len(bindings) != 1:
+        raise TrajectoryQueryError("path must bind exactly one market prefix for MARKET_MARK")
+    return ExcursionReference(
+        kind=ExcursionReferenceKind.MARKET_MARK,
+        information_key=window.reference.decision_key,
+        value=window.decision_close_observation.value,
+        source_binding_sha256=bindings[0],
+        source_field="close",
     )
 
 
 @dataclass(frozen=True)
 class ExcursionView:
     path_id: str
+    reference_identity: str
+    reference_kind: ExcursionReferenceKind
+    reference_value: float
     status: DerivedViewStatus
     observed_max_high: float | None
     observed_min_low: float | None
-    observed_high_delta_from_decision_close: float | None
-    observed_low_delta_from_decision_close: float | None
+    observed_high_delta_from_reference: float | None
+    observed_low_delta_from_reference: float | None
     max_high_position: int | None
     min_low_position: int | None
+    horizon_completion: HorizonCompletionState
     coverage_assessment: CoverageAssessment
     censoring_state: CensoringState
+    query_resolution: QueryResolutionState
     view_hash: str
 
     def __post_init__(self) -> None:
         _require_hash(self.path_id, "excursion path_id")
+        _require_hash(self.reference_identity, "excursion reference_identity")
         _require_hash(self.view_hash, "excursion view_hash")
+        if self.reference_kind is not ExcursionReferenceKind.MARKET_MARK:
+            raise TrajectoryQueryError("unsupported excursion reference kind")
         if not isinstance(self.status, DerivedViewStatus):
             raise TrajectoryQueryError("excursion status required")
+        if not isinstance(self.horizon_completion, HorizonCompletionState):
+            raise TrajectoryQueryError("excursion horizon completion required")
+        if not isinstance(self.coverage_assessment, CoverageAssessment):
+            raise TrajectoryQueryError("excursion coverage assessment required")
+        if not isinstance(self.censoring_state, CensoringState):
+            raise TrajectoryQueryError("excursion source censoring required")
+        if not isinstance(self.query_resolution, QueryResolutionState):
+            raise TrajectoryQueryError("excursion query resolution required")
         values = (
             self.observed_max_high,
             self.observed_min_low,
-            self.observed_high_delta_from_decision_close,
-            self.observed_low_delta_from_decision_close,
+            self.observed_high_delta_from_reference,
+            self.observed_low_delta_from_reference,
         )
         if self.status is DerivedViewStatus.NO_POST_DECISION_ROWS:
             if any(value is not None for value in values) or self.max_high_position is not None or self.min_low_position is not None:
@@ -1929,9 +2676,29 @@ class ExcursionView:
                 raise TrajectoryQueryError("available excursion view is incomplete")
 
 
-def derive_excursion_view(*, window: TrajectoryWindow) -> ExcursionView:
+def derive_excursion_view(
+    *,
+    window: TrajectoryWindow,
+    reference: ExcursionReference,
+) -> ExcursionView:
     if not isinstance(window, TrajectoryWindow):
         raise TypeError("window must be a TrajectoryWindow")
+    if not isinstance(reference, ExcursionReference):
+        raise TypeError("explicit ExcursionReference required")
+    market_bindings = [
+        binding_hash
+        for domain, binding_hash in window.reference.decision_source_bindings
+        if domain == "MARKET_TIMELINE"
+    ]
+    if (
+        reference.kind is not ExcursionReferenceKind.MARKET_MARK
+        or reference.information_key != window.reference.decision_key
+        or reference.source_field != "close"
+        or len(market_bindings) != 1
+        or reference.source_binding_sha256 != market_bindings[0]
+        or reference.value != window.decision_close_observation.value
+    ):
+        raise TrajectoryQueryError("excursion reference is not the verified decision MARKET_MARK")
     if not window.bars:
         status = DerivedViewStatus.NO_POST_DECISION_ROWS
         maximum = minimum = high_delta = low_delta = None
@@ -1942,36 +2709,50 @@ def derive_excursion_view(*, window: TrajectoryWindow) -> ExcursionView:
         minimum_bar = min(window.bars, key=lambda bar: (bar.low, bar.position))
         maximum = maximum_bar.high
         minimum = minimum_bar.low
-        high_delta = maximum - window.decision_close_observation.value
-        low_delta = minimum - window.decision_close_observation.value
+        high_delta = maximum - reference.value
+        low_delta = minimum - reference.value
         max_position = maximum_bar.position
         min_position = minimum_bar.position
+    completion = _horizon_completion(window)
+    resolution = QueryResolutionState.RESOLVED
     digest = canonical_sha256(
-        domain="TRAJECTORY_OBSERVED_EXCURSION_VIEW_V1",
+        domain="TRAJECTORY_OBSERVED_EXCURSION_VIEW_V2",
         payload={
             "path_id": window.reference.path_id,
+            "reference_identity": reference.identity_hash,
             "status": status.value,
             "observed_max_high": maximum,
             "observed_min_low": minimum,
-            "observed_high_delta_from_decision_close": high_delta,
-            "observed_low_delta_from_decision_close": low_delta,
+            "observed_high_delta_from_reference": high_delta,
+            "observed_low_delta_from_reference": low_delta,
             "max_high_position": max_position,
             "min_low_position": min_position,
+            "horizon_completion": completion.value,
             "coverage_assessment": window.reference.coverage_assessment.value,
+            "coverage_issues": [
+                (issue.left_position, issue.right_position, issue.observed_delta_ns, issue.expected_delta_ns)
+                for issue in window.reference.coverage_issues
+            ],
             "censoring_state": window.reference.censoring_state.value,
+            "query_resolution": resolution.value,
         },
     )
     return ExcursionView(
         path_id=window.reference.path_id,
+        reference_identity=reference.identity_hash,
+        reference_kind=reference.kind,
+        reference_value=reference.value,
         status=status,
         observed_max_high=maximum,
         observed_min_low=minimum,
-        observed_high_delta_from_decision_close=high_delta,
-        observed_low_delta_from_decision_close=low_delta,
+        observed_high_delta_from_reference=high_delta,
+        observed_low_delta_from_reference=low_delta,
         max_high_position=max_position,
         min_low_position=min_position,
+        horizon_completion=completion,
         coverage_assessment=window.reference.coverage_assessment,
         censoring_state=window.reference.censoring_state,
+        query_resolution=resolution,
         view_hash=digest,
     )
 
@@ -1984,6 +2765,11 @@ class TimingView:
     first_observed_touch_key: InformationKey | None
     observed_bar_offset: int | None
     elapsed_time_ns: int | None
+    horizon_completion: HorizonCompletionState
+    source_censoring: CensoringState
+    coverage_assessment: CoverageAssessment
+    coverage_issues: tuple[CoverageIssue, ...]
+    query_resolution: QueryResolutionState
     view_hash: str
 
     def __post_init__(self) -> None:
@@ -1999,16 +2785,33 @@ class TimingView:
             raise TrajectoryQueryError("trajectory timing offset must follow decision bar")
         if self.elapsed_time_ns is not None and self.elapsed_time_ns < 0:
             raise TrajectoryQueryError("elapsed time must not be negative")
+        if not isinstance(self.horizon_completion, HorizonCompletionState):
+            raise TrajectoryQueryError("timing horizon completion is required")
+        if not isinstance(self.source_censoring, CensoringState):
+            raise TrajectoryQueryError("timing source censoring is required")
+        if not isinstance(self.coverage_assessment, CoverageAssessment):
+            raise TrajectoryQueryError("timing coverage assessment is required")
+        if not isinstance(self.query_resolution, QueryResolutionState):
+            raise TrajectoryQueryError("timing query resolution is required")
 
 
 def derive_timing_view(
     *,
     window: TrajectoryWindow,
-    target_reference: ObservedTargetReference | ProjectedTargetReference | ProjectedInvalidationReference,
+    target_reference: ObservedEntityLocator | ProjectedTargetReference | ProjectedInvalidationReference,
+    case: TrajectoryDecisionCase | None = None,
+    surfaces: Iterable[object] | None = None,
 ) -> TimingView:
-    if isinstance(target_reference, ObservedTargetReference):
-        interaction = derive_observed_target_interaction(window=window, observed_target=target_reference)
-        identity = target_reference.identity_hash
+    if isinstance(target_reference, ObservedEntityLocator):
+        if case is None or surfaces is None:
+            raise TrajectoryQueryError("observed timing requires a case and verified Stage4B2 surfaces")
+        interaction = derive_observed_target_interaction(
+            window=window,
+            case=case,
+            surfaces=surfaces,
+            observed_target=target_reference,
+        )
+        identity = interaction.observed_target_identity
     elif isinstance(target_reference, ProjectedTargetReference):
         interaction = derive_projected_target_interaction(window=window, projected_target=target_reference)
         identity = target_reference.identity_hash
@@ -2020,7 +2823,7 @@ def derive_timing_view(
         identity = target_reference.identity_hash
     else:
         raise TypeError(
-            "ObservedTargetReference, ProjectedTargetReference, or ProjectedInvalidationReference required"
+            "ObservedEntityLocator, ProjectedTargetReference, or ProjectedInvalidationReference required"
         )
     touch_key = interaction.first_observed_touch_key
     offset = None if touch_key is None else touch_key.bar_position - window.reference.decision_key.bar_position
@@ -2030,8 +2833,12 @@ def derive_timing_view(
         if decision_time is None:
             raise TrajectoryQueryError("mixed positional/time-indexed timing keys")
         elapsed = int(touch_key.event_time_utc.value - decision_time.value)
+    completion = _horizon_completion(window)
+    censoring = window.reference.censoring_state
+    coverage = window.reference.coverage_assessment
+    query_resolution = QueryResolutionState.RESOLVED
     digest = canonical_sha256(
-        domain="TRAJECTORY_OBSERVED_TIMING_VIEW_V1",
+        domain="TRAJECTORY_OBSERVED_TIMING_VIEW_V2",
         payload={
             "path_id": window.reference.path_id,
             "reference_identity": identity,
@@ -2039,6 +2846,14 @@ def derive_timing_view(
             "first_observed_touch_key": touch_key,
             "observed_bar_offset": offset,
             "elapsed_time_ns": elapsed,
+            "horizon_completion": completion.value,
+            "source_censoring": censoring.value,
+            "coverage_assessment": coverage.value,
+            "coverage_issues": [
+                (issue.left_position, issue.right_position, issue.observed_delta_ns, issue.expected_delta_ns)
+                for issue in window.reference.coverage_issues
+            ],
+            "query_resolution": query_resolution.value,
         },
     )
     return TimingView(
@@ -2048,5 +2863,10 @@ def derive_timing_view(
         first_observed_touch_key=touch_key,
         observed_bar_offset=offset,
         elapsed_time_ns=elapsed,
+        horizon_completion=completion,
+        source_censoring=censoring,
+        coverage_assessment=coverage,
+        coverage_issues=window.reference.coverage_issues,
+        query_resolution=query_resolution,
         view_hash=digest,
     )

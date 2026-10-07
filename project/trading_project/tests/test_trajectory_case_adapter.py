@@ -116,29 +116,34 @@ def test_case_identity_changes_when_decision_facts_or_exact_key_change():
     assert base_case.decision_prefix_hash != changed_case.decision_prefix_hash
 
 
-def test_parent_snapshot_must_be_available_at_decision_and_is_identity_binding():
+def test_parent_snapshot_attachment_is_disabled_before_case_identity():
     market = _market()
     adapter = PositionalTimelineAdapter("parent-case")
     timeline = MarketObservationTimeline.seal(adapter=adapter, market_history=market)
     decision_key = adapter.key_for_position(market.index, 4, InformationPhase.COMPLETED_ROW_AVAILABLE)
-    available_key = adapter.key_for_position(market.index, 3, InformationPhase.RESEARCH_SNAPSHOT_AVAILABLE)
-    later_key = adapter.key_for_position(market.index, 5, InformationPhase.COMPLETED_ROW_AVAILABLE)
+    claimed_available_key = adapter.key_for_position(
+        market.index, 4, InformationPhase.RESEARCH_SNAPSHOT_AVAILABLE
+    )
     surface = s4a.build_volatility_surface(timeline=timeline, adapter=adapter, market_history=market)
 
-    parent = ParentDecisionSnapshotReference(
-        snapshot_id="parent-snapshot-1",
+    # Reproduce the independent auditor's future-coded identifier with a claimed
+    # decision-time key. V1 must reject the attachment, not trust its assertions.
+    forged = ParentDecisionSnapshotReference(
+        snapshot_id="future-outcome=TARGET_FIRST",
         schema_version="NEUTRAL_PARENT_V1",
         content_sha256="a" * 64,
-        available_at=available_key,
+        available_at=claimed_available_key,
     )
-    parent_case = create_trajectory_decision_case(
-        timeline=timeline,
-        adapter=adapter,
-        market_history=market,
-        decision_key=decision_key,
-        surfaces=(surface,),
-        parent_snapshot=parent,
-    )
+    with pytest.raises(TrajectoryCaseError, match="attachment is disabled"):
+        create_trajectory_decision_case(
+            timeline=timeline,
+            adapter=adapter,
+            market_history=market,
+            decision_key=decision_key,
+            surfaces=(surface,),
+            parent_snapshot=forged,
+        )
+
     no_parent_case = create_trajectory_decision_case(
         timeline=timeline,
         adapter=adapter,
@@ -147,23 +152,7 @@ def test_parent_snapshot_must_be_available_at_decision_and_is_identity_binding()
         surfaces=(surface,),
         parent_snapshot=None,
     )
-    assert parent_case.case_id != no_parent_case.case_id
-
-    unavailable = ParentDecisionSnapshotReference(
-        snapshot_id="later-snapshot",
-        schema_version="NEUTRAL_PARENT_V1",
-        content_sha256="b" * 64,
-        available_at=later_key,
-    )
-    with pytest.raises(TrajectoryCaseError, match="not available at decision"):
-        create_trajectory_decision_case(
-            timeline=timeline,
-            adapter=adapter,
-            market_history=market,
-            decision_key=decision_key,
-            surfaces=(surface,),
-            parent_snapshot=unavailable,
-        )
+    assert no_parent_case.parent_snapshot is None
 
 
 def test_case_rejects_preclose_decision_boundary_and_tampered_surface():
@@ -206,3 +195,44 @@ def test_case_is_deeply_immutable_and_does_not_hash_full_history_into_identity()
     with pytest.raises(FrozenInstanceError):
         case.surface_prefix_bindings[0].prefix_hash = "0" * 64
     assert isinstance(case.surface_prefix_bindings, tuple)
+
+
+def test_case_creation_uses_market_snapshot_captured_before_timeline_verification(monkeypatch):
+    market = _market()
+    baseline_market = market.copy(deep=True)
+    adapter = PositionalTimelineAdapter("case-capture-boundary")
+    timeline = MarketObservationTimeline.seal(adapter=adapter, market_history=market)
+    decision_key = adapter.key_for_position(
+        market.index, 4, InformationPhase.COMPLETED_ROW_AVAILABLE
+    )
+    surface = s4a.build_volatility_surface(
+        timeline=timeline, adapter=adapter, market_history=market
+    )
+    baseline = create_trajectory_decision_case(
+        timeline=timeline,
+        adapter=adapter,
+        market_history=baseline_market,
+        decision_key=decision_key,
+        surfaces=(surface,),
+        parent_snapshot=None,
+    )
+    original_verify = MarketObservationTimeline.verify
+
+    def verify_then_mutate_original(self, *, adapter, market_history):
+        result = original_verify(self, adapter=adapter, market_history=market_history)
+        if self.timeline_id == "case-capture-boundary":
+            market.loc[8, "high"] = 999999.0
+        return result
+
+    monkeypatch.setattr(MarketObservationTimeline, "verify", verify_then_mutate_original)
+    captured = create_trajectory_decision_case(
+        timeline=timeline,
+        adapter=adapter,
+        market_history=market,
+        decision_key=decision_key,
+        surfaces=(surface,),
+        parent_snapshot=None,
+    )
+    assert market.loc[8, "high"] == 999999.0
+    assert captured.case_id == baseline.case_id
+    assert captured.decision_prefix_hash == baseline.decision_prefix_hash

@@ -8,8 +8,9 @@ integrity and prefix-projection APIs.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, fields, replace
 from decimal import Decimal, InvalidOperation
+from enum import Enum
 import re
 from typing import Iterable
 
@@ -57,6 +58,90 @@ def _require_nonempty(value: str, field: str) -> None:
 def _require_sha256(value: str, field: str) -> None:
     if not isinstance(value, str) or _SHA256_RE.fullmatch(value) is None:
         raise TrajectoryCaseError(f"{field} must be lowercase SHA-256 hex")
+
+
+def _assert_immutable_snapshot_value(value: object, *, field: str) -> None:
+    """Reject mutable object cells/metadata before a captured source is verified.
+
+    ``DataFrame.copy(deep=True)`` does not recursively copy Python objects inside
+    object-dtype cells. The trajectory adapter therefore accepts only scalar or
+    recursively immutable tuple values in a source snapshot.
+    """
+    if value is None or value is pd.NA or value is pd.NaT:
+        return
+    if isinstance(value, np.generic):
+        scalar = value.item()
+        if scalar is value:
+            raise TrajectoryCaseError(f"unsupported mutable snapshot value: {field}")
+        _assert_immutable_snapshot_value(scalar, field=field)
+        return
+    if isinstance(value, tuple):
+        for index, item in enumerate(value):
+            _assert_immutable_snapshot_value(item, field=f"{field}[{index}]")
+        return
+    if isinstance(
+        value,
+        (str, bytes, bool, int, float, Decimal, pd.Timestamp, pd.Timedelta, Enum),
+    ):
+        return
+    raise TrajectoryCaseError(
+        f"unsupported mutable or non-scalar snapshot value: {field}:{type(value).__name__}"
+    )
+
+
+def _snapshot_frame(frame: pd.DataFrame, *, field: str) -> pd.DataFrame:
+    """Capture an owned DataFrame and reject cells that cannot be frozen safely."""
+    if not isinstance(frame, pd.DataFrame):
+        raise TrajectoryCaseError(f"{field} must be a DataFrame")
+    snapshot = frame.copy(deep=True)
+    snapshot.index = frame.index.copy(deep=True)
+    snapshot.columns = frame.columns.copy(deep=True)
+    for value in snapshot.index.tolist():
+        _assert_immutable_snapshot_value(value, field=f"{field}.index")
+    for value in snapshot.columns.tolist():
+        _assert_immutable_snapshot_value(value, field=f"{field}.column")
+    for row in snapshot.itertuples(index=False, name=None):
+        for column, value in zip(snapshot.columns.tolist(), row):
+            _assert_immutable_snapshot_value(value, field=f"{field}.{column}")
+    return snapshot
+
+
+def snapshot_market_history(market_history: pd.DataFrame) -> pd.DataFrame:
+    """Capture the only market frame to be verified and used by a trajectory call."""
+    return _snapshot_frame(market_history, field="market_history")
+
+
+def snapshot_stage4_surface(surface: object) -> object:
+    """Capture every mutable frame in one supported public Stage 4 surface.
+
+    Returned surface objects are private to the calling trajectory operation;
+    integrity verification, prefix projection and row extraction must all use
+    this same object.
+    """
+    supported = (
+        s4a.Stage4ADomainSurface,
+        s4b1.Stage4B1StructureSurface,
+        s4b2.Stage4B2LiquiditySurface,
+        s4b2.Stage4B2OrderBlockSurface,
+        s4b2.Stage4B2FVGSurface,
+        s4b2.Stage4B2DealingRangeSurface,
+        s4c.Stage4CHtfScaleSurface,
+    )
+    if not isinstance(surface, supported):
+        raise TrajectoryCaseError(f"unsupported Stage 4 surface type: {type(surface).__name__}")
+    updates = {}
+    for descriptor in fields(surface):
+        value = getattr(surface, descriptor.name)
+        if isinstance(value, pd.DataFrame):
+            updates[descriptor.name] = _snapshot_frame(
+                value, field=f"{type(surface).__name__}.{descriptor.name}"
+            )
+        else:
+            _assert_immutable_snapshot_value(value, field=f"{type(surface).__name__}.{descriptor.name}")
+    try:
+        return replace(surface, **updates)
+    except Exception as exc:
+        raise TrajectoryCaseError(f"could not capture Stage 4 surface snapshot: {exc}") from exc
 
 
 def _number_token(value: object, *, field: str) -> dict[str, str]:
@@ -326,14 +411,8 @@ def _case_identity_payload(
     surface_prefix_bindings: tuple[SurfacePrefixBinding, ...],
     parent_snapshot: ParentDecisionSnapshotReference | None,
 ) -> dict:
-    parent = None
     if parent_snapshot is not None:
-        parent = {
-            "snapshot_id": parent_snapshot.snapshot_id,
-            "schema_version": parent_snapshot.schema_version,
-            "content_sha256": parent_snapshot.content_sha256,
-            "available_at": parent_snapshot.available_at,
-        }
+        raise TrajectoryCaseError("parent snapshot attachment is disabled in V1")
     return {
         "contract_version": TRAJECTORY_CASE_CONTRACT_VERSION,
         "timeline_id": timeline_id,
@@ -347,7 +426,7 @@ def _case_identity_payload(
         "surface_prefix_binding_hashes": sorted(
             binding.stable_binding_hash for binding in surface_prefix_bindings
         ),
-        "parent_snapshot": parent,
+        "parent_snapshot": None,
     }
 
 
@@ -411,12 +490,7 @@ class TrajectoryDecisionCase:
         ):
             raise TrajectoryCaseError("surface prefix binding is not frozen at this decision")
         if self.parent_snapshot is not None:
-            if not isinstance(self.parent_snapshot, ParentDecisionSnapshotReference):
-                raise TrajectoryCaseError("invalid parent_snapshot")
-            if self.parent_snapshot.available_at.timeline_id != self.timeline_id:
-                raise TrajectoryCaseError("parent snapshot timeline mismatch")
-            if self.parent_snapshot.available_at > self.decision_key:
-                raise TrajectoryCaseError("parent snapshot was unavailable at decision")
+            raise TrajectoryCaseError("parent snapshot attachment is disabled in V1")
         if not isinstance(self.source_provenance, CaseSourceProvenance):
             raise TrajectoryCaseError("source_provenance is required")
         artifact_reference = self.source_provenance.source_artifact_reference
@@ -565,18 +639,14 @@ def _make_surface_prefix_binding(
     )
 
 
-def verify_case_source_prefix(
+def _verify_case_source_prefix_snapshot(
     *,
     case: TrajectoryDecisionCase,
     timeline: MarketObservationTimeline,
     adapter: TimelineAdapter,
-    market_history: pd.DataFrame,
+    market_snapshot: pd.DataFrame,
 ) -> None:
-    """Verify current caller-supplied rows preserve the case's decision prefix.
-
-    Whole-history ``timeline_hash`` may differ after legal future append; the
-    exact decision-time prefix, adapter semantics, and source schema may not.
-    """
+    """Verify the exact private market snapshot used by the caller."""
     if not isinstance(case, TrajectoryDecisionCase):
         raise TypeError("case must be a TrajectoryDecisionCase")
     if not isinstance(timeline, MarketObservationTimeline):
@@ -593,35 +663,46 @@ def verify_case_source_prefix(
         or tuple(timeline.optional_columns_present) != case.optional_columns_present
     ):
         raise TrajectoryCaseError("case source contract changed")
-    timeline.verify(adapter=adapter, market_history=market_history)
+    timeline.verify(adapter=adapter, market_history=market_snapshot)
     try:
-        adapter.validate_key(case.decision_key, market_history.index)
+        adapter.validate_key(case.decision_key, market_snapshot.index)
     except Exception as exc:
         raise TrajectoryCaseError(f"case decision key is unavailable: {exc}") from exc
     current_prefix_hash = _decision_prefix_hash(
         timeline=timeline,
         adapter=adapter,
-        market_history=market_history,
+        market_history=market_snapshot,
         decision_position=case.decision_key.bar_position,
     )
     if current_prefix_hash != case.decision_prefix_hash:
         raise TrajectoryCaseError("supplied history changed the frozen decision prefix")
 
 
-def verify_surface_prefix_compatibility(
+def verify_case_source_prefix(
     *,
     case: TrajectoryDecisionCase,
-    surface: object,
-) -> SurfacePrefixBinding:
-    """Verify a supplied surface still reproduces the case's frozen prefix.
+    timeline: MarketObservationTimeline,
+    adapter: TimelineAdapter,
+    market_history: pd.DataFrame,
+) -> None:
+    """Capture then verify supplied rows; hashes do not imply durable retrieval."""
+    market_snapshot = snapshot_market_history(market_history)
+    _verify_case_source_prefix_snapshot(
+        case=case,
+        timeline=timeline,
+        adapter=adapter,
+        market_snapshot=market_snapshot,
+    )
 
-    A newer whole-history surface may be used after future append. Its full
-    timeline/surface IDs can differ, but its public prefix binding at the case
-    decision must match exactly.
-    """
+
+def _verify_surface_prefix_snapshot(
+    *,
+    case: TrajectoryDecisionCase,
+    surface_snapshot: object,
+) -> SurfacePrefixBinding:
     if not isinstance(case, TrajectoryDecisionCase):
         raise TypeError("case must be a TrajectoryDecisionCase")
-    binding = _make_surface_prefix_binding(surface, case.decision_key)
+    binding = _make_surface_prefix_binding(surface_snapshot, case.decision_key)
     matches = [
         prior
         for prior in case.surface_prefix_bindings
@@ -630,6 +711,21 @@ def verify_surface_prefix_compatibility(
     if len(matches) != 1:
         raise TrajectoryCaseError("surface is not bound to this decision case")
     return binding
+
+
+def verify_surface_prefix_compatibility(
+    *,
+    case: TrajectoryDecisionCase,
+    surface: object,
+) -> SurfacePrefixBinding:
+    """Capture first, then verify one supplied surface against the frozen case.
+
+    A newer whole-history surface may be used after future append. Its full
+    timeline/surface IDs can differ, but its public prefix binding at the case
+    decision must match exactly.
+    """
+    surface_snapshot = snapshot_stage4_surface(surface)
+    return _verify_surface_prefix_snapshot(case=case, surface_snapshot=surface_snapshot)
 
 
 def create_trajectory_decision_case(
@@ -647,6 +743,8 @@ def create_trajectory_decision_case(
     absent surface/parent is explicit. No horizon, sampling, candidate pair,
     future path, outcome, or strategy field participates in case construction.
     """
+    if parent_snapshot is not None:
+        raise TrajectoryCaseError("parent snapshot attachment is disabled in V1")
     if not isinstance(timeline, MarketObservationTimeline):
         raise TypeError("timeline must be a MarketObservationTimeline")
     if not isinstance(adapter, (PositionalTimelineAdapter, TimeIndexedTimelineAdapter)):
@@ -655,29 +753,34 @@ def create_trajectory_decision_case(
         raise TypeError("market_history must be a caller-supplied DataFrame")
     if not isinstance(decision_key, InformationKey):
         raise TypeError("decision_key must be an InformationKey")
+
+    try:
+        raw_surface_inputs = tuple(surfaces)
+    except TypeError as exc:
+        raise TrajectoryCaseError("surfaces must be an iterable of public Stage 4 surfaces") from exc
+    # Capture every mutable input before any integrity/prefix verification.
+    market_snapshot = snapshot_market_history(market_history)
+    surface_inputs = tuple(snapshot_stage4_surface(surface) for surface in raw_surface_inputs)
+
     if decision_key.information_phase not in _LEGAL_DECISION_PHASES:
         raise TrajectoryCaseError("decision key must be completed-row or research-snapshot available")
     if decision_key.timeline_id != timeline.timeline_id or adapter.timeline_id != timeline.timeline_id:
         raise TrajectoryCaseError("decision/timeline/adapter identity mismatch")
 
-    # This verifies caller-supplied rows; it is not durable retrieval.
-    timeline.verify(adapter=adapter, market_history=market_history)
+    # Verify and derive only from the exact private market snapshot captured above.
+    timeline.verify(adapter=adapter, market_history=market_snapshot)
     try:
-        adapter.validate_key(decision_key, market_history.index)
+        adapter.validate_key(decision_key, market_snapshot.index)
     except Exception as exc:
         raise TrajectoryCaseError(f"decision key is unavailable on supplied timeline: {exc}") from exc
 
     decision_prefix_hash = _decision_prefix_hash(
         timeline=timeline,
         adapter=adapter,
-        market_history=market_history,
+        market_history=market_snapshot,
         decision_position=decision_key.bar_position,
     )
 
-    try:
-        surface_inputs = tuple(surfaces)
-    except TypeError as exc:
-        raise TrajectoryCaseError("surfaces must be an iterable of public Stage 4 surfaces") from exc
     if any(
         getattr(surface, "timeline_id", None) != timeline.timeline_id
         or getattr(surface, "timeline_hash", None) != timeline.timeline_hash
@@ -694,14 +797,6 @@ def create_trajectory_decision_case(
     )
     if len({binding.stable_binding_hash for binding in bindings}) != len(bindings):
         raise TrajectoryCaseError("duplicate Stage 4 prefix binding")
-
-    if parent_snapshot is not None:
-        if not isinstance(parent_snapshot, ParentDecisionSnapshotReference):
-            raise TypeError("parent_snapshot must be a ParentDecisionSnapshotReference or None")
-        if parent_snapshot.available_at.timeline_id != timeline.timeline_id:
-            raise TrajectoryCaseError("parent snapshot timeline mismatch")
-        if parent_snapshot.available_at > decision_key:
-            raise TrajectoryCaseError("parent snapshot is not available at decision")
 
     surface_versions = tuple(
         SurfaceVersionReference(
