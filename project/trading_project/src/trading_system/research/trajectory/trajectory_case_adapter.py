@@ -35,6 +35,11 @@ from trading_system.research.trajectory.trajectory_timeline_resolver import (
 from trading_system.research.trajectory import trajectory_stage4a as s4a
 from trading_system.research.trajectory import trajectory_stage4b1 as s4b1
 from trading_system.research.trajectory import trajectory_stage4b2 as s4b2
+from trading_system.research.trajectory.trajectory_stage4b2_consistency import (
+    LOCAL_VERIFICATION_SCOPE,
+    Stage4B2ConsistencyError,
+    verify_stage4b2_consistency,
+)
 from trading_system.research.trajectory import trajectory_stage4c as s4c
 
 
@@ -279,6 +284,7 @@ class SurfacePrefixBinding:
     stable_binding_hash: str
     source_surface_id: str
     source_timeline_hash: str
+    verification_scope: str | None = None
 
     def __post_init__(self) -> None:
         for name in ("surface_family", "domain", "contract_version", "timeline_id"):
@@ -291,6 +297,11 @@ class SurfacePrefixBinding:
             "source_timeline_hash",
         ):
             _require_sha256(getattr(self, name), name)
+        if self.surface_family == "STAGE4B2":
+            if self.verification_scope != LOCAL_VERIFICATION_SCOPE:
+                raise TrajectoryCaseError("Stage4B2 binding lacks successful local consistency verification")
+        elif self.verification_scope is not None:
+            raise TrajectoryCaseError("local Stage4B2 verification scope is invalid for this surface family")
         if not isinstance(self.adapter_kind, TIMELINE_ADAPTER_KIND):
             raise TrajectoryCaseError("invalid surface adapter_kind")
         if not isinstance(self.boundary_key, InformationKey):
@@ -323,11 +334,14 @@ class SurfaceVersionReference:
     stable_binding_hash: str
     source_surface_id: str
     source_timeline_hash: str
+    verification_scope: str | None = None
 
     def __post_init__(self) -> None:
         _require_sha256(self.stable_binding_hash, "stable_binding_hash")
         _require_sha256(self.source_surface_id, "source_surface_id")
         _require_sha256(self.source_timeline_hash, "source_timeline_hash")
+        if self.verification_scope not in (None, LOCAL_VERIFICATION_SCOPE):
+            raise TrajectoryCaseError("invalid local surface verification scope")
 
 
 @dataclass(frozen=True)
@@ -365,6 +379,17 @@ class CaseSourceProvenance:
             raise TrajectoryCaseError("source provenance binding hash mismatch")
 
 
+def _surface_version_payload(item: SurfaceVersionReference) -> dict:
+    payload = {
+        "stable_binding_hash": item.stable_binding_hash,
+        "source_surface_id": item.source_surface_id,
+        "source_timeline_hash": item.source_timeline_hash,
+    }
+    if item.verification_scope is not None:
+        payload["verification_scope"] = item.verification_scope
+    return payload
+
+
 def _provenance_hash(
     *,
     timeline_hash: str,
@@ -386,14 +411,7 @@ def _provenance_hash(
         payload={
             "timeline_hash": timeline_hash,
             "source_artifact_reference": reference,
-            "surface_versions": [
-                {
-                    "stable_binding_hash": item.stable_binding_hash,
-                    "source_surface_id": item.source_surface_id,
-                    "source_timeline_hash": item.source_timeline_hash,
-                }
-                for item in surface_versions
-            ],
+            "surface_versions": [_surface_version_payload(item) for item in surface_versions],
         },
     )
 
@@ -503,7 +521,10 @@ class TrajectoryDecisionCase:
             sorted(
                 (
                     SurfaceVersionReference(
-                        b.stable_binding_hash, b.source_surface_id, b.source_timeline_hash
+                        b.stable_binding_hash,
+                        b.source_surface_id,
+                        b.source_timeline_hash,
+                        b.verification_scope,
                     )
                     for b in self.surface_prefix_bindings
                 ),
@@ -537,6 +558,7 @@ def _make_surface_prefix_binding(
     surface: object, boundary_key: InformationKey
 ) -> SurfacePrefixBinding:
     """Verify and bind one supported public Stage 4 surface prefix."""
+    verification_scope = None
     if isinstance(surface, s4a.Stage4ADomainSurface):
         binding = s4a.project_surface_prefix(surface=surface, boundary_key=boundary_key)
         family = "STAGE4A"
@@ -573,6 +595,13 @@ def _make_surface_prefix_binding(
             s4b2.Stage4B2DealingRangeSurface,
         ),
     ):
+        try:
+            consistency = verify_stage4b2_consistency(surface)
+        except Stage4B2ConsistencyError as exc:
+            raise TrajectoryCaseError(str(exc)) from exc
+        verification_scope = consistency.verification_scope
+        # The private snapshot is checked before the decision-prefix projector;
+        # the projector may repeat its existing integrity check, not the new cross-table pass.
         binding = s4b2.project_domain_prefix(surface=surface, boundary_key=boundary_key)
         family = "STAGE4B2"
         domain = binding.domain
@@ -636,6 +665,7 @@ def _make_surface_prefix_binding(
         stable_binding_hash=stable_hash,
         source_surface_id=source_surface_id,
         source_timeline_hash=source_timeline_hash,
+        verification_scope=verification_scope,
     )
 
 
@@ -803,6 +833,7 @@ def create_trajectory_decision_case(
             stable_binding_hash=binding.stable_binding_hash,
             source_surface_id=binding.source_surface_id,
             source_timeline_hash=binding.source_timeline_hash,
+            verification_scope=binding.verification_scope,
         )
         for binding in bindings
     )

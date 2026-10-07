@@ -956,6 +956,74 @@ def test_each_query_protocol_field_and_study_identity_changes_query_id_without_c
     )
 
 
+def test_coverage_contract_identity_changes_path_and_derived_view_not_query_id():
+    index = pd.date_range("2024-01-01 00:00", periods=8, freq="min", tz="UTC")
+    market = _market(8, index=index)
+    case, timeline, adapter, _ = _case(
+        market, timeline_id="coverage-contract-identity", time_indexed=True
+    )
+    end = adapter.key_for_position(market.index, 6, InformationPhase.COMPLETED_ROW_AVAILABLE)
+    horizon = _horizon(end)
+    pair = _pair(case, target_price=250.0)
+    protocol = _protocol_identity()
+    query = create_trajectory_query_reference(
+        case=case,
+        protocol_identity=protocol,
+        horizon_request=horizon,
+        candidate_pair=pair,
+        sampling_membership=None,
+    )
+    baseline_contract = _coverage(pd.Timedelta(minutes=1))
+    variants = (
+        replace(baseline_contract, contract_id="other-grid"),
+        replace(baseline_contract, contract_version="2"),
+        replace(baseline_contract, contract_sha256="d" * 64),
+        replace(baseline_contract, expected_step=pd.Timedelta(minutes=2)),
+    )
+
+    baseline_window = build_trajectory_window(
+        case=case,
+        timeline=timeline,
+        adapter=adapter,
+        market_history=market,
+        horizon_request=horizon,
+        coverage_contract=baseline_contract,
+    )
+    baseline_result = derive_projected_target_interaction(
+        window=baseline_window, projected_target=pair.projected_target
+    )
+    changed_paths = set()
+    changed_results = set()
+    for contract in variants:
+        window = build_trajectory_window(
+            case=case,
+            timeline=timeline,
+            adapter=adapter,
+            market_history=market,
+            horizon_request=horizon,
+            coverage_contract=contract,
+        )
+        result = derive_projected_target_interaction(
+            window=window, projected_target=pair.projected_target
+        )
+        repeated_query = create_trajectory_query_reference(
+            case=case,
+            protocol_identity=protocol,
+            horizon_request=horizon,
+            candidate_pair=pair,
+            sampling_membership=None,
+        )
+        assert repeated_query.query_id == query.query_id
+        assert window.reference.path_id != baseline_window.reference.path_id
+        assert result.view_hash != baseline_result.view_hash
+        changed_paths.add(window.reference.path_id)
+        changed_results.add(result.view_hash)
+
+    assert len(changed_paths) == len(variants)
+    assert len(changed_results) == len(variants)
+    assert query.case_id == case.case_id
+
+
 def test_every_sampling_audit_identity_field_participates_and_is_path_free():
     market = _market(7)
     case, _, adapter, _ = _case(market, timeline_id="sampling-audit-fields")
@@ -1106,8 +1174,9 @@ def test_unknown_duplicate_and_future_unavailable_entity_ids_fail_closed(_b2_sou
     assert fvg.origin_positions == (0,)
     assert fvg.creation_position == fvg.availability_position == 2
 
-    # Create a self-consistent Stage4B2 surface containing a duplicate canonical
-    # ID so the exact-one-match check is exercised after public integrity checks.
+    # Recompute the normalized-entity and surface IDs around a duplicate. The
+    # new local consistency pass must reject this cross-table inconsistency before
+    # a decision case can bind the surface.
     original = surfaces["LIQUIDITY"]
     duplicated_rows = pd.concat(
         [original.normalized_entity_frame, original.normalized_entity_frame.iloc[[0]]],
@@ -1141,17 +1210,11 @@ def test_unknown_duplicate_and_future_unavailable_entity_ids_fail_closed(_b2_sou
     duplicate_surfaces = (duplicate_surface,) + tuple(
         surface for domain, surface in surfaces.items() if domain != "LIQUIDITY"
     )
-    duplicate_case, _ = _b2_case(
-        _b2_sources,
-        decision_position=20,
-        surfaces_override=duplicate_surfaces,
-    )
-    duplicate_binding = next(item for item in duplicate_case.surface_prefix_bindings if item.domain == "LIQUIDITY")
-    with pytest.raises(TrajectoryQueryError, match="exactly one decision-visible row"):
-        resolve_observed_entity(
-            case=duplicate_case,
-            surfaces=duplicate_surfaces,
-            locator=ObservedEntityLocator("LIQUIDITY", duplicate_binding.stable_binding_hash, "0"),
+    with pytest.raises(TrajectoryCaseError, match="normalized entity rows"):
+        _b2_case(
+            _b2_sources,
+            decision_position=20,
+            surfaces_override=duplicate_surfaces,
         )
 
 
