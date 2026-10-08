@@ -7,7 +7,12 @@ import pickle
 import pandas as pd
 import pytest
 
-from trading_system.research.information_time import InformationPhase
+from trading_system.research.information_time import (
+    INFORMATION_KEY_VERSION,
+    InformationKey,
+    InformationPhase,
+    TimeIndexedTimelineAdapter,
+)
 from trading_system.research.trajectory import trajectory_stage4b2 as s4b2
 from trading_system.research.trajectory.trajectory_contract import MarketObservationTimeline
 from trading_system.research.trajectory.trajectory_query_views import decision_surface_view
@@ -55,6 +60,51 @@ def _universe(sources, position: int = 7):
     )
 
 
+def _time_indexed_sources(sources):
+    market = sources[0].copy(deep=True)
+    market.index = pd.date_range(
+        "2024-01-01T00:00:00Z", periods=len(market), freq="min"
+    )
+    adapter = TimeIndexedTimelineAdapter("coverage-time-indexed-fixture")
+    timeline = MarketObservationTimeline.seal(adapter=adapter, market_history=market)
+    surface = s4b2.build_fvg_surface(
+        timeline=timeline,
+        adapter=adapter,
+        market_history=market,
+    )
+    return market, adapter, timeline, None, {"FVG": surface}
+
+
+def _forged_key(key, **changes):
+    values = {
+        name: getattr(key, name)
+        for name in (
+            "information_key_version",
+            "timeline_id",
+            "bar_position",
+            "event_time_utc",
+            "information_phase",
+            "deterministic_sequence",
+        )
+    }
+    values.update(changes)
+    forged = object.__new__(InformationKey)
+    for name, value in values.items():
+        object.__setattr__(forged, name, value)
+    return forged
+
+
+def _key_at_unchecked_position(sources, position: int):
+    return InformationKey(
+        information_key_version=INFORMATION_KEY_VERSION,
+        timeline_id=sources[1].timeline_id,
+        bar_position=position,
+        event_time_utc=None,
+        information_phase=InformationPhase.COMPLETED_ROW_AVAILABLE,
+        deterministic_sequence=0,
+    )
+
+
 def _question(question_id: str = "q-context"):
     return ResearchQuestion.declare(
         question_id=question_id,
@@ -88,6 +138,11 @@ def _verify_ledger(ledger, sources):
         market_history=sources[0],
         fvg_surface=sources[4]["FVG"],
     )
+
+
+def _verified_unassessed(sources):
+    universe = _universe(sources)
+    return universe, _verify_ledger(_ledger(universe), sources)
 
 
 def _append_initial_assessment(
@@ -1298,3 +1353,232 @@ def test_verified_ledger_snapshot_is_immutable_and_not_a_claim_of_empirical_trut
         for name in pilot.__all__
         for token in ("prediction", "probability", "trade_signal", "execution")
     )
+
+
+def test_verified_coverage_accepts_valid_in_range_key_and_preserves_history(_b2_sources):
+    universe = _universe(_b2_sources)
+    candidate_id = universe.eligible_candidate_ids[0]
+    verified = _append_initial_assessment(_ledger(universe), candidate_id, _b2_sources)
+    previous_coverage = verified.coverage_history
+    previous_assessments = verified.assessments
+    previous_facts = verified.factual_evidence
+    valid_key = _key(_b2_sources, 10)
+
+    deferred = record_candidate_coverage(
+        ledger=verified,
+        candidate_id=candidate_id,
+        question_id="q-context",
+        state=CandidateCoverageState.DEFERRED,
+        as_of_key=valid_key,
+        reason="Valid verified coverage transition; no factual relevance claim.",
+    )
+    assert isinstance(deferred, VerifiedCandidateResearchLedger)
+    assert deferred.latest_coverage(candidate_id, "q-context").as_of_key == valid_key
+    assert deferred.coverage_history[:-1] == previous_coverage
+    assert all(
+        old is new
+        for old, new in zip(previous_coverage, deferred.coverage_history[:-1], strict=True)
+    )
+    assert deferred.factual_evidence == previous_facts
+    assert deferred.assessments is previous_assessments
+    assert all(
+        old is new
+        for old, new in zip(previous_assessments, deferred.assessments, strict=True)
+    )
+    assert verified.coverage_history is previous_coverage
+
+    restored = restore_deferred_candidate(
+        ledger=deferred,
+        candidate_id=candidate_id,
+        question_id="q-context",
+        as_of_key=_key(_b2_sources, 11),
+        reason="Valid in-range restoration for investigation only.",
+    )
+    assert isinstance(restored, VerifiedCandidateResearchLedger)
+    assert restored.latest_coverage(candidate_id, "q-context").as_of_key == _key(_b2_sources, 11)
+    assert restored.factual_evidence == previous_facts
+    assert restored.assessments == previous_assessments
+
+
+@pytest.mark.parametrize(
+    "key_case",
+    (
+        "same_timeline_out_of_range",
+        "negative_position",
+        "wrong_timeline",
+        "malformed_phase",
+        "malformed_sequence",
+    ),
+)
+@pytest.mark.parametrize("transition", ("record", "restore"))
+def test_verified_coverage_rejects_invalid_timeline_keys(_b2_sources, key_case, transition):
+    universe, verified = _verified_unassessed(_b2_sources)
+    candidate_id = universe.eligible_candidate_ids[0]
+    good_key = _key(_b2_sources, 10)
+    if transition == "restore":
+        verified = record_candidate_coverage(
+            ledger=verified,
+            candidate_id=candidate_id,
+            question_id="q-context",
+            state=CandidateCoverageState.DEFERRED,
+            as_of_key=_key(_b2_sources, 9),
+            reason="Set up an explicitly deferred candidate.",
+        )
+    if key_case == "same_timeline_out_of_range":
+        invalid_key = _key_at_unchecked_position(_b2_sources, 999)
+    elif key_case == "negative_position":
+        invalid_key = _forged_key(good_key, bar_position=-1)
+    elif key_case == "wrong_timeline":
+        invalid_key = InformationKey(
+            information_key_version=INFORMATION_KEY_VERSION,
+            timeline_id="different-timeline",
+            bar_position=10,
+            event_time_utc=None,
+            information_phase=InformationPhase.COMPLETED_ROW_AVAILABLE,
+            deterministic_sequence=0,
+        )
+    elif key_case == "malformed_phase":
+        invalid_key = _forged_key(good_key, information_phase="NOT_A_PHASE")
+    else:
+        invalid_key = _forged_key(good_key, deterministic_sequence=-1)
+
+    def call_transition():
+        if transition == "record":
+            return record_candidate_coverage(
+                ledger=verified,
+                candidate_id=candidate_id,
+                question_id="q-context",
+                state=CandidateCoverageState.UNRESOLVED,
+                as_of_key=invalid_key,
+                reason="Invalid boundaries must not remain verified.",
+            )
+        return restore_deferred_candidate(
+            ledger=verified,
+            candidate_id=candidate_id,
+            question_id="q-context",
+            as_of_key=invalid_key,
+            reason="Invalid boundary restoration attempt.",
+        )
+    with pytest.raises(CandidatePilotError, match="verified source timeline/index|coverage key"):
+        call_transition()
+
+
+@pytest.mark.parametrize("transition", ("record", "restore"))
+def test_verified_coverage_rejects_time_index_timestamp_forgery(_b2_sources, transition):
+    time_sources = _time_indexed_sources(_b2_sources)
+    universe, verified = _verified_unassessed(time_sources)
+    candidate_id = universe.eligible_candidate_ids[0]
+    if transition == "restore":
+        verified = record_candidate_coverage(
+            ledger=verified,
+            candidate_id=candidate_id,
+            question_id="q-context",
+            state=CandidateCoverageState.DEFERRED,
+            as_of_key=_key(time_sources, 9),
+            reason="Set up an explicitly deferred time-indexed candidate.",
+        )
+    actual_key = _key(time_sources, 10)
+    forged_timestamp = actual_key.event_time_utc + pd.Timedelta(minutes=1)
+    invalid_key = _forged_key(actual_key, event_time_utc=forged_timestamp)
+    with pytest.raises(CandidatePilotError, match="verified source timeline/index|coverage key"):
+        if transition == "record":
+            record_candidate_coverage(
+                ledger=verified,
+                candidate_id=candidate_id,
+                question_id="q-context",
+                state=CandidateCoverageState.DEFERRED,
+                as_of_key=invalid_key,
+                reason="Caller-declared timestamp does not match this sealed row.",
+            )
+        else:
+            restore_deferred_candidate(
+                ledger=verified,
+                candidate_id=candidate_id,
+                question_id="q-context",
+                as_of_key=invalid_key,
+                reason="Caller-declared timestamp does not match this sealed row.",
+            )
+
+
+def test_raw_coverage_stays_unverified_even_for_out_of_range_keys(_b2_sources):
+    universe = _universe(_b2_sources)
+    raw = _ledger(universe)
+    candidate_id = universe.eligible_candidate_ids[0]
+    out_of_range = _key_at_unchecked_position(_b2_sources, 999)
+    updated = record_candidate_coverage(
+        ledger=raw,
+        candidate_id=candidate_id,
+        question_id="q-context",
+        state=CandidateCoverageState.DEFERRED,
+        as_of_key=out_of_range,
+        reason="Raw coverage data is not promoted to source-verified history.",
+    )
+    assert isinstance(updated, CandidateResearchLedger)
+    assert not isinstance(updated, VerifiedCandidateResearchLedger)
+    assert updated.factual_evidence == raw.factual_evidence
+    with pytest.raises(CandidatePilotError):
+        _verify_ledger(updated, _b2_sources)
+
+
+def test_verified_coverage_requires_its_issued_timeline_context(_b2_sources):
+    universe, verified = _verified_unassessed(_b2_sources)
+    record = object.__getattribute__(verified, "_record")
+    incomplete = object.__new__(VerifiedCandidateResearchLedger)
+    object.__setattr__(incomplete, "_record", record)
+    object.__setattr__(
+        incomplete,
+        "_scope",
+        pilot._verified_scope_for_universe(record.universe),
+    )
+    object.__setattr__(incomplete, "_issuer", pilot._VERIFIED_LEDGER_ISSUER)
+    with pytest.raises(CandidatePilotError, match="capability is incomplete"):
+        record_candidate_coverage(
+            ledger=incomplete,
+            candidate_id=universe.eligible_candidate_ids[0],
+            question_id="q-context",
+            state=CandidateCoverageState.DEFERRED,
+            as_of_key=_key(_b2_sources, 10),
+            reason="Missing exact adapter/index context must fail closed.",
+        )
+
+
+def test_future_source_append_reverifies_context_without_rewriting_coverage_ids(_b2_sources):
+    market, adapter, _, _, _ = _b2_sources
+    prefix_market = market.iloc[:8].copy(deep=True)
+    prefix_adapter = type(adapter)(adapter.timeline_id)
+    prefix_timeline = MarketObservationTimeline.seal(
+        adapter=prefix_adapter,
+        market_history=prefix_market,
+    )
+    prefix_surface = s4b2.build_fvg_surface(
+        timeline=prefix_timeline,
+        adapter=prefix_adapter,
+        market_history=prefix_market,
+    )
+    prefix_sources = (prefix_market, prefix_adapter, prefix_timeline, None, {"FVG": prefix_surface})
+    prefix_universe = _universe(prefix_sources, position=7)
+    raw_prefix = _ledger(prefix_universe)
+    # Re-verification against the exact longer source suffix updates the stored
+    # index context while preserving the old causal universe/coverage identity.
+    verified = _verify_ledger(raw_prefix, _b2_sources)
+    candidate_id = prefix_universe.eligible_candidate_ids[0]
+    verified = _append_initial_assessment(verified, candidate_id, _b2_sources)
+    before_coverage = verified.coverage_history
+    before_assessments = verified.assessments
+    before_facts = verified.factual_evidence
+    after = record_candidate_coverage(
+        ledger=verified,
+        candidate_id=candidate_id,
+        question_id="q-context",
+        state=CandidateCoverageState.NOT_EVALUATED,
+        as_of_key=_key(_b2_sources, 12),
+        reason="Transition after a future source append, still a coverage-only state.",
+    )
+    assert isinstance(after, VerifiedCandidateResearchLedger)
+    assert after.universe.universe_id == verified.universe.universe_id
+    assert after.coverage_history[0].coverage_id == before_coverage[0].coverage_id
+    assert after.coverage_history[0] is before_coverage[0]
+    assert after.assessments == before_assessments
+    assert after.assessments[0] is before_assessments[0]
+    assert after.factual_evidence == before_facts
+    assert verified.coverage_history is before_coverage

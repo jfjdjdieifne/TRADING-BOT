@@ -1447,6 +1447,64 @@ class _VerifiedLedgerSourceScope:
     asof_view_hash: str
 
 
+@dataclass(frozen=True, eq=False)
+class _VerifiedTimelineSourceContext:
+    """Exact adapter/index snapshot authenticated when the ledger was verified."""
+
+    timeline: MarketObservationTimeline
+    adapter: TimelineAdapter
+    market_index: pd.Index
+
+
+def _validate_verified_timeline_context(
+    context: _VerifiedTimelineSourceContext,
+    scope: _VerifiedLedgerSourceScope,
+) -> None:
+    if (
+        not isinstance(context, _VerifiedTimelineSourceContext)
+        or not isinstance(context.timeline, MarketObservationTimeline)
+        or not isinstance(context.adapter, (PositionalTimelineAdapter, TimeIndexedTimelineAdapter))
+        or not isinstance(context.market_index, pd.Index)
+    ):
+        raise CandidatePilotError("verified source timeline/index context is missing or malformed")
+    if (
+        context.timeline.timeline_id != scope.timeline_id
+        or context.adapter.timeline_id != scope.timeline_id
+        or len(context.market_index) != context.timeline.bar_count
+    ):
+        raise CandidatePilotError("verified adapter/index context differs from the sealed source timeline")
+    try:
+        context.adapter.validate_key(scope.decision_key, context.market_index)
+    except Exception as exc:
+        raise CandidatePilotError("verified decision boundary is unavailable on its sealed timeline/index") from exc
+
+
+def _validate_verified_coverage_key(
+    as_of_key: InformationKey,
+    context: _VerifiedTimelineSourceContext,
+    scope: _VerifiedLedgerSourceScope,
+) -> None:
+    _validate_verified_timeline_context(context, scope)
+    if not isinstance(as_of_key, InformationKey):
+        raise CandidatePilotError("coverage transition requires an InformationKey")
+    try:
+        # Reconstruct through the public information-time contract so even an
+        # instance forged around frozen dataclass checks fails closed.
+        checked_key = InformationKey(
+            information_key_version=as_of_key.information_key_version,
+            timeline_id=as_of_key.timeline_id,
+            bar_position=as_of_key.bar_position,
+            event_time_utc=as_of_key.event_time_utc,
+            information_phase=as_of_key.information_phase,
+            deterministic_sequence=as_of_key.deterministic_sequence,
+        )
+        context.adapter.validate_key(checked_key, context.market_index)
+    except Exception as exc:
+        raise CandidatePilotError(
+            f"coverage key is invalid for the verified source timeline/index: {exc}"
+        ) from exc
+
+
 _VERIFIED_LEDGER_ISSUER = object()
 _VERIFIED_BATCH_ISSUER = object()
 
@@ -1463,7 +1521,7 @@ class VerifiedCandidateResearchLedger:
     not the truth of a human assessment, empirical relevance, or trading utility.
     """
 
-    __slots__ = ("_record", "_scope", "_issuer")
+    __slots__ = ("_record", "_scope", "_source_context", "_issuer")
 
     def __init__(self, *args, **kwargs) -> None:
         raise CandidatePilotError(
@@ -1543,21 +1601,24 @@ def _verified_scope_for_universe(universe: CandidateUniverse) -> _VerifiedLedger
 def _issue_verified_ledger(
     ledger: CandidateResearchLedger,
     scope: _VerifiedLedgerSourceScope,
+    source_context: _VerifiedTimelineSourceContext,
 ) -> VerifiedCandidateResearchLedger:
     if not isinstance(ledger, CandidateResearchLedger):
         raise CandidatePilotError("only a CandidateResearchLedger record can be verified")
     if _verified_scope_for_universe(ledger.universe) != scope:
         raise CandidatePilotError("verified ledger source scope changed during append")
+    _validate_verified_timeline_context(source_context, scope)
     verified = object.__new__(VerifiedCandidateResearchLedger)
     object.__setattr__(verified, "_record", ledger)
     object.__setattr__(verified, "_scope", scope)
+    object.__setattr__(verified, "_source_context", source_context)
     object.__setattr__(verified, "_issuer", _VERIFIED_LEDGER_ISSUER)
     return verified
 
 
 def _require_verified_ledger(
     ledger: object,
-) -> tuple[CandidateResearchLedger, _VerifiedLedgerSourceScope]:
+) -> tuple[CandidateResearchLedger, _VerifiedLedgerSourceScope, _VerifiedTimelineSourceContext]:
     if not isinstance(ledger, VerifiedCandidateResearchLedger):
         raise CandidatePilotError(
             "source-verified CandidateResearchLedger required; raw ledgers are unverified data"
@@ -1566,26 +1627,33 @@ def _require_verified_ledger(
         issuer = object.__getattribute__(ledger, "_issuer")
         record = object.__getattribute__(ledger, "_record")
         scope = object.__getattribute__(ledger, "_scope")
+        source_context = object.__getattribute__(ledger, "_source_context")
     except AttributeError as exc:
         raise CandidatePilotError("verified ledger capability is incomplete") from exc
     if issuer is not _VERIFIED_LEDGER_ISSUER:
         raise CandidatePilotError("verified ledger was not issued by the source-verification boundary")
     if not isinstance(record, CandidateResearchLedger) or _verified_scope_for_universe(record.universe) != scope:
         raise CandidatePilotError("verified ledger source scope no longer matches its record")
-    # The issued record and every nested history item are immutable. Reuse
-    # this scoped snapshot rather than replaying source verification on reads.
-    return record, scope
+    _validate_verified_timeline_context(source_context, scope)
+    # The issued record and its exact adapter/index snapshot are immutable.
+    # Reuse this context rather than replaying source verification on reads.
+    return record, scope, source_context
 
 
 def _coverage_ledger_parts(
     ledger: CandidateResearchLedger | VerifiedCandidateResearchLedger,
-) -> tuple[CandidateResearchLedger, VerifiedCandidateResearchLedger | None]:
+) -> tuple[
+    CandidateResearchLedger,
+    VerifiedCandidateResearchLedger | None,
+    _VerifiedLedgerSourceScope | None,
+    _VerifiedTimelineSourceContext | None,
+]:
     if isinstance(ledger, VerifiedCandidateResearchLedger):
-        record, _ = _require_verified_ledger(ledger)
-        return record, ledger
+        record, scope, source_context = _require_verified_ledger(ledger)
+        return record, ledger, scope, source_context
     if isinstance(ledger, CandidateResearchLedger):
         _validate_ledger(ledger)
-        return ledger, None
+        return ledger, None, None, None
     raise CandidatePilotError("coverage operation requires a ledger data record")
 
 
@@ -1595,8 +1663,8 @@ def _return_coverage_ledger(
 ) -> CandidateResearchLedger | VerifiedCandidateResearchLedger:
     if prior_verified is None:
         return updated
-    _, scope = _require_verified_ledger(prior_verified)
-    return _issue_verified_ledger(updated, scope)
+    _, scope, source_context = _require_verified_ledger(prior_verified)
+    return _issue_verified_ledger(updated, scope, source_context)
 
 
 def initialize_candidate_research_ledger(
@@ -1746,10 +1814,16 @@ def verify_candidate_research_ledger(
             factual_evidence=ledger.factual_evidence,
             evidence_batches=ledger.evidence_batches,
         )
-        return _issue_verified_ledger(
-            verified_record,
-            _verified_scope_for_universe(rebuilt_universe),
+        verified_scope = _verified_scope_for_universe(rebuilt_universe)
+        # The rebuilt universe has already verified this complete timeline
+        # input. Keep its exact adapter and sealed index so later verified
+        # coverage updates need neither caller attestation nor source replay.
+        source_context = _VerifiedTimelineSourceContext(
+            timeline=timeline,
+            adapter=adapter,
+            market_index=market_history.index.copy(deep=True),
         )
+        return _issue_verified_ledger(verified_record, verified_scope, source_context)
     except CandidatePilotError:
         raise
     except Exception as exc:
@@ -1759,7 +1833,7 @@ def verify_candidate_research_ledger(
 def reconcile_candidate_coverage(
     *, ledger: CandidateResearchLedger | VerifiedCandidateResearchLedger, question_id: str
 ) -> CoverageReconciliation:
-    record, _ = _coverage_ledger_parts(ledger)
+    record, _, _, _ = _coverage_ledger_parts(ledger)
     if question_id not in {item.question_id for item in record.questions}:
         raise CandidatePilotError("coverage reconciliation question is not registered")
     expected = record.universe.eligible_candidate_ids
@@ -1789,7 +1863,9 @@ def record_candidate_coverage(
     reason: str,
 ) -> CandidateResearchLedger | VerifiedCandidateResearchLedger:
     """Update coverage data only; raw input remains raw, verified input stays scoped."""
-    raw, prior_verified = _coverage_ledger_parts(ledger)
+    raw, prior_verified, scope, source_context = _coverage_ledger_parts(ledger)
+    if prior_verified is not None:
+        _validate_verified_coverage_key(as_of_key, source_context, scope)
     if state not in (
         CandidateCoverageState.DEFERRED,
         CandidateCoverageState.UNRESOLVED,
@@ -1826,7 +1902,9 @@ def restore_deferred_candidate(
     reason: str,
 ) -> CandidateResearchLedger | VerifiedCandidateResearchLedger:
     """Restore only for investigation; this action is explicitly not utility evidence."""
-    raw, prior_verified = _coverage_ledger_parts(ledger)
+    raw, prior_verified, scope, source_context = _coverage_ledger_parts(ledger)
+    if prior_verified is not None:
+        _validate_verified_coverage_key(as_of_key, source_context, scope)
     latest = raw.latest_coverage(candidate_id, question_id)
     if latest.state is not CandidateCoverageState.DEFERRED:
         raise CandidatePilotError("only an explicitly DEFERRED candidate can be restored")
@@ -1912,7 +1990,7 @@ def _append_candidate_assessment_record(
     verified_batch: _VerifiedFVGRevisionBatch | None = None,
 ) -> VerifiedCandidateResearchLedger:
     """Internal append; raw ledgers and unverified batches have no authority."""
-    record, scope = _require_verified_ledger(ledger)
+    record, scope, source_context = _require_verified_ledger(ledger)
     supplied_batch = (
         None
         if verified_batch is None
@@ -2008,7 +2086,7 @@ def _append_candidate_assessment_record(
         factual_evidence=new_evidence_history,
         evidence_batches=new_batch_history,
     )
-    return _issue_verified_ledger(updated, scope)
+    return _issue_verified_ledger(updated, scope, source_context)
 
 
 def revise_candidate_assessment(
@@ -2037,7 +2115,7 @@ def revise_candidate_assessment(
     source, candidate, and previous assessment boundary; no eligible rows is a
     fail-closed no-revision result. Earlier records are never edited.
     """
-    record, _scope = _require_verified_ledger(ledger)
+    record, _scope, _source_context = _require_verified_ledger(ledger)
     previous = record.latest_assessment(candidate_id, question_id)
     if previous is None:
         raise CandidatePilotError("revision requires an earlier question-specific assessment")
