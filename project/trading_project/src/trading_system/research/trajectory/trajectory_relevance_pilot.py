@@ -59,6 +59,14 @@ from trading_system.research.trajectory import trajectory_stage4b2 as s4b2
 PILOT_CONTRACT_VERSION = "CONTEXTUAL_CANDIDATE_RELEVANCE_PILOT_V1"
 FVG_ELIGIBILITY_POLICY_ID = "STAGE4B2_FVG_VISIBLE_BY_CREATION_POSITION_V1"
 FVG_EVENT_EVIDENCE_KIND = "FVG_NORMALIZED_LIFECYCLE_EVENT"
+_FVG_NORMALIZED_EVENT_COLUMNS = (
+    "event_position", "fvg_id", "direction", "event_type", "origin_position",
+    "middle_position", "creation_position", "zone_low", "zone_high", "midpoint",
+    "gap_width", "gap_width_fraction", "gap_width_percentile",
+    "gap_width_history_count", "middle_body_fraction", "middle_signed_body_fraction",
+    "event_high", "event_low", "event_close", "zone_range_coverage_fraction",
+    "fvg_age_bars", "same_information_batch_order_unknown",
+)
 _SUPPORTED_CONTEXT_DOMAINS = (
     "VOLATILITY", "SESSION", "ORDER_FLOW_PROXY", "ABSORPTION_PROXY",
     "SHARED_STRUCTURE", "LIQUIDITY", "ORDER_BLOCK", "FVG",
@@ -856,6 +864,8 @@ def build_fvg_candidate_universe(
 
 @dataclass(frozen=True)
 class EvidenceBatch:
+    """Immutable retrieval result; public assessment APIs do not accept caller batches."""
+
     batch_id: str
     case_id: str
     candidate_id: str
@@ -879,8 +889,34 @@ class EvidenceBatch:
         if len({ref.reference_id for ref in self.evidence}) != len(self.evidence):
             raise CandidatePilotError("evidence batch contains duplicate references")
         for ref in self.evidence:
-            if ref.candidate_id != self.candidate_id or ref.evidence_kind != FVG_EVENT_EVIDENCE_KIND:
+            if ref.available_at.timeline_id != self.start_key.timeline_id:
+                raise CandidatePilotError("evidence availability must use the batch causal timeline")
+            if (
+                ref.candidate_id != self.candidate_id
+                or ref.evidence_kind != FVG_EVENT_EVIDENCE_KIND
+                or ref.producer_domain != "FVG"
+            ):
                 raise CandidatePilotError("revision batch may contain only this candidate's FVG lifecycle events")
+            if ref.source_binding_hash != self.source_binding_hash:
+                raise CandidatePilotError("per-reference source binding differs from the batch binding")
+            if ref.source_prefix_hash != self.source_prefix_hash:
+                raise CandidatePilotError("per-reference source prefix differs from the batch prefix")
+            if ref.row_columns != _FVG_NORMALIZED_EVENT_COLUMNS:
+                raise CandidatePilotError("revision reference does not use the exact normalized FVG event schema")
+            row = dict(zip(ref.row_columns, ref.row))
+            row_candidate_id = _cell_text(row["fvg_id"], field_name="normalized event fvg_id")
+            event_position = _cell_position(row["event_position"], field_name="event_position")
+            if row_candidate_id != self.candidate_id:
+                raise CandidatePilotError("normalized event row belongs to another canonical FVG ID")
+            if event_position != ref.available_at.bar_position:
+                raise CandidatePilotError("event position and claimed availability position disagree")
+            if (
+                ref.available_at.information_phase is not InformationPhase.COMPLETED_ROW_AVAILABLE
+                or ref.available_at.deterministic_sequence != 0
+            ):
+                raise CandidatePilotError("FVG lifecycle evidence must use its completed-row availability key")
+            if row["same_information_batch_order_unknown"].kind is not FrozenCellKind.BOOLEAN:
+                raise CandidatePilotError("same-batch ordering ambiguity must remain an explicit boolean fact")
             if not self.start_key < ref.available_at or ref.available_at > self.as_of_key:
                 raise CandidatePilotError("revision batch contains evidence outside its causal interval")
         expected = _evidence_batch_id(
@@ -936,10 +972,17 @@ def retrieve_new_fvg_factual_evidence(
     candidate = universe.candidate(candidate_id)
     if not isinstance(fvg_surface, s4b2.Stage4B2FVGSurface):
         raise CandidatePilotError("fvg_surface must be the public Stage4B2 FVG surface")
+    if not isinstance(start_key, InformationKey) or not isinstance(as_of_key, InformationKey):
+        raise CandidatePilotError("revision interval requires explicit InformationKeys")
     if start_key.timeline_id != universe.timeline_id or as_of_key.timeline_id != universe.timeline_id:
         raise CandidatePilotError("revision keys must belong to the registered timeline")
     if start_key < universe.decision_key or not start_key < as_of_key:
         raise CandidatePilotError("revision interval must advance from the registered historical boundary")
+    if start_key.information_phase not in (
+        InformationPhase.COMPLETED_ROW_AVAILABLE,
+        InformationPhase.RESEARCH_SNAPSHOT_AVAILABLE,
+    ):
+        raise CandidatePilotError("revision start key is not a completed-row boundary")
     if as_of_key.information_phase not in (
         InformationPhase.COMPLETED_ROW_AVAILABLE,
         InformationPhase.RESEARCH_SNAPSHOT_AVAILABLE,
@@ -952,6 +995,7 @@ def retrieve_new_fvg_factual_evidence(
             adapter=adapter,
             market_history=market_history,
         )
+        adapter.validate_key(start_key, market_history.index)
         adapter.validate_key(as_of_key, market_history.index)
         view = create_asof_surface_view(
             case=universe._case,
@@ -962,6 +1006,8 @@ def retrieve_new_fvg_factual_evidence(
         raise CandidatePilotError(f"later FVG source/as-of verification failed closed: {exc}") from exc
     instance = _fvg_instance(view, universe.source_binding_hash)
     entity_table, event_table = instance.tables[2], instance.tables[3]
+    if event_table.columns != _FVG_NORMALIZED_EVENT_COLUMNS:
+        raise CandidatePilotError("verified FVG source exposes an unexpected normalized event schema")
     id_column = _column_index(entity_table, "fvg_id")
     entity_rows = [row for row in entity_table.rows if _cell_text(row[id_column], field_name="fvg_id") == candidate_id]
     if len(entity_rows) != 1 or tuple(zip(entity_table.columns, entity_rows[0])) != candidate.factual_attributes:
@@ -1520,12 +1566,51 @@ def append_candidate_assessment(
     provisional_status: ProvisionalStatus = ProvisionalStatus.PROVISIONAL,
     reason: str,
     declaration_reference: str | None = None,
+) -> CandidateResearchLedger:
+    """Append an assessment without accepting caller-authored factual batches.
+
+    Later-key factual revisions must use :func:`revise_candidate_assessment`,
+    which retrieves new rows from the verified FVG source itself.
+    """
+    return _append_candidate_assessment_record(
+        ledger=ledger,
+        candidate_id=candidate_id,
+        question_id=question_id,
+        category=category,
+        protocol=protocol,
+        as_of_key=as_of_key,
+        evidence_reference_ids=evidence_reference_ids,
+        supporting_reference_ids=supporting_reference_ids,
+        conflicting_reference_ids=conflicting_reference_ids,
+        unknown_reference_ids=unknown_reference_ids,
+        provisional_status=provisional_status,
+        reason=reason,
+        declaration_reference=declaration_reference,
+        evidence_batch=None,
+    )
+
+
+def _append_candidate_assessment_record(
+    *,
+    ledger: CandidateResearchLedger,
+    candidate_id: str,
+    question_id: str,
+    category: AssessmentCategory,
+    protocol: AssessmentProtocolIdentity,
+    as_of_key: InformationKey,
+    evidence_reference_ids: Iterable[str],
+    supporting_reference_ids: Iterable[str] = (),
+    conflicting_reference_ids: Iterable[str] = (),
+    unknown_reference_ids: Iterable[str] = (),
+    provisional_status: ProvisionalStatus = ProvisionalStatus.PROVISIONAL,
+    reason: str,
+    declaration_reference: str | None = None,
     evidence_batch: EvidenceBatch | None = None,
 ) -> CandidateResearchLedger:
-    """Append one immutable question-specific declared/provisional assessment.
+    """Internal ledger append used after public-input validation/retrieval.
 
-    This API rejects EMPIRICALLY_VALIDATED_RELEVANCE. A later-key record must
-    cite a nonempty batch of newly available, source-backed FVG lifecycle rows.
+    A later-key record must cite a nonempty batch of newly available FVG
+    lifecycle rows. Public assessment APIs do not accept this batch from callers.
     """
     candidate = ledger.universe.candidate(candidate_id)
     question_matches = [item for item in ledger.questions if item.question_id == question_id]
@@ -1627,8 +1712,11 @@ def revise_candidate_assessment(
     question_id: str,
     category: AssessmentCategory,
     protocol: AssessmentProtocolIdentity,
-    evidence_batch: EvidenceBatch,
-    evidence_reference_ids: Iterable[str],
+    as_of_key: InformationKey,
+    timeline: MarketObservationTimeline,
+    adapter: TimelineAdapter,
+    market_history: pd.DataFrame,
+    fvg_surface: s4b2.Stage4B2FVGSurface,
     supporting_reference_ids: Iterable[str] = (),
     conflicting_reference_ids: Iterable[str] = (),
     unknown_reference_ids: Iterable[str] = (),
@@ -1636,24 +1724,58 @@ def revise_candidate_assessment(
     reason: str,
     declaration_reference: str | None = None,
 ) -> CandidateResearchLedger:
-    """Append a later revision; the earlier record is never edited or replaced."""
-    if ledger.latest_assessment(candidate_id, question_id) is None:
+    """Retrieve verified new FVG facts internally and append a later revision.
+
+    Callers supply the new as-of boundary and source inputs, never an
+    ``EvidenceBatch`` or factual rows. Retrieval is bound to the registered
+    source, candidate, and previous assessment boundary; no eligible rows is a
+    fail-closed no-revision result. Earlier records are never edited.
+    """
+    previous = ledger.latest_assessment(candidate_id, question_id)
+    if previous is None:
         raise CandidatePilotError("revision requires an earlier question-specific assessment")
-    return append_candidate_assessment(
+    if not isinstance(as_of_key, InformationKey) or as_of_key.timeline_id != ledger.universe.timeline_id:
+        raise CandidatePilotError("revision as-of key must belong to the registered timeline")
+    if not previous.as_of_key < as_of_key:
+        raise CandidatePilotError("revision as-of key must advance beyond the prior assessment")
+
+    batch = retrieve_new_fvg_factual_evidence(
+        universe=ledger.universe,
+        candidate_id=candidate_id,
+        timeline=timeline,
+        adapter=adapter,
+        market_history=market_history,
+        fvg_surface=fvg_surface,
+        start_key=previous.as_of_key,
+        as_of_key=as_of_key,
+    )
+    if not batch.evidence:
+        raise CandidatePilotError("no eligible new FVG factual evidence; revision was not appended")
+
+    new_ids = tuple(item.reference_id for item in batch.evidence)
+    evidence_ids = tuple(dict.fromkeys((*previous.evidence_reference_ids, *new_ids)))
+    supporting = tuple(supporting_reference_ids)
+    conflicting = tuple(conflicting_reference_ids)
+    unknown = tuple(unknown_reference_ids)
+    classified = set(supporting) | set(conflicting) | set(unknown)
+    # Unclassified newly retrieved facts remain explicitly unknown; their
+    # arrival never implies support, conflict, or an outcome.
+    unknown = tuple(dict.fromkeys((*unknown, *(item for item in new_ids if item not in classified))))
+    return _append_candidate_assessment_record(
         ledger=ledger,
         candidate_id=candidate_id,
         question_id=question_id,
         category=category,
         protocol=protocol,
-        as_of_key=evidence_batch.as_of_key,
-        evidence_reference_ids=evidence_reference_ids,
-        supporting_reference_ids=supporting_reference_ids,
-        conflicting_reference_ids=conflicting_reference_ids,
-        unknown_reference_ids=unknown_reference_ids,
+        as_of_key=as_of_key,
+        evidence_reference_ids=evidence_ids,
+        supporting_reference_ids=supporting,
+        conflicting_reference_ids=conflicting,
+        unknown_reference_ids=unknown,
         provisional_status=provisional_status,
         reason=reason,
         declaration_reference=declaration_reference,
-        evidence_batch=evidence_batch,
+        evidence_batch=batch,
     )
 
 
