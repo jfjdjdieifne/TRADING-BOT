@@ -1235,7 +1235,7 @@ class CoverageReconciliation:
 
 @dataclass(frozen=True)
 class CandidateResearchLedger:
-    """Immutable register and append-only assessment/coverage/evidence history."""
+    """Raw immutable data container; construction does not verify source membership."""
 
     universe: CandidateUniverse
     questions: tuple[ResearchQuestion, ...]
@@ -1267,13 +1267,16 @@ class CandidateResearchLedger:
         _validate_ledger(self)
 
     def assessments_for(self, candidate_id: str, question_id: str) -> tuple[CandidateAssessmentRecord, ...]:
+        """Return stored assessment data; raw-ledger results are not source-verified facts."""
         return tuple(record for record in self.assessments if record.key == (candidate_id, question_id))
 
     def latest_assessment(self, candidate_id: str, question_id: str) -> CandidateAssessmentRecord | None:
+        """Return the latest stored assessment; callers needing facts must pass a verified snapshot."""
         matches = self.assessments_for(candidate_id, question_id)
         return matches[-1] if matches else None
 
     def latest_coverage(self, candidate_id: str, question_id: str) -> CandidateCoverageRecord:
+        """Coverage-only accessor; coverage state is not factual relevance evidence."""
         matches = [
             record for record in self.coverage_history
             if (record.candidate_id, record.question_id) == (candidate_id, question_id)
@@ -1379,6 +1382,7 @@ def _validate_ledger(ledger: CandidateResearchLedger) -> None:
         prior_assessments[key] = record
 
     coverage_latest: dict[tuple[str, str], CandidateCoverageRecord] = {}
+    assessments_by_id = {item.assessment_id: item for item in ledger.assessments}
     coverage_ids: set[str] = set()
     initial_pairs: set[tuple[str, str]] = set()
     for record in ledger.coverage_history:
@@ -1400,8 +1404,15 @@ def _validate_ledger(ledger: CandidateResearchLedger) -> None:
                 raise CandidatePilotError("coverage history is not append-only-linked")
             if record.as_of_key.timeline_id != ledger.universe.timeline_id or record.as_of_key < previous.as_of_key:
                 raise CandidatePilotError("coverage key precedes its registered history")
-        if record.state is CandidateCoverageState.ASSESSED and record.assessment_id not in assessment_ids:
-            raise CandidatePilotError("ASSESSED coverage references a missing assessment")
+        if record.state is CandidateCoverageState.ASSESSED:
+            assessment = assessments_by_id.get(record.assessment_id or "")
+            if assessment is None or assessment.key != pair:
+                raise CandidatePilotError("ASSESSED coverage references a missing or unrelated assessment")
+            if (
+                assessment.as_of_key > record.as_of_key
+                or _coverage_state_for_assessment(assessment.provisional_status) is not CandidateCoverageState.ASSESSED
+            ):
+                raise CandidatePilotError("ASSESSED coverage conflicts with its assessment status/as-of boundary")
         if record.restoration_is_not_utility_evidence and (
             previous is None or previous.state is not CandidateCoverageState.DEFERRED
         ):
@@ -1421,6 +1432,171 @@ def _validate_ledger(ledger: CandidateResearchLedger) -> None:
             item.assessment_id for item in ledger.assessments if item.key == pair
         }:
             raise CandidatePilotError("current ASSESSED coverage does not reference this candidate/question")
+
+
+
+@dataclass(frozen=True)
+class _VerifiedLedgerSourceScope:
+    universe_id: str
+    case_id: str
+    timeline_id: str
+    decision_key: InformationKey
+    decision_market_prefix_hash: str
+    source_binding_hash: str
+    source_prefix_hash: str
+    asof_view_hash: str
+
+
+_VERIFIED_LEDGER_ISSUER = object()
+_VERIFIED_BATCH_ISSUER = object()
+
+
+class VerifiedCandidateResearchLedger:
+    """In-process capability for a source-verified ledger snapshot.
+
+    ``CandidateResearchLedger`` remains freely constructible raw data. This
+    wrapper is issued only by the source verifier (or a verified append path),
+    and is deliberately not a security boundary against arbitrary Python code.
+    Its identity seal prevents ordinary callers from accidentally promoting a
+    raw ledger merely by setting a public ``trusted`` flag or copying a hash.
+    Verification establishes source-backed provenance and structural linkage,
+    not the truth of a human assessment, empirical relevance, or trading utility.
+    """
+
+    __slots__ = ("_record", "_scope", "_issuer")
+
+    def __init__(self, *args, **kwargs) -> None:
+        raise CandidatePilotError(
+            "verified ledgers must be issued by verify_candidate_research_ledger"
+        )
+
+    def __getattr__(self, name: str):
+        return getattr(object.__getattribute__(self, "_record"), name)
+
+    def __setattr__(self, name: str, value: object) -> None:
+        raise AttributeError("verified ledger snapshots are immutable")
+
+    def __delattr__(self, name: str) -> None:
+        raise AttributeError("verified ledger snapshots are immutable")
+
+    def __repr__(self) -> str:
+        return f"VerifiedCandidateResearchLedger(universe_id={self.universe.universe_id!r})"
+
+
+@dataclass(frozen=True)
+class _VerifiedFVGRevisionBatch:
+    """Internal source-retrieval result, scoped to one verified ledger source."""
+
+    _batch: EvidenceBatch
+    _scope: _VerifiedLedgerSourceScope
+    _issuer: object = field(repr=False, compare=False)
+
+
+def _issue_verified_fvg_revision_batch(
+    batch: EvidenceBatch,
+    scope: _VerifiedLedgerSourceScope,
+) -> _VerifiedFVGRevisionBatch:
+    if (
+        batch.case_id != scope.case_id
+        or batch.source_binding_hash != scope.source_binding_hash
+        or batch.start_key.timeline_id != scope.timeline_id
+        or batch.as_of_key.timeline_id != scope.timeline_id
+    ):
+        raise CandidatePilotError("verified FVG retrieval batch is outside the registered source scope")
+    wrapped = object.__new__(_VerifiedFVGRevisionBatch)
+    object.__setattr__(wrapped, "_batch", batch)
+    object.__setattr__(wrapped, "_scope", scope)
+    object.__setattr__(wrapped, "_issuer", _VERIFIED_BATCH_ISSUER)
+    return wrapped
+
+
+def _require_verified_fvg_revision_batch(
+    value: object,
+    scope: _VerifiedLedgerSourceScope,
+) -> EvidenceBatch:
+    if not isinstance(value, _VerifiedFVGRevisionBatch):
+        raise CandidatePilotError("revision requires an internally retrieved source-verified FVG batch")
+    if (
+        object.__getattribute__(value, "_issuer") is not _VERIFIED_BATCH_ISSUER
+        or object.__getattribute__(value, "_scope") != scope
+    ):
+        raise CandidatePilotError("revision batch was not retrieved for this verified source scope")
+    batch = object.__getattribute__(value, "_batch")
+    if not isinstance(batch, EvidenceBatch):
+        raise CandidatePilotError("verified revision batch is malformed")
+    return batch
+
+
+def _verified_scope_for_universe(universe: CandidateUniverse) -> _VerifiedLedgerSourceScope:
+    return _VerifiedLedgerSourceScope(
+        universe_id=universe.universe_id,
+        case_id=universe.case_id,
+        timeline_id=universe.timeline_id,
+        decision_key=universe.decision_key,
+        decision_market_prefix_hash=universe.decision_market_prefix_hash,
+        source_binding_hash=universe.source_binding_hash,
+        source_prefix_hash=universe.source_prefix_hash,
+        asof_view_hash=universe.asof_view_hash,
+    )
+
+
+def _issue_verified_ledger(
+    ledger: CandidateResearchLedger,
+    scope: _VerifiedLedgerSourceScope,
+) -> VerifiedCandidateResearchLedger:
+    if not isinstance(ledger, CandidateResearchLedger):
+        raise CandidatePilotError("only a CandidateResearchLedger record can be verified")
+    if _verified_scope_for_universe(ledger.universe) != scope:
+        raise CandidatePilotError("verified ledger source scope changed during append")
+    verified = object.__new__(VerifiedCandidateResearchLedger)
+    object.__setattr__(verified, "_record", ledger)
+    object.__setattr__(verified, "_scope", scope)
+    object.__setattr__(verified, "_issuer", _VERIFIED_LEDGER_ISSUER)
+    return verified
+
+
+def _require_verified_ledger(
+    ledger: object,
+) -> tuple[CandidateResearchLedger, _VerifiedLedgerSourceScope]:
+    if not isinstance(ledger, VerifiedCandidateResearchLedger):
+        raise CandidatePilotError(
+            "source-verified CandidateResearchLedger required; raw ledgers are unverified data"
+        )
+    try:
+        issuer = object.__getattribute__(ledger, "_issuer")
+        record = object.__getattribute__(ledger, "_record")
+        scope = object.__getattribute__(ledger, "_scope")
+    except AttributeError as exc:
+        raise CandidatePilotError("verified ledger capability is incomplete") from exc
+    if issuer is not _VERIFIED_LEDGER_ISSUER:
+        raise CandidatePilotError("verified ledger was not issued by the source-verification boundary")
+    if not isinstance(record, CandidateResearchLedger) or _verified_scope_for_universe(record.universe) != scope:
+        raise CandidatePilotError("verified ledger source scope no longer matches its record")
+    # The issued record and every nested history item are immutable. Reuse
+    # this scoped snapshot rather than replaying source verification on reads.
+    return record, scope
+
+
+def _coverage_ledger_parts(
+    ledger: CandidateResearchLedger | VerifiedCandidateResearchLedger,
+) -> tuple[CandidateResearchLedger, VerifiedCandidateResearchLedger | None]:
+    if isinstance(ledger, VerifiedCandidateResearchLedger):
+        record, _ = _require_verified_ledger(ledger)
+        return record, ledger
+    if isinstance(ledger, CandidateResearchLedger):
+        _validate_ledger(ledger)
+        return ledger, None
+    raise CandidatePilotError("coverage operation requires a ledger data record")
+
+
+def _return_coverage_ledger(
+    updated: CandidateResearchLedger,
+    prior_verified: VerifiedCandidateResearchLedger | None,
+) -> CandidateResearchLedger | VerifiedCandidateResearchLedger:
+    if prior_verified is None:
+        return updated
+    _, scope = _require_verified_ledger(prior_verified)
+    return _issue_verified_ledger(updated, scope)
 
 
 def initialize_candidate_research_ledger(
@@ -1458,17 +1634,140 @@ def initialize_candidate_research_ledger(
     )
 
 
+def verify_candidate_research_ledger(
+    *,
+    ledger: CandidateResearchLedger,
+    timeline: MarketObservationTimeline,
+    adapter: TimelineAdapter,
+    market_history: pd.DataFrame,
+    fvg_surface: s4b2.Stage4B2FVGSurface,
+) -> VerifiedCandidateResearchLedger:
+    """Promote a raw ledger only after reconstructing its source-backed history.
+
+    This is the sole raw-to-verified boundary. It rebuilds the exact decision
+    universe from the supplied public Stage4B2 FVG source, validates every
+    assessment/coverage key, reconstructs every historical revision batch from
+    that source, and compares the complete factual history. Hash consistency
+    alone is never treated as source membership.
+    """
+    if not isinstance(ledger, CandidateResearchLedger):
+        raise CandidatePilotError("verification requires a raw CandidateResearchLedger data record")
+    try:
+        _validate_ledger(ledger)
+        rebuilt_universe = build_fvg_candidate_universe(
+            timeline=timeline,
+            adapter=adapter,
+            market_history=market_history,
+            fvg_surface=fvg_surface,
+            decision_key=ledger.universe.decision_key,
+        )
+        if ledger.universe != rebuilt_universe:
+            raise CandidatePilotError("ledger candidate universe/source/timeline prefix differs from verified FVG input")
+        # Full-artifact hashes and surface IDs can legitimately change when
+        # future rows are appended. Verify stable timeline/policy identity and
+        # the exact causal universe prefix; retain only the freshly rebuilt
+        # provenance in the verified snapshot.
+        for stored_candidate, rebuilt_candidate in zip(
+            ledger.universe.candidates, rebuilt_universe.candidates, strict=True
+        ):
+            stored_provenance = stored_candidate.source_provenance
+            rebuilt_provenance = rebuilt_candidate.source_provenance
+            if (
+                stored_provenance.source_timeline_id != rebuilt_provenance.source_timeline_id
+                or stored_provenance.source_timeline_id != rebuilt_universe.timeline_id
+                or stored_provenance.producer_policy_identity != rebuilt_provenance.producer_policy_identity
+                or stored_provenance.verification_scope != rebuilt_provenance.verification_scope
+            ):
+                raise CandidatePilotError("ledger timeline/source producer identity differs from verified FVG input")
+
+        valid_assessment_phases = (
+            InformationPhase.COMPLETED_ROW_AVAILABLE,
+            InformationPhase.RESEARCH_SNAPSHOT_AVAILABLE,
+        )
+        for assessment in ledger.assessments:
+            if assessment.as_of_key.information_phase not in valid_assessment_phases:
+                raise CandidatePilotError("assessment history contains a non-completed-row boundary")
+            adapter.validate_key(assessment.as_of_key, market_history.index)
+        for coverage in ledger.coverage_history:
+            adapter.validate_key(coverage.as_of_key, market_history.index)
+
+        expected_evidence: list[FactualEvidenceReference] = [
+            reference
+            for candidate in rebuilt_universe.candidates
+            for reference in candidate.evidence_references
+        ]
+        if tuple(ledger.factual_evidence[:len(expected_evidence)]) != tuple(expected_evidence):
+            raise CandidatePilotError("initial factual references are not the exact registered source records")
+        seen_reference_ids = {reference.reference_id for reference in expected_evidence}
+        batch_ids: set[str] = set()
+        for batch in ledger.evidence_batches:
+            if batch.batch_id in batch_ids:
+                raise CandidatePilotError("historical source verification found a duplicate evidence batch")
+            if not batch.evidence:
+                raise CandidatePilotError("historical source verification rejects empty evidence batches")
+            batch_ids.add(batch.batch_id)
+            expected_batch = retrieve_new_fvg_factual_evidence(
+                universe=rebuilt_universe,
+                candidate_id=batch.candidate_id,
+                timeline=timeline,
+                adapter=adapter,
+                market_history=market_history,
+                fvg_surface=fvg_surface,
+                start_key=batch.start_key,
+                as_of_key=batch.as_of_key,
+            )
+            if batch != expected_batch:
+                raise CandidatePilotError(
+                    "historical evidence batch is not the exact verified Stage4B2 FVG retrieval result"
+                )
+            for reference in expected_batch.evidence:
+                if reference.reference_id in seen_reference_ids:
+                    raise CandidatePilotError("historical source verification found duplicated or replayed factual evidence")
+                seen_reference_ids.add(reference.reference_id)
+                adapter.validate_key(reference.available_at, market_history.index)
+                expected_evidence.append(reference)
+
+        if tuple(expected_evidence) != ledger.factual_evidence:
+            raise CandidatePilotError("factual evidence history contains missing, extra, reordered, or fabricated records")
+        used_batch_ids = [
+            assessment.evidence_batch_id
+            for assessment in ledger.assessments
+            if assessment.evidence_batch_id is not None
+        ]
+        if len(used_batch_ids) != len(set(used_batch_ids)) or set(used_batch_ids) != batch_ids:
+            raise CandidatePilotError("historical evidence batches do not link one-to-one to verified revisions")
+
+        # Retain the source-reconstructed universe, not caller-attached provenance.
+        verified_record = CandidateResearchLedger(
+            universe=rebuilt_universe,
+            questions=ledger.questions,
+            assessments=ledger.assessments,
+            coverage_history=ledger.coverage_history,
+            factual_evidence=ledger.factual_evidence,
+            evidence_batches=ledger.evidence_batches,
+        )
+        return _issue_verified_ledger(
+            verified_record,
+            _verified_scope_for_universe(rebuilt_universe),
+        )
+    except CandidatePilotError:
+        raise
+    except Exception as exc:
+        raise CandidatePilotError(f"candidate ledger source verification failed closed: {exc}") from exc
+
+
 def reconcile_candidate_coverage(
-    *, ledger: CandidateResearchLedger, question_id: str
+    *, ledger: CandidateResearchLedger | VerifiedCandidateResearchLedger, question_id: str
 ) -> CoverageReconciliation:
-    if question_id not in {item.question_id for item in ledger.questions}:
+    record, _ = _coverage_ledger_parts(ledger)
+    if question_id not in {item.question_id for item in record.questions}:
         raise CandidatePilotError("coverage reconciliation question is not registered")
-    expected = ledger.universe.eligible_candidate_ids
+    expected = record.universe.eligible_candidate_ids
     latest = {
-        record.candidate_id: record
-        for record in ledger.coverage_history
-        if record.question_id == question_id
-        and ledger.latest_coverage(record.candidate_id, question_id).coverage_id == record.coverage_id
+        item.candidate_id: item
+        for item in record.coverage_history
+        if item.question_id == question_id
+        and record.latest_coverage(item.candidate_id, question_id).coverage_id == item.coverage_id
     }
     accounted = tuple(candidate_id for candidate_id in expected if candidate_id in latest)
     missing = tuple(candidate_id for candidate_id in expected if candidate_id not in latest)
@@ -1482,28 +1781,30 @@ def reconcile_candidate_coverage(
 
 def record_candidate_coverage(
     *,
-    ledger: CandidateResearchLedger,
+    ledger: CandidateResearchLedger | VerifiedCandidateResearchLedger,
     candidate_id: str,
     question_id: str,
     state: CandidateCoverageState,
     as_of_key: InformationKey,
     reason: str,
-) -> CandidateResearchLedger:
+) -> CandidateResearchLedger | VerifiedCandidateResearchLedger:
+    """Update coverage data only; raw input remains raw, verified input stays scoped."""
+    raw, prior_verified = _coverage_ledger_parts(ledger)
     if state not in (
         CandidateCoverageState.DEFERRED,
         CandidateCoverageState.UNRESOLVED,
         CandidateCoverageState.NOT_EVALUATED,
     ):
         raise CandidatePilotError("use assessment append or restoration APIs for ASSESSED/REGISTERED states")
-    ledger.universe.candidate(candidate_id)
-    if question_id not in {item.question_id for item in ledger.questions}:
+    raw.universe.candidate(candidate_id)
+    if question_id not in {item.question_id for item in raw.questions}:
         raise CandidatePilotError("coverage question is not registered")
-    latest = ledger.latest_coverage(candidate_id, question_id)
+    latest = raw.latest_coverage(candidate_id, question_id)
     if latest.state is CandidateCoverageState.DEFERRED:
         raise CandidatePilotError("deferred candidate must be explicitly restored before further coverage changes")
-    if as_of_key.timeline_id != ledger.universe.timeline_id or as_of_key < latest.as_of_key:
+    if as_of_key.timeline_id != raw.universe.timeline_id or as_of_key < latest.as_of_key:
         raise CandidatePilotError("coverage key precedes registered coverage history")
-    record = _make_coverage(
+    coverage_record = _make_coverage(
         candidate_id=candidate_id,
         question_id=question_id,
         state=state,
@@ -1512,22 +1813,24 @@ def record_candidate_coverage(
         assessment_id=None,
         previous_coverage_id=latest.coverage_id,
     )
-    return dataclass_replace(ledger, coverage_history=ledger.coverage_history + (record,))
+    updated = dataclass_replace(raw, coverage_history=raw.coverage_history + (coverage_record,))
+    return _return_coverage_ledger(updated, prior_verified)
 
 
 def restore_deferred_candidate(
     *,
-    ledger: CandidateResearchLedger,
+    ledger: CandidateResearchLedger | VerifiedCandidateResearchLedger,
     candidate_id: str,
     question_id: str,
     as_of_key: InformationKey,
     reason: str,
-) -> CandidateResearchLedger:
+) -> CandidateResearchLedger | VerifiedCandidateResearchLedger:
     """Restore only for investigation; this action is explicitly not utility evidence."""
-    latest = ledger.latest_coverage(candidate_id, question_id)
+    raw, prior_verified = _coverage_ledger_parts(ledger)
+    latest = raw.latest_coverage(candidate_id, question_id)
     if latest.state is not CandidateCoverageState.DEFERRED:
         raise CandidatePilotError("only an explicitly DEFERRED candidate can be restored")
-    if as_of_key.timeline_id != ledger.universe.timeline_id or as_of_key < latest.as_of_key:
+    if as_of_key.timeline_id != raw.universe.timeline_id or as_of_key < latest.as_of_key:
         raise CandidatePilotError("restoration key precedes deferred coverage")
     _require_text(reason, "restoration reason")
     restored = _make_coverage(
@@ -1540,7 +1843,8 @@ def restore_deferred_candidate(
         previous_coverage_id=latest.coverage_id,
         restoration_is_not_utility_evidence=True,
     )
-    return dataclass_replace(ledger, coverage_history=ledger.coverage_history + (restored,))
+    updated = dataclass_replace(raw, coverage_history=raw.coverage_history + (restored,))
+    return _return_coverage_ledger(updated, prior_verified)
 
 
 def _coverage_state_for_assessment(status: ProvisionalStatus) -> CandidateCoverageState:
@@ -1553,7 +1857,7 @@ def _coverage_state_for_assessment(status: ProvisionalStatus) -> CandidateCovera
 
 def append_candidate_assessment(
     *,
-    ledger: CandidateResearchLedger,
+    ledger: VerifiedCandidateResearchLedger,
     candidate_id: str,
     question_id: str,
     category: AssessmentCategory,
@@ -1566,8 +1870,8 @@ def append_candidate_assessment(
     provisional_status: ProvisionalStatus = ProvisionalStatus.PROVISIONAL,
     reason: str,
     declaration_reference: str | None = None,
-) -> CandidateResearchLedger:
-    """Append an assessment without accepting caller-authored factual batches.
+) -> VerifiedCandidateResearchLedger:
+    """Append an assessment only to a source-verified ledger snapshot.
 
     Later-key factual revisions must use :func:`revise_candidate_assessment`,
     which retrieves new rows from the verified FVG source itself.
@@ -1586,13 +1890,13 @@ def append_candidate_assessment(
         provisional_status=provisional_status,
         reason=reason,
         declaration_reference=declaration_reference,
-        evidence_batch=None,
+        verified_batch=None,
     )
 
 
 def _append_candidate_assessment_record(
     *,
-    ledger: CandidateResearchLedger,
+    ledger: VerifiedCandidateResearchLedger,
     candidate_id: str,
     question_id: str,
     category: AssessmentCategory,
@@ -1605,15 +1909,17 @@ def _append_candidate_assessment_record(
     provisional_status: ProvisionalStatus = ProvisionalStatus.PROVISIONAL,
     reason: str,
     declaration_reference: str | None = None,
-    evidence_batch: EvidenceBatch | None = None,
-) -> CandidateResearchLedger:
-    """Internal ledger append used after public-input validation/retrieval.
-
-    A later-key record must cite a nonempty batch of newly available FVG
-    lifecycle rows. Public assessment APIs do not accept this batch from callers.
-    """
-    candidate = ledger.universe.candidate(candidate_id)
-    question_matches = [item for item in ledger.questions if item.question_id == question_id]
+    verified_batch: _VerifiedFVGRevisionBatch | None = None,
+) -> VerifiedCandidateResearchLedger:
+    """Internal append; raw ledgers and unverified batches have no authority."""
+    record, scope = _require_verified_ledger(ledger)
+    supplied_batch = (
+        None
+        if verified_batch is None
+        else _require_verified_fvg_revision_batch(verified_batch, scope)
+    )
+    candidate = record.universe.candidate(candidate_id)
+    question_matches = [item for item in record.questions if item.question_id == question_id]
     if len(question_matches) != 1:
         raise CandidatePilotError("assessment question is not registered")
     if category is AssessmentCategory.EMPIRICALLY_VALIDATED_RELEVANCE:
@@ -1622,26 +1928,25 @@ def _append_candidate_assessment_record(
         raise CandidatePilotError("assessment category/status is invalid")
     if not isinstance(protocol, AssessmentProtocolIdentity):
         raise CandidatePilotError("assessment protocol identity is required")
-    if as_of_key.timeline_id != ledger.universe.timeline_id or as_of_key < ledger.universe.decision_key:
+    if as_of_key.timeline_id != record.universe.timeline_id or as_of_key < record.universe.decision_key:
         raise CandidatePilotError("assessment key precedes its registered candidate universe")
-    coverage = ledger.latest_coverage(candidate_id, question_id)
+    coverage = record.latest_coverage(candidate_id, question_id)
     if coverage.state is CandidateCoverageState.DEFERRED:
         raise CandidatePilotError("restore a deferred candidate before appending another assessment")
-    previous = ledger.latest_assessment(candidate_id, question_id)
+    previous = record.latest_assessment(candidate_id, question_id)
     previous_id = None if previous is None else previous.assessment_id
-    comparison_key = ledger.universe.decision_key if previous is None else previous.as_of_key
+    comparison_key = record.universe.decision_key if previous is None else previous.as_of_key
     if as_of_key < comparison_key:
         raise CandidatePilotError("assessment key precedes the prior question-specific assessment")
 
-    supplied_batch = evidence_batch
     new_refs: tuple[FactualEvidenceReference, ...] = ()
     if as_of_key > comparison_key:
         if supplied_batch is None:
             raise CandidatePilotError("later-key assessment requires a newly retrieved factual evidence batch")
         if (
-            supplied_batch.case_id != ledger.universe.case_id
+            supplied_batch.case_id != record.universe.case_id
             or supplied_batch.candidate_id != candidate_id
-            or supplied_batch.source_binding_hash != ledger.universe.source_binding_hash
+            or supplied_batch.source_binding_hash != record.universe.source_binding_hash
             or supplied_batch.start_key != comparison_key
             or supplied_batch.as_of_key != as_of_key
             or not supplied_batch.evidence
@@ -1651,15 +1956,15 @@ def _append_candidate_assessment_record(
     elif supplied_batch is not None:
         raise CandidatePilotError("a same-key assessment cannot claim a later-evidence batch")
 
-    prior_evidence = {item.reference_id: item for item in ledger.factual_evidence}
-    batch_ids = {item.batch_id for item in ledger.evidence_batches}
+    prior_evidence = {item.reference_id: item for item in record.factual_evidence}
+    batch_ids = {item.batch_id for item in record.evidence_batches}
     if supplied_batch is not None:
         if supplied_batch.batch_id in batch_ids:
             raise CandidatePilotError("evidence batch has already been appended")
         if any(item.reference_id in prior_evidence for item in supplied_batch.evidence):
             raise CandidatePilotError("new evidence was already present in the append-only ledger")
-    new_evidence_history = ledger.factual_evidence + tuple(new_refs)
-    new_batch_history = ledger.evidence_batches + (() if supplied_batch is None else (supplied_batch,))
+    new_evidence_history = record.factual_evidence + tuple(new_refs)
+    new_batch_history = record.evidence_batches + (() if supplied_batch is None else (supplied_batch,))
     evidence_ids = tuple(evidence_reference_ids)
     supporting = tuple(supporting_reference_ids)
     conflicting = tuple(conflicting_reference_ids)
@@ -1684,7 +1989,7 @@ def _append_candidate_assessment_record(
         new_evidence_reference_ids=tuple(item.reference_id for item in new_refs),
         evidence_batch_id=None if supplied_batch is None else supplied_batch.batch_id,
     )
-    assessments = ledger.assessments + (assessment,)
+    assessments = record.assessments + (assessment,)
     state = _coverage_state_for_assessment(provisional_status)
     coverage_record = _make_coverage(
         candidate_id=candidate_id,
@@ -1695,19 +2000,20 @@ def _append_candidate_assessment_record(
         assessment_id=assessment.assessment_id if state is CandidateCoverageState.ASSESSED else None,
         previous_coverage_id=coverage.coverage_id,
     )
-    return CandidateResearchLedger(
-        universe=ledger.universe,
-        questions=ledger.questions,
+    updated = CandidateResearchLedger(
+        universe=record.universe,
+        questions=record.questions,
         assessments=assessments,
-        coverage_history=ledger.coverage_history + (coverage_record,),
+        coverage_history=record.coverage_history + (coverage_record,),
         factual_evidence=new_evidence_history,
         evidence_batches=new_batch_history,
     )
+    return _issue_verified_ledger(updated, scope)
 
 
 def revise_candidate_assessment(
     *,
-    ledger: CandidateResearchLedger,
+    ledger: VerifiedCandidateResearchLedger,
     candidate_id: str,
     question_id: str,
     category: AssessmentCategory,
@@ -1723,7 +2029,7 @@ def revise_candidate_assessment(
     provisional_status: ProvisionalStatus = ProvisionalStatus.PROVISIONAL,
     reason: str,
     declaration_reference: str | None = None,
-) -> CandidateResearchLedger:
+) -> VerifiedCandidateResearchLedger:
     """Retrieve verified new FVG facts internally and append a later revision.
 
     Callers supply the new as-of boundary and source inputs, never an
@@ -1731,16 +2037,17 @@ def revise_candidate_assessment(
     source, candidate, and previous assessment boundary; no eligible rows is a
     fail-closed no-revision result. Earlier records are never edited.
     """
-    previous = ledger.latest_assessment(candidate_id, question_id)
+    record, _scope = _require_verified_ledger(ledger)
+    previous = record.latest_assessment(candidate_id, question_id)
     if previous is None:
         raise CandidatePilotError("revision requires an earlier question-specific assessment")
-    if not isinstance(as_of_key, InformationKey) or as_of_key.timeline_id != ledger.universe.timeline_id:
+    if not isinstance(as_of_key, InformationKey) or as_of_key.timeline_id != record.universe.timeline_id:
         raise CandidatePilotError("revision as-of key must belong to the registered timeline")
     if not previous.as_of_key < as_of_key:
         raise CandidatePilotError("revision as-of key must advance beyond the prior assessment")
 
     batch = retrieve_new_fvg_factual_evidence(
-        universe=ledger.universe,
+        universe=record.universe,
         candidate_id=candidate_id,
         timeline=timeline,
         adapter=adapter,
@@ -1775,7 +2082,7 @@ def revise_candidate_assessment(
         provisional_status=provisional_status,
         reason=reason,
         declaration_reference=declaration_reference,
-        evidence_batch=batch,
+        verified_batch=_issue_verified_fvg_revision_batch(batch, _scope),
     )
 
 
@@ -1813,8 +2120,10 @@ __all__ = [
     "CandidateCoverageRecord",
     "CoverageReconciliation",
     "CandidateResearchLedger",
+    "VerifiedCandidateResearchLedger",
     "build_fvg_candidate_universe",
     "initialize_candidate_research_ledger",
+    "verify_candidate_research_ledger",
     "retrieve_new_fvg_factual_evidence",
     "append_candidate_assessment",
     "revise_candidate_assessment",

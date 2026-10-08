@@ -18,6 +18,7 @@ from trading_system.research.trajectory.trajectory_relevance_pilot import (
     CandidateCoverageState,
     CandidatePilotError,
     CandidateResearchLedger,
+    VerifiedCandidateResearchLedger,
     ProvisionalStatus,
     ResearchQuestion,
     append_candidate_assessment,
@@ -28,6 +29,7 @@ from trading_system.research.trajectory.trajectory_relevance_pilot import (
     restore_deferred_candidate,
     retrieve_new_fvg_factual_evidence,
     revise_candidate_assessment,
+    verify_candidate_research_ledger,
 )
 from test_trajectory_query_views import _b2_sources
 import trading_system.research.trajectory.trajectory_relevance_pilot as pilot
@@ -76,7 +78,22 @@ def _ledger(universe, *questions):
     )
 
 
-def _append_initial_assessment(ledger, candidate_id: str, question_id: str = "q-context"):
+def _verify_ledger(ledger, sources):
+    if isinstance(ledger, VerifiedCandidateResearchLedger):
+        return ledger
+    return verify_candidate_research_ledger(
+        ledger=ledger,
+        timeline=sources[2],
+        adapter=sources[1],
+        market_history=sources[0],
+        fvg_surface=sources[4]["FVG"],
+    )
+
+
+def _append_initial_assessment(
+    ledger, candidate_id: str, sources, question_id: str = "q-context"
+):
+    ledger = _verify_ledger(ledger, sources)
     candidate = ledger.universe.candidate(candidate_id)
     evidence_id = candidate.entity_evidence.reference_id
     return append_candidate_assessment(
@@ -182,6 +199,100 @@ def _batch_variant(batch, evidence, **overrides):
     return pilot.EvidenceBatch(**values)
 
 
+def _forged_source_revision_record(
+    verified, sources, candidate_id, as_of_key, *, mutation="event_type"
+):
+    """Build self-hashed history whose event row/metadata is not source exact."""
+    raw = object.__getattribute__(verified, "_record")
+    previous = raw.latest_assessment(candidate_id, "q-context")
+    assert previous is not None
+    source_batch = retrieve_new_fvg_factual_evidence(
+        universe=raw.universe,
+        candidate_id=candidate_id,
+        timeline=sources[2],
+        adapter=sources[1],
+        market_history=sources[0],
+        fvg_surface=sources[4]["FVG"],
+        start_key=previous.as_of_key,
+        as_of_key=as_of_key,
+    )
+    assert source_batch.evidence
+    original_ref = source_batch.evidence[0]
+    batch_overrides = {}
+    if mutation == "event_type":
+        forged_ref = _reference_variant(
+            original_ref,
+            row=_row_with_cell(
+                original_ref,
+                "event_type",
+                pilot.FrozenCellKind.STRING,
+                "FABRICATED_SOURCE_EVENT",
+            ),
+        )
+    elif mutation == "event_position":
+        first_position = source_batch.start_key.bar_position + 1
+        last_position = source_batch.as_of_key.bar_position
+        old_position = original_ref.available_at.bar_position
+        replacement_position = old_position + 1 if old_position < last_position else old_position - 1
+        assert first_position <= replacement_position <= last_position
+        forged_ref = _reference_variant(
+            original_ref,
+            available_at=_key(sources, replacement_position),
+            row=_row_with_cell(
+                original_ref,
+                "event_position",
+                pilot.FrozenCellKind.NUMBER,
+                str(replacement_position),
+            ),
+        )
+    elif mutation == "source_prefix_hash":
+        stale_prefix = "e" * 64
+        forged_ref = _reference_variant(original_ref, source_prefix_hash=stale_prefix)
+        batch_overrides["source_prefix_hash"] = stale_prefix
+    else:
+        raise AssertionError(f"unknown forged-history mutation: {mutation}")
+    forged_batch = _batch_variant(source_batch, (forged_ref,), **batch_overrides)
+    new_ids = (forged_ref.reference_id,)
+    assessment = pilot._make_assessment(
+        candidate_id=candidate_id,
+        candidate_identity_hash=raw.universe.candidate(candidate_id).candidate_identity_hash,
+        question=raw.questions[0],
+        category=AssessmentCategory.UNKNOWN,
+        protocol=_protocol("forged-history"),
+        as_of_key=as_of_key,
+        evidence_reference_ids=tuple(dict.fromkeys((*previous.evidence_reference_ids, *new_ids))),
+        supporting_reference_ids=(),
+        conflicting_reference_ids=(),
+        unknown_reference_ids=new_ids,
+        provisional_status=ProvisionalStatus.UNKNOWN,
+        reason="Self-hashed but not present in the Stage4B2 source.",
+        declaration_reference=None,
+        previous_assessment_id=previous.assessment_id,
+        new_evidence_reference_ids=new_ids,
+        evidence_batch_id=forged_batch.batch_id,
+    )
+    latest_coverage = raw.latest_coverage(candidate_id, "q-context")
+    coverage = pilot._make_coverage(
+        candidate_id=candidate_id,
+        question_id="q-context",
+        state=CandidateCoverageState.UNRESOLVED,
+        as_of_key=as_of_key,
+        reason="Fabricated revision remains unverified.",
+        assessment_id=None,
+        previous_coverage_id=latest_coverage.coverage_id,
+    )
+    # Direct construction intentionally succeeds: structural self-consistency
+    # is exactly what must not be mistaken for source authenticity.
+    return CandidateResearchLedger(
+        universe=raw.universe,
+        questions=raw.questions,
+        assessments=raw.assessments + (assessment,),
+        coverage_history=raw.coverage_history + (coverage,),
+        factual_evidence=raw.factual_evidence + (forged_ref,),
+        evidence_batches=raw.evidence_batches + (forged_batch,),
+    )
+
+
 def test_complete_visible_enumeration_uses_every_asof_fvg_entity(_b2_sources):
     universe = _universe(_b2_sources)
     case = universe._case
@@ -239,6 +350,7 @@ def test_historical_universe_and_assessment_identities_survive_future_append(_b2
         fvg_surface=prefix_surface,
         decision_key=prefix_key,
     )
+    prefix_sources = (prefix_market, prefix_adapter, prefix_timeline, None, {"FVG": prefix_surface})
     assert full_universe.case_id == prefix_universe.case_id
     assert full_universe == prefix_universe
     assert full_universe.universe_id == prefix_universe.universe_id
@@ -248,8 +360,8 @@ def test_historical_universe_and_assessment_identities_survive_future_append(_b2
     assert full_universe.candidate("0").source_provenance.source_surface_id != prefix_universe.candidate("0").source_provenance.source_surface_id
 
     question = _question()
-    full_ledger = _append_initial_assessment(_ledger(full_universe, question), "0")
-    prefix_ledger = _append_initial_assessment(_ledger(prefix_universe, question), "0")
+    full_ledger = _append_initial_assessment(_ledger(full_universe, question), "0", _b2_sources)
+    prefix_ledger = _append_initial_assessment(_ledger(prefix_universe, question), "0", prefix_sources)
     assert full_ledger.assessments[0].assessment_id == prefix_ledger.assessments[0].assessment_id
     assert pickle.dumps(full_ledger.assessments[0], protocol=5) == pickle.dumps(
         prefix_ledger.assessments[0], protocol=5
@@ -302,7 +414,7 @@ def test_assessments_are_scoped_to_registered_research_questions(_b2_sources):
     universe = _universe(_b2_sources)
     q_one = _question("q-one")
     q_two = _question("q-two")
-    ledger = _ledger(universe, q_one, q_two)
+    ledger = _verify_ledger(_ledger(universe, q_one, q_two), _b2_sources)
     candidate = universe.candidate("0")
     ref = candidate.entity_evidence.reference_id
     ledger = append_candidate_assessment(
@@ -322,7 +434,7 @@ def test_assessments_are_scoped_to_registered_research_questions(_b2_sources):
 
 def test_multiple_provisional_assessments_are_preserved_append_only(_b2_sources):
     universe = _universe(_b2_sources)
-    ledger = _ledger(universe)
+    ledger = _verify_ledger(_ledger(universe), _b2_sources)
     candidate = universe.candidate("1")
     factual = candidate.entity_evidence.reference_id
     unknown = candidate.unknown_context_references[0].reference_id
@@ -369,7 +481,7 @@ def test_later_revision_contains_only_new_asof_lifecycle_evidence(_b2_sources):
     universe = _universe(_b2_sources)
     surface = _b2_sources[4]["FVG"]
     candidate_id = _candidate_with_later_event(universe, surface)
-    ledger = _append_initial_assessment(_ledger(universe), candidate_id)
+    ledger = _append_initial_assessment(_ledger(universe), candidate_id, _b2_sources)
     candidate_identity_before = universe.candidate(candidate_id).candidate_identity_hash
     question_identity_before = ledger.questions[0].identity_hash
     later_key = _key(_b2_sources, 20)
@@ -477,7 +589,7 @@ def test_unrelated_candidate_and_non_fvg_producer_rows_are_rejected(_b2_sources)
 def test_stale_batch_binding_and_prefix_metadata_are_rejected(_b2_sources):
     universe = _universe(_b2_sources)
     candidate_id = _candidate_with_later_event(universe, _b2_sources[4]["FVG"])
-    ledger = _append_initial_assessment(_ledger(universe), candidate_id)
+    ledger = _append_initial_assessment(_ledger(universe), candidate_id, _b2_sources)
     batch = retrieve_new_fvg_factual_evidence(
         universe=universe,
         candidate_id=candidate_id,
@@ -571,7 +683,7 @@ def test_empty_and_duplicate_batches_cannot_create_a_revision(_b2_sources):
         _batch_variant(source_batch, (ref, ref))
 
     no_event_candidate_id = "0"
-    ledger = _append_initial_assessment(_ledger(universe), no_event_candidate_id)
+    ledger = _append_initial_assessment(_ledger(universe), no_event_candidate_id, _b2_sources)
     unchanged = ledger
     with pytest.raises(CandidatePilotError, match="no eligible new FVG factual evidence"):
         _revise(ledger, _b2_sources, no_event_candidate_id, _key(_b2_sources, 20))
@@ -582,7 +694,7 @@ def test_empty_and_duplicate_batches_cannot_create_a_revision(_b2_sources):
 def test_self_rehashed_non_source_row_cannot_enter_public_revision_api(_b2_sources):
     universe = _universe(_b2_sources)
     candidate_id = _candidate_with_later_event(universe, _b2_sources[4]["FVG"])
-    ledger = _append_initial_assessment(_ledger(universe), candidate_id)
+    ledger = _append_initial_assessment(_ledger(universe), candidate_id, _b2_sources)
     source_batch = retrieve_new_fvg_factual_evidence(
         universe=universe,
         candidate_id=candidate_id,
@@ -625,7 +737,7 @@ def test_self_rehashed_non_source_row_cannot_enter_public_revision_api(_b2_sourc
 def test_revision_cannot_replay_prior_interval_evidence(_b2_sources):
     universe = _universe(_b2_sources)
     candidate_id = _candidate_with_later_event(universe, _b2_sources[4]["FVG"])
-    ledger = _append_initial_assessment(_ledger(universe), candidate_id)
+    ledger = _append_initial_assessment(_ledger(universe), candidate_id, _b2_sources)
     first_key = _key(_b2_sources, 20)
     first_revision = _revise(ledger, _b2_sources, candidate_id, first_key)
     first_ids = set(first_revision.assessments[-1].new_evidence_reference_ids)
@@ -645,7 +757,7 @@ def test_revision_cannot_replay_prior_interval_evidence(_b2_sources):
 def test_same_information_batch_ambiguity_is_preserved_without_order_inference(_b2_sources):
     universe = _universe(_b2_sources)
     candidate_id = "0"
-    ledger = _append_initial_assessment(_ledger(universe), candidate_id)
+    ledger = _append_initial_assessment(_ledger(universe), candidate_id, _b2_sources)
     as_of_key = _key(_b2_sources, 82)
     batch = retrieve_new_fvg_factual_evidence(
         universe=universe,
@@ -684,7 +796,7 @@ def test_same_information_batch_ambiguity_is_preserved_without_order_inference(_
 def test_revision_reuses_the_verified_surface_without_closed_engine_replay(_b2_sources, monkeypatch):
     universe = _universe(_b2_sources)
     candidate_id = _candidate_with_later_event(universe, _b2_sources[4]["FVG"])
-    ledger = _append_initial_assessment(_ledger(universe), candidate_id)
+    ledger = _append_initial_assessment(_ledger(universe), candidate_id, _b2_sources)
 
     def forbidden_replay(**kwargs):
         pytest.fail("revision must not replay the closed Stage4B2 producer")
@@ -698,7 +810,7 @@ def test_historical_assessment_records_are_immutable(_b2_sources):
     universe = _universe(_b2_sources)
     surface = _b2_sources[4]["FVG"]
     candidate_id = _candidate_with_later_event(universe, surface)
-    ledger = _append_initial_assessment(_ledger(universe), candidate_id)
+    ledger = _append_initial_assessment(_ledger(universe), candidate_id, _b2_sources)
     old = ledger.assessments[0]
     old_bytes = pickle.dumps(old, protocol=5)
     later_key = _key(_b2_sources, 20)
@@ -758,7 +870,7 @@ def test_deferred_candidate_can_be_restored_for_investigation_only(_b2_sources):
 
 def test_pilot_has_no_universal_score_and_rejects_empirical_relevance(_b2_sources):
     universe = _universe(_b2_sources)
-    ledger = _ledger(universe)
+    ledger = _verify_ledger(_ledger(universe), _b2_sources)
     record_fields = {item.name for item in fields(pilot.CandidateAssessmentRecord)}
     context_fields = {item.name for item in fields(pilot.CandidateContext)}
     assert not any("score" in name.lower() for name in record_fields | context_fields)
@@ -791,7 +903,7 @@ def test_append_keeps_registered_historical_prefix_and_prior_ids_stable(_b2_sour
     universe = _universe(_b2_sources)
     surface = _b2_sources[4]["FVG"]
     candidate_id = _candidate_with_later_event(universe, surface)
-    ledger = _append_initial_assessment(_ledger(universe), candidate_id)
+    ledger = _append_initial_assessment(_ledger(universe), candidate_id, _b2_sources)
     before = (
         universe.universe_id,
         universe.decision_market_prefix_hash,
@@ -835,7 +947,7 @@ def test_mutated_or_missing_source_fails_closed_without_appending(_b2_sources):
     universe = _universe(_b2_sources)
     surface = _b2_sources[4]["FVG"]
     candidate_id = _candidate_with_later_event(universe, surface)
-    ledger = _append_initial_assessment(_ledger(universe), candidate_id)
+    ledger = _append_initial_assessment(_ledger(universe), candidate_id, _b2_sources)
     initial_assessments = ledger.assessments
     later_key = _key(_b2_sources, 20)
     mutated_surface = replace(surface, normalized_event_frame=surface.normalized_event_frame.copy(deep=True))
@@ -891,7 +1003,7 @@ def test_registration_coverage_reconciles_exactly_to_eligible_universe(_b2_sourc
             as_of_key=universe.decision_key,
             reason=f"Explicit {state.value}; not an irrelevance finding.",
         )
-    ledger = _append_initial_assessment(ledger, "3")
+    ledger = _append_initial_assessment(ledger, "3", _b2_sources)
     reconciliation = reconcile_candidate_coverage(ledger=ledger, question_id="q-context")
     counts = dict(reconciliation.state_counts)
     assert reconciliation.reconciled
@@ -905,3 +1017,284 @@ def test_registration_coverage_reconciles_exactly_to_eligible_universe(_b2_sourc
     assert counts[CandidateCoverageState.UNRESOLVED.value] == 1
     assert counts[CandidateCoverageState.NOT_EVALUATED.value] == 1
     assert sum(counts.values()) == len(universe.candidates)
+
+
+def test_direct_ledger_construction_is_raw_and_rejected_by_factual_consumers(_b2_sources):
+    universe = _universe(_b2_sources)
+    initial = _ledger(universe)
+    raw = CandidateResearchLedger(
+        universe=initial.universe,
+        questions=initial.questions,
+        assessments=initial.assessments,
+        coverage_history=initial.coverage_history,
+        factual_evidence=initial.factual_evidence,
+        evidence_batches=initial.evidence_batches,
+    )
+    assert isinstance(raw, CandidateResearchLedger)
+    assert not isinstance(raw, VerifiedCandidateResearchLedger)
+
+    candidate_id = universe.eligible_candidate_ids[0]
+    candidate = universe.candidate(candidate_id)
+    append_args = dict(
+        ledger=raw,
+        candidate_id=candidate_id,
+        question_id="q-context",
+        category=AssessmentCategory.FACTUAL_CONTEXT,
+        protocol=_protocol("raw-must-not-append"),
+        as_of_key=universe.decision_key,
+        evidence_reference_ids=(candidate.entity_evidence.reference_id,),
+        reason="Raw records must not be treated as verified source history.",
+    )
+    with pytest.raises(CandidatePilotError, match="source-verified.*raw ledgers"):
+        append_candidate_assessment(**append_args)
+    with pytest.raises(CandidatePilotError, match="source-verified.*raw ledgers"):
+        revise_candidate_assessment(
+            **_revision_inputs(raw, _b2_sources, candidate_id, _key(_b2_sources, 20))
+        )
+    with pytest.raises(CandidatePilotError, match="source-verified.*raw ledgers"):
+        pilot._append_candidate_assessment_record(**append_args)
+
+
+def test_valid_source_backed_ledger_and_historical_revision_reverify(_b2_sources):
+    universe = _universe(_b2_sources)
+    candidate_id = _candidate_with_later_event(universe, _b2_sources[4]["FVG"])
+    verified_initial = _append_initial_assessment(_ledger(universe), candidate_id, _b2_sources)
+    assert isinstance(verified_initial, VerifiedCandidateResearchLedger)
+
+    initial_record = object.__getattribute__(verified_initial, "_record")
+    reverified_initial = _verify_ledger(initial_record, _b2_sources)
+    assert isinstance(reverified_initial, VerifiedCandidateResearchLedger)
+    assert reverified_initial.assessments == verified_initial.assessments
+    assert reverified_initial.factual_evidence == verified_initial.factual_evidence
+
+    later_key = _key(_b2_sources, 20)
+    revised = _revise(verified_initial, _b2_sources, candidate_id, later_key)
+    assert isinstance(revised, VerifiedCandidateResearchLedger)
+    assert len(revised.assessments) == 2
+    assert len(revised.evidence_batches) == 1
+    revised_record = object.__getattribute__(revised, "_record")
+    reverified_revision = _verify_ledger(revised_record, _b2_sources)
+    assert reverified_revision.assessments == revised.assessments
+    assert reverified_revision.evidence_batches == revised.evidence_batches
+    assert reverified_revision.factual_evidence == revised.factual_evidence
+
+
+@pytest.mark.parametrize("mutation", ("event_type", "event_position", "source_prefix_hash"))
+def test_self_hashed_fabricated_source_history_cannot_be_promoted(_b2_sources, mutation):
+    universe = _universe(_b2_sources)
+    candidate_id = _candidate_with_later_event(universe, _b2_sources[4]["FVG"])
+    verified = _append_initial_assessment(_ledger(universe), candidate_id, _b2_sources)
+    fabricated = _forged_source_revision_record(
+        verified,
+        _b2_sources,
+        candidate_id,
+        _key(_b2_sources, 20),
+        mutation=mutation,
+    )
+    # The direct dataclass construction, row/reference/batch/assessment/coverage
+    # identities agree structurally, but the changed source row/metadata does not.
+    assert fabricated.evidence_batches[-1].batch_id
+    assert fabricated.evidence_batches[-1].evidence[0].evidence_kind == pilot.FVG_EVENT_EVIDENCE_KIND
+    if mutation == "event_type":
+        assert "FABRICATED_SOURCE_EVENT" in {
+            dict(zip(ref.row_columns, ref.row))["event_type"].value
+            for ref in fabricated.evidence_batches[-1].evidence
+        }
+    with pytest.raises(CandidatePilotError, match="exact verified Stage4B2 FVG retrieval result"):
+        _verify_ledger(fabricated, _b2_sources)
+
+    with pytest.raises(CandidatePilotError, match="source-verified.*raw ledgers"):
+        revise_candidate_assessment(
+            **_revision_inputs(fabricated, _b2_sources, candidate_id, _key(_b2_sources, 82))
+        )
+
+
+def test_verifier_requires_exact_universe_and_discards_untrusted_artifact_provenance(_b2_sources):
+    universe = _universe(_b2_sources)
+    assert len(universe.candidates) > 1
+    subset = replace(universe, universe_id="", candidates=universe.candidates[:-1])
+    subset_record = _ledger(subset)
+    with pytest.raises(CandidatePilotError, match="candidate universe/source/timeline prefix"):
+        _verify_ledger(subset_record, _b2_sources)
+
+    candidate = universe.candidates[0]
+    forged_provenance = replace(
+        candidate.source_provenance,
+        source_timeline_id="caller-invented-timeline",
+    )
+    forged_candidate = replace(candidate, source_provenance=forged_provenance, context_id="")
+    forged_candidates = (forged_candidate,) + universe.candidates[1:]
+    forged_universe = replace(universe, universe_id="", candidates=forged_candidates)
+    forged_record = _ledger(forged_universe)
+    with pytest.raises(CandidatePilotError, match="timeline/source producer identity"):
+        _verify_ledger(forged_record, _b2_sources)
+
+
+def test_rehashing_fabricated_initial_entity_row_does_not_pass_source_verification(_b2_sources):
+    universe = _universe(_b2_sources)
+    candidate = universe.candidates[0]
+    ref = candidate.entity_evidence
+    numeric_column, numeric_cell = next(
+        (column, cell)
+        for column, cell in zip(ref.row_columns, ref.row)
+        if cell.kind is pilot.FrozenCellKind.NUMBER
+    )
+    forged_ref = _reference_variant(
+        ref,
+        row=_row_with_cell(
+            ref,
+            numeric_column,
+            pilot.FrozenCellKind.NUMBER,
+            "987654321.25",
+        ),
+    )
+    forged_candidate = replace(
+        candidate,
+        factual_attributes=tuple(zip(ref.row_columns, forged_ref.row)),
+        entity_evidence=forged_ref,
+        context_id="",
+    )
+    forged_universe = replace(
+        universe,
+        universe_id="",
+        candidates=(forged_candidate,) + universe.candidates[1:],
+    )
+    forged_record = _ledger(forged_universe)
+    assert forged_record.factual_evidence[0].row_sha256 != ref.row_sha256
+    with pytest.raises(CandidatePilotError, match="candidate universe/source/timeline prefix"):
+        _verify_ledger(forged_record, _b2_sources)
+
+
+def test_missing_or_wrong_timeline_source_fails_closed(_b2_sources):
+    universe = _universe(_b2_sources)
+    record = _ledger(universe)
+    with pytest.raises(CandidatePilotError):
+        verify_candidate_research_ledger(
+            ledger=record,
+            timeline=_b2_sources[2],
+            adapter=_b2_sources[1],
+            market_history=_b2_sources[0],
+            fvg_surface=None,
+        )
+
+    other_adapter = type(_b2_sources[1])("unrelated-timeline")
+    other_timeline = MarketObservationTimeline.seal(
+        adapter=other_adapter,
+        market_history=_b2_sources[0],
+    )
+    with pytest.raises(CandidatePilotError):
+        verify_candidate_research_ledger(
+            ledger=record,
+            timeline=other_timeline,
+            adapter=other_adapter,
+            market_history=_b2_sources[0],
+            fvg_surface=_b2_sources[4]["FVG"],
+        )
+
+
+def test_future_appended_source_preserves_verified_prefix_and_old_assessments(_b2_sources):
+    market, adapter, _, _, _ = _b2_sources
+    prefix_market = market.iloc[:8].copy(deep=True)
+    prefix_adapter = type(adapter)(adapter.timeline_id)
+    prefix_timeline = MarketObservationTimeline.seal(
+        adapter=prefix_adapter,
+        market_history=prefix_market,
+    )
+    prefix_surface = s4b2.build_fvg_surface(
+        timeline=prefix_timeline,
+        adapter=prefix_adapter,
+        market_history=prefix_market,
+    )
+    prefix_sources = (prefix_market, prefix_adapter, prefix_timeline, None, {"FVG": prefix_surface})
+    prefix_universe = _universe(prefix_sources, position=7)
+    raw_prefix_ledger = _ledger(prefix_universe)
+
+    # The supplied source contains future-appended rows. Verification compares
+    # the exact causal decision prefix and timeline identity, not mutable
+    # whole-artifact hashes; the issued record keeps freshly rebuilt provenance.
+    verified = _verify_ledger(raw_prefix_ledger, _b2_sources)
+    full_universe = _universe(_b2_sources, position=7)
+    assert verified.universe == full_universe
+    assert verified.universe.candidate("0").source_provenance.source_surface_id == (
+        full_universe.candidate("0").source_provenance.source_surface_id
+    )
+
+    candidate_id = _candidate_with_later_event(full_universe, _b2_sources[4]["FVG"])
+    assessed = _append_initial_assessment(verified, candidate_id, _b2_sources)
+    original_history = assessed.assessments
+    original_record = object.__getattribute__(assessed, "_record")
+    revised = _revise(assessed, _b2_sources, candidate_id, _key(_b2_sources, 20))
+    assert assessed.assessments is original_history
+    assert len(assessed.assessments) == 1
+    assert object.__getattribute__(assessed, "_record") is original_record
+    assert len(revised.assessments) == 2
+    assert revised.assessments[0] == assessed.assessments[0]
+    _verify_ledger(object.__getattribute__(revised, "_record"), _b2_sources)
+
+
+def test_raw_coverage_operations_do_not_promote_factual_history(_b2_sources):
+    universe = _universe(_b2_sources)
+    raw = _ledger(universe)
+    coverage_only = record_candidate_coverage(
+        ledger=raw,
+        candidate_id=universe.eligible_candidate_ids[0],
+        question_id="q-context",
+        state=CandidateCoverageState.DEFERRED,
+        as_of_key=universe.decision_key,
+        reason="Coverage-only deferral; it is not factual relevance evidence.",
+    )
+    assert isinstance(coverage_only, CandidateResearchLedger)
+    assert not isinstance(coverage_only, VerifiedCandidateResearchLedger)
+    assert coverage_only.factual_evidence == raw.factual_evidence
+    assert reconcile_candidate_coverage(ledger=coverage_only, question_id="q-context").reconciled
+
+    verified = _verify_ledger(raw, _b2_sources)
+    verified_coverage = record_candidate_coverage(
+        ledger=verified,
+        candidate_id=universe.eligible_candidate_ids[0],
+        question_id="q-context",
+        state=CandidateCoverageState.DEFERRED,
+        as_of_key=universe.decision_key,
+        reason="Coverage-only deferral; no factual judgment.",
+    )
+    assert isinstance(verified_coverage, VerifiedCandidateResearchLedger)
+    restored = restore_deferred_candidate(
+        ledger=verified_coverage,
+        candidate_id=universe.eligible_candidate_ids[0],
+        question_id="q-context",
+        as_of_key=universe.decision_key,
+        reason="Return to investigation only.",
+    )
+    assert isinstance(restored, VerifiedCandidateResearchLedger)
+    assert restored.factual_evidence == verified.factual_evidence
+    assert restored.assessments == verified.assessments
+    assert restored.latest_coverage(
+        universe.eligible_candidate_ids[0], "q-context"
+    ).restoration_is_not_utility_evidence
+
+
+def test_verified_ledger_snapshot_is_immutable_and_not_a_claim_of_empirical_truth(_b2_sources):
+    universe = _universe(_b2_sources)
+    candidate_id = universe.eligible_candidate_ids[0]
+    verified = _append_initial_assessment(_ledger(universe), candidate_id, _b2_sources)
+    assert isinstance(verified, VerifiedCandidateResearchLedger)
+    with pytest.raises(AttributeError, match="immutable"):
+        verified.assessments = ()
+    with pytest.raises(AttributeError, match="immutable"):
+        verified._record = _ledger(universe)
+    raw = object.__getattribute__(verified, "_record")
+    with pytest.raises(FrozenInstanceError):
+        raw.assessments = ()
+    with pytest.raises(CandidatePilotError, match="verify_candidate_research_ledger"):
+        VerifiedCandidateResearchLedger(universe=universe)
+
+    assessment = verified.assessments[0]
+    assert assessment.provisional_status is ProvisionalStatus.PROVISIONAL
+    assert assessment.category is AssessmentCategory.DECLARED_HUMAN_ASSESSMENT
+    assert not hasattr(verified, "relevance_score")
+    assert not hasattr(verified, "trading_signal")
+    assert not any(
+        token in name.lower()
+        for name in pilot.__all__
+        for token in ("prediction", "probability", "trade_signal", "execution")
+    )
