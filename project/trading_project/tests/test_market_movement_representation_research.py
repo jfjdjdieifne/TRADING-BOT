@@ -11,6 +11,7 @@ import json
 import pandas as pd
 import pytest
 
+import trading_system.research.trajectory.market_movement_representation_research as movement_research_module
 from trading_system.market_understanding.availability import InformationAxis
 from trading_system.market_understanding.contracts import SchemaIdentity
 from trading_system.market_understanding.detector_witness import (
@@ -45,6 +46,7 @@ from trading_system.research.trajectory.market_movement_representation_research 
     DeclaredSwingPolicy,
     S5RepresentationPlan,
     SUITABILITY_NOT_ESTABLISHED,
+    main,
     run_market_movement_representation_research,
     verify_replay_prefix_invariance,
 )
@@ -178,7 +180,7 @@ def _declarations() -> tuple[DeclaredSwingPolicy, DeclaredSwingPolicy]:
     )
 
 
-def _run(frame: pd.DataFrame, *, policies=(), s5_plans=(), timeline: str = TIMELINE, limits=None, output_dir=None, measure_python_allocations=False):
+def _run(frame: pd.DataFrame, *, policies=(), s5_plans=(), timeline: str = TIMELINE, limits=None, output_dir=None, measure_python_allocations=False, progress=False):
     identity = _identity("2026-05-01T04:00:00Z")
     return run_market_movement_representation_research(
         market_history=frame,
@@ -189,6 +191,7 @@ def _run(frame: pd.DataFrame, *, policies=(), s5_plans=(), timeline: str = TIMEL
         replay_limits=limits or ReplayLimits(),
         output_dir=output_dir,
         measure_python_allocations=measure_python_allocations,
+        progress=progress,
     )
 
 
@@ -323,8 +326,8 @@ def test_turning_point_origin_is_not_availability_and_asof_query_is_strict() -> 
     assert any(item.record_identity == event.record_identity for item in query_witness_surface_as_of(witness, at_key=at_confirmation).swing_event_witnesses)
 
 
-def test_competing_policy_views_separate_geometric_operational_and_availability_differences() -> None:
-    result = _run(_rich_market(70), policies=_declarations())
+def test_competing_policy_views_separate_geometric_operational_and_availability_differences(capsys) -> None:
+    result = _run(_rich_market(70), policies=_declarations(), progress=True)
     pairs = result.report["disagreements"]["geometric"]["stage4b1_policy_pairs"]
 
     assert len(pairs) == 1
@@ -334,6 +337,9 @@ def test_competing_policy_views_separate_geometric_operational_and_availability_
     assert len(all_categories["information_availability"]["stage4b1_policy_pairs"]) == 1
     assert all_categories["task_relevant"]["state"] == "NOT_ASSESSED_MISSING_TASK_AND_OUTCOME_AUTHORITY"
     assert all_categories["no_universal_winner_selected"] is True
+    captured = capsys.readouterr()
+    assert "representation comparison: Stage4B1 pair=1/1; fields_examined=" in captured.err
+    assert "row-value comparisons=" in captured.err
 
 
 def test_downstream_disagreement_references_are_actual_core_producer_ids() -> None:
@@ -377,10 +383,10 @@ def test_s5_dataset_hash_mismatch_blocks_plan_before_its_policy_is_reused() -> N
     assert result.report["available_views"]["STAGE4B1"]["state"] == BLOCKED_MISSING_AUTHORIZED_POLICY
 
 
-def test_valid_s5_contract_retains_scale_scope_and_authoritative_availability() -> None:
+def test_valid_s5_contract_retains_scale_scope_and_authoritative_availability(capsys) -> None:
     frame = _zigzag_market()
     plan = _s5_plan(frame)
-    result = _run(frame, timeline="synthetic-s5-movement-test", s5_plans=(plan,))
+    result = _run(frame, timeline="synthetic-s5-movement-test", s5_plans=(plan,), progress=True)
 
     assert "synthetic-alpha-representation" in result.s5_bundles
     candidate = result.s5_bundles["synthetic-alpha-representation"]
@@ -438,6 +444,15 @@ def test_valid_s5_contract_retains_scale_scope_and_authoritative_availability() 
     assert spec["intrinsic_scale_key"] == "synthetic-owner-scale-reference"
     assert spec["scope_axis"] == "TIME_INDEXED"
     assert spec["authorization_reference_state"] == "REFERENCE_PRESENT_NOT_AUTHENTICATED"
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    s2_stage = "S2 witness extraction for S5 representation synthetic-alpha-representation: started"
+    s5_stage = "S5 construction for synthetic-alpha-representation: started"
+    assert s2_stage in captured.err
+    assert s5_stage in captured.err
+    assert "S2 synthetic-alpha-representation: prepared bar facts=10/10" in captured.err
+    assert captured.err.index(s2_stage) < captured.err.index(s5_stage)
+    assert "run completed; state=COMPLETED" in captured.err
 
 
 def test_s5_output_file_resolves_actual_s2_witness_references(tmp_path) -> None:
@@ -528,3 +543,89 @@ def test_replay_is_deterministic_excluding_runtime_measurements() -> None:
     assert first.report["measurements"]["wall_clock_seconds"] >= 0
     assert first.report["measurements"]["process_peak_rss_bytes"] is None or first.report["measurements"]["process_peak_rss_bytes"] >= 0
     assert first.report["measurements"]["python_allocation_tracing_enabled"] is False
+
+
+def test_progress_is_opt_in_and_does_not_change_analytical_output(capsys) -> None:
+    frame = _simple_market()
+    without_progress = _run(frame)
+    quiet = capsys.readouterr()
+    with_progress = _run(frame, progress=True)
+    reported = capsys.readouterr()
+
+    assert "movement-research" not in quiet.err
+    assert quiet.out == ""
+    assert "[movement-research +" in reported.err
+    assert "run completed; state=COMPLETED" in reported.err
+    assert reported.out == ""
+    assert "%" not in reported.err
+    assert set(without_progress.report) == set(with_progress.report)
+    assert "progress" not in with_progress.report
+    assert without_progress.report["deterministic_fingerprint_sha256"] == with_progress.report["deterministic_fingerprint_sha256"]
+    assert without_progress.report["coverage"] == with_progress.report["coverage"]
+    assert without_progress.report["disagreements"] == with_progress.report["disagreements"]
+    assert without_progress.turning_point_records == with_progress.turning_point_records
+
+
+def test_cli_progress_stages_are_ordered_and_stdout_remains_json(tmp_path, capsys) -> None:
+    frame = _simple_market()
+    csv_frame = frame.copy()
+    csv_frame.insert(0, "close_time_utc", frame.index.astype(str))
+    csv_path = tmp_path / "synthetic-bars.csv"
+    csv_frame.to_csv(csv_path, index=False)
+
+    output_dir = tmp_path / "research-output"
+    code = main([
+        "--csv", str(csv_path),
+        "--symbol", "BTCUSDT",
+        "--period-start-utc", "2026-05-01T00:00:00Z",
+        "--period-end-utc", "2026-05-01T04:00:00Z",
+        "--output-dir", str(output_dir),
+        "--progress",
+    ])
+    captured = capsys.readouterr()
+
+    assert code == 0
+    report = json.loads(captured.out)
+    assert report["run_state"] == "COMPLETED"
+    assert "Input loading, timestamp validation, and policy-manifest parsing: completed" in captured.err
+    assert "bars=6" in captured.err
+    ordered_stages = (
+        "Input loading, timestamp validation, and policy-manifest parsing: started",
+        "Runner input and policy declaration validation: started",
+        "CMC build (input/source validation, timeline construction, existing producer/surface construction): started",
+        "Causal market-context replay: started",
+        "S2 witness extraction for evidence-only Stage4B1 view: started",
+        "Representation comparison: started",
+        "Output writing and manifest finalization: started",
+        "run completed; state=COMPLETED",
+    )
+    positions = [captured.err.index(stage) for stage in ordered_stages]
+    assert positions == sorted(positions)
+    assert "Output writing: skipped" not in captured.err
+
+
+def test_progress_reports_failures_without_completion(capsys) -> None:
+    with pytest.raises(TypeError, match="market_history must be"):
+        _run([], progress=True)
+    captured = capsys.readouterr()
+
+    assert "Runner input and policy declaration validation: failed" in captured.err
+    assert "run failed; error_type=TypeError" in captured.err
+    assert "run completed" not in captured.err
+    assert captured.out == ""
+
+
+def test_progress_does_not_claim_completion_after_keyboard_interrupt(monkeypatch, capsys) -> None:
+    def interrupt_build(*args, **kwargs):
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr(movement_research_module, "build_causal_market_context_core", interrupt_build)
+    with pytest.raises(KeyboardInterrupt):
+        _run(_simple_market(), progress=True)
+    captured = capsys.readouterr()
+
+    assert "CMC build (input/source validation, timeline construction, existing producer/surface construction): interrupted" in captured.err
+    assert "run interrupted; error_type=KeyboardInterrupt" in captured.err
+    assert "CMC build (input/source validation, timeline construction, existing producer/surface construction): completed" not in captured.err
+    assert "run completed" not in captured.err
+    assert captured.out == ""

@@ -45,6 +45,33 @@ project/trading_project/.venv/bin/python -m trading_system.research.trajectory.m
 
 The output directory must be new/empty and outside the Git checkout. Without `--swing-policy-json` and `--s5-plan-json`, swing-dependent representations are explicitly blocked; shared OHLC-only producers still run. `--measure-python-allocations` opt-in enables `tracemalloc`, adds overhead, and does not measure all native NumPy/Pandas allocations. Process peak RSS is reported when the host exposes a supported unit convention; it is a process high-water mark, not an isolated per-run delta.
 
+### Windows / Python 3.10 PowerShell example
+
+From the repository root, use the Windows Python 3.10 launcher and the local CSV already supplied by the owner. Replace the CSV path and period metadata with the exact values for that file; no download is performed. Choose a new output folder outside the checkout.
+
+```powershell
+py -3.10 -m venv project\trading_project\.venv
+.\project\trading_project\.venv\Scripts\python.exe -m pip install -e "project\trading_project[dev]" "pandas>=2.0,<3"
+
+$Python = ".\project\trading_project\.venv\Scripts\python.exe"
+$Csv = "C:\path\to\the-owner-existing-BTCUSDT-1m.csv"  # replace with the existing local CSV
+$Output = "D:\market-research\btc-movement-run"          # new and outside the Git checkout
+$PeriodStartUtc = "OWNER_DECLARED_START_UTC"
+$PeriodEndUtc = "OWNER_DECLARED_END_UTC"
+
+& $Python -m trading_system.research.trajectory.market_movement_representation_research `
+  --csv $Csv `
+  --symbol BTCUSDT `
+  --period-start-utc $PeriodStartUtc `
+  --period-end-utc $PeriodEndUtc `
+  --output-dir $Output `
+  --progress
+```
+
+`--progress` is explicit and off by default. It writes flushed status lines to stderr; the normal JSON report remains on stdout and gains no progress field. Completed stages show their wall-clock duration. S2 bar-fact preparation reports genuine `prepared/total` counts at a minimum 5,000-bar spacing (at most about ten updates per dataset). For 44,640 bars, that counter emits 5,000, 10,000, …, 40,000, then 44,640/44,640 for each S2 dataset. Stage4B1 field comparisons and S5 pair comparisons each report actual counters, throttled to roughly ten updates per comparison stream. JSONL writers report actual rows written at 5,000-row minimum spacing and use known totals to cap updates at roughly ten; streamed files without a known total report every 50,000 rows. There are no percentages.
+
+The Causal Market Context (CMC) builder and replay are blocking public calls without progress callbacks. Their messages truthfully show start and completion, with known counts only after return. Builder completion includes the existing input/source checks, timeline seal, and Stage4A/4B/4C surface construction; it does not claim a substage finished while the call is still running. Replay likewise reports boundary/entity/event/relationship counts on return. S2 adaptation, S5 construction, and final manifest hashing are also not internally instrumented; they show start/completion, and any separately available runner-owned counters are reported outside those calls. A long wait inside one of these closed calls therefore has no heartbeat; the runner does not invent internal percentages or callback progress.
+
 ### Owner policy declarations
 
 `--swing-policy-json` accepts schema version `MOVEMENT_SWING_POLICY_DECLARATIONS_V1` with a `policies` array. Each declaration must provide exactly:

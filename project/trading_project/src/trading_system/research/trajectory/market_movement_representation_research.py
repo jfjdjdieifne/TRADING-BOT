@@ -12,6 +12,7 @@ repairs, sorts, or regenerates market data.
 from __future__ import annotations
 
 import argparse
+from contextlib import contextmanager
 import hashlib
 import itertools
 import json
@@ -19,10 +20,10 @@ import math
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
+import sys
 import time
 import tracemalloc
-import sys
-from typing import Any, Iterable, Mapping, Sequence
+from typing import Any, Callable, Iterable, Iterator, Mapping, Sequence, TextIO
 
 import numpy as np
 import pandas as pd
@@ -84,6 +85,68 @@ SUITABILITY_NOT_ESTABLISHED = "SUITABILITY_NOT_ESTABLISHED"
 BLOCKED_MISSING_AUTHORIZED_POLICY = "BLOCKED_MISSING_AUTHORIZED_POLICY"
 _AUTH_REF_PRESENT = "REFERENCE_PRESENT_NOT_AUTHENTICATED"
 _CALLER_FRAME_SCHEMA = SchemaIdentity("CALLER_SUPPLIED_OHLC", "CALLER_FRAME_V1")
+
+
+class _ResearchProgress:
+    """Low-volume stderr progress with flushed, monotonic wall-clock timings."""
+
+    def __init__(self, stream: TextIO | None = None) -> None:
+        self.stream = sys.stderr if stream is None else stream
+        self.started_at = time.perf_counter()
+        self._finished = False
+        self._stream_failed = False
+
+    def emit(self, message: str) -> None:
+        if self._stream_failed:
+            return
+        elapsed = time.perf_counter() - self.started_at
+        try:
+            print(f"[movement-research +{elapsed:.2f}s] {message}", file=self.stream, flush=True)
+        except (OSError, ValueError):
+            # A closed/redirection-broken progress stream must not affect research.
+            self._stream_failed = True
+
+    def finish(self, status: str, detail: str | None = None) -> None:
+        if self._finished:
+            return
+        suffix = f"; {detail}" if detail else ""
+        self.emit(f"run {status}{suffix}")
+        self._finished = True
+
+    @contextmanager
+    def stage(self, label: str) -> Iterator[Callable[[str], None]]:
+        started = time.perf_counter()
+        self.emit(f"{label}: started")
+        details: list[str] = []
+
+        def complete(detail: str = "") -> None:
+            if detail:
+                details.append(detail)
+
+        try:
+            yield complete
+        except BaseException as exc:
+            elapsed = time.perf_counter() - started
+            state = "interrupted" if isinstance(exc, (KeyboardInterrupt, SystemExit)) else "failed"
+            self.emit(f"{label}: {state} after {elapsed:.2f}s ({type(exc).__name__})")
+            raise
+        else:
+            elapsed = time.perf_counter() - started
+            suffix = f"; {('; '.join(details))}" if details else ""
+            self.emit(f"{label}: completed in {elapsed:.2f}s{suffix}")
+
+
+@contextmanager
+def _progress_stage(
+    progress: _ResearchProgress | None,
+    label: str,
+) -> Iterator[Callable[[str], None]]:
+    if progress is None:
+        yield lambda _detail="": None
+    else:
+        with progress.stage(label) as complete:
+            yield complete
+
 
 # These are the current public Stage4B1 result fields. Keeping the partition here
 # describes *which output fields differ*; it assigns neither meaning nor score.
@@ -373,8 +436,17 @@ def _source_schema_for(bundle: CoreBundle) -> SchemaIdentity:
     return _CALLER_FRAME_SCHEMA
 
 
-def _bars_for_dataset(bundle: CoreBundle, dataset_id: str, source_schema: SchemaIdentity) -> tuple[PublishedOhlcBarFact, ...]:
+def _bars_for_dataset(
+    bundle: CoreBundle,
+    dataset_id: str,
+    source_schema: SchemaIdentity,
+    *,
+    progress: _ResearchProgress | None = None,
+    progress_label: str = "S2 input preparation",
+) -> tuple[PublishedOhlcBarFact, ...]:
     bars = []
+    total = len(bundle.market)
+    progress_step = max(5_000, (total + 9) // 10)
     for position, (_, row) in enumerate(bundle.market.iterrows()):
         key = bundle.adapter.key_for_position(
             bundle.market.index,
@@ -394,6 +466,10 @@ def _bars_for_dataset(bundle: CoreBundle, dataset_id: str, source_schema: Schema
                 published_bar_record_ref=f"movement-research-input:{dataset_id}:{position}",
             )
         )
+        if progress is not None:
+            completed = position + 1
+            if completed % progress_step == 0 or completed == total:
+                progress.emit(f"{progress_label}: prepared bar facts={completed}/{total}")
     return tuple(bars)
 
 
@@ -421,19 +497,39 @@ def _confirmed_swing_events(frame: pd.DataFrame) -> tuple[tuple[str, int, float,
     return tuple(events)
 
 
-def _stage4b1_comparisons(bundle: CoreBundle, replay: ReplayMemoryResult | ReplaySummary) -> list[dict[str, Any]]:
+def _stage4b1_comparisons(
+    bundle: CoreBundle,
+    replay: ReplayMemoryResult | ReplaySummary,
+    *,
+    progress: _ResearchProgress | None = None,
+) -> list[dict[str, Any]]:
     representations = sorted(bundle.structures, key=lambda item: item.config.representation_id)
     result: list[dict[str, Any]] = []
-    for left, right in itertools.combinations(representations, 2):
+    fields = tuple(dict.fromkeys(_GEOMETRY_FIELDS + _OPERATIONAL_FIELDS + _AVAILABILITY_FIELDS + _POLICY_EVIDENCE_FIELDS))
+    pair_total = len(representations) * (len(representations) - 1) // 2
+    field_pair_total = pair_total * len(fields)
+    progress_step = max(1, (field_pair_total + 9) // 10)
+    field_pairs_examined = 0
+    row_value_comparisons = 0
+    for pair_index, (left, right) in enumerate(itertools.combinations(representations, 2), start=1):
         left_frame, right_frame = left.structure.frame, right.structure.frame
-        fields = tuple(dict.fromkeys(_GEOMETRY_FIELDS + _OPERATIONAL_FIELDS + _AVAILABILITY_FIELDS + _POLICY_EVIDENCE_FIELDS))
         mismatch_counts: Counter[str] = Counter()
-        for name in fields:
-            if name not in left_frame.columns or name not in right_frame.columns:
-                continue
-            for position in range(len(bundle.market)):
-                if not _same_value(left_frame.iloc[position][name], right_frame.iloc[position][name]):
-                    mismatch_counts[name] += 1
+        for field_index, name in enumerate(fields, start=1):
+            if name in left_frame.columns and name in right_frame.columns:
+                for position in range(len(bundle.market)):
+                    if not _same_value(left_frame.iloc[position][name], right_frame.iloc[position][name]):
+                        mismatch_counts[name] += 1
+                if progress is not None:
+                    row_value_comparisons += len(bundle.market)
+            if progress is not None:
+                field_pairs_examined += 1
+                if field_pairs_examined % progress_step == 0 or field_pairs_examined == field_pair_total:
+                    progress.emit(
+                        f"representation comparison: Stage4B1 pair={pair_index}/{pair_total}; "
+                        f"fields_examined={field_index}/{len(fields)}; "
+                        f"field-pairs={field_pairs_examined}/{field_pair_total}; "
+                        f"row-value comparisons={row_value_comparisons}"
+                    )
         left_events = _confirmed_swing_events(left_frame)
         right_events = _confirmed_swing_events(right_frame)
         left_geometry = Counter((side, origin, price) for side, origin, price, _ in left_events)
@@ -483,10 +579,16 @@ def _tp_geometry_signature(record: Any) -> tuple[str, int, float]:
     return (str(record.extrema_kind), int(record.origin_position), float(record.swing_price.value))
 
 
-def _s5_comparisons(bundles: Mapping[str, CandidateWaveRepresentationBundle]) -> list[dict[str, Any]]:
+def _s5_comparisons(
+    bundles: Mapping[str, CandidateWaveRepresentationBundle],
+    *,
+    progress: _ResearchProgress | None = None,
+) -> list[dict[str, Any]]:
     result: list[dict[str, Any]] = []
     values = sorted(bundles.items())
-    for (left_id, left), (right_id, right) in itertools.combinations(values, 2):
+    pair_total = len(values) * (len(values) - 1) // 2
+    progress_step = max(1, (pair_total + 9) // 10)
+    for pair_index, ((left_id, left), (right_id, right)) in enumerate(itertools.combinations(values, 2), start=1):
         left_tp = {item.turning_point_id: item for item in left.authoritative_turning_points}
         right_tp = {item.turning_point_id: item for item in right.authoritative_turning_points}
         left_geom = Counter(_tp_geometry_signature(item) for item in left.authoritative_turning_points)
@@ -540,6 +642,8 @@ def _s5_comparisons(bundles: Mapping[str, CandidateWaveRepresentationBundle]) ->
             "task_relevant_disagreement": "NOT_ASSESSED_MISSING_TASK_AND_OUTCOME_AUTHORITY",
             "no_winner_selected": True,
         })
+        if progress is not None and (pair_index % progress_step == 0 or pair_index == pair_total):
+            progress.emit(f"representation comparison: S5 pairs completed={pair_index}/{pair_total}")
     return result
 
 
@@ -903,16 +1007,35 @@ def _write_json(path: Path, payload: Any) -> None:
     path.write_text(json.dumps(_jsonable(payload), ensure_ascii=False, sort_keys=True, indent=2, allow_nan=False) + "\n", encoding="utf-8")
 
 
-def _write_jsonl(path: Path, rows: Iterable[Mapping[str, Any]]) -> int:
+def _write_jsonl(
+    path: Path,
+    rows: Iterable[Mapping[str, Any]],
+    *,
+    progress: _ResearchProgress | None = None,
+    progress_label: str = "Output writing",
+    expected_total: int | None = None,
+) -> int:
     count = 0
+    progress_step = max(5_000, ((expected_total or 0) + 9) // 10) if expected_total is not None else 50_000
     with path.open("w", encoding="utf-8", newline="\n") as handle:
         for row in rows:
             handle.write(json.dumps(_jsonable(row), ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False) + "\n")
             count += 1
+            if progress is not None and (
+                count % progress_step == 0
+                or (expected_total is not None and count == expected_total)
+            ):
+                total = f"/{expected_total}" if expected_total is not None else ""
+                progress.emit(f"{progress_label}: written records={count}{total}")
     return count
 
 
-def _finalize_output(run: MovementResearchRun, root: Path) -> MovementResearchRun:
+def _finalize_output(
+    run: MovementResearchRun,
+    root: Path,
+    *,
+    progress: _ResearchProgress | None = None,
+) -> MovementResearchRun:
     report = dict(run.report)
     if run.replay is None or run.core_bundle is None or report.get("run_state") != "COMPLETED":
         (root / "RUN_INCOMPLETE").write_text("No complete causal market-context replay was produced.\n", encoding="utf-8")
@@ -924,12 +1047,42 @@ def _finalize_output(run: MovementResearchRun, root: Path) -> MovementResearchRu
 
     tp_path = root / "causal_turning_point_records.jsonl"
     tp_rows = run.turning_point_records if run.turning_point_records else _iter_turning_point_records(run.core_bundle, run.s5_bundles, run.witness_bundles, run.s5_witness_bundles)
-    tp_count = _write_jsonl(tp_path, tp_rows)
+    tp_total = run.report.get("causal_turning_points", {}).get("record_count")
+    tp_count = _write_jsonl(
+        tp_path,
+        tp_rows,
+        progress=progress,
+        progress_label="Output writing causal turning-point records",
+        expected_total=tp_total if isinstance(tp_total, int) else None,
+    )
     s5_path = root / "s5_representation_records.jsonl"
-    s5_count = _write_jsonl(s5_path, _iter_s5_record_payloads(run.s5_bundles))
+    s5_total = sum(
+        len(records)
+        for candidate in run.s5_bundles.values()
+        for records in (
+            candidate.wave_identity_records,
+            candidate.running_wave_observations,
+            candidate.finalized_wave_geometries,
+            candidate.wave_status_events,
+        )
+    )
+    s5_count = _write_jsonl(
+        s5_path,
+        _iter_s5_record_payloads(run.s5_bundles),
+        progress=progress,
+        progress_label="Output writing S5 representation records",
+        expected_total=s5_total,
+    )
     refs_path = root / "disagreement_affected_references.jsonl"
     ref_rows = run.disagreement_reference_rows if run.disagreement_reference_rows else _affected_disagreement_references(run.replay)
-    ref_count = _write_jsonl(refs_path, ref_rows)
+    ref_total = len(run.disagreement_reference_rows) if run.disagreement_reference_rows else None
+    ref_count = _write_jsonl(
+        refs_path,
+        ref_rows,
+        progress=progress,
+        progress_label="Output writing disagreement references",
+        expected_total=ref_total,
+    )
     report["record_files"] = {
         "causal_turning_point_records": {"path": tp_path.name, "records": tp_count},
         "s5_representation_records": {"path": s5_path.name, "records": s5_count},
@@ -971,29 +1124,32 @@ def _run_market_movement_representation_research_impl(
     preblocked_policy_candidates: Sequence[Mapping[str, Any]] = (),
     preblocked_s5_candidates: Sequence[Mapping[str, Any]] = (),
     measure_python_allocations: bool = False,
+    progress: _ResearchProgress | None = None,
 ) -> MovementResearchRun:
     """Build and compare available causal representations over one supplied OHLC interval.
 
     Policy selection and suitability are deliberately absent. Invalid/missing S5
     authorities are reported as blocked; they are never replaced by defaults.
     """
-    if not isinstance(market_history, pd.DataFrame):
-        raise TypeError("market_history must be an OHLC pandas DataFrame")
-    if not isinstance(source_identity, SourceArtifactIdentity):
-        raise TypeError("source_identity must be SourceArtifactIdentity")
-    if not isinstance(replay_limits, ReplayLimits):
-        raise TypeError("replay_limits must be the existing ReplayLimits contract")
-    if not isinstance(measure_python_allocations, bool):
-        raise TypeError("measure_python_allocations must be bool")
-    if not isinstance(timeline_id, str) or not timeline_id.strip():
-        raise ValueError("timeline_id must be a nonempty explicit or content-derived identity")
-    declared = tuple(swing_policies)
-    plans = tuple(s5_plans)
-    if any(not isinstance(item, DeclaredSwingPolicy) for item in declared):
-        raise TypeError("swing_policies must contain DeclaredSwingPolicy records")
-    if any(not isinstance(item, S5RepresentationPlan) for item in plans):
-        raise TypeError("s5_plans must contain S5RepresentationPlan records")
-    root = _prepare_output_root(output_dir)
+    with _progress_stage(progress, "Runner input and policy declaration validation") as stage_complete:
+        if not isinstance(market_history, pd.DataFrame):
+            raise TypeError("market_history must be an OHLC pandas DataFrame")
+        if not isinstance(source_identity, SourceArtifactIdentity):
+            raise TypeError("source_identity must be SourceArtifactIdentity")
+        if not isinstance(replay_limits, ReplayLimits):
+            raise TypeError("replay_limits must be the existing ReplayLimits contract")
+        if not isinstance(measure_python_allocations, bool):
+            raise TypeError("measure_python_allocations must be bool")
+        if not isinstance(timeline_id, str) or not timeline_id.strip():
+            raise ValueError("timeline_id must be a nonempty explicit or content-derived identity")
+        declared = tuple(swing_policies)
+        plans = tuple(s5_plans)
+        if any(not isinstance(item, DeclaredSwingPolicy) for item in declared):
+            raise TypeError("swing_policies must contain DeclaredSwingPolicy records")
+        if any(not isinstance(item, S5RepresentationPlan) for item in plans):
+            raise TypeError("s5_plans must contain S5RepresentationPlan records")
+        root = _prepare_output_root(output_dir)
+        stage_complete(f"bars={len(market_history)}; declared_swing_policies={len(declared)}; declared_s5_plans={len(plans)}")
     core_output = None if root is None else root / "causal_market_context_core"
 
     tracing_started_here = measure_python_allocations and not tracemalloc.is_tracing()
@@ -1046,19 +1202,35 @@ def _run_market_movement_representation_research_impl(
             return MovementResearchRun(report, None, None, {}, {}, tuple(blocked_s5), (), (), str(root) if root else None)
 
         try:
-            core_bundle = build_causal_market_context_core(
-                market_history=market_history,
-                source_identity=source_identity,
-                timeline_id=timeline_id,
-                source_file_sha256=source_file_sha256,
-                source_validation=source_validation,
-                swing_policies=tuple(item.config for item in merged_policies),
-            )
-            replay = replay_causal_market_context(
-                core_bundle,
-                output_dir=core_output,
-                limits=replay_limits,
-            )
+            with _progress_stage(
+                progress,
+                "CMC build (input/source validation, timeline construction, existing producer/surface construction)",
+            ) as stage_complete:
+                core_bundle = build_causal_market_context_core(
+                    market_history=market_history,
+                    source_identity=source_identity,
+                    timeline_id=timeline_id,
+                    source_file_sha256=source_file_sha256,
+                    source_validation=source_validation,
+                    swing_policies=tuple(item.config for item in merged_policies),
+                )
+                stage_complete(
+                    f"bars={len(core_bundle.market)}; Stage4A_surfaces={len(core_bundle.stage4a)}; "
+                    f"Stage4B1_structures={len(core_bundle.structures)}; Stage4B2_FVG_surface=present; "
+                    f"Stage4C_HTF_surface=present; CMC API has no internal progress callback"
+                )
+            with _progress_stage(progress, "Causal market-context replay") as stage_complete:
+                replay = replay_causal_market_context(
+                    core_bundle,
+                    output_dir=core_output,
+                    limits=replay_limits,
+                )
+                replay_summary = replay.summary if isinstance(replay, ReplayMemoryResult) else replay
+                stage_complete(
+                    f"boundaries={replay_summary.boundary_count}; entities={replay_summary.entity_count}; "
+                    f"producer_events={replay_summary.producer_event_count}; relationships={replay_summary.relationship_count}; "
+                    f"relationship_coverage={replay_summary.relationship_coverage_state}; replay API has no internal progress callback"
+                )
         except CausalMarketContextCoreError as exc:
             if not _is_resource_exhaustion(exc):
                 raise
@@ -1086,20 +1258,37 @@ def _run_market_movement_representation_research_impl(
         for plan in valid_plans:
             representation_id = plan.representation_spec.representation_id
             try:
-                bars = _bars_for_dataset(core_bundle, plan.dataset_identity.dataset_id, source_schema)
-                witness_bundle = adapt_detector_witness_stream(bars, confirmation_policy=plan.confirmation_policy)
-                # Public S2 binding is checked again at execution time; no synthesized
-                # confirmation is passed through to the S5 promotion API.
-                if witness_bundle.policy_witness_ref != plan.policy_artifact.detector_policy_witness_ref:
-                    raise PolicyScopeMismatch("S2 recomputed witness identity differs from PolicyArtifact")
-                candidate = construct_candidate_wave_representation(
-                    bars,
-                    witness_bundle=witness_bundle,
-                    representation_spec=plan.representation_spec,
-                    policy_artifact=plan.policy_artifact,
-                    dataset_identity=plan.dataset_identity,
-                    dataset_role=plan.dataset_role,
-                )
+                with _progress_stage(progress, f"S2 witness extraction for S5 representation {representation_id}") as stage_complete:
+                    bars = _bars_for_dataset(
+                        core_bundle,
+                        plan.dataset_identity.dataset_id,
+                        source_schema,
+                        progress=progress,
+                        progress_label=f"S2 {representation_id}",
+                    )
+                    witness_bundle = adapt_detector_witness_stream(bars, confirmation_policy=plan.confirmation_policy)
+                    # Public S2 binding is checked again at execution time; no synthesized
+                    # confirmation is passed through to the S5 promotion API.
+                    if witness_bundle.policy_witness_ref != plan.policy_artifact.detector_policy_witness_ref:
+                        raise PolicyScopeMismatch("S2 recomputed witness identity differs from PolicyArtifact")
+                    stage_complete(
+                        f"input_bar_facts={len(bars)}; event_witnesses={len(witness_bundle.swing_event_witnesses)}; "
+                        "adaptation is a blocking public call"
+                    )
+                with _progress_stage(progress, f"S5 construction for {representation_id}") as stage_complete:
+                    candidate = construct_candidate_wave_representation(
+                        bars,
+                        witness_bundle=witness_bundle,
+                        representation_spec=plan.representation_spec,
+                        policy_artifact=plan.policy_artifact,
+                        dataset_identity=plan.dataset_identity,
+                        dataset_role=plan.dataset_role,
+                    )
+                    stage_complete(
+                        f"authoritative_turning_points={len(candidate.authoritative_turning_points)}; "
+                        f"finalized_geometries={len(candidate.finalized_wave_geometries)}; "
+                        "constructor has no internal progress callback"
+                    )
                 s5_bundles[representation_id] = candidate
                 s5_witness_bundles[representation_id] = witness_bundle
             except (SchemaViolation, PolicyScopeMismatch, SelectionBlockedError, ValueError) as exc:
@@ -1115,19 +1304,42 @@ def _run_market_movement_representation_research_impl(
         witness_dataset = "MR-" + _canonical_sha256({"source_identity": _jsonable(source_identity), "timeline_id": timeline_id, "dataset_scope": "CALLER_STABLE_TIMELINE_IDENTITY_NO_FUTURE_CONTENT_HASH_IN_ASOF_WITNESS"})[:32]
         source_schema = _source_schema_for(core_bundle)
         if not merged_policies:
-            evidence_bars = _bars_for_dataset(core_bundle, witness_dataset, source_schema)
-            evidence_bundle = adapt_detector_witness_stream(evidence_bars)
-            witness_bundles[str(TypedState.NOT_CONFIGURED)] = evidence_bundle
+            with _progress_stage(progress, "S2 witness extraction for evidence-only Stage4B1 view") as stage_complete:
+                evidence_bars = _bars_for_dataset(
+                    core_bundle,
+                    witness_dataset,
+                    source_schema,
+                    progress=progress,
+                    progress_label="S2 evidence-only view",
+                )
+                evidence_bundle = adapt_detector_witness_stream(evidence_bars)
+                witness_bundles[str(TypedState.NOT_CONFIGURED)] = evidence_bundle
+                stage_complete(
+                    f"input_bar_facts={len(evidence_bars)}; event_witnesses={len(evidence_bundle.swing_event_witnesses)}; "
+                    "evidence-only; adapter has no internal progress callback"
+                )
         else:
             for declaration in merged_policies:
                 policy_spec = DetectorPolicyWitnessSpec.from_policy(declaration.config.policy)
                 if policy_spec.spec_identity in witness_bundles:
                     continue
-                bars = _bars_for_dataset(core_bundle, witness_dataset, source_schema)
-                witness_bundles[policy_spec.spec_identity] = adapt_detector_witness_stream(
-                    bars,
-                    confirmation_policy=declaration.config.policy,
-                )
+                with _progress_stage(progress, f"S2 witness extraction for policy {declaration.config.policy_id}") as stage_complete:
+                    bars = _bars_for_dataset(
+                        core_bundle,
+                        witness_dataset,
+                        source_schema,
+                        progress=progress,
+                        progress_label=f"S2 {declaration.config.policy_id}",
+                    )
+                    witness_bundles[policy_spec.spec_identity] = adapt_detector_witness_stream(
+                        bars,
+                        confirmation_policy=declaration.config.policy,
+                    )
+                    stage_complete(
+                        f"input_bar_facts={len(bars)}; "
+                        f"event_witnesses={len(witness_bundles[policy_spec.spec_identity].swing_event_witnesses)}; "
+                        "adapter has no internal progress callback"
+                    )
 
         s5_turning_point_count = sum(len(candidate.authoritative_turning_points) for candidate in s5_bundles.values())
         stage4b1_turning_point_count = sum(len(_confirmed_swing_events(item.structure.frame)) for item in core_bundle.structures)
@@ -1136,8 +1348,13 @@ def _run_market_movement_representation_research_impl(
         s2_event_count = s2_stage4b1_event_count + s2_s5_event_count
         turning_count = stage4b1_turning_point_count + s2_event_count + s5_turning_point_count
         disagreement_refs = tuple(_affected_disagreement_references(replay)) if isinstance(replay, ReplayMemoryResult) else ()
-        structural_comparisons = _stage4b1_comparisons(core_bundle, replay)
-        wave_comparisons = _s5_comparisons(s5_bundles)
+        with _progress_stage(progress, "Representation comparison") as stage_complete:
+            structural_comparisons = _stage4b1_comparisons(core_bundle, replay, progress=progress)
+            wave_comparisons = _s5_comparisons(s5_bundles, progress=progress)
+            stage_complete(
+                f"Stage4B1_pairs={len(structural_comparisons)}; S5_pairs={len(wave_comparisons)}; "
+                "reported counters are completed pairs and actual row-value comparisons"
+            )
         summary = replay.summary if isinstance(replay, ReplayMemoryResult) else replay
         domain_coverage = [_jsonable(row) for row in core_bundle.coverage]
         candidate_counts = _domain_counts(summary)
@@ -1346,8 +1563,24 @@ def run_market_movement_representation_research(
     preblocked_policy_candidates: Sequence[Mapping[str, Any]] = (),
     preblocked_s5_candidates: Sequence[Mapping[str, Any]] = (),
     measure_python_allocations: bool = False,
+    progress: bool = False,
+    _progress_reporter: _ResearchProgress | None = None,
+    _defer_progress_finish: bool = False,
 ) -> MovementResearchRun:
-    """Measured public entry point; output serialization is outside the run timer."""
+    """Measured public entry point; output serialization is outside the run timer.
+
+    ``progress`` is opt-in and writes only to stderr. The private reporter hook
+    lets the CLI include CSV loading in the same elapsed-time clock.
+    """
+    if not isinstance(progress, bool):
+        raise TypeError("progress must be bool")
+    if not isinstance(_defer_progress_finish, bool):
+        raise TypeError("_defer_progress_finish must be bool")
+    if _progress_reporter is not None and not progress:
+        raise ValueError("_progress_reporter requires progress=True")
+    if _defer_progress_finish and _progress_reporter is None:
+        raise ValueError("_defer_progress_finish requires an injected CLI progress reporter")
+    progress_reporter = _progress_reporter or (_ResearchProgress() if progress else None)
     started = time.perf_counter()
     tracing_was_already_active = tracemalloc.is_tracing()
     tracing_started_here = measure_python_allocations and not tracing_was_already_active
@@ -1368,7 +1601,13 @@ def run_market_movement_representation_research(
             preblocked_policy_candidates=preblocked_policy_candidates,
             preblocked_s5_candidates=preblocked_s5_candidates,
             measure_python_allocations=measure_python_allocations,
+            progress=progress_reporter,
         )
+    except BaseException as exc:
+        if progress_reporter is not None:
+            status = "interrupted" if isinstance(exc, (KeyboardInterrupt, SystemExit)) else "failed"
+            progress_reporter.finish(status, f"error_type={type(exc).__name__}")
+        raise
     finally:
         elapsed = time.perf_counter() - started
         if measure_python_allocations and tracemalloc.is_tracing():
@@ -1392,15 +1631,39 @@ def run_market_movement_representation_research(
     result = _wrap_measurement(result, measurements)
     if result.output_directory is not None:
         try:
-            result = _finalize_output(result, Path(result.output_directory))
-        except Exception:
+            with _progress_stage(progress_reporter, "Output writing and manifest finalization") as stage_complete:
+                result = _finalize_output(
+                    result,
+                    Path(result.output_directory),
+                    progress=progress_reporter,
+                )
+                record_files = result.report.get("record_files", {})
+                record_total = sum(
+                    int(item.get("records", 0))
+                    for item in record_files.values()
+                    if isinstance(item, Mapping)
+                )
+                stage_complete(
+                    f"record_files={len(record_files)}; listed_record_rows={record_total}; "
+                    f"output_directory={result.output_directory}"
+                )
+        except BaseException as exc:
             marker = Path(result.output_directory) / "RUN_INCOMPLETE"
             if not marker.exists():
                 try:
                     marker.write_text("Run output finalization failed.\n", encoding="utf-8")
                 except OSError:
                     pass
+            if progress_reporter is not None:
+                status = "interrupted" if isinstance(exc, (KeyboardInterrupt, SystemExit)) else "failed"
+                progress_reporter.finish(status, f"error_type={type(exc).__name__}")
             raise
+    elif progress_reporter is not None:
+        progress_reporter.emit("Output writing: skipped (no output_dir configured; records retained in memory)")
+    if progress_reporter is not None and not _defer_progress_finish:
+        state = str(result.report.get("run_state", "UNKNOWN"))
+        status = "completed" if state == "COMPLETED" else "finished"
+        progress_reporter.finish(status, f"state={state}; core_wall_clock_seconds={elapsed:.2f}")
     return result
 
 
@@ -1631,42 +1894,49 @@ def _parse_cli(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--max-spatial-relations-per-boundary", type=int, default=128)
     parser.add_argument("--max-spatial-relations-total", type=int, default=250_000)
     parser.add_argument("--measure-python-allocations", action="store_true", help="opt in to tracemalloc; adds runtime overhead and does not capture all native memory")
+    parser.add_argument("--progress", action="store_true", help="opt in to throttled elapsed-time progress on stderr; never changes analytical output")
     return parser.parse_args(argv)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = _parse_cli(argv)
+    progress_reporter = _ResearchProgress() if args.progress else None
     try:
-        raw_bytes = Path(args.csv).expanduser().read_bytes()
-        input_sha = hashlib.sha256(raw_bytes).hexdigest()
-        frame = pd.read_csv(args.csv)
-        if args.timestamp_column not in frame.columns:
-            raise ValueError(f"CSV is missing timestamp column {args.timestamp_column!r}")
-        times = pd.to_datetime(frame.pop(args.timestamp_column), utc=True, errors="raise")
-        frame.index = pd.DatetimeIndex(times, name=args.timestamp_column)
-        identity = SourceArtifactIdentity(args.symbol, "SPOT", "1m", args.period_start_utc, args.period_end_utc)
-        timeline_id = args.timeline_id or ("movement-" + _canonical_sha256({"input_sha256": input_sha, "symbol": args.symbol, "period_start_utc": args.period_start_utc, "period_end_utc": args.period_end_utc})[:24])
-        policies: tuple[DeclaredSwingPolicy, ...] = ()
-        blocked_policies: tuple[Mapping[str, Any], ...] = ()
-        if args.swing_policy_json:
-            policies, blocked_policies, _ = _read_policy_json(args.swing_policy_json)
-        s5_plans: tuple[S5RepresentationPlan, ...] = ()
-        blocked_s5: tuple[Mapping[str, Any], ...] = ()
-        if args.s5_plan_json:
-            s5_plans, blocked_s5 = _create_cli_s5_plans(
-                args.s5_plan_json,
-                market_history=frame,
-                timeline_id=timeline_id,
-                source_file_sha256=input_sha,
-                policy_declarations=policies,
+        with _progress_stage(progress_reporter, "Input loading, timestamp validation, and policy-manifest parsing") as stage_complete:
+            raw_bytes = Path(args.csv).expanduser().read_bytes()
+            input_sha = hashlib.sha256(raw_bytes).hexdigest()
+            frame = pd.read_csv(args.csv)
+            if args.timestamp_column not in frame.columns:
+                raise ValueError(f"CSV is missing timestamp column {args.timestamp_column!r}")
+            times = pd.to_datetime(frame.pop(args.timestamp_column), utc=True, errors="raise")
+            frame.index = pd.DatetimeIndex(times, name=args.timestamp_column)
+            identity = SourceArtifactIdentity(args.symbol, "SPOT", "1m", args.period_start_utc, args.period_end_utc)
+            timeline_id = args.timeline_id or ("movement-" + _canonical_sha256({"input_sha256": input_sha, "symbol": args.symbol, "period_start_utc": args.period_start_utc, "period_end_utc": args.period_end_utc})[:24])
+            policies: tuple[DeclaredSwingPolicy, ...] = ()
+            blocked_policies: tuple[Mapping[str, Any], ...] = ()
+            if args.swing_policy_json:
+                policies, blocked_policies, _ = _read_policy_json(args.swing_policy_json)
+            s5_plans: tuple[S5RepresentationPlan, ...] = ()
+            blocked_s5: tuple[Mapping[str, Any], ...] = ()
+            if args.s5_plan_json:
+                s5_plans, blocked_s5 = _create_cli_s5_plans(
+                    args.s5_plan_json,
+                    market_history=frame,
+                    timeline_id=timeline_id,
+                    source_file_sha256=input_sha,
+                    policy_declarations=policies,
+                )
+            limits = ReplayLimits(
+                max_registered_entities=args.max_registered_entities,
+                max_producer_events=args.max_producer_events,
+                max_interval_nodes_per_query=args.max_interval_nodes,
+                max_spatial_relations_per_boundary=args.max_spatial_relations_per_boundary,
+                max_spatial_relations_total=args.max_spatial_relations_total,
             )
-        limits = ReplayLimits(
-            max_registered_entities=args.max_registered_entities,
-            max_producer_events=args.max_producer_events,
-            max_interval_nodes_per_query=args.max_interval_nodes,
-            max_spatial_relations_per_boundary=args.max_spatial_relations_per_boundary,
-            max_spatial_relations_total=args.max_spatial_relations_total,
-        )
+            stage_complete(
+                f"bars={len(frame)}; owner_csv_sha256={input_sha}; "
+                f"swing_policies={len(policies)}; valid_s5_plans={len(s5_plans)}"
+            )
         result = run_market_movement_representation_research(
             market_history=frame,
             source_identity=identity,
@@ -1679,12 +1949,31 @@ def main(argv: Sequence[str] | None = None) -> int:
             preblocked_policy_candidates=blocked_policies,
             preblocked_s5_candidates=blocked_s5,
             measure_python_allocations=args.measure_python_allocations,
+            progress=args.progress,
+            _progress_reporter=progress_reporter,
+            _defer_progress_finish=progress_reporter is not None,
         )
         print(json.dumps(_jsonable(result.report), ensure_ascii=False, sort_keys=True, indent=2, allow_nan=False))
+        if progress_reporter is not None:
+            state = str(result.report.get("run_state", "UNKNOWN"))
+            status = "completed" if state == "COMPLETED" else "finished"
+            measurements = result.report.get("measurements", {})
+            core_seconds = measurements.get("wall_clock_seconds") if isinstance(measurements, Mapping) else None
+            detail = f"state={state}"
+            if isinstance(core_seconds, (int, float)) and not isinstance(core_seconds, bool):
+                detail += f"; core_wall_clock_seconds={core_seconds:.2f}"
+            progress_reporter.finish(status, detail)
         return 0 if result.report.get("run_state") == "COMPLETED" else 2
     except (OSError, ValueError, TypeError, CausalMarketContextCoreError) as exc:
+        if progress_reporter is not None:
+            progress_reporter.finish("failed", f"error_type={type(exc).__name__}")
         print(json.dumps({"schema_version": REPORT_SCHEMA_VERSION, "run_state": "FAILED_INPUT_OR_CONTRACT", "error": str(exc)}, ensure_ascii=False, sort_keys=True, indent=2))
         return 2
+    except BaseException as exc:
+        if progress_reporter is not None:
+            state = "interrupted" if isinstance(exc, (KeyboardInterrupt, SystemExit)) else "failed"
+            progress_reporter.finish(state, f"error_type={type(exc).__name__}")
+        raise
 
 
 __all__ = [
