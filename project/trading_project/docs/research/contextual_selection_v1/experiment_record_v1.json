@@ -1,0 +1,5196 @@
+{
+ "summary": {
+  "experiment_id": "CSM-SEL-EXP-V1",
+  "target_commit": "c96b9a56b3e966432c30cf058c19abda9c02224b",
+  "inputs": {
+   "1m_2025-08_sha256": "15d26d2374bce8804e25012ff76e5fad976633a2fde843ffb0f487e1c90a0cf4",
+   "1m_2025-09_sha256": "e1d5c8f350d83df866ff36c3b4d74f7e5b383db07cde7bca0ee1f200d7a48979",
+   "window": "2025-08-01 -> 2025-09-27 UTC",
+   "semantics": "PUBLISHED_OHLC_FACT; SOURCE_ORIGIN_UNVERIFIED"
+  },
+  "declared_policies": {
+   "P-ORIGIN": {
+    "policy_id": "P-ORIGIN",
+    "description": "origin of most recent confirmed leg (SWS-02)",
+    "value": "origin-of-last-confirmed-leg",
+    "class": "O",
+    "sensitivity_required": true
+   },
+   "P-CONTINUATION": {
+    "policy_id": "P-CONTINUATION",
+    "description": "continuation-long uses completed down-legs in up-leg",
+    "value": "down-legs-in-up-leg",
+    "class": "O",
+    "sensitivity_required": true
+   },
+   "P-TF": {
+    "policy_id": "P-TF",
+    "description": "coarse=1h fine=5m (builder-declared; owner not consulted)",
+    "value": "1h/5m",
+    "class": "O",
+    "sensitivity_required": true
+   },
+   "P-FK-K-COARSE": {
+    "policy_id": "P-FK-K-COARSE",
+    "description": "F-K window grid on coarse view",
+    "value": [
+     5,
+     12
+    ],
+    "class": "O",
+    "sensitivity_required": true
+   },
+   "P-FK-K-FINE": {
+    "policy_id": "P-FK-K-FINE",
+    "description": "F-K window on fine view",
+    "value": [
+     6
+    ],
+    "class": "O",
+    "sensitivity_required": true
+   },
+   "P-T-TAU-FINE": {
+    "policy_id": "P-T-TAU-FINE",
+    "description": "F-T reversal amount on fine view (USD)",
+    "value": 80.0,
+    "class": "O",
+    "sensitivity_required": true
+   },
+   "P-TIE": {
+    "policy_id": "P-TIE",
+    "description": "close equality is not a crossing (SP-03 open choice)",
+    "value": "not-bound",
+    "class": "O",
+    "sensitivity_required": true
+   }
+  },
+  "n_boundaries": 9,
+  "n_events": 59,
+  "ledger": {
+   "n_results": 176,
+   "n_events": 59,
+   "n_revisions": 174,
+   "justified": 176,
+   "unresolved": 0,
+   "empty": 0
+  },
+  "replay_checks": [
+   {
+    "boundary": "B1_post5",
+    "rep": "C_FK5",
+    "recomputed": "C:F-K(k=5)|low@1300",
+    "stored": "C:F-K(k=5)|low@1300",
+    "equal": true
+   },
+   {
+    "boundary": "B1_post5",
+    "rep": "F_FK6",
+    "recomputed": "F:F-K(k=6)|low@15898",
+    "stored": "F:F-K(k=6)|low@15898",
+    "equal": true
+   },
+   {
+    "boundary": "B2_post6",
+    "rep": "C_FK5",
+    "recomputed": "C:F-K(k=5)|low@1300",
+    "stored": "C:F-K(k=5)|low@1300",
+    "equal": true
+   },
+   {
+    "boundary": "B2_post6",
+    "rep": "F_FK6",
+    "recomputed": "F:F-K(k=6)|low@16056",
+    "stored": "F:F-K(k=6)|low@16056",
+    "equal": true
+   }
+  ],
+  "exclusion_histogram": {
+   "X-SUPER": 105780,
+   "X-STATE": 96,
+   "X-POL": 145644
+  },
+  "unresolved_histogram": {},
+  "sp16_agreement": {
+   "disagree": 9
+  },
+  "learning_evidence": {
+   "objective_A_golden_set": "12/12 exact (tests/test_contextual_selection_csm.py)",
+   "objective_B_contextual_coherence": "NOT_ESTABLISHED",
+   "objective_B_blocker": "no acceptable-set annotations exist for any real instrument/window; route: annotation protocol (file 03 \u00a72) + seed bindings from source-verified cases (SXM-005/006, ICT-2024-09-16)",
+   "objective_C_predictive_usefulness": "NOT_ESTABLISHED (not evaluated in the selection step by design)"
+  },
+  "selection_quality": {
+   "state": "NOT_ESTABLISHED",
+   "blocker": "EP: no annotated acceptable sets for this instrument/window; per file 18 objective B requires human annotations with inter-annotator agreement before any preference learning",
+   "what_was_measured": "deterministic selection behavior, ambiguity preservation, representation dependence, replay equality \u2014 not selection quality"
+  }
+ },
+ "boundaries": [
+  {
+   "boundary": "D1_2025-09-20",
+   "decision_time_utc": "2025-09-20 00:00:00",
+   "tasks": {
+    "C_FK5": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "C:F-K(k=5)|high@1170",
+      "survivors": [
+       "C:F-K(k=5)|high@1170"
+      ],
+      "n_excluded": 568,
+      "excluded_codes": {
+       "X-SUPER": 406,
+       "X-STATE": 1,
+       "X-POL": 161
+      },
+      "notes": [
+       "last_confirmed_leg=C:F-K(k=5)|leg1170-1175",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "C:F-K(k=5)|low@1175"
+     },
+     "n_points": 569,
+     "n_legs": 136,
+     "unresolved_codes": []
+    },
+    "C_FK12": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "C:F-K(k=12)|low@1146",
+      "survivors": [
+       "C:F-K(k=12)|low@1146"
+      ],
+      "n_excluded": 343,
+      "excluded_codes": {
+       "X-SUPER": 269,
+       "X-STATE": 1,
+       "X-POL": 73
+      },
+      "notes": [
+       "last_confirmed_leg=C:F-K(k=12)|leg1146-1155",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "C:F-K(k=12)|high@1170"
+     },
+     "n_points": 344,
+     "n_legs": 59,
+     "unresolved_codes": []
+    },
+    "C_FT250": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "C:F-T(tau=250)|high@1192",
+      "survivors": [
+       "C:F-T(tau=250)|high@1192"
+      ],
+      "n_excluded": 520,
+      "excluded_codes": {
+       "X-STATE": 1,
+       "X-POL": 519
+      },
+      "notes": [
+       "last_confirmed_leg=C:F-T(tau=250)|leg1192-1196",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "C:F-T(tau=250)|low@1196"
+     },
+     "n_points": 521,
+     "n_legs": 520,
+     "unresolved_codes": []
+    },
+    "F_FK6": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "F:F-K(k=6)|high@14386",
+      "survivors": [
+       "F:F-K(k=6)|high@14386"
+      ],
+      "n_excluded": 6331,
+      "excluded_codes": {
+       "X-SUPER": 4713,
+       "X-STATE": 1,
+       "X-POL": 1617
+      },
+      "notes": [
+       "last_confirmed_leg=F:F-K(k=6)|leg14386-14393",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "F:F-K(k=6)|low@14393"
+     },
+     "n_points": 6332,
+     "n_legs": 1317,
+     "unresolved_codes": []
+    },
+    "F_FT80": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "F:F-T(tau=80)|high@14386",
+      "survivors": [
+       "F:F-T(tau=80)|high@14386"
+      ],
+      "n_excluded": 5128,
+      "excluded_codes": {
+       "X-STATE": 1,
+       "X-POL": 5127
+      },
+      "notes": [
+       "last_confirmed_leg=F:F-T(tau=80)|leg14386-14393",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "F:F-T(tau=80)|low@14393"
+     },
+     "n_points": 5129,
+     "n_legs": 5128,
+     "unresolved_codes": []
+    },
+    "T-S5_by_view_C_rep": {
+     "C_FK5": {
+      "status": "justified",
+      "falsifier": [
+       "C:F-K(k=5)|high@1170"
+      ],
+      "notes": [
+       "I:C_FK5:D1_2025-09-20: origin of C:F-K(k=5)|leg1170-1175 -> C:F-K(k=5)|high@1170"
+      ]
+     },
+     "C_FK12": {
+      "status": "justified",
+      "falsifier": [
+       "C:F-K(k=12)|low@1146"
+      ],
+      "notes": [
+       "I:C_FK12:D1_2025-09-20: origin of C:F-K(k=12)|leg1146-1155 -> C:F-K(k=12)|low@1146"
+      ]
+     },
+     "C_FT250": {
+      "status": "justified",
+      "falsifier": [
+       "C:F-T(tau=250)|high@1192"
+      ],
+      "notes": [
+       "I:C_FT250:D1_2025-09-20: origin of C:F-T(tau=250)|leg1192-1196 -> C:F-T(tau=250)|high@1192"
+      ]
+     }
+    }
+   },
+   "representation_report_SP16": {
+    "coarse_origins": {
+     "C_FK5": "C:F-K(k=5)|high@1170",
+     "C_FK12": "C:F-K(k=12)|low@1146",
+     "C_FT250": "C:F-T(tau=250)|high@1192"
+    },
+    "agreement": "disagree",
+    "note": "disagreement is reported, never merged (SWS-01)"
+   }
+  },
+  {
+   "boundary": "D2_2025-09-22",
+   "decision_time_utc": "2025-09-22 00:00:00",
+   "tasks": {
+    "C_FK5": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "C:F-K(k=5)|high@1232",
+      "survivors": [
+       "C:F-K(k=5)|high@1232"
+      ],
+      "n_excluded": 588,
+      "excluded_codes": {
+       "X-SUPER": 417,
+       "X-STATE": 1,
+       "X-POL": 170
+      },
+      "notes": [
+       "last_confirmed_leg=C:F-K(k=5)|leg1232-1233",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "C:F-K(k=5)|low@1240"
+     },
+     "n_points": 589,
+     "n_legs": 142,
+     "unresolved_codes": []
+    },
+    "C_FK12": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "C:F-K(k=12)|low@1196",
+      "survivors": [
+       "C:F-K(k=12)|low@1196"
+      ],
+      "n_excluded": 353,
+      "excluded_codes": {
+       "X-SUPER": 277,
+       "X-STATE": 1,
+       "X-POL": 75
+      },
+      "notes": [
+       "last_confirmed_leg=C:F-K(k=12)|leg1196-1215",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "C:F-K(k=12)|high@1215"
+     },
+     "n_points": 354,
+     "n_legs": 61,
+     "unresolved_codes": []
+    },
+    "C_FT250": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "C:F-T(tau=250)|high@1242",
+      "survivors": [
+       "C:F-T(tau=250)|high@1242"
+      ],
+      "n_excluded": 534,
+      "excluded_codes": {
+       "X-STATE": 1,
+       "X-POL": 533
+      },
+      "notes": [
+       "last_confirmed_leg=C:F-T(tau=250)|leg1242-1246",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "C:F-T(tau=250)|low@1246"
+     },
+     "n_points": 535,
+     "n_legs": 534,
+     "unresolved_codes": []
+    },
+    "F_FK6": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "F:F-K(k=6)|high@14962",
+      "survivors": [
+       "F:F-K(k=6)|high@14962"
+      ],
+      "n_excluded": 6584,
+      "excluded_codes": {
+       "X-SUPER": 4898,
+       "X-POL": 1686
+      },
+      "notes": [
+       "last_confirmed_leg=F:F-K(k=6)|leg14962-14967",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "F:F-K(k=6)|low@14967"
+     },
+     "n_points": 6585,
+     "n_legs": 1370,
+     "unresolved_codes": []
+    },
+    "F_FT80": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "F:F-T(tau=80)|low@14968",
+      "survivors": [
+       "F:F-T(tau=80)|low@14968"
+      ],
+      "n_excluded": 5199,
+      "excluded_codes": {
+       "X-STATE": 1,
+       "X-POL": 5198
+      },
+      "notes": [
+       "last_confirmed_leg=F:F-T(tau=80)|leg14968-14970",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "F:F-T(tau=80)|high@14970"
+     },
+     "n_points": 5200,
+     "n_legs": 5199,
+     "unresolved_codes": []
+    },
+    "T-S5_by_view_C_rep": {
+     "C_FK5": {
+      "status": "justified",
+      "falsifier": [
+       "C:F-K(k=5)|high@1232"
+      ],
+      "notes": [
+       "I:C_FK5:D2_2025-09-22: origin of C:F-K(k=5)|leg1232-1233 -> C:F-K(k=5)|high@1232"
+      ]
+     },
+     "C_FK12": {
+      "status": "justified",
+      "falsifier": [
+       "C:F-K(k=12)|low@1196"
+      ],
+      "notes": [
+       "I:C_FK12:D2_2025-09-22: origin of C:F-K(k=12)|leg1196-1215 -> C:F-K(k=12)|low@1196"
+      ]
+     },
+     "C_FT250": {
+      "status": "justified",
+      "falsifier": [
+       "C:F-T(tau=250)|high@1242"
+      ],
+      "notes": [
+       "I:C_FT250:D2_2025-09-22: origin of C:F-T(tau=250)|leg1242-1246 -> C:F-T(tau=250)|high@1242"
+      ]
+     }
+    }
+   },
+   "propagations": [
+    {
+     "event_bar": 14408,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|high@1242",
+     "before": "active-structure",
+     "after": "broken@14408",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14408,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14408,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14416,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|high@1242",
+     "before": "active-structure",
+     "after": "broken@14416",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14416,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14416,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14420,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|high@1242",
+     "before": "active-structure",
+     "after": "broken@14420",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14420,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14420,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14469,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|high@1242",
+     "before": "active-structure",
+     "after": "broken@14469",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14469,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14469,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14476,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|high@1242",
+     "before": "active-structure",
+     "after": "broken@14476",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14476,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14476,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14491,
+     "step": 1,
+     "subject": "status:C:F-K(k=5)|high@1232",
+     "before": "active-structure",
+     "after": "broken@14491",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14491,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-K(k=5)|high@1232",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14491,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-K(k=5)|high@1232",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14502,
+     "step": 1,
+     "subject": "status:C:F-K(k=5)|high@1232",
+     "before": "active-structure",
+     "after": "broken@14502",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14502,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-K(k=5)|high@1232",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14502,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-K(k=5)|high@1232",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14533,
+     "step": 1,
+     "subject": "status:C:F-K(k=5)|high@1232",
+     "before": "active-structure",
+     "after": "broken@14533",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14533,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-K(k=5)|high@1232",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14533,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-K(k=5)|high@1232",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14541,
+     "step": 1,
+     "subject": "status:C:F-K(k=5)|high@1232",
+     "before": "active-structure",
+     "after": "broken@14541",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14541,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-K(k=5)|high@1232",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14541,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-K(k=5)|high@1232",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14654,
+     "step": 1,
+     "subject": "status:C:F-K(k=5)|high@1232",
+     "before": "active-structure",
+     "after": "broken@14654",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14654,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-K(k=5)|high@1232",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14654,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-K(k=5)|high@1232",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14656,
+     "step": 1,
+     "subject": "status:C:F-K(k=5)|high@1232",
+     "before": "active-structure",
+     "after": "broken@14656",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14656,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-K(k=5)|high@1232",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14656,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-K(k=5)|high@1232",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14685,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|high@1242",
+     "before": "active-structure",
+     "after": "broken@14685",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14685,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14685,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14698,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|high@1242",
+     "before": "active-structure",
+     "after": "broken@14698",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14698,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14698,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14722,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|high@1242",
+     "before": "active-structure",
+     "after": "broken@14722",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14722,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14722,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14735,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|high@1242",
+     "before": "active-structure",
+     "after": "broken@14735",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14735,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14735,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14760,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|high@1242",
+     "before": "active-structure",
+     "after": "broken@14760",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14760,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14760,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14779,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|high@1242",
+     "before": "active-structure",
+     "after": "broken@14779",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14779,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14779,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14807,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|high@1242",
+     "before": "active-structure",
+     "after": "broken@14807",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14807,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14807,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14822,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|high@1242",
+     "before": "active-structure",
+     "after": "broken@14822",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14822,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14822,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14826,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|high@1242",
+     "before": "active-structure",
+     "after": "broken@14826",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14826,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14826,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14833,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|high@1242",
+     "before": "active-structure",
+     "after": "broken@14833",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14833,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14833,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14856,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|high@1242",
+     "before": "active-structure",
+     "after": "broken@14856",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14856,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14856,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14858,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|high@1242",
+     "before": "active-structure",
+     "after": "broken@14858",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14858,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14858,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14864,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|high@1242",
+     "before": "active-structure",
+     "after": "broken@14864",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14864,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 14864,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|high@1242",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    }
+   ],
+   "representation_report_SP16": {
+    "coarse_origins": {
+     "C_FK5": "C:F-K(k=5)|high@1232",
+     "C_FK12": "C:F-K(k=12)|low@1196",
+     "C_FT250": "C:F-T(tau=250)|high@1242"
+    },
+    "agreement": "disagree",
+    "note": "disagreement is reported, never merged (SWS-01)"
+   }
+  },
+  {
+   "boundary": "D3_2025-09-24",
+   "decision_time_utc": "2025-09-24 00:00:00",
+   "tasks": {
+    "C_FK5": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "C:F-K(k=5)|low@1275",
+      "survivors": [
+       "C:F-K(k=5)|low@1275"
+      ],
+      "n_excluded": 613,
+      "excluded_codes": {
+       "X-SUPER": 435,
+       "X-STATE": 2,
+       "X-POL": 176
+      },
+      "notes": [
+       "last_confirmed_leg=C:F-K(k=5)|leg1275-1281",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "C:F-K(k=5)|high@1286"
+     },
+     "n_points": 614,
+     "n_legs": 147,
+     "unresolved_codes": []
+    },
+    "C_FK12": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "C:F-K(k=12)|high@1215",
+      "survivors": [
+       "C:F-K(k=12)|high@1215"
+      ],
+      "n_excluded": 370,
+      "excluded_codes": {
+       "X-SUPER": 291,
+       "X-STATE": 2,
+       "X-POL": 77
+      },
+      "notes": [
+       "last_confirmed_leg=C:F-K(k=12)|leg1215-1254",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "C:F-K(k=12)|low@1275"
+     },
+     "n_points": 371,
+     "n_legs": 63,
+     "unresolved_codes": []
+    },
+    "C_FT250": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "C:F-T(tau=250)|high@1284",
+      "survivors": [
+       "C:F-T(tau=250)|high@1284"
+      ],
+      "n_excluded": 554,
+      "excluded_codes": {
+       "X-STATE": 1,
+       "X-POL": 553
+      },
+      "notes": [
+       "last_confirmed_leg=C:F-T(tau=250)|leg1284-1292",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "C:F-T(tau=250)|low@1292"
+     },
+     "n_points": 555,
+     "n_legs": 554,
+     "unresolved_codes": []
+    },
+    "F_FK6": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "F:F-K(k=6)|high@15541",
+      "survivors": [
+       "F:F-K(k=6)|high@15541"
+      ],
+      "n_excluded": 6840,
+      "excluded_codes": {
+       "X-SUPER": 5086,
+       "X-POL": 1754
+      },
+      "notes": [
+       "last_confirmed_leg=F:F-K(k=6)|leg15541-15545",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "F:F-K(k=6)|low@15545"
+     },
+     "n_points": 6841,
+     "n_legs": 1430,
+     "unresolved_codes": []
+    },
+    "F_FT80": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "F:F-T(tau=80)|low@15545",
+      "survivors": [
+       "F:F-T(tau=80)|low@15545"
+      ],
+      "n_excluded": 5423,
+      "excluded_codes": {
+       "X-STATE": 1,
+       "X-POL": 5422
+      },
+      "notes": [
+       "last_confirmed_leg=F:F-T(tau=80)|leg15545-15547",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "F:F-T(tau=80)|high@15547"
+     },
+     "n_points": 5424,
+     "n_legs": 5423,
+     "unresolved_codes": []
+    },
+    "T-S5_by_view_C_rep": {
+     "C_FK5": {
+      "status": "justified",
+      "falsifier": [
+       "C:F-K(k=5)|low@1275"
+      ],
+      "notes": [
+       "I:C_FK5:D3_2025-09-24: origin of C:F-K(k=5)|leg1275-1281 -> C:F-K(k=5)|low@1275"
+      ]
+     },
+     "C_FK12": {
+      "status": "justified",
+      "falsifier": [
+       "C:F-K(k=12)|high@1215"
+      ],
+      "notes": [
+       "I:C_FK12:D3_2025-09-24: origin of C:F-K(k=12)|leg1215-1254 -> C:F-K(k=12)|high@1215"
+      ]
+     },
+     "C_FT250": {
+      "status": "justified",
+      "falsifier": [
+       "C:F-T(tau=250)|high@1284"
+      ],
+      "notes": [
+       "I:C_FT250:D3_2025-09-24: origin of C:F-T(tau=250)|leg1284-1292 -> C:F-T(tau=250)|high@1284"
+      ]
+     }
+    }
+   },
+   "propagations": [
+    {
+     "event_bar": 15051,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|high@1284",
+     "before": "active-structure",
+     "after": "broken@15051",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15051,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|high@1284",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15051,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|high@1284",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15143,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|high@1284",
+     "before": "active-structure",
+     "after": "broken@15143",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15143,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|high@1284",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15143,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|high@1284",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15359,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|high@1284",
+     "before": "active-structure",
+     "after": "broken@15359",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15359,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|high@1284",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15359,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|high@1284",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15362,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|high@1284",
+     "before": "active-structure",
+     "after": "broken@15362",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15362,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|high@1284",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15362,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|high@1284",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15378,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|high@1284",
+     "before": "active-structure",
+     "after": "broken@15378",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15378,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|high@1284",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15378,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|high@1284",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15404,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|high@1284",
+     "before": "active-structure",
+     "after": "broken@15404",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15404,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|high@1284",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15404,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|high@1284",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15433,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|high@1284",
+     "before": "active-structure",
+     "after": "broken@15433",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15433,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|high@1284",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15433,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|high@1284",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    }
+   ],
+   "representation_report_SP16": {
+    "coarse_origins": {
+     "C_FK5": "C:F-K(k=5)|low@1275",
+     "C_FK12": "C:F-K(k=12)|high@1215",
+     "C_FT250": "C:F-T(tau=250)|high@1284"
+    },
+    "agreement": "disagree",
+    "note": "disagreement is reported, never merged (SWS-01)"
+   }
+  },
+  {
+   "boundary": "B0_midnight_open",
+   "decision_time_utc": "2025-09-25 00:01:00",
+   "tasks": {
+    "C_FK5": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "C:F-K(k=5)|low@1300",
+      "survivors": [
+       "C:F-K(k=5)|low@1300"
+      ],
+      "n_excluded": 627,
+      "excluded_codes": {
+       "X-SUPER": 447,
+       "X-STATE": 1,
+       "X-POL": 179
+      },
+      "notes": [
+       "last_confirmed_leg=C:F-K(k=5)|leg1300-1313",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "C:F-K(k=5)|high@1313"
+     },
+     "n_points": 628,
+     "n_legs": 148,
+     "unresolved_codes": []
+    },
+    "C_FK12": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "C:F-K(k=12)|high@1286",
+      "survivors": [
+       "C:F-K(k=12)|high@1286"
+      ],
+      "n_excluded": 378,
+      "excluded_codes": {
+       "X-SUPER": 298,
+       "X-STATE": 1,
+       "X-POL": 79
+      },
+      "notes": [
+       "last_confirmed_leg=C:F-K(k=12)|leg1286-1300",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "C:F-K(k=12)|low@1300"
+     },
+     "n_points": 379,
+     "n_legs": 64,
+     "unresolved_codes": []
+    },
+    "C_FT250": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "C:F-T(tau=250)|low@1315",
+      "survivors": [
+       "C:F-T(tau=250)|low@1315"
+      ],
+      "n_excluded": 563,
+      "excluded_codes": {
+       "X-STATE": 1,
+       "X-POL": 562
+      },
+      "notes": [
+       "last_confirmed_leg=C:F-T(tau=250)|leg1315-1316",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "C:F-T(tau=250)|high@1316"
+     },
+     "n_points": 564,
+     "n_legs": 563,
+     "unresolved_codes": []
+    },
+    "F_FK6": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "F:F-K(k=6)|low@15826",
+      "survivors": [
+       "F:F-K(k=6)|low@15826"
+      ],
+      "n_excluded": 6958,
+      "excluded_codes": {
+       "X-SUPER": 5170,
+       "X-STATE": 1,
+       "X-POL": 1787
+      },
+      "notes": [
+       "last_confirmed_leg=F:F-K(k=6)|leg15826-15833",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "F:F-K(k=6)|high@15833"
+     },
+     "n_points": 6959,
+     "n_legs": 1454,
+     "unresolved_codes": []
+    },
+    "F_FT80": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "F:F-T(tau=80)|high@15833",
+      "survivors": [
+       "F:F-T(tau=80)|high@15833"
+      ],
+      "n_excluded": 5534,
+      "excluded_codes": {
+       "X-STATE": 1,
+       "X-POL": 5533
+      },
+      "notes": [
+       "last_confirmed_leg=F:F-T(tau=80)|leg15833-15837",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "F:F-T(tau=80)|low@15837"
+     },
+     "n_points": 5535,
+     "n_legs": 5534,
+     "unresolved_codes": []
+    },
+    "T-S5_by_view_C_rep": {
+     "C_FK5": {
+      "status": "justified",
+      "falsifier": [
+       "C:F-K(k=5)|low@1300"
+      ],
+      "notes": [
+       "I:C_FK5:B0_midnight_open: origin of C:F-K(k=5)|leg1300-1313 -> C:F-K(k=5)|low@1300"
+      ]
+     },
+     "C_FK12": {
+      "status": "justified",
+      "falsifier": [
+       "C:F-K(k=12)|high@1286"
+      ],
+      "notes": [
+       "I:C_FK12:B0_midnight_open: origin of C:F-K(k=12)|leg1286-1300 -> C:F-K(k=12)|high@1286"
+      ]
+     },
+     "C_FT250": {
+      "status": "justified",
+      "falsifier": [
+       "C:F-T(tau=250)|low@1315"
+      ],
+      "notes": [
+       "I:C_FT250:B0_midnight_open: origin of C:F-T(tau=250)|leg1315-1316 -> C:F-T(tau=250)|low@1315"
+      ]
+     }
+    }
+   },
+   "propagations": [
+    {
+     "event_bar": 15728,
+     "step": 1,
+     "subject": "status:C:F-K(k=12)|high@1286",
+     "before": "active-structure",
+     "after": "broken@15728",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15728,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-K(k=12)|high@1286",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15728,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-K(k=12)|high@1286",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15745,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|low@1315",
+     "before": "active-structure",
+     "after": "broken@15745",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15745,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|low@1315",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15745,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|low@1315",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15747,
+     "step": 1,
+     "subject": "status:C:F-K(k=12)|high@1286",
+     "before": "active-structure",
+     "after": "broken@15747",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15747,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-K(k=12)|high@1286",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15747,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-K(k=12)|high@1286",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15826,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|low@1315",
+     "before": "active-structure",
+     "after": "broken@15826",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15826,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|low@1315",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15826,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|low@1315",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15827,
+     "step": 1,
+     "subject": "status:C:F-K(k=12)|high@1286",
+     "before": "active-structure",
+     "after": "broken@15827",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15827,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-K(k=12)|high@1286",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15827,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-K(k=12)|high@1286",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15831,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|low@1315",
+     "before": "active-structure",
+     "after": "broken@15831",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15831,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|low@1315",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15831,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|low@1315",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15832,
+     "step": 1,
+     "subject": "status:C:F-K(k=12)|high@1286",
+     "before": "active-structure",
+     "after": "broken@15832",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15832,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-K(k=12)|high@1286",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15832,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-K(k=12)|high@1286",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15834,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|low@1315",
+     "before": "active-structure",
+     "after": "broken@15834",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15834,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|low@1315",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15834,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|low@1315",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15838,
+     "step": 1,
+     "subject": "status:C:F-K(k=12)|high@1286",
+     "before": "active-structure",
+     "after": "broken@15838",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15838,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-K(k=12)|high@1286",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15838,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-K(k=12)|high@1286",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    }
+   ],
+   "representation_report_SP16": {
+    "coarse_origins": {
+     "C_FK5": "C:F-K(k=5)|low@1300",
+     "C_FK12": "C:F-K(k=12)|high@1286",
+     "C_FT250": "C:F-T(tau=250)|low@1315"
+    },
+    "agreement": "disagree",
+    "note": "disagreement is reported, never merged (SWS-01)"
+   }
+  },
+  {
+   "boundary": "B1_post5",
+   "decision_time_utc": "2025-09-25 06:49:00",
+   "tasks": {
+    "C_FK5": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "C:F-K(k=5)|low@1300",
+      "survivors": [
+       "C:F-K(k=5)|low@1300"
+      ],
+      "n_excluded": 631,
+      "excluded_codes": {
+       "X-SUPER": 451,
+       "X-STATE": 1,
+       "X-POL": 179
+      },
+      "notes": [
+       "last_confirmed_leg=C:F-K(k=5)|leg1300-1313",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "C:F-K(k=5)|high@1313"
+     },
+     "n_points": 632,
+     "n_legs": 148,
+     "unresolved_codes": []
+    },
+    "C_FK12": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "C:F-K(k=12)|low@1300",
+      "survivors": [
+       "C:F-K(k=12)|low@1300"
+      ],
+      "n_excluded": 381,
+      "excluded_codes": {
+       "X-SUPER": 300,
+       "X-STATE": 1,
+       "X-POL": 80
+      },
+      "notes": [
+       "last_confirmed_leg=C:F-K(k=12)|leg1300-1313",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "C:F-K(k=12)|high@1313"
+     },
+     "n_points": 382,
+     "n_legs": 65,
+     "unresolved_codes": []
+    },
+    "C_FT250": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "C:F-T(tau=250)|high@1322",
+      "survivors": [
+       "C:F-T(tau=250)|high@1322"
+      ],
+      "n_excluded": 566,
+      "excluded_codes": {
+       "X-STATE": 1,
+       "X-POL": 565
+      },
+      "notes": [
+       "last_confirmed_leg=C:F-T(tau=250)|leg1322-1324",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "C:F-T(tau=250)|low@1324"
+     },
+     "n_points": 567,
+     "n_legs": 566,
+     "unresolved_codes": []
+    },
+    "F_FK6": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "F:F-K(k=6)|low@15898",
+      "survivors": [
+       "F:F-K(k=6)|low@15898"
+      ],
+      "n_excluded": 6995,
+      "excluded_codes": {
+       "X-SUPER": 5196,
+       "X-STATE": 2,
+       "X-POL": 1797
+      },
+      "notes": [
+       "last_confirmed_leg=F:F-K(k=6)|leg15898-15905",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "F:F-K(k=6)|high@15905"
+     },
+     "n_points": 6996,
+     "n_legs": 1465,
+     "unresolved_codes": []
+    },
+    "F_FT80": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "F:F-T(tau=80)|low@15917",
+      "survivors": [
+       "F:F-T(tau=80)|low@15917"
+      ],
+      "n_excluded": 5567,
+      "excluded_codes": {
+       "X-STATE": 1,
+       "X-POL": 5566
+      },
+      "notes": [
+       "last_confirmed_leg=F:F-T(tau=80)|leg15917-15919",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "F:F-T(tau=80)|high@15919"
+     },
+     "n_points": 5568,
+     "n_legs": 5567,
+     "unresolved_codes": []
+    },
+    "T-S5_by_view_C_rep": {
+     "C_FK5": {
+      "status": "justified",
+      "falsifier": [
+       "C:F-K(k=5)|low@1300"
+      ],
+      "notes": [
+       "I:C_FK5:B1_post5: origin of C:F-K(k=5)|leg1300-1313 -> C:F-K(k=5)|low@1300"
+      ]
+     },
+     "C_FK12": {
+      "status": "justified",
+      "falsifier": [
+       "C:F-K(k=12)|low@1300"
+      ],
+      "notes": [
+       "I:C_FK12:B1_post5: origin of C:F-K(k=12)|leg1300-1313 -> C:F-K(k=12)|low@1300"
+      ]
+     },
+     "C_FT250": {
+      "status": "justified",
+      "falsifier": [
+       "C:F-T(tau=250)|high@1322"
+      ],
+      "notes": [
+       "I:C_FT250:B1_post5: origin of C:F-T(tau=250)|leg1322-1324 -> C:F-T(tau=250)|high@1322"
+      ]
+     }
+    }
+   },
+   "propagations": [
+    {
+     "event_bar": 15846,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|high@1322",
+     "before": "active-structure",
+     "after": "broken@15846",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15846,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|high@1322",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15846,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|high@1322",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15854,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|high@1322",
+     "before": "active-structure",
+     "after": "broken@15854",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15854,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|high@1322",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15854,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|high@1322",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    }
+   ],
+   "representation_report_SP16": {
+    "coarse_origins": {
+     "C_FK5": "C:F-K(k=5)|low@1300",
+     "C_FK12": "C:F-K(k=12)|low@1300",
+     "C_FT250": "C:F-T(tau=250)|high@1322"
+    },
+    "agreement": "disagree",
+    "note": "disagreement is reported, never merged (SWS-01)"
+   }
+  },
+  {
+   "boundary": "M1_2025-09-25_noon",
+   "decision_time_utc": "2025-09-25 12:00:00",
+   "tasks": {
+    "C_FK5": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "C:F-K(k=5)|low@1300",
+      "survivors": [
+       "C:F-K(k=5)|low@1300"
+      ],
+      "n_excluded": 634,
+      "excluded_codes": {
+       "X-SUPER": 454,
+       "X-STATE": 1,
+       "X-POL": 179
+      },
+      "notes": [
+       "last_confirmed_leg=C:F-K(k=5)|leg1300-1313",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "C:F-K(k=5)|high@1313"
+     },
+     "n_points": 635,
+     "n_legs": 148,
+     "unresolved_codes": []
+    },
+    "C_FK12": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "C:F-K(k=12)|low@1300",
+      "survivors": [
+       "C:F-K(k=12)|low@1300"
+      ],
+      "n_excluded": 384,
+      "excluded_codes": {
+       "X-SUPER": 303,
+       "X-STATE": 1,
+       "X-POL": 80
+      },
+      "notes": [
+       "last_confirmed_leg=C:F-K(k=12)|leg1300-1313",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "C:F-K(k=12)|high@1313"
+     },
+     "n_points": 385,
+     "n_legs": 65,
+     "unresolved_codes": []
+    },
+    "C_FT250": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "C:F-T(tau=250)|low@1327",
+      "survivors": [
+       "C:F-T(tau=250)|low@1327"
+      ],
+      "n_excluded": 569,
+      "excluded_codes": {
+       "X-STATE": 1,
+       "X-POL": 568
+      },
+      "notes": [
+       "last_confirmed_leg=C:F-T(tau=250)|leg1327-1329",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "C:F-T(tau=250)|high@1329"
+     },
+     "n_points": 570,
+     "n_legs": 569,
+     "unresolved_codes": []
+    },
+    "F_FK6": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "F:F-K(k=6)|low@15960",
+      "survivors": [
+       "F:F-K(k=6)|low@15960"
+      ],
+      "n_excluded": 7031,
+      "excluded_codes": {
+       "X-SUPER": 5224,
+       "X-STATE": 1,
+       "X-POL": 1806
+      },
+      "notes": [
+       "last_confirmed_leg=F:F-K(k=6)|leg15960-15964",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "F:F-K(k=6)|high@15964"
+     },
+     "n_points": 7032,
+     "n_legs": 1472,
+     "unresolved_codes": []
+    },
+    "F_FT80": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "F:F-T(tau=80)|low@15976",
+      "survivors": [
+       "F:F-T(tau=80)|low@15976"
+      ],
+      "n_excluded": 5587,
+      "excluded_codes": {
+       "X-STATE": 1,
+       "X-POL": 5586
+      },
+      "notes": [
+       "last_confirmed_leg=F:F-T(tau=80)|leg15976-15978",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "F:F-T(tau=80)|high@15978"
+     },
+     "n_points": 5588,
+     "n_legs": 5587,
+     "unresolved_codes": []
+    },
+    "T-S5_by_view_C_rep": {
+     "C_FK5": {
+      "status": "justified",
+      "falsifier": [
+       "C:F-K(k=5)|low@1300"
+      ],
+      "notes": [
+       "I:C_FK5:M1_2025-09-25_noon: origin of C:F-K(k=5)|leg1300-1313 -> C:F-K(k=5)|low@1300"
+      ]
+     },
+     "C_FK12": {
+      "status": "justified",
+      "falsifier": [
+       "C:F-K(k=12)|low@1300"
+      ],
+      "notes": [
+       "I:C_FK12:M1_2025-09-25_noon: origin of C:F-K(k=12)|leg1300-1313 -> C:F-K(k=12)|low@1300"
+      ]
+     },
+     "C_FT250": {
+      "status": "justified",
+      "falsifier": [
+       "C:F-T(tau=250)|low@1327"
+      ],
+      "notes": [
+       "I:C_FT250:M1_2025-09-25_noon: origin of C:F-T(tau=250)|leg1327-1329 -> C:F-T(tau=250)|low@1327"
+      ]
+     }
+    }
+   },
+   "propagations": [
+    {
+     "event_bar": 15979,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|low@1327",
+     "before": "active-structure",
+     "after": "broken@15979",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15979,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|low@1327",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15979,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|low@1327",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    }
+   ],
+   "representation_report_SP16": {
+    "coarse_origins": {
+     "C_FK5": "C:F-K(k=5)|low@1300",
+     "C_FK12": "C:F-K(k=12)|low@1300",
+     "C_FT250": "C:F-T(tau=250)|low@1327"
+    },
+    "agreement": "disagree",
+    "note": "disagreement is reported, never merged (SWS-01)"
+   }
+  },
+  {
+   "boundary": "B2_post6",
+   "decision_time_utc": "2025-09-25 19:34:00",
+   "tasks": {
+    "C_FK5": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "C:F-K(k=5)|low@1300",
+      "survivors": [
+       "C:F-K(k=5)|low@1300"
+      ],
+      "n_excluded": 638,
+      "excluded_codes": {
+       "X-SUPER": 458,
+       "X-STATE": 1,
+       "X-POL": 179
+      },
+      "notes": [
+       "last_confirmed_leg=C:F-K(k=5)|leg1300-1313",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "C:F-K(k=5)|high@1313"
+     },
+     "n_points": 639,
+     "n_legs": 148,
+     "unresolved_codes": []
+    },
+    "C_FK12": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "C:F-K(k=12)|low@1300",
+      "survivors": [
+       "C:F-K(k=12)|low@1300"
+      ],
+      "n_excluded": 388,
+      "excluded_codes": {
+       "X-SUPER": 307,
+       "X-STATE": 1,
+       "X-POL": 80
+      },
+      "notes": [
+       "last_confirmed_leg=C:F-K(k=12)|leg1300-1313",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "C:F-K(k=12)|high@1313"
+     },
+     "n_points": 389,
+     "n_legs": 65,
+     "unresolved_codes": []
+    },
+    "C_FT250": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "C:F-T(tau=250)|low@1335",
+      "survivors": [
+       "C:F-T(tau=250)|low@1335"
+      ],
+      "n_excluded": 573,
+      "excluded_codes": {
+       "X-STATE": 1,
+       "X-POL": 572
+      },
+      "notes": [
+       "last_confirmed_leg=C:F-T(tau=250)|leg1335-1336",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "C:F-T(tau=250)|high@1336"
+     },
+     "n_points": 574,
+     "n_legs": 573,
+     "unresolved_codes": []
+    },
+    "F_FK6": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "F:F-K(k=6)|low@16056",
+      "survivors": [
+       "F:F-K(k=6)|low@16056"
+      ],
+      "n_excluded": 7078,
+      "excluded_codes": {
+       "X-SUPER": 5260,
+       "X-STATE": 1,
+       "X-POL": 1817
+      },
+      "notes": [
+       "last_confirmed_leg=F:F-K(k=6)|leg16056-16060",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "F:F-K(k=6)|high@16060"
+     },
+     "n_points": 7079,
+     "n_legs": 1481,
+     "unresolved_codes": []
+    },
+    "F_FT80": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "F:F-T(tau=80)|low@16070",
+      "survivors": [
+       "F:F-T(tau=80)|low@16070"
+      ],
+      "n_excluded": 5627,
+      "excluded_codes": {
+       "X-STATE": 1,
+       "X-POL": 5626
+      },
+      "notes": [
+       "last_confirmed_leg=F:F-T(tau=80)|leg16070-16072",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "F:F-T(tau=80)|high@16072"
+     },
+     "n_points": 5628,
+     "n_legs": 5627,
+     "unresolved_codes": []
+    },
+    "T-S5_by_view_C_rep": {
+     "C_FK5": {
+      "status": "justified",
+      "falsifier": [
+       "C:F-K(k=5)|low@1300"
+      ],
+      "notes": [
+       "I:C_FK5:B2_post6: origin of C:F-K(k=5)|leg1300-1313 -> C:F-K(k=5)|low@1300"
+      ]
+     },
+     "C_FK12": {
+      "status": "justified",
+      "falsifier": [
+       "C:F-K(k=12)|low@1300"
+      ],
+      "notes": [
+       "I:C_FK12:B2_post6: origin of C:F-K(k=12)|leg1300-1313 -> C:F-K(k=12)|low@1300"
+      ]
+     },
+     "C_FT250": {
+      "status": "justified",
+      "falsifier": [
+       "C:F-T(tau=250)|low@1335"
+      ],
+      "notes": [
+       "I:C_FT250:B2_post6: origin of C:F-T(tau=250)|leg1335-1336 -> C:F-T(tau=250)|low@1335"
+      ]
+     }
+    }
+   },
+   "propagations": [
+    {
+     "event_bar": 15996,
+     "step": 1,
+     "subject": "status:C:F-K(k=5)|low@1300",
+     "before": "active-structure",
+     "after": "broken@15996",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15996,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-K(k=5)|low@1300",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15996,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-K(k=5)|low@1300",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15996,
+     "step": 1,
+     "subject": "status:C:F-K(k=12)|low@1300",
+     "before": "active-structure",
+     "after": "broken@15996",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15996,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-K(k=12)|low@1300",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15996,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-K(k=12)|low@1300",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15996,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|low@1335",
+     "before": "active-structure",
+     "after": "broken@15996",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15996,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|low@1335",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 15996,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|low@1335",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 16004,
+     "step": 1,
+     "subject": "status:C:F-K(k=5)|low@1300",
+     "before": "active-structure",
+     "after": "broken@16004",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 16004,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-K(k=5)|low@1300",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 16004,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-K(k=5)|low@1300",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 16004,
+     "step": 1,
+     "subject": "status:C:F-K(k=12)|low@1300",
+     "before": "active-structure",
+     "after": "broken@16004",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 16004,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-K(k=12)|low@1300",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 16004,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-K(k=12)|low@1300",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 16004,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|low@1335",
+     "before": "active-structure",
+     "after": "broken@16004",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 16004,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|low@1335",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 16004,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|low@1335",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 16024,
+     "step": 1,
+     "subject": "status:C:F-K(k=5)|low@1300",
+     "before": "active-structure",
+     "after": "broken@16024",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 16024,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-K(k=5)|low@1300",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 16024,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-K(k=5)|low@1300",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 16024,
+     "step": 1,
+     "subject": "status:C:F-K(k=12)|low@1300",
+     "before": "active-structure",
+     "after": "broken@16024",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 16024,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-K(k=12)|low@1300",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 16024,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-K(k=12)|low@1300",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 16041,
+     "step": 1,
+     "subject": "status:C:F-K(k=5)|low@1300",
+     "before": "active-structure",
+     "after": "broken@16041",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 16041,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-K(k=5)|low@1300",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 16041,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-K(k=5)|low@1300",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 16041,
+     "step": 1,
+     "subject": "status:C:F-K(k=12)|low@1300",
+     "before": "active-structure",
+     "after": "broken@16041",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 16041,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-K(k=12)|low@1300",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 16041,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-K(k=12)|low@1300",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 16044,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|low@1335",
+     "before": "active-structure",
+     "after": "broken@16044",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 16044,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|low@1335",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 16044,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|low@1335",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    }
+   ],
+   "representation_report_SP16": {
+    "coarse_origins": {
+     "C_FK5": "C:F-K(k=5)|low@1300",
+     "C_FK12": "C:F-K(k=12)|low@1300",
+     "C_FT250": "C:F-T(tau=250)|low@1335"
+    },
+    "agreement": "disagree",
+    "note": "disagreement is reported, never merged (SWS-01)"
+   }
+  },
+  {
+   "boundary": "D4_2025-09-26",
+   "decision_time_utc": "2025-09-26 12:00:00",
+   "tasks": {
+    "C_FK5": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "C:F-K(k=5)|low@1338",
+      "survivors": [
+       "C:F-K(k=5)|low@1338"
+      ],
+      "n_excluded": 645,
+      "excluded_codes": {
+       "X-SUPER": 462,
+       "X-STATE": 2,
+       "X-POL": 181
+      },
+      "notes": [
+       "last_confirmed_leg=C:F-K(k=5)|leg1338-1346",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "C:F-K(k=5)|high@1346"
+     },
+     "n_points": 646,
+     "n_legs": 150,
+     "unresolved_codes": []
+    },
+    "C_FK12": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "C:F-K(k=12)|high@1313",
+      "survivors": [
+       "C:F-K(k=12)|high@1313"
+      ],
+      "n_excluded": 390,
+      "excluded_codes": {
+       "X-SUPER": 308,
+       "X-STATE": 1,
+       "X-POL": 81
+      },
+      "notes": [
+       "last_confirmed_leg=C:F-K(k=12)|leg1313-1338",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "C:F-K(k=12)|low@1338"
+     },
+     "n_points": 391,
+     "n_legs": 65,
+     "unresolved_codes": []
+    },
+    "C_FT250": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "C:F-T(tau=250)|low@1351",
+      "survivors": [
+       "C:F-T(tau=250)|low@1351"
+      ],
+      "n_excluded": 581,
+      "excluded_codes": {
+       "X-STATE": 1,
+       "X-POL": 580
+      },
+      "notes": [
+       "last_confirmed_leg=C:F-T(tau=250)|leg1351-1353",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "C:F-T(tau=250)|high@1353"
+     },
+     "n_points": 582,
+     "n_legs": 581,
+     "unresolved_codes": []
+    },
+    "F_FK6": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "F:F-K(k=6)|high@16240",
+      "survivors": [
+       "F:F-K(k=6)|high@16240"
+      ],
+      "n_excluded": 7167,
+      "excluded_codes": {
+       "X-SUPER": 5323,
+       "X-STATE": 1,
+       "X-POL": 1843
+      },
+      "notes": [
+       "last_confirmed_leg=F:F-K(k=6)|leg16240-16257",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "F:F-K(k=6)|low@16263"
+     },
+     "n_points": 7168,
+     "n_legs": 1503,
+     "unresolved_codes": []
+    },
+    "F_FT80": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "F:F-T(tau=80)|high@16264",
+      "survivors": [
+       "F:F-T(tau=80)|high@16264"
+      ],
+      "n_excluded": 5710,
+      "excluded_codes": {
+       "X-STATE": 1,
+       "X-POL": 5709
+      },
+      "notes": [
+       "last_confirmed_leg=F:F-T(tau=80)|leg16264-16265",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "F:F-T(tau=80)|low@16265"
+     },
+     "n_points": 5711,
+     "n_legs": 5710,
+     "unresolved_codes": []
+    },
+    "T-S5_by_view_C_rep": {
+     "C_FK5": {
+      "status": "justified",
+      "falsifier": [
+       "C:F-K(k=5)|low@1338"
+      ],
+      "notes": [
+       "I:C_FK5:D4_2025-09-26: origin of C:F-K(k=5)|leg1338-1346 -> C:F-K(k=5)|low@1338"
+      ]
+     },
+     "C_FK12": {
+      "status": "justified",
+      "falsifier": [
+       "C:F-K(k=12)|high@1313"
+      ],
+      "notes": [
+       "I:C_FK12:D4_2025-09-26: origin of C:F-K(k=12)|leg1313-1338 -> C:F-K(k=12)|high@1313"
+      ]
+     },
+     "C_FT250": {
+      "status": "justified",
+      "falsifier": [
+       "C:F-T(tau=250)|low@1351"
+      ],
+      "notes": [
+       "I:C_FT250:D4_2025-09-26: origin of C:F-T(tau=250)|leg1351-1353 -> C:F-T(tau=250)|low@1351"
+      ]
+     }
+    }
+   },
+   "propagations": [
+    {
+     "event_bar": 16136,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|low@1351",
+     "before": "active-structure",
+     "after": "broken@16136",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 16136,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|low@1351",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 16136,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|low@1351",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 16255,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|low@1351",
+     "before": "active-structure",
+     "after": "broken@16255",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 16255,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|low@1351",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 16255,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|low@1351",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 16259,
+     "step": 1,
+     "subject": "status:C:F-T(tau=250)|low@1351",
+     "before": "active-structure",
+     "after": "broken@16259",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 16259,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-T(tau=250)|low@1351",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 16259,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-T(tau=250)|low@1351",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    }
+   ],
+   "representation_report_SP16": {
+    "coarse_origins": {
+     "C_FK5": "C:F-K(k=5)|low@1338",
+     "C_FK12": "C:F-K(k=12)|high@1313",
+     "C_FT250": "C:F-T(tau=250)|low@1351"
+    },
+    "agreement": "disagree",
+    "note": "disagreement is reported, never merged (SWS-01)"
+   }
+  },
+  {
+   "boundary": "D5_2025-09-26_end",
+   "decision_time_utc": "2025-09-26 23:00:00",
+   "tasks": {
+    "C_FK5": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "C:F-K(k=5)|high@1346",
+      "survivors": [
+       "C:F-K(k=5)|high@1346"
+      ],
+      "n_excluded": 648,
+      "excluded_codes": {
+       "X-SUPER": 465,
+       "X-STATE": 1,
+       "X-POL": 182
+      },
+      "notes": [
+       "last_confirmed_leg=C:F-K(k=5)|leg1346-1355",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "C:F-K(k=5)|low@1355"
+     },
+     "n_points": 649,
+     "n_legs": 151,
+     "unresolved_codes": []
+    },
+    "C_FK12": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "C:F-K(k=12)|high@1313",
+      "survivors": [
+       "C:F-K(k=12)|high@1313"
+      ],
+      "n_excluded": 392,
+      "excluded_codes": {
+       "X-SUPER": 309,
+       "X-STATE": 2,
+       "X-POL": 81
+      },
+      "notes": [
+       "last_confirmed_leg=C:F-K(k=12)|leg1313-1338",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "C:F-K(k=12)|low@1338"
+     },
+     "n_points": 393,
+     "n_legs": 66,
+     "unresolved_codes": []
+    },
+    "C_FT250": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "C:F-T(tau=250)|high@1362",
+      "survivors": [
+       "C:F-T(tau=250)|high@1362"
+      ],
+      "n_excluded": 586,
+      "excluded_codes": {
+       "X-STATE": 1,
+       "X-POL": 585
+      },
+      "notes": [
+       "last_confirmed_leg=C:F-T(tau=250)|leg1362-1363",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "C:F-T(tau=250)|low@1363"
+     },
+     "n_points": 587,
+     "n_legs": 586,
+     "unresolved_codes": []
+    },
+    "F_FK6": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "F:F-K(k=6)|low@16389",
+      "survivors": [
+       "F:F-K(k=6)|low@16389"
+      ],
+      "n_excluded": 7223,
+      "excluded_codes": {
+       "X-SUPER": 5363,
+       "X-STATE": 1,
+       "X-POL": 1859
+      },
+      "notes": [
+       "last_confirmed_leg=F:F-K(k=6)|leg16389-16395",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "F:F-K(k=6)|high@16395"
+     },
+     "n_points": 7224,
+     "n_legs": 1515,
+     "unresolved_codes": []
+    },
+    "F_FT80": {
+     "T-S1_origin": {
+      "status": "justified",
+      "selected": "F:F-T(tau=80)|low@16396",
+      "survivors": [
+       "F:F-T(tau=80)|low@16396"
+      ],
+      "n_excluded": 5761,
+      "excluded_codes": {
+       "X-STATE": 1,
+       "X-POL": 5760
+      },
+      "notes": [
+       "last_confirmed_leg=F:F-T(tau=80)|leg16396-16402",
+       "role=origin-of-last-confirmed-leg (O-class; SWS-02: not a market claim)"
+      ]
+     },
+     "T-S1_extreme": {
+      "status": "justified",
+      "selected": "F:F-T(tau=80)|high@16402"
+     },
+     "n_points": 5762,
+     "n_legs": 5761,
+     "unresolved_codes": []
+    },
+    "T-S5_by_view_C_rep": {
+     "C_FK5": {
+      "status": "justified",
+      "falsifier": [
+       "C:F-K(k=5)|high@1346"
+      ],
+      "notes": [
+       "I:C_FK5:D5_2025-09-26_end: origin of C:F-K(k=5)|leg1346-1355 -> C:F-K(k=5)|high@1346"
+      ]
+     },
+     "C_FK12": {
+      "status": "justified",
+      "falsifier": [
+       "C:F-K(k=12)|high@1313"
+      ],
+      "notes": [
+       "I:C_FK12:D5_2025-09-26_end: origin of C:F-K(k=12)|leg1313-1338 -> C:F-K(k=12)|high@1313"
+      ]
+     },
+     "C_FT250": {
+      "status": "justified",
+      "falsifier": [
+       "C:F-T(tau=250)|high@1362"
+      ],
+      "notes": [
+       "I:C_FT250:D5_2025-09-26_end: origin of C:F-T(tau=250)|leg1362-1363 -> C:F-T(tau=250)|high@1362"
+      ]
+     }
+    }
+   },
+   "propagations": [
+    {
+     "event_bar": 16337,
+     "step": 1,
+     "subject": "status:C:F-K(k=5)|high@1346",
+     "before": "active-structure",
+     "after": "broken@16337",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 16337,
+     "step": 2,
+     "subject": "T-S1(view C)",
+     "before": "C:F-K(k=5)|high@1346",
+     "after": "recomputed-next-boundary",
+     "rule": "R:SP-20 recomputation, not patch"
+    },
+    {
+     "event_bar": 16337,
+     "step": 3,
+     "subject": "T-S5(falsifier)",
+     "before": "C:F-K(k=5)|high@1346",
+     "after": "invalid(contradicted)",
+     "rule": "R:SP-20 recomputation, not patch"
+    }
+   ],
+   "representation_report_SP16": {
+    "coarse_origins": {
+     "C_FK5": "C:F-K(k=5)|high@1346",
+     "C_FK12": "C:F-K(k=12)|high@1313",
+     "C_FT250": "C:F-T(tau=250)|high@1362"
+    },
+    "agreement": "disagree",
+    "note": "disagreement is reported, never merged (SWS-01)"
+   }
+  }
+ ],
+ "binding_events": [
+  {
+   "boundary": "D2_2025-09-22",
+   "event_bar": 14408,
+   "close_time": "2025-09-20 00:45:00",
+   "close": 115703.98,
+   "bound": [
+    "C:F-T(tau=250)|high@1242"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|high@1242'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "D2_2025-09-22",
+   "event_bar": 14416,
+   "close_time": "2025-09-20 01:25:00",
+   "close": 115699.65,
+   "bound": [
+    "C:F-T(tau=250)|high@1242"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|high@1242'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "D2_2025-09-22",
+   "event_bar": 14420,
+   "close_time": "2025-09-20 01:45:00",
+   "close": 115670.24,
+   "bound": [
+    "C:F-T(tau=250)|high@1242"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|high@1242'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "D2_2025-09-22",
+   "event_bar": 14469,
+   "close_time": "2025-09-20 05:50:00",
+   "close": 115668.47,
+   "bound": [
+    "C:F-T(tau=250)|high@1242"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|high@1242'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "D2_2025-09-22",
+   "event_bar": 14476,
+   "close_time": "2025-09-20 06:25:00",
+   "close": 115679.02,
+   "bound": [
+    "C:F-T(tau=250)|high@1242"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|high@1242'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "D2_2025-09-22",
+   "event_bar": 14491,
+   "close_time": "2025-09-20 07:40:00",
+   "close": 115839.99,
+   "bound": [
+    "C:F-K(k=5)|high@1232"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-K(k=5)|high@1232'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "D2_2025-09-22",
+   "event_bar": 14502,
+   "close_time": "2025-09-20 08:35:00",
+   "close": 115845.99,
+   "bound": [
+    "C:F-K(k=5)|high@1232"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-K(k=5)|high@1232'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "D2_2025-09-22",
+   "event_bar": 14533,
+   "close_time": "2025-09-20 11:10:00",
+   "close": 115819.49,
+   "bound": [
+    "C:F-K(k=5)|high@1232"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-K(k=5)|high@1232'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "D2_2025-09-22",
+   "event_bar": 14541,
+   "close_time": "2025-09-20 11:50:00",
+   "close": 115885.7,
+   "bound": [
+    "C:F-K(k=5)|high@1232"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-K(k=5)|high@1232'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "D2_2025-09-22",
+   "event_bar": 14654,
+   "close_time": "2025-09-20 21:15:00",
+   "close": 115822.18,
+   "bound": [
+    "C:F-K(k=5)|high@1232"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-K(k=5)|high@1232'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "D2_2025-09-22",
+   "event_bar": 14656,
+   "close_time": "2025-09-20 21:25:00",
+   "close": 115821.34,
+   "bound": [
+    "C:F-K(k=5)|high@1232"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-K(k=5)|high@1232'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "D2_2025-09-22",
+   "event_bar": 14685,
+   "close_time": "2025-09-20 23:50:00",
+   "close": 115677.64,
+   "bound": [
+    "C:F-T(tau=250)|high@1242"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|high@1242'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "D2_2025-09-22",
+   "event_bar": 14698,
+   "close_time": "2025-09-21 00:55:00",
+   "close": 115693.14,
+   "bound": [
+    "C:F-T(tau=250)|high@1242"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|high@1242'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "D2_2025-09-22",
+   "event_bar": 14722,
+   "close_time": "2025-09-21 02:55:00",
+   "close": 115692.82,
+   "bound": [
+    "C:F-T(tau=250)|high@1242"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|high@1242'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "D2_2025-09-22",
+   "event_bar": 14735,
+   "close_time": "2025-09-21 04:00:00",
+   "close": 115669.41,
+   "bound": [
+    "C:F-T(tau=250)|high@1242"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|high@1242'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "D2_2025-09-22",
+   "event_bar": 14760,
+   "close_time": "2025-09-21 06:05:00",
+   "close": 115687.44,
+   "bound": [
+    "C:F-T(tau=250)|high@1242"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|high@1242'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "D2_2025-09-22",
+   "event_bar": 14779,
+   "close_time": "2025-09-21 07:40:00",
+   "close": 115693.1,
+   "bound": [
+    "C:F-T(tau=250)|high@1242"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|high@1242'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "D2_2025-09-22",
+   "event_bar": 14807,
+   "close_time": "2025-09-21 10:00:00",
+   "close": 115683.54,
+   "bound": [
+    "C:F-T(tau=250)|high@1242"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|high@1242'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "D2_2025-09-22",
+   "event_bar": 14822,
+   "close_time": "2025-09-21 11:15:00",
+   "close": 115680.97,
+   "bound": [
+    "C:F-T(tau=250)|high@1242"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|high@1242'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "D2_2025-09-22",
+   "event_bar": 14826,
+   "close_time": "2025-09-21 11:35:00",
+   "close": 115669.65,
+   "bound": [
+    "C:F-T(tau=250)|high@1242"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|high@1242'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "D2_2025-09-22",
+   "event_bar": 14833,
+   "close_time": "2025-09-21 12:10:00",
+   "close": 115687.23,
+   "bound": [
+    "C:F-T(tau=250)|high@1242"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|high@1242'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "D2_2025-09-22",
+   "event_bar": 14856,
+   "close_time": "2025-09-21 14:05:00",
+   "close": 115669.48,
+   "bound": [
+    "C:F-T(tau=250)|high@1242"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|high@1242'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "D2_2025-09-22",
+   "event_bar": 14858,
+   "close_time": "2025-09-21 14:15:00",
+   "close": 115674.49,
+   "bound": [
+    "C:F-T(tau=250)|high@1242"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|high@1242'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "D2_2025-09-22",
+   "event_bar": 14864,
+   "close_time": "2025-09-21 14:45:00",
+   "close": 115666.13,
+   "bound": [
+    "C:F-T(tau=250)|high@1242"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|high@1242'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "D3_2025-09-24",
+   "event_bar": 15051,
+   "close_time": "2025-09-22 06:20:00",
+   "close": 113083.63,
+   "bound": [
+    "C:F-T(tau=250)|high@1284"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|high@1284'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "D3_2025-09-24",
+   "event_bar": 15143,
+   "close_time": "2025-09-22 14:00:00",
+   "close": 113130.63,
+   "bound": [
+    "C:F-T(tau=250)|high@1284"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|high@1284'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "D3_2025-09-24",
+   "event_bar": 15359,
+   "close_time": "2025-09-23 08:00:00",
+   "close": 113090.13,
+   "bound": [
+    "C:F-T(tau=250)|high@1284"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|high@1284'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "D3_2025-09-24",
+   "event_bar": 15362,
+   "close_time": "2025-09-23 08:15:00",
+   "close": 113068.33,
+   "bound": [
+    "C:F-T(tau=250)|high@1284"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|high@1284'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "D3_2025-09-24",
+   "event_bar": 15378,
+   "close_time": "2025-09-23 09:35:00",
+   "close": 113064.51,
+   "bound": [
+    "C:F-T(tau=250)|high@1284"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|high@1284'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "D3_2025-09-24",
+   "event_bar": 15404,
+   "close_time": "2025-09-23 11:45:00",
+   "close": 113056.64,
+   "bound": [
+    "C:F-T(tau=250)|high@1284"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|high@1284'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "D3_2025-09-24",
+   "event_bar": 15433,
+   "close_time": "2025-09-23 14:10:00",
+   "close": 113193.03,
+   "bound": [
+    "C:F-T(tau=250)|high@1284"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|high@1284'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "B0_midnight_open",
+   "event_bar": 15728,
+   "close_time": "2025-09-24 14:45:00",
+   "close": 113382.5,
+   "bound": [
+    "C:F-K(k=12)|high@1286"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-K(k=12)|high@1286'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "B0_midnight_open",
+   "event_bar": 15745,
+   "close_time": "2025-09-24 16:10:00",
+   "close": 113267.97,
+   "bound": [
+    "C:F-T(tau=250)|low@1315"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|low@1315'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "B0_midnight_open",
+   "event_bar": 15747,
+   "close_time": "2025-09-24 16:20:00",
+   "close": 113426.91,
+   "bound": [
+    "C:F-K(k=12)|high@1286"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-K(k=12)|high@1286'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "B0_midnight_open",
+   "event_bar": 15826,
+   "close_time": "2025-09-24 22:55:00",
+   "close": 113267.24,
+   "bound": [
+    "C:F-T(tau=250)|low@1315"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|low@1315'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "B0_midnight_open",
+   "event_bar": 15827,
+   "close_time": "2025-09-24 23:00:00",
+   "close": 113336.33,
+   "bound": [
+    "C:F-K(k=12)|high@1286"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-K(k=12)|high@1286'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "B0_midnight_open",
+   "event_bar": 15831,
+   "close_time": "2025-09-24 23:20:00",
+   "close": 113264.88,
+   "bound": [
+    "C:F-T(tau=250)|low@1315"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|low@1315'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "B0_midnight_open",
+   "event_bar": 15832,
+   "close_time": "2025-09-24 23:25:00",
+   "close": 113301.12,
+   "bound": [
+    "C:F-K(k=12)|high@1286"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-K(k=12)|high@1286'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "B0_midnight_open",
+   "event_bar": 15834,
+   "close_time": "2025-09-24 23:35:00",
+   "close": 113248.66,
+   "bound": [
+    "C:F-T(tau=250)|low@1315",
+    "F:F-K(k=6)|low@15826"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|low@1315'], 'F': ['F:F-K(k=6)|low@15826']}"
+   ]
+  },
+  {
+   "boundary": "B0_midnight_open",
+   "event_bar": 15838,
+   "close_time": "2025-09-24 23:55:00",
+   "close": 113291.33,
+   "bound": [
+    "C:F-K(k=12)|high@1286"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-K(k=12)|high@1286'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "B1_post5",
+   "event_bar": 15846,
+   "close_time": "2025-09-25 00:35:00",
+   "close": 113199.52,
+   "bound": [
+    "C:F-T(tau=250)|high@1322"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|high@1322'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "B1_post5",
+   "event_bar": 15854,
+   "close_time": "2025-09-25 01:15:00",
+   "close": 113269.0,
+   "bound": [
+    "C:F-T(tau=250)|high@1322"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|high@1322'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "B1_post5",
+   "event_bar": 15920,
+   "close_time": "2025-09-25 06:45:00",
+   "close": 111625.88,
+   "bound": [
+    "F:F-T(tau=80)|low@15917"
+   ],
+   "notes": [
+    "binding per view: {'C': [], 'F': ['F:F-T(tau=80)|low@15917']}"
+   ]
+  },
+  {
+   "boundary": "M1_2025-09-25_noon",
+   "event_bar": 15973,
+   "close_time": "2025-09-25 11:10:00",
+   "close": 111525.2,
+   "bound": [
+    "F:F-K(k=6)|low@15960"
+   ],
+   "notes": [
+    "binding per view: {'C': [], 'F': ['F:F-K(k=6)|low@15960']}"
+   ]
+  },
+  {
+   "boundary": "M1_2025-09-25_noon",
+   "event_bar": 15975,
+   "close_time": "2025-09-25 11:20:00",
+   "close": 111521.72,
+   "bound": [
+    "F:F-K(k=6)|low@15960"
+   ],
+   "notes": [
+    "binding per view: {'C': [], 'F': ['F:F-K(k=6)|low@15960']}"
+   ]
+  },
+  {
+   "boundary": "M1_2025-09-25_noon",
+   "event_bar": 15978,
+   "close_time": "2025-09-25 11:35:00",
+   "close": 111486.16,
+   "bound": [
+    "F:F-K(k=6)|low@15960"
+   ],
+   "notes": [
+    "binding per view: {'C': [], 'F': ['F:F-K(k=6)|low@15960']}"
+   ]
+  },
+  {
+   "boundary": "M1_2025-09-25_noon",
+   "event_bar": 15979,
+   "close_time": "2025-09-25 11:40:00",
+   "close": 111417.25,
+   "bound": [
+    "C:F-T(tau=250)|low@1327",
+    "F:F-T(tau=80)|low@15976"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|low@1327'], 'F': ['F:F-T(tau=80)|low@15976']}"
+   ]
+  },
+  {
+   "boundary": "M1_2025-09-25_noon",
+   "event_bar": 15981,
+   "close_time": "2025-09-25 11:50:00",
+   "close": 111368.72,
+   "bound": [
+    "F:F-T(tau=80)|low@15976"
+   ],
+   "notes": [
+    "binding per view: {'C': [], 'F': ['F:F-T(tau=80)|low@15976']}"
+   ]
+  },
+  {
+   "boundary": "M1_2025-09-25_noon",
+   "event_bar": 15983,
+   "close_time": "2025-09-25 12:00:00",
+   "close": 111348.0,
+   "bound": [
+    "F:F-T(tau=80)|low@15976"
+   ],
+   "notes": [
+    "binding per view: {'C': [], 'F': ['F:F-T(tau=80)|low@15976']}"
+   ]
+  },
+  {
+   "boundary": "B2_post6",
+   "event_bar": 15996,
+   "close_time": "2025-09-25 13:05:00",
+   "close": 110861.7,
+   "bound": [
+    "C:F-K(k=5)|low@1300",
+    "C:F-K(k=12)|low@1300",
+    "C:F-T(tau=250)|low@1335"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-K(k=5)|low@1300', 'C:F-K(k=12)|low@1300', 'C:F-T(tau=250)|low@1335'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "B2_post6",
+   "event_bar": 16004,
+   "close_time": "2025-09-25 13:45:00",
+   "close": 110720.91,
+   "bound": [
+    "C:F-K(k=5)|low@1300",
+    "C:F-K(k=12)|low@1300",
+    "C:F-T(tau=250)|low@1335"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-K(k=5)|low@1300', 'C:F-K(k=12)|low@1300', 'C:F-T(tau=250)|low@1335'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "B2_post6",
+   "event_bar": 16024,
+   "close_time": "2025-09-25 15:25:00",
+   "close": 110956.01,
+   "bound": [
+    "C:F-K(k=5)|low@1300",
+    "C:F-K(k=12)|low@1300"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-K(k=5)|low@1300', 'C:F-K(k=12)|low@1300'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "B2_post6",
+   "event_bar": 16041,
+   "close_time": "2025-09-25 16:50:00",
+   "close": 110981.94,
+   "bound": [
+    "C:F-K(k=5)|low@1300",
+    "C:F-K(k=12)|low@1300"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-K(k=5)|low@1300', 'C:F-K(k=12)|low@1300'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "B2_post6",
+   "event_bar": 16044,
+   "close_time": "2025-09-25 17:05:00",
+   "close": 110839.63,
+   "bound": [
+    "C:F-T(tau=250)|low@1335"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|low@1335'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "D4_2025-09-26",
+   "event_bar": 16136,
+   "close_time": "2025-09-26 00:45:00",
+   "close": 108809.25,
+   "bound": [
+    "C:F-T(tau=250)|low@1351"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|low@1351'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "D4_2025-09-26",
+   "event_bar": 16255,
+   "close_time": "2025-09-26 10:40:00",
+   "close": 108894.98,
+   "bound": [
+    "C:F-T(tau=250)|low@1351"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|low@1351'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "D4_2025-09-26",
+   "event_bar": 16259,
+   "close_time": "2025-09-26 11:00:00",
+   "close": 108895.0,
+   "bound": [
+    "C:F-T(tau=250)|low@1351"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-T(tau=250)|low@1351'], 'F': []}"
+   ]
+  },
+  {
+   "boundary": "D4_2025-09-26",
+   "event_bar": 16266,
+   "close_time": "2025-09-26 11:35:00",
+   "close": 108968.88,
+   "bound": [
+    "F:F-T(tau=80)|high@16264"
+   ],
+   "notes": [
+    "binding per view: {'C': [], 'F': ['F:F-T(tau=80)|high@16264']}"
+   ]
+  },
+  {
+   "boundary": "D5_2025-09-26_end",
+   "event_bar": 16337,
+   "close_time": "2025-09-26 17:30:00",
+   "close": 109912.14,
+   "bound": [
+    "C:F-K(k=5)|high@1346"
+   ],
+   "notes": [
+    "binding per view: {'C': ['C:F-K(k=5)|high@1346'], 'F': []}"
+   ]
+  }
+ ],
+ "propagation_log": [
+  {
+   "event_bar": 14408,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|high@1242",
+   "before": "active-structure",
+   "after": "broken@14408",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14408,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14408,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14416,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|high@1242",
+   "before": "active-structure",
+   "after": "broken@14416",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14416,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14416,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14420,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|high@1242",
+   "before": "active-structure",
+   "after": "broken@14420",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14420,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14420,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14469,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|high@1242",
+   "before": "active-structure",
+   "after": "broken@14469",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14469,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14469,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14476,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|high@1242",
+   "before": "active-structure",
+   "after": "broken@14476",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14476,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14476,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14491,
+   "step": 1,
+   "subject": "status:C:F-K(k=5)|high@1232",
+   "before": "active-structure",
+   "after": "broken@14491",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14491,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-K(k=5)|high@1232",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14491,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-K(k=5)|high@1232",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14502,
+   "step": 1,
+   "subject": "status:C:F-K(k=5)|high@1232",
+   "before": "active-structure",
+   "after": "broken@14502",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14502,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-K(k=5)|high@1232",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14502,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-K(k=5)|high@1232",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14533,
+   "step": 1,
+   "subject": "status:C:F-K(k=5)|high@1232",
+   "before": "active-structure",
+   "after": "broken@14533",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14533,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-K(k=5)|high@1232",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14533,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-K(k=5)|high@1232",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14541,
+   "step": 1,
+   "subject": "status:C:F-K(k=5)|high@1232",
+   "before": "active-structure",
+   "after": "broken@14541",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14541,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-K(k=5)|high@1232",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14541,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-K(k=5)|high@1232",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14654,
+   "step": 1,
+   "subject": "status:C:F-K(k=5)|high@1232",
+   "before": "active-structure",
+   "after": "broken@14654",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14654,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-K(k=5)|high@1232",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14654,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-K(k=5)|high@1232",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14656,
+   "step": 1,
+   "subject": "status:C:F-K(k=5)|high@1232",
+   "before": "active-structure",
+   "after": "broken@14656",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14656,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-K(k=5)|high@1232",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14656,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-K(k=5)|high@1232",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14685,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|high@1242",
+   "before": "active-structure",
+   "after": "broken@14685",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14685,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14685,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14698,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|high@1242",
+   "before": "active-structure",
+   "after": "broken@14698",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14698,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14698,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14722,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|high@1242",
+   "before": "active-structure",
+   "after": "broken@14722",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14722,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14722,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14735,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|high@1242",
+   "before": "active-structure",
+   "after": "broken@14735",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14735,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14735,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14760,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|high@1242",
+   "before": "active-structure",
+   "after": "broken@14760",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14760,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14760,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14779,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|high@1242",
+   "before": "active-structure",
+   "after": "broken@14779",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14779,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14779,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14807,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|high@1242",
+   "before": "active-structure",
+   "after": "broken@14807",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14807,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14807,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14822,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|high@1242",
+   "before": "active-structure",
+   "after": "broken@14822",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14822,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14822,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14826,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|high@1242",
+   "before": "active-structure",
+   "after": "broken@14826",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14826,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14826,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14833,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|high@1242",
+   "before": "active-structure",
+   "after": "broken@14833",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14833,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14833,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14856,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|high@1242",
+   "before": "active-structure",
+   "after": "broken@14856",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14856,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14856,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14858,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|high@1242",
+   "before": "active-structure",
+   "after": "broken@14858",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14858,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14858,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14864,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|high@1242",
+   "before": "active-structure",
+   "after": "broken@14864",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14864,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 14864,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|high@1242",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15051,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|high@1284",
+   "before": "active-structure",
+   "after": "broken@15051",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15051,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|high@1284",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15051,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|high@1284",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15143,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|high@1284",
+   "before": "active-structure",
+   "after": "broken@15143",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15143,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|high@1284",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15143,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|high@1284",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15359,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|high@1284",
+   "before": "active-structure",
+   "after": "broken@15359",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15359,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|high@1284",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15359,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|high@1284",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15362,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|high@1284",
+   "before": "active-structure",
+   "after": "broken@15362",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15362,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|high@1284",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15362,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|high@1284",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15378,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|high@1284",
+   "before": "active-structure",
+   "after": "broken@15378",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15378,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|high@1284",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15378,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|high@1284",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15404,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|high@1284",
+   "before": "active-structure",
+   "after": "broken@15404",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15404,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|high@1284",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15404,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|high@1284",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15433,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|high@1284",
+   "before": "active-structure",
+   "after": "broken@15433",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15433,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|high@1284",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15433,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|high@1284",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15728,
+   "step": 1,
+   "subject": "status:C:F-K(k=12)|high@1286",
+   "before": "active-structure",
+   "after": "broken@15728",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15728,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-K(k=12)|high@1286",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15728,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-K(k=12)|high@1286",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15745,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|low@1315",
+   "before": "active-structure",
+   "after": "broken@15745",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15745,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|low@1315",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15745,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|low@1315",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15747,
+   "step": 1,
+   "subject": "status:C:F-K(k=12)|high@1286",
+   "before": "active-structure",
+   "after": "broken@15747",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15747,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-K(k=12)|high@1286",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15747,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-K(k=12)|high@1286",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15826,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|low@1315",
+   "before": "active-structure",
+   "after": "broken@15826",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15826,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|low@1315",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15826,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|low@1315",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15827,
+   "step": 1,
+   "subject": "status:C:F-K(k=12)|high@1286",
+   "before": "active-structure",
+   "after": "broken@15827",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15827,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-K(k=12)|high@1286",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15827,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-K(k=12)|high@1286",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15831,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|low@1315",
+   "before": "active-structure",
+   "after": "broken@15831",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15831,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|low@1315",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15831,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|low@1315",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15832,
+   "step": 1,
+   "subject": "status:C:F-K(k=12)|high@1286",
+   "before": "active-structure",
+   "after": "broken@15832",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15832,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-K(k=12)|high@1286",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15832,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-K(k=12)|high@1286",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15834,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|low@1315",
+   "before": "active-structure",
+   "after": "broken@15834",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15834,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|low@1315",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15834,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|low@1315",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15838,
+   "step": 1,
+   "subject": "status:C:F-K(k=12)|high@1286",
+   "before": "active-structure",
+   "after": "broken@15838",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15838,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-K(k=12)|high@1286",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15838,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-K(k=12)|high@1286",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15846,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|high@1322",
+   "before": "active-structure",
+   "after": "broken@15846",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15846,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|high@1322",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15846,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|high@1322",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15854,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|high@1322",
+   "before": "active-structure",
+   "after": "broken@15854",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15854,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|high@1322",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15854,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|high@1322",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15979,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|low@1327",
+   "before": "active-structure",
+   "after": "broken@15979",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15979,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|low@1327",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15979,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|low@1327",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15996,
+   "step": 1,
+   "subject": "status:C:F-K(k=5)|low@1300",
+   "before": "active-structure",
+   "after": "broken@15996",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15996,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-K(k=5)|low@1300",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15996,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-K(k=5)|low@1300",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15996,
+   "step": 1,
+   "subject": "status:C:F-K(k=12)|low@1300",
+   "before": "active-structure",
+   "after": "broken@15996",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15996,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-K(k=12)|low@1300",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15996,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-K(k=12)|low@1300",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15996,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|low@1335",
+   "before": "active-structure",
+   "after": "broken@15996",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15996,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|low@1335",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 15996,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|low@1335",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16004,
+   "step": 1,
+   "subject": "status:C:F-K(k=5)|low@1300",
+   "before": "active-structure",
+   "after": "broken@16004",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16004,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-K(k=5)|low@1300",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16004,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-K(k=5)|low@1300",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16004,
+   "step": 1,
+   "subject": "status:C:F-K(k=12)|low@1300",
+   "before": "active-structure",
+   "after": "broken@16004",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16004,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-K(k=12)|low@1300",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16004,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-K(k=12)|low@1300",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16004,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|low@1335",
+   "before": "active-structure",
+   "after": "broken@16004",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16004,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|low@1335",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16004,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|low@1335",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16024,
+   "step": 1,
+   "subject": "status:C:F-K(k=5)|low@1300",
+   "before": "active-structure",
+   "after": "broken@16024",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16024,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-K(k=5)|low@1300",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16024,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-K(k=5)|low@1300",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16024,
+   "step": 1,
+   "subject": "status:C:F-K(k=12)|low@1300",
+   "before": "active-structure",
+   "after": "broken@16024",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16024,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-K(k=12)|low@1300",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16024,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-K(k=12)|low@1300",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16041,
+   "step": 1,
+   "subject": "status:C:F-K(k=5)|low@1300",
+   "before": "active-structure",
+   "after": "broken@16041",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16041,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-K(k=5)|low@1300",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16041,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-K(k=5)|low@1300",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16041,
+   "step": 1,
+   "subject": "status:C:F-K(k=12)|low@1300",
+   "before": "active-structure",
+   "after": "broken@16041",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16041,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-K(k=12)|low@1300",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16041,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-K(k=12)|low@1300",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16044,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|low@1335",
+   "before": "active-structure",
+   "after": "broken@16044",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16044,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|low@1335",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16044,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|low@1335",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16136,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|low@1351",
+   "before": "active-structure",
+   "after": "broken@16136",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16136,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|low@1351",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16136,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|low@1351",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16255,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|low@1351",
+   "before": "active-structure",
+   "after": "broken@16255",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16255,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|low@1351",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16255,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|low@1351",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16259,
+   "step": 1,
+   "subject": "status:C:F-T(tau=250)|low@1351",
+   "before": "active-structure",
+   "after": "broken@16259",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16259,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-T(tau=250)|low@1351",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16259,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-T(tau=250)|low@1351",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16337,
+   "step": 1,
+   "subject": "status:C:F-K(k=5)|high@1346",
+   "before": "active-structure",
+   "after": "broken@16337",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16337,
+   "step": 2,
+   "subject": "T-S1(view C)",
+   "before": "C:F-K(k=5)|high@1346",
+   "after": "recomputed-next-boundary",
+   "rule": "R:SP-20 recomputation, not patch"
+  },
+  {
+   "event_bar": 16337,
+   "step": 3,
+   "subject": "T-S5(falsifier)",
+   "before": "C:F-K(k=5)|high@1346",
+   "after": "invalid(contradicted)",
+   "rule": "R:SP-20 recomputation, not patch"
+  }
+ ]
+}
