@@ -117,9 +117,10 @@ def main() -> int:
     from trading_system.research.contextual_selection import (  # noqa: E402
         KIND_PROCEDURE, KIND_RESEARCH, KIND_SOURCE,
         InterpretationLedger, PolicyRegistry, Representation,
-        TIE_CROSS_EQUAL_UNBOUND, TIE_FT_EQ_FIRST,
+        SharedInformationAxis, TIE_CROSS_EQUAL_UNBOUND, TIE_FT_EQ_FIRST,
         build_legs, candidate_record, fk_turning_points, ft_turning_points,
-        reference_state_at, task_s1_structural_reference,
+        reference_state_at, same_bar_evidence_class,
+        task_s1_structural_reference,
         task_s2_event_binding, task_s5_falsifier,
     )
 
@@ -130,6 +131,13 @@ def main() -> int:
     fC = resample_ohlc(f1m, "1h", pd.Timedelta(hours=1))
     fF = resample_ohlc(f1m, "5min", pd.Timedelta(minutes=5))
     print(f"bars: 1m={len(f1m)} 5m={len(fF)} 1h={len(fC)}", flush=True)
+
+    # ---- shared information-time axis (CLOSED 6.2A-0 contract) ----------
+    # ALL cross-timeframe comparisons are verified on ONE master timeline;
+    # left context starts 2025-08-01, the evaluated event window is
+    # 2025-09-20..2025-09-27 (context is never confused with evaluation).
+    axis = SharedInformationAxis("BTCUSDT_1m_utc_completion", f1m.index)
+    print(f"shared axis: {axis.timeline_id} rows={axis.n_rows}", flush=True)
 
     # ---- policy/provenance classification (audit §8) ---------------------
     pol = PolicyRegistry()
@@ -166,6 +174,7 @@ def main() -> int:
     coverage_rows = []          # candidate-level rows (audit D6/§7)
     ambiguities_out = []
     t2_exclusions = Counter()   # final audit patch: T-S2 gate accounting
+    binding_kind_counts = Counter()  # first-break vs later-interaction (A/B)
     selection_history = []      # (available_time, reference candidates) per boundary
     registered = {}             # rid -> (uid_t1, uid_s5) active payload registrations
     replay_checks = []
@@ -282,12 +291,18 @@ def main() -> int:
                     allow_provisional=True)
                 t2_exclusions.update(
                     f"{e.code}|{e.detail[:28]}" for e in ev.excluded)
+                for _k in ev.binding_kinds.values():
+                    binding_kind_counts[_k] += 1
                 if ev.survivors:
                     ledger.record(ev, payload={
                         "kind": "T-S2", "event_bar": j, "close_price": c,
                         "refs_by_view": refs_by_view, "prev_close": prev_c,
                         "event_time": event_time,
-                        "state_id_prefix": f"{prev_bname}->{bname}:E{j}"})
+                        "state_id_prefix": f"{prev_bname}->{bname}:E{j}",
+                        # replay preserves ALL declared task parameters
+                        # (causal-state integration V1)
+                        "allow_provisional": True,
+                        "tie_policy": TIE_CROSS_EQUAL_UNBOUND})
                     ledger.record_event(
                         int(j), "binding",
                         f"close={c} time={event_time} notes={ev.notes}",
@@ -296,6 +311,7 @@ def main() -> int:
                         "boundary_interval": f"{prev_bname}->{bname}",
                         "event_bar": int(j), "event_time": str(event_time),
                         "close": c, "bound": ev.survivors,
+                        "binding_kinds": dict(ev.binding_kinds),
                         "notes": ev.notes,
                     })
                     # W8-pattern REAL propagation on breaks of active refs
@@ -309,7 +325,8 @@ def main() -> int:
                             log = ledger.propagate(
                                 int(j), [prev_sel],
                                 changed_states={prev_sel: "broken"},
-                                update_time=event_time)
+                                update_time=event_time,
+                                event_ref=f"{prev_bname}->{bname}:E{j}")
                             row.setdefault("propagations", []).extend(log)
 
         # ---- boundary-time propagation (D5): dependents registered at
@@ -376,6 +393,24 @@ def main() -> int:
 
     # ---- old-vs-new comparison (§9) -------------------------------------
     comparison = None
+    # new-run self-check ALWAYS runs (acceptance criterion 1): zero tolerated
+    # future-reference use — every binding verified on the shared axis
+    knowable_by_id = {rrow["candidate_id"]: rrow["knowable_time"]
+                      for rrow in coverage_rows if rrow["knowable_time"]}
+    new_violations = []
+    axis_verified = 0
+    for e in events_out:
+        et = pd.Timestamp(e["event_time"])
+        for cid in e.get("bound", []):
+            kt = knowable_by_id.get(cid)
+            # CAUSAL-STATE INTEGRATION V1: the availability claim is
+            # verified on the shared InformationKey axis (one market
+            # event = one information-time identity)
+            if axis.available(kt, et):
+                axis_verified += 1
+            else:
+                new_violations.append({"event_time": str(et), "bound": cid,
+                                       "knowable": str(kt)})
     if args.old_record and args.old_record.exists():
         old = json.load(open(args.old_record))
         old_events = old.get("binding_events", [])
@@ -383,8 +418,6 @@ def main() -> int:
         # reproduce the auditor's future-reference counterexamples on the
         # OLD events with the NEW availability axis: rebuild id -> knowable
         # time from the regenerated candidates (id scheme is stable).
-        knowable_by_id = {rrow["candidate_id"]: rrow["knowable_time"]
-                          for rrow in coverage_rows if rrow["knowable_time"]}
         contaminated, contam_events = [], set()
         for e in old_events:
             et = pd.Timestamp(e["close_time"])
@@ -427,14 +460,7 @@ def main() -> int:
                         "finding": "later-boundary selection applied to "
                                    "earlier event (D1)"})
                     later_events.add(e.get("close_time"))
-        # new-run self-check: zero tolerated future-reference violations
-        new_violations = []
-        for e in events_out:
-            et = pd.Timestamp(e["event_time"])
-            for cid in e.get("bound", []):
-                kt = knowable_by_id.get(cid)
-                if kt is not None and pd.Timestamp(kt) > et:
-                    new_violations.append({"event_time": str(et), "bound": cid})
+        # new-run self-check moved outside (always runs)
         comparison = {
             "old_record": str(args.old_record),
             "old_n_events": len(old_events),
@@ -453,6 +479,7 @@ def main() -> int:
                 "examples": contaminated[:10] + later_sel[:10],
             },
             "new_run_future_reference_violations": len(new_violations),
+            "new_run_information_key_axis_verified_bindings": axis_verified,
             "new_n_events": len(events_out),
             "new_propagation": ledger.snapshot(),
         }
@@ -504,9 +531,17 @@ def main() -> int:
     recur_counts = Counter((a.get("rep"), a.get("bar")) for a in amb_records)
     recur_all = sum(1 for ev, n in recur_counts.items()
                     if n == len(boundaries_out))
-    resolved_recs = [a for a in amb_records if _rec_ev(a)]
-    unresolved_recs = [a for a in amb_records if not _rec_ev(a)]
-    side_counts = Counter(_rec_ev(a) for a in resolved_recs)
+    # endpoint evidence classes (causal-state integration V1): only PROVEN
+    # ordering resolves; constrained-but-not-unique stays material
+    ev_class = Counter(same_bar_evidence_class(_rec_ev(a)) for a in amb_records)
+    resolved_recs = [a for a in amb_records
+                     if same_bar_evidence_class(_rec_ev(a)) == "proven"]
+    constrained_recs = [a for a in amb_records
+                        if same_bar_evidence_class(_rec_ev(a)) == "constrained"]
+    unresolved_recs = [a for a in amb_records
+                       if same_bar_evidence_class(_rec_ev(a)) == "unavailable"]
+    side_counts = Counter(_rec_ev(a) for a in
+                          resolved_recs + constrained_recs)
     amb_by_id = {r["candidate_id"]: r for r in coverage_rows
                  if r.get("same_bar_order") == "unresolved"}
     affecting = []
@@ -526,7 +561,8 @@ def main() -> int:
                             "boundary": b["boundary"], "rep": rep_name,
                             "task": tname, "candidate_id": cid,
                             "same_bar_evidence": r.get("same_bar_evidence"),
-                            "material": not r.get("same_bar_evidence"),
+                            "material": (same_bar_evidence_class(
+                                r.get("same_bar_evidence")) != "proven"),
                             "task_status": trow.get("status"),
                             "selected": sel == cid,
                         })
@@ -544,10 +580,45 @@ def main() -> int:
                                    sorted(Counter(recur_counts.values()).items())},
         "endpoint_resolved_records": len(resolved_recs),
         "endpoint_resolution_side": dict(side_counts),
+        "evidence_class_counts": dict(ev_class),
+        "constrained_not_unique_records": len(constrained_recs),
         "genuinely_unresolved_records": len(unresolved_recs),
         "genuinely_unresolved_events": len({(a.get("rep"), a.get("bar"))
                                            for a in unresolved_recs}),
         "affecting_actual_selections": affecting,
+    }
+    binding_accounting = {
+        "note": ("T-S2 binding kinds from pre-event lifecycle state "
+                 "(knowledge contract file 16): first-break = structural "
+                 "break eligibility (A); later-interaction = subsequent "
+                 "factual price interaction with a known level (B), "
+                 "preserved as separate events and never dropped"),
+        "by_kind": dict(binding_kind_counts),
+        "factual_later_interactions": sum(
+            v for k, v in binding_kind_counts.items()
+            if "later-interaction" in k),
+        "first_break_bindings": sum(
+            v for k, v in binding_kind_counts.items()
+            if k.endswith("first-break") and "later" not in k),
+    }
+
+    # ---- stable identity recognition across overlapping replay windows (§11)
+    rep_ck5 = reps["C_FK5"]
+    fC_eval = fC[(fC.index >= pd.Timestamp(args.start))
+                 & (fC.index < pd.Timestamp(args.end))]
+    ids_full = {p.candidate_id
+                for p in fk_turning_points(fC, int(rep_ck5.param("k")), rep_ck5)}
+    ids_eval = {p.candidate_id
+                for p in fk_turning_points(fC_eval, int(rep_ck5.param("k")),
+                                           rep_ck5)}
+    identity_recognition = {
+        "rep": "C_FK5",
+        "note": ("source/time identity: candidates regenerated on the "
+                 "evaluation-only window (local bar indices shifted) are "
+                 "recognized in the full left-context run by identity"),
+        "n_eval_window_candidates": len(ids_eval),
+        "recognized_in_full_context": len(ids_eval & ids_full),
+        "unrecognized_examples": sorted(ids_eval - ids_full)[:5],
     }
     print("propagation summary:", propagation_summary, flush=True)
     print("ambiguity accounting:", {k: v for k, v in ambiguity_accounting.items()
@@ -556,6 +627,8 @@ def main() -> int:
     print("ambiguity affecting selections (material only):",
           [a for a in affecting if a["material"]], flush=True)
     print("t2 exclusions:", dict(t2_exclusions), flush=True)
+    print("binding accounting:", binding_accounting, flush=True)
+    print("identity recognition:", identity_recognition, flush=True)
 
     # ---- record (provenance: ACTUAL source version used for the run) ----
     csm_path = Path(args.src) / "trading_system/research/contextual_selection/csm.py"
@@ -571,6 +644,13 @@ def main() -> int:
         "inputs": {
             "months": args.months,
             "window": f"{args.start} -> {args.end} UTC",
+            "left_context_start": "2025-08-01 (context only)",
+            "evaluation_event_window": "2025-09-20 .. 2025-09-27 UTC",
+            "shared_information_axis": {
+                "timeline_id": axis.timeline_id,
+                "n_rows": axis.n_rows,
+                "contract": "INFORMATION_KEY_V1_2 (CLOSED 6.2A-0, reused)",
+            },
             "files": {f"BTCUSDT_1m_{m.strip()}.csv":
                       _sha256_file(args.mirror_dir / f"BTCUSDT_1m_{m.strip()}.csv")
                       for m in args.months.split(",")},
@@ -614,6 +694,8 @@ def main() -> int:
               "comparison_v1_vs_v2": comparison,
               "propagation_summary": propagation_summary,
               "ambiguity_accounting": ambiguity_accounting,
+              "binding_accounting": binding_accounting,
+              "identity_recognition": identity_recognition,
               "propagation_revisions": ledger.revisions}
     out_path = out_dir / "experiment_record_v2.json"
     out_path.write_text(json.dumps(record, indent=1, default=str))

@@ -71,6 +71,18 @@ def _pt(pid, rep, side, occ, level, know, status="confirmed", **kw):
         knowable_time=T0 + timedelta(minutes=know), **kw)
 
 
+def _fill_leg_times(legs):
+    """Causal-state integration V1: fixture legs carry verified times on the
+    shared T0-minute axis (same convention as ``_pt``) so decision-time
+    availability is always verifiable."""
+    for l in legs:
+        if l.t0_time is None:
+            l.t0_time = T0 + timedelta(minutes=l.t0)
+            l.t1_time = T0 + timedelta(minutes=l.t1)
+            l.knowable_time = T0 + timedelta(minutes=l.knowable_bar)
+    return legs
+
+
 @pytest.fixture(scope="module")
 def world():
     """Coarse points C + fine points F exactly as file 19 §19.2."""
@@ -101,6 +113,7 @@ def world():
         LegCandidate("fD", REP_F, "fC.1", "fD.1", "down", 38, 39, 42.0, 22.0, 41),
         LegCandidate("fE", REP_F, "fD.1", "fE.1", "up", 39, 40, 22.0, 50.0, 42),
     ]
+    _fill_leg_times(clegs + flegs)
     pol = PolicyRegistry()
     pol.register("P-ORIGIN", "role: origin of the most recent confirmed leg (SWS-02, O-class)",
                  "origin-of-last-confirmed-leg")
@@ -214,6 +227,7 @@ def _extended_world(world):
     legs = world["clegs"] + [
         LegCandidate("Leg4", REP_C, "H_b", "L_c", "down", 40, 48, 50.0, 28.0, 56),
     ]
+    _fill_leg_times(legs)
     return pts, legs
 
 

@@ -119,8 +119,8 @@ def test_t2_status_gating_provisional_superseded_broken():
     prov = _pt("prov", rep, "low", 3, 10.0, 5, status=STATUS_PROVISIONAL)
     sup = _pt("sup", rep, "low", 3, 10.0, 5)
     sup.add_transition(4, STATUS_SUPERSEDED, by="other", note="test")
-    brk = _pt("brk", rep, "low", 3, 10.0, 5)
-    brk.add_transition(4, STATUS_BROKEN, note="test")
+    brk = _pt("brk", rep, "low", 3, 10.0, 4)   # knowable at the event time
+    brk.add_transition(2, STATUS_BROKEN, note="test")   # broken BEFORE the event
     ok = _pt("ok", rep, "low", 3, 10.0, 4)   # knowable at the event time
     t4 = T0 + timedelta(minutes=4)
     r = task_s2_event_binding(4, 0.0, {"C": [prov, sup, brk, ok]}, 4,
@@ -128,12 +128,16 @@ def test_t2_status_gating_provisional_superseded_broken():
     codes = {e.candidate_id: e.code for e in r.excluded}
     assert codes.get("prov") == X_STATE
     assert codes.get("sup") == X_SUPER
-    assert codes.get("brk") == X_STATE
-    assert r.survivors == ["ok"]
-    # explicit provisional contract opens prov only
+    # knowledge contract (file 16 T-S2): a historically-broken reference is
+    # STILL bindable as a separate later factual interaction — never dropped
+    assert set(r.survivors) == {"brk", "ok"}
+    assert r.binding_kinds["ok"] == "first-break"
+    assert r.binding_kinds["brk"] == "later-interaction"
+    # explicit provisional contract opens prov only, tagged per SWS-04a
     r2 = task_s2_event_binding(4, 0.0, {"C": [prov]}, 4, event_time=t4,
                                allow_provisional=True)
     assert r2.survivors == ["prov"]
+    assert r2.binding_kinds["prov"] == "provisional:first-break"
 
 
 # --------------------------------------------------------------------------
@@ -279,22 +283,36 @@ def test_same_bar_ambiguity_surfaces_on_t1_selection():
     assert r.selected_id is None
     assert r.survivors == ["low@1327"]
     assert r.unresolved is not None and r.unresolved.reason_code == REASON_AI
-    assert "same-bar order unresolved" in " ".join(r.notes)
+    assert "same-bar order unavailable" in " ".join(r.notes)
     # dependents are blocked, not silently fed
     assert "T-S5-falsifier" in r.unresolved.dependents_blocked
 
 
 def test_same_bar_endpoint_evidence_does_not_downgrade():
-    # when OHLC endpoints determine the order the choice is unrelated to the
+    # when OHLC endpoints PROVE the order the choice is unrelated to the
     # ambiguity: stays justified and the factual resolution is noted
     pol = PolicyRegistry()
     pol.register("P-ORIGIN", "origin role", "origin-of-last-confirmed-leg")
-    rep, pts, legs = _amb_world(evidence="low-first")
+    rep, pts, legs = _amb_world(evidence="proven:low-first:open-at-low")
     r = task_s1_structural_reference(pts, legs, 1335, rep,
                                      "origin-of-last-confirmed-leg", pol,
                                      "P-ORIGIN")
     assert r.status == "justified" and r.selected_id == "low@1327"
-    assert any("determined by OHLC endpoints" in n for n in r.notes)
+    assert any("proven by OHLC endpoints" in n for n in r.notes)
+
+
+def test_same_bar_constrained_evidence_stays_material():
+    # close-at-extreme evidence is CONSTRained but not unique: the first-touch
+    # order is not proven, so the ambiguity remains material (AI)
+    pol = PolicyRegistry()
+    pol.register("P-ORIGIN", "origin role", "origin-of-last-confirmed-leg")
+    rep, pts, legs = _amb_world(evidence="constrained:close-at-low")
+    r = task_s1_structural_reference(pts, legs, 1335, rep,
+                                     "origin-of-last-confirmed-leg", pol,
+                                     "P-ORIGIN")
+    assert r.status == "unresolved"
+    assert r.unresolved is not None and r.unresolved.reason_code == REASON_AI
+    assert "constrained" in r.unresolved.evidence_needed
 
 
 def test_same_bar_ambiguity_on_unselected_candidate_is_unrelated():
@@ -327,18 +345,25 @@ def test_same_bar_ambiguity_surfaces_on_t5_falsifier():
 
 def test_endpoint_order_evidence_from_generator():
     # bar 3 is both the unique left-window high and low; its OPEN is at the
-    # high -> factual order "high-first" is recorded on both candidates
+    # high -> the first-touch order is PROVEN high-first on both candidates
     rows = [(5, 6, 4, 5)] * 8
-    rows[3] = (9.0, 9.0, 2.0, 5.0)      # open == high -> high-first
+    rows[3] = (9.0, 9.0, 2.0, 5.0)      # open == high -> proven high-first
     bars = _bars(rows)
     rep = _rep("C", k=3)
     pts = [p for p in fk_turning_points(bars, 3, rep) if p.occurrence_bar == 3]
     assert len(pts) == 2
     assert all(p.same_bar_order == "unresolved" for p in pts)
-    assert all(p.same_bar_evidence == "high-first" for p in pts)
-    # interior endpoints -> no evidence
+    assert all(p.same_bar_evidence == "proven:high-first:open-at-high"
+               for p in pts)
+    # close at the high: order CONSTRained but not unique (not proven)
     rows2 = [(5, 6, 4, 5)] * 8
-    rows2[3] = (5.0, 9.0, 2.0, 5.0)
+    rows2[3] = (5.0, 9.0, 2.0, 9.0)     # close == high -> constrained
     pts2 = [p for p in fk_turning_points(_bars(rows2), 3, rep)
             if p.occurrence_bar == 3]
-    assert all(p.same_bar_evidence is None for p in pts2)
+    assert all(p.same_bar_evidence == "constrained:close-at-high" for p in pts2)
+    # interior endpoints -> ordering unavailable
+    rows3 = [(5, 6, 4, 5)] * 8
+    rows3[3] = (5.0, 9.0, 2.0, 5.0)
+    pts3 = [p for p in fk_turning_points(_bars(rows3), 3, rep)
+            if p.occurrence_bar == 3]
+    assert all(p.same_bar_evidence is None for p in pts3)
