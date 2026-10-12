@@ -10,6 +10,9 @@ These tests are the regression golden set required by LRN-06 §18.7 item 1.
 """
 from __future__ import annotations
 
+import copy
+from datetime import timedelta
+
 import pandas as pd
 import pytest
 
@@ -40,6 +43,9 @@ from trading_system.research.contextual_selection import (
     task_s5_falsifier,
 )
 
+# Shared information-time axis for the fixture: bar i -> T0 + i minutes.
+T0 = pd.Timestamp("2025-01-01 00:00:00")
+
 # --------------------------------------------------------------------------
 # Shared fixture (file 19 §19.2) — ordinal levels, bar indices as labels
 # --------------------------------------------------------------------------
@@ -57,9 +63,12 @@ REP_F = _rep("F", "fine", k=2)
 
 
 def _pt(pid, rep, side, occ, level, know, status="confirmed", **kw):
-    return PointCandidate(candidate_id=pid, rep=rep, side=side,
-                          occurrence_bar=occ, level=level, knowable_bar=know,
-                          status=status, **kw)
+    return PointCandidate(
+        candidate_id=pid, rep=rep, side=side,
+        occurrence_bar=occ, level=level, knowable_bar=know,
+        status=status,
+        occurrence_time=T0 + timedelta(minutes=occ),
+        knowable_time=T0 + timedelta(minutes=know), **kw)
 
 
 @pytest.fixture(scope="module")
@@ -145,6 +154,9 @@ def test_W2_entry_leg_ambiguity_preserved(world):
     assert "zone-boundaries" in r.unresolved.dependents_blocked
     # factual differences preserved in notes (depth vs recency not decided)
     assert any("depth" in n and "knowable" in n for n in r.notes)
+    # audit D6: depth values are actual numbers (fB: |35-25|=10, fD: |42-22|=20)
+    note_text = " ".join(r.notes)
+    assert "depth=10" in note_text and "depth=20" in note_text
 
 
 # --------------------------------------------------------------------------
@@ -165,6 +177,24 @@ def test_W3_task_change(world):
     notes = " ".join(r.notes)
     assert "I1" in notes and "L_b" in notes
     assert "I2" in notes and "fD.1" in notes
+    # audit D6: direction is structural — role output changes with direction
+    claims_up = [{"interpretation": "I3", "view": "F",
+                  "role": "high-of-current-leg", "direction": "up"}]
+    claims_dn = [{"interpretation": "I4", "view": "F",
+                  "role": "high-of-current-leg", "direction": "down"}]
+    ru = task_s5_falsifier(claims_up, world["points"],
+                           world["clegs"] + world["flegs"], 52, state_id_prefix="W3u")
+    rd = task_s5_falsifier(claims_dn, world["points"],
+                           world["clegs"] + world["flegs"], 52, state_id_prefix="W3d")
+    assert ru.selected_id == "fE.1"   # high of last up-leg fE
+    assert rd.selected_id == "fC.1"   # high of last down-leg fD
+    # missing direction -> explicit unresolved (IC), never inferred
+    claims_nodir = [{"interpretation": "I5", "view": "F",
+                     "role": "low-of-current-leg"}]
+    rn = task_s5_falsifier(claims_nodir, world["points"],
+                           world["clegs"] + world["flegs"], 52, state_id_prefix="W3n")
+    assert rn.status == "unresolved"
+    assert rn.unresolved is not None and rn.unresolved.reason_code == REASON_IC
     # entry-timing for the same bars stays ambiguous (W2 pattern)
     r3 = task_s3_entry_leg(world["clegs"][2], world["flegs"], 52, REP_F,
                            continuation_condition=("direction", "down"),
@@ -236,7 +266,8 @@ def test_W5_break_binding_and_reversal_ai(world):
               next(p for p in world["fine"] if p.candidate_id == "fD.1")]
     r = task_s2_event_binding(event_bar=53, close_price=19.0,
                               refs_by_view={"C": refs_c, "F": refs_f},
-                              decision_bar=53, state_id_prefix="W5")
+                              decision_bar=53, state_id_prefix="W5",
+                              event_time=T0 + timedelta(minutes=53))
     assert set(r.survivors) == {"L_b", "fB.1", "fD.1"}
     notes = " ".join(r.notes)
     assert "'C': ['L_b']" in notes or '"C": ["L_b"]' in notes or "C" in notes
@@ -257,22 +288,61 @@ def test_W5_break_binding_and_reversal_ai(world):
 def test_W8_role_change_and_propagation(world):
     pts, legs = _extended_world(world)
     pol = world["pol"]
+    # structural reference at 56 in the intact world: origin of H_b->L_c
     r = task_s1_structural_reference(pts, legs, 56, REP_C,
                                      "origin-of-last-confirmed-leg", pol, "P-ORIGIN",
                                      state_id_prefix="W8")
     assert r.selected_id == "H_b"  # origin of H_b->L_c after the bar-53 break
+    assert r.direction == "down"   # direction from the leg data (D6), not notes
+
+    # state at bar 53: Leg3 is the last knowable confirmed leg -> L_b
+    r53 = task_s1_structural_reference(pts, legs, 53, REP_C,
+                                       "origin-of-last-confirmed-leg", pol, "P-ORIGIN",
+                                       state_id_prefix="W8")
+    assert r53.selected_id == "L_b"
+    claims = [{"interpretation": "I1", "view": "C",
+               "role": "origin-of-last-confirmed-leg", "direction": "up"}]
+    s53 = task_s5_falsifier(claims, pts, legs, 53, state_id_prefix="W8S5")
+    assert s53.selected_id == "L_b"
+
     ledger = InterpretationLedger()
-    ledger.record_event(53, "close-break", "close 19 < L_b 20", ["L_b"])
-    log = ledger.propagate(53, [
-        ("status:L_b", "active-structure", "broken@53"),
-        ("T-S1(view C)", "L_b", "H_b"),
-        ("T-S5(I1)", "L_b", "invalid(I1-contradicted)"),
-        ("liquidity-relevance-set", "R-up={H_b}", "R-down(recomputed)"),
-        ("zones-dependent-on-W1-state", "recompute", "recomputed"),
-    ])
-    assert len(log) == 5
-    assert log[1]["before"] == "L_b" and log[1]["after"] == "H_b"
-    assert all("SP-20" in e["rule"] for e in log)
+    t1_uid = ledger.record(r53, payload={
+        "kind": "T-S1", "points": copy.deepcopy(pts), "legs": copy.deepcopy(legs),
+        "rep": REP_C, "role": "origin-of-last-confirmed-leg",
+        "policy": pol, "policy_id": "P-ORIGIN", "state_id_prefix": "W8"})
+    s5_uid = ledger.record(s53, payload={
+        "kind": "T-S5", "claims": copy.deepcopy(claims),
+        "points": copy.deepcopy(pts), "legs": copy.deepcopy(legs),
+        "state_id_prefix": "W8S5"})
+    ledger.record_event(53, "close-break", "close 19 < L_b 20", ["L_b"],
+                        event_time=T0 + timedelta(minutes=53))
+
+    # break fact at 53 -> propagation recomputes dependents (no strings)
+    log53 = ledger.propagate(53, ["L_b"], changed_states={"L_b": "broken"},
+                             update_time=T0 + timedelta(minutes=53))
+    assert log53 and all("SP-20" in e["rule"] for e in log53)
+    t1v2 = ledger.versions[t1_uid][1]
+    # computed: L_b unusable now, but the successor is NOT knowable until 56
+    assert t1v2["recomputable"] and t1v2["computed_changes"]
+    assert t1v2["result"].status == "unresolved"
+    assert t1v2["result"].selected_id is None          # H_b must NOT appear at 53
+    assert all(c.get("after") != "H_b" for c in t1v2["computed_changes"])
+    # the falsifier fired as a COMPUTED task-level effect
+    s5v2 = ledger.versions[s5_uid][1]
+    assert s5v2["result"].status == "falsified"
+    assert any(c.get("field") == "status" and c.get("after") == "falsified"
+               for c in s5v2["computed_changes"])
+
+    # bar 56: Leg4 becomes knowable -> ONLY NOW can T-S1 move to H_b
+    ledger.record_change(56, "Leg4", "knowable")
+    log56 = ledger.propagate(56, ["Leg4"])
+    t1v3 = ledger.versions[t1_uid][2]
+    assert t1v3["result"].selected_id == "H_b"
+    assert any(c.get("field") == "selected_id" and c.get("after") == "H_b"
+               for c in t1v3["computed_changes"])
+    # prior historical versions preserved (nothing rewritten in place)
+    assert ledger.versions[t1_uid][0]["result"].selected_id == "L_b"
+    assert ledger.versions[t1_uid][1]["result"].selected_id is None
     assert ledger.snapshot()["n_events"] == 1
 
 
@@ -311,7 +381,8 @@ def test_W10_singleton_binding(world):
               next(p for p in world["fine"] if p.candidate_id == "fD.1")]
     r = task_s2_event_binding(event_bar=47, close_price=24.0,
                               refs_by_view={"C": refs_c, "F": refs_f},
-                              decision_bar=47, state_id_prefix="W10")
+                              decision_bar=47, state_id_prefix="W10",
+                              event_time=T0 + timedelta(minutes=47))
     assert r.status == "justified"
     assert r.survivors == ["fB.1"]
     assert r.selected_id == "fB.1"
