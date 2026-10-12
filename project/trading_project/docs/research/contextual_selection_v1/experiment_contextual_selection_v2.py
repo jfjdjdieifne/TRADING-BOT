@@ -165,6 +165,7 @@ def main() -> int:
     events_out = []
     coverage_rows = []          # candidate-level rows (audit D6/§7)
     ambiguities_out = []
+    t2_exclusions = Counter()   # final audit patch: T-S2 gate accounting
     selection_history = []      # (available_time, reference candidates) per boundary
     registered = {}             # rid -> (uid_t1, uid_s5) active payload registrations
     replay_checks = []
@@ -274,7 +275,13 @@ def main() -> int:
                 ev = task_s2_event_binding(
                     j, c, refs_by_view, j, tie_bound=False, prev_close=prev_c,
                     state_id_prefix=f"{prev_bname}->{bname}:E{j}",
-                    event_time=event_time)
+                    event_time=event_time,
+                    # FINAL AUDIT PATCH: provisional references are admitted
+                    # ONLY by this explicit contract (occurrence-visible);
+                    # the csm default excludes them.  Statuses are recorded.
+                    allow_provisional=True)
+                t2_exclusions.update(
+                    f"{e.code}|{e.detail[:28]}" for e in ev.excluded)
                 if ev.survivors:
                     ledger.record(ev, payload={
                         "kind": "T-S2", "event_bar": j, "close_price": c,
@@ -450,6 +457,106 @@ def main() -> int:
             "new_propagation": ledger.snapshot(),
         }
 
+    # ---- final audit patch (item 5): propagation + ambiguity accounting ----
+    # NOTE on semantics: propagation_revisions rows are CUMULATIVE per-boundary
+    # records of one replay stream — never "independent market events".
+    revs = ledger.revisions
+    change_facts = [r for r in revs if r.get("kind") == "change-fact"]
+    recomputations = [r for r in revs if r.get("kind") != "change-fact"]
+    with_diffs = [r for r in recomputations if r.get("computed_changes")]
+    no_ops = [r for r in recomputations if not r.get("computed_changes")]
+    propagation_summary = {
+        "note": ("rows are cumulative per-boundary records of one replay "
+                 "stream (distinct idem rep-bar events per boundary), not "
+                 "independent market events"),
+        "total_rows": len(revs),
+        "change_facts": len(change_facts),
+        "recomputations": len(recomputations),
+        "recomputations_with_computed_diffs": len(with_diffs),
+        "recomputations_no_op": len(no_ops),
+    }
+
+    def _rid(cid: str) -> str:
+        return cid.split("|")[0]
+
+    # Cumulative ambiguity RECORDS = per-boundary generator ambiguity entries
+    # (ambiguities_out), cross-referenced with candidate-level endpoint
+    # evidence from the final candidate inventory.
+    kind_map = {"same-bar-extreme-vs-reversal": "F-T",
+                "same-bar-order-unresolved": "F-K"}
+    amb_records = [a for a in ambiguities_out
+                   if a.get("kind") in kind_map]
+    ev_by_id = {r["candidate_id"]: r.get("same_bar_evidence")
+                for r in coverage_rows}
+
+    def _rec_ev(a):
+        if a.get("endpoint_evidence"):
+            return a["endpoint_evidence"]
+        for pid in a.get("pair", []):
+            e = ev_by_id.get(pid)
+            if e:
+                return e
+        return None
+
+    fam_counts = Counter(kind_map[a["kind"]] for a in amb_records)
+    distinct_events = sorted({(a.get("rep"), a.get("bar"))
+                              for a in amb_records})
+    recur_counts = Counter((a.get("rep"), a.get("bar")) for a in amb_records)
+    recur_all = sum(1 for ev, n in recur_counts.items()
+                    if n == len(boundaries_out))
+    resolved_recs = [a for a in amb_records if _rec_ev(a)]
+    unresolved_recs = [a for a in amb_records if not _rec_ev(a)]
+    side_counts = Counter(_rec_ev(a) for a in resolved_recs)
+    amb_by_id = {r["candidate_id"]: r for r in coverage_rows
+                 if r.get("same_bar_order") == "unresolved"}
+    affecting = []
+    for b in boundaries_out:
+        for rep_name, tdict in b["tasks"].items():
+            if not isinstance(tdict, dict):
+                continue
+            for tname, trow in tdict.items():
+                if not isinstance(trow, dict):
+                    continue
+                sel = trow.get("selected") or trow.get("selected_id")
+                scanned = ([sel] if sel else []) + list(trow.get("survivors") or [])
+                for cid in scanned:
+                    r = amb_by_id.get(cid)
+                    if r:
+                        affecting.append({
+                            "boundary": b["boundary"], "rep": rep_name,
+                            "task": tname, "candidate_id": cid,
+                            "same_bar_evidence": r.get("same_bar_evidence"),
+                            "material": not r.get("same_bar_evidence"),
+                            "task_status": trow.get("status"),
+                            "selected": sel == cid,
+                        })
+    ambiguity_accounting = {
+        "note": ("cumulative ambiguity RECORDS across boundary/rep runs "
+                 "(repeated observations of the same bar event recur across "
+                 "prefixes) — distinct rep-bar events are the market-event "
+                 "scale; records are never independent market events"),
+        "total_records": len(amb_records),
+        "by_family": dict(fam_counts),
+        "distinct_rep_bar_events": len(distinct_events),
+        "events_recurring_in_all_boundaries": recur_all,
+        "max_records_per_event": max(recur_counts.values()) if recur_counts else 0,
+        "recurrence_distribution": {str(k): v for k, v in
+                                   sorted(Counter(recur_counts.values()).items())},
+        "endpoint_resolved_records": len(resolved_recs),
+        "endpoint_resolution_side": dict(side_counts),
+        "genuinely_unresolved_records": len(unresolved_recs),
+        "genuinely_unresolved_events": len({(a.get("rep"), a.get("bar"))
+                                           for a in unresolved_recs}),
+        "affecting_actual_selections": affecting,
+    }
+    print("propagation summary:", propagation_summary, flush=True)
+    print("ambiguity accounting:", {k: v for k, v in ambiguity_accounting.items()
+                                    if k != "affecting_actual_selections"},
+          flush=True)
+    print("ambiguity affecting selections (material only):",
+          [a for a in affecting if a["material"]], flush=True)
+    print("t2 exclusions:", dict(t2_exclusions), flush=True)
+
     # ---- record (provenance: ACTUAL source version used for the run) ----
     csm_path = Path(args.src) / "trading_system/research/contextual_selection/csm.py"
     summary = {
@@ -475,6 +582,10 @@ def main() -> int:
             "crossing": TIE_CROSS_EQUAL_UNBOUND,
             "ft_equal_extreme": TIE_FT_EQ_FIRST,
         },
+        "t2_provisional_contract": (
+            "T-S2 admits provisional references ONLY via explicit "
+            "allow_provisional=True (occurrence-visible); the csm default "
+            "excludes provisional/superseded/broken candidates"),
         "n_boundaries": len(boundaries_out),
         "n_events": len(events_out),
         "n_candidate_rows": len(coverage_rows),
@@ -483,6 +594,7 @@ def main() -> int:
         "replay_checks": replay_checks,
         "exclusion_histogram": dict(Counter(
             e.code for r in ledger.results for e in r.excluded)),
+        "t2_exclusion_histogram": dict(t2_exclusions),
         "unresolved_histogram": dict(Counter(
             r.unresolved.reason_code for r in ledger.results if r.unresolved)),
         "sp16_agreement": dict(Counter(
@@ -500,6 +612,8 @@ def main() -> int:
               "binding_events": events_out,
               "ambiguities": ambiguities_out[:200],
               "comparison_v1_vs_v2": comparison,
+              "propagation_summary": propagation_summary,
+              "ambiguity_accounting": ambiguity_accounting,
               "propagation_revisions": ledger.revisions}
     out_path = out_dir / "experiment_record_v2.json"
     out_path.write_text(json.dumps(record, indent=1, default=str))

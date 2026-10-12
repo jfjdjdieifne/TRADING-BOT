@@ -157,6 +157,10 @@ class PointCandidate:
     status_transitions: List[StatusTransition] = field(default_factory=list)
     # --- audit D4: "unresolved" when same-bar high/low order is unknowable ---
     same_bar_order: str = "resolved"   # "resolved" | "unresolved"
+    # factual (CLASS_F) OHLC-endpoint evidence that DOES determine the
+    # intrabar order ("high-first" | "low-first") even when the generator
+    # cannot order the bar: e.g. an open at the extreme.  None = no evidence.
+    same_bar_evidence: Optional[str] = None
     initial_status: str = ""           # status at construction (D3 history)
 
     def __post_init__(self) -> None:
@@ -364,18 +368,48 @@ def available_at(c: object, *,
     Timestamps are the only axis allowed to cross view domains; bar indices
     are compared only inside one timeframe domain.  When both sides carry
     times, the time comparison governs (never raw cross-domain indices).
+    A candidate with no recorded ``knowable_time`` under a time query is NOT
+    available: an unverifiable availability is never claimed (this covers the
+    truncated-prefix tail whose confirmation lies beyond the supplied bars).
     """
     k_time = getattr(c, "knowable_time", None)
     if as_of_time is not None:
         if k_time is None:
-            raise ValueError(
-                "candidate lacks knowable_time; availability cannot be "
-                "evaluated on the shared information-time axis (audit D1)")
+            return False   # unverifiable on the time axis -> not available
         return bool(k_time <= as_of_time)
     if as_of_bar is not None:
         return bool(getattr(c, "knowable_bar") <= as_of_bar)
     raise ValueError("availability requires a shared axis "
                      "(as_of_time with candidate knowable_time, or as_of_bar)")
+
+
+def _endpoint_order(open_: float, high: float, low: float,
+                    close: float) -> Optional[str]:
+    """Factual OHLC-endpoint evidence (CLASS_F) for intrabar high/low order.
+
+    An endpoint sitting at an extreme identifies which side was reached at
+    that endpoint: an open at the high means the high was first; a close at
+    the high means the low was first.  Returns None when neither endpoint
+    determines the order (interior open and close).  This is a factual
+    calculation, not a selection rule.
+    """
+    if open_ == high and open_ != low and close != high:
+        return "high-first"
+    if open_ == low and open_ != high and close != low:
+        return "low-first"
+    if close == high and close != low and open_ != high:
+        return "low-first"    # high reached last
+    if close == low and close != high and open_ != low:
+        return "high-first"   # low reached last
+    return None
+
+
+def material_same_bar_ambiguity(c: object) -> bool:
+    """True iff candidate ``c`` carries an unresolved intrabar order that the
+    OHLC endpoints do NOT determine — the consequential case that must be
+    surfaced on task results (never silently downgraded elsewhere)."""
+    return (getattr(c, "same_bar_order", "resolved") == "unresolved"
+            and getattr(c, "same_bar_evidence", None) is None)
 
 
 def reference_state_at(selection_history: Sequence[Tuple[object, Sequence[object]]],
@@ -462,8 +496,16 @@ def fk_turning_points(bars: pd.DataFrame, k: int, rep: Representation,
             if not flag:
                 continue
             occ_time = (pd.Timestamp(times[i]) if times is not None else None)
-            know_time = (pd.Timestamp(times[min(i + k, n - 1)]) if times is not None
-                         else None)
+            # FINAL AUDIT PATCH (F-K tail knowability): a confirmation that
+            # lies beyond the supplied bars gets NO knowable_time — the tail
+            # must never claim the last observed timestamp as availability.
+            know_time = (pd.Timestamp(times[i + k])
+                         if (times is not None and i + k < n) else None)
+            ev = None
+            if is_high and is_low:
+                row = bars.iloc[i]
+                ev = _endpoint_order(float(row["open"]), float(row["high"]),
+                                     float(row["low"]), float(row["close"]))
             cand = PointCandidate(
                 candidate_id=f"{id_prefix}{rep.rep_id}|{side}@{i}",
                 rep=rep,
@@ -475,6 +517,7 @@ def fk_turning_points(bars: pd.DataFrame, k: int, rep: Representation,
                 occurrence_time=occ_time,
                 knowable_time=know_time,
                 same_bar_order="unresolved" if (is_high and is_low) else "resolved",
+                same_bar_evidence=ev,
             )
             cand.add_transition(i, STATUS_PROVISIONAL, info_time=occ_time,
                                 note="registered (SWS-04a)")
@@ -532,9 +575,10 @@ def ft_turning_points(bars: pd.DataFrame, tau: float, rep: Representation,
     ext_i = 0
     ext_level = 0.0
     ext_order = "resolved"
+    ext_ev: Optional[str] = None
 
     def _emit(i: int, side: str, occ_i: int, level: float, status: str,
-              order: str) -> None:
+              order: str, ev: Optional[str] = None) -> None:
         occ_time = (pd.Timestamp(times[occ_i]) if times is not None else None)
         know_time = (pd.Timestamp(times[i])
                      if (times is not None and 0 <= i < len(times)) else None)
@@ -543,7 +587,7 @@ def ft_turning_points(bars: pd.DataFrame, tau: float, rep: Representation,
             rep=rep, side=side, occurrence_bar=occ_i, level=level,
             knowable_bar=i, status=status,
             occurrence_time=occ_time, knowable_time=know_time,
-            same_bar_order=order)
+            same_bar_order=order, same_bar_evidence=ev)
         cand.add_transition(occ_i, STATUS_PROVISIONAL, info_time=occ_time,
                             note=f"F-T registered (tie={tie_policy})")
         if status == STATUS_CONFIRMED:
@@ -554,7 +598,7 @@ def ft_turning_points(bars: pd.DataFrame, tau: float, rep: Representation,
     for i in range(n):
         if ext_side is None:
             ext_side, ext_i, ext_level = "high", i, float(highs[i])
-            ext_order = "resolved"
+            ext_order, ext_ev = "resolved", None
             continue
         if ext_side == "high":
             if tie_policy == TIE_FT_EQ_LAST:
@@ -563,26 +607,35 @@ def ft_turning_points(bars: pd.DataFrame, tau: float, rep: Representation,
                 update = highs[i] > ext_level  # TIE-FT-EQ-FIRST-V1
             reversal = ext_level - lows[i] >= tau
             if update and reversal:
-                # same-bar both-sides: intrabar order unknowable (audit D4)
+                # same-bar both-sides: intrabar order unknowable (audit D4);
+                # factual OHLC-endpoint evidence recorded when it determines
+                row = bars.iloc[i]
+                ev = _endpoint_order(float(row["open"]), float(row["high"]),
+                                     float(row["low"]), float(row["close"]))
                 if ambiguities is not None:
                     ambiguities.append({
-                        "bar": i, "kind": "same-bar-extreme-vs-reversal",
+                        "rep": rep.rep_id, "bar": i,
+                        "kind": "same-bar-extreme-vs-reversal",
                         "side": "high", "prior_extreme_bar": ext_i,
                         "prior_extreme": ext_level, "high": float(highs[i]),
-                        "low": float(lows[i]), "tie_policy": tie_policy,
+                        "low": float(lows[i]),
+                        "open": float(row["open"]), "close": float(row["close"]),
+                        "tie_policy": tie_policy,
+                        "endpoint_evidence": ev,
                         "note": "OHLC cannot order the intrabar high/low; "
                                 "no sequence synthesized",
                     })
                 ext_side, ext_i, ext_level = "high", i, float(highs[i])
-                ext_order = "unresolved"
+                ext_order, ext_ev = "unresolved", ev
                 continue
             if update:
                 ext_side, ext_i, ext_level = "high", i, float(highs[i])
-                ext_order = "resolved"
+                ext_order, ext_ev = "resolved", None
             elif reversal:
-                _emit(i, "high", ext_i, ext_level, STATUS_CONFIRMED, ext_order)
+                _emit(i, "high", ext_i, ext_level, STATUS_CONFIRMED,
+                      ext_order, ext_ev)
                 ext_side, ext_i, ext_level = "low", i, float(lows[i])
-                ext_order = "resolved" if highs[i] <= ext_level or True else "resolved"
+                ext_order, ext_ev = "resolved", None
         else:
             if tie_policy == TIE_FT_EQ_LAST:
                 update = lows[i] <= ext_level
@@ -590,27 +643,36 @@ def ft_turning_points(bars: pd.DataFrame, tau: float, rep: Representation,
                 update = lows[i] < ext_level  # TIE-FT-EQ-FIRST-V1
             reversal = highs[i] - ext_level >= tau
             if update and reversal:
+                row = bars.iloc[i]
+                ev = _endpoint_order(float(row["open"]), float(row["high"]),
+                                     float(row["low"]), float(row["close"]))
                 if ambiguities is not None:
                     ambiguities.append({
-                        "bar": i, "kind": "same-bar-extreme-vs-reversal",
+                        "rep": rep.rep_id, "bar": i,
+                        "kind": "same-bar-extreme-vs-reversal",
                         "side": "low", "prior_extreme_bar": ext_i,
                         "prior_extreme": ext_level, "high": float(highs[i]),
-                        "low": float(lows[i]), "tie_policy": tie_policy,
+                        "low": float(lows[i]),
+                        "open": float(row["open"]), "close": float(row["close"]),
+                        "tie_policy": tie_policy,
+                        "endpoint_evidence": ev,
                         "note": "OHLC cannot order the intrabar high/low; "
                                 "no sequence synthesized",
                     })
                 ext_side, ext_i, ext_level = "low", i, float(lows[i])
-                ext_order = "unresolved"
+                ext_order, ext_ev = "unresolved", ev
                 continue
             if update:
                 ext_side, ext_i, ext_level = "low", i, float(lows[i])
-                ext_order = "resolved"
+                ext_order, ext_ev = "resolved", None
             elif reversal:
-                _emit(i, "low", ext_i, ext_level, STATUS_CONFIRMED, ext_order)
+                _emit(i, "low", ext_i, ext_level, STATUS_CONFIRMED,
+                      ext_order, ext_ev)
                 ext_side, ext_i, ext_level = "high", i, float(highs[i])
-                ext_order = "resolved"
+                ext_order, ext_ev = "resolved", None
     if ext_side is not None:
-        _emit(n + 1, ext_side, ext_i, ext_level, STATUS_PROVISIONAL, ext_order)
+        _emit(n + 1, ext_side, ext_i, ext_level, STATUS_PROVISIONAL,
+              ext_order, ext_ev)
     return out
 
 
@@ -633,8 +695,10 @@ def build_legs(points: Sequence[PointCandidate], rep: Representation,
         if a.occurrence_bar == b.occurrence_bar:
             if ambiguities is not None:
                 ambiguities.append({
-                    "bar": a.occurrence_bar, "kind": "same-bar-order-unresolved",
+                    "rep": rep.rep_id, "bar": a.occurrence_bar,
+                    "kind": "same-bar-order-unresolved",
                     "pair": [a.candidate_id, b.candidate_id],
+                    "endpoint_evidence": getattr(a, "same_bar_evidence", None),
                     "note": "OHLC cannot order same-bar high/low; no directional "
                             "zero-duration leg synthesized",
                 })
@@ -642,7 +706,8 @@ def build_legs(points: Sequence[PointCandidate], rep: Representation,
         if a.level == b.level:
             if ambiguities is not None:
                 ambiguities.append({
-                    "bar": a.occurrence_bar, "kind": "zero-amplitude-leg",
+                    "rep": rep.rep_id, "bar": a.occurrence_bar,
+                    "kind": "zero-amplitude-leg",
                     "pair": [a.candidate_id, b.candidate_id],
                     "note": "equal endpoints: direction not established",
                 })
@@ -728,14 +793,43 @@ def sp01_knowability(candidates: Sequence[object], decision_bar: Optional[int],
 def sp05_containment(coarse: LegCandidate, fine: LegCandidate,
                      tie_inclusive: bool = True) -> str:
     """SP-05: contained | escaping | disjoint.  Boundary tie rule is a declared
-    policy (SWS-06; TIE-BOUNDARIES-INCLUSIVE-V1 default): inclusive spans."""
-    if fine.t1 < coarse.t0 or fine.t0 > coarse.t1:
-        return "disjoint"
+    policy (SWS-06; TIE-BOUNDARIES-INCLUSIVE-V1 default): inclusive spans.
+
+    FINAL AUDIT PATCH (T-S3 cross-timeframe containment): time spans are
+    compared on VERIFIED TIMESTAMPS whenever both legs carry them — raw bar
+    indices from different timeframe domains are never compared.  A mixed
+    pair (times on only one leg) raises; index comparison is allowed only
+    inside a single declared domain (no times at all).
+    """
+    c_times = (coarse.t0_time, coarse.t1_time)
+    f_times = (fine.t0_time, fine.t1_time)
+    have = [t is not None for t in c_times + f_times]
+    if all(have):
+        ct0, ct1 = sorted(c_times)
+        ft0, ft1 = sorted(f_times)
+        if ft1 < ct0 or ft0 > ct1:
+            return "disjoint"
+        if tie_inclusive:
+            time_inside = ct0 <= ft0 and ft1 <= ct1
+        else:
+            time_inside = ct0 < ft0 and ft1 < ct1
+    elif any(have):
+        raise ValueError(
+            "containment requires timestamps on BOTH legs or on neither "
+            "(single declared domain); raw cross-domain indices are never "
+            "compared (final audit patch)")
+    else:
+        ct0, ct1 = sorted((coarse.t0, coarse.t1))
+        ft0, ft1 = sorted((fine.t0, fine.t1))
+        if ft1 < ct0 or ft0 > ct1:
+            return "disjoint"
+        if tie_inclusive:
+            time_inside = ct0 <= ft0 and ft1 <= ct1
+        else:
+            time_inside = ct0 < ft0 and ft1 < ct1
     if tie_inclusive:
-        time_inside = coarse.t0 <= fine.t0 and fine.t1 <= coarse.t1
         price_inside = coarse.p_lo <= fine.p_lo and fine.p_hi <= coarse.p_hi
     else:
-        time_inside = coarse.t0 < fine.t0 and fine.t1 < coarse.t1
         price_inside = coarse.p_lo < fine.p_lo and fine.p_hi < coarse.p_hi
     return "contained" if (time_inside and price_inside) else "escaping"
 
@@ -908,16 +1002,59 @@ def task_s1_structural_reference(points: Sequence[PointCandidate],
                        dependencies=_deps(target_id, last_leg.leg_id),
                        direction=last_leg.direction,
                        decision_time=decision_time)
+        # FINAL AUDIT PATCH (same-bar ambiguity propagation): a selected
+        # reference whose intrabar high/low order is unresolved AND not
+        # determined by OHLC endpoints must not silently produce a fully
+        # justified task result — the consequential ambiguity is surfaced to
+        # the result and its dependents.  Endpoint-determined order is
+        # factual: it is noted, never downgraded.
+        amb_note = None
+        if getattr(target, "same_bar_order", "resolved") == "unresolved":
+            ev = getattr(target, "same_bar_evidence", None)
+            if ev is None:
+                for p in confirmed:
+                    if p.candidate_id != target_id:
+                        excluded.append(Exclusion(
+                            p.candidate_id, X_POL, f"O:{policy_id}",
+                            "not the origin of the last confirmed leg"))
+                state = UnresolvedState(
+                    state_id=f"{state_id_prefix}-{decision_bar}", task="T-S1",
+                    decision_bar=decision_bar,
+                    survivors=[target_id], excluded=excluded,
+                    reason_code=REASON_AI,
+                    evidence_needed=("intrabar high/low order of the selected "
+                                     "reference is unresolved (OHLC endpoints "
+                                     "interior); tick data (MO) or a declared "
+                                     "ordering policy needed"),
+                    policy_refs=pregs, provenance=prov,
+                    dependents_blocked=["T-S5-falsifier", "T-S4-base",
+                                        "zone-context", "liquidity-objective"])
+                return _mk("T-S1", decision_bar, "unresolved", None, [target_id],
+                           excluded, state, prov, pregs, rep.rep_id,
+                           dependents=["T-S5-falsifier", "T-S4-base",
+                                       "zone-context", "liquidity-objective"],
+                           notes=[f"last_confirmed_leg={last_leg.leg_id}",
+                                  f"role={role} (O-class; SWS-02: not a market claim)",
+                                  "same-bar order unresolved; surfaced (AI)"],
+                           direction=last_leg.direction,
+                           dependencies=_deps(target_id, last_leg.leg_id,
+                                              last_leg.start_id, last_leg.end_id),
+                           decision_time=decision_time)
+            amb_note = (f"same-bar order determined by OHLC endpoints "
+                        f"({ev}); not downgraded")
         for p in confirmed:
             if p.candidate_id != target_id:
                 excluded.append(Exclusion(p.candidate_id, X_POL, f"O:{policy_id}",
                                           "not the origin of the last confirmed leg"))
+        notes_final = [f"last_confirmed_leg={last_leg.leg_id}",
+                       f"role={role} (O-class; SWS-02: not a market claim)"]
+        if amb_note:
+            notes_final.append(amb_note)
         return _mk("T-S1", decision_bar, "justified", target_id, [target_id],
                    excluded, None, prov, pregs, rep.rep_id,
                    dependents=["T-S5-falsifier", "T-S4-base", "zone-context",
                                "liquidity-objective"],
-                   notes=[f"last_confirmed_leg={last_leg.leg_id}",
-                          f"role={role} (O-class; SWS-02: not a market claim)"],
+                   notes=notes_final,
                    direction=last_leg.direction,
                    dependencies=_deps(target_id, last_leg.leg_id,
                                       last_leg.start_id, last_leg.end_id),
@@ -936,9 +1073,36 @@ def task_s1_structural_reference(points: Sequence[PointCandidate],
             if p.candidate_id != best.candidate_id:
                 excluded.append(Exclusion(p.candidate_id, X_POL, "R:within-class:knowable_bar",
                                           "less recent confirmed point"))
+        # FINAL AUDIT PATCH (same-bar ambiguity propagation), same gate as the
+        # origin branch: a selected reference with materially unresolved
+        # intrabar order must surface (AI); endpoint-determined is noted.
+        e_notes = ["role=last-confirmed-extreme"]
+        if getattr(best, "same_bar_order", "resolved") == "unresolved":
+            ev = getattr(best, "same_bar_evidence", None)
+            if ev is None:
+                state = UnresolvedState(
+                    state_id=f"{state_id_prefix}-{decision_bar}", task="T-S1",
+                    decision_bar=decision_bar,
+                    survivors=[best.candidate_id], excluded=excluded,
+                    reason_code=REASON_AI,
+                    evidence_needed=("intrabar high/low order of the selected "
+                                     "reference is unresolved (OHLC endpoints "
+                                     "interior); tick data (MO) or a declared "
+                                     "ordering policy needed"),
+                    policy_refs=pregs, provenance=prov,
+                    dependents_blocked=["T-S5-falsifier", "T-S4-base",
+                                        "zone-context", "liquidity-objective"])
+                return _mk("T-S1", decision_bar, "unresolved", None,
+                           [best.candidate_id], excluded, state, prov, pregs,
+                           rep.rep_id,
+                           notes=e_notes + ["same-bar order unresolved; surfaced (AI)"],
+                           dependencies=_deps(best.candidate_id),
+                           decision_time=decision_time)
+            e_notes.append(f"same-bar order determined by OHLC endpoints ({ev}); "
+                           "not downgraded")
         return _mk("T-S1", decision_bar, "justified", best.candidate_id,
                    [best.candidate_id], excluded, None, prov, pregs, rep.rep_id,
-                   notes=["role=last-confirmed-extreme"],
+                   notes=e_notes,
                    dependencies=_deps(best.candidate_id),
                    decision_time=decision_time)
     state = UnresolvedState(
@@ -960,7 +1124,8 @@ def task_s2_event_binding(event_bar: int, close_price: float,
                           prev_close: Optional[float] = None,
                           state_id_prefix: str = "S2",
                           event_time: Optional[pd.Timestamp] = None,
-                          tie_policy: str = TIE_CROSS_EQUAL_UNBOUND) -> SelectionResult:
+                          tie_policy: str = TIE_CROSS_EQUAL_UNBOUND,
+                          allow_provisional: bool = False) -> SelectionResult:
     """T-S2: which references does a closed-bar event bind to (SP-03)?
 
     The binding set keeps all members; no ranking (SWS-05).  When
@@ -969,10 +1134,17 @@ def task_s2_event_binding(event_bar: int, close_price: float,
     event bar (golden cases W5/W10).
 
     Audit D1: references from MULTIPLE views are compared on the shared
-    information-time axis only — ``event_time`` is then mandatory and every
-    reference must carry ``knowable_time``.  Raw bar indices from different
-    timeframe domains are never compared; an unavailable reference is
-    excluded X-KNOW and can never enter an earlier event's binding.
+    information-time axis only — ``event_time`` is then mandatory.  Raw bar
+    indices from different timeframe domains are never compared; an
+    unavailable reference is excluded X-KNOW and can never enter an earlier
+    event's binding (a reference with no verifiable knowable_time is not
+    available).
+
+    FINAL AUDIT PATCH (status gating): the task contract requires KNOWABLE
+    references — superseded (X-SUPER) and broken (X-STATE) candidates are
+    excluded, and provisional candidates are excluded X-STATE unless the
+    caller explicitly declares ``allow_provisional=True`` (provisional use is
+    then gated on occurrence visibility, never on the projected confirmation).
     """
     prov = ["R:SP-03", "F:close-basis (declared; wick variant open)",
             f"tie={tie_policy}"]
@@ -995,8 +1167,37 @@ def task_s2_event_binding(event_bar: int, close_price: float,
         return (px != r.level) if not tie_bound else True
 
     for view, refs in refs_by_view.items():
-        knowable, late = [], []
+        # FINAL AUDIT PATCH: status gate BEFORE availability (task contract)
+        usable = []
+        knowable: List[object] = []
+        late: List[object] = []
         for r in refs:
+            st = (r.status_at(event_bar, event_time)
+                  if hasattr(r, "status_at") else getattr(r, "status", STATUS_CONFIRMED))
+            if st == STATUS_SUPERSEDED:
+                excluded.append(Exclusion(r.candidate_id, X_SUPER, "R:SP-13/SWS-04c",
+                                          "superseded reference not bindable"))
+            elif st == STATUS_BROKEN:
+                excluded.append(Exclusion(r.candidate_id, X_STATE, "R:SP-20",
+                                          "broken reference not bindable"))
+            elif st == STATUS_PROVISIONAL and not allow_provisional:
+                excluded.append(Exclusion(r.candidate_id, X_STATE, "R:SP-01/SWS-04a",
+                                          "provisional not allowed by task contract"))
+            elif st == STATUS_PROVISIONAL:
+                # explicit provisional use: gated on OCCURRENCE visibility,
+                # never on the projected confirmation time
+                occ_t = getattr(r, "occurrence_time", None)
+                occ_b = getattr(r, "occurrence_bar", 0)
+                if ((event_time is not None and occ_t is not None
+                     and occ_t <= event_time)
+                        or (event_time is None and occ_b <= event_bar)):
+                    knowable.append(r)
+                else:
+                    excluded.append(Exclusion(r.candidate_id, X_KNOW, "R:SP-01",
+                                              "provisional occurrence after event"))
+            else:
+                usable.append(r)
+        for r in usable:
             ok = available_at(r, as_of_bar=event_bar, as_of_time=event_time)
             if ok:
                 knowable.append(r)
@@ -1046,7 +1247,8 @@ def task_s3_entry_leg(coarse_leg: LegCandidate, fine_legs: Sequence[LegCandidate
                       decision_bar: int, rep: Representation,
                       continuation_condition: Optional[Tuple[str, str]] = None,
                       policy: Optional[PolicyRegistry] = None,
-                      state_id_prefix: str = "S3") -> SelectionResult:
+                      state_id_prefix: str = "S3",
+                      decision_time: Optional[pd.Timestamp] = None) -> SelectionResult:
     """T-S3: which completed fine leg contained in the coarse leg times an entry.
 
     continuation_condition: optional declared O policy (e.g. ("direction",
@@ -1054,15 +1256,37 @@ def task_s3_entry_leg(coarse_leg: LegCandidate, fine_legs: Sequence[LegCandidate
     an up-leg).  Depth vs recency is never decided here (SWS-07): without a
     declared policy the surviving pair is emitted as MP (or EP when a learned
     preference would be needed).
+
+    FINAL AUDIT PATCH: availability is evaluated on the shared information
+    axis (``decision_time`` when given); containment uses verified timestamps
+    for cross-timeframe legs (sp05_containment).
     """
     prov = ["R:SP-05", "R:SP-08", "R:SP-01", "R:SP-06"]
     pregs: List[str] = []
     excluded: List[Exclusion] = []
     survivors: List[LegCandidate] = []
+    # decision-time availability (shared axis): the coarse leg itself must be
+    # knowable at the decision boundary too
+    if not available_at(coarse_leg, as_of_bar=decision_bar,
+                        as_of_time=decision_time):
+        excluded.append(Exclusion(coarse_leg.leg_id, X_KNOW, "R:SP-01",
+                                  "coarse leg not knowable at decision time"))
+        state = UnresolvedState(
+            state_id=f"{state_id_prefix}-{decision_bar}", task="T-S3",
+            decision_bar=decision_bar, survivors=[], excluded=excluded,
+            reason_code=REASON_IC,
+            evidence_needed="coarse basis not knowable at the decision time",
+            policy_refs=[], provenance=prov,
+            dependents_blocked=["zone-boundaries", "fine-liquidity-below-above"])
+        return _mk("T-S3", decision_bar, "unresolved", None, [], excluded,
+                   state, prov, pregs, rep.rep_id,
+                   dependencies=[coarse_leg.leg_id] + [f.leg_id for f in fine_legs])
     for f in fine_legs:
-        if f.knowable_bar > decision_bar:
+        if not available_at(f, as_of_bar=decision_bar,
+                            as_of_time=decision_time):
             excluded.append(Exclusion(f.leg_id, X_KNOW, "R:SP-01",
-                                      f"knowable {f.knowable_bar} > t={decision_bar}"))
+                                      f"knowable {getattr(f, 'knowable_time', None) or f.knowable_bar}"
+                                      f" > t={decision_time or decision_bar}"))
             continue
         label = sp05_containment(coarse_leg, f)
         if label != "contained":
@@ -1083,7 +1307,8 @@ def task_s3_entry_leg(coarse_leg: LegCandidate, fine_legs: Sequence[LegCandidate
     # SP-06 dominance on the declared H_T facts (completed, contained, direction)
     reqs: List[Tuple[str, Callable[[object], bool]]] = [
         ("completed", lambda f: f.completed),
-        ("knowable", lambda f: f.knowable_bar <= decision_bar),
+        ("knowable", lambda f: available_at(f, as_of_bar=decision_bar,
+                                            as_of_time=decision_time)),
     ]
     if continuation_condition is not None:
         reqs.append(("direction-match",
@@ -1169,6 +1394,37 @@ def task_s5_falsifier(claims: Sequence[dict], points: Sequence[PointCandidate],
                                           "no confirmed leg in view"))
                 continue
             last = max(vlegs, key=lambda l: (l.knowable_bar, l.t1))
+            # FINAL AUDIT PATCH (T-S5 origin direction validation): the claim's
+            # direction is validated against the supporting leg — opposite or
+            # missing direction must NOT silently produce the same justified
+            # result (previously this branch ignored direction entirely).
+            want_dir = claim.get("direction")
+            if want_dir not in ("up", "down"):
+                state = UnresolvedState(
+                    state_id=f"{state_id_prefix}-{decision_bar}", task="T-S5",
+                    decision_bar=decision_bar, survivors=resolved, excluded=excluded,
+                    reason_code=REASON_IC,
+                    evidence_needed=(f"claim {interp} role {role} requires a "
+                                     "supported direction (movement "
+                                     "representation); none given"),
+                    policy_refs=[], provenance=prov)
+                return _mk("T-S5", decision_bar, "unresolved", None, resolved,
+                           excluded, state, prov, [], "claims",
+                           notes=notes, dependencies=deps)
+            if want_dir != last.direction:
+                state = UnresolvedState(
+                    state_id=f"{state_id_prefix}-{decision_bar}", task="T-S5",
+                    decision_bar=decision_bar, survivors=resolved, excluded=excluded,
+                    reason_code=REASON_AI,
+                    evidence_needed=(f"claim {interp} direction {want_dir!r} "
+                                     f"contradicts the supporting leg "
+                                     f"{last.leg_id} direction {last.direction!r}; "
+                                     "re-read the interpretation"),
+                    policy_refs=[], provenance=prov)
+                return _mk("T-S5", decision_bar, "unresolved", None, resolved,
+                           excluded, state, prov, [], "claims",
+                           notes=notes, dependencies=deps,
+                           direction=last.direction)
             resolved.append(last.start_id)
             deps += [last.start_id, last.leg_id]
             notes.append(f"{interp}: origin of {last.leg_id} -> {last.start_id}")
@@ -1246,6 +1502,24 @@ def task_s5_falsifier(claims: Sequence[dict], points: Sequence[PointCandidate],
             policy_refs=[], provenance=prov)
         return _mk("T-S5", decision_bar, "unresolved", None, [], excluded, state,
                    prov, [], "claims", notes=notes, dependencies=deps)
+    # FINAL AUDIT PATCH (same-bar ambiguity propagation): a resolved falsifier
+    # whose intrabar order is materially unresolved must surface that state.
+    amb_ids = [pid for pid in resolved if material_same_bar_ambiguity(by_id.get(pid))]
+    if amb_ids:
+        state = UnresolvedState(
+            state_id=f"{state_id_prefix}-{decision_bar}", task="T-S5",
+            decision_bar=decision_bar, survivors=resolved, excluded=excluded,
+            reason_code=REASON_AI,
+            evidence_needed=("falsifier reference has unresolved intrabar "
+                             f"high/low order ({amb_ids}); tick data (MO) or a "
+                             "declared ordering policy needed"),
+            policy_refs=[], provenance=prov,
+            dependents_blocked=["invalidation-levels", "stop-side-reference"])
+        return _mk("T-S5", decision_bar, "unresolved", None, resolved, excluded,
+                   state, prov, [], "claims",
+                   dependents=["invalidation-levels", "stop-side-reference"],
+                   notes=notes + ["same-bar order unresolved; surfaced (AI)"],
+                   dependencies=deps)
     status = "justified" if len(resolved) == 1 else "unresolved"
     unresolved = None
     if status == "unresolved":
@@ -1529,6 +1803,7 @@ def candidate_record(c: object, *, task_id: str = "", run_id: str = "",
         "candidate_id": _cid(c),
         "representation_id": getattr(getattr(c, "rep", None), "rep_id", None),
         "side": getattr(c, "side", None),
+        "level": getattr(c, "level", None),
         "occurrence_bar": getattr(c, "occurrence_bar", None),
         "knowable_bar": getattr(c, "knowable_bar", None),
         "occurrence_time": _ts(getattr(c, "occurrence_time", None)),
@@ -1538,6 +1813,11 @@ def candidate_record(c: object, *, task_id: str = "", run_id: str = "",
             if hasattr(c, "status_at") else getattr(c, "status", None)),
         "status_final": getattr(c, "status", None),
         "same_bar_order": getattr(c, "same_bar_order", None),
+        "same_bar_evidence": getattr(c, "same_bar_evidence", None),
+        "leg_direction": getattr(c, "direction", None),
+        "leg_depth": getattr(c, "depth", None),
+        "leg_t0_time": _ts(getattr(c, "t0_time", None)),
+        "leg_t1_time": _ts(getattr(c, "t1_time", None)),
         "eligible": eligible,
         "exclusion_code": None if exclusion is None else exclusion.code,
         "exclusion_detail": None if exclusion is None else exclusion.detail,
