@@ -43,6 +43,16 @@ from trading_system.research.contextual_selection import (
 
 T0 = pd.Timestamp("2025-01-01 00:00:00")
 
+# consolidation V1: validated shared information-time axis over the fixture's
+# T0-minute grid (every fixture timestamp lies on this grid)
+from trading_system.research.contextual_selection import (  # noqa: E402
+    SharedInformationAxis as _SharedInformationAxis,
+)
+AXIS = _SharedInformationAxis(
+    "test-fixture-minute-grid",
+    pd.date_range(T0, T0 + pd.Timedelta(minutes=2000), freq="1min"))
+
+
 
 def _rep(view: str, family: str = "F-K", **params) -> Representation:
     return Representation(family=family, view_id=view, scale_label=view,
@@ -85,7 +95,7 @@ def test_D1_cross_timeframe_unavailable_reference_cannot_bind():
     r = task_s2_event_binding(
         event_bar=200, close_price=90.0,
         refs_by_view={"C": [late_ref], "F": [fine_ref]},
-        decision_bar=200, event_time=event_time)
+        decision_bar=200, event_time=event_time, axis=AXIS)
     assert "F-low" in r.survivors
     assert "C-low" not in r.survivors
     codes = {e.candidate_id: e.code for e in r.excluded}
@@ -99,8 +109,8 @@ def test_D1_cross_view_requires_time_axis():
     rep_f = _rep("F", k=2)
     a = _pt("c1", rep_c, "low", 35, 20.0, 40)
     b = _pt("f1", rep_f, "low", 38, 25.0, 41)
-    with pytest.raises(ValueError, match="information-time"):
-        task_s2_event_binding(53, 19.0, {"C": [a], "F": [b]}, 53)
+    with pytest.raises(ValueError, match="information-time|shared time axis"):
+        task_s2_event_binding(53, 19.0, {"C": [a], "F": [b]}, 53, axis=AXIS)
 
 
 def test_D1_chronological_event_replay_uses_prior_state_only():
@@ -207,16 +217,19 @@ def test_D3_provisional_state_explicit_exclusion():
     p_prov = _pt("hp", rep, "high", 10, 50.0, 15, status="provisional")
     pol = PolicyRegistry()
     pol.register("P-ORIGIN", "origin role", "origin-of-last-confirmed-leg")
-    leg = LegCandidate("Lg1", rep, "hp", "ok", "down", 10, 20, 50.0, 40.0, 25)
+    leg = LegCandidate("Lg1", rep, "hp", "ok", "down", 10, 20, 50.0, 40.0, 25,
+                       t0_time=T0 + timedelta(minutes=10),
+                       t1_time=T0 + timedelta(minutes=20),
+                       knowable_time=T0 + timedelta(minutes=25))
     ok = _pt("ok", rep, "low", 20, 40.0, 25)
     r = task_s1_structural_reference([p_prov, ok], [leg], 14, rep,
                                      "origin-of-last-confirmed-leg", pol,
-                                     "P-ORIGIN", allow_provisional=False)
+                                     "P-ORIGIN", allow_provisional=False, axis=AXIS, decision_time=T0 + timedelta(minutes=14))
     codes = {e.candidate_id: e.code for e in r.excluded}
     assert codes.get("hp") == X_STATE               # explicit exclusion
     r2 = task_s1_structural_reference([p_prov, ok], [leg], 14, rep,
                                       "origin-of-last-confirmed-leg", pol,
-                                      "P-ORIGIN", allow_provisional=True)
+                                      "P-ORIGIN", allow_provisional=True, axis=AXIS, decision_time=T0 + timedelta(minutes=14))
     codes2 = {e.candidate_id: e.code for e in r2.excluded}
     assert codes2.get("hp") is None                  # allowed by explicit policy
 
@@ -260,12 +273,20 @@ def test_D4_ft_equal_extreme_tie_policy_explicit():
     amb = []
     pts = ft_turning_points(bars, tau=4.0, rep=rep,
                             tie_policy=TIE_FT_EQ_FIRST, ambiguities=amb)
-    highs_reg = [p for p in pts if p.side == "high" and p.level == 20.0]
+    highs_reg = [p for p in pts if p.side == "high" and p.level == 20.0
+                 and p.status != STATUS_SUPERSEDED]
     assert highs_reg and highs_reg[0].occurrence_bar == 3     # FIRST kept
     # explicit alternative policy is available and identified
     pts_last = ft_turning_points(bars, tau=4.0, rep=rep, tie_policy=TIE_FT_EQ_LAST)
-    highs_last = [p for p in pts_last if p.side == "high" and p.level == 20.0]
+    highs_last = [p for p in pts_last if p.side == "high" and p.level == 20.0
+                  and p.status != STATUS_SUPERSEDED]
     assert highs_last and highs_last[0].occurrence_bar == 5   # explicit LAST
+    # consolidation V1 (task §6): the displaced equal extreme is RETAINED as
+    # a superseded lifecycle row (never silently discarded), and superseded
+    # candidates never enter selection
+    retired = [p for p in pts_last if p.occurrence_bar == 3
+               and p.status == STATUS_SUPERSEDED]
+    assert retired and retired[0].superseded_by is not None
 
 
 def test_D4_ft_same_bar_extreme_and_reversal_unresolved():
@@ -299,10 +320,13 @@ def test_D5_propagate_never_accepts_caller_before_after_strings():
     pol.register("P-ORIGIN", "origin role", "origin-of-last-confirmed-leg")
     p1 = _pt("A", rep, "low", 10, 10.0, 12)
     p2 = _pt("B", rep, "high", 20, 40.0, 22)
-    leg = LegCandidate("Lg1", rep, "A", "B", "up", 10, 20, 10.0, 40.0, 22)
+    leg = LegCandidate("Lg1", rep, "A", "B", "up", 10, 20, 10.0, 40.0, 22,
+                       t0_time=T0 + timedelta(minutes=10),
+                       t1_time=T0 + timedelta(minutes=20),
+                       knowable_time=T0 + timedelta(minutes=22))
     r = task_s1_structural_reference([p1, p2], [leg], 25, rep,
                                      "origin-of-last-confirmed-leg", pol,
-                                     "P-ORIGIN")
+                                     "P-ORIGIN", axis=AXIS, decision_time=T0 + timedelta(minutes=25))
     assert r.selected_id == "A"
     ledger = InterpretationLedger()
     uid = ledger.record(r)                      # NO payload: not recomputable
@@ -315,8 +339,9 @@ def test_D5_propagate_never_accepts_caller_before_after_strings():
     uid2 = ledger2.record(r, payload={
         "kind": "T-S1", "points": [p1, p2], "legs": [leg], "rep": rep,
         "role": "origin-of-last-confirmed-leg", "policy": pol,
-        "policy_id": "P-ORIGIN"})
-    log2 = ledger2.propagate(25, ["A"], changed_states={"A": "broken"})
+        "policy_id": "P-ORIGIN", "axis": AXIS})
+    log2 = ledger2.propagate(25, ["A"], changed_states={"A": "broken"},
+                             update_time=T0 + timedelta(minutes=25))
     v2 = ledger2.versions[uid2][1]
     assert v2["computed_changes"]               # computed diff exists
     assert v2["result"].status == "unresolved"  # broken origin, no successor leg
@@ -333,20 +358,26 @@ def test_D6_direction_sensitive_falsifier_effect():
         _pt("p1", rep, "high", 3, 35.0, 8),
         _pt("p2", rep, "low", 6, 25.0, 11),
     ]
-    legs = [LegCandidate("up1", rep, "p0", "p1", "up", 0, 3, 20.0, 35.0, 8),
-            LegCandidate("dn1", rep, "p1", "p2", "down", 3, 6, 35.0, 25.0, 11)]
+    legs = [LegCandidate("up1", rep, "p0", "p1", "up", 0, 3, 20.0, 35.0, 8,
+                         t0_time=T0 + timedelta(minutes=0),
+                         t1_time=T0 + timedelta(minutes=3),
+                         knowable_time=T0 + timedelta(minutes=8)),
+            LegCandidate("dn1", rep, "p1", "p2", "down", 3, 6, 35.0, 25.0, 11,
+                         t0_time=T0 + timedelta(minutes=3),
+                         t1_time=T0 + timedelta(minutes=6),
+                         knowable_time=T0 + timedelta(minutes=11))]
     r_low_down = task_s5_falsifier(
         [{"interpretation": "I", "view": "F", "role": "low-of-current-leg",
-          "direction": "down"}], pts, legs, 12)
+          "direction": "down"}], pts, legs, 12, axis=AXIS, decision_time=T0 + timedelta(minutes=12))
     r_low_up = task_s5_falsifier(
         [{"interpretation": "I", "view": "F", "role": "low-of-current-leg",
-          "direction": "up"}], pts, legs, 12)
+          "direction": "up"}], pts, legs, 12, axis=AXIS, decision_time=T0 + timedelta(minutes=12))
     assert r_low_down.selected_id == "p2"   # low of the last down leg (p1->p2)
     assert r_low_up.selected_id == "p0"     # low of the last up leg (p0->p1)
     # inconsistent direction value -> explicit unresolved
     r_bad = task_s5_falsifier(
         [{"interpretation": "I", "view": "F", "role": "low-of-current-leg",
-          "direction": "sideways"}], pts, legs, 12)
+          "direction": "sideways"}], pts, legs, 12, axis=AXIS, decision_time=T0 + timedelta(minutes=12))
     assert r_bad.status == "unresolved"
     assert r_bad.unresolved is not None and r_bad.unresolved.reason_code == REASON_IC
 
@@ -358,12 +389,15 @@ def test_D6_candidate_ledger_covers_every_candidate():
     pts = [_pt("a", rep, "low", 4, 10.0, 6),
            _pt("b", rep, "high", 8, 40.0, 10),
            _pt("c", rep, "low", 12, 20.0, 14, status="provisional")]
-    leg = LegCandidate("Lg1", rep, "a", "b", "up", 4, 8, 10.0, 40.0, 10)
+    leg = LegCandidate("Lg1", rep, "a", "b", "up", 4, 8, 10.0, 40.0, 10,
+                       t0_time=T0 + timedelta(minutes=4),
+                       t1_time=T0 + timedelta(minutes=8),
+                       knowable_time=T0 + timedelta(minutes=10))
     pol = PolicyRegistry()
     pol.register("P-ORIGIN", "origin role", "origin-of-last-confirmed-leg")
     r = task_s1_structural_reference(pts, [leg], 13, rep,
                                      "origin-of-last-confirmed-leg", pol,
-                                     "P-ORIGIN")
+                                     "P-ORIGIN", axis=AXIS, decision_time=T0 + timedelta(minutes=13))
     rows = [candidate_record(p, task_id="T-S1", run_id="t", boundary="B",
                              decision_bar=13,
                              eligible=(p.candidate_id in r.survivors),

@@ -136,7 +136,11 @@ def main() -> int:
     # ALL cross-timeframe comparisons are verified on ONE master timeline;
     # left context starts 2025-08-01, the evaluated event window is
     # 2025-09-20..2025-09-27 (context is never confused with evaluation).
-    axis = SharedInformationAxis("BTCUSDT_1m_utc_completion", f1m.index)
+    # consolidation V1: the axis carries TRUE bar-completion times (bar end,
+    # never bar start) — matching its D1 contract and the D1..D5 boundary
+    # keys (a boundary at 00:00 is the completion of the previous minute bar)
+    axis = SharedInformationAxis("BTCUSDT_1m_utc_completion",
+                                 f1m.index + pd.Timedelta(minutes=1))
     print(f"shared axis: {axis.timeline_id} rows={axis.n_rows}", flush=True)
 
     # ---- policy/provenance classification (audit §8) ---------------------
@@ -172,6 +176,7 @@ def main() -> int:
     boundaries_out = []
     events_out = []
     coverage_rows = []          # candidate-level rows (audit D6/§7)
+    prefix_inventory: dict = {}   # rep -> ids seen in truncated prefixes (§6)
     ambiguities_out = []
     t2_exclusions = Counter()   # final audit patch: T-S2 gate accounting
     binding_kind_counts = Counter()  # first-break vs later-interaction (A/B)
@@ -190,81 +195,6 @@ def main() -> int:
         # before this boundary's results are computed (audit D5/D1)
         registered_active = dict(registered)
 
-        # ---- T-S1 per representation at this boundary (D1: time axis) ----
-        for rid, rep in reps.items():
-            fview = fC if rep.view_id == "C" else fF
-            closes = fview.index  # completion times == the index (D1 shift)
-            cutoff = int(closes.searchsorted(b_time, side="right") - 1)
-            bars_t = fview.iloc[: cutoff + 1]
-            amb = []
-            if rep.family == "F-K":
-                pts = fk_turning_points(bars_t, int(rep.param("k")), rep)
-            else:
-                pts = ft_turning_points(bars_t, rep.param("tau"), rep,
-                                        tie_policy=TIE_FT_EQ_FIRST,
-                                        ambiguities=amb)
-            legs = build_legs(pts, rep, ambiguities=amb)
-            ambiguities_out += [{"boundary": bname, "rep": rid, **a} for a in amb]
-            r = task_s1_structural_reference(
-                pts, legs, cutoff, rep, "origin-of-last-confirmed-leg",
-                pol, "P-ORIGIN", state_id_prefix=f"{bname}:{rid}:S1",
-                decision_time=b_time)
-            uid = ledger.record(r, payload={
-                "kind": "T-S1", "points": pts, "legs": legs, "rep": rep,
-                "role": "origin-of-last-confirmed-leg", "policy": pol,
-                "policy_id": "P-ORIGIN", "state_id_prefix": f"{bname}:{rid}:S1"})
-            r_ext = task_s1_structural_reference(
-                pts, legs, cutoff, rep, "last-confirmed-extreme", pol, None,
-                state_id_prefix=f"{bname}:{rid}:S1x", decision_time=b_time)
-            by_id = {p.candidate_id: p for p in pts}
-            row["tasks"][rid] = {
-                "T-S1_origin": {
-                    "status": r.status,
-                    "selected": r.selected_id,
-                    "direction": r.direction,
-                    "survivors": r.survivors,
-                    "n_excluded": len(r.excluded),
-                    "excluded_codes": dict(Counter(e.code for e in r.excluded)),
-                    "notes": r.notes,
-                },
-                "T-S1_extreme": {"status": r_ext.status, "selected": r_ext.selected_id},
-                "n_points": len(pts),
-                "n_legs": len(legs),
-                "unresolved_codes": [r.unresolved.reason_code] if r.unresolved else [],
-            }
-            old_selections.setdefault(bname, {})[rid] = r.selected_id
-
-            # ---- T-S5 falsifier (D6: direction from structural data) ------
-            direction = r.direction
-            claims = [{"interpretation": f"I:{rid}:{bname}", "view": rep.view_id,
-                       "role": "origin-of-last-confirmed-leg",
-                       "direction": direction}]
-            r5 = task_s5_falsifier(claims, pts, legs, cutoff,
-                                   state_id_prefix=f"{bname}:{rid}:S5")
-            uid5 = ledger.record(r5, payload={
-                "kind": "T-S5", "claims": claims, "points": pts, "legs": legs,
-                "state_id_prefix": f"{bname}:{rid}:S5"})
-            row["tasks"][rid]["T-S5"] = {"status": r5.status,
-                                         "falsifier": r5.survivors,
-                                         "direction_used": direction}
-            registered[rid] = (uid, uid5)
-
-            # ---- candidate-level coverage rows (D6/§7) --------------------
-            ex_by_id = {}
-            for e in r.excluded:
-                ex_by_id.setdefault(e.candidate_id, e)
-            for p in pts:
-                coverage_rows.append(candidate_record(
-                    p, task_id="T-S1", run_id=f"{bname}:{rid}",
-                    boundary=bname, decision_bar=cutoff, decision_time=b_time,
-                    eligible=(p.candidate_id in r.survivors),
-                    exclusion=ex_by_id.get(p.candidate_id),
-                    selected=(p.candidate_id == r.selected_id),
-                    unresolved_reason=(r.unresolved.reason_code
-                                       if r.unresolved else None)))
-            if r.selected_id and r.selected_id in by_id:
-                fresh_refs.append(by_id[r.selected_id])
-
         # ---- chronological event replay (D1): events since the PREVIOUS
         # boundary use the PREVIOUS boundary's selection state only ---------
         if prev_t is not None:
@@ -281,6 +211,7 @@ def main() -> int:
                 refs_by_view = {}
                 for p in refs_now:
                     refs_by_view.setdefault(p.view_id, []).append(p)
+                event_ref = f"{prev_bname}->{bname}:E{j}"
                 ev = task_s2_event_binding(
                     j, c, refs_by_view, j, tie_bound=False, prev_close=prev_c,
                     state_id_prefix=f"{prev_bname}->{bname}:E{j}",
@@ -288,7 +219,10 @@ def main() -> int:
                     # FINAL AUDIT PATCH: provisional references are admitted
                     # ONLY by this explicit contract (occurrence-visible);
                     # the csm default excludes them.  Statuses are recorded.
-                    allow_provisional=True)
+                    allow_provisional=True,
+                    # consolidation V1: validated as-of axis + the event's
+                    # own reference (PRE_EVENT_STATE reconstruction)
+                    event_ref=event_ref, axis=axis)
                 t2_exclusions.update(
                     f"{e.code}|{e.detail[:28]}" for e in ev.excluded)
                 for _k in ev.binding_kinds.values():
@@ -302,7 +236,8 @@ def main() -> int:
                         # replay preserves ALL declared task parameters
                         # (causal-state integration V1)
                         "allow_provisional": True,
-                        "tie_policy": TIE_CROSS_EQUAL_UNBOUND})
+                        "tie_policy": TIE_CROSS_EQUAL_UNBOUND,
+                        "event_ref": event_ref, "axis": axis})
                     ledger.record_event(
                         int(j), "binding",
                         f"close={c} time={event_time} notes={ev.notes}",
@@ -312,6 +247,8 @@ def main() -> int:
                         "event_bar": int(j), "event_time": str(event_time),
                         "close": c, "bound": ev.survivors,
                         "binding_kinds": dict(ev.binding_kinds),
+                        # consolidation V1 (task §3): explicit event phases
+                        "event_phase": ev.event_phase,
                         "notes": ev.notes,
                     })
                     # W8-pattern REAL propagation on breaks of active refs
@@ -328,6 +265,135 @@ def main() -> int:
                                 update_time=event_time,
                                 event_ref=f"{prev_bname}->{bname}:E{j}")
                             row.setdefault("propagations", []).extend(log)
+
+
+        # ---- T-S1 per representation at this boundary (D1: time axis) ----
+        for rid, rep in reps.items():
+            fview = fC if rep.view_id == "C" else fF
+            closes = fview.index  # completion times == the index (D1 shift)
+            cutoff = int(closes.searchsorted(b_time, side="right") - 1)
+            bars_t = fview.iloc[: cutoff + 1]
+            amb = []
+            if rep.family == "F-K":
+                pts = fk_turning_points(bars_t, int(rep.param("k")), rep)
+            else:
+                pts = ft_turning_points(bars_t, rep.param("tau"), rep,
+                                        tie_policy=TIE_FT_EQ_FIRST,
+                                        ambiguities=amb)
+            legs = build_legs(pts, rep, ambiguities=amb)
+            # consolidation V1 (task §2): regenerating candidates must NEVER
+            # reset recorded lifecycle events (the audited B2 pattern) — the
+            # ledger's recorded transitions are re-applied before the tasks
+            led_restore = ledger.restore_history(pts)
+            prefix_inventory.setdefault(rid, set()).update(
+                p.candidate_id for p in pts)
+            ambiguities_out += [{"boundary": bname, "rep": rid, **a} for a in amb]
+            r = task_s1_structural_reference(
+                pts, legs, cutoff, rep, "origin-of-last-confirmed-leg",
+                pol, "P-ORIGIN", state_id_prefix=f"{bname}:{rid}:S1",
+                decision_time=b_time, axis=axis)
+            uid = ledger.record(r, payload={
+                "kind": "T-S1", "points": pts, "legs": legs, "rep": rep,
+                "role": "origin-of-last-confirmed-leg", "policy": pol,
+                "policy_id": "P-ORIGIN", "state_id_prefix": f"{bname}:{rid}:S1",
+                "decision_time": b_time, "axis": axis})
+            r_ext = task_s1_structural_reference(
+                pts, legs, cutoff, rep, "last-confirmed-extreme", pol, None,
+                state_id_prefix=f"{bname}:{rid}:S1x", decision_time=b_time,
+                axis=axis)
+            uid_ext = ledger.record(r_ext, payload={
+                "kind": "T-S1", "points": pts, "legs": legs, "rep": rep,
+                "role": "last-confirmed-extreme", "policy": pol,
+                "policy_id": None, "state_id_prefix": f"{bname}:{rid}:S1x",
+                "decision_time": b_time, "axis": axis})
+            by_id = {p.candidate_id: p for p in pts}
+            row["tasks"][rid] = {
+                "T-S1_origin": {
+                    "status": r.status,
+                    "selected": r.selected_id,
+                    "direction": r.direction,
+                    "survivors": r.survivors,
+                    "n_excluded": len(r.excluded),
+                    "excluded_codes": dict(Counter(e.code for e in r.excluded)),
+                    "notes": r.notes,
+                    "policy_refs": list(r.policy_refs),
+                    "unresolved": (None if r.unresolved is None else {
+                        "reason_code": r.unresolved.reason_code,
+                        "evidence_needed": r.unresolved.evidence_needed}),
+                },
+                # consolidation V1 (task §6): survivors + reasons serialized
+                # for EVERY task variant (not just status/selected)
+                "T-S1_extreme": {
+                    "status": r_ext.status,
+                    "selected": r_ext.selected_id,
+                    "survivors": r_ext.survivors,
+                    "reason": (r_ext.unresolved.reason_code
+                               if r_ext.unresolved else None),
+                    "evidence_needed": (r_ext.unresolved.evidence_needed
+                                        if r_ext.unresolved else None),
+                    "notes": r_ext.notes,
+                    "policy_refs": list(r_ext.policy_refs),
+                },
+                "n_points": len(pts),
+                "n_legs": len(legs),
+                "restored_transitions": led_restore,
+                "unresolved_codes": [r.unresolved.reason_code] if r.unresolved else [],
+            }
+            old_selections.setdefault(bname, {})[rid] = r.selected_id
+
+            # ---- T-S5 falsifier (D6: direction from structural data) ------
+            direction = r.direction
+            claims = [{"interpretation": f"I:{rid}:{bname}", "view": rep.view_id,
+                       "role": "origin-of-last-confirmed-leg",
+                       "direction": direction}]
+            r5 = task_s5_falsifier(claims, pts, legs, cutoff,
+                                   state_id_prefix=f"{bname}:{rid}:S5",
+                                   decision_time=b_time, axis=axis)
+            uid5 = ledger.record(r5, payload={
+                "kind": "T-S5", "claims": claims, "points": pts, "legs": legs,
+                "state_id_prefix": f"{bname}:{rid}:S5",
+                "decision_time": b_time, "axis": axis})
+            row["tasks"][rid]["T-S5"] = {
+                "status": r5.status,
+                "falsifier": r5.survivors,
+                "survivors": r5.survivors,
+                "direction_used": direction,
+                "reason": (r5.unresolved.reason_code if r5.unresolved else None),
+                "evidence_needed": (r5.unresolved.evidence_needed
+                                    if r5.unresolved else None),
+                "notes": r5.notes,
+                "policy_refs": list(r5.policy_refs),
+            }
+            registered[rid] = (uid, uid5)
+
+            # ---- candidate-level coverage rows (D6/§7) --------------------
+            # points AND legs are covered (consolidation V1 §6/§8)
+            ex_by_id = {}
+            for e in r.excluded:
+                ex_by_id.setdefault(e.candidate_id, e)
+            for p in pts:
+                coverage_rows.append(candidate_record(
+                    p, task_id="T-S1", run_id=f"{bname}:{rid}",
+                    boundary=bname, decision_bar=cutoff, decision_time=b_time,
+                    eligible=(p.candidate_id in r.survivors),
+                    exclusion=ex_by_id.get(p.candidate_id),
+                    selected=(p.candidate_id == r.selected_id),
+                    unresolved_reason=(r.unresolved.reason_code
+                                       if r.unresolved else None)))
+            ex5_by_id = {}
+            for e in r5.excluded:
+                ex5_by_id.setdefault(e.candidate_id, e)
+            for l in legs:
+                coverage_rows.append(candidate_record(
+                    l, task_id="T-S5", run_id=f"{bname}:{rid}",
+                    boundary=bname, decision_bar=cutoff, decision_time=b_time,
+                    eligible=(l.leg_id in r5.survivors),
+                    exclusion=ex5_by_id.get(l.leg_id),
+                    selected=(l.leg_id == r5.selected_id),
+                    unresolved_reason=(r5.unresolved.reason_code
+                                       if r5.unresolved else None)))
+            if r.selected_id and r.selected_id in by_id:
+                fresh_refs.append(by_id[r.selected_id])
 
         # ---- boundary-time propagation (D5): dependents registered at
         # earlier boundaries recompute with the information knowable at THIS
@@ -369,9 +435,10 @@ def main() -> int:
                         if rep.family == "F-K" else
                         ft_turning_points(bars_t, rep.param("tau"), rep))
                 legs2 = build_legs(pts2, rep)
+                ledger.restore_history(pts2)   # replay keeps recorded lifecycle
                 r2 = task_s1_structural_reference(
                     pts2, legs2, cutoff2, rep, "origin-of-last-confirmed-leg",
-                    pol, "P-ORIGIN", decision_time=b_time)
+                    pol, "P-ORIGIN", decision_time=b_time, axis=axis)
                 same = r2.selected_id == row["tasks"][rid]["T-S1_origin"]["selected"]
                 replay_checks.append({
                     "boundary": bname, "rep": rid, "recomputed": r2.selected_id,
@@ -419,10 +486,13 @@ def main() -> int:
         # OLD events with the NEW availability axis: rebuild id -> knowable
         # time from the regenerated candidates (id scheme is stable).
         contaminated, contam_events = [], set()
+        unmatched_old_ids = 0
         for e in old_events:
-            et = pd.Timestamp(e["close_time"])
+            et = pd.Timestamp(e.get("close_time") or e.get("event_time"))
             for cid in e.get("bound", []):
                 kt = knowable_by_id.get(cid)
+                if kt is None:
+                    unmatched_old_ids += 1
                 if kt is not None and pd.Timestamp(kt) > et:
                     contaminated.append({
                         "old_event_time": str(et), "bound": cid,
@@ -446,6 +516,8 @@ def main() -> int:
         later_sel, later_events = [], set()
         for e in old_events:
             cur = e.get("boundary")
+            if cur is None and e.get("boundary_interval"):
+                cur = e["boundary_interval"].split("->")[-1]
             if cur not in border:
                 continue
             i = border.index(cur)
@@ -455,11 +527,14 @@ def main() -> int:
                 if (sel_map.get(cur, {}).get(rep_of) == cid
                         and sel_map.get(prev_b, {}).get(rep_of) != cid):
                     later_sel.append({
-                        "old_event_time": e.get("close_time"), "bound": cid,
+                        "old_event_time": (e.get("close_time")
+                                           or e.get("event_time")),
+                        "bound": cid,
                         "used_from_boundary": cur, "not_in_boundary": prev_b,
                         "finding": "later-boundary selection applied to "
                                    "earlier event (D1)"})
-                    later_events.add(e.get("close_time"))
+                    later_events.add(str(e.get("close_time")
+                                         or e.get("event_time")))
         # new-run self-check moved outside (always runs)
         comparison = {
             "old_record": str(args.old_record),
@@ -471,6 +546,12 @@ def main() -> int:
             "reproduced_future_reference_counterexamples": {
                 "audit_reported": "36 of 59 event records contain references "
                                   "unavailable at event time",
+                "id_scheme_note": (
+                    "the old record used bar-index candidate ids; the stable "
+                    "source/time id scheme cannot resolve knowable times for "
+                    f"{unmatched_old_ids} old bound ids — those rows are "
+                    "unverifiable, not cleared"),
+                "unmatched_old_bound_ids": unmatched_old_ids,
                 "unavailable_at_event_time_bindings": len(contaminated),
                 "unavailable_at_event_time_distinct_events": len(contam_events),
                 "later_boundary_selection_retroactive_bindings": len(later_sel),
@@ -620,6 +701,28 @@ def main() -> int:
         "recognized_in_full_context": len(ids_eval & ids_full),
         "unrecognized_examples": sorted(ids_eval - ids_full)[:5],
     }
+
+    # ---- terminal provisional candidate retention (consolidation V1 §6) ---
+    # every candidate observable in a truncated prefix must persist in the
+    # one-shot full-history inventory (confirmed, or superseded-but-retained)
+    retention = {}
+    for rid, rep in reps.items():
+        fview = fC if rep.view_id == "C" else fF
+        if rep.family == "F-K":
+            full_pts = fk_turning_points(fview, int(rep.param("k")), rep)
+        else:
+            full_pts = ft_turning_points(fview, rep.param("tau"), rep)
+        full_ids = {p.candidate_id for p in full_pts}
+        prefix_ids = prefix_inventory.get(rid, set())
+        missing = prefix_ids - full_ids
+        retention[rid] = {
+            "n_full_history_inventory": len(full_ids),
+            "n_prefix_inventory_union": len(prefix_ids),
+            "n_prefix_only_ids": len(missing),
+            "prefix_only_examples": sorted(missing)[:5],
+            "n_retained_superseded_in_full": sum(
+                1 for p in full_pts if p.status == "superseded"),
+        }
     print("propagation summary:", propagation_summary, flush=True)
     print("ambiguity accounting:", {k: v for k, v in ambiguity_accounting.items()
                                     if k != "affecting_actual_selections"},
@@ -679,6 +782,15 @@ def main() -> int:
             r.unresolved.reason_code for r in ledger.results if r.unresolved)),
         "sp16_agreement": dict(Counter(
             b["representation_report_SP16"]["agreement"] for b in boundaries_out)),
+        # consolidation V1 (task §6/§8): retention probe + ALWAYS-ON self-check
+        "candidate_retention": retention,
+        "self_check": {
+            "axis_verified_bindings": axis_verified,
+            "future_reference_violations": len(new_violations),
+            "violation_examples": new_violations[:10],
+            "rule": "every binding must be verified on the shared axis at "
+                    "its event time; zero violations tolerated",
+        },
         "selection_quality": {
             "state": "NOT_ESTABLISHED",
             "blocker": "EP: no acceptable-set annotations exist for this "
@@ -700,6 +812,101 @@ def main() -> int:
     out_path = out_dir / "experiment_record_v2.json"
     out_path.write_text(json.dumps(record, indent=1, default=str))
     print("record:", out_path, flush=True)
+
+    # ---- inspectable manifest (task §7): durable identities + reproduction --
+    info_time_path = (Path(args.src) / "trading_system/research/information_time.py")
+    manifest = {
+        "experiment_id": "CSM-SEL-EXP-V2-CONSOLIDATION",
+        "source": {
+            "git_head_at_run": _git_head(),
+            "csm_py_sha256": _sha256_file(csm_path),
+            "experiment_py_sha256": _sha256_file(Path(__file__).resolve()),
+            "information_time_py_sha256": (_sha256_file(info_time_path)
+                                           if info_time_path.exists() else None),
+        },
+        "inputs": summary["inputs"],
+        "policy_registry": summary["policy_classification"],
+        "evaluation_window": "2025-09-20 .. 2025-09-27 UTC",
+        "left_context_start": "2025-08-01 UTC",
+        "counts": {
+            "boundaries": len(boundaries_out),
+            "event_bindings": len(events_out),
+            "binding_kinds": binding_accounting.get("by_kind"),
+            "candidate_rows": len(coverage_rows),
+            "historical_transitions_reapplied": sum(
+                (b["tasks"][rid].get("restored_transitions") or 0)
+                for b in boundaries_out for rid in b["tasks"]),
+            "dependency_updates": len(ledger.revisions),
+            "ambiguity_records": ambiguity_accounting.get("total_records"),
+            "incomplete_dependency_coverage": summary["ledger"].get(
+                "incomplete_dependency_coverage"),
+        },
+        "self_check": summary["self_check"],
+        "candidate_retention": retention,
+        "reproduction": {
+            "python": "3.11",
+            "pandas": "2.2.3",
+            "numpy": "2.2.6",
+            "command": (
+                "PYTHONPATH=src python "
+                "docs/research/contextual_selection_v1/"
+                "experiment_contextual_selection_v2.py "
+                "--mirror-dir <mirror> --out-dir <out> "
+                "--months 2025-08,2025-09 "
+                "--start 2025-08-01 --end 2025-09-28 "
+                f"--old-record {out_path} --src src"),
+            "inputs": "CSV sha256 identities above (btc-usdt-1m mirror)",
+            "outputs": ["experiment_record_v2.json",
+                        "candidate_ledger_v1.jsonl.gz",
+                        "propagation_log_v1.jsonl",
+                        "experiment_manifest_v1.json", "REPRODUCE.md"],
+        },
+    }
+    manifest_path = out_dir / "experiment_manifest_v1.json"
+    manifest_path.write_text(json.dumps(manifest, indent=1, default=str))
+    repro = out_dir / "REPRODUCE.md"
+    repro.write_text(f"""# CSM V1 consolidation run — reproduction
+
+Authoritative full-run output of the END-TO-END CONSOLIDATION V1 build.
+Selection quality: NOT_ESTABLISHED (EP blocker, unchanged).
+
+## Source
+- git head at run: `{manifest['source']['git_head_at_run']}`
+- csm.py sha256: `{manifest['source']['csm_py_sha256']}`
+- experiment sha256: `{manifest['source']['experiment_py_sha256']}`
+- information_time.py sha256 (CLOSED, byte-identical): `{manifest['source']['information_time_py_sha256']}`
+
+## Environment
+Python 3.11, pandas==2.2.3, numpy==2.2.6 (pinned; pandas 3.x breaks the tests)
+
+## Inputs
+BTCUSDT 1m CSVs (PUBLISHED_OHLC_FACT; SOURCE_ORIGIN_UNVERIFIED), identities:
+
+{json.dumps(manifest['inputs']['files'], indent=1)}
+
+Mirror source: parshant231234-eng/BTCUSDT-Historical-Data @ 27c9be70
+(nested 1m/2025/MM/), fetched with Accept: application/vnd.github.raw.
+
+## Window
+- context (market observations only): 2025-08-01 .. 2025-09-20 UTC
+- evaluation/event window: 2025-09-20 .. 2025-09-27 UTC
+
+## Command
+```
+{manifest['reproduction']['command']}
+```
+
+## Outputs
+- experiment_record_v2.json — full run record (boundaries, events, revisions)
+- candidate_ledger_v1.jsonl.gz — candidate-level coverage rows (points AND legs)
+- propagation_log_v1.jsonl — computed change-fact / recomputation rows
+- experiment_manifest_v1.json — this manifest (machine-readable)
+- historical note: the tracked `experiment_record_v2.json` of the
+  pre-consolidation build (source head e90a62f, short window) is retained
+  for historical comparison ONLY and is not the output of this build.
+""")
+    print("manifest:", manifest_path, flush=True)
+    print("reproduce:", repro, flush=True)
     print("ledger:", summary["ledger"], flush=True)
     print("exclusions:", summary["exclusion_histogram"], flush=True)
     print("unresolved:", summary["unresolved_histogram"], flush=True)

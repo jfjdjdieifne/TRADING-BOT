@@ -40,6 +40,16 @@ from trading_system.research.contextual_selection import (
 
 T0 = pd.Timestamp("2025-01-01 00:00:00")
 
+# consolidation V1: validated shared information-time axis over the fixture's
+# T0-minute grid (every fixture timestamp lies on this grid)
+from trading_system.research.contextual_selection import (  # noqa: E402
+    SharedInformationAxis as _SharedInformationAxis,
+)
+AXIS = _SharedInformationAxis(
+    "test-fixture-minute-grid",
+    pd.date_range(T0, T0 + pd.Timedelta(minutes=2000), freq="1min"))
+
+
 
 def _rep(view: str, family: str = "F-K", **params) -> Representation:
     return Representation(family=family, view_id=view, scale_label=view,
@@ -102,15 +112,15 @@ def test_tail_prefix_full_t2_event_binding_equivalence():
     p_full = [p for p in fk_turning_points(full, 2, rep) if p.side == "low"][0]
     t4 = pd.Timestamp(full.index[4])
     # default contract (no provisional): both empty, no future reference
-    r_t = task_s2_event_binding(4, 0.0, {"C": [p_trunc]}, 4, event_time=t4)
-    r_f = task_s2_event_binding(4, 0.0, {"C": [p_full]}, 4, event_time=t4)
+    r_t = task_s2_event_binding(4, 0.0, {"C": [p_trunc]}, 4, event_time=t4, axis=AXIS)
+    r_f = task_s2_event_binding(4, 0.0, {"C": [p_full]}, 4, event_time=t4, axis=AXIS)
     assert r_t.survivors == [] and r_f.survivors == []
     assert {e.candidate_id for e in r_t.excluded} == {p_trunc.candidate_id}
     # explicit provisional use is occurrence-gated on BOTH runs (equivalence)
     r_t2 = task_s2_event_binding(4, 0.0, {"C": [p_trunc]}, 4, event_time=t4,
-                                 allow_provisional=True)
+                                 allow_provisional=True, axis=AXIS)
     r_f2 = task_s2_event_binding(4, 0.0, {"C": [p_full]}, 4, event_time=t4,
-                                 allow_provisional=True)
+                                 allow_provisional=True, axis=AXIS)
     assert r_t2.survivors == r_f2.survivors == [p_trunc.candidate_id]
 
 
@@ -118,13 +128,15 @@ def test_t2_status_gating_provisional_superseded_broken():
     rep = _rep("C", k=2)
     prov = _pt("prov", rep, "low", 3, 10.0, 5, status=STATUS_PROVISIONAL)
     sup = _pt("sup", rep, "low", 3, 10.0, 5)
-    sup.add_transition(4, STATUS_SUPERSEDED, by="other", note="test")
+    t4 = T0 + timedelta(minutes=4)
+    sup.add_transition(4, STATUS_SUPERSEDED, info_time=t4, by="other", note="test")
     brk = _pt("brk", rep, "low", 3, 10.0, 4)   # knowable at the event time
-    brk.add_transition(2, STATUS_BROKEN, note="test")   # broken BEFORE the event
+    brk.add_transition(2, STATUS_BROKEN, info_time=T0 + timedelta(minutes=2),
+                       note="test")   # broken BEFORE the event
     ok = _pt("ok", rep, "low", 3, 10.0, 4)   # knowable at the event time
     t4 = T0 + timedelta(minutes=4)
     r = task_s2_event_binding(4, 0.0, {"C": [prov, sup, brk, ok]}, 4,
-                              event_time=t4)
+                              event_time=t4, axis=AXIS)
     codes = {e.candidate_id: e.code for e in r.excluded}
     assert codes.get("prov") == X_STATE
     assert codes.get("sup") == X_SUPER
@@ -135,7 +147,7 @@ def test_t2_status_gating_provisional_superseded_broken():
     assert r.binding_kinds["brk"] == "later-interaction"
     # explicit provisional contract opens prov only, tagged per SWS-04a
     r2 = task_s2_event_binding(4, 0.0, {"C": [prov]}, 4, event_time=t4,
-                               allow_provisional=True)
+                               allow_provisional=True, axis=AXIS)
     assert r2.survivors == ["prov"]
     assert r2.binding_kinds["prov"] == "provisional:first-break"
 
@@ -176,13 +188,13 @@ def test_t3_decision_time_availability_check():
     late = _leg("late", 120, 180, 30.0, 70.0, 250)   # knowable after decision
     rep = _rep("F", k=2)
     r = task_s3_entry_leg(coarse, [inside, late], 210, rep,
-                          decision_time=T0 + timedelta(minutes=210))
+                          decision_time=T0 + timedelta(minutes=210), axis=AXIS)
     codes = {e.candidate_id: e.code for e in r.excluded}
     assert codes.get("late") == X_KNOW
     assert r.survivors == ["inside"] and r.selected_id == "inside"
     # the coarse leg itself must be knowable at the decision time
     r2 = task_s3_entry_leg(coarse, [inside], 150, rep,
-                           decision_time=T0 + timedelta(minutes=150))
+                           decision_time=T0 + timedelta(minutes=150), axis=AXIS)
     assert r2.status == "unresolved"   # coarse knowable only at 200
 
 
@@ -208,8 +220,14 @@ def _s5_world():
         _pt("C", rep_c, "low", 30, 20.0, 32),
     ]
     legs = [
-        LegCandidate("up1", rep_c, "A", "B", "up", 10, 20, 10.0, 40.0, 22),
-        LegCandidate("dn1", rep_c, "B", "C", "down", 20, 30, 40.0, 20.0, 32),
+        LegCandidate("up1", rep_c, "A", "B", "up", 10, 20, 10.0, 40.0, 22,
+                     t0_time=T0 + timedelta(minutes=10),
+                     t1_time=T0 + timedelta(minutes=20),
+                     knowable_time=T0 + timedelta(minutes=22)),
+        LegCandidate("dn1", rep_c, "B", "C", "down", 20, 30, 40.0, 20.0, 32,
+                     t0_time=T0 + timedelta(minutes=20),
+                     t1_time=T0 + timedelta(minutes=30),
+                     knowable_time=T0 + timedelta(minutes=32)),
     ]
     return pts, legs
 
@@ -219,14 +237,14 @@ def test_s5_origin_direction_validated():
     claim = {"interpretation": "I", "view": "C",
              "role": "origin-of-last-confirmed-leg"}
     # last confirmed leg is dn1 (down): its origin is B
-    ok = task_s5_falsifier([{**claim, "direction": "down"}], pts, legs, 40)
+    ok = task_s5_falsifier([{**claim, "direction": "down"}], pts, legs, 40, axis=AXIS, decision_time=T0 + timedelta(minutes=40))
     assert ok.status == "justified" and ok.selected_id == "B"
     # missing direction: explicit unresolved (IC) — NOT the same justified result
-    miss = task_s5_falsifier([{**claim, "direction": None}], pts, legs, 40)
+    miss = task_s5_falsifier([{**claim, "direction": None}], pts, legs, 40, axis=AXIS, decision_time=T0 + timedelta(minutes=40))
     assert miss.status == "unresolved"
     assert miss.unresolved is not None and miss.unresolved.reason_code == REASON_IC
     # opposite direction: explicit unresolved (AI) — NOT the same justified result
-    opp = task_s5_falsifier([{**claim, "direction": "up"}], pts, legs, 40)
+    opp = task_s5_falsifier([{**claim, "direction": "up"}], pts, legs, 40, axis=AXIS, decision_time=T0 + timedelta(minutes=40))
     assert opp.status == "unresolved"
     assert opp.unresolved is not None and opp.unresolved.reason_code == REASON_AI
     assert opp.selected_id is None
@@ -237,21 +255,21 @@ def test_s5_all_roles_direction_behavior():
     # low-of-current-leg selects per direction (task-specific effect)
     lo_dn = task_s5_falsifier([{"interpretation": "I", "view": "C",
                                 "role": "low-of-current-leg",
-                                "direction": "down"}], pts, legs, 40)
+                                "direction": "down"}], pts, legs, 40, axis=AXIS, decision_time=T0 + timedelta(minutes=40))
     lo_up = task_s5_falsifier([{"interpretation": "I", "view": "C",
                                 "role": "low-of-current-leg",
-                                "direction": "up"}], pts, legs, 40)
+                                "direction": "up"}], pts, legs, 40, axis=AXIS, decision_time=T0 + timedelta(minutes=40))
     assert lo_dn.selected_id == "C"    # low of last down leg B->C
     assert lo_up.selected_id == "A"    # low of last up leg A->B
     # missing/invalid direction -> explicit IC unresolved
     bad = task_s5_falsifier([{"interpretation": "I", "view": "C",
-                              "role": "high-of-current-leg"}], pts, legs, 40)
+                              "role": "high-of-current-leg"}], pts, legs, 40, axis=AXIS, decision_time=T0 + timedelta(minutes=40))
     assert bad.status == "unresolved"
     assert bad.unresolved.reason_code == REASON_IC
     # last-confirmed-extreme keeps its side-based contract
     ext = task_s5_falsifier([{"interpretation": "I", "view": "C",
                               "role": "last-confirmed-extreme",
-                              "side": "low"}], pts, legs, 40)
+                              "side": "low"}], pts, legs, 40, axis=AXIS, decision_time=T0 + timedelta(minutes=40))
     assert ext.selected_id == "C"
 
 
@@ -266,7 +284,10 @@ def _amb_world(evidence=None):
               same_bar_order="unresolved", same_bar_evidence=evidence)
     high = _pt("high@1329", rep, "high", 1329, 50.0, 1331)
     legs = [LegCandidate("leg1327-1329", rep, "low@1327", "high@1329", "up",
-                         1327, 1329, 28.0, 50.0, 1331)]
+                         1327, 1329, 28.0, 50.0, 1331,
+                         t0_time=T0 + timedelta(minutes=1327),
+                         t1_time=T0 + timedelta(minutes=1329),
+                         knowable_time=T0 + timedelta(minutes=1331))]
     return rep, [low, high], legs
 
 
@@ -278,7 +299,7 @@ def test_same_bar_ambiguity_surfaces_on_t1_selection():
     rep, pts, legs = _amb_world(evidence=None)
     r = task_s1_structural_reference(pts, legs, 1335, rep,
                                      "origin-of-last-confirmed-leg", pol,
-                                     "P-ORIGIN")
+                                     "P-ORIGIN", axis=AXIS, decision_time=T0 + timedelta(minutes=1335))
     assert r.status == "unresolved"
     assert r.selected_id is None
     assert r.survivors == ["low@1327"]
@@ -296,7 +317,7 @@ def test_same_bar_endpoint_evidence_does_not_downgrade():
     rep, pts, legs = _amb_world(evidence="proven:low-first:open-at-low")
     r = task_s1_structural_reference(pts, legs, 1335, rep,
                                      "origin-of-last-confirmed-leg", pol,
-                                     "P-ORIGIN")
+                                     "P-ORIGIN", axis=AXIS, decision_time=T0 + timedelta(minutes=1335))
     assert r.status == "justified" and r.selected_id == "low@1327"
     assert any("proven by OHLC endpoints" in n for n in r.notes)
 
@@ -309,7 +330,7 @@ def test_same_bar_constrained_evidence_stays_material():
     rep, pts, legs = _amb_world(evidence="constrained:close-at-low")
     r = task_s1_structural_reference(pts, legs, 1335, rep,
                                      "origin-of-last-confirmed-leg", pol,
-                                     "P-ORIGIN")
+                                     "P-ORIGIN", axis=AXIS, decision_time=T0 + timedelta(minutes=1335))
     assert r.status == "unresolved"
     assert r.unresolved is not None and r.unresolved.reason_code == REASON_AI
     assert "constrained" in r.unresolved.evidence_needed
@@ -324,7 +345,7 @@ def test_same_bar_ambiguity_on_unselected_candidate_is_unrelated():
     pts[0].same_bar_order = "resolved"
     r = task_s1_structural_reference(pts, legs, 1335, rep,
                                      "origin-of-last-confirmed-leg", pol,
-                                     "P-ORIGIN")
+                                     "P-ORIGIN", axis=AXIS, decision_time=T0 + timedelta(minutes=1335))
     assert r.status == "justified" and r.selected_id == "low@1327"
 
 
@@ -333,7 +354,7 @@ def test_same_bar_ambiguity_surfaces_on_t5_falsifier():
     r = task_s5_falsifier(
         [{"interpretation": "I", "view": "T",
           "role": "origin-of-last-confirmed-leg", "direction": "up"}],
-        pts, legs, 1335)
+        pts, legs, 1335, axis=AXIS, decision_time=T0 + timedelta(minutes=1335))
     assert r.status == "unresolved"
     assert r.unresolved is not None and r.unresolved.reason_code == REASON_AI
     assert "same-bar order unresolved" in " ".join(r.notes)

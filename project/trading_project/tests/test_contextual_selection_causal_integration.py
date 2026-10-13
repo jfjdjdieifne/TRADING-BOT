@@ -53,6 +53,16 @@ from trading_system.research.contextual_selection import (
 
 T0 = pd.Timestamp("2025-01-01 00:00:00")
 
+# consolidation V1: validated shared information-time axis over the fixture's
+# T0-minute grid (every fixture timestamp lies on this grid)
+from trading_system.research.contextual_selection import (  # noqa: E402
+    SharedInformationAxis as _SharedInformationAxis,
+)
+AXIS = _SharedInformationAxis(
+    "test-fixture-minute-grid",
+    pd.date_range(T0, T0 + pd.Timedelta(minutes=2000), freq="1min"))
+
+
 
 def _rep(view: str, family: str = "F-K", **params) -> Representation:
     return Representation(family=family, view_id=view, scale_label=view,
@@ -99,7 +109,7 @@ def test_t1_leg_support_must_be_available_at_decision():
     r50 = task_s1_structural_reference(pts, legs, 50, rep,
                                        "origin-of-last-confirmed-leg", pol,
                                        "P-ORIGIN",
-                                       decision_time=T0 + timedelta(minutes=50))
+                                       decision_time=T0 + timedelta(minutes=50), axis=AXIS)
     assert r50.selected_id != "lo"          # leg support not yet knowable
     assert r50.status == "unresolved"
     codes = {e.candidate_id: e.code for e in r50.excluded}
@@ -107,7 +117,7 @@ def test_t1_leg_support_must_be_available_at_decision():
     r60 = task_s1_structural_reference(pts, legs, 60, rep,
                                        "origin-of-last-confirmed-leg", pol,
                                        "P-ORIGIN",
-                                       decision_time=T0 + timedelta(minutes=60))
+                                       decision_time=T0 + timedelta(minutes=60), axis=AXIS)
     assert r60.status == "justified" and r60.selected_id == "lo"
 
 
@@ -119,10 +129,10 @@ def test_t5_leg_support_availability_discipline():
     claim = {"interpretation": "I", "view": "C",
              "role": "origin-of-last-confirmed-leg", "direction": "up"}
     r50 = task_s5_falsifier([claim], pts, legs, 50,
-                            decision_time=T0 + timedelta(minutes=50))
+                            decision_time=T0 + timedelta(minutes=50), axis=AXIS)
     assert r50.status == "unresolved"      # supporting leg not yet knowable
     r60 = task_s5_falsifier([claim], pts, legs, 60,
-                            decision_time=T0 + timedelta(minutes=60))
+                            decision_time=T0 + timedelta(minutes=60), axis=AXIS)
     assert r60.status == "justified" and r60.selected_id == "lo"
 
 
@@ -149,11 +159,11 @@ def test_regenerated_candidates_restore_recorded_history():
     claims = [{"interpretation": "I", "view": "C",
                "role": "origin-of-last-confirmed-leg", "direction": "up"}]
     legs = [_lg("up1", rep, "L", "H", "up", 10, 20, 20.0, 40.0, 25)]
-    s5 = task_s5_falsifier(claims, [p], legs, 30)
+    s5 = task_s5_falsifier(claims, [p], legs, 30, axis=AXIS, decision_time=T0 + timedelta(minutes=30))
     ledger.record(s5, payload={"kind": "T-S5", "claims": copy.deepcopy(claims),
                                "points": copy.deepcopy([p]),
                                "legs": copy.deepcopy(legs),
-                               "state_id_prefix": "R"})
+                               "state_id_prefix": "R", "axis": AXIS})
     ledger.propagate(30, ["L"], changed_states={"L": STATUS_BROKEN},
                      update_time=T0 + timedelta(minutes=30))
     # regeneration: a fresh copy with the same identity starts "clean"...
@@ -175,7 +185,7 @@ def test_binding_survives_post_event_break_and_later_interactions_bind():
     ref = _pt("ref", rep, "high", 10, 100.0, 12)
     t_ev1 = T0 + timedelta(minutes=20)
     # event 1: first break-side crossing
-    ev1 = task_s2_event_binding(20, 110.0, {"C": [ref]}, 20, event_time=t_ev1)
+    ev1 = task_s2_event_binding(20, 110.0, {"C": [ref]}, 20, event_time=t_ev1, axis=AXIS)
     assert ev1.survivors == ["ref"]
     assert ev1.binding_kinds["ref"] == "first-break"
     # the event's post-state transition is applied AFTER the binding record
@@ -189,7 +199,7 @@ def test_binding_survives_post_event_break_and_later_interactions_bind():
     # dropped and never editing the first
     ev2 = task_s2_event_binding(30, 112.0, {"C": [ref]}, 30,
                                 prev_close=90.0,
-                                event_time=T0 + timedelta(minutes=30))
+                                event_time=T0 + timedelta(minutes=30), axis=AXIS)
     assert ev2.survivors == ["ref"]
     assert ev2.binding_kinds["ref"] == "later-interaction"
 
@@ -200,7 +210,7 @@ def test_provisional_replay_policy_retained_through_propagation():
     ledger = InterpretationLedger()
     ev = task_s2_event_binding(4, 0.0, {"C": [prov]}, 4, prev_close=20.0,
                                event_time=T0 + timedelta(minutes=4),
-                               allow_provisional=True)
+                               allow_provisional=True, axis=AXIS)
     assert ev.survivors == ["tail"]
     uid = ledger.record(ev, payload={
         "kind": "T-S2", "event_bar": 4, "close_price": 0.0,
@@ -208,7 +218,7 @@ def test_provisional_replay_policy_retained_through_propagation():
         "prev_close": 20.0, "state_id_prefix": "P",
         "event_time": T0 + timedelta(minutes=4),
         "allow_provisional": True,          # declared Π_T — must survive
-        "tie_policy": "TIE-CROSS-EQUAL-UNBOUND-V1"})
+        "tie_policy": "TIE-CROSS-EQUAL-UNBOUND-V1", "axis": AXIS})
     # a change fact on a dependency forces recomputation of this dependent
     log = ledger.propagate(6, ["tail"], changed_states={"tail": "knowable"},
                            update_time=T0 + timedelta(minutes=6))
@@ -222,7 +232,7 @@ def test_no_provisional_policy_by_default():
     rep = _rep("C", k=2)
     prov = _pt("tail", rep, "low", 3, 10.0, 99, status=STATUS_PROVISIONAL)
     ev = task_s2_event_binding(4, 0.0, {"C": [prov]}, 4,
-                               event_time=T0 + timedelta(minutes=4))
+                               event_time=T0 + timedelta(minutes=4), axis=AXIS)
     assert ev.survivors == []
     assert any(e.code == X_STATE for e in ev.excluded)
 
@@ -316,7 +326,7 @@ def test_t5_constrained_ambiguity_surfaces_ai():
     r = task_s5_falsifier(
         [{"interpretation": "I", "view": "T",
           "role": "origin-of-last-confirmed-leg", "direction": "up"}],
-        [low, high], legs, 30)
+        [low, high], legs, 30, axis=AXIS, decision_time=T0 + timedelta(minutes=30))
     assert r.status == "unresolved"
     assert r.unresolved is not None and r.unresolved.reason_code == REASON_AI
 
@@ -335,12 +345,13 @@ def test_change_facts_and_recomputations_are_separate_streams():
     r = task_s1_structural_reference([lo, hi], legs, 45, rep,
                                      "origin-of-last-confirmed-leg", pol,
                                      "P-ORIGIN",
-                                     decision_time=T0 + timedelta(minutes=45))
+                                     decision_time=T0 + timedelta(minutes=45), axis=AXIS)
     uid = ledger.record(r, payload={
         "kind": "T-S1", "points": copy.deepcopy([lo, hi]),
         "legs": copy.deepcopy(legs), "rep": rep, "role":
         "origin-of-last-confirmed-leg", "policy": pol, "policy_id": "P-ORIGIN",
-        "state_id_prefix": "D", "decision_time": T0 + timedelta(minutes=45)})
+        "state_id_prefix": "D", "decision_time": T0 + timedelta(minutes=45),
+        "axis": AXIS})
     ledger.propagate(50, ["lo"], changed_states={"lo": STATUS_BROKEN},
                      update_time=T0 + timedelta(minutes=50))
     kinds = [x["kind"] for x in ledger.revisions]
@@ -362,7 +373,7 @@ def test_incomplete_dependency_coverage_is_tracked():
     p = _pt("p", rep, "high", 1, 10.0, 2)
     ledger = InterpretationLedger()
     r = task_s2_event_binding(3, 11.0, {"C": [p]}, 3,
-                              event_time=T0 + timedelta(minutes=3))
+                              event_time=T0 + timedelta(minutes=3), axis=AXIS)
     ledger.record(r)                          # NO payload: non-recomputable
     snap = ledger.snapshot()
     assert snap["n_dependents_without_payload"] == 1
@@ -405,7 +416,16 @@ def test_containment_mixed_pair_refused_single_domain_allowed():
                         1.0, 2.0, 1)
     with pytest.raises(ValueError, match="timestamps on BOTH legs"):
         sp05_containment(coarse, bare)
-    # neither has times: single declared domain, index comparison allowed
+    # neither has times: index comparison allowed ONLY inside one declared
+    # domain (consolidation V1: bar numbers from different view domains do
+    # not establish temporal containment — the audited counterexample)
+    same_view_a = LegCandidate("sv_a", _rep("C", k=2), "x", "y", "up", 0, 10,
+                               1.0, 2.0, 10)
+    same_view_b = LegCandidate("sv_b", _rep("C", k=2), "x", "y", "up", 2, 5,
+                               1.2, 1.8, 5)
+    assert sp05_containment(same_view_a, same_view_b) == "contained"
     bare2 = LegCandidate("bare2", _rep("C", k=2), "x", "y", "up", 0, 10,
                          1.0, 2.0, 10)
-    assert sp05_containment(bare2, bare) == "contained"
+    with pytest.raises(ValueError,
+                       match="across views requires verified timestamps"):
+        sp05_containment(bare2, bare)   # cross-view, no times: refused

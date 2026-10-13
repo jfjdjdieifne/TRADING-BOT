@@ -85,6 +85,15 @@ TIE_FT_EQ_FIRST = "TIE-FT-EQ-FIRST-V1"   # keep first equal extreme (default)
 TIE_FT_EQ_LAST = "TIE-FT-EQ-LAST-V1"     # explicit alternative (never implicit)
 TIE_BOUNDARIES = "TIE-BOUNDARIES-INCLUSIVE-V1"
 TIE_CROSS_EQUAL_UNBOUND = "TIE-CROSS-EQUAL-UNBOUND-V1"  # equality not a crossing
+TIE_CROSS_EQUAL_BOUND_V1 = "TIE-CROSS-EQUAL-BOUND-V1"    # equality IS a crossing
+TIE_CROSS_POLICIES = (TIE_CROSS_EQUAL_UNBOUND, TIE_CROSS_EQUAL_BOUND_V1)
+
+# ---- END-TO-END CONSOLIDATION V1 (independent audit of 312163a) ----------
+# Explicit event phases (task §3): a historical binding is evaluated against
+# PRE_EVENT_STATE; the event's own transition never rewrites it.
+PHASE_PRE_EVENT = "PRE_EVENT_STATE"
+PHASE_BINDING = "EVENT_BINDING"
+PHASE_POST_EVENT = "POST_EVENT_STATE"
 
 
 # --------------------------------------------------------------------------
@@ -143,6 +152,10 @@ class StatusTransition:
     info_time: Optional[pd.Timestamp] = None
     by: Optional[str] = None      # e.g. candidate id that superseded this one
     note: str = ""
+    # authorizing EVENT reference (consolidation V1): the recorded event this
+    # transition implements.  Pre-event state queries exclude the event's own
+    # transitions so applying an event never rewrites its own binding.
+    event_ref: Optional[str] = None
 
 
 @dataclass
@@ -181,22 +194,29 @@ class PointCandidate:
 
     def add_transition(self, info_bar: int, status: str,
                        info_time: Optional[pd.Timestamp] = None,
-                       by: Optional[str] = None, note: str = "") -> None:
+                       by: Optional[str] = None, note: str = "",
+                       event_ref: Optional[str] = None) -> None:
         self.status_transitions.append(
             StatusTransition(info_bar=info_bar, status=status,
-                             info_time=info_time, by=by, note=note))
+                             info_time=info_time, by=by, note=note,
+                             event_ref=event_ref))
         self.status = status  # final-field mirror for callers that read it
 
     def status_at(self, info_bar: Optional[int] = None,
-                  info_time: Optional[pd.Timestamp] = None) -> str:
+                  info_time: Optional[pd.Timestamp] = None,
+                  excluding_event_ref: Optional[str] = None) -> str:
         """Reconstruct the status knowable at the requested boundary (D3).
 
-        ROOT-CAUSE REPAIR (causal-state integration V1): the time axis
-        GOVERNS whenever both the query and the transition carry verified
-        times; the bar axis is consulted ONLY inside a single declared domain
-        (no times on either side).  The previous conjunction of both filters
-        let a domain-local bar index silently veto a time-based query
-        (cross-timeframe look-ahead / state loss).
+        END-TO-END CONSOLIDATION V1: a TIME-based query NEVER falls back to a
+        bar index — a transition without ``info_time`` is unplaceable on the
+        time axis and is not applied (a bar index from another domain must
+        not give it meaning).  The bar axis is consulted only for bar-only
+        queries (single declared domain).
+
+        ``excluding_event_ref`` reconstructs the PRE_EVENT_STATE: the
+        transitions authorized by the excluded event itself are omitted, so
+        applying an event's own break never rewrites that event's binding
+        (first-break stays first-break on replay).
 
         Falls back to the final ``status`` field when no transition history
         exists (hand-built candidates); later supersession recorded as a
@@ -206,17 +226,19 @@ class PointCandidate:
             return self.status
         applicable = []
         for t in self.status_transitions:
-            if info_time is not None and t.info_time is not None:
-                if t.info_time > info_time:
-                    continue                      # time axis governs
-            elif info_bar is not None and (info_time is None or t.info_time is None):
+            if excluding_event_ref is not None and t.event_ref == excluding_event_ref:
+                continue                          # the event's own transition
+            if info_time is not None:
+                if t.info_time is not None:
+                    if t.info_time > info_time:
+                        continue                  # time axis governs
+                else:
+                    # unplaceable on the time axis: never borrow a foreign
+                    # domain's bar index (consolidation V1, audit D4)
+                    continue
+            elif info_bar is not None:
                 if t.info_bar > info_bar:
                     continue                      # single-domain bar axis
-            elif info_time is not None and t.info_time is None:
-                # transition unplaceable on the time axis: cannot verify its
-                # historical position from a cross-domain bar index — treat
-                # as not-yet-applicable (explicit conservative state)
-                continue
             applicable.append(t)
         # queried before the first recorded transition: the constructed state
         return applicable[-1].status if applicable else self.initial_status
@@ -323,6 +345,14 @@ class SelectionResult:
     # --- causal-state integration V1: T-S2 pre-event lifecycle tags ---
     # bound reference -> "first-break" | "later-interaction" (|"provisional:")
     binding_kinds: Dict[str, str] = field(default_factory=dict)
+    # --- consolidation V1 (task §3): explicit event phases -------------
+    # {PRE_EVENT_STATE: {cid: status}, EVENT_BINDING: {bound, binding_kinds},
+    #  POST_EVENT_STATE: {cid: authorized status}}
+    event_phase: Optional[dict] = None
+    # --- consolidation V1 (task §4): exact policy identity/version/values
+    # captured when this result was produced — later registry mutation can
+    # never change the historical meaning of this result.
+    policy_snapshots: Dict[str, dict] = field(default_factory=dict)
 
     @property
     def is_justified(self) -> bool:
@@ -349,6 +379,13 @@ class PolicyRegistry:
     Audit D7 (§8): every entry carries a ``kind``; research configuration is
     never presented as an owner-approved analytical policy.  Entries without
     an explicit kind default to KIND_RESEARCH.
+
+    END-TO-END CONSOLIDATION V1 (task §4): entries are VERSIONED and
+    immutable per version.  Re-registering a policy id creates a NEW version
+    (v2, v3, ...); earlier results hold ``policy_snapshots`` of the exact
+    identity/version/values used at creation, so a registry mutation can
+    never silently change their historical meaning.  ``ref()`` names the
+    version explicitly.
     """
 
     def __init__(self) -> None:
@@ -359,8 +396,11 @@ class PolicyRegistry:
                  kind: str = KIND_RESEARCH) -> None:
         if kind not in POLICY_KINDS:
             raise ValueError(f"bad policy kind {kind!r}")
+        prev = self._entries.get(policy_id)
+        version = 1 if prev is None else prev["version"] + 1
         self._entries[policy_id] = {
             "policy_id": policy_id,
+            "version": version,
             "description": description,
             "value": value,
             "class": CLASS_O,
@@ -371,10 +411,17 @@ class PolicyRegistry:
     def ref(self, policy_id: str) -> str:
         if policy_id not in self._entries:
             raise KeyError(f"policy {policy_id!r} not registered (SP-18)")
-        return f"O:{policy_id}"
+        return f"O:{policy_id}@v{self._entries[policy_id]['version']}"
 
     def get(self, policy_id: str) -> dict:
         return self._entries[policy_id]
+
+    def snapshot_of(self, policy_id: str) -> dict:
+        """Exact policy identity/version/effective values at call time
+        (consolidation V1: results preserve their own policy meaning)."""
+        if policy_id not in self._entries:
+            raise KeyError(f"policy {policy_id!r} not registered (SP-18)")
+        return dict(self._entries[policy_id])
 
     def items(self) -> Iterable[Tuple[str, dict]]:
         return self._entries.items()
@@ -386,7 +433,8 @@ class PolicyRegistry:
 
 def available_at(c: object, *,
                  as_of_bar: Optional[int] = None,
-                 as_of_time: Optional[pd.Timestamp] = None) -> bool:
+                 as_of_time: Optional[pd.Timestamp] = None,
+                 axis: Optional["SharedInformationAxis"] = None) -> bool:
     """Availability of a candidate on a shared axis.
 
     Timestamps are the only axis allowed to cross view domains; bar indices
@@ -395,16 +443,84 @@ def available_at(c: object, *,
     A candidate with no recorded ``knowable_time`` under a time query is NOT
     available: an unverifiable availability is never claimed (this covers the
     truncated-prefix tail whose confirmation lies beyond the supplied bars).
+
+    END-TO-END CONSOLIDATION V1: when a validated ``axis`` is supplied the
+    comparison is KEY-VALIDATED (both times must resolve on the master
+    timeline — an off-grid timestamp is explicit unavailability, never a raw
+    float comparison).  Public task entry points REQUIRE the axis whenever
+    time-bearing evidence is evaluated (``require_validated_asof``).
     """
     k_time = getattr(c, "knowable_time", None)
     if as_of_time is not None:
         if k_time is None:
             return False   # unverifiable on the time axis -> not available
+        if axis is not None:
+            return axis.available(k_time, as_of_time)
         return bool(k_time <= as_of_time)
     if as_of_bar is not None:
         return bool(getattr(c, "knowable_bar") <= as_of_bar)
     raise ValueError("availability requires a shared axis "
                      "(as_of_time with candidate knowable_time, or as_of_bar)")
+
+
+def _time_bearing(*objs: object) -> bool:
+    """True iff any evaluated object carries information-time evidence."""
+    for o in objs:
+        if o is None:
+            continue
+        seq = o if isinstance(o, (list, tuple, dict)) else (o,)
+        if isinstance(o, dict):
+            seq = [x for v in o.values() for x in (v if isinstance(v, (list, tuple)) else (v,))]
+        for x in seq:
+            if x is None or not hasattr(x, "__dict__") and not hasattr(x, "candidate_id") \
+               and not hasattr(x, "leg_id") and not hasattr(x, "knowable_bar"):
+                continue
+            if getattr(x, "knowable_time", None) is not None:
+                return True
+            if getattr(x, "occurrence_time", None) is not None:
+                return True
+            if getattr(x, "t0_time", None) is not None or getattr(x, "t1_time", None) is not None:
+                return True
+    return False
+
+
+def require_validated_asof(task_id: str, *,
+                           axis: Optional["SharedInformationAxis"],
+                           boundary_time: Optional[pd.Timestamp],
+                           time_bearing: bool) -> None:
+    """Unified information-time enforcement (consolidation V1, task §1).
+
+    EVERY public task path routes its as-of evaluation through this gate:
+
+    * time-bearing evidence (any input carries timestamps) REQUIRES the
+      decision/event boundary on the shared time axis AND a validated axis —
+      the call is rejected (ValueError) otherwise: no silent bypass.
+    * a time boundary with no axis is likewise rejected.
+    * pure bar-domain evidence (no times anywhere) keeps the single-domain
+      bar contract unchanged.
+
+    Missing essential evidence fails CLOSED (the call is refused) — never a
+    bar-index fallback for time-bearing evidence.
+    """
+    if boundary_time is None and not time_bearing:
+        return                       # pure bar-domain contract (one domain)
+    if boundary_time is None:
+        raise ValueError(
+            f"{task_id}: time-bearing evidence requires the decision/event "
+            f"boundary on the shared time axis (decision_time/event_time); "
+            f"missing boundary is never replaced by a bar index")
+    if axis is None:
+        raise ValueError(
+            f"{task_id}: validated as-of contract requires a shared "
+            f"information-time axis (axis=...); raw timestamp comparison is "
+            f"not a verified information-time claim")
+    try:
+        axis.key_for_time(boundary_time)
+    except InformationKeyError as exc:
+        raise ValueError(
+            f"{task_id}: decision/event boundary {boundary_time} is not a "
+            f"verified information time on axis {axis.timeline_id!r}: {exc}"
+        ) from exc
 
 
 def _endpoint_order(open_: float, high: float, low: float,
@@ -749,6 +865,30 @@ def ft_turning_points(bars: pd.DataFrame, tau: float, rep: Representation,
                                 note="F-T reversal >= tau")
         out.append(cand)
 
+    def _retire(occ_i: int, side: str, level: float, order: str,
+                ev: Optional[str], by_id: str) -> None:
+        """END-TO-END CONSOLIDATION V1 (task §6): a provisional running
+        extreme displaced by a more extreme bar is RETAINED with its
+        lifecycle (superseded, ``superseded_by`` set) — consistent with
+        F-K's SWS-04c retention, and never silently discarded.  Retention
+        is inventory bookkeeping only: superseded candidates are excluded
+        from every selection path (X-SUPER) and from leg construction."""
+        occ_time = (pd.Timestamp(times[occ_i]) if times is not None else None)
+        cand = PointCandidate(
+            candidate_id=stable_point_id(rep, side, occ_i, occ_time, id_prefix),
+            rep=rep, side=side, occurrence_bar=occ_i, level=level,
+            knowable_bar=occ_i, status=STATUS_SUPERSEDED,
+            occurrence_time=occ_time, knowable_time=None,
+            same_bar_order=order, same_bar_evidence=ev)
+        cand.superseded_by = by_id
+        cand.add_transition(occ_i, STATUS_PROVISIONAL, info_time=occ_time,
+                            note=f"F-T registered (tie={tie_policy})")
+        cand.add_transition(occ_i, STATUS_SUPERSEDED, info_time=occ_time,
+                            by=by_id,
+                            note="F-T provisional extreme displaced by a "
+                                 "more extreme bar (retained)")
+        out.append(cand)
+
     for i in range(n):
         if ext_side is None:
             ext_side, ext_i, ext_level = "high", i, float(highs[i])
@@ -779,10 +919,18 @@ def ft_turning_points(bars: pd.DataFrame, tau: float, rep: Representation,
                         "note": "OHLC cannot order the intrabar high/low; "
                                 "no sequence synthesized",
                     })
+                _retire(ext_i, "high", ext_level, ext_order, ext_ev,
+                        stable_point_id(rep, "high", i,
+                                        pd.Timestamp(times[i]) if times is not None else None,
+                                        id_prefix))
                 ext_side, ext_i, ext_level = "high", i, float(highs[i])
                 ext_order, ext_ev = "unresolved", ev
                 continue
             if update:
+                _retire(ext_i, "high", ext_level, ext_order, ext_ev,
+                        stable_point_id(rep, "high", i,
+                                        pd.Timestamp(times[i]) if times is not None else None,
+                                        id_prefix))
                 ext_side, ext_i, ext_level = "high", i, float(highs[i])
                 ext_order, ext_ev = "resolved", None
             elif reversal:
@@ -813,10 +961,18 @@ def ft_turning_points(bars: pd.DataFrame, tau: float, rep: Representation,
                         "note": "OHLC cannot order the intrabar high/low; "
                                 "no sequence synthesized",
                     })
+                _retire(ext_i, "low", ext_level, ext_order, ext_ev,
+                        stable_point_id(rep, "low", i,
+                                        pd.Timestamp(times[i]) if times is not None else None,
+                                        id_prefix))
                 ext_side, ext_i, ext_level = "low", i, float(lows[i])
                 ext_order, ext_ev = "unresolved", ev
                 continue
             if update:
+                _retire(ext_i, "low", ext_level, ext_order, ext_ev,
+                        stable_point_id(rep, "low", i,
+                                        pd.Timestamp(times[i]) if times is not None else None,
+                                        id_prefix))
                 ext_side, ext_i, ext_level = "low", i, float(lows[i])
                 ext_order, ext_ev = "resolved", None
             elif reversal:
@@ -867,6 +1023,13 @@ def build_legs(points: Sequence[PointCandidate], rep: Representation,
                 })
             continue
         direction = "up" if b.level > a.level else "down"
+        # END-TO-END CONSOLIDATION V1 (audit D3): an endpoint without a
+        # verifiable knowable_time leaves the leg's availability UNVERIFIABLE
+        # — fail closed (knowable_time=None), never claimed from one side.
+        kt_a = getattr(a, "knowable_time", None)
+        kt_b = getattr(b, "knowable_time", None)
+        know_time = (max(kt_a, kt_b)
+                     if (kt_a is not None and kt_b is not None) else None)
         legs.append(LegCandidate(
             leg_id=stable_leg_id(rep, a.occurrence_bar, b.occurrence_bar,
                                  a.occurrence_time, b.occurrence_time),
@@ -878,8 +1041,7 @@ def build_legs(points: Sequence[PointCandidate], rep: Representation,
             knowable_bar=max(a.knowable_bar, b.knowable_bar),
             completed=b.status == STATUS_CONFIRMED,
             t0_time=a.occurrence_time, t1_time=b.occurrence_time,
-            knowable_time=max([t for t in (a.knowable_time, b.knowable_time)
-                               if t is not None], default=None),
+            knowable_time=know_time,
         ))
     if completed_only:
         legs = [l for l in legs if l.completed]
@@ -896,7 +1058,8 @@ def _cid(c: object) -> str:
 
 def sp01_knowability(candidates: Sequence[object], decision_bar: Optional[int],
                      allow_provisional: bool = False,
-                     as_of_time: Optional[pd.Timestamp] = None
+                     as_of_time: Optional[pd.Timestamp] = None,
+                     axis: Optional["SharedInformationAxis"] = None
                      ) -> Tuple[List[object], List[Exclusion]]:
     """SP-01 knowability with historical status reconstruction (audit D3).
 
@@ -936,7 +1099,8 @@ def sp01_knowability(candidates: Sequence[object], decision_bar: Optional[int],
             else:
                 passed.append(c)
         else:
-            if not available_at(c, as_of_bar=decision_bar, as_of_time=as_of_time):
+            if not available_at(c, as_of_bar=decision_bar,
+                                as_of_time=as_of_time, axis=axis):
                 excluded.append(Exclusion(_cid(c), X_KNOW, "R:SP-01",
                                           f"knowable_bar={getattr(c, 'knowable_bar', '?')} "
                                           f"> t={decision_bar}"))
@@ -974,6 +1138,14 @@ def sp05_containment(coarse: LegCandidate, fine: LegCandidate,
             "(single declared domain); raw cross-domain indices are never "
             "compared (final audit patch)")
     else:
+        # END-TO-END CONSOLIDATION V1 (audit D5): numeric bar indices alone
+        # establish containment ONLY inside one declared domain.  Cross-view
+        # pairs without timestamps are incomparable — refuse, never 'contained'.
+        if getattr(coarse, "view_id", None) != getattr(fine, "view_id", None):
+            raise ValueError(
+                "containment across views requires verified timestamps on "
+                "both legs; bar numbers from different view domains do not "
+                "establish temporal containment (consolidation V1)")
         ct0, ct1 = sorted((coarse.t0, coarse.t1))
         ft0, ft1 = sorted((fine.t0, fine.t1))
         if ft1 < ct0 or ft0 > ct1:
@@ -1073,7 +1245,8 @@ def task_s1_structural_reference(points: Sequence[PointCandidate],
                                  policy_id: Optional[str] = None,
                                  allow_provisional: bool = False,
                                  state_id_prefix: str = "S1",
-                                 decision_time: Optional[pd.Timestamp] = None
+                                 decision_time: Optional[pd.Timestamp] = None,
+                                 axis: Optional["SharedInformationAxis"] = None
                                  ) -> SelectionResult:
     """T-S1: which confirmed point is the reference for view V's current state.
 
@@ -1081,16 +1254,30 @@ def task_s1_structural_reference(points: Sequence[PointCandidate],
     "last-confirmed-extreme".  Without a declared role the output is MP.
     The analytical direction of the resolved reference is derived from the
     supporting leg (audit D6) — never from note strings.
+
+    END-TO-END CONSOLIDATION V1 (task §1): all as-of availability runs
+    through the validated shared information-time axis whenever evidence is
+    time-bearing (``require_validated_asof``); no silent bar fallback.
     """
+    require_validated_asof("T-S1", axis=axis, boundary_time=decision_time,
+                           time_bearing=_time_bearing(points, legs))
     prov = ["R:SP-01", "R:SP-13", "R:SP-14", "F:H_T(confirmed,knowable,in-view)"]
     pregs: List[str] = []
-    in_view = [p for p in points if p.rep.view_id == rep.view_id and p.rep.family == rep.family
-               and p.rep.params == rep.params]
-    others = [p for p in points if p not in in_view]
+    psnaps: Dict[str, dict] = {}
+    # consolidation V1 (perf-neutral structural repair): the in-view partition
+    # is computed by the DECLARED predicate (O(n)) — the previous membership
+    # scan performed O(n^2) full record equality over the entire candidate
+    # inventory on every recomputation (hours-long full-context runs)
+    def _in_view(p: object) -> bool:
+        return (p.rep.view_id == rep.view_id and p.rep.family == rep.family
+                and p.rep.params == rep.params)
+
+    in_view = [p for p in points if _in_view(p)]
+    others = [p for p in points if not _in_view(p)]
     excluded: List[Exclusion] = [Exclusion(p.candidate_id, X_SCALE, "R:SP-02",
                                            "not in view V") for p in others]
     passed, ex1 = sp01_knowability(in_view, decision_bar, allow_provisional,
-                                   as_of_time=decision_time)
+                                   as_of_time=decision_time, axis=axis)
     excluded += ex1
     confirmed = [p for p in passed if p.status_at(decision_bar, decision_time)
                  == STATUS_CONFIRMED]
@@ -1105,7 +1292,8 @@ def task_s1_structural_reference(points: Sequence[PointCandidate],
     for l in view_legs:
         if not l.completed:
             continue
-        if available_at(l, as_of_bar=decision_bar, as_of_time=decision_time):
+        if available_at(l, as_of_bar=decision_bar, as_of_time=decision_time,
+                        axis=axis):
             confirmed_legs.append(l)
         else:
             excluded.append(Exclusion(
@@ -1116,6 +1304,19 @@ def task_s1_structural_reference(points: Sequence[PointCandidate],
     def _deps(*ids: str) -> List[str]:
         return [i for i in ids if i]
 
+    # consolidation V1 (task §4): every result carries the exact policy
+    # identity/version/values used when it was produced — including the
+    # declared role and any registered policy id for ANY role
+    psnaps["role"] = {"policy_id": "role", "version": 1, "value": role,
+                      "class": CLASS_O, "kind": KIND_PROCEDURE}
+    if policy_id is not None:
+        psnaps[policy_id] = policy.snapshot_of(policy_id)
+
+    def _ret(*args, **kwargs) -> SelectionResult:
+        r = _mk(*args, **kwargs)
+        r.policy_snapshots = dict(psnaps)
+        return r
+
     if not confirmed_legs and not confirmed:
         state = UnresolvedState(
             state_id=f"{state_id_prefix}-{decision_bar}", task="T-S1",
@@ -1123,7 +1324,7 @@ def task_s1_structural_reference(points: Sequence[PointCandidate],
             reason_code=REASON_IC, evidence_needed="more history / confirmation",
             policy_refs=[], provenance=prov,
             dependents_blocked=["T-S5", "T-S4", "zone-context", "liquidity-objective"])
-        return _mk("T-S1", decision_bar, "unresolved", None, [], excluded, state,
+        return _ret("T-S1", decision_bar, "unresolved", None, [], excluded, state,
                    prov, pregs, rep.rep_id, decision_time=decision_time)
 
     if role == "origin-of-last-confirmed-leg":
@@ -1136,10 +1337,11 @@ def task_s1_structural_reference(points: Sequence[PointCandidate],
                 evidence_needed="declare Pi_T role (SP-18) and run SP-12 sensitivity",
                 policy_refs=[], provenance=prov,
                 dependents_blocked=["T-S5", "T-S4", "zone-context", "liquidity-objective"])
-            return _mk("T-S1", decision_bar, "unresolved", None,
+            return _ret("T-S1", decision_bar, "unresolved", None,
                        [p.candidate_id for p in confirmed], excluded, state,
                        prov, pregs, rep.rep_id, decision_time=decision_time)
         pregs.append(policy.ref(policy_id))
+        psnaps[policy_id] = policy.snapshot_of(policy_id)
         if not confirmed_legs:
             state = UnresolvedState(
                 state_id=f"{state_id_prefix}-{decision_bar}", task="T-S1",
@@ -1148,7 +1350,7 @@ def task_s1_structural_reference(points: Sequence[PointCandidate],
                 reason_code=REASON_IC, evidence_needed="no confirmed leg in view V yet",
                 policy_refs=pregs, provenance=prov,
                 dependents_blocked=["T-S5", "T-S4"])
-            return _mk("T-S1", decision_bar, "unresolved", None,
+            return _ret("T-S1", decision_bar, "unresolved", None,
                        [p.candidate_id for p in confirmed], excluded, state,
                        prov, pregs, rep.rep_id, decision_time=decision_time)
         last_leg = max(confirmed_legs, key=leg_recency_key)
@@ -1166,7 +1368,7 @@ def task_s1_structural_reference(points: Sequence[PointCandidate],
                                  "successor reference not yet knowable"),
                 policy_refs=pregs, provenance=prov,
                 dependents_blocked=["T-S5", "T-S4"])
-            return _mk("T-S1", decision_bar, "unresolved", None, [],
+            return _ret("T-S1", decision_bar, "unresolved", None, [],
                        excluded, state, prov, pregs, rep.rep_id,
                        dependencies=_deps(target_id, last_leg.leg_id),
                        direction=last_leg.direction,
@@ -1200,7 +1402,7 @@ def task_s1_structural_reference(points: Sequence[PointCandidate],
                     policy_refs=pregs, provenance=prov,
                     dependents_blocked=["T-S5-falsifier", "T-S4-base",
                                         "zone-context", "liquidity-objective"])
-                return _mk("T-S1", decision_bar, "unresolved", None, [target_id],
+                return _ret("T-S1", decision_bar, "unresolved", None, [target_id],
                            excluded, state, prov, pregs, rep.rep_id,
                            dependents=["T-S5-falsifier", "T-S4-base",
                                        "zone-context", "liquidity-objective"],
@@ -1221,7 +1423,7 @@ def task_s1_structural_reference(points: Sequence[PointCandidate],
                        f"role={role} (O-class; SWS-02: not a market claim)"]
         if amb_note:
             notes_final.append(amb_note)
-        return _mk("T-S1", decision_bar, "justified", target_id, [target_id],
+        return _ret("T-S1", decision_bar, "justified", target_id, [target_id],
                    excluded, None, prov, pregs, rep.rep_id,
                    dependents=["T-S5-falsifier", "T-S4-base", "zone-context",
                                "liquidity-objective"],
@@ -1237,7 +1439,7 @@ def task_s1_structural_reference(points: Sequence[PointCandidate],
                 decision_bar=decision_bar, survivors=[], excluded=excluded,
                 reason_code=REASON_IC, evidence_needed="no confirmed point yet",
                 policy_refs=pregs, provenance=prov)
-            return _mk("T-S1", decision_bar, "unresolved", None, [], excluded,
+            return _ret("T-S1", decision_bar, "unresolved", None, [], excluded,
                        state, prov, pregs, rep.rep_id, decision_time=decision_time)
         best = max(confirmed, key=lambda p: p.knowable_bar)
         for p in confirmed:
@@ -1265,7 +1467,7 @@ def task_s1_structural_reference(points: Sequence[PointCandidate],
                     policy_refs=pregs, provenance=prov,
                     dependents_blocked=["T-S5-falsifier", "T-S4-base",
                                         "zone-context", "liquidity-objective"])
-                return _mk("T-S1", decision_bar, "unresolved", None,
+                return _ret("T-S1", decision_bar, "unresolved", None,
                            [best.candidate_id], excluded, state, prov, pregs,
                            rep.rep_id,
                            notes=e_notes + [f"same-bar order {cls}; surfaced (AI)"],
@@ -1273,7 +1475,7 @@ def task_s1_structural_reference(points: Sequence[PointCandidate],
                            decision_time=decision_time)
             e_notes.append(f"same-bar order proven by OHLC endpoints ({ev}); "
                            "not downgraded")
-        return _mk("T-S1", decision_bar, "justified", best.candidate_id,
+        return _ret("T-S1", decision_bar, "justified", best.candidate_id,
                    [best.candidate_id], excluded, None, prov, pregs, rep.rep_id,
                    notes=e_notes,
                    dependencies=_deps(best.candidate_id),
@@ -1284,7 +1486,7 @@ def task_s1_structural_reference(points: Sequence[PointCandidate],
         excluded=excluded, reason_code=REASON_MP,
         evidence_needed=f"declared role for question (role={role!r} not recognized)",
         policy_refs=[], provenance=prov)
-    return _mk("T-S1", decision_bar, "unresolved", None,
+    return _ret("T-S1", decision_bar, "unresolved", None,
                [p.candidate_id for p in confirmed], excluded, state, prov,
                pregs, rep.rep_id, decision_time=decision_time)
 
@@ -1298,7 +1500,10 @@ def task_s2_event_binding(event_bar: int, close_price: float,
                           state_id_prefix: str = "S2",
                           event_time: Optional[pd.Timestamp] = None,
                           tie_policy: str = TIE_CROSS_EQUAL_UNBOUND,
-                          allow_provisional: bool = False) -> SelectionResult:
+                          allow_provisional: bool = False,
+                          event_ref: Optional[str] = None,
+                          axis: Optional["SharedInformationAxis"] = None
+                          ) -> SelectionResult:
     """T-S2: which references does a closed-bar event bind to (SP-03)?
 
     The binding set keeps all members; no ranking (SWS-05).  When
@@ -1335,10 +1540,26 @@ def task_s2_event_binding(event_bar: int, close_price: float,
     """
     prov = ["R:SP-03", "F:close-basis (declared; wick variant open)",
             f"tie={tie_policy}"]
+    # ---- consolidation V1 (task §4): tie policy vs tie behavior ---------
+    # The DECLARED policy governs actual behavior; the boolean and the
+    # policy name can never contradict each other.
+    if tie_policy not in TIE_CROSS_POLICIES:
+        raise ValueError(f"unknown tie policy {tie_policy!r}")
+    if tie_bound and tie_policy != TIE_CROSS_EQUAL_BOUND_V1:
+        raise ValueError(
+            "tie-policy contradiction: tie_bound=True requires "
+            f"{TIE_CROSS_EQUAL_BOUND_V1!r} (declared {tie_policy!r}); "
+            "declared policy and actual tie behavior must agree")
+    if tie_policy == TIE_CROSS_EQUAL_BOUND_V1:
+        tie_bound = True      # behavior derived from the declared policy
+    all_refs = [r for refs in refs_by_view.values() for r in refs]
+    require_validated_asof("T-S2", axis=axis, boundary_time=event_time,
+                           time_bearing=_time_bearing(all_refs))
     bound: List[str] = []
     binding_kinds: Dict[str, str] = {}
     excluded: List[Exclusion] = []
     per_view: Dict[str, List[str]] = {}
+    pre_all: Dict[str, str] = {}      # PRE_EVENT_STATE (consolidation V1)
     multi_view = len(refs_by_view) > 1
     if multi_view and event_time is None:
         raise ValueError(
@@ -1356,15 +1577,17 @@ def task_s2_event_binding(event_bar: int, close_price: float,
 
     for view, refs in refs_by_view.items():
         # status gate BEFORE availability (task contract); st here is the
-        # PRE-EVENT lifecycle state (this task never mutates candidates)
+        # PRE-EVENT lifecycle state (this task never mutates candidates).
+        # consolidation V1: excluding_event_ref reconstructs PRE_EVENT_STATE —
+        # the event's own recorded transitions never rewrite its binding.
         usable = []
         knowable: List[object] = []
         late: List[object] = []
-        pre_status: Dict[str, str] = {}
         for r in refs:
-            st = (r.status_at(event_bar, event_time)
+            st = (r.status_at(event_bar, event_time,
+                              excluding_event_ref=event_ref)
                   if hasattr(r, "status_at") else getattr(r, "status", STATUS_CONFIRMED))
-            pre_status[r.candidate_id] = st
+            pre_all[r.candidate_id] = st
             if st == STATUS_SUPERSEDED:
                 excluded.append(Exclusion(r.candidate_id, X_SUPER, "R:SP-13/SWS-04c",
                                           "superseded (never confirmed) not bindable"))
@@ -1390,7 +1613,8 @@ def task_s2_event_binding(event_bar: int, close_price: float,
                 # dropped
                 usable.append(r)
         for r in usable:
-            ok = available_at(r, as_of_bar=event_bar, as_of_time=event_time)
+            ok = available_at(r, as_of_bar=event_bar, as_of_time=event_time,
+                              axis=axis)
             if ok:
                 knowable.append(r)
             else:
@@ -1409,11 +1633,30 @@ def task_s2_event_binding(event_bar: int, close_price: float,
         per_view[view] = [r.candidate_id for r in hit]
         bound += per_view[view]
         for r in hit:
-            st = pre_status.get(r.candidate_id)
+            st = pre_all.get(r.candidate_id)
             kind = ("later-interaction" if st == STATUS_BROKEN else "first-break")
             if st == STATUS_PROVISIONAL:
                 kind = "provisional:" + kind
             binding_kinds[r.candidate_id] = kind
+    # explicit event phases (consolidation V1, task §3)
+    post_state = dict(pre_all)
+    for cid, kind in binding_kinds.items():
+        if kind.endswith("first-break"):
+            post_state[cid] = STATUS_BROKEN
+    event_phase = {
+        PHASE_PRE_EVENT: dict(pre_all),
+        PHASE_BINDING: {"bound": list(bound),
+                        "binding_kinds": dict(binding_kinds)},
+        PHASE_POST_EVENT: post_state,
+    }
+    task_psnaps = {
+        "tie_policy": {"policy_id": "tie_policy", "version": 1,
+                       "value": tie_policy, "class": CLASS_O,
+                       "kind": KIND_PROCEDURE},
+        "allow_provisional": {"policy_id": "allow_provisional", "version": 1,
+                              "value": bool(allow_provisional), "class": CLASS_O,
+                              "kind": KIND_PROCEDURE},
+    }
     if not bound:
         result = _mk("T-S2", event_bar, "empty", None, [], excluded, None, prov,
                      [], f"event@{event_bar}",
@@ -1423,6 +1666,8 @@ def task_s2_event_binding(event_bar: int, close_price: float,
                                    for r in refs],
                      decision_time=event_time)
         result.binding_kinds = binding_kinds
+        result.event_phase = event_phase
+        result.policy_snapshots = task_psnaps
         return result
     unresolved = None
     status = "justified"
@@ -1440,10 +1685,12 @@ def task_s2_event_binding(event_bar: int, close_price: float,
                  dependents=["view-trend-state", "falsifier-evaluation", "reclaim-check"],
                  notes=[f"binding per view: {per_view}",
                         f"binding kinds (pre-event state): {kinds_note or 'none'}"],
-                 dependencies=[r.candidate_id for refs in refs_by_view.values()
-                               for r in refs],
-                 decision_time=event_time)
+                         dependencies=[r.candidate_id for refs in refs_by_view.values()
+                                       for r in refs],
+                         decision_time=event_time)
     result.binding_kinds = binding_kinds
+    result.event_phase = event_phase
+    result.policy_snapshots = task_psnaps
     return result
 
 
@@ -1452,7 +1699,8 @@ def task_s3_entry_leg(coarse_leg: LegCandidate, fine_legs: Sequence[LegCandidate
                       continuation_condition: Optional[Tuple[str, str]] = None,
                       policy: Optional[PolicyRegistry] = None,
                       state_id_prefix: str = "S3",
-                      decision_time: Optional[pd.Timestamp] = None) -> SelectionResult:
+                      decision_time: Optional[pd.Timestamp] = None,
+                      axis: Optional["SharedInformationAxis"] = None) -> SelectionResult:
     """T-S3: which completed fine leg contained in the coarse leg times an entry.
 
     continuation_condition: optional declared O policy (e.g. ("direction",
@@ -1466,13 +1714,25 @@ def task_s3_entry_leg(coarse_leg: LegCandidate, fine_legs: Sequence[LegCandidate
     for cross-timeframe legs (sp05_containment).
     """
     prov = ["R:SP-05", "R:SP-08", "R:SP-01", "R:SP-06"]
+    # END-TO-END CONSOLIDATION V1 (task §1): T-S3 is the cross-timeframe task
+    # — time-bearing legs REQUIRE the decision boundary and the validated
+    # shared axis; a missing decision_time is never accepted (audit D6).
+    require_validated_asof("T-S3", axis=axis, boundary_time=decision_time,
+                           time_bearing=_time_bearing([coarse_leg], fine_legs))
     pregs: List[str] = []
+    psnaps3: Dict[str, dict] = {}
     excluded: List[Exclusion] = []
     survivors: List[LegCandidate] = []
+    def _ret(*args, **kwargs) -> SelectionResult:
+        kwargs.setdefault("decision_time", decision_time)
+        r = _mk(*args, **kwargs)
+        r.policy_snapshots = dict(psnaps3)
+        return r
+
     # decision-time availability (shared axis): the coarse leg itself must be
     # knowable at the decision boundary too
     if not available_at(coarse_leg, as_of_bar=decision_bar,
-                        as_of_time=decision_time):
+                        as_of_time=decision_time, axis=axis):
         excluded.append(Exclusion(coarse_leg.leg_id, X_KNOW, "R:SP-01",
                                   "coarse leg not knowable at decision time"))
         state = UnresolvedState(
@@ -1482,12 +1742,12 @@ def task_s3_entry_leg(coarse_leg: LegCandidate, fine_legs: Sequence[LegCandidate
             evidence_needed="coarse basis not knowable at the decision time",
             policy_refs=[], provenance=prov,
             dependents_blocked=["zone-boundaries", "fine-liquidity-below-above"])
-        return _mk("T-S3", decision_bar, "unresolved", None, [], excluded,
+        return _ret("T-S3", decision_bar, "unresolved", None, [], excluded,
                    state, prov, pregs, rep.rep_id,
                    dependencies=[coarse_leg.leg_id] + [f.leg_id for f in fine_legs])
     for f in fine_legs:
         if not available_at(f, as_of_bar=decision_bar,
-                            as_of_time=decision_time):
+                            as_of_time=decision_time, axis=axis):
             excluded.append(Exclusion(f.leg_id, X_KNOW, "R:SP-01",
                                       f"knowable {getattr(f, 'knowable_time', None) or f.knowable_bar}"
                                       f" > t={decision_time or decision_bar}"))
@@ -1501,6 +1761,13 @@ def task_s3_entry_leg(coarse_leg: LegCandidate, fine_legs: Sequence[LegCandidate
             continue
         if continuation_condition is not None:
             pregs.append("O:P-CONTINUATION" if policy is None else policy.ref("P-CONTINUATION"))
+            if policy is not None:
+                psnaps3["P-CONTINUATION"] = policy.snapshot_of("P-CONTINUATION")
+            else:
+                psnaps3["P-CONTINUATION"] = {
+                    "policy_id": "P-CONTINUATION", "version": 1,
+                    "value": continuation_condition, "class": CLASS_O,
+                    "kind": KIND_PROCEDURE}
             kind, want = continuation_condition
             if kind == "direction" and f.direction != want:
                 excluded.append(Exclusion(f.leg_id, X_POL,
@@ -1512,7 +1779,8 @@ def task_s3_entry_leg(coarse_leg: LegCandidate, fine_legs: Sequence[LegCandidate
     reqs: List[Tuple[str, Callable[[object], bool]]] = [
         ("completed", lambda f: f.completed),
         ("knowable", lambda f: available_at(f, as_of_bar=decision_bar,
-                                            as_of_time=decision_time)),
+                                            as_of_time=decision_time,
+                                            axis=axis)),
     ]
     if continuation_condition is not None:
         reqs.append(("direction-match",
@@ -1527,10 +1795,10 @@ def task_s3_entry_leg(coarse_leg: LegCandidate, fine_legs: Sequence[LegCandidate
             decision_bar=decision_bar, survivors=[], excluded=excluded,
             reason_code=REASON_IC, evidence_needed="no completed contained fine leg yet",
             policy_refs=pregs, provenance=prov)
-        return _mk("T-S3", decision_bar, "unresolved", None, [], excluded, state,
+        return _ret("T-S3", decision_bar, "unresolved", None, [], excluded, state,
                    prov, pregs, rep.rep_id, dependencies=deps)
     if len(survivors) == 1:
-        return _mk("T-S3", decision_bar, "justified", surv_ids[0], surv_ids,
+        return _ret("T-S3", decision_bar, "justified", surv_ids[0], surv_ids,
                    excluded, None, prov, pregs, rep.rep_id,
                    notes=["singleton after H_T + dominance"], dependencies=deps)
     # audit D6: factual depth is the absolute price travel of the leg
@@ -1546,7 +1814,7 @@ def task_s3_entry_leg(coarse_leg: LegCandidate, fine_legs: Sequence[LegCandidate
                          "data (file 18, objective B) for an EP resolution"),
         policy_refs=pregs, provenance=prov,
         dependents_blocked=["zone-boundaries", "fine-liquidity-below-above"])
-    return _mk("T-S3", decision_bar, "unresolved", None, surv_ids, excluded,
+    return _ret("T-S3", decision_bar, "unresolved", None, surv_ids, excluded,
                state, prov, pregs, rep.rep_id,
                notes=["factual differences preserved: " + "; ".join(diffs),
                       "depth-vs-recency is SWS-07 open (MP/EP), not a fact"],
@@ -1556,7 +1824,8 @@ def task_s3_entry_leg(coarse_leg: LegCandidate, fine_legs: Sequence[LegCandidate
 def task_s5_falsifier(claims: Sequence[dict], points: Sequence[PointCandidate],
                       legs: Sequence[LegCandidate], decision_bar: int,
                       state_id_prefix: str = "S5",
-                      decision_time: Optional[pd.Timestamp] = None) -> SelectionResult:
+                      decision_time: Optional[pd.Timestamp] = None,
+                      axis: Optional["SharedInformationAxis"] = None) -> SelectionResult:
     """T-S5 / SP-04: map each reference-form claim of interpretation I to its
     falsifier reference.  Claims are dicts:
       {"interpretation": "I1", "view": "C", "role": "...", "direction": "up"}
@@ -1577,6 +1846,8 @@ def task_s5_falsifier(claims: Sequence[dict], points: Sequence[PointCandidate],
     FALSIFIES the claim (computed task-level effect).
     """
     prov = ["R:SP-04", "F:given I written in reference terms (SWS-08)"]
+    require_validated_asof("T-S5", axis=axis, boundary_time=decision_time,
+                           time_bearing=_time_bearing(points, legs))
     resolved: List[str] = []
     excluded: List[Exclusion] = []
     notes: List[str] = []
@@ -1599,7 +1870,7 @@ def task_s5_falsifier(claims: Sequence[dict], points: Sequence[PointCandidate],
         vlegs = [l for l in legs_by_view.get(view, [])
                  if l.completed
                  and available_at(l, as_of_bar=decision_bar,
-                                  as_of_time=decision_time)]
+                                  as_of_time=decision_time, axis=axis)]
         if role == "origin-of-last-confirmed-leg":
             if not vlegs:
                 excluded.append(Exclusion(f"{interp}:{role}", X_STATE, "R:SP-04",
@@ -1667,9 +1938,25 @@ def task_s5_falsifier(claims: Sequence[dict], points: Sequence[PointCandidate],
             deps += [pid, last.leg_id]
             notes.append(f"{interp}: {role}[{want_dir}] of {last.leg_id} -> {pid}")
         elif role == "last-confirmed-extreme":
-            vpts = [p for p in points if p.view_id == view
-                    and p.status_at(decision_bar) == STATUS_CONFIRMED
-                    and p.knowable_bar <= decision_bar]
+            # END-TO-END CONSOLIDATION V1 (audit D2): time-aware availability
+            # governs — a point whose knowable_time is after the decision
+            # boundary can NEVER justify a result at that boundary (the old
+            # bar-index-only filter admitted late-confirmed references).
+            # Late but confirmed points get an auditable X-KNOW exclusion.
+            vpts = []
+            for p in points:
+                if p.view_id != view:
+                    continue
+                if p.status_at(decision_bar, decision_time) != STATUS_CONFIRMED:
+                    continue
+                if not available_at(p, as_of_bar=decision_bar,
+                                    as_of_time=decision_time, axis=axis):
+                    excluded.append(Exclusion(
+                        p.candidate_id, X_KNOW, "R:SP-01",
+                        f"knowable {getattr(p, 'knowable_time', None) or p.knowable_bar}"
+                        f" > t={decision_time or decision_bar}"))
+                    continue
+                vpts.append(p)
             if not vpts:
                 excluded.append(Exclusion(f"{interp}:{role}", X_STATE, "R:SP-04",
                                           "no confirmed point in view"))
@@ -1774,6 +2061,9 @@ class InterpretationLedger:
         self._payloads: Dict[str, dict] = {}
         # uid -> every candidate/leg id the task consumed (input dependencies)
         self._payload_ids: Dict[str, set] = {}
+        # uid -> registered RESULT uids it depends on (consolidation V1 §5:
+        # transitive dependent recomputation along result-dependency edges)
+        self._result_deps: Dict[str, set] = {}
         self._uid_seq = 0
 
     # ---- recording -----------------------------------------------------
@@ -1797,6 +2087,13 @@ class InterpretationLedger:
         if payload is not None:
             self._payloads[uid] = dict(payload, _kind=payload.get("kind"))
             self._payload_ids[uid] = _payload_ids(payload)
+        else:
+            self._payload_ids[uid] = set()
+        # result-level dependency edges (consolidation V1 §5): explicit
+        # ``depends_on_results`` and any dependency naming a registered uid
+        deps = set(payload.get("depends_on_results", []) if payload else [])
+        deps |= {d for d in (result.dependencies or []) if d in self.versions}
+        self._result_deps[uid] = deps
         return uid
 
     def record_event(self, event_bar: int, kind: str, detail: str,
@@ -1838,6 +2135,14 @@ class InterpretationLedger:
         ``event_ref`` as its authorizing event when given), then every
         dependent is re-evaluated — the logged differences are computed from
         the recomputed results, never supplied by the caller.
+
+        END-TO-END CONSOLIDATION V1 (task §5): TRANSITIVE along registered
+        result-dependency edges.  A -> B -> C: when A is reconsidered, B is
+        reconsidered too; when B is reconsidered, C is reconsidered with its
+        correct updated inputs and information time.  Results outside the
+        dependency closure of the change are never recomputed; every result
+        is recomputed at most once per call; dependency cycles are detected
+        and reported explicitly.
         """
         log: List[dict] = []
         changed = set(changed_ids)
@@ -1846,70 +2151,146 @@ class InterpretationLedger:
                 self.record_change(update_bar, cid, st,
                                    info_time=update_time, event_ref=event_ref)
                 if st == STATUS_BROKEN:
-                    self._mark_broken(cid, update_bar, update_time)
+                    self._mark_broken(cid, update_bar, update_time,
+                                      event_ref=event_ref)
+        cycle = self._find_dependency_cycle()
         step = 0
-        for uid, versions in self.versions.items():
-            last = versions[-1]
-            result: SelectionResult = last["result"]
-            input_ids = self._payload_ids.get(uid, set())
-            if not changed.intersection(set(result.dependencies or []) | input_ids):
-                continue
-            payload = self._payloads.get(uid)
-            if payload is None:
+        if cycle:
+            entry = {
+                "kind": "dependency-cycle",
+                "event_bar": update_bar, "info_time": update_time,
+                "cycle": cycle,
+                "note": "cycle in registered result dependencies; each "
+                        "result is recomputed at most once and the cyclic "
+                        "edge is not followed twice (explicit detection)",
+                "rule": "R:SP-20 cycle detection",
+            }
+            self.revisions.append(entry)
+            log.append(entry)
+        frontier = set(changed) | set(changed_states or {})
+        done: set = set()
+        while frontier:
+            wave = sorted(uid for uid in self.versions
+                          if uid not in done and self._deps_of(uid) & frontier)
+            if not wave:
+                break
+            next_frontier = set()
+            for uid in wave:
+                done.add(uid)
+                versions = self.versions[uid]
+                last = versions[-1]
+                result: SelectionResult = last["result"]
+                payload = self._payloads.get(uid)
                 step += 1
+                if payload is None:
+                    entry = {
+                        "kind": "recomputation",
+                        "event_bar": update_bar, "info_time": update_time,
+                        "step": step, "uid": uid,
+                        "subject": result.task_id, "version": last["version"] + 1,
+                        "computed_changes": [],
+                        "note": "dependent registered without payload; not "
+                                "recomputable — no propagation claimed",
+                        "rule": "R:SP-20 recomputation, not patch",
+                    }
+                    self.revisions.append(entry)
+                    log.append(entry)
+                    continue
+                new_result = self._recompute(payload, update_bar, update_time)
+                changes = _diff_results(result, new_result)
+                new_version = {
+                    "version": last["version"] + 1,
+                    "info_bar": update_bar,
+                    "result": new_result,
+                    "computed_changes": changes,
+                    "recomputable": True,
+                }
+                versions.append(new_version)
+                self.results.append(new_result)
                 entry = {
                     "kind": "recomputation",
                     "event_bar": update_bar, "info_time": update_time,
-                    "step": step, "uid": uid,
-                    "subject": result.task_id, "version": last["version"] + 1,
-                    "computed_changes": [],
-                    "note": "dependent registered without payload; not "
-                            "recomputable — no propagation claimed",
+                    "step": step, "uid": uid, "subject": result.task_id,
+                    "version": new_version["version"],
+                    "selected_before": result.selected_id,
+                    "selected_after": new_result.selected_id,
+                    "status_before": result.status,
+                    "status_after": new_result.status,
+                    "computed_changes": changes,
+                    "cascade_from": sorted(frontier & self._deps_of(uid)),
                     "rule": "R:SP-20 recomputation, not patch",
                 }
                 self.revisions.append(entry)
                 log.append(entry)
-                continue
-            new_result = self._recompute(payload, update_bar, update_time)
-            changes = _diff_results(result, new_result)
-            new_version = {
-                "version": last["version"] + 1,
-                "info_bar": update_bar,
-                "result": new_result,
-                "computed_changes": changes,
-                "recomputable": True,
-            }
-            versions.append(new_version)
-            self.results.append(new_result)
-            step += 1
-            entry = {
-                "kind": "recomputation",
-                "event_bar": update_bar, "info_time": update_time,
-                "step": step, "uid": uid, "subject": result.task_id,
-                "version": new_version["version"],
-                "selected_before": result.selected_id,
-                "selected_after": new_result.selected_id,
-                "status_before": result.status,
-                "status_after": new_result.status,
-                "computed_changes": changes,
-                "rule": "R:SP-20 recomputation, not patch",
-            }
-            self.revisions.append(entry)
-            log.append(entry)
+                # this result's dependents are reconsidered along the
+                # registered result-dependency edges (transitive A -> B -> C):
+                # a dependent of a recomputed result is never "unaffected"
+                next_frontier.add(uid)
+            frontier = next_frontier
         return log
 
+    def _deps_of(self, uid: str) -> set:
+        versions = self.versions.get(uid)
+        last = versions[-1] if versions else None
+        result = last["result"] if last else None
+        return (set(self._result_deps.get(uid, ()))
+                | set(self._payload_ids.get(uid, ()))
+                | set((result.dependencies or []) if result else ()))
+
+    def _find_dependency_cycle(self) -> List[str]:
+        """Explicit cycle detection over registered result-dependency edges
+        (consolidation V1 task §5).  Returns the cycle path, or []."""
+        WHITE, GREY, BLACK = 0, 1, 2
+        color = {uid: WHITE for uid in self.versions}
+        stack: List[str] = []
+
+        def _dfs(uid: str) -> List[str]:
+            color[uid] = GREY
+            stack.append(uid)
+            for dep in sorted(self._result_deps.get(uid, ())):
+                if dep not in color:
+                    continue                      # unregistered name: not an edge
+                if color[dep] == GREY:
+                    return stack[stack.index(dep):] + [dep]
+                if color[dep] == WHITE:
+                    found = _dfs(dep)
+                    if found:
+                        return found
+            stack.pop()
+            color[uid] = BLACK
+            return []
+
+        for uid in sorted(color):
+            if color[uid] == WHITE:
+                found = _dfs(uid)
+                if found:
+                    return found
+        return []
+
     def _mark_broken(self, candidate_id: str, info_bar: int,
-                     info_time: Optional[pd.Timestamp]) -> None:
+                     info_time: Optional[pd.Timestamp],
+                     event_ref: Optional[str] = None) -> None:
         """Apply a recorded break fact to the stored world copies so that
-        recomputation sees the structural state as of the update boundary."""
+        recomputation sees the structural state as of the update boundary.
+
+        END-TO-END CONSOLIDATION V1 (audit F): transitions reach candidates
+        referenced through ANY payload shape — ``points``, ``claims_points``,
+        and ``refs_by_view`` (T-S2-only recording must persist too).  The
+        transition cites its authorizing ``event_ref`` so pre-event state
+        queries can exclude the event's own transition.
+        """
+        seen: set = set()
         for payload in self._payloads.values():
-            for key in ("points", "claims_points"):
-                for p in payload.get(key) or []:
-                    if getattr(p, "candidate_id", None) == candidate_id:
-                        # append-only transition; earlier history preserved
-                        p.add_transition(info_bar, STATUS_BROKEN,
-                                         info_time=info_time,
-                                         note="break fact (SP-20)")
+            for p in _payload_points(payload):
+                if id(p) in seen:
+                    continue
+                seen.add(id(p))
+                if getattr(p, "candidate_id", None) == candidate_id:
+                    # append-only transition; earlier history preserved
+                    p.add_transition(info_bar, STATUS_BROKEN,
+                                     info_time=info_time,
+                                     note="break fact (SP-20)",
+                                     event_ref=event_ref)
 
     def restore_history(self, candidates: Sequence[object]) -> int:
         """CAUSAL-STATE INTEGRATION V1: re-apply every recorded lifecycle
@@ -1919,25 +2300,43 @@ class InterpretationLedger:
         transitions, and a historically broken reference must never come back
         as a fresh confirmed reference without a genuine new event.  Returns
         the number of transitions re-applied.
+
+        END-TO-END CONSOLIDATION V1 (audit F): transition sources cover every
+        payload shape (``points``, ``claims_points``, ``refs_by_view``) and
+        carry their authorizing ``event_ref`` — lifecycle state is
+        recoverable independently of which task payload referenced the
+        candidate.
         """
         applied = 0
+        # consolidation V1 (perf-neutral): identity index over the regenerated
+        # candidates — the previous nested scan was O(payloads x points x
+        # candidates) record walks per restore
+        targets: Dict[str, List[object]] = {}
+        for c in candidates:
+            pid = getattr(c, "candidate_id", None)
+            if pid:
+                targets.setdefault(pid, []).append(c)
+        seen_trans: set = set()
         for payload in self._payloads.values():
-            for key in ("points", "claims_points"):
-                for p in payload.get(key) or []:
-                    pid = getattr(p, "candidate_id", None)
-                    if not pid:
+            for p in _payload_points(payload):
+                pid = getattr(p, "candidate_id", None)
+                if not pid or pid not in targets:
+                    continue
+                for t in getattr(p, "status_transitions", []) or []:
+                    key = (pid, t.info_bar, t.status, t.info_time, t.event_ref)
+                    if key in seen_trans:
                         continue
-                    for t in getattr(p, "status_transitions", []) or []:
-                        for c in candidates:
-                            if getattr(c, "candidate_id", None) != pid:
-                                continue
-                            have = {(x.info_bar, x.status, x.info_time)
-                                    for x in getattr(c, "status_transitions", [])}
-                            if (t.info_bar, t.status, t.info_time) not in have:
-                                c.add_transition(t.info_bar, t.status,
-                                                 info_time=t.info_time,
-                                                 by=t.by, note=t.note)
-                                applied += 1
+                    seen_trans.add(key)
+                    for c in targets[pid]:
+                        have = {(x.info_bar, x.status, x.info_time, x.event_ref)
+                                for x in getattr(c, "status_transitions", [])}
+                        if (t.info_bar, t.status, t.info_time,
+                                t.event_ref) not in have:
+                            c.add_transition(t.info_bar, t.status,
+                                             info_time=t.info_time,
+                                             by=t.by, note=t.note,
+                                             event_ref=t.event_ref)
+                            applied += 1
         return applied
 
     def _recompute(self, payload: dict, update_bar: int,
@@ -1949,23 +2348,28 @@ class InterpretationLedger:
                 payload["role"], payload["policy"], payload.get("policy_id"),
                 payload.get("allow_provisional", False),
                 state_id_prefix=payload.get("state_id_prefix", "S1"),
-                decision_time=payload.get("decision_time", update_time))
+                decision_time=payload.get("decision_time", update_time),
+                axis=payload.get("axis"))
         if kind == "T-S5":
             return task_s5_falsifier(
                 payload["claims"], payload["points"], payload["legs"],
                 update_bar, state_id_prefix=payload.get("state_id_prefix", "S5"),
-                decision_time=payload.get("decision_time", update_time))
+                decision_time=payload.get("decision_time", update_time),
+                axis=payload.get("axis"))
         if kind == "T-S3":
             return task_s3_entry_leg(
                 payload["coarse_leg"], payload["fine_legs"], update_bar,
                 payload["rep"], payload.get("continuation_condition"),
                 payload.get("policy"),
                 state_id_prefix=payload.get("state_id_prefix", "S3"),
-                decision_time=payload.get("decision_time", update_time))
+                decision_time=payload.get("decision_time", update_time),
+                axis=payload.get("axis"))
         if kind == "T-S2":
             # CAUSAL-STATE INTEGRATION V1: replay preserves ALL declared task
             # parameters — provisional eligibility policy and tie policy are
-            # part of the recorded task contract and must survive recomputation
+            # part of the recorded task contract and must survive recomputation.
+            # consolidation V1: ``event_ref`` reconstructs the PRE_EVENT_STATE
+            # on replay — the event's own transition never changes its binding.
             return task_s2_event_binding(
                 payload["event_bar"], payload["close_price"],
                 payload["refs_by_view"], update_bar,
@@ -1974,7 +2378,9 @@ class InterpretationLedger:
                 state_id_prefix=payload.get("state_id_prefix", "S2"),
                 event_time=payload.get("event_time"),
                 tie_policy=payload.get("tie_policy", TIE_CROSS_EQUAL_UNBOUND),
-                allow_provisional=payload.get("allow_provisional", False))
+                allow_provisional=payload.get("allow_provisional", False),
+                event_ref=payload.get("event_ref"),
+                axis=payload.get("axis"))
         raise ValueError(f"payload kind {kind!r} not recomputable")
 
     def snapshot(self) -> dict:
@@ -1994,15 +2400,31 @@ class InterpretationLedger:
             "n_result_versions": sum(len(v) for v in self.versions.values()),
             "n_dependents_without_payload": len(missing),
             "incomplete_dependency_coverage": missing[:50],
+            "n_result_dependency_edges": sum(
+                len(v) for v in self._result_deps.values()),
+            "dependency_cycles_detected": sum(
+                1 for r in self.revisions if r.get("kind") == "dependency-cycle"),
         }
+
+
+def _payload_points(payload: dict) -> List[object]:
+    """Every point-candidate a stored task references — ANY payload shape
+    (``points``, ``claims_points``, ``refs_by_view``): lifecycle transitions
+    must persist regardless of which task recorded the candidate
+    (consolidation V1, audit F)."""
+    pts: List[object] = []
+    for key in ("points", "claims_points"):
+        pts.extend(payload.get(key) or [])
+    for refs in (payload.get("refs_by_view") or {}).values():
+        pts.extend(refs or [])
+    return pts
 
 
 def _payload_ids(payload: dict) -> set:
     """Every candidate/leg id a stored task consumed (audit D5 dependency refs)."""
     ids: set = set()
-    for key in ("points", "claims_points"):
-        for p in payload.get(key) or []:
-            ids.add(getattr(p, "candidate_id", None))
+    for p in _payload_points(payload):
+        ids.add(getattr(p, "candidate_id", None))
     for key in ("legs", "fine_legs"):
         for l in payload.get(key) or []:
             ids.add(getattr(l, "leg_id", None))
@@ -2037,6 +2459,24 @@ def _diff_results(old: SelectionResult, new: SelectionResult) -> List[dict]:
         # revision keeps a bounded sample plus the exact count (audit D6)
         changes.append({"field": "exclusions", "n_changed": len(diffs),
                         "diffs": diffs[:20]})
+    # consolidation V1 (task §3/§4): binding kinds and policy identity are
+    # part of the result's meaning and MUST appear in difference accounting
+    if old.binding_kinds != new.binding_kinds:
+        changes.append({"field": "binding_kinds",
+                        "before": dict(old.binding_kinds),
+                        "after": dict(new.binding_kinds)})
+    if old.policy_refs != new.policy_refs:
+        changes.append({"field": "policy_refs",
+                        "before": list(old.policy_refs),
+                        "after": list(new.policy_refs)})
+    if old.policy_snapshots != new.policy_snapshots:
+        pv_old = {k: (v.get("version"), v.get("value"))
+                  for k, v in old.policy_snapshots.items()}
+        pv_new = {k: (v.get("version"), v.get("value"))
+                  for k, v in new.policy_snapshots.items()}
+        if pv_old != pv_new:
+            changes.append({"field": "policy_snapshots",
+                            "before": pv_old, "after": pv_new})
     return changes
 
 
@@ -2063,6 +2503,8 @@ def candidate_record(c: object, *, task_id: str = "", run_id: str = "",
         "decision_bar": decision_bar,
         "decision_time": None if decision_time is None else str(decision_time),
         "candidate_id": _cid(c),
+        "start_id": getattr(c, "start_id", None),   # leg support (consolidation V1 §6)
+        "end_id": getattr(c, "end_id", None),
         "representation_id": getattr(getattr(c, "rep", None), "rep_id", None),
         "side": getattr(c, "side", None),
         "level": getattr(c, "level", None),

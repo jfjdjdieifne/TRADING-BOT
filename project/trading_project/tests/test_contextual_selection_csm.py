@@ -46,6 +46,16 @@ from trading_system.research.contextual_selection import (
 # Shared information-time axis for the fixture: bar i -> T0 + i minutes.
 T0 = pd.Timestamp("2025-01-01 00:00:00")
 
+# consolidation V1: validated shared information-time axis over the fixture's
+# T0-minute grid (every fixture timestamp lies on this grid)
+from trading_system.research.contextual_selection import (  # noqa: E402
+    SharedInformationAxis as _SharedInformationAxis,
+)
+AXIS = _SharedInformationAxis(
+    "test-fixture-minute-grid",
+    pd.date_range(T0, T0 + pd.Timedelta(minutes=2000), freq="1min"))
+
+
 # --------------------------------------------------------------------------
 # Shared fixture (file 19 §19.2) — ordinal levels, bar indices as labels
 # --------------------------------------------------------------------------
@@ -131,7 +141,7 @@ def test_W1_structural_reference(world):
     r = task_s1_structural_reference(
         world["points"], world["clegs"], decision_bar=52, rep=REP_C,
         role="origin-of-last-confirmed-leg", policy=world["pol"],
-        policy_id="P-ORIGIN", state_id_prefix="W1")
+        policy_id="P-ORIGIN", state_id_prefix="W1", axis=AXIS, decision_time=T0 + timedelta(minutes=52))
     assert r.status == "justified"
     assert r.selected_id == "L_b"
     assert r.survivors == ["L_b"]
@@ -154,7 +164,7 @@ def test_W2_entry_leg_ambiguity_preserved(world):
     r = task_s3_entry_leg(
         world["clegs"][2], world["flegs"], decision_bar=52, rep=REP_F,
         continuation_condition=("direction", "down"),
-        policy=world["pol"], state_id_prefix="W2")
+        policy=world["pol"], state_id_prefix="W2", axis=AXIS, decision_time=T0 + timedelta(minutes=52))
     assert r.status == "unresolved"
     assert sorted(r.survivors) == ["fB", "fD"]
     assert r.unresolved is not None
@@ -184,7 +194,7 @@ def test_W3_task_change(world):
          "role": "low-of-current-leg", "direction": "down"},
     ]
     r = task_s5_falsifier(claims, world["points"], world["clegs"] + world["flegs"],
-                          decision_bar=52, state_id_prefix="W3")
+                          decision_bar=52, state_id_prefix="W3", axis=AXIS, decision_time=T0 + timedelta(minutes=52))
     assert r.status == "unresolved"  # two claims -> two references, kept apart
     assert set(r.survivors) == {"L_b", "fD.1"}
     notes = " ".join(r.notes)
@@ -196,22 +206,22 @@ def test_W3_task_change(world):
     claims_dn = [{"interpretation": "I4", "view": "F",
                   "role": "high-of-current-leg", "direction": "down"}]
     ru = task_s5_falsifier(claims_up, world["points"],
-                           world["clegs"] + world["flegs"], 52, state_id_prefix="W3u")
+                           world["clegs"] + world["flegs"], 52, state_id_prefix="W3u", axis=AXIS, decision_time=T0 + timedelta(minutes=52))
     rd = task_s5_falsifier(claims_dn, world["points"],
-                           world["clegs"] + world["flegs"], 52, state_id_prefix="W3d")
+                           world["clegs"] + world["flegs"], 52, state_id_prefix="W3d", axis=AXIS, decision_time=T0 + timedelta(minutes=52))
     assert ru.selected_id == "fE.1"   # high of last up-leg fE
     assert rd.selected_id == "fC.1"   # high of last down-leg fD
     # missing direction -> explicit unresolved (IC), never inferred
     claims_nodir = [{"interpretation": "I5", "view": "F",
                      "role": "low-of-current-leg"}]
     rn = task_s5_falsifier(claims_nodir, world["points"],
-                           world["clegs"] + world["flegs"], 52, state_id_prefix="W3n")
+                           world["clegs"] + world["flegs"], 52, state_id_prefix="W3n", axis=AXIS, decision_time=T0 + timedelta(minutes=52))
     assert rn.status == "unresolved"
     assert rn.unresolved is not None and rn.unresolved.reason_code == REASON_IC
     # entry-timing for the same bars stays ambiguous (W2 pattern)
     r3 = task_s3_entry_leg(world["clegs"][2], world["flegs"], 52, REP_F,
                            continuation_condition=("direction", "down"),
-                           policy=world["pol"])
+                           policy=world["pol"], axis=AXIS, decision_time=T0 + timedelta(minutes=52))
     assert r3.status == "unresolved" and sorted(r3.survivors) == ["fB", "fD"]
 
 
@@ -236,11 +246,11 @@ def test_W4_provisional_then_branches(world):
     pol = world["pol"]
     # t = 59: last confirmed leg H_b->L_c; origin H_b
     r = task_s1_structural_reference(pts, legs, 59, REP_C,
-                                     "origin-of-last-confirmed-leg", pol, "P-ORIGIN")
+                                     "origin-of-last-confirmed-leg", pol, "P-ORIGIN", axis=AXIS, decision_time=T0 + timedelta(minutes=59))
     assert r.selected_id == "H_b"
     # t = 64 (= 60+k-1): H_p provisional -> X-STATE; reference stays H_b (IC note)
     r64 = task_s1_structural_reference(pts, legs, 64, REP_C,
-                                       "origin-of-last-confirmed-leg", pol, "P-ORIGIN")
+                                       "origin-of-last-confirmed-leg", pol, "P-ORIGIN", axis=AXIS, decision_time=T0 + timedelta(minutes=64))
     assert r64.selected_id == "H_b"
     codes = {e.candidate_id: e.code for e in r64.excluded}
     assert codes.get("H_p") == X_STATE
@@ -248,7 +258,7 @@ def test_W4_provisional_then_branches(world):
     pts_a = [p for p in pts if p.candidate_id != "H_p"] + [
         _pt("H_p", REP_C, "high", 60, 55.0, 65)]
     r65 = task_s1_structural_reference(pts_a, legs, 65, REP_C,
-                                       "last-confirmed-extreme", pol, None)
+                                       "last-confirmed-extreme", pol, None, axis=AXIS, decision_time=T0 + timedelta(minutes=65))
     assert r65.selected_id == "H_p"
     # Branch B: higher high at 62 supersedes H_p (SWS-04c)
     hp = next(p for p in pts if p.candidate_id == "H_p")
@@ -256,7 +266,7 @@ def test_W4_provisional_then_branches(world):
     hp.superseded_by = "H_n"
     pts_b = pts + [_pt("H_n", REP_C, "high", 62, 58.0, 67, status="provisional")]
     r66 = task_s1_structural_reference(pts_b, legs, 66, REP_C,
-                                       "origin-of-last-confirmed-leg", pol, "P-ORIGIN")
+                                       "origin-of-last-confirmed-leg", pol, "P-ORIGIN", axis=AXIS, decision_time=T0 + timedelta(minutes=66))
     assert r66.selected_id == "H_b"
     codes_b = {e.candidate_id: e.code for e in r66.excluded}
     assert codes_b.get("H_p") == X_SUPER
@@ -265,7 +275,7 @@ def test_W4_provisional_then_branches(world):
     r64_again = task_s1_structural_reference(
         [p for p in pts if p.knowable_bar <= 64 or p.candidate_id == "H_p"],
         [l for l in legs if l.knowable_bar <= 64], 64, REP_C,
-        "origin-of-last-confirmed-leg", pol, "P-ORIGIN")
+        "origin-of-last-confirmed-leg", pol, "P-ORIGIN", axis=AXIS, decision_time=T0 + timedelta(minutes=64))
     assert r64_again.selected_id == r64.selected_id
     assert {e.candidate_id for e in r64_again.excluded} == {e.candidate_id for e in r64.excluded}
 
@@ -281,7 +291,7 @@ def test_W5_break_binding_and_reversal_ai(world):
     r = task_s2_event_binding(event_bar=53, close_price=19.0,
                               refs_by_view={"C": refs_c, "F": refs_f},
                               decision_bar=53, state_id_prefix="W5",
-                              event_time=T0 + timedelta(minutes=53))
+                              event_time=T0 + timedelta(minutes=53), axis=AXIS)
     assert set(r.survivors) == {"L_b", "fB.1", "fD.1"}
     notes = " ".join(r.notes)
     assert "'C': ['L_b']" in notes or '"C": ["L_b"]' in notes or "C" in notes
@@ -305,29 +315,30 @@ def test_W8_role_change_and_propagation(world):
     # structural reference at 56 in the intact world: origin of H_b->L_c
     r = task_s1_structural_reference(pts, legs, 56, REP_C,
                                      "origin-of-last-confirmed-leg", pol, "P-ORIGIN",
-                                     state_id_prefix="W8")
+                                     state_id_prefix="W8", axis=AXIS, decision_time=T0 + timedelta(minutes=56))
     assert r.selected_id == "H_b"  # origin of H_b->L_c after the bar-53 break
     assert r.direction == "down"   # direction from the leg data (D6), not notes
 
     # state at bar 53: Leg3 is the last knowable confirmed leg -> L_b
     r53 = task_s1_structural_reference(pts, legs, 53, REP_C,
                                        "origin-of-last-confirmed-leg", pol, "P-ORIGIN",
-                                       state_id_prefix="W8")
+                                       state_id_prefix="W8", axis=AXIS, decision_time=T0 + timedelta(minutes=53))
     assert r53.selected_id == "L_b"
     claims = [{"interpretation": "I1", "view": "C",
                "role": "origin-of-last-confirmed-leg", "direction": "up"}]
-    s53 = task_s5_falsifier(claims, pts, legs, 53, state_id_prefix="W8S5")
+    s53 = task_s5_falsifier(claims, pts, legs, 53, state_id_prefix="W8S5", axis=AXIS, decision_time=T0 + timedelta(minutes=53))
     assert s53.selected_id == "L_b"
 
     ledger = InterpretationLedger()
     t1_uid = ledger.record(r53, payload={
         "kind": "T-S1", "points": copy.deepcopy(pts), "legs": copy.deepcopy(legs),
         "rep": REP_C, "role": "origin-of-last-confirmed-leg",
-        "policy": pol, "policy_id": "P-ORIGIN", "state_id_prefix": "W8"})
+        "policy": pol, "policy_id": "P-ORIGIN", "state_id_prefix": "W8",
+        "axis": AXIS})
     s5_uid = ledger.record(s53, payload={
         "kind": "T-S5", "claims": copy.deepcopy(claims),
         "points": copy.deepcopy(pts), "legs": copy.deepcopy(legs),
-        "state_id_prefix": "W8S5"})
+        "state_id_prefix": "W8S5", "axis": AXIS})
     ledger.record_event(53, "close-break", "close 19 < L_b 20", ["L_b"],
                         event_time=T0 + timedelta(minutes=53))
 
@@ -349,7 +360,7 @@ def test_W8_role_change_and_propagation(world):
 
     # bar 56: Leg4 becomes knowable -> ONLY NOW can T-S1 move to H_b
     ledger.record_change(56, "Leg4", "knowable")
-    log56 = ledger.propagate(56, ["Leg4"])
+    log56 = ledger.propagate(56, ["Leg4"], update_time=T0 + timedelta(minutes=56))
     t1v3 = ledger.versions[t1_uid][2]
     assert t1v3["result"].selected_id == "H_b"
     assert any(c.get("field") == "selected_id" and c.get("after") == "H_b"
@@ -368,17 +379,20 @@ def test_W9_representation_dependence(world):
     # F-K view C: origin L_b (W1)
     r_fk = task_s1_structural_reference(
         world["points"], world["clegs"], 52, REP_C,
-        "origin-of-last-confirmed-leg", world["pol"], "P-ORIGIN")
+        "origin-of-last-confirmed-leg", world["pol"], "P-ORIGIN", axis=AXIS, decision_time=T0 + timedelta(minutes=52))
     # F-T with large tau: L_b never registers -> points L_a..H_a only
     REP_FT = _rep("C", "coarse", family="F-T", tau=25.0)
     pts_ft = [
         _pt("L_a", REP_FT, "low", 10, 10.0, 15),
         _pt("H_a", REP_FT, "high", 20, 40.0, 25),
     ]
-    legs_ft = [LegCandidate("Leg1", REP_FT, "L_a", "H_a", "up", 10, 20, 10.0, 40.0, 25)]
+    legs_ft = [LegCandidate("Leg1", REP_FT, "L_a", "H_a", "up", 10, 20, 10.0, 40.0, 25,
+                            t0_time=T0 + timedelta(minutes=10),
+                            t1_time=T0 + timedelta(minutes=20),
+                            knowable_time=T0 + timedelta(minutes=25))]
     r_ft = task_s1_structural_reference(
         pts_ft, legs_ft, 52, REP_FT,
-        "origin-of-last-confirmed-leg", world["pol"], "P-ORIGIN")
+        "origin-of-last-confirmed-leg", world["pol"], "P-ORIGIN", axis=AXIS, decision_time=T0 + timedelta(minutes=52))
     assert r_fk.selected_id == "L_b"
     assert r_ft.selected_id == "L_a"
     # SP-16: report disagreement; do not merge
@@ -396,7 +410,7 @@ def test_W10_singleton_binding(world):
     r = task_s2_event_binding(event_bar=47, close_price=24.0,
                               refs_by_view={"C": refs_c, "F": refs_f},
                               decision_bar=47, state_id_prefix="W10",
-                              event_time=T0 + timedelta(minutes=47))
+                              event_time=T0 + timedelta(minutes=47), axis=AXIS)
     assert r.status == "justified"
     assert r.survivors == ["fB.1"]
     assert r.selected_id == "fB.1"
