@@ -291,7 +291,8 @@ def test_W5_break_binding_and_reversal_ai(world):
     r = task_s2_event_binding(event_bar=53, close_price=19.0,
                               refs_by_view={"C": refs_c, "F": refs_f},
                               decision_bar=53, state_id_prefix="W5",
-                              event_time=T0 + timedelta(minutes=53), axis=AXIS)
+                              event_time=T0 + timedelta(minutes=53), axis=AXIS,
+                              event_ref="W5-E53")
     assert set(r.survivors) == {"L_b", "fB.1", "fD.1"}
     notes = " ".join(r.notes)
     assert "'C': ['L_b']" in notes or '"C": ["L_b"]' in notes or "C" in notes
@@ -344,7 +345,8 @@ def test_W8_role_change_and_propagation(world):
 
     # break fact at 53 -> propagation recomputes dependents (no strings)
     log53 = ledger.propagate(53, ["L_b"], changed_states={"L_b": "broken"},
-                             update_time=T0 + timedelta(minutes=53))
+                             update_time=T0 + timedelta(minutes=53),
+                             axis=AXIS)
     assert log53 and all("SP-20" in e["rule"] for e in log53)
     t1v2 = ledger.versions[t1_uid][1]
     # computed: L_b unusable now, but the successor is NOT knowable until 56
@@ -360,7 +362,8 @@ def test_W8_role_change_and_propagation(world):
 
     # bar 56: Leg4 becomes knowable -> ONLY NOW can T-S1 move to H_b
     ledger.record_change(56, "Leg4", "knowable")
-    log56 = ledger.propagate(56, ["Leg4"], update_time=T0 + timedelta(minutes=56))
+    log56 = ledger.propagate(56, ["Leg4"], update_time=T0 + timedelta(minutes=56),
+                             axis=AXIS)
     t1v3 = ledger.versions[t1_uid][2]
     assert t1v3["result"].selected_id == "H_b"
     assert any(c.get("field") == "selected_id" and c.get("after") == "H_b"
@@ -410,7 +413,8 @@ def test_W10_singleton_binding(world):
     r = task_s2_event_binding(event_bar=47, close_price=24.0,
                               refs_by_view={"C": refs_c, "F": refs_f},
                               decision_bar=47, state_id_prefix="W10",
-                              event_time=T0 + timedelta(minutes=47), axis=AXIS)
+                              event_time=T0 + timedelta(minutes=47), axis=AXIS,
+                              event_ref="W10-E47")
     assert r.status == "justified"
     assert r.survivors == ["fB.1"]
     assert r.selected_id == "fB.1"

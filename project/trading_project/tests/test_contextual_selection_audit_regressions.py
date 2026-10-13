@@ -95,7 +95,8 @@ def test_D1_cross_timeframe_unavailable_reference_cannot_bind():
     r = task_s2_event_binding(
         event_bar=200, close_price=90.0,
         refs_by_view={"C": [late_ref], "F": [fine_ref]},
-        decision_bar=200, event_time=event_time, axis=AXIS)
+        decision_bar=200, event_time=event_time, axis=AXIS,
+        event_ref="D1-E200")
     assert "F-low" in r.survivors
     assert "C-low" not in r.survivors
     codes = {e.candidate_id: e.code for e in r.excluded}
@@ -157,7 +158,7 @@ def test_D2_fk_confirmation_endpoint_inclusive_supersession():
     highs[4] = 11.0
     bars = _bars(lows, highs)
     rep = _rep("C", k=2)
-    pts = fk_turning_points(bars, k=2, rep=rep)
+    pts = fk_turning_points(bars, k=2, rep=rep, axis=AXIS)
     p2 = [p for p in pts if p.occurrence_bar == 2 and p.side == "high"]
     p4 = [p for p in pts if p.occurrence_bar == 4 and p.side == "high"]
     assert p2 and p4
@@ -179,12 +180,12 @@ def test_D2_fk_full_left_context_required():
     highs = [8.0] * n
     bars = _bars(lows, highs)
     rep = _rep("C", k=3)
-    strict = fk_turning_points(bars, k=3, rep=rep)
+    strict = fk_turning_points(bars, k=3, rep=rep, axis=AXIS)
     assert all(p.occurrence_bar >= 3 for p in strict)   # full left context only
     assert any(p.occurrence_bar == 5 for p in strict)   # valid candidates exist
     assert not any(p.occurrence_bar == 1 for p in strict)
     # explicit different policy slot may allow short left edges
-    loose = fk_turning_points(bars, k=3, rep=rep, allow_short_left=True)
+    loose = fk_turning_points(bars, k=3, rep=rep, allow_short_left=True, axis=AXIS)
     assert any(p.occurrence_bar == 1 for p in loose)
 
 
@@ -200,7 +201,7 @@ def test_D3_later_supersession_does_not_rewrite_earlier_state():
     highs[12] = 45.0      # supersedes bar-10 high inside its window (k=5)
     bars = _bars(lows, highs)
     rep = _rep("C", k=5)
-    pts = fk_turning_points(bars, k=5, rep=rep)
+    pts = fk_turning_points(bars, k=5, rep=rep, axis=AXIS)
     p10 = next(p for p in pts if p.occurrence_bar == 10 and p.side == "high")
     assert p10.status == STATUS_SUPERSEDED
     # as-of queries reconstruct the status knowable at each boundary
@@ -272,12 +273,13 @@ def test_D4_ft_equal_extreme_tie_policy_explicit():
     rep = _rep("T", family="F-T", tau=4.0)
     amb = []
     pts = ft_turning_points(bars, tau=4.0, rep=rep,
-                            tie_policy=TIE_FT_EQ_FIRST, ambiguities=amb)
+                            tie_policy=TIE_FT_EQ_FIRST, ambiguities=amb,
+                            axis=AXIS)
     highs_reg = [p for p in pts if p.side == "high" and p.level == 20.0
                  and p.status != STATUS_SUPERSEDED]
     assert highs_reg and highs_reg[0].occurrence_bar == 3     # FIRST kept
     # explicit alternative policy is available and identified
-    pts_last = ft_turning_points(bars, tau=4.0, rep=rep, tie_policy=TIE_FT_EQ_LAST)
+    pts_last = ft_turning_points(bars, tau=4.0, rep=rep, tie_policy=TIE_FT_EQ_LAST, axis=AXIS)
     highs_last = [p for p in pts_last if p.side == "high" and p.level == 20.0
                   and p.status != STATUS_SUPERSEDED]
     assert highs_last and highs_last[0].occurrence_bar == 5   # explicit LAST
@@ -303,7 +305,7 @@ def test_D4_ft_same_bar_extreme_and_reversal_unresolved():
     bars = _bars(lows, highs)
     rep = _rep("T", family="F-T", tau=4.0)
     amb = []
-    ft_turning_points(bars, tau=4.0, rep=rep, ambiguities=amb)
+    ft_turning_points(bars, tau=4.0, rep=rep, ambiguities=amb, axis=AXIS)
     assert any(a["kind"] == "same-bar-extreme-vs-reversal" and a["bar"] == 5
                for a in amb)
 
@@ -330,7 +332,8 @@ def test_D5_propagate_never_accepts_caller_before_after_strings():
     assert r.selected_id == "A"
     ledger = InterpretationLedger()
     uid = ledger.record(r)                      # NO payload: not recomputable
-    log = ledger.propagate(25, ["A"], changed_states={"A": "broken"})
+    log = ledger.propagate(25, ["A"], changed_states={"A": "broken"},
+                           axis=AXIS)
     assert log, "dependent must be visited"
     assert "not recomputable" in log[0].get("note", "")
     assert log[0]["computed_changes"] == []     # nothing claimed without proof
@@ -341,7 +344,8 @@ def test_D5_propagate_never_accepts_caller_before_after_strings():
         "role": "origin-of-last-confirmed-leg", "policy": pol,
         "policy_id": "P-ORIGIN", "axis": AXIS})
     log2 = ledger2.propagate(25, ["A"], changed_states={"A": "broken"},
-                             update_time=T0 + timedelta(minutes=25))
+                             update_time=T0 + timedelta(minutes=25),
+                             axis=AXIS)
     v2 = ledger2.versions[uid2][1]
     assert v2["computed_changes"]               # computed diff exists
     assert v2["result"].status == "unresolved"  # broken origin, no successor leg
@@ -434,8 +438,8 @@ def test_R_prefix_replay_determinism():
         highs[i] = v
     bars = _bars(lows, highs)
     rep = _rep("C", k=5)
-    full = fk_turning_points(bars, k=5, rep=rep)
-    trunc = fk_turning_points(bars.iloc[:35], k=5, rep=rep)
+    full = fk_turning_points(bars, k=5, rep=rep, axis=AXIS)
+    trunc = fk_turning_points(bars.iloc[:35], k=5, rep=rep, axis=AXIS)
     for p in trunc:
         q = next(x for x in full if x.candidate_id == p.candidate_id)
         assert p.status_at(34) == q.status_at(34)

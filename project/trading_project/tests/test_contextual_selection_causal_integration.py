@@ -141,7 +141,7 @@ def test_status_at_time_axis_governs_over_domain_bar():
     # domain-local bar index from another timeframe's query
     p = _pt("x", _rep("C", k=2), "high", 500, 10.0, 505)  # 1m-domain bars
     p.add_transition(505, STATUS_BROKEN,
-                     info_time=T0 + timedelta(minutes=505))
+                     info_time=T0 + timedelta(minutes=505), axis=AXIS)
     # query with a 5m-domain bar index (small) but the correct time
     assert p.status_at(100, T0 + timedelta(minutes=600)) == STATUS_BROKEN
     # before the transition time: still confirmed (time governs)
@@ -165,13 +165,13 @@ def test_regenerated_candidates_restore_recorded_history():
                                "legs": copy.deepcopy(legs),
                                "state_id_prefix": "R", "axis": AXIS})
     ledger.propagate(30, ["L"], changed_states={"L": STATUS_BROKEN},
-                     update_time=T0 + timedelta(minutes=30))
+                     update_time=T0 + timedelta(minutes=30), axis=AXIS)
     # regeneration: a fresh copy with the same identity starts "clean"...
     fresh = _pt("L", rep, "low", 10, 20.0, 15)
     assert fresh.status_at(30, T0 + timedelta(minutes=30)) == STATUS_CONFIRMED
     # ...but restoring recorded history must bring the broken state back —
     # a historically broken reference never reappears as fresh confirmed
-    n = ledger.restore_history([fresh])
+    n = ledger.restore_history([fresh], axis=AXIS)
     assert n >= 1
     assert fresh.status_at(30, T0 + timedelta(minutes=30)) == STATUS_BROKEN
 
@@ -185,12 +185,13 @@ def test_binding_survives_post_event_break_and_later_interactions_bind():
     ref = _pt("ref", rep, "high", 10, 100.0, 12)
     t_ev1 = T0 + timedelta(minutes=20)
     # event 1: first break-side crossing
-    ev1 = task_s2_event_binding(20, 110.0, {"C": [ref]}, 20, event_time=t_ev1, axis=AXIS)
+    ev1 = task_s2_event_binding(20, 110.0, {"C": [ref]}, 20, event_time=t_ev1, axis=AXIS,
+                          event_ref="EV1")
     assert ev1.survivors == ["ref"]
     assert ev1.binding_kinds["ref"] == "first-break"
     # the event's post-state transition is applied AFTER the binding record
     ref.add_transition(20, STATUS_BROKEN, info_time=t_ev1,
-                       note="break by event 1")
+                       note="break by event 1", event_ref="EV1", axis=AXIS)
     # the original binding record is immutable (still present, unchanged)
     assert ev1.survivors == ["ref"]
     assert ev1.binding_kinds["ref"] == "first-break"
@@ -199,7 +200,8 @@ def test_binding_survives_post_event_break_and_later_interactions_bind():
     # dropped and never editing the first
     ev2 = task_s2_event_binding(30, 112.0, {"C": [ref]}, 30,
                                 prev_close=90.0,
-                                event_time=T0 + timedelta(minutes=30), axis=AXIS)
+                                event_time=T0 + timedelta(minutes=30), axis=AXIS,
+                                event_ref="EV2")
     assert ev2.survivors == ["ref"]
     assert ev2.binding_kinds["ref"] == "later-interaction"
 
@@ -210,7 +212,8 @@ def test_provisional_replay_policy_retained_through_propagation():
     ledger = InterpretationLedger()
     ev = task_s2_event_binding(4, 0.0, {"C": [prov]}, 4, prev_close=20.0,
                                event_time=T0 + timedelta(minutes=4),
-                               allow_provisional=True, axis=AXIS)
+                               allow_provisional=True, axis=AXIS,
+                               event_ref="EV-PROV")
     assert ev.survivors == ["tail"]
     uid = ledger.record(ev, payload={
         "kind": "T-S2", "event_bar": 4, "close_price": 0.0,
@@ -218,10 +221,12 @@ def test_provisional_replay_policy_retained_through_propagation():
         "prev_close": 20.0, "state_id_prefix": "P",
         "event_time": T0 + timedelta(minutes=4),
         "allow_provisional": True,          # declared Π_T — must survive
-        "tie_policy": "TIE-CROSS-EQUAL-UNBOUND-V1", "axis": AXIS})
+        "tie_policy": "TIE-CROSS-EQUAL-UNBOUND-V1",
+        "event_ref": "EV-PROV",             # replay identity (audit F)
+        "axis": AXIS})
     # a change fact on a dependency forces recomputation of this dependent
     log = ledger.propagate(6, ["tail"], changed_states={"tail": "knowable"},
-                           update_time=T0 + timedelta(minutes=6))
+                           update_time=T0 + timedelta(minutes=6), axis=AXIS)
     v2 = ledger.versions[uid][-1]
     assert v2["version"] == 2               # recomputed, not rewritten
     # the provisional binding SURVIVES the recompute (policy retained)
@@ -232,7 +237,8 @@ def test_no_provisional_policy_by_default():
     rep = _rep("C", k=2)
     prov = _pt("tail", rep, "low", 3, 10.0, 99, status=STATUS_PROVISIONAL)
     ev = task_s2_event_binding(4, 0.0, {"C": [prov]}, 4,
-                               event_time=T0 + timedelta(minutes=4), axis=AXIS)
+                               event_time=T0 + timedelta(minutes=4), axis=AXIS,
+                               event_ref="EV-NOPROV")
     assert ev.survivors == []
     assert any(e.code == X_STATE for e in ev.excluded)
 
@@ -254,11 +260,11 @@ def _id_bars():
 def test_candidate_identity_stable_across_replay_windows():
     bars = _id_bars()
     rep = _rep("C", k=3)
-    full = {p.side: p for p in fk_turning_points(bars, 3, rep)
+    full = {p.side: p for p in fk_turning_points(bars, 3, rep, axis=AXIS)
             if p.occurrence_bar in (10, 20)}
     # a window that STARTS LATER shifts every local bar index (10 -> 5)…
     trunc = bars.iloc[5:]
-    rerun = {p.side: p for p in fk_turning_points(trunc, 3, rep)
+    rerun = {p.side: p for p in fk_turning_points(trunc, 3, rep, axis=AXIS)
              if p.occurrence_bar in (5, 15)}
     # …but source/time identity is unchanged: the same historical candidate is
     # recognized across overlapping replay windows
@@ -273,9 +279,9 @@ def test_candidate_identity_stable_across_replay_windows():
 def test_leg_identity_stable_across_replay_windows():
     bars = _id_bars()
     rep = _rep("C", k=3)
-    pts_full = fk_turning_points(bars, 3, rep)
+    pts_full = fk_turning_points(bars, 3, rep, axis=AXIS)
     legs_full = build_legs(pts_full, rep)
-    pts_trunc = fk_turning_points(bars.iloc[5:], 3, rep)
+    pts_trunc = fk_turning_points(bars.iloc[5:], 3, rep, axis=AXIS)
     legs_trunc = build_legs(pts_trunc, rep)
     ids_full = {l.leg_id for l in legs_full}
     ids_trunc = {l.leg_id for l in legs_trunc}
@@ -353,7 +359,7 @@ def test_change_facts_and_recomputations_are_separate_streams():
         "state_id_prefix": "D", "decision_time": T0 + timedelta(minutes=45),
         "axis": AXIS})
     ledger.propagate(50, ["lo"], changed_states={"lo": STATUS_BROKEN},
-                     update_time=T0 + timedelta(minutes=50))
+                     update_time=T0 + timedelta(minutes=50), axis=AXIS)
     kinds = [x["kind"] for x in ledger.revisions]
     assert "change-fact" in kinds
     # the break fact cites its authorizing event when given
@@ -373,7 +379,8 @@ def test_incomplete_dependency_coverage_is_tracked():
     p = _pt("p", rep, "high", 1, 10.0, 2)
     ledger = InterpretationLedger()
     r = task_s2_event_binding(3, 11.0, {"C": [p]}, 3,
-                              event_time=T0 + timedelta(minutes=3), axis=AXIS)
+                              event_time=T0 + timedelta(minutes=3), axis=AXIS,
+                              event_ref="EV-INCOMPLETE")
     ledger.record(r)                          # NO payload: non-recomputable
     snap = ledger.snapshot()
     assert snap["n_dependents_without_payload"] == 1

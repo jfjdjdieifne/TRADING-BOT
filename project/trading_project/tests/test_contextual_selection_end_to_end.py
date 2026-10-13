@@ -96,7 +96,8 @@ def test_off_grid_knowable_time_is_not_a_verified_claim():
     ref.knowable_time = OFF_GRID                 # 00:00:30 — off the grid
     ev_t = T0 + timedelta(minutes=5)             # 00:05:00 — on the grid
     r = task_s2_event_binding(5, 0.0, {"C": [ref]}, 5, event_time=ev_t,
-                              axis=AXIS, state_id_prefix="off")
+                              axis=AXIS, state_id_prefix="off",
+                              event_ref="OFF-E5")
     assert r.survivors == []                     # never bound
     codes = {e.candidate_id: e.code for e in r.excluded}
     assert codes.get("off") == "X-KNOW"          # explicit, auditable
@@ -159,7 +160,7 @@ def test_time_query_never_borrows_a_foreign_domain_bar_index():
     p = _pt("p", rep, "low", 10, 10.0, 12)
     p.add_transition(7, STATUS_BROKEN, note="bar-only row (foreign domain)")
     p.add_transition(15, STATUS_SUPERSEDED, info_time=T0 + timedelta(minutes=15),
-                     note="placeable")
+                     note="placeable", axis=AXIS)
     # time query at T0+12: the unplaceable break must NOT apply
     assert p.status_at(99, T0 + timedelta(minutes=12)) == STATUS_CONFIRMED
     # the placeable transition DOES apply at its own time
@@ -207,14 +208,15 @@ def test_lifecycle_reset_at_b2_is_prevented_by_restore_history():
     # an event breaks L at 30 (first break), then B2 at 50 regenerates the
     # world from scratch — the same identities reappear FRESH
     led.propagate(30, ["L"], changed_states={"L": STATUS_BROKEN},
-                  update_time=T0 + timedelta(minutes=30), event_ref="E30")
+                  update_time=T0 + timedelta(minutes=30), event_ref="E30",
+                  axis=AXIS)
     pts_b2 = [_pt("L", rep, "low", 10, 10.0, 12),
               _pt("H", rep, "high", 20, 40.0, 22)]
     legs_b2 = [_lg("up", rep, "L", "H", "up", 10, 20, 10.0, 40.0, 22)]
     # WITHOUT restore_history the regenerated row is fresh confirmed (the
     # audited reset); with it, the recorded lifecycle is recovered
     assert pts_b2[0].status_at(50, T0 + timedelta(minutes=50)) == STATUS_CONFIRMED
-    n = led.restore_history(pts_b2)
+    n = led.restore_history(pts_b2, axis=AXIS)
     assert n >= 1
     assert pts_b2[0].status_at(50, T0 + timedelta(minutes=50)) == STATUS_BROKEN
     r_b2 = task_s1_structural_reference(pts_b2, legs_b2, 50, rep,
@@ -244,7 +246,8 @@ def test_t2_only_recording_persists_broken_transition():
                             "event_ref": "E20", "axis": AXIS,
                             "tie_policy": TIE_CROSS_EQUAL_UNBOUND})
     led.propagate(20, ["L"], changed_states={"L": STATUS_BROKEN},
-                  update_time=T0 + timedelta(minutes=20), event_ref="E20")
+                  update_time=T0 + timedelta(minutes=20), event_ref="E20",
+                  axis=AXIS)
     # the transition reached the referenced point (refs_by_view shape)
     assert ref.status_at(20, T0 + timedelta(minutes=20),
                          excluding_event_ref="E20") != STATUS_BROKEN
@@ -270,25 +273,36 @@ def test_pre_event_binding_survives_the_events_own_transition():
     assert ev.event_phase[PHASE_POST_EVENT]["L"] == STATUS_BROKEN
     # apply the event's own transition at the SAME timestamp…
     ref.add_transition(20, STATUS_BROKEN, info_time=t_ev, event_ref="E20",
-                       note="the event's own break")
+                       note="the event's own break", axis=AXIS)
     # …and replay: the binding kind must be STABLE
     ev2 = task_s2_event_binding(20, 0.0, {"C": [ref]}, 20, event_time=t_ev,
                                 axis=AXIS, event_ref="E20")
     assert ev2.binding_kinds == {"L": "first-break"}
-    # without the event's transition the later state is visible (append-only)
+    # a DISTINCT event ordered after at the same time sees the applied break
+    # (append-only later state) — identity-bearing "later state" view
     ev3 = task_s2_event_binding(20, 0.0, {"C": [ref]}, 20, event_time=t_ev,
-                                axis=AXIS)
+                                axis=AXIS, event_ref="E21")
     assert ev3.binding_kinds == {"L": "later-interaction"}
+    # SAFE INTEGRATION V1: identity-less time-based replay is REJECTED —
+    # the API must never silently relabel the same event
+    with pytest.raises(ValueError, match="identity"):
+        task_s2_event_binding(20, 0.0, {"C": [ref]}, 20, event_time=t_ev,
+                              axis=AXIS)
     # difference accounting reports binding-kind changes: a replay WITHOUT
     # the event-ref exclusion sees the applied break and the computed diff
     # names the binding_kinds field (never a silent rewrite)
     led = InterpretationLedger()
     led.record(ev, payload={"kind": "T-S2", "event_bar": 20, "close_price": 0.0,
                             "refs_by_view": {"C": [ref]}, "event_time": t_ev,
-                            "axis": AXIS,
+                            "axis": AXIS, "event_ref": "E20",
                             "tie_policy": TIE_CROSS_EQUAL_UNBOUND})
-    led.propagate(20, ["L"], changed_states={"L": STATUS_BROKEN},
-                  update_time=t_ev)
+    # a GENUINE world change: an independent EARLIER break (authorized by a
+    # different event) lands, and the identity-bearing replay recomputes it
+    ref.add_transition(10, STATUS_BROKEN,
+                       info_time=T0 + timedelta(minutes=10),
+                       event_ref="E10", note="independent earlier break",
+                       axis=AXIS)
+    led.propagate(20, ["L"], update_time=t_ev)
     diffs = led.versions["T-S2#1"][1]["computed_changes"]
     kinds_diff = [d for d in diffs if d.get("field") == "binding_kinds"]
     assert kinds_diff, f"binding_kinds missing from difference accounting: {diffs}"
@@ -303,16 +317,19 @@ def test_tie_policy_and_tie_behavior_cannot_contradict():
     # the audited contradiction: boolean says bound, policy says unbound
     with pytest.raises(ValueError, match="tie-policy contradiction"):
         task_s2_event_binding(20, 10.0, {"C": [ref]}, 20, tie_bound=True,
-                              event_time=T0 + timedelta(minutes=20), axis=AXIS)
+                              event_time=T0 + timedelta(minutes=20), axis=AXIS,
+                              event_ref="TIE-E20")
     # the declared policy governs actual behavior: UNBOUND → equality no bind
     r = task_s2_event_binding(20, 10.0, {"C": [ref]}, 20,
                               event_time=T0 + timedelta(minutes=20), axis=AXIS,
-                              tie_policy=TIE_CROSS_EQUAL_UNBOUND)
+                              tie_policy=TIE_CROSS_EQUAL_UNBOUND,
+                              event_ref="TIE-E20")
     assert r.survivors == []
     # the BOUND policy makes equality a crossing — declared AND effective
     r2 = task_s2_event_binding(20, 10.0, {"C": [ref]}, 20,
                                event_time=T0 + timedelta(minutes=20), axis=AXIS,
-                               tie_policy=TIE_CROSS_EQUAL_BOUND_V1)
+                               tie_policy=TIE_CROSS_EQUAL_BOUND_V1,
+                               event_ref="TIE-E20")
     assert r2.survivors == ["L"]
     assert r2.policy_snapshots["tie_policy"]["value"] == TIE_CROSS_EQUAL_BOUND_V1
 
@@ -344,7 +361,7 @@ def test_policy_mutation_after_result_creation_is_never_silent():
                            "policy": pol, "policy_id": "P-ORIGIN",
                            "decision_time": T0 + timedelta(minutes=14),
                            "axis": AXIS})
-    led.propagate(15, ["L"], update_time=T0 + timedelta(minutes=15))
+    led.propagate(15, ["L"], update_time=T0 + timedelta(minutes=15), axis=AXIS)
     diffs = led.versions["T-S1#1"][1]["computed_changes"]
     assert any(d.get("field") in ("policy_refs", "policy_snapshots")
                for d in diffs)
@@ -369,7 +386,8 @@ def test_provisional_policy_survives_replay_with_exact_declared_values():
     prov = _pt("P", rep, "low", 3, 10.0, 5, status=STATUS_PROVISIONAL)
     t4 = T0 + timedelta(minutes=4)
     ev = task_s2_event_binding(4, 0.0, {"C": [prov]}, 4, event_time=t4,
-                               axis=AXIS, allow_provisional=True)
+                               axis=AXIS, allow_provisional=True,
+                               event_ref="E4")
     assert ev.survivors == ["P"]
     assert ev.binding_kinds["P"] == "provisional:first-break"
     assert ev.policy_snapshots["allow_provisional"]["value"] is True
@@ -380,7 +398,7 @@ def test_provisional_policy_survives_replay_with_exact_declared_values():
                             "event_ref": "E4",
                             "tie_policy": TIE_CROSS_EQUAL_UNBOUND})
     led.propagate(4, ["P"], changed_states={"P": STATUS_BROKEN},
-                  update_time=t4, event_ref="E4")
+                  update_time=t4, event_ref="E4", axis=AXIS)
     replay = led.versions["T-S2#1"][1]["result"]
     # replay preserves the declared provisional policy AND the pre-event kind
     assert replay.policy_snapshots["allow_provisional"]["value"] is True
@@ -391,7 +409,7 @@ def test_provisional_policy_survives_replay_with_exact_declared_values():
     assert led.versions["T-S2#1"][1]["computed_changes"] == []
     # without the flag the csm default excludes provisional references
     r2 = task_s2_event_binding(4, 0.0, {"C": [prov]}, 4, event_time=t4,
-                               axis=AXIS)
+                               axis=AXIS, event_ref="E4b")
     assert r2.survivors == []
 
 
@@ -464,7 +482,7 @@ def test_transitive_dependency_recomputation_a_b_c():
     # followed TRANSITIVELY (B and C must leave version 1); unrelated D stays
     led.propagate(30, ["A_root"],
                   changed_states={"A_root": STATUS_BROKEN},
-                  update_time=T0 + timedelta(minutes=30))
+                  update_time=T0 + timedelta(minutes=30), axis=AXIS)
     v = {uid: len(led.versions[uid]) for uid in (uid_a, uid_b, uid_c, uid_d)}
     assert v[uid_a] == 2                       # A recomputed
     assert v[uid_b] == 2                       # B reconsidered (A->B)
@@ -476,7 +494,8 @@ def test_transitive_dependency_recomputation_a_b_c():
     assert any(e.get("cascade_from") for e in steps)
     # cycle detection: a cyclic edge is reported explicitly and cannot loop
     led._result_deps[uid_a] = {uid_c}          # close the cycle C -> A
-    led.propagate(32, ["B_alt"], update_time=T0 + timedelta(minutes=32))
+    led.propagate(32, ["B_alt"], update_time=T0 + timedelta(minutes=32),
+                  axis=AXIS)
     assert any(r.get("kind") == "dependency-cycle" for r in led.revisions)
 
 
@@ -498,9 +517,9 @@ def test_terminal_provisional_candidates_retained_across_prefixes():
     rep = _rep("T", family="F-T", tau=10.0)
     prefix_ids = set()
     for cut in (25, 35, 45):
-        pts_p = ft_turning_points(bars.iloc[:cut], tau=10.0, rep=rep)
+        pts_p = ft_turning_points(bars.iloc[:cut], tau=10.0, rep=rep, axis=AXIS)
         prefix_ids |= {p.candidate_id for p in pts_p}
-    pts_full = ft_turning_points(bars, tau=10.0, rep=rep)
+    pts_full = ft_turning_points(bars, tau=10.0, rep=rep, axis=AXIS)
     full_ids = {p.candidate_id for p in pts_full}
     missing = prefix_ids - full_ids
     assert not missing, f"prefix candidates silently discarded: {sorted(missing)[:5]}"

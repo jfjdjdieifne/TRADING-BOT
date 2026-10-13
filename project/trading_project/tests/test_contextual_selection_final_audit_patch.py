@@ -89,38 +89,42 @@ def _tail_fixture():
 
 def test_tail_knowable_time_never_claims_last_bar():
     full, trunc, rep = _tail_fixture()
-    p_trunc = [p for p in fk_turning_points(trunc, 2, rep) if p.side == "low"][0]
-    p_full = [p for p in fk_turning_points(full, 2, rep) if p.side == "low"][0]
+    p_trunc = [p for p in fk_turning_points(trunc, 2, rep, axis=AXIS) if p.side == "low"][0]
+    p_full = [p for p in fk_turning_points(full, 2, rep, axis=AXIS) if p.side == "low"][0]
     assert p_trunc.knowable_bar == 5 and p_trunc.status == STATUS_PROVISIONAL
     # the truncated candidate must NOT claim the last observed timestamp
     assert p_trunc.knowable_time is None
     assert p_full.knowable_time == pd.Timestamp(full.index[5])
     # auditor's probe at bar 4: both must agree the candidate is NOT available
     t4 = pd.Timestamp(full.index[4])
-    assert available_at(p_trunc, as_of_time=t4) is False
-    assert available_at(p_full, as_of_time=t4) is False
+    assert available_at(p_trunc, as_of_time=t4, axis=AXIS) is False
+    assert available_at(p_full, as_of_time=t4, axis=AXIS) is False
     # no over-claim at ANY query time: truncated implies full
     for t in full.index:
         tt = pd.Timestamp(t)
-        if available_at(p_trunc, as_of_time=tt):
-            assert available_at(p_full, as_of_time=tt)
+        if available_at(p_trunc, as_of_time=tt, axis=AXIS):
+            assert available_at(p_full, as_of_time=tt, axis=AXIS)
 
 
 def test_tail_prefix_full_t2_event_binding_equivalence():
     full, trunc, rep = _tail_fixture()
-    p_trunc = [p for p in fk_turning_points(trunc, 2, rep) if p.side == "low"][0]
-    p_full = [p for p in fk_turning_points(full, 2, rep) if p.side == "low"][0]
+    p_trunc = [p for p in fk_turning_points(trunc, 2, rep, axis=AXIS) if p.side == "low"][0]
+    p_full = [p for p in fk_turning_points(full, 2, rep, axis=AXIS) if p.side == "low"][0]
     t4 = pd.Timestamp(full.index[4])
     # default contract (no provisional): both empty, no future reference
-    r_t = task_s2_event_binding(4, 0.0, {"C": [p_trunc]}, 4, event_time=t4, axis=AXIS)
-    r_f = task_s2_event_binding(4, 0.0, {"C": [p_full]}, 4, event_time=t4, axis=AXIS)
+    r_t = task_s2_event_binding(4, 0.0, {"C": [p_trunc]}, 4, event_time=t4, axis=AXIS,
+                              event_ref="TAIL-E4")
+    r_f = task_s2_event_binding(4, 0.0, {"C": [p_full]}, 4, event_time=t4, axis=AXIS,
+                              event_ref="TAIL-E4")
     assert r_t.survivors == [] and r_f.survivors == []
     assert {e.candidate_id for e in r_t.excluded} == {p_trunc.candidate_id}
     # explicit provisional use is occurrence-gated on BOTH runs (equivalence)
     r_t2 = task_s2_event_binding(4, 0.0, {"C": [p_trunc]}, 4, event_time=t4,
-                                 allow_provisional=True, axis=AXIS)
+                                 allow_provisional=True, axis=AXIS,
+                                 event_ref="TAIL-E4")
     r_f2 = task_s2_event_binding(4, 0.0, {"C": [p_full]}, 4, event_time=t4,
-                                 allow_provisional=True, axis=AXIS)
+                                 allow_provisional=True, axis=AXIS,
+                                 event_ref="TAIL-E4")
     assert r_t2.survivors == r_f2.survivors == [p_trunc.candidate_id]
 
 
@@ -129,14 +133,15 @@ def test_t2_status_gating_provisional_superseded_broken():
     prov = _pt("prov", rep, "low", 3, 10.0, 5, status=STATUS_PROVISIONAL)
     sup = _pt("sup", rep, "low", 3, 10.0, 5)
     t4 = T0 + timedelta(minutes=4)
-    sup.add_transition(4, STATUS_SUPERSEDED, info_time=t4, by="other", note="test")
+    sup.add_transition(4, STATUS_SUPERSEDED, info_time=t4, by="other", note="test",
+                       axis=AXIS)
     brk = _pt("brk", rep, "low", 3, 10.0, 4)   # knowable at the event time
     brk.add_transition(2, STATUS_BROKEN, info_time=T0 + timedelta(minutes=2),
-                       note="test")   # broken BEFORE the event
+                       note="test", axis=AXIS)   # broken BEFORE the event
     ok = _pt("ok", rep, "low", 3, 10.0, 4)   # knowable at the event time
     t4 = T0 + timedelta(minutes=4)
     r = task_s2_event_binding(4, 0.0, {"C": [prov, sup, brk, ok]}, 4,
-                              event_time=t4, axis=AXIS)
+                              event_time=t4, axis=AXIS, event_ref="GATE-E4")
     codes = {e.candidate_id: e.code for e in r.excluded}
     assert codes.get("prov") == X_STATE
     assert codes.get("sup") == X_SUPER
@@ -147,7 +152,8 @@ def test_t2_status_gating_provisional_superseded_broken():
     assert r.binding_kinds["brk"] == "later-interaction"
     # explicit provisional contract opens prov only, tagged per SWS-04a
     r2 = task_s2_event_binding(4, 0.0, {"C": [prov]}, 4, event_time=t4,
-                               allow_provisional=True, axis=AXIS)
+                               allow_provisional=True, axis=AXIS,
+                               event_ref="GATE-E4")
     assert r2.survivors == ["prov"]
     assert r2.binding_kinds["prov"] == "provisional:first-break"
 
@@ -371,7 +377,7 @@ def test_endpoint_order_evidence_from_generator():
     rows[3] = (9.0, 9.0, 2.0, 5.0)      # open == high -> proven high-first
     bars = _bars(rows)
     rep = _rep("C", k=3)
-    pts = [p for p in fk_turning_points(bars, 3, rep) if p.occurrence_bar == 3]
+    pts = [p for p in fk_turning_points(bars, 3, rep, axis=AXIS) if p.occurrence_bar == 3]
     assert len(pts) == 2
     assert all(p.same_bar_order == "unresolved" for p in pts)
     assert all(p.same_bar_evidence == "proven:high-first:open-at-high"
@@ -379,12 +385,12 @@ def test_endpoint_order_evidence_from_generator():
     # close at the high: order CONSTRained but not unique (not proven)
     rows2 = [(5, 6, 4, 5)] * 8
     rows2[3] = (5.0, 9.0, 2.0, 9.0)     # close == high -> constrained
-    pts2 = [p for p in fk_turning_points(_bars(rows2), 3, rep)
+    pts2 = [p for p in fk_turning_points(_bars(rows2), 3, rep, axis=AXIS)
             if p.occurrence_bar == 3]
     assert all(p.same_bar_evidence == "constrained:close-at-high" for p in pts2)
     # interior endpoints -> ordering unavailable
     rows3 = [(5, 6, 4, 5)] * 8
     rows3[3] = (5.0, 9.0, 2.0, 5.0)
-    pts3 = [p for p in fk_turning_points(_bars(rows3), 3, rep)
+    pts3 = [p for p in fk_turning_points(_bars(rows3), 3, rep, axis=AXIS)
             if p.occurrence_bar == 3]
     assert all(p.same_bar_evidence is None for p in pts3)

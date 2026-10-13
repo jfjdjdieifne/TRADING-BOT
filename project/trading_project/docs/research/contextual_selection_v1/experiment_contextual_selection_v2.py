@@ -118,14 +118,30 @@ def main() -> int:
         KIND_PROCEDURE, KIND_RESEARCH, KIND_SOURCE,
         InterpretationLedger, PolicyRegistry, Representation,
         SharedInformationAxis, TIE_CROSS_EQUAL_UNBOUND, TIE_FT_EQ_FIRST,
+        available_at,
         build_legs, candidate_record, fk_turning_points, ft_turning_points,
         reference_state_at, same_bar_evidence_class,
         task_s1_structural_reference,
         task_s2_event_binding, task_s5_falsifier,
     )
+    from trading_system.research.contextual_selection.artifacts import (  # noqa: E402
+        write_run_artifacts,
+    )
 
     out_dir: Path = args.out_dir
+    # SAFE INTEGRATION V1 (audit F §"Output failure"): the run writes ONLY
+    # into a clean output directory — seeded/stale artifacts are never mixed
+    # with (or mistaken for) this run's outputs.
+    TARGET_ARTIFACTS = ("experiment_record_v2.json",
+                        "candidate_ledger_v1.jsonl.gz",
+                        "propagation_log_v1.jsonl",
+                        "experiment_manifest_v1.json", "REPRODUCE.md")
     out_dir.mkdir(parents=True, exist_ok=True)
+    stale = [n for n in TARGET_ARTIFACTS if (out_dir / n).exists()]
+    if stale:
+        print(f"REFUSING: output directory {out_dir} already contains "
+              f"{stale} — use a clean output directory", flush=True)
+        return 2
 
     f1m = load_1m(args.mirror_dir, args.months, args.start, args.end)
     fC = resample_ohlc(f1m, "1h", pd.Timedelta(hours=1))
@@ -241,7 +257,8 @@ def main() -> int:
                     ledger.record_event(
                         int(j), "binding",
                         f"close={c} time={event_time} notes={ev.notes}",
-                        ev.survivors, event_time=event_time)
+                        ev.survivors, event_time=event_time,
+                        event_ref=event_ref)
                     events_out.append({
                         "boundary_interval": f"{prev_bname}->{bname}",
                         "event_bar": int(j), "event_time": str(event_time),
@@ -251,6 +268,25 @@ def main() -> int:
                         "event_phase": ev.event_phase,
                         "notes": ev.notes,
                     })
+                    # SAFE INTEGRATION V1 (audit F §"Candidate ledger"): the
+                    # T-S2 event-binding candidates get their own per-task
+                    # lifecycle rows (with the pre-event binding kind)
+                    ex2_by_id = {}
+                    for e in ev.excluded:
+                        ex2_by_id.setdefault(e.candidate_id, e)
+                    for p_ref in refs_now:
+                        coverage_rows.append(candidate_record(
+                            p_ref, task_id="T-S2",
+                            run_id=f"{prev_bname}->{bname}:E{j}",
+                            boundary=f"{prev_bname}->{bname}",
+                            decision_bar=int(j), decision_time=event_time,
+                            eligible=(p_ref.candidate_id in ev.survivors),
+                            exclusion=ex2_by_id.get(p_ref.candidate_id),
+                            selected=(p_ref.candidate_id == ev.selected_id),
+                            task_detail={
+                                "event_ref": event_ref,
+                                "binding_kind": ev.binding_kinds.get(
+                                    p_ref.candidate_id)}))
                     # W8-pattern REAL propagation on breaks of active refs
                     for rid, (uid, uid5) in registered_active.items():
                         # break of the ACTIVE reference (selected at prev boundary)
@@ -263,7 +299,7 @@ def main() -> int:
                                 int(j), [prev_sel],
                                 changed_states={prev_sel: "broken"},
                                 update_time=event_time,
-                                event_ref=f"{prev_bname}->{bname}:E{j}")
+                                event_ref=event_ref, axis=axis)
                             row.setdefault("propagations", []).extend(log)
 
 
@@ -275,16 +311,17 @@ def main() -> int:
             bars_t = fview.iloc[: cutoff + 1]
             amb = []
             if rep.family == "F-K":
-                pts = fk_turning_points(bars_t, int(rep.param("k")), rep)
+                pts = fk_turning_points(bars_t, int(rep.param("k")), rep,
+                                        axis=axis)
             else:
                 pts = ft_turning_points(bars_t, rep.param("tau"), rep,
                                         tie_policy=TIE_FT_EQ_FIRST,
-                                        ambiguities=amb)
+                                        ambiguities=amb, axis=axis)
             legs = build_legs(pts, rep, ambiguities=amb)
             # consolidation V1 (task §2): regenerating candidates must NEVER
             # reset recorded lifecycle events (the audited B2 pattern) — the
             # ledger's recorded transitions are re-applied before the tasks
-            led_restore = ledger.restore_history(pts)
+            led_restore = ledger.restore_history(pts, axis=axis)
             prefix_inventory.setdefault(rid, set()).update(
                 p.candidate_id for p in pts)
             ambiguities_out += [{"boundary": bname, "rep": rid, **a} for a in amb]
@@ -367,31 +404,48 @@ def main() -> int:
             registered[rid] = (uid, uid5)
 
             # ---- candidate-level coverage rows (D6/§7) --------------------
-            # points AND legs are covered (consolidation V1 §6/§8)
-            ex_by_id = {}
-            for e in r.excluded:
-                ex_by_id.setdefault(e.candidate_id, e)
-            for p in pts:
-                coverage_rows.append(candidate_record(
-                    p, task_id="T-S1", run_id=f"{bname}:{rid}",
-                    boundary=bname, decision_bar=cutoff, decision_time=b_time,
-                    eligible=(p.candidate_id in r.survivors),
-                    exclusion=ex_by_id.get(p.candidate_id),
-                    selected=(p.candidate_id == r.selected_id),
-                    unresolved_reason=(r.unresolved.reason_code
-                                       if r.unresolved else None)))
+            # SAFE INTEGRATION V1 (audit F §"Candidate ledger"): one row per
+            # candidate PER TASK VARIANT — T-S1 origin AND T-S1 extreme,
+            # T-S2 event-binding refs (in the event loop), and T-S5 support
+            # legs with LEG-level classification (a leg id is NEVER compared
+            # against T-S5 point survivor ids).
+            def _rows_for(task, objs, res, b_bar, b_t):
+                ex_by = {}
+                for e in res.excluded:
+                    ex_by.setdefault(e.candidate_id, e)
+                for o in objs:
+                    oid = getattr(o, "candidate_id", None) or o.leg_id
+                    coverage_rows.append(candidate_record(
+                        o, task_id=task, run_id=f"{bname}:{rid}",
+                        boundary=bname, decision_bar=b_bar, decision_time=b_t,
+                        eligible=(oid in res.survivors),
+                        exclusion=ex_by.get(oid),
+                        selected=(oid == res.selected_id),
+                        unresolved_reason=(res.unresolved.reason_code
+                                           if res.unresolved else None)))
+            _rows_for("T-S1_origin", pts, r, cutoff, b_time)
+            _rows_for("T-S1_extreme", pts, r_ext, cutoff, b_time)
             ex5_by_id = {}
             for e in r5.excluded:
                 ex5_by_id.setdefault(e.candidate_id, e)
+            support = set(r5.dependencies)   # resolved supports (pts + legs)
             for l in legs:
+                # LEG-level eligibility: evaluated support iff completed and
+                # decision-time-available; r5.survivors are POINT ids and
+                # never define leg eligibility (audit F)
+                leg_eval = l.completed and available_at(
+                    l, as_of_bar=cutoff, as_of_time=b_time, axis=axis)
+                ex = ex5_by_id.get(l.leg_id)
                 coverage_rows.append(candidate_record(
-                    l, task_id="T-S5", run_id=f"{bname}:{rid}",
+                    l, task_id="T-S5_support", run_id=f"{bname}:{rid}",
                     boundary=bname, decision_bar=cutoff, decision_time=b_time,
-                    eligible=(l.leg_id in r5.survivors),
-                    exclusion=ex5_by_id.get(l.leg_id),
-                    selected=(l.leg_id == r5.selected_id),
+                    eligible=(leg_eval and ex is None),
+                    exclusion=ex,
+                    selected=(l.leg_id in support),
                     unresolved_reason=(r5.unresolved.reason_code
-                                       if r5.unresolved else None)))
+                                       if r5.unresolved else None),
+                    task_detail={"support_of_falsifier": l.leg_id in support,
+                                 "evaluated_support": leg_eval}))
             if r.selected_id and r.selected_id in by_id:
                 fresh_refs.append(by_id[r.selected_id])
 
@@ -405,7 +459,8 @@ def main() -> int:
             sel_id = row["tasks"][rid]["T-S1_origin"]["selected"]
             changed_ids = [x for x in (sel_id,) if x]
             if changed_ids:
-                log = ledger.propagate(cutoff_b, changed_ids, update_time=b_time)
+                log = ledger.propagate(cutoff_b, changed_ids,
+                                       update_time=b_time, axis=axis)
                 row.setdefault("boundary_propagations", []).extend(log)
 
         # ---- SP-16 representation-dependence report ----------------------
@@ -431,11 +486,13 @@ def main() -> int:
                 fview = fC if rep.view_id == "C" else fF
                 cutoff2 = int(fview.index.searchsorted(b_time, side="right") - 1)
                 bars_t = fview.iloc[: cutoff2 + 1]
-                pts2 = (fk_turning_points(bars_t, int(rep.param("k")), rep)
+                pts2 = (fk_turning_points(bars_t, int(rep.param("k")), rep,
+                                          axis=axis)
                         if rep.family == "F-K" else
-                        ft_turning_points(bars_t, rep.param("tau"), rep))
+                        ft_turning_points(bars_t, rep.param("tau"), rep,
+                                          axis=axis))
                 legs2 = build_legs(pts2, rep)
-                ledger.restore_history(pts2)   # replay keeps recorded lifecycle
+                ledger.restore_history(pts2, axis=axis)   # replay keeps recorded lifecycle
                 r2 = task_s1_structural_reference(
                     pts2, legs2, cutoff2, rep, "origin-of-last-confirmed-leg",
                     pol, "P-ORIGIN", decision_time=b_time, axis=axis)
@@ -451,12 +508,11 @@ def main() -> int:
             f"{rid}={row['tasks'][rid]['T-S1_origin']['selected']}"
             for rid in reps), flush=True)
 
-    # ---- candidate ledger serialization (D6/§7) --------------------------
-    cand_path = out_dir / "candidate_ledger_v1.jsonl.gz"
-    with gzip.open(cand_path, "wt") as fh:
-        for rrow in coverage_rows:
-            fh.write(json.dumps(rrow) + "\n")
-    print(f"candidate ledger rows: {len(coverage_rows)} -> {cand_path}", flush=True)
+    # ---- candidate ledger (D6/§7) ---------------------------------------
+    # SAFE INTEGRATION V1: serialization is STAGED and committed atomically
+    # at the end (write_run_artifacts) — a failure never leaves a truncated
+    # gzip beside stale files.
+    print(f"candidate ledger rows: {len(coverage_rows)} (staged)", flush=True)
 
     # ---- old-vs-new comparison (§9) -------------------------------------
     comparison = None
@@ -688,10 +744,11 @@ def main() -> int:
     fC_eval = fC[(fC.index >= pd.Timestamp(args.start))
                  & (fC.index < pd.Timestamp(args.end))]
     ids_full = {p.candidate_id
-                for p in fk_turning_points(fC, int(rep_ck5.param("k")), rep_ck5)}
+                for p in fk_turning_points(fC, int(rep_ck5.param("k")), rep_ck5,
+                                           axis=axis)}
     ids_eval = {p.candidate_id
                 for p in fk_turning_points(fC_eval, int(rep_ck5.param("k")),
-                                           rep_ck5)}
+                                           rep_ck5, axis=axis)}
     identity_recognition = {
         "rep": "C_FK5",
         "note": ("source/time identity: candidates regenerated on the "
@@ -709,9 +766,11 @@ def main() -> int:
     for rid, rep in reps.items():
         fview = fC if rep.view_id == "C" else fF
         if rep.family == "F-K":
-            full_pts = fk_turning_points(fview, int(rep.param("k")), rep)
+            full_pts = fk_turning_points(fview, int(rep.param("k")), rep,
+                                         axis=axis)
         else:
-            full_pts = ft_turning_points(fview, rep.param("tau"), rep)
+            full_pts = ft_turning_points(fview, rep.param("tau"), rep,
+                                         axis=axis)
         full_ids = {p.candidate_id for p in full_pts}
         prefix_ids = prefix_inventory.get(rid, set())
         missing = prefix_ids - full_ids
@@ -810,8 +869,8 @@ def main() -> int:
               "identity_recognition": identity_recognition,
               "propagation_revisions": ledger.revisions}
     out_path = out_dir / "experiment_record_v2.json"
-    out_path.write_text(json.dumps(record, indent=1, default=str))
-    print("record:", out_path, flush=True)
+    # SAFE INTEGRATION V1: the record is STAGED with the other artifacts and
+    # committed atomically below.
 
     # ---- inspectable manifest (task §7): durable identities + reproduction --
     info_time_path = (Path(args.src) / "trading_system/research/information_time.py")
@@ -854,7 +913,8 @@ def main() -> int:
                 "--mirror-dir <mirror> --out-dir <out> "
                 "--months 2025-08,2025-09 "
                 "--start 2025-08-01 --end 2025-09-28 "
-                f"--old-record {out_path} --src src"),
+                "--old-record docs/research/contextual_selection_v1/"
+                "experiment_record_v2.json --src src"),
             "inputs": "CSV sha256 identities above (btc-usdt-1m mirror)",
             "outputs": ["experiment_record_v2.json",
                         "candidate_ledger_v1.jsonl.gz",
@@ -862,12 +922,10 @@ def main() -> int:
                         "experiment_manifest_v1.json", "REPRODUCE.md"],
         },
     }
-    manifest_path = out_dir / "experiment_manifest_v1.json"
-    manifest_path.write_text(json.dumps(manifest, indent=1, default=str))
-    repro = out_dir / "REPRODUCE.md"
-    repro.write_text(f"""# CSM V1 consolidation run — reproduction
+    repro_text = f"""# CSM V1 safe-integration run — reproduction
 
-Authoritative full-run output of the END-TO-END CONSOLIDATION V1 build.
+Authoritative full-run output of the CLOSED-FOUNDATION PRESERVATION AND
+SAFE INTEGRATION build (audit REVISE remediation).
 Selection quality: NOT_ESTABLISHED (EP blocker, unchanged).
 
 ## Source
@@ -895,18 +953,36 @@ Mirror source: parshant231234-eng/BTCUSDT-Historical-Data @ 27c9be70
 ```
 {manifest['reproduction']['command']}
 ```
+`--old-record` names a DISTINCT historical input (the tracked
+pre-consolidation record kept for comparison) — never this run's output.
 
 ## Outputs
 - experiment_record_v2.json — full run record (boundaries, events, revisions)
-- candidate_ledger_v1.jsonl.gz — candidate-level coverage rows (points AND legs)
-- propagation_log_v1.jsonl — computed change-fact / recomputation rows
+- candidate_ledger_v1.jsonl.gz — per-candidate coverage rows: T-S1 origin,
+  T-S1 extreme, T-S2 event refs (with binding kinds) and T-S5 support legs
+  (leg-level classification); every row carries its status-transition
+  sequence and explicit superseded_by
+- propagation_log_v1.jsonl — change-fact / recomputation / stale-descendant
+  rows (emitted artifact; matches the record's propagation_revisions)
 - experiment_manifest_v1.json — this manifest (machine-readable)
 - historical note: the tracked `experiment_record_v2.json` of the
   pre-consolidation build (source head e90a62f, short window) is retained
   for historical comparison ONLY and is not the output of this build.
-""")
-    print("manifest:", manifest_path, flush=True)
-    print("reproduce:", repro, flush=True)
+"""
+    # ---- atomic commit of every artifact (audit F §9) --------------------
+    # All payloads serialize to staged temps first; a failure removes every
+    # temp and leaves no target partially written (no truncated gzip, no
+    # stale mixtures).  Targets are committed only into the clean out dir.
+    artifact_hashes = write_run_artifacts(out_dir, {
+        "experiment_record_v2.json": record,
+        "candidate_ledger_v1.jsonl.gz": ("jsonl.gz", coverage_rows),
+        "propagation_log_v1.jsonl": ("jsonl", ledger.revisions),
+        "experiment_manifest_v1.json": manifest,
+        "REPRODUCE.md": repro_text,
+    })
+    print("manifest:", out_dir / "experiment_manifest_v1.json", flush=True)
+    print("reproduce:", out_dir / "REPRODUCE.md", flush=True)
+    print("artifact sha256:", json.dumps(artifact_hashes, indent=1), flush=True)
     print("ledger:", summary["ledger"], flush=True)
     print("exclusions:", summary["exclusion_histogram"], flush=True)
     print("unresolved:", summary["unresolved_histogram"], flush=True)
