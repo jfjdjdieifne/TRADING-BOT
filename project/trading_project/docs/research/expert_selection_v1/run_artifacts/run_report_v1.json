@@ -1,0 +1,314 @@
+{
+  "experiment_id": "EXPERT-SEL-MARKET-V1",
+  "supersedes": null,
+  "research_only": "selection counts do not prove selection correctness; zero temporal violations does not prove contextual selection quality",
+  "source_version": {
+    "git_head": "4fae301eaeabef14d8159d4eecb8cde1982fbb2a",
+    "information_time_sha256": "72b03ca6d2333080e0df6dc18b1928147e877b41175f132c7bf08eb4e4d74ace",
+    "expert_selection_sha256": "48dd39e2a03f4feb80b9e55cc0c91a48684c13e874fb88295ee4d1d22e469fe3",
+    "csm_sha256": "6db88bca1f82eafde5d8f4ff8529815895f3c2a79e1fc609706841d19fda05be"
+  },
+  "inputs": {
+    "mirror": "parshant231234-eng/BTCUSDT-Historical-Data@27c9be70",
+    "mirror_dir": "/home/user/work/data/btc/mirror",
+    "months": "2025-08,2025-09",
+    "window": [
+      "2025-08-01 00:00:00",
+      "2025-09-27 00:00:00"
+    ],
+    "resample": "1h (completion-time index, D1 convention)",
+    "n_1m_rows": 82080,
+    "n_1h_bars": 1368
+  },
+  "representation": "C:F-K(k=5)",
+  "knowledge_ids": [
+    "KP-01",
+    "KP-02",
+    "KP-03",
+    "KP-04",
+    "KP-05",
+    "KP-06",
+    "KP-07"
+  ],
+  "policy_registry": {
+    "P-ORIGIN-RESEARCH": {
+      "policy_id": "P-ORIGIN-RESEARCH",
+      "version": 1,
+      "description": "role semantics: origin of the most recent confirmed leg (SWS-02; research configuration, never owner-approved)",
+      "value": "origin-of-last-confirmed-leg",
+      "class": "O",
+      "kind": "research_configuration",
+      "sensitivity_required": true
+    }
+  },
+  "summary": {
+    "n_boundaries": 57,
+    "total_selection_opportunities": 114,
+    "n_candidate_rows": 18615,
+    "n_candidates_per_boundary_avg": 326.57894736842104,
+    "actual_selections": {
+      "M1_role": 56,
+      "M2_preference": 1
+    },
+    "unresolved": {
+      "M2_preference:EP": 56,
+      "M1_role:AI": 1
+    },
+    "preference_rules_activated": {
+      "M2_preference:KP-02": 57
+    },
+    "preference_inactive_reasons": {
+      "KP-01": 114,
+      "KP-02": 57,
+      "KP-03": 114,
+      "KP-04": 114,
+      "KP-05": 114,
+      "KP-06": 114,
+      "KP-07": 114
+    },
+    "conflicts": {},
+    "source_provenance_evidence_counts": {
+      "F": 9926,
+      "R": 19255,
+      "S": 1
+    },
+    "temporal_violations": {
+      "n": 0,
+      "cases": []
+    },
+    "revision_behavior": {
+      "n_status_transitions_generated": 37173,
+      "n_reference_changes_M1": 54,
+      "events": [
+        {
+          "boundary": "2025-08-03 00:00:00",
+          "from": "C:F-K(k=5)|low@2025-08-01T09:00:00",
+          "to": "C:F-K(k=5)|low@2025-08-01T23:00:00"
+        },
+        {
+          "boundary": "2025-08-04 00:00:00",
+          "from": "C:F-K(k=5)|low@2025-08-01T23:00:00",
+          "to": "C:F-K(k=5)|high@2025-08-03T12:00:00"
+        },
+        {
+          "boundary": "2025-08-05 00:00:00",
+          "from": "C:F-K(k=5)|high@2025-08-03T12:00:00",
+          "to": null
+        },
+        {
+          "boundary": "2025-08-07 00:00:00",
+          "from": "C:F-K(k=5)|high@2025-08-05T11:00:00",
+          "to": "C:F-K(k=5)|low@2025-08-06T14:00:00"
+        },
+        {
+          "boundary": "2025-08-08 00:00:00",
+          "from": "C:F-K(k=5)|low@2025-08-06T14:00:00",
+          "to": "C:F-K(k=5)|high@2025-08-07T12:00:00"
+        },
+        {
+          "boundary": "2025-08-09 00:00:00",
+          "from": "C:F-K(k=5)|high@2025-08-07T12:00:00",
+          "to": "C:F-K(k=5)|high@2025-08-08T15:00:00"
+        },
+        {
+          "boundary": "2025-08-10 00:00:00",
+          "from": "C:F-K(k=5)|high@2025-08-08T15:00:00",
+          "to": "C:F-K(k=5)|low@2025-08-09T04:00:00"
+        },
+        {
+          "boundary": "2025-08-11 00:00:00",
+          "from": "C:F-K(k=5)|low@2025-08-09T04:00:00",
+          "to": "C:F-K(k=5)|low@2025-08-09T22:00:00"
+        },
+        {
+          "boundary": "2025-08-12 00:00:00",
+          "from": "C:F-K(k=5)|low@2025-08-09T22:00:00",
+          "to": "C:F-K(k=5)|low@2025-08-10T21:00:00"
+        },
+        {
+          "boundary": "2025-08-13 00:00:00",
+          "from": "C:F-K(k=5)|low@2025-08-10T21:00:00",
+          "to": "C:F-K(k=5)|high@2025-08-12T03:00:00"
+        },
+        {
+          "boundary": "2025-08-14 00:00:00",
+          "from": "C:F-K(k=5)|high@2025-08-12T03:00:00",
+          "to": "C:F-K(k=5)|high@2025-08-12T21:00:00"
+        },
+        {
+          "boundary": "2025-08-15 00:00:00",
+          "from": "C:F-K(k=5)|high@2025-08-12T21:00:00",
+          "to": "C:F-K(k=5)|high@2025-08-14T01:00:00"
+        },
+        {
+          "boundary": "2025-08-16 00:00:00",
+          "from": "C:F-K(k=5)|high@2025-08-14T01:00:00",
+          "to": "C:F-K(k=5)|high@2025-08-15T07:00:00"
+        },
+        {
+          "boundary": "2025-08-17 00:00:00",
+          "from": "C:F-K(k=5)|high@2025-08-15T07:00:00",
+          "to": "C:F-K(k=5)|low@2025-08-16T11:00:00"
+        },
+        {
+          "boundary": "2025-08-18 00:00:00",
+          "from": "C:F-K(k=5)|low@2025-08-16T11:00:00",
+          "to": "C:F-K(k=5)|high@2025-08-17T14:00:00"
+        },
+        {
+          "boundary": "2025-08-19 00:00:00",
+          "from": "C:F-K(k=5)|high@2025-08-17T14:00:00",
+          "to": "C:F-K(k=5)|high@2025-08-17T23:00:00"
+        },
+        {
+          "boundary": "2025-08-20 00:00:00",
+          "from": "C:F-K(k=5)|high@2025-08-17T23:00:00",
+          "to": "C:F-K(k=5)|low@2025-08-19T05:00:00"
+        },
+        {
+          "boundary": "2025-08-21 00:00:00",
+          "from": "C:F-K(k=5)|low@2025-08-19T05:00:00",
+          "to": "C:F-K(k=5)|high@2025-08-20T09:00:00"
+        },
+        {
+          "boundary": "2025-08-22 00:00:00",
+          "from": "C:F-K(k=5)|high@2025-08-20T09:00:00",
+          "to": "C:F-K(k=5)|low@2025-08-20T15:00:00"
+        },
+        {
+          "boundary": "2025-08-23 00:00:00",
+          "from": "C:F-K(k=5)|low@2025-08-20T15:00:00",
+          "to": "C:F-K(k=5)|low@2025-08-22T13:00:00"
+        },
+        {
+          "boundary": "2025-08-24 00:00:00",
+          "from": "C:F-K(k=5)|low@2025-08-22T13:00:00",
+          "to": "C:F-K(k=5)|high@2025-08-22T19:00:00"
+        },
+        {
+          "boundary": "2025-08-25 00:00:00",
+          "from": "C:F-K(k=5)|high@2025-08-22T19:00:00",
+          "to": "C:F-K(k=5)|low@2025-08-23T16:00:00"
+        },
+        {
+          "boundary": "2025-08-26 00:00:00",
+          "from": "C:F-K(k=5)|low@2025-08-23T16:00:00",
+          "to": "C:F-K(k=5)|low@2025-08-25T14:00:00"
+        },
+        {
+          "boundary": "2025-08-27 00:00:00",
+          "from": "C:F-K(k=5)|low@2025-08-25T14:00:00",
+          "to": "C:F-K(k=5)|high@2025-08-26T13:00:00"
+        },
+        {
+          "boundary": "2025-08-28 00:00:00",
+          "from": "C:F-K(k=5)|high@2025-08-26T13:00:00",
+          "to": "C:F-K(k=5)|low@2025-08-27T09:00:00"
+        },
+        {
+          "boundary": "2025-08-29 00:00:00",
+          "from": "C:F-K(k=5)|low@2025-08-27T09:00:00",
+          "to": "C:F-K(k=5)|low@2025-08-28T01:00:00"
+        },
+        {
+          "boundary": "2025-08-31 00:00:00",
+          "from": "C:F-K(k=5)|low@2025-08-28T01:00:00",
+          "to": "C:F-K(k=5)|low@2025-08-30T14:00:00"
+        },
+        {
+          "boundary": "2025-09-01 00:00:00",
+          "from": "C:F-K(k=5)|low@2025-08-30T14:00:00",
+          "to": "C:F-K(k=5)|low@2025-08-31T14:00:00"
+        },
+        {
+          "boundary": "2025-09-02 00:00:00",
+          "from": "C:F-K(k=5)|low@2025-08-31T14:00:00",
+          "to": "C:F-K(k=5)|low@2025-09-01T06:00:00"
+        },
+        {
+          "boundary": "2025-09-03 00:00:00",
+          "from": "C:F-K(k=5)|low@2025-09-01T06:00:00",
+          "to": "C:F-K(k=5)|low@2025-09-02T13:00:00"
+        },
+        {
+          "boundary": "2025-09-04 00:00:00",
+          "from": "C:F-K(k=5)|low@2025-09-02T13:00:00",
+          "to": "C:F-K(k=5)|low@2025-09-03T08:00:00"
+        },
+        {
+          "boundary": "2025-09-05 00:00:00",
+          "from": "C:F-K(k=5)|low@2025-09-03T08:00:00",
+          "to": "C:F-K(k=5)|high@2025-09-04T11:00:00"
+        },
+        {
+          "boundary": "2025-09-06 00:00:00",
+          "from": "C:F-K(k=5)|high@2025-09-04T11:00:00",
+          "to": "C:F-K(k=5)|high@2025-09-05T13:00:00"
+        },
+        {
+          "boundary": "2025-09-07 00:00:00",
+          "from": "C:F-K(k=5)|high@2025-09-05T13:00:00",
+          "to": "C:F-K(k=5)|high@2025-09-06T15:00:00"
+        },
+        {
+          "boundary": "2025-09-08 00:00:00",
+          "from": "C:F-K(k=5)|high@2025-09-06T15:00:00",
+          "to": "C:F-K(k=5)|high@2025-09-07T15:00:00"
+        },
+        {
+          "boundary": "2025-09-09 00:00:00",
+          "from": "C:F-K(k=5)|high@2025-09-07T15:00:00",
+          "to": "C:F-K(k=5)|low@2025-09-08T03:00:00"
+        },
+        {
+          "boundary": "2025-09-10 00:00:00",
+          "from": "C:F-K(k=5)|low@2025-09-08T03:00:00",
+          "to": "C:F-K(k=5)|high@2025-09-09T08:00:00"
+        },
+        {
+          "boundary": "2025-09-11 00:00:00",
+          "from": "C:F-K(k=5)|high@2025-09-09T08:00:00",
+          "to": "C:F-K(k=5)|low@2025-09-10T02:00:00"
+        },
+        {
+          "boundary": "2025-09-12 00:00:00",
+          "from": "C:F-K(k=5)|low@2025-09-10T02:00:00",
+          "to": "C:F-K(k=5)|low@2025-09-10T20:00:00"
+        },
+        {
+          "boundary": "2025-09-13 00:00:00",
+          "from": "C:F-K(k=5)|low@2025-09-10T20:00:00",
+          "to": "C:F-K(k=5)|high@2025-09-12T01:00:00"
+        }
+      ]
+    },
+    "replay_determinism": [
+      {
+        "boundary": "2025-08-02 00:00:00",
+        "identical": true
+      },
+      {
+        "boundary": "2025-08-21 00:00:00",
+        "identical": true
+      },
+      {
+        "boundary": "2025-09-09 00:00:00",
+        "identical": true
+      }
+    ],
+    "runtime": {
+      "per_boundary_ms_avg": 179.2708138771902,
+      "per_boundary_ms_max": 498.061215000007,
+      "total_s": 12.65945134499998
+    },
+    "same_bar_ambiguities": 1
+  },
+  "limitations": [
+    "research configuration (P-ORIGIN-RESEARCH) is never an owner-approved analytical policy (kind=research_configuration)",
+    "one coarse view (1h F-K k=5) and one representation family in this run; representation dependence (W9) reported by the test suite, not re-run here",
+    "fine view / cross-scale selection omitted (single selection task scope)",
+    "test-history evidence derived by exact interval containment + SP-03 close crossings; no tolerance thresholds were invented",
+    "no outcome evaluation: selection quality remains NOT_ESTABLISHED (objective C quarantine)",
+    "cluster/round-number markers (KP-06) not observable in this generator output \u2014 preference inactive by contract"
+  ]
+}

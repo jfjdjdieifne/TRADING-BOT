@@ -122,3 +122,31 @@ __all__ = [
     "task_s1_structural_reference", "task_s2_event_binding",
     "task_s3_entry_leg", "task_s5_falsifier",
 ]
+
+# --- EXPERT-GROUNDED CONTEXTUAL SELECTION V1 (additive; no core change) ----
+# The judgment layer over the kernel: documented source-grounded conditional
+# preferences for STRUCTURAL_REFERENCE_SELECTION (task classification A-F),
+# conflict preservation, evidence + provenance chains.
+from trading_system.research.contextual_selection.expert_selection import (  # noqa: F401
+    EXPERT_KNOWLEDGE_SRS_V1,
+    EXPERT_ROLE_UNDECLARED,
+    KNOWLEDGE_BY_ID,
+    OUTCOME_SELECTED,
+    OUTCOME_UNRESOLVED,
+    SRS_TASK_ID,
+    SRS_TASK_NAME,
+    ContextualRelationships,
+    EvidenceItem,
+    ExpertPreference,
+    ExpertSelection,
+    apply_expert_preferences,
+    expert_structural_reference_selection,
+)
+
+__all__ += [
+    "EXPERT_KNOWLEDGE_SRS_V1", "EXPERT_ROLE_UNDECLARED", "KNOWLEDGE_BY_ID",
+    "OUTCOME_SELECTED", "OUTCOME_UNRESOLVED", "SRS_TASK_ID", "SRS_TASK_NAME",
+    "ContextualRelationships", "EvidenceItem", "ExpertPreference",
+    "ExpertSelection", "apply_expert_preferences",
+    "expert_structural_reference_selection",
+]
