@@ -8,12 +8,16 @@
       "BTCUSDT_1m_2025-08.csv": "15d26d2374bce8804e25012ff76e5fad976633a2fde843ffb0f487e1c90a0cf4",
       "BTCUSDT_1m_2025-09.csv": "e1d5c8f350d83df866ff36c3b4d74f7e5b383db07cde7bca0ee1f200d7a48979"
     },
-    "final_source_commit": "9bca73b2cf0033a2a39e48d56b351e55b8d47bec",
+    "final_source_commit": "33df36b190fdeb70b1a882e10a84c1bbd099d0f5",
     "dependency_versions": {
       "python": "3.11.2",
       "numpy": "1.26.4",
       "pandas": "2.2.3",
-      "pytest": "8.3.5"
+      "pytest": "8.3.5",
+      "tzdata": {
+        "version": "2026.6",
+        "source": "importlib.metadata:tzdata"
+      }
     },
     "representation": "C:F-K(k=5)",
     "window": [
@@ -23,10 +27,10 @@
     "n_boundaries": 57
   },
   "source_version": {
-    "git_head": "9bca73b2cf0033a2a39e48d56b351e55b8d47bec",
+    "git_head": "33df36b190fdeb70b1a882e10a84c1bbd099d0f5",
     "information_time_sha256": "72b03ca6d2333080e0df6dc18b1928147e877b41175f132c7bf08eb4e4d74ace",
-    "expert_selection_sha256": "e9ad58baabb6e63474b7d8938fe65785d9e9d8db29bea2c72a5f1f79b242f9a9",
-    "csm_sha256": "b6b4b0a112a7e14f839b0406e407a3a8b93f2e200356af0261d8662d89802d86"
+    "expert_selection_sha256": "1a732e867cc82101e9178116954cfc36a5b0d790a9bbf81290e2e71896644919",
+    "csm_sha256": "9a58dca85af6969b0c713da3f27825a48b760b6b646e11cc67b5109fc1ef5e82"
   },
   "inputs": {
     "mirror": "parshant231234-eng/BTCUSDT-Historical-Data@27c9be70",
@@ -95,7 +99,8 @@
     },
     "revision_behavior": {
       "n_status_transitions_generated": 37173,
-      "n_reference_changes_M1": 54,
+      "n_asymmetric_adjacent_selection_id_changes_M1": 54,
+      "count_semantics": "the reported count is an ASYMMETRIC ADJACENT-SELECTION-ID CHANGE count: consecutive M1 boundaries whose selected IDs differ (a -> b counted once at b).  It is NOT ledger propagation \u2014 no InterpretationLedger propagation is run or counted in this replay.",
       "events": [
         {
           "boundary": "2025-08-03 00:00:00",
@@ -314,9 +319,9 @@
       }
     ],
     "runtime": {
-      "per_boundary_ms_avg": 173.2528743157896,
-      "per_boundary_ms_max": 470.4341299998305,
-      "total_s": 12.660718817000088
+      "per_boundary_ms_avg": 194.20232391232213,
+      "per_boundary_ms_max": 508.4684780003954,
+      "total_s": 13.922966457999792
     },
     "same_bar_ambiguities": 1
   },

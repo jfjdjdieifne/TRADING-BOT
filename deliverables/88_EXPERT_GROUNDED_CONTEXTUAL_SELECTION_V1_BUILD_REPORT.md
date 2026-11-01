@@ -327,3 +327,147 @@ determinism identical ×3; runtime 12.7 s total (173 ms/boundary avg).
   (unchanged; asserted by test 11 and recorded in the run report).
 - No trading, performance or selection-quality claims are made; selection
   quality remains NOT_ESTABLISHED.  No live trades executed.
+
+---
+
+# V1.2 Audit Remediation Addendum — Five Remaining Findings Closed
+
+Base: `856c2c369b36c6fae4e469e24259bbc1aa667de6` ·
+Code commit (recorded in the replay manifest):
+**`33df36b190fdeb70b1a882e10a84c1bbd099d0f5`** · Scope: minimal, test-backed.
+
+## 1 — Relationship stamp integrity
+
+`validate_relationship_stamp` (public selection API) now rejects and RECORDS
+each of: **negative** `known_bar`; **out-of-axis** `known_bar` (no such axis
+coordinate: `known_bar >= axis.n_rows` under the codebase's shared-axis
+convention that the scene's bar domain is the axis's coordinate domain);
+future stamps; off-grid times; missing/unmappable stamps; and **inconsistent
+`known_bar`/`known_time` pairs** — the pair must identify the SAME axis
+coordinate: `key_for_time(known_time).bar_position == known_bar` (approved
+sealed-interface usage; `InformationKey` compares by `bar_position`, the
+key type declares `eq=False`).  Every rejection lands in
+`dropped_evidence` with its reason and never influences selection.
+New adversarial tests: negative bars (declarations and events), out-of-axis
+bars, inconsistent bar/time pairs (+ a consistent-pair control), beside the
+existing future/off-grid/unmappable tests.
+
+## 2 — Task, role, and comparison completeness
+
+* every preference record's `task_id` must equal the active task — a
+  foreign record is inactive with an explicit "task mismatch" cause and
+  never influences selection (control test proves the same record applies
+  when its task matches);
+* registered policy semantics must match the declared role:
+  `policy.snapshot_of(policy_id)["value"] == role`, else UNRESOLVED with
+  "policy-role mismatch" (both mismatch directions tested; matching control
+  passes);
+* an unknown `ref_kind` is **incomparable**, never an ordinary "other":
+  the declared vocabulary `KNOWN_REF_KINDS = (old-low-htf,
+  old-high-reclaimed, local)` is enforced via the rule's `domain`;
+* comparisons require **complete comparable evidence across the eligible
+  set**: evidence missing for any eligible candidate (or a value outside
+  the documented domain) licenses NO comparison and yields UNRESOLVED with
+  explicit per-candidate reasons (IC for missing, EP for unknown values) —
+  never a subset comparison, never a silent omission.  Tests: partial
+  evidence (3 of 4 eligible; the subset would have "won") → UNRESOLVED
+  naming the gap; unknown `ref_kind` → UNRESOLVED naming candidate + value.
+
+## 3 — Binding source support (KP-03 disposition)
+
+Determination from the pinned source (`jfjdjdieifne/test @ 6c8bf6fd`):
+* `knowledge_foundation/05 §5.4a` P-R — "Support reference | **Partly
+  stated** | REF-OLD-LOW-HTF (old low on higher timeframe); REF-OLD-HIGH-
+  RECLAIMED ... Both verbal (P1)" — inside the **G-OB-P order-block
+  parameter register**;
+* `knowledge_foundation/15 §15.2` H — "higher-timeframe preference for
+  support references" listed among ICT-source-supported distinctions
+  ("only those marked S in §15.3");
+* `knowledge_foundation/15 §15.3` S — "'old low on a higher timeframe' as
+  a support reference (P1) | **Only as the source's stated condition, not
+  as an observed fact**";
+* `knowledge_foundation/16 §16.3` — T-S1's Π_T "is an operational
+  definition, not a market claim (SWS-02)" and "**is not an ICT-source
+  claim**".
+
+The exact comparison+context (old-low-htf beats locally drawn candidates
+WHEN SELECTING T-S1's origin/extreme reference) **cannot be established**
+by the pinned source — the support-reference statement lives in the
+order-block construction context and is expressly a stated condition only.
+Per the finding, **KP-03 is now nonbinding research-only (F-class,
+licenses="none")**; no replacement rule or citation was invented.  Tests
+show unsupported contexts cannot produce a selection through this
+preference alone: with the BEST declaration evidence, the origin role
+(no policy) stays UNRESOLVED and the extreme role resolves only through
+its operational role definition (no `preference:` evidence item, KP-03
+inactive) — both roles, KP-03 never active.
+
+## 4 — Tie guard
+
+When the delegated kernel reports (or the independent detector confirms) an
+equal-knowable-time tie — top knowable-stamp tie for
+`last-confirmed-extreme`, top leg-recency tie with distinct origins for
+`origin-of-last-confirmed-leg` — the expert layer returns UNRESOLVED(MP,
+"declare a tie policy (SP-18)") **before applying preferences**.  A
+preference never overrides a tie.  Tests: valid preference evidence on BOTH
+tied candidates (the preference would pick one) for BOTH roles, repeated
+with reversed candidate order — outcome UNRESOLVED, survivors = the tied
+set, `activated_preferences` empty.
+
+## 5 — Real downstream dependency update
+
+`task_s5_falsifier`'s early-UNRESOLVED exits (missing direction → IC;
+direction contradiction → AI) now preserve the dependencies ACTUALLY
+evaluated — the supporting leg consumed by `max(vlegs, key=leg_recency_key)`
+contributes `start_id` + `leg_id` even though the computation exits
+unresolved (result may remain unresolved; no conclusion is forced).
+`_diff_results` reports dependency updates as computed changes.  The
+changed-evidence test asserts the downstream T-S5 version 2 carries
+**H_b and Leg4** in `dependencies` (with a `dependencies` computed-change
+entry) while honestly remaining unresolved.
+
+## 6 — Reproducibility and acceptance
+
+`replay_manifest_v1.json` records the **actual timezone-data package
+version** (tzdata **2026.6**, via `importlib.metadata` — with documented
+module/system fallbacks, never a guess).  The reported **54** is now
+labelled `n_asymmetric_adjacent_selection_id_changes_M1` with a
+`count_semantics` string: an asymmetric adjacent-selection-ID change count
+(consecutive M1 boundaries with different selected IDs), **not ledger
+propagation** (no propagation is run or counted in this replay).
+
+## Verification and results
+
+* Focused suites (pinned env): **35/35** expert +
+  **26/26** kernel/audit = 61 green; **full suite exit 0**.
+  Test commands:
+  `PYTHONPATH=src python -m pytest tests/test_contextual_selection_expert_selection.py -q`
+  `PYTHONPATH=src python -m pytest tests/test_contextual_selection_csm.py tests/test_contextual_selection_final_audit_patch.py -q`
+  `PYTHONPATH=src python -m pytest tests/ -q`
+* Historical replay re-run after the code changes; manifest
+  `final_source_commit` = **`33df36b190fdeb70b1a882e10a84c1bbd099d0f5`**
+  (exact code commit executed).  57 boundaries × 2 modes, 18,615 coverage
+  rows; M1 56 SELECTED + 1 AI; M2 0 selections / 57 explicit UNRESOLVED
+  (MP); 0 temporal violations; replay determinism identical ×3; 13.9 s.
+* `git diff --check`: clean.  `information_time.py` sha256 =
+  `72b03ca6d2333080e0df6dc18b1928147e877b41175f132c7bf08eb4e4d74ace`
+  (untouched).
+* No trading, performance or selection-quality claims; selection quality
+  remains NOT_ESTABLISHED.  No live trades executed.
+
+## Remaining limitations (explicit)
+
+* Out-of-axis `known_bar` detection requires the axis (`axis.n_rows` under
+  the shared-axis bar-domain convention); with no axis supplied, only the
+  negative/future checks apply.
+* The bar/time same-coordinate check encodes the codebase's convention
+  (scene bar domain == axis coordinate domain); a scene whose bars are NOT
+  axis coordinates would need an explicit mapping interface (not invented
+  here).
+* The comparison mechanism (license rules, domains, completeness) is
+  exercised through explicitly injected knowledge records; the DEFAULT
+  knowledge set contains no binding comparison (KP-02/03/06 all F-class by
+  the two audit rounds), so default-KB selections are never
+  preference-produced.
+* Policy-role match requires the registered policy `value` to name the role
+  string exactly (the registry's documented usage in this codebase).
