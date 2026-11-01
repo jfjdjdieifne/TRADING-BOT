@@ -91,8 +91,8 @@ __all__ = [
     "RUN_CONTEXT_REPLAY", "RUN_CONTEXT_LIVE",
     "Episode", "EpisodeExtractor", "ContextEventModel",
     "ContextualDecision", "decide", "extract_context",
-    "chronological_split", "evaluate_model", "summarize_decisions",
-    "EPISODE_HORIZON_BARS",
+    "chronological_split", "evaluate_model", "evaluate_ex_ante_baseline",
+    "summarize_decisions", "EPISODE_HORIZON_BARS", "HORIZON_DISCLOSURE",
 ]
 
 # --------------------------------------------------------------------- #
@@ -177,6 +177,20 @@ RUN_CONTEXT_LIVE = "live-process"
 # the episode labeling horizon in task-scale bars.  Sensitivity is a
 # research question; no source-derived candle count is claimed.
 EPISODE_HORIZON_BARS = 24
+
+HORIZON_DISCLOSURE = (
+    "EPISODE_HORIZON_BARS = 24 is NOT source-grounded, NOT owner-"
+    "approved, and NOT a market rule: it is a declared engineering "
+    "parameter for bounded episode labeling.  It determines each label "
+    "as the FIRST predefined observable event whose binding occurs on a "
+    "completed task-scale bar inside the half-open window "
+    "(as_of_bar, as_of_bar + 24]; episodes whose window extends past "
+    "the available data are CENSORED, excluded, and reported — their "
+    "labels are never guessed.  Sensitivity across alternative horizon "
+    "values remains UNTESTED: no other defensible, explicitly declared "
+    "configuration exists in this project, and no alternative values "
+    "were invented or searched to improve the result."
+)
 
 _MODEL_STATUS = "provisional-unvalidated"
 
@@ -785,22 +799,36 @@ def _named_event_definition(named_event: str) -> Dict[str, Any]:
 # chronological evaluation (no trade-profit labels)                      #
 # --------------------------------------------------------------------- #
 def chronological_split(episodes: Sequence[Episode],
-                        train_fraction: float = 2 / 3
-                        ) -> Tuple[List[Episode], List[Episode]]:
+                        train_fraction: float = 2 / 3, *,
+                        return_purged: bool = False):
     """Deterministic chronological split: earlier episodes fit, strictly
-    later episodes evaluate.  No shuffling, ever."""
+    later episodes evaluate.  No shuffling, ever.
+
+    EVALUATION-WINDOW LEAKAGE FIX: a training episode is usable for a
+    reported evaluation ONLY if its label window closed strictly before
+    the FIRST evaluated decision.  Overlapping training episodes are
+    PURGED from the fitting set and reported (identity + timestamps);
+    they are never silently fitted.
+    """
     usable = sorted([e for e in episodes if e.usable],
                     key=lambda e: e.as_of_time)
     if not usable:
-        return [], []
+        return ([], [], []) if return_purged else ([], [])
     cut = int(len(usable) * train_fraction)
     cut = max(1, min(cut, len(usable) - 1)) if len(usable) > 1 else 1
     train, ev = usable[:cut], usable[cut:]
+    purged: List[Episode] = []
     if ev and train:
         assert max(e.as_of_time for e in train) < \
             min(e.as_of_time for e in ev), \
             "chronological separation violated"
-    return train, ev
+        first_eval_time = min(e.as_of_time for e in ev)
+        kept = [e for e in train
+                if e.window_end_time is not None and
+                pd.Timestamp(e.window_end_time) < first_eval_time]
+        purged = [e for e in train if e not in kept]
+        train = kept
+    return (train, ev, purged) if return_purged else (train, ev)
 
 
 def evaluate_model(model: ContextEventModel,
@@ -845,6 +873,61 @@ def evaluate_model(model: ContextEventModel,
         "labels_note": "structural event identities only; win/loss here "
                        "means scenario continuation/violation — NEVER "
                        "trade profit/loss",
+    }
+
+
+def evaluate_ex_ante_baseline(train: Sequence[Episode],
+                              episodes: Sequence[Episode]
+                              ) -> Dict[str, Any]:
+    """Ex-ante baseline: the TRAINING-period majority class, derived
+    strictly BEFORE any evaluation outcome is known, then applied to the
+    SAME evaluation episodes as the model.
+
+    Deterministic: a training tie yields an explicit no-call — never a
+    random or arbitrary tie-break.  The evaluation-set majority is NEVER
+    consulted.
+    """
+    counts: Dict[str, int] = {}
+    for e in train:
+        if e.usable:
+            counts[e.label] = counts.get(e.label, 0) + 1
+    top = max(counts.values()) if counts else 0
+    winners = sorted(e for e, n in counts.items() if n == top)
+    if counts and len(winners) == 1 and top > 0:
+        predicted = winners[0]
+    else:
+        predicted = "(no-call: training tie)"
+    predictions: List[dict] = []
+    hits = misses = no_calls = 0
+    for e in episodes:
+        if not e.usable:
+            continue
+        if predicted.startswith("(no-call"):
+            no_calls += 1
+            predictions.append({"episode_id": e.episode_id,
+                                "as_of": str(e.as_of_time),
+                                "predicted": predicted,
+                                "realized": e.label, "hit": None})
+        else:
+            ok = (predicted == e.label)
+            hits += 1 if ok else 0
+            misses += 0 if ok else 1
+            predictions.append({"episode_id": e.episode_id,
+                                "as_of": str(e.as_of_time),
+                                "predicted": predicted,
+                                "realized": e.label, "hit": ok})
+    total = hits + misses + no_calls
+    return {
+        "method": "train-majority-class (ex-ante)",
+        "derivation": "computed only from the training-period labels; "
+                      "the evaluation outcomes are unknown at "
+                      "derivation time",
+        "train_label_counts": counts,
+        "predicted_class": predicted,
+        "predictions": predictions,
+        "hits": hits, "misses": misses, "no_calls": no_calls,
+        "hit_rate": round(hits / total, 4) if total else None,
+        "n_eval_episodes": total,
     }
 
 

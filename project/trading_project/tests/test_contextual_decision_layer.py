@@ -45,9 +45,11 @@ from trading_system.research.contextual_selection.decision_layer import (
     EpisodeExtractor,
     chronological_split,
     decide,
+    evaluate_ex_ante_baseline,
     evaluate_model,
     extract_context,
     summarize_decisions,
+    HORIZON_DISCLOSURE,
 )
 
 
@@ -186,6 +188,12 @@ def test_no_edge_with_named_discriminator_not_vague_abstention():
     for vague in ("wait for confirmation", "watch the market",
                   "be careful", "see what happens"):
         assert vague not in disc.lower()
+    # the USER-FACING text (not only JSON) must say NO_EDGE and label the
+    # primary as a baseline — never a preferred forecast
+    text = d.to_explanation()
+    assert "NO_EDGE" in text
+    assert "no-edge baseline" in text
+    assert "not a preferred scenario" in text
 
     # TIED training evidence -> NO_EDGE as well (explicit tie, no
     # arbitrary tie-breaker)
@@ -327,7 +335,10 @@ def test_condition_already_present_not_predicted():
 def test_eval_chronological_no_profit_labels():
     eng, b4 = engine_of(PATH_UP, run_id="t7")
     frames = {"4h": b4, "1h": b4, "15m": b4}
-    ex = EpisodeExtractor(frames=frames, k=2, horizon_bars=4)
+    # horizon 1 bar: consecutive snapshots remain separable under the
+    # strict "label windows close before the first evaluated decision"
+    # purge rule
+    ex = EpisodeExtractor(frames=frames, k=2, horizon_bars=1)
     recs = [eng.analyze(b4.index[bar]) for bar in (10, 11, 12, 13, 15, 16)]
     eps = [ex.extract(r, run_id="t7", seq=i) for i, r in enumerate(recs)]
     usable = [e for e in eps if e.usable]
@@ -365,6 +376,110 @@ def test_eval_chronological_no_profit_labels():
     assert summary["no_edge_count"] == sum(
         1 for d in decisions if d.state == STATE_NO_EDGE)
     assert "never" in summary["no_edge_note"].lower()
+
+
+# --------------------------------------------------------------------- #
+# T8: evaluation-window leakage purge (fails under the old as-of-only    #
+#     split)                                                             #
+# --------------------------------------------------------------------- #
+def test_eval_split_purges_overlapping_train_windows():
+    def ep(eid, as_of_s, win_s, label=EVENT_CONTINUATION):
+        return Episode(
+            episode_id=eid, as_of_time=pd.Timestamp(as_of_s, tz="UTC"),
+            as_of_bar=0, context={"direction": "up", "ref_status":
+                                  "selected", "sp05": "none",
+                                  "fc_status": "none"},
+            label=label, label_time=None, label_detail={},
+            exclusion_reason=None, window_end_bar=24,
+            window_end_time=pd.Timestamp(win_s, tz="UTC"))
+
+    eps = [
+        ep("EP-a", "2025-01-01", "2025-01-02"),
+        ep("EP-b", "2025-01-02", "2025-01-06"),   # window crosses eval start
+        ep("EP-c", "2025-01-03", "2025-01-07"),   # window crosses eval start
+        ep("EP-d", "2025-01-05", "2025-01-08", EVENT_VIOLATION),
+        ep("EP-e", "2025-01-06", "2025-01-09", EVENT_VIOLATION),
+    ]
+    train, ev, purged = chronological_split(eps, train_fraction=0.6,
+                                            return_purged=True)
+    first_eval = min(e.as_of_time for e in ev)
+
+    # the OLD as-of-only split leaks: its train set contains episodes
+    # whose label windows close at/after the first evaluated decision
+    as_of_only_train = sorted(eps, key=lambda e: e.as_of_time)[:3]
+    assert any(e.window_end_time >= first_eval for e in as_of_only_train), \
+        "fixture must demonstrate the old-split leak"
+
+    # the fixed split purges every overlapping train episode and reports
+    # their identities and timestamps
+    assert {e.episode_id for e in purged} == {"EP-b", "EP-c"}
+    assert [str(e.as_of_time) for e in purged] == \
+        ["2025-01-02 00:00:00+00:00", "2025-01-03 00:00:00+00:00"]
+    assert [str(e.window_end_time) for e in purged] == \
+        ["2025-01-06 00:00:00+00:00", "2025-01-07 00:00:00+00:00"]
+    assert [e.episode_id for e in train] == ["EP-a"]
+    # strict invariant: every fitted label window closes before the
+    # first evaluated decision
+    assert all(e.window_end_time < first_eval for e in train)
+    # eval episodes themselves are untouched
+    assert [e.episode_id for e in ev] == ["EP-d", "EP-e"]
+
+
+# --------------------------------------------------------------------- #
+# T9: ex-ante baseline derived from the training period only             #
+# --------------------------------------------------------------------- #
+def test_ex_ante_baseline_derived_from_train_only():
+    def ep(eid, as_of_s, win_s, label):
+        return Episode(
+            episode_id=eid, as_of_time=pd.Timestamp(as_of_s, tz="UTC"),
+            as_of_bar=0, context={"direction": "up", "ref_status":
+                                  "selected", "sp05": "none",
+                                  "fc_status": "none"},
+            label=label, label_time=None, label_detail={},
+            exclusion_reason=None, window_end_bar=24,
+            window_end_time=pd.Timestamp(win_s, tz="UTC"))
+
+    # TRAIN majority = continuation; EVAL majority = violation.  A
+    # baseline derived without evaluation knowledge must predict the
+    # TRAIN majority and must NOT follow the eval majority.
+    train = [ep(f"EP-tr-{i}", f"2025-01-0{i+1}", f"2025-01-0{i+2}",
+                EVENT_CONTINUATION) for i in range(3)] + \
+            [ep("EP-tr-3", "2025-01-04", "2025-01-05", EVENT_VIOLATION)]
+    ev = [ep(f"EP-ev-{i}", f"2025-02-0{i+1}", f"2025-02-0{i+2}",
+             EVENT_VIOLATION) for i in range(2)] + \
+         [ep("EP-ev-2", "2025-02-03", "2025-02-04", EVENT_CONTINUATION)]
+
+    rep = evaluate_ex_ante_baseline(train, ev)
+    assert rep["method"] == "train-majority-class (ex-ante)"
+    assert rep["predicted_class"] == EVENT_CONTINUATION
+    assert rep["train_label_counts"] == {EVENT_CONTINUATION: 3,
+                                         EVENT_VIOLATION: 1}
+    assert [p["predicted"] for p in rep["predictions"]] == \
+        [EVENT_CONTINUATION] * 3
+    assert rep["hits"] == 1 and rep["misses"] == 2
+    assert "eval" not in json.dumps(rep["train_label_counts"]).lower()
+
+    # a train tie is handled deterministically: no-call, never a random
+    # or arbitrary tie-break
+    tied = [ep("EP-t-0", "2025-01-01", "2025-01-02", EVENT_CONTINUATION),
+            ep("EP-t-1", "2025-01-02", "2025-01-03", EVENT_VIOLATION)]
+    rep2 = evaluate_ex_ante_baseline(tied, ev)
+    assert rep2["predicted_class"] == "(no-call: training tie)"
+    assert rep2["no_calls"] == 3 and rep2["hits"] == 0
+    rep3 = evaluate_ex_ante_baseline(tied, ev)
+    assert rep2 == rep3, "baseline must be deterministic"
+
+
+# --------------------------------------------------------------------- #
+# T10: horizon disclosure (not source-grounded / not a market rule)      #
+# --------------------------------------------------------------------- #
+def test_horizon_disclosure_declared_not_grounded():
+    text = HORIZON_DISCLOSURE.lower()
+    for claim in ("not source-grounded", "not owner-approved",
+                  "not a market rule", "untested"):
+        assert claim in text
+    assert "sensitivity" in text
+    assert EPISODE_HORIZON_BARS == 24
 
 
 # --------------------------------------------------------------------- #

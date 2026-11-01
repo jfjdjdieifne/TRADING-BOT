@@ -57,11 +57,13 @@ from trading_system.research.contextual_selection.decision_layer import (  # noq
     EPISODE_HORIZON_BARS,
     EVENT_DEFINITIONS,
     EVENTS,
+    HORIZON_DISCLOSURE,
     RUN_CONTEXT_REPLAY,
     ContextEventModel,
     EpisodeExtractor,
     chronological_split,
     decide,
+    evaluate_ex_ante_baseline,
     evaluate_model,
     summarize_decisions,
 )
@@ -165,11 +167,15 @@ def main(argv=None) -> int:
     summary = summarize_decisions(decisions)
 
     # ---- out-of-sample evaluation (chronological; later data only) ---
-    train, ev = chronological_split(episodes,
-                                    train_fraction=args.train_fraction)
+    # EVALUATION-WINDOW LEAKAGE FIX: training episodes whose label
+    # windows do not close strictly before the first evaluated decision
+    # are purged from the fitting set and REPORTED (never silently used)
+    train, ev, purged = chronological_split(
+        episodes, train_fraction=args.train_fraction, return_purged=True)
     eval_model = ContextEventModel()
     eval_model.fit(train)
     eval_report = evaluate_model(eval_model, ev)
+    baseline_report = evaluate_ex_ante_baseline(train, ev)
     excluded = [e for e in episodes if not e.usable]
 
     if args.at:
@@ -211,10 +217,33 @@ def main(argv=None) -> int:
         "excluded_episodes": [
             {"episode_id": e.episode_id, "as_of": str(e.as_of_time),
              "reason": e.exclusion_reason} for e in excluded],
+        "purged_overlapping_train_episodes": {
+            "count": len(purged),
+            "rule": "training label windows must close strictly before "
+                    "the first evaluated decision; overlapping episodes "
+                    "are purged from the fitting set and reported here",
+            "episodes": [
+                {"episode_id": e.episode_id,
+                 "as_of_time": str(e.as_of_time),
+                 "window_end_time": str(e.window_end_time)}
+                for e in purged],
+        },
         "chronological_separation": (
             f"train as_of <= {max((e.as_of_time for e in train), default=None)}"
-            f" < eval as_of >= {min((e.as_of_time for e in ev), default=None)}"),
+            f" < eval as_of >= {min((e.as_of_time for e in ev), default=None)}; "
+            f"max fitted window_end = "
+            f"{max((e.window_end_time for e in train), default=None)} "
+            f"(must be < first evaluated decision)"),
         "evaluation": eval_report,
+        "ex_ante_baseline": baseline_report,
+        "model_vs_baseline": (
+            f"model hit_rate_on_covered = "
+            f"{eval_report['hit_rate_on_covered']} vs ex-ante baseline "
+            f"({baseline_report['predicted_class']}) hit_rate = "
+            f"{baseline_report['hit_rate']} — the ranking is provisional "
+            f"and unvalidated; no predictive quality is claimed from "
+            f"{eval_report['n_eval_episodes']} evaluation episodes"),
+        "horizon_disclosure": HORIZON_DISCLOSURE,
         "decision_summary": summary,
         "label_vocabulary": {e: EVENT_DEFINITIONS[e] for e in EVENTS},
     }
@@ -241,6 +270,9 @@ def main(argv=None) -> int:
         },
         "decision_summary": summary,
         "evaluation": eval_report,
+        "ex_ante_baseline": baseline_report,
+        "purged_overlapping_train_count": len(purged),
+        "horizon_disclosure": HORIZON_DISCLOSURE,
         "selection_quality": "NOT_ESTABLISHED",
         "claims": {
             "ranking": "PROVISIONAL and UNVALIDATED (not calibrated); "
