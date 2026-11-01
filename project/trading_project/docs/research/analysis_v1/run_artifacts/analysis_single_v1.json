@@ -1,0 +1,604 @@
+{
+  "analysis_id": "AN-9f5d9cfb4329",
+  "analysis_version": 1,
+  "as_of_bar": 77,
+  "as_of_time": "2025-08-14 00:00:00+00:00",
+  "conflicting_evidence": [],
+  "csm_payload": {
+    "decision_bar": 77,
+    "evidence": [
+      {
+        "class": "F",
+        "detail": "turning-point side",
+        "name": "side",
+        "source_ref": "F:candidate",
+        "value": "high"
+      },
+      {
+        "class": "F",
+        "detail": "declared representation level",
+        "name": "level",
+        "source_ref": "F:candidate",
+        "value": 122335.16
+      },
+      {
+        "class": "F",
+        "detail": "knowable at or before the decision",
+        "name": "knowable",
+        "source_ref": "R:SP-01",
+        "value": {
+          "knowable_bar": 66,
+          "knowable_time": "2025-08-12 04:00:00+00:00"
+        }
+      },
+      {
+        "class": "F",
+        "detail": "append-only status history (audit D3)",
+        "name": "status_at_decision",
+        "source_ref": "R:SP-13",
+        "value": "confirmed"
+      },
+      {
+        "class": "F",
+        "detail": "endpoint of these legs",
+        "name": "leg_role",
+        "source_ref": "R:SP-14",
+        "value": [
+          "C:F-K(k=5)|leg2025-08-11T08:00:00+00:00-2025-08-12T00:00:00+00:00"
+        ]
+      },
+      {
+        "class": "F",
+        "detail": "survived the kernel's existing eligibility gates",
+        "name": "gate_facts",
+        "source_ref": "R:SP-01/R:SP-13/R:SP-02",
+        "value": {
+          "confirmed": true,
+          "in_view": true,
+          "knowable_at_decision": true
+        }
+      }
+    ],
+    "interpretation_ids": [
+      "I-primary",
+      "I-alt"
+    ],
+    "legs": [
+      "C:F-K(k=5)|leg2025-08-03T04:00:00+00:00-2025-08-04T20:00:00+00:00",
+      "C:F-K(k=5)|leg2025-08-04T20:00:00+00:00-2025-08-05T16:00:00+00:00",
+      "C:F-K(k=5)|leg2025-08-05T16:00:00+00:00-2025-08-08T04:00:00+00:00",
+      "C:F-K(k=5)|leg2025-08-11T08:00:00+00:00-2025-08-12T00:00:00+00:00",
+      "C:F-K(k=5)|leg2025-08-12T00:00:00+00:00-2025-08-14T00:00:00+00:00"
+    ],
+    "points": [
+      "PTC:F-K(k=5)|low@2025-08-02T00:00:00+00:00",
+      "PTC:F-K(k=5)|low@2025-08-02T20:00:00+00:00",
+      "PTC:F-K(k=5)|low@2025-08-03T04:00:00+00:00",
+      "PTC:F-K(k=5)|high@2025-08-03T12:00:00+00:00",
+      "PTC:F-K(k=5)|high@2025-08-03T20:00:00+00:00",
+      "PTC:F-K(k=5)|high@2025-08-04T04:00:00+00:00",
+      "PTC:F-K(k=5)|high@2025-08-04T16:00:00+00:00",
+      "PTC:F-K(k=5)|high@2025-08-04T20:00:00+00:00",
+      "PTC:F-K(k=5)|low@2025-08-05T08:00:00+00:00",
+      "PTC:F-K(k=5)|low@2025-08-05T16:00:00+00:00",
+      "PTC:F-K(k=5)|high@2025-08-06T16:00:00+00:00",
+      "PTC:F-K(k=5)|high@2025-08-06T20:00:00+00:00",
+      "PTC:F-K(k=5)|high@2025-08-07T12:00:00+00:00",
+      "PTC:F-K(k=5)|high@2025-08-07T20:00:00+00:00",
+      "PTC:F-K(k=5)|high@2025-08-08T00:00:00+00:00",
+      "PTC:F-K(k=5)|high@2025-08-08T04:00:00+00:00",
+      "PTC:F-K(k=5)|high@2025-08-09T12:00:00+00:00",
+      "PTC:F-K(k=5)|high@2025-08-10T04:00:00+00:00",
+      "PTC:F-K(k=5)|high@2025-08-10T08:00:00+00:00",
+      "PTC:F-K(k=5)|high@2025-08-10T16:00:00+00:00",
+      "PTC:F-K(k=5)|high@2025-08-11T00:00:00+00:00",
+      "PTC:F-K(k=5)|high@2025-08-11T04:00:00+00:00",
+      "PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00",
+      "PTC:F-K(k=5)|low@2025-08-12T00:00:00+00:00",
+      "PTC:F-K(k=5)|high@2025-08-12T20:00:00+00:00",
+      "PTC:F-K(k=5)|high@2025-08-13T00:00:00+00:00",
+      "PTC:F-K(k=5)|high@2025-08-13T12:00:00+00:00",
+      "PTC:F-K(k=5)|high@2025-08-13T16:00:00+00:00",
+      "PTC:F-K(k=5)|high@2025-08-13T20:00:00+00:00",
+      "PTC:F-K(k=5)|high@2025-08-14T00:00:00+00:00"
+    ],
+    "policy_snapshots": {
+      "P-ORIGIN-RESEARCH": {
+        "class": "O",
+        "description": "role semantics: origin of the most recent confirmed leg (SWS-02; research configuration, never owner-approved)",
+        "kind": "research_configuration",
+        "policy_id": "P-ORIGIN-RESEARCH",
+        "sensitivity_required": true,
+        "value": "origin-of-last-confirmed-leg",
+        "version": 1
+      },
+      "expert_layer": {
+        "class": "O",
+        "kind": "source_declared_procedure",
+        "policy_id": "expert-selection-v1.1",
+        "value": {
+          "knowledge_ids": [
+            "KP-01",
+            "KP-02",
+            "KP-03",
+            "KP-04",
+            "KP-05",
+            "KP-06",
+            "KP-07"
+          ],
+          "task": "STRUCTURAL_REFERENCE_SELECTION"
+        },
+        "version": 1
+      },
+      "role": {
+        "class": "O",
+        "kind": "source_declared_procedure",
+        "policy_id": "role",
+        "value": "origin-of-last-confirmed-leg",
+        "version": 1
+      }
+    },
+    "status": "SELECTED",
+    "task_id": "T-S5"
+  },
+  "dependencies": [
+    "C:F-K(k=5)|leg2025-08-11T08:00:00+00:00-2025-08-12T00:00:00+00:00",
+    "PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00",
+    "PTC:F-K(k=5)|low@2025-08-12T00:00:00+00:00"
+  ],
+  "forecasts": [
+    {
+      "analysis_ref": "AN-9f5d9cfb4329@v1",
+      "asof_bar": 77,
+      "asof_time": "2025-08-14 00:00:00+00:00",
+      "condition": {
+        "basis": "SRS-SP03 + SRS-SP04 + SRS-TS5",
+        "claim_class": "paraphrase",
+        "definition": "a completed 4h bar whose CLOSE is strictly beyond the reference level 122335 on the up side (SP-03 close-based binding; equality is not a crossing \u2014 TIE-CROSS-EQUAL-UNBOUND-V1)",
+        "detector": "sp03-close-violation",
+        "executable": true
+      },
+      "dependencies": [
+        "PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00",
+        "I-primary"
+      ],
+      "forecast_id": "FC-analysis-v1-0001",
+      "if_event": "close-based violation of PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00 (level 122335) on the up side",
+      "interpretation_id": "I-primary",
+      "market_state_snapshot": {
+        "boundary": "2025-08-14 00:00:00+00:00",
+        "direction": "down",
+        "level": 122335.16,
+        "reference": "PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00"
+      },
+      "next_observation": "the next completed 4h bar's CLOSE vs 122335",
+      "observed_before_record": true,
+      "provenance": [
+        "SRS-SP03",
+        "SRS-SP04",
+        "SRS-TS5",
+        "SRS-CLAIM-SEM"
+      ],
+      "revises": null,
+      "role": "origin-of-last-confirmed-leg",
+      "status": "already_observed",
+      "status_evidence": [
+        {
+          "bar": 76,
+          "close": 122744.21,
+          "kind": "sp03-close-violation",
+          "level": 122335.16,
+          "side": "up",
+          "time": "2025-08-13 20:00:00+00:00"
+        },
+        {
+          "bar": 77,
+          "close": 123306.43,
+          "kind": "sp03-close-violation",
+          "level": 122335.16,
+          "side": "up",
+          "time": "2025-08-14 00:00:00+00:00"
+        }
+      ],
+      "support_description": "no close beyond 122335 on the up side on subsequent completed bars",
+      "task_id": "T-S5",
+      "then_effect": "interpretation I-primary LOSES SUPPORT (SP-04: the falsifier reference is violated; the interpretation's status changes, not its wording)",
+      "version": 1,
+      "weaken_description": "a completed bar closing up of 122335 (SP-03)"
+    }
+  ],
+  "interpretations": [
+    {
+      "alternative_explanations": [
+        "the down leg is exhausted and a up structure develops (monitored as I-alt)"
+      ],
+      "alternative_ids": [
+        "I-alt"
+      ],
+      "as_of_time": "2025-08-14 00:00:00+00:00",
+      "claim_class": "engineering-interpretation",
+      "data": {
+        "direction": "down",
+        "last_leg": "C:F-K(k=5)|leg2025-08-11T08:00:00+00:00-2025-08-12T00:00:00+00:00",
+        "reference_candidate": "PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00",
+        "reference_status": "selected"
+      },
+      "dependencies": [
+        "C:F-K(k=5)|leg2025-08-11T08:00:00+00:00-2025-08-12T00:00:00+00:00",
+        "PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00",
+        "PTC:F-K(k=5)|low@2025-08-12T00:00:00+00:00",
+        "PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00"
+      ],
+      "description": "the completed task-scale leg moved down (C:F-K(k=5)|leg2025-08-11T08:00:00+00:00-2025-08-12T00:00:00+00:00); the current interpretation is that the origin-of-last-confirmed-leg = PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00 continues to define the boundary of that claim at this as-of (research configuration)",
+      "falsifier_reference": "PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00",
+      "interpretation_id": "I-primary",
+      "invalidating_observations": [
+        "completed 4h bar CLOSE up of 122335 (SP-03 close-based violation of PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00) at 2025-08-13 20:00:00+00:00",
+        "completed 4h bar CLOSE up of 122335 (SP-03 close-based violation of PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00) at 2025-08-14 00:00:00+00:00"
+      ],
+      "label": "movement-continuation",
+      "next_discriminating_observation": "the next completed 4h bar's CLOSE relative to PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00",
+      "note": "",
+      "opposed_evidence": [
+        "SP-03 close violation of PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00 (2 event(s))"
+      ],
+      "provenance": [
+        "SRS-TS5",
+        "SRS-SP03",
+        "SRS-SP04",
+        "SRS-FK",
+        "SRS-CLAIM-SEM"
+      ],
+      "scope": "BTCUSDT 4h",
+      "status": "invalidated",
+      "supporting_evidence": [
+        "SF-DIR-analysis-v1-77",
+        "SF-AVL-1h-analysis-v1-77",
+        "SF-AVL-15m-analysis-v1-77"
+      ],
+      "unknowns": [
+        "no expiry is defined (no approved policy defines one)",
+        "no probabilities are claimed"
+      ],
+      "version": 1,
+      "would_be_supported_by": [
+        "continuation without a close-based violation of PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00 (SP-03)"
+      ],
+      "would_be_weakened_by": [
+        "a completed bar closing beyond PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00 on the falsifying side (SP-03 close-based binding; SRS-SP03)"
+      ]
+    },
+    {
+      "alternative_explanations": [
+        "continuation of the down structure (I-primary)"
+      ],
+      "alternative_ids": [
+        "I-primary"
+      ],
+      "as_of_time": "2025-08-14 00:00:00+00:00",
+      "claim_class": "research-hypothesis",
+      "data": {
+        "direction": "up"
+      },
+      "dependencies": [
+        "C:F-K(k=5)|leg2025-08-11T08:00:00+00:00-2025-08-12T00:00:00+00:00"
+      ],
+      "description": "materially different alternative: the down structure is exhausted and price develops an active up structure from the current boundary",
+      "falsifier_reference": null,
+      "interpretation_id": "I-alt",
+      "invalidating_observations": [
+        "a new confirmed down leg beyond the previous extreme"
+      ],
+      "label": "movement-reversal",
+      "next_discriminating_observation": "the next completed 4h leg's direction",
+      "note": "",
+      "opposed_evidence": [
+        "SF-DIR-analysis-v1-77"
+      ],
+      "provenance": [
+        "SRS-CLAIM-SEM"
+      ],
+      "scope": "BTCUSDT 4h",
+      "status": "alternative-monitoring",
+      "supporting_evidence": [],
+      "unknowns": [
+        "no probability is attached (not calibrated)"
+      ],
+      "version": 1,
+      "would_be_supported_by": [
+        "a new confirmed up leg (F-K k=5 completion)",
+        "a completed bar closing beyond PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00 on the falsifying side (SP-03)"
+      ],
+      "would_be_weakened_by": [
+        "continuation of the down structure without a close-based violation"
+      ]
+    }
+  ],
+  "invalidating_observations": [
+    "completed 4h bar CLOSE up of 122335 (SP-03 close-based violation of PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00) at 2025-08-13 20:00:00+00:00",
+    "completed 4h bar CLOSE up of 122335 (SP-03 close-based violation of PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00) at 2025-08-14 00:00:00+00:00"
+  ],
+  "ledger_uids": [
+    "T-S1#1",
+    "T-S5#2"
+  ],
+  "lifecycle_state": "CONDITION_ALREADY_OBSERVED",
+  "limitations": [
+    "selection_quality = NOT_ESTABLISHED (no independent quality target has been evaluated)",
+    "P-ORIGIN-RESEARCH is research configuration, not an owner-approved analytical policy",
+    "no source-defined operational confirmation event applies to this path's claims (trade-through validation is S-class for ORDER-BLOCK candidates, out of scope here) \u2014 no CONFIRMED state is ever claimed",
+    "no probabilities (not calibrated on a versioned out-of-sample set); no forecast expiry (no approved policy defines one)",
+    "position status is absent: no authoritative position feed was supplied; no position is inferred from price structure",
+    "RECONSTRUCTED start: forecasts and analyses before 2025-08-14 00:00:00+00:00 were not recorded by this engine; earlier swing/leg live observation times cannot be reconstructed from this process (facts are computed from available bars only)"
+  ],
+  "next_discriminating_observation": "the next completed 4h leg's direction",
+  "observation_mode": "reconstructed",
+  "observation_note": "analysis assembled from historical data available through this boundary; no live event stream was observed by this engine before it",
+  "observed_state": "last completed 4h bar: 2025-08-14 00:00:00+00:00 close=123306",
+  "policy_id": "P-ORIGIN-RESEARCH",
+  "policy_kind": "research_configuration",
+  "position_note": "no authoritative position feed was supplied; no position is inferred from price structure",
+  "position_status": "absent",
+  "prior": null,
+  "prior_state": null,
+  "reference_status": {
+    "interpretations": [
+      "I-primary",
+      "I-alt"
+    ],
+    "role": "origin-of-last-confirmed-leg",
+    "selected": "PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00",
+    "selection_evidence": [
+      {
+        "class": "F",
+        "detail": "turning-point side",
+        "name": "side",
+        "source_ref": "F:candidate",
+        "value": "high"
+      },
+      {
+        "class": "F",
+        "detail": "declared representation level",
+        "name": "level",
+        "source_ref": "F:candidate",
+        "value": 122335.16
+      },
+      {
+        "class": "F",
+        "detail": "knowable at or before the decision",
+        "name": "knowable",
+        "source_ref": "R:SP-01",
+        "value": {
+          "knowable_bar": 66,
+          "knowable_time": "2025-08-12 04:00:00+00:00"
+        }
+      },
+      {
+        "class": "F",
+        "detail": "append-only status history (audit D3)",
+        "name": "status_at_decision",
+        "source_ref": "R:SP-13",
+        "value": "confirmed"
+      },
+      {
+        "class": "F",
+        "detail": "endpoint of these legs",
+        "name": "leg_role",
+        "source_ref": "R:SP-14",
+        "value": [
+          "C:F-K(k=5)|leg2025-08-11T08:00:00+00:00-2025-08-12T00:00:00+00:00"
+        ]
+      },
+      {
+        "class": "F",
+        "detail": "survived the kernel's existing eligibility gates",
+        "name": "gate_facts",
+        "source_ref": "R:SP-01/R:SP-13/R:SP-02",
+        "value": {
+          "confirmed": true,
+          "in_view": true,
+          "knowable_at_decision": true
+        }
+      }
+    ],
+    "selection_status": "SELECTED",
+    "selection_task": "T-S1",
+    "status": "selected"
+  },
+  "rejected_evidence": [],
+  "revises": null,
+  "revision_reason": null,
+  "role": "origin-of-last-confirmed-leg",
+  "role_semantics": "role semantics: origin of the most recent confirmed leg (SWS-02; research configuration, never owner-approved)",
+  "run_id": "analysis-v1",
+  "selection_quality": "NOT_ESTABLISHED",
+  "source_claim_classes": {
+    "SRS-CLAIM-SEM": "directly-stated",
+    "SRS-FK": "paraphrase",
+    "SRS-ICT-FVG": "unsupported-or-unavailable",
+    "SRS-ICT-FVG-24": "unsupported-or-unavailable",
+    "SRS-ICT-M22-E12": "unsupported-or-unavailable",
+    "SRS-ICT-M22-E3": "unsupported-or-unavailable",
+    "SRS-ICT-OB": "unsupported-or-unavailable",
+    "SRS-SP03": "paraphrase",
+    "SRS-SP04": "paraphrase",
+    "SRS-SP05": "paraphrase",
+    "SRS-TAKEN": "paraphrase",
+    "SRS-TS5": "paraphrase"
+  },
+  "sources": [
+    "SRS-FK",
+    "SRS-TS5",
+    "SRS-SP03",
+    "SRS-SP04",
+    "SRS-SP05",
+    "SRS-TAKEN",
+    "SRS-CLAIM-SEM",
+    "SRS-ICT-OB",
+    "SRS-ICT-FVG",
+    "SRS-ICT-M22-E3",
+    "SRS-ICT-M22-E12",
+    "SRS-ICT-FVG-24"
+  ],
+  "structural_facts": [
+    {
+      "as_of_bar": 77,
+      "as_of_time": "2025-08-14 00:00:00+00:00",
+      "basis": "SRS-FK + SRS-CLAIM-SEM",
+      "claim_class": "engineering-interpretation",
+      "dependencies": [
+        "PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00",
+        "PTC:F-K(k=5)|low@2025-08-12T00:00:00+00:00",
+        "C:F-K(k=5)|leg2025-08-11T08:00:00+00:00-2025-08-12T00:00:00+00:00"
+      ],
+      "description": "the most recent completed task-scale leg C:F-K(k=5)|leg2025-08-11T08:00:00+00:00-2025-08-12T00:00:00+00:00 (PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00->PTC:F-K(k=5)|low@2025-08-12T00:00:00+00:00) moved down (the last completed 5-confirmation leg on the 4h task scale (F-K k=5, scale relative to the declared task))",
+      "fact_id": "SF-DIR-analysis-v1-77",
+      "inputs": {
+        "end_id": "PTC:F-K(k=5)|low@2025-08-12T00:00:00+00:00",
+        "knowable_bar": 70,
+        "leg": "C:F-K(k=5)|leg2025-08-11T08:00:00+00:00-2025-08-12T00:00:00+00:00",
+        "start_id": "PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00",
+        "t0": 61,
+        "t1": 65
+      },
+      "kind": "derived-movement-direction",
+      "verification": "derived on the declared task scale; 'movement' is relative to this scale, never a universal wave size"
+    },
+    {
+      "as_of_bar": 77,
+      "as_of_time": "2025-08-14 00:00:00+00:00",
+      "basis": "SRS-SP05 + SRS-CLAIM-SEM",
+      "claim_class": "engineering-interpretation",
+      "dependencies": [
+        "frame:1h"
+      ],
+      "description": "312 completed 1h bars and 32 completed 1h legs are available at this boundary (availability = completion time; any incomplete higher-timeframe bar is never used)",
+      "fact_id": "SF-AVL-1h-analysis-v1-77",
+      "inputs": {
+        "n_completed": 312,
+        "n_legs": 32,
+        "scale": "1h"
+      },
+      "kind": "derived-frame-availability",
+      "verification": "counts of completed rows only; no future row is read"
+    },
+    {
+      "as_of_bar": 77,
+      "as_of_time": "2025-08-14 00:00:00+00:00",
+      "basis": "SRS-SP05 + SRS-CLAIM-SEM",
+      "claim_class": "engineering-interpretation",
+      "dependencies": [
+        "frame:15m"
+      ],
+      "description": "1248 completed 15m bars and 121 completed 15m legs are available at this boundary (availability = completion time; any incomplete higher-timeframe bar is never used)",
+      "fact_id": "SF-AVL-15m-analysis-v1-77",
+      "inputs": {
+        "n_completed": 1248,
+        "n_legs": 121,
+        "scale": "15m"
+      },
+      "kind": "derived-frame-availability",
+      "verification": "counts of completed rows only; no future row is read"
+    },
+    {
+      "as_of_bar": 77,
+      "as_of_time": "2025-08-14 00:00:00+00:00",
+      "basis": "SRS-SP05 + SRS-CLAIM-SEM",
+      "claim_class": "engineering-interpretation",
+      "dependencies": [
+        "C:F-K(k=5)|leg2025-08-11T08:00:00+00:00-2025-08-12T00:00:00+00:00",
+        "C:F-K(k=5)|leg2025-08-12T21:00:00+00:00-2025-08-13T06:00:00+00:00"
+      ],
+      "description": "the last completed 1h leg C:F-K(k=5)|leg2025-08-12T21:00:00+00:00-2025-08-13T06:00:00+00:00 is 'disjoint' inside the task-scale leg C:F-K(k=5)|leg2025-08-11T08:00:00+00:00-2025-08-12T00:00:00+00:00 (SP-05, verified timestamps; TIE-BOUNDARIES-INCLUSIVE-V1)",
+      "fact_id": "SF-SP05-1h-analysis-v1-77",
+      "inputs": {
+        "coarse": "C:F-K(k=5)|leg2025-08-11T08:00:00+00:00-2025-08-12T00:00:00+00:00",
+        "fine": "C:F-K(k=5)|leg2025-08-12T21:00:00+00:00-2025-08-13T06:00:00+00:00",
+        "scale": "1h",
+        "status": "disjoint"
+      },
+      "kind": "derived-cross-scale-containment",
+      "verification": "operational containment state; a state, not a cause"
+    },
+    {
+      "as_of_bar": 77,
+      "as_of_time": "2025-08-14 00:00:00+00:00",
+      "basis": "SRS-SP05 + SRS-CLAIM-SEM",
+      "claim_class": "engineering-interpretation",
+      "dependencies": [
+        "C:F-K(k=5)|leg2025-08-11T08:00:00+00:00-2025-08-12T00:00:00+00:00",
+        "C:F-K(k=5)|leg2025-08-13T14:15:00+00:00-2025-08-13T15:30:00+00:00"
+      ],
+      "description": "the last completed 15m leg C:F-K(k=5)|leg2025-08-13T14:15:00+00:00-2025-08-13T15:30:00+00:00 is 'disjoint' inside the task-scale leg C:F-K(k=5)|leg2025-08-11T08:00:00+00:00-2025-08-12T00:00:00+00:00 (SP-05, verified timestamps; TIE-BOUNDARIES-INCLUSIVE-V1)",
+      "fact_id": "SF-SP05-15m-analysis-v1-77",
+      "inputs": {
+        "coarse": "C:F-K(k=5)|leg2025-08-11T08:00:00+00:00-2025-08-12T00:00:00+00:00",
+        "fine": "C:F-K(k=5)|leg2025-08-13T14:15:00+00:00-2025-08-13T15:30:00+00:00",
+        "scale": "15m",
+        "status": "disjoint"
+      },
+      "kind": "derived-cross-scale-containment",
+      "verification": "operational containment state; a state, not a cause"
+    }
+  ],
+  "supporting_evidence": [
+    {
+      "class": "F",
+      "detail": "turning-point side",
+      "name": "side",
+      "source_ref": "F:candidate",
+      "value": "high"
+    },
+    {
+      "class": "F",
+      "detail": "declared representation level",
+      "name": "level",
+      "source_ref": "F:candidate",
+      "value": 122335.16
+    },
+    {
+      "class": "F",
+      "detail": "knowable at or before the decision",
+      "name": "knowable",
+      "source_ref": "R:SP-01",
+      "value": {
+        "knowable_bar": 66,
+        "knowable_time": "2025-08-12 04:00:00+00:00"
+      }
+    },
+    {
+      "class": "F",
+      "detail": "append-only status history (audit D3)",
+      "name": "status_at_decision",
+      "source_ref": "R:SP-13",
+      "value": "confirmed"
+    },
+    {
+      "class": "F",
+      "detail": "endpoint of these legs",
+      "name": "leg_role",
+      "source_ref": "R:SP-14",
+      "value": [
+        "C:F-K(k=5)|leg2025-08-11T08:00:00+00:00-2025-08-12T00:00:00+00:00"
+      ]
+    },
+    {
+      "class": "F",
+      "detail": "survived the kernel's existing eligibility gates",
+      "name": "gate_facts",
+      "source_ref": "R:SP-01/R:SP-13/R:SP-02",
+      "value": {
+        "confirmed": true,
+        "in_view": true,
+        "knowable_at_decision": true
+      }
+    }
+  ],
+  "task_id": "T-S5",
+  "task_name": "contextual-analysis-lifecycle",
+  "task_scale": "4h",
+  "unresolved": [
+    "unavailable evidence: frame:1h rows after 2025-08-14 00:00:00+00:00 \u2014 future: rows completing after the as-of boundary are unavailable by construction (availability = completion time)",
+    "unavailable evidence: frame:15m rows after 2025-08-14 00:00:00+00:00 \u2014 future: rows completing after the as-of boundary are unavailable by construction (availability = completion time)"
+  ]
+}
