@@ -1,0 +1,108 @@
+{
+  "artifact": "contextual-decision-layer-v1",
+  "claims": {
+    "identity": "NOT Michael Huddleston; no replication claim; no accuracy or profitability claim",
+    "labels": "structural event identities only; never trade profit/loss",
+    "ranking": "PROVISIONAL and UNVALIDATED (not calibrated); probabilities are NOT emitted",
+    "readiness": "NOT ready for trade execution: analytical decisions only"
+  },
+  "config": {
+    "decision_states": [
+      "SCENARIO_DEVELOPING",
+      "AWAITING_EVENT",
+      "EVENT_OCCURRED",
+      "PRIOR_VIEW_WEAKENED_OR_INVALIDATED",
+      "NO_EDGE",
+      "UNRESOLVED"
+    ],
+    "episode_horizon_bars": 24,
+    "events": [
+      "E-CONTINUATION",
+      "E-VIOLATION",
+      "E-NONE-IN-HORIZON",
+      "E-AMBIGUOUS-SAME-BAR"
+    ],
+    "horizon_note": "declared research configuration for bounded episode labeling; NOT a market rule and NOT owner-approved",
+    "k": 5,
+    "model": "context-conditioned event frequency table; no smoothing; ties explicit; ordinal ranking only",
+    "task_scale": "4h",
+    "train_fraction": 0.6666666666666666
+  },
+  "decision_summary": {
+    "n_decisions": 60,
+    "no_edge_count": 7,
+    "no_edge_frequency": 0.1167,
+    "no_edge_note": "NO_EDGE is an explicit decision (evidence does not distinguish the scenarios) and is NEVER counted as success",
+    "no_edge_reasons": {
+      "model support continuation=0 vs violation=0": 5,
+      "model support continuation=6 vs violation=6": 2
+    },
+    "states": {
+      "AWAITING_EVENT": 10,
+      "EVENT_OCCURRED": 20,
+      "NO_EDGE": 7,
+      "PRIOR_VIEW_WEAKENED_OR_INVALIDATED": 7,
+      "SCENARIO_DEVELOPING": 12,
+      "UNRESOLVED": 4
+    }
+  },
+  "evaluation": {
+    "confusion_predicted_rows_realized_cols": {
+      "E-CONTINUATION": {
+        "E-CONTINUATION": 1,
+        "E-VIOLATION": 1
+      },
+      "E-VIOLATION": {
+        "E-AMBIGUOUS-SAME-BAR": 1,
+        "E-CONTINUATION": 5,
+        "E-VIOLATION": 9
+      }
+    },
+    "coverage": 1.0,
+    "hit": 10,
+    "hit_rate_on_covered": 0.5882,
+    "hit_rate_overall": 0.5882,
+    "label_distribution": {
+      "E-AMBIGUOUS-SAME-BAR": 1,
+      "E-CONTINUATION": 6,
+      "E-VIOLATION": 10
+    },
+    "labels_note": "structural event identities only; win/loss here means scenario continuation/violation \u2014 NEVER trade profit/loss",
+    "miss": 7,
+    "n_eval_episodes": 17,
+    "no_call": 0
+  },
+  "provenance": {
+    "dataset_commit": "27c9be705ac9280248672c895082c057b979ebff",
+    "dataset_mirror": "parshant231234-eng/BTCUSDT-Historical-Data @27c9be705ac9280248672c895082c057b979ebff",
+    "dependency_versions": {
+      "numpy": "1.26.4",
+      "pandas": "2.2.3",
+      "pytest": "8.3.5",
+      "python": "3.11.2",
+      "tzdata": "2026.6"
+    },
+    "expected_sha256": {
+      "BTCUSDT_1m_2025-08.csv": "15d26d2374bce8804e25012ff76e5fad976633a2fde843ffb0f487e1c90a0cf4",
+      "BTCUSDT_1m_2025-09.csv": "e1d5c8f350d83df866ff36c3b4d74f7e5b383db07cde7bca0ee1f200d7a48979"
+    },
+    "final_source_commit": "07df71371d5b8cd0a1782ff7ca8de66aa79ee3a8",
+    "hashes_match_expected": {
+      "BTCUSDT_1m_2025-08.csv": true,
+      "BTCUSDT_1m_2025-09.csv": true
+    },
+    "input_sha256": {
+      "BTCUSDT_1m_2025-08.csv": "15d26d2374bce8804e25012ff76e5fad976633a2fde843ffb0f487e1c90a0cf4",
+      "BTCUSDT_1m_2025-09.csv": "e1d5c8f350d83df866ff36c3b4d74f7e5b383db07cde7bca0ee1f200d7a48979"
+    },
+    "sealed_information_time_sha256": "72b03ca6d2333080e0df6dc18b1928147e877b41175f132c7bf08eb4e4d74ace"
+  },
+  "run": {
+    "from": "2025-08-01 00:00:00+00:00",
+    "mode": "run",
+    "n_boundaries": 60,
+    "run_context": "historical-replay",
+    "to": "2025-09-30 00:00:00+00:00"
+  },
+  "selection_quality": "NOT_ESTABLISHED"
+}
