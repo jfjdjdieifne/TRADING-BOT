@@ -42,6 +42,7 @@ import pytest
 from trading_system.research.contextual_selection import (
     EVENT_CLOSE_THROUGH,
     EVENT_WICK_TOUCH,
+    KNOWLEDGE_BY_ID,
     OUTCOME_SELECTED,
     OUTCOME_UNRESOLVED,
     REASON_EP,
@@ -189,9 +190,20 @@ def test_03_prominent_but_task_irrelevant():
 
 
 # --------------------------------------------------------------------------
-# 4 — source-grounded conditional preference (KP-03, substantiated)
+# 4 — source-grounded conditional preference MECHANISM + KP-03 disposition
 # --------------------------------------------------------------------------
-def test_04_source_grounded_conditional_preference_kp03():
+def _injected_htf_record(pref_id="T-HTF", task_id="T-S1"):
+    """A test-local documented comparison record over the real license rule."""
+    return ExpertPreference(
+        pref_id=pref_id, task_id=task_id, kclass="E", klass="S",
+        source="test-source (documented comparison)", source_family="t",
+        statement="indicated reference kinds are preferred (test record)",
+        context="test", observable_evidence=("ref_kind",),
+        licenses="old-low-htf>other", exceptions="",
+        conflict_status="", provenance_refs=())
+
+
+def test_04_source_grounded_conditional_preference_mechanism():
     w = make_world()
     rel = ContextualRelationships(ref_kind={
         "L_b": {"value": "old-low-htf", "known_bar": 35,
@@ -203,17 +215,46 @@ def test_04_source_grounded_conditional_preference_kp03():
         "H_b": {"value": "local", "known_bar": 45,
                 "known_time": T0 + timedelta(minutes=45)},
     })
-    s = _sel(w, role="origin-of-last-confirmed-leg", policy_id=None, rel=rel)
+    s = _sel(w, role="origin-of-last-confirmed-leg", policy_id=None, rel=rel,
+             knowledge=(_injected_htf_record(),))
     assert s.outcome == OUTCOME_SELECTED and s.candidate_id == "L_b"
-    kp03 = [a for a in s.activated_preferences if a["pref_id"] == "KP-03"]
-    assert kp03 and kp03[0]["pairs"]
-    pref_items = [e for e in s.evidence if e.name == "preference:KP-03"]
+    act = [a for a in s.activated_preferences if a["pref_id"] == "T-HTF"]
+    assert act and act[0]["pairs"]
+    pref_items = [e for e in s.evidence if e.name == "preference:T-HTF"]
     assert pref_items and pref_items[0].klass == "S"
-    assert "ICT" in pref_items[0].detail or "old-low-htf" == pref_items[0].value
-    assert any("ICT" in a["source"] or "Huddleston" in a["source"]
-               for a in kp03)
     assert any(p.startswith("R:preference-resolution")
                for p in s.provenance)
+
+
+def test_04b_finding3_kp03_nonbinding_unsupported_contexts():
+    """Finding 3: the pinned source does not establish the old-low/HTF
+    comparison for T-S1 role selection — KP-03 is nonbinding research-only
+    and NO unsupported context can produce a selection through it alone."""
+    w = make_world()
+    rel = ContextualRelationships(ref_kind={
+        "L_b": {"value": "old-low-htf", "known_bar": 35},
+        "L_a": {"value": "old-high-reclaimed", "known_bar": 15},
+        "H_a": {"value": "local", "known_bar": 25},
+        "H_b": {"value": "local", "known_bar": 45},
+    })
+    # origin role without policy: nothing can resolve — KP-03 cannot select
+    s1 = _sel(w, role="origin-of-last-confirmed-leg", policy_id=None, rel=rel)
+    assert s1.outcome == OUTCOME_UNRESOLVED and s1.candidate_id is None
+    assert not s1.activated_preferences
+    # extreme role resolves only by its OPERATIONAL role definition
+    # (SWS-02, 'not an ICT-source claim') — never THROUGH KP-03
+    s2 = _sel(w, role="last-confirmed-extreme", policy_id=None, rel=rel)
+    assert not s2.activated_preferences
+    assert all(not e.name.startswith("preference:") for e in s2.evidence)
+    for s in (s1, s2):
+        kp03 = [i for i in s.inactive_preferences if i["pref_id"] == "KP-03"]
+        assert kp03 and ("nonbinding" in kp03[0]["cause"]
+                         or "never licenses" in kp03[0]["cause"])
+    # the record documents the exact source boundary; it never licenses
+    kp03_rec = KNOWLEDGE_BY_ID["KP-03"]
+    assert kp03_rec.kclass == "F" and kp03_rec.licenses == "none"
+    assert "not an ICT-source claim" in kp03_rec.statement
+    assert "knowledge_foundation/16 §16.3" in kp03_rec.statement
 
 
 # --------------------------------------------------------------------------
@@ -221,7 +262,8 @@ def test_04_source_grounded_conditional_preference_kp03():
 # --------------------------------------------------------------------------
 def test_05a_policy_vs_preference_tension_preserved():
     w = make_world()
-    # KP-03 prefers L_a (old-low-htf) but Pi_T role semantics select L_b
+    # the injected documented comparison prefers L_a (old-low-htf) but the
+    # Pi_T role policy selects L_b
     rel = ContextualRelationships(ref_kind={
         "L_a": {"value": "old-low-htf", "known_bar": 15,
                 "known_time": T0 + timedelta(minutes=15)},
@@ -233,13 +275,13 @@ def test_05a_policy_vs_preference_tension_preserved():
                 "known_time": T0 + timedelta(minutes=45)},
     })
     s = _sel(w, role="origin-of-last-confirmed-leg", policy_id="P-ORIGIN",
-             rel=rel)
+             rel=rel, knowledge=(_injected_htf_record(),))
     # documented precedence: Pi_T resolves; the tension is PRESERVED
     assert s.outcome == OUTCOME_SELECTED and s.candidate_id == "L_b"
     kinds = {c["kind"] for c in s.conflicts}
     assert "policy-vs-preference" in kinds
     tension = [c for c in s.conflicts if c["kind"] == "policy-vs-preference"]
-    assert any(c["pref_ids"] == ["KP-03"] for c in tension)
+    assert any(c["pref_ids"] == ["T-HTF"] for c in tension)
     assert any("SP-12" in c["resolution"] for c in tension)
 
 
@@ -512,6 +554,13 @@ def test_10_real_ledger_propagation_through_dependent_conclusion():
     assert v2[-1]["result"].selected_id != "L_b"
     assert any(c["field"] in ("selected_id", "status")
                for c in v2[-1]["computed_changes"])
+    # finding 5: the DOWNSTREAM early-UNRESOLVED result preserves the
+    # dependencies actually evaluated — H_b and Leg4 were consumed by the
+    # supporting-leg evaluation and must appear (result may stay unresolved)
+    deps2 = set(v2[-1]["result"].dependencies)
+    assert "H_b" in deps2 and "Leg4" in deps2
+    assert any(c["field"] == "dependencies"
+               for c in v2[-1]["computed_changes"])
     assert any(e.get("kind") == "recomputation" and not e.get("stale")
                for e in log)
 
@@ -744,10 +793,205 @@ def test_preference_resolution_is_pure_and_replayable():
     maps = {"a": {"ref_kind": "old-low-htf"},
             "b": {"ref_kind": "local"},
             "c": {"ref_kind": "local"}}
-    r1 = apply_expert_preferences(ids, maps)
-    r2 = apply_expert_preferences(ids, maps)
+    kb = (_injected_htf_record(),)
+    r1 = apply_expert_preferences(ids, maps, kb)
+    r2 = apply_expert_preferences(ids, maps, kb)
     assert json.dumps(r1, sort_keys=True, default=str) == \
         json.dumps(r2, sort_keys=True, default=str)
     act, inact, conf, winner, diag = r1
     assert winner == "a" and not conf
     assert diag["preferred"] == ["a"]
+    # default knowledge (all F-class) can never produce a winner
+    r3 = apply_expert_preferences(ids, maps)
+    assert r3[3] is None and not r3[0]
+
+
+# --------------------------------------------------------------------------
+# Audit acceptance (findings 1-4): stamp integrity, task/role/comparison
+# completeness, nonbinding KP-03 contexts, tie guard vs preferences
+# --------------------------------------------------------------------------
+def test_adv_finding1_negative_known_bar_rejected():
+    w = make_world()
+    rel = ContextualRelationships(ref_kind={
+        "L_a": {"value": "old-low-htf", "known_bar": -5},
+    })
+    s = _sel(w, role="origin-of-last-confirmed-leg", policy_id=None, rel=rel)
+    assert any("negative" in d["reason"] for d in s.dropped_evidence)
+    assert not any(e.name == "ref_kind" for e in s.evidence)
+    assert s.outcome == OUTCOME_UNRESOLVED and not s.activated_preferences
+    # events carry the same discipline
+    rel2 = ContextualRelationships(test_history={
+        "L_b": [{"bar": -3, "kind": EVENT_WICK_TOUCH}]})
+    s2 = _sel(w, role="origin-of-last-confirmed-leg", policy_id=None,
+              rel=rel2)
+    assert any("negative" in d["reason"] for d in s2.dropped_evidence)
+
+
+def test_adv_finding1_out_of_axis_known_bar_rejected():
+    w = make_world()
+    assert AXIS.n_rows == 2001
+    rel = ContextualRelationships(ref_kind={
+        "L_a": {"value": "old-low-htf", "known_bar": 100000},
+    })
+    s = _sel(w, role="origin-of-last-confirmed-leg", policy_id=None, rel=rel)
+    assert any("out-of-axis" in d["reason"] for d in s.dropped_evidence)
+    assert not any(e.name == "ref_kind" for e in s.evidence)
+    assert s.outcome == OUTCOME_UNRESOLVED
+
+
+def test_adv_finding1_inconsistent_bar_time_pair_rejected():
+    w = make_world()
+    # bar says coordinate 35, time says coordinate 40 — different axis
+    # coordinates: REJECTED (and the consistent pair passes)
+    rel_bad = ContextualRelationships(ref_kind={
+        "L_b": {"value": "old-low-htf", "known_bar": 35,
+                "known_time": T0 + timedelta(minutes=40)},
+    })
+    s_bad = _sel(w, role="origin-of-last-confirmed-leg", policy_id=None,
+                 rel=rel_bad)
+    assert any("inconsistent stamps" in d["reason"]
+               for d in s_bad.dropped_evidence)
+    assert not any(e.name == "ref_kind" for e in s_bad.evidence)
+    rel_ok = ContextualRelationships(ref_kind={
+        "L_b": {"value": "old-low-htf", "known_bar": 35,
+                "known_time": T0 + timedelta(minutes=35)},
+    })
+    s_ok = _sel(w, role="origin-of-last-confirmed-leg", policy_id=None,
+                rel=rel_ok)
+    assert not any("inconsistent" in d["reason"]
+                   for d in s_ok.dropped_evidence)
+    assert any(e.name == "ref_kind" for e in s_ok.evidence)
+    # rejected evidence never influences selection
+    assert s_bad.outcome == OUTCOME_UNRESOLVED
+
+
+def test_adv_finding2_task_id_mismatch_never_applies():
+    w = make_world()
+    rel = ContextualRelationships(ref_kind={
+        "L_b": {"value": "old-low-htf", "known_bar": 35},
+        "L_a": {"value": "local", "known_bar": 15},
+        "H_a": {"value": "local", "known_bar": 25},
+        "H_b": {"value": "local", "known_bar": 45},
+    })
+    foreign = _injected_htf_record(pref_id="T-FOREIGN", task_id="T-S9")
+    s = _sel(w, role="origin-of-last-confirmed-leg", policy_id=None, rel=rel,
+             knowledge=(foreign,))
+    assert s.outcome == OUTCOME_UNRESOLVED and s.candidate_id is None
+    assert not s.activated_preferences
+    causes = {i["pref_id"]: i["cause"] for i in s.inactive_preferences}
+    assert "task mismatch" in causes.get("T-FOREIGN", "")
+    # the same record DOES apply when its task matches (control)
+    ok = _sel(w, role="origin-of-last-confirmed-leg", policy_id=None, rel=rel,
+              knowledge=(_injected_htf_record(),))
+    assert ok.outcome == OUTCOME_SELECTED and ok.candidate_id == "L_b"
+
+
+def test_adv_finding2_policy_role_mismatch_unresolved():
+    w = make_world()
+    pol = PolicyRegistry()
+    pol.register("P-EXTREME", "role", "last-confirmed-extreme")
+    w2 = dict(w, pol=pol)
+    s = _sel(w2, role="origin-of-last-confirmed-leg", policy_id="P-EXTREME")
+    assert s.outcome == OUTCOME_UNRESOLVED and s.candidate_id is None
+    assert s.reason["code"] == REASON_MP
+    assert "policy-role mismatch" in s.reason["text"]
+    # the reversed mismatch is equally rejected
+    pol2 = PolicyRegistry()
+    pol2.register("P-ORIGIN2", "role", "origin-of-last-confirmed-leg")
+    w3 = dict(w, pol=pol2)
+    s2 = _sel(w3, role="last-confirmed-extreme", policy_id="P-ORIGIN2")
+    assert s2.outcome == OUTCOME_UNRESOLVED
+    assert "policy-role mismatch" in s2.reason["text"]
+    # matching semantics proceed normally (control)
+    s3 = _sel(w, role="origin-of-last-confirmed-leg", policy_id="P-ORIGIN")
+    assert s3.outcome == OUTCOME_SELECTED and s3.candidate_id == "L_b"
+
+
+def test_adv_finding2_partial_evidence_across_eligible_unresolved():
+    w = make_world()
+    # evidence on 3 of 4 eligible survivors; the 3 alone would pick L_b
+    rel = ContextualRelationships(ref_kind={
+        "L_b": {"value": "old-low-htf", "known_bar": 35},
+        "L_a": {"value": "local", "known_bar": 15},
+        "H_a": {"value": "local", "known_bar": 25},
+    })
+    s = _sel(w, role="origin-of-last-confirmed-leg", policy_id=None, rel=rel,
+             knowledge=(_injected_htf_record(),))
+    assert s.outcome == OUTCOME_UNRESOLVED and s.candidate_id is None
+    assert not s.activated_preferences          # NO subset comparison
+    assert s.reason["code"] == REASON_IC
+    assert "H_b" in s.reason["text"]            # gap named explicitly
+    assert set(s.surviving_candidate_ids) == {"L_a", "H_a", "L_b", "H_b"}
+
+
+def test_adv_finding2_unknown_ref_kind_incomparable_not_other():
+    w = make_world()
+    # "mystery-kind" is OUTSIDE the declared vocabulary: incomparable —
+    # never an ordinary "other" that would lose to old-low-htf
+    rel = ContextualRelationships(ref_kind={
+        "L_b": {"value": "old-low-htf", "known_bar": 35},
+        "L_a": {"value": "local", "known_bar": 15},
+        "H_a": {"value": "mystery-kind", "known_bar": 25},
+        "H_b": {"value": "local", "known_bar": 45},
+    })
+    s = _sel(w, role="origin-of-last-confirmed-leg", policy_id=None, rel=rel,
+             knowledge=(_injected_htf_record(),))
+    assert s.outcome == OUTCOME_UNRESOLVED and s.candidate_id is None
+    assert not s.activated_preferences          # no pair was licensed
+    assert s.reason["code"] == REASON_EP        # empirical not learned
+    assert "mystery-kind" in s.reason["text"] and "H_a" in s.reason["text"]
+    assert "ordinary" in s.reason["evidence_needed"] or "other" in \
+        s.reason["evidence_needed"]
+
+
+def _tie_world_extreme():
+    return {"points": [
+        _pt("X_1", REP_C, "low", 30, 20.0, 35),
+        _pt("X_2", REP_C, "high", 31, 40.0, 35),
+    ], "clegs": [], "pol": PolicyRegistry()}
+
+
+def test_adv_finding4_tie_not_overridden_by_preference_extreme():
+    # valid preference evidence for BOTH tied candidates; the preference
+    # WOULD pick X_1 — the tie guard must return UNRESOLVED anyway
+    rel = ContextualRelationships(ref_kind={
+        "X_1": {"value": "old-low-htf", "known_bar": 35},
+        "X_2": {"value": "local", "known_bar": 35},
+    })
+    for order in ([0, 1], [1, 0]):
+        w = _tie_world_extreme()
+        w["points"] = [w["points"][i] for i in order]
+        s = _sel(w, role="last-confirmed-extreme", rel=rel,
+                 knowledge=(_injected_htf_record(),))
+        assert s.outcome == OUTCOME_UNRESOLVED and s.candidate_id is None
+        assert set(s.surviving_candidate_ids) == {"X_1", "X_2"}
+        assert "tie" in s.reason["text"]
+        assert not s.activated_preferences      # before applying preferences
+
+
+def test_adv_finding4_tie_not_overridden_by_preference_origin():
+    pts = [
+        _pt("A_1", REP_C, "low", 10, 10.0, 15),
+        _pt("A_2", REP_C, "high", 20, 40.0, 25),
+        _pt("B_1", REP_C, "low", 30, 20.0, 35),
+        _pt("B_2", REP_C, "high", 40, 50.0, 45),
+    ]
+    leg1 = _leg("T1", REP_C, "A_1", "A_2", "up", 10, 20, 10.0, 40.0, 45)
+    leg2 = _leg("T2", REP_C, "B_1", "B_2", "up", 30, 40, 20.0, 50.0, 45)
+    leg2.t1_time = leg1.t1_time
+    leg2.knowable_time = leg1.knowable_time
+    leg2.t1 = leg1.t1
+    rel = ContextualRelationships(ref_kind={
+        "A_1": {"value": "old-low-htf", "known_bar": 15},
+        "B_1": {"value": "local", "known_bar": 35},
+    })
+    for order in ([0, 1], [1, 0]):
+        w = {"points": [pts[i] for i in order],
+             "clegs": [leg1, leg2] if order == [0, 1] else [leg2, leg1],
+             "pol": PolicyRegistry()}
+        s = _sel(w, role="origin-of-last-confirmed-leg", policy_id=None,
+                 rel=rel, knowledge=(_injected_htf_record(),))
+        assert s.outcome == OUTCOME_UNRESOLVED and s.candidate_id is None
+        assert set(s.surviving_candidate_ids) == {"A_1", "B_1"}
+        assert "tie" in s.reason["text"]
+        assert not s.activated_preferences

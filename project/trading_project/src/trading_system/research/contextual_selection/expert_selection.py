@@ -24,12 +24,12 @@ V1.1 = remediation of the expert-selection V1 audit (findings 1-6):
   F3  nonempty test_history is NOT binding evidence.  Wick/range touches and
       close-throughs are distinct observations kept apart; neither implies
       rejection, validation or successful reaction (file 15 §15.4: taken
-      status "establishes state, not cause").  "tested > untested" and
-      "cluster > non-cluster" are NONBINDING research hypotheses (task
-      classification F) — the pinned knowledge repository substantiates
-      neither as a selection comparison.  The only source-substantiated
-      conditional comparison is KP-03 (REF-OLD-LOW-HTF family; file 05
-      §5.4a P-R + file 15 §15.3 H).
+      status "establishes state, not cause").  "tested > untested",
+      "cluster > non-cluster" AND the old-low/higher-timeframe comparison
+      are NONBINDING research hypotheses (task classification F) — the
+      pinned knowledge repository does not establish any of them as a
+      selection comparison for T-S1 role selection (finding 3: KP-03 kept
+      as a documented refusal record; no replacement rule invented).
   F4  equal knowable-time ties are UNRESOLVED in the kernel (task_s1) and
       independently guarded here; no selection is ever order-resolved.
   F5  real ``InterpretationLedger`` recomputation: complete serialized
@@ -70,6 +70,7 @@ from trading_system.research.contextual_selection.csm import (  # noqa: F401
     UnresolvedState,
     X_STATE,
     X_SUPER,
+    available_at,
     candidate_record,
     leg_recency_key,
     register_recompute_handler,
@@ -214,33 +215,51 @@ EXPERT_KNOWLEDGE_SRS_V1: Tuple[ExpertPreference, ...] = (
     ),
     _kp(
         pref_id="KP-03",
-        kclass=KCLASS_E, klass=CLASS_S,
+        kclass=KCLASS_F, klass=CLASS_S,
         source=("ICT / Michael J. Huddleston, ICT Mentorship Core Content "
                 "Month 04 lessons (SRC-ICT-OB / SRC-ICT-FVG, P1 partial "
-                "transcripts): a support reference is an 'old low on a "
-                "higher timeframe' or a reclaimed 'old high' "
-                "(REF-OLD-LOW-HTF / REF-OLD-HIGH-RECLAIMED)"),
+                "transcripts), as recorded in the pinned knowledge "
+                "repository (jfjdjdieifne/test @ 6c8bf6fd): "
+                "knowledge_foundation/05 §5.4a P-R — 'Support reference | "
+                "Partly stated | REF-OLD-LOW-HTF (old low on higher "
+                "timeframe); REF-OLD-HIGH-RECLAIMED (old high price moved "
+                "above recently). Both verbal (P1)' (inside the G-OB-P "
+                "order-block parameter register); "
+                "knowledge_foundation/15 §15.2 H — 'higher-timeframe "
+                "preference for support references' among the "
+                "ICT-source-supported distinctions 'only those marked S in "
+                "§15.3'; knowledge_foundation/15 §15.3 S row — \"'old low "
+                "on a higher timeframe' as a support reference (P1) | Only "
+                "as the source's stated condition, not as an observed "
+                "fact\""),
         source_family="ICT",
-        statement=("for a declared support/structural-reference role, "
-                   "candidates whose upstream-declared reference kind is "
-                   "'old-low-htf' or 'old-high-reclaimed' are the "
-                   "source-indicated references over locally drawn ones "
-                   "(the exact S-class distinction of file 15 §15.3 H)"),
-        context="declared support/structural reference role (any valid "
-                "T-S1 role)",
+        statement=(
+            "NONBINDING research hypothesis (finding 3): the pinned source "
+            "states the old-low-on-higher-timeframe identity FOR SUPPORT "
+            "REFERENCES in the order-block context, and lists a "
+            "higher-timeframe preference for support references as an "
+            "S-class distinction.  The pinned source does NOT establish "
+            "that comparison for T-S1 role selection: "
+            "knowledge_foundation/16 §16.3 records that the T-S1 role "
+            "policy Π_T 'is an operational definition, not a market claim "
+            "(SWS-02)' and 'is not an ICT-source claim'.  Per audit the "
+            "exact comparison+context cannot be established for this task, "
+            "so the preference is nonbinding research-only; no replacement "
+            "rule or citation is invented"),
+        context="documented refusal record (never a selection comparison)",
         observable_evidence=("ref_kind",),
-        licenses="old-low-htf>other",
-        exceptions=("the source does not define how the old reference is "
-                    "confirmed or when it expires (file 05 §5.4a P-R open) — "
-                    "the preference is provisional; auto-caption wording is "
-                    "P1 grade; a dispute needing the source's exact wording "
-                    "surfaces AI instead of guessing; the declaration must "
-                    "carry a knowability stamp or it is unavailable"),
-        conflict_status="uncontested in the pinned repository (CF-01 "
-                        "concerns the order-block definition, not this)",
+        licenses="none",
+        exceptions=("the source's support-reference statement is limited to "
+                    "the stated condition ('only as the source's stated "
+                    "condition, not as an observed fact', §15.3) and is "
+                    "'Partly stated' — how the old reference is confirmed "
+                    "and its expiry are missing (§5.4a P-R); a dispute "
+                    "needing the source's exact wording surfaces AI"),
+        conflict_status="hypothesis only (F-class; never binding)",
         provenance_refs=("knowledge_foundation/05 §5.4a:P-R",
+                         "knowledge_foundation/15 §15.2 H",
                          "knowledge_foundation/15 §15.3",
-                         "knowledge_foundation/08:CASE observables",
+                         "knowledge_foundation/16 §16.3",
                          "SRC-ICT-OB", "SRC-ICT-FVG"),
     ),
     _kp(
@@ -377,12 +396,32 @@ def validate_relationship_stamp(
     """Finding F1: validate one relationship fact against the decision.
 
     Uses ONLY the approved interfaces over the sealed 6.2A-0 contract
-    (``SharedInformationAxis.is_on_grid`` / ``available``).  Missing,
-    future, off-grid or unmappable evidence is UNAVAILABLE
-    ``(False, reason)`` and must never influence selection.
+    (``SharedInformationAxis.key_for_time`` / ``is_on_grid`` / ``available``).
+    Rejected categories (each recorded, never used):
+
+    * missing/unmappable stamp (no knowability info, non-integer bar);
+    * **negative** ``known_bar``;
+    * **out-of-axis** ``known_bar`` (no such coordinate on the master
+      timeline — the scene's bar domain is the axis's coordinate domain,
+      the shared-axis convention of this codebase);
+    * **future** stamp (after the decision boundary);
+    * **off-grid** time;
+    * **inconsistent** ``known_bar``/``known_time`` pair that does not
+      identify the same axis coordinate (``key_for_time(time).bar_position``
+      must equal ``known_bar``).
     """
     if known_bar is None and known_time is None:
         return False, "unmappable: no knowability stamp"
+    if known_bar is not None:
+        if not isinstance(known_bar, int) or isinstance(known_bar, bool):
+            return False, "unmappable: bar stamp is not an integer"
+        if known_bar < 0:
+            return False, f"negative known_bar {known_bar}"
+        if axis is not None and known_bar >= axis.n_rows:
+            return False, (f"out-of-axis known_bar {known_bar}: no such axis "
+                           f"coordinate (n_rows={axis.n_rows})")
+        if known_bar > decision_bar:
+            return False, "future: knowable bar after the decision bar"
     if known_time is not None:
         if axis is None:
             return False, ("time-bearing relationship evidence requires the "
@@ -394,11 +433,14 @@ def validate_relationship_stamp(
                            "decision boundary time")
         if not axis.available(known_time, decision_time):
             return False, "not available at the decision boundary"
-    if known_bar is not None:
-        if not isinstance(known_bar, int) or isinstance(known_bar, bool):
-            return False, "unmappable: bar stamp is not an integer"
-        if known_bar > decision_bar:
-            return False, "future: knowable bar after the decision bar"
+    if known_bar is not None and known_time is not None and axis is not None:
+        # same-axis-coordinate consistency (public key interface only)
+        coord = axis.key_for_time(known_time).bar_position
+        if coord != known_bar:
+            return False, (
+                f"inconsistent stamps: known_bar={known_bar} and "
+                f"known_time={known_time} identify different axis "
+                f"coordinates (bar_position={coord} vs {known_bar})")
     return True, ""
 
 
@@ -481,19 +523,38 @@ class ContextualRelationships:
 
 
 # ---------------------------------------------------------------------------
-# Licensed comparisons — ONLY source-substantiated conditional preferences
-# (finding F3).  F-class hypotheses never appear here.
+# Licensed comparisons — the mechanism for documented conditional
+# preferences.  The DEFAULT knowledge set contains NO binding comparison
+# (finding 3: KP-03 is nonbinding research-only); the mechanism is exercised
+# through explicitly injected knowledge records and remains fully audited.
 # ---------------------------------------------------------------------------
 
+#: Declared reference-kind vocabulary.  A ref_kind OUTSIDE this vocabulary is
+#: NOT an ordinary "other" category — it is INCOMPARABLE (finding 2) and
+#: blocks the comparison with an explicit reason.
+KNOWN_REF_KINDS: Tuple[str, ...] = ("old-low-htf", "old-high-reclaimed",
+                                    "local")
+_INDICATED_REF_KINDS = frozenset({"old-low-htf", "old-high-reclaimed"})
+
+
 def _rule_old_htf(left: dict, right: dict) -> Optional[bool]:
-    indicated = {"old-low-htf", "old-high-reclaimed"}
+    """Documented comparison shape: indicated reference kinds over locally
+    drawn ones.  Unknown kinds are rejected as incomparable BEFORE licensing
+    (``domain``); the guard here is defense in depth."""
     lk = left.get("ref_kind")
     rk = right.get("ref_kind")
-    l_in = lk in indicated
-    r_in = rk in indicated
+    if lk not in KNOWN_REF_KINDS or rk not in KNOWN_REF_KINDS:
+        return None
+    l_in = lk in _INDICATED_REF_KINDS
+    r_in = rk in _INDICATED_REF_KINDS
     if l_in == r_in:
         return None
     return l_in
+
+
+#: value domains the rule is defined over (finding 2: values outside a
+#: domain make the comparison incomparable — never a silent "other")
+_rule_old_htf.domain = {"ref_kind": frozenset(KNOWN_REF_KINDS)}  # type: ignore[attr-defined]
 
 
 _LICENSE_RULES: Dict[str, Callable[[dict, dict], Optional[bool]]] = {
@@ -653,30 +714,49 @@ def apply_expert_preferences(
         evidence_maps: Dict[str, dict],
         knowledge: Sequence[ExpertPreference] = EXPERT_KNOWLEDGE_SRS_V1,
         *,
+        task_id: str = SRS_TASK_ID,
         scene: Optional[dict] = None,
         license_rules: Optional[Dict[str, Callable[[dict, dict],
                                                    Optional[bool]]]] = None,
 ) -> Tuple[List[dict], List[dict], List[dict], Optional[str], dict]:
-    """Apply documented conditional preferences over the ELIGIBLE survivor
-    set.  Returns (activated, inactive, conflicts, winner_or_None,
-    diagnostics).  F-class records never license anything (finding F3);
-    contradictory licensed comparisons are PRESERVED (task §7) and resolve
-    nothing; a unique candidate is returned only when it wins at least one
-    licensed comparison and loses none.  ``license_rules`` may substitute
-    the rule registry (test seam for conflict preservation)."""
+    """Apply documented conditional preferences over the ELIGIBLE set.
+    Returns (activated, inactive, conflicts, winner_or_None, diagnostics).
+
+    Audit findings discipline:
+      * a record whose ``task_id`` does not match the active task NEVER
+        applies (finding 2);
+      * F-class records never license anything (finding 3);
+      * comparable evidence must be COMPLETE across the eligible set —
+        missing evidence or values outside the rule's documented domain
+        make the comparison INCOMPARABLE: it licenses NOTHING and is
+        reported in ``diagnostics["incomplete"]`` (finding 2: never compare
+        a subset, never treat an unknown value as an ordinary "other",
+        never silently omit a candidate);
+      * contradictory licensed comparisons are PRESERVED (task §7) and
+        resolve nothing; a unique candidate is returned only when it wins
+        at least one clean comparison and loses none.
+    """
     scene = scene or {}
     rules = _LICENSE_RULES if license_rules is None else license_rules
     activated: List[dict] = []
     inactive: List[dict] = []
     conflicts: List[dict] = []
+    incomplete: List[dict] = []
     ids = list(survivor_ids)
 
     for pref in knowledge:
+        if pref.task_id != task_id:
+            inactive.append({
+                "pref_id": pref.pref_id,
+                "cause": f"task mismatch: record belongs to {pref.task_id!r}, "
+                         f"active task is {task_id!r} — never applies "
+                         f"(finding 2)"})
+            continue
         if pref.kclass == KCLASS_F:
             inactive.append({"pref_id": pref.pref_id,
                              "cause": "F-class: nonbinding research "
                                       "hypothesis — never licenses a "
-                                      "comparison (task §4; finding F3)"})
+                                      "comparison (task §4; finding 3)"})
             continue
         if pref.licenses == "none":
             inactive.append({"pref_id": pref.pref_id,
@@ -686,19 +766,42 @@ def apply_expert_preferences(
         rule = rules.get(pref.licenses)
         if rule is None:  # pragma: no cover — registry integrity
             raise ValueError(f"unknown license rule {pref.licenses!r}")
-        present = [cid for cid in ids
-                   if all(k in evidence_maps.get(cid, {})
-                          for k in pref.observable_evidence)]
-        if not present:
+        # ---- finding 2: COMPLETE comparable evidence over the set --------
+        missing = {cid: [k for k in pref.observable_evidence
+                         if k not in evidence_maps.get(cid, {})]
+                   for cid in ids}
+        missing = {cid: keys for cid, keys in missing.items() if keys}
+        if missing:
+            incomplete.append({"pref_id": pref.pref_id,
+                               "kind": "missing-evidence", "gaps": missing})
             inactive.append({
                 "pref_id": pref.pref_id,
-                "cause": f"observable evidence {pref.observable_evidence} "
-                         f"absent/unavailable on all survivors — preference "
-                         f"inapplicable (never a default)"})
+                "cause": f"incomplete comparison: evidence "
+                         f"{pref.observable_evidence} missing for {sorted(missing)} "
+                         f"— no subset comparison is ever licensed "
+                         f"(finding 2)"})
+            continue
+        domain = getattr(rule, "domain", None) or {}
+        incomparable: Dict[str, dict] = {}
+        for cid in ids:
+            for field_name, allowed in domain.items():
+                v = evidence_maps[cid].get(field_name)
+                if v not in allowed:
+                    incomparable.setdefault(cid, {})[field_name] = v
+        if incomparable:
+            incomplete.append({"pref_id": pref.pref_id,
+                               "kind": "incomparable-values",
+                               "gaps": incomparable})
+            inactive.append({
+                "pref_id": pref.pref_id,
+                "cause": f"incomplete comparison: values outside the "
+                         f"documented domain for {sorted(incomparable)} — "
+                         f"an unknown value is NOT an ordinary 'other' "
+                         f"category (finding 2)"})
             continue
         pref_pairs: List[dict] = []
-        for i, a in enumerate(present):
-            for b in present[i + 1:]:
+        for i, a in enumerate(ids):
+            for b in ids[i + 1:]:
                 verdict = rule(evidence_maps[a], evidence_maps[b])
                 if verdict is None:
                     continue
@@ -709,7 +812,7 @@ def apply_expert_preferences(
         if not pref_pairs:
             inactive.append({
                 "pref_id": pref.pref_id,
-                "cause": "evidence present but not in the documented "
+                "cause": "evidence complete but not in the documented "
                          "comparison shape — no comparison licensed "
                          "(incomplete comparisons never resolve)"})
             continue
@@ -743,9 +846,15 @@ def apply_expert_preferences(
 
     preferred = [cid for cid in ids
                  if clean_wins[cid] > 0 and clean_losses[cid] == 0]
-    winner = preferred[0] if len(preferred) == 1 else None
+    # finding 2: incomplete/incomparable evidence blocks resolution even if
+    # a subset would have produced a preferred candidate
+    if incomplete:
+        winner = None
+    else:
+        winner = preferred[0] if len(preferred) == 1 else None
     diagnostics = {"clean_wins": clean_wins, "clean_losses": clean_losses,
-                   "preferred": preferred, "n_conflicts": len(conflicts)}
+                   "preferred": preferred, "n_conflicts": len(conflicts),
+                   "incomplete": incomplete}
     return activated, inactive, conflicts, winner, diagnostics
 
 
@@ -972,8 +1081,13 @@ def expert_structural_reference_selection(
 
     scene = {"task_id": SRS_TASK_ID, "role": role,
              "has_declared_policy": policy_id is not None}
-    activated, inactive, conflicts, pref_winner, diag = apply_expert_preferences(
-        eligible_ids, maps, knowledge, scene=scene)
+    # Preferences are applied ONLY after role validity, policy-role match
+    # and the tie guard (findings 2/4) — placeholders until then.
+    activated: List[dict] = []
+    inactive: List[dict] = []
+    conflicts: List[dict] = []
+    pref_winner: Optional[str] = None
+    diag: dict = {}
 
     prov = list(base.provenance) + [
         "X:expert-selection-v1.1",
@@ -1009,27 +1123,33 @@ def expert_structural_reference_selection(
 
     def _finish(outcome: str, candidate_id: Optional[str],
                 reason: Optional[dict], interpretation: Optional[dict],
-                extra_prov: Sequence[str] = ()) -> ExpertSelection:
-        survivors = list(base.survivors)
+                extra_prov: Sequence[str] = (), *,
+                survivors: Optional[Sequence[str]] = None,
+                extra_excluded: Sequence[Exclusion] = (),
+                dependencies: Optional[Sequence[str]] = None
+                ) -> ExpertSelection:
+        surv = list(base.survivors if survivors is None else survivors)
+        excl = list(all_excluded) + list(extra_excluded)
         final = _mk_final(
             outcome=outcome, decision_bar=decision_bar,
             decision_time=decision_time, rep_id=rep.rep_id,
-            candidate_id=candidate_id, survivors=survivors,
-            excluded=all_excluded, reason=reason,
+            candidate_id=candidate_id, survivors=surv,
+            excluded=excl, reason=reason,
             provenance=list(prov) + list(extra_prov), policy_refs=pregs,
             psnaps=psnaps, dependents=list(base.dependents),
-            dependencies=list(base.dependencies),
+            dependencies=list(base.dependencies if dependencies is None
+                              else dependencies),
             direction=base.direction, notes=list(base.notes))
         if outcome == OUTCOME_SELECTED and candidate_id is not None:
             ev = _evidence_chain(candidate_id)
         else:
-            ev = [e for cid in survivors for e in items_by_id.get(cid, ())]
+            ev = [e for cid in surv for e in items_by_id.get(cid, ())]
         return ExpertSelection(
             outcome=outcome, task_id=SRS_TASK_ID, task_name=SRS_TASK_NAME,
             decision_bar=decision_bar, decision_time=decision_time,
             representation_id=rep.rep_id, candidate_id=candidate_id,
             evidence=ev, reason=reason,
-            surviving_candidate_ids=survivors, excluded=all_excluded,
+            surviving_candidate_ids=surv, excluded=excl,
             activated_preferences=activated, inactive_preferences=inactive,
             conflicts=conflicts, base_result=base, final_result=final,
             interpretation=interpretation,
@@ -1050,34 +1170,54 @@ def expert_structural_reference_selection(
         }
         return _finish(OUTCOME_UNRESOLVED, None, reason, None)
 
-    # ---- F4: equal knowable-time tie guard (defense in depth) -----------
-    if base.is_justified and base.selected_id is not None:
-        sel_p = by_id.get(base.selected_id)
-        tied_ids: List[str] = []
-        if role == "last-confirmed-extreme" and sel_p is not None:
-            key = _know_stamp(sel_p)
-            tied_ids = [cid for cid in base.survivors
-                        if cid != base.selected_id and cid in by_id
-                        and _know_stamp(by_id[cid]) == key]
-        elif role == "origin-of-last-confirmed-leg":
-            sel_legs = [l for l in legs
-                        if getattr(l, "start_id", None) == base.selected_id]
-            if sel_legs:
-                key = max(_leg_key(l) for l in sel_legs)
-                for l in legs:
-                    if (getattr(l, "start_id", None) != base.selected_id
-                            and _leg_key(l) == key):
-                        tied_ids.append(l.start_id)
-        if tied_ids:
-            survivors = sorted(set(base.survivors) | set(tied_ids))
+    # ---- F2: registered policy semantics must match the declared role ---
+    if policy_id is not None:
+        pval = policy.snapshot_of(policy_id).get("value")
+        if pval != role:
             reason = {
                 "code": REASON_MP,
-                "text": ("equal knowable-time/recency tie between "
-                         f"{sorted(set(tied_ids) | {base.selected_id})} — "
-                         "never order-resolved (finding F4)"),
-                "evidence_needed": "declare a tie policy (SP-18)",
+                "text": (f"policy-role mismatch: registered policy "
+                         f"{policy_id!r} semantics {pval!r} do not match "
+                         f"the declared role {role!r}"),
+                "evidence_needed": ("register a policy whose value names "
+                                    "the declared role (SP-18), or declare "
+                                    "the role the policy was registered "
+                                    "for; a mismatched policy is never "
+                                    "applied (finding 2)"),
             }
             return _finish(OUTCOME_UNRESOLVED, None, reason, None)
+
+    # ---- F4: equal knowable-time tie -> UNRESOLVED BEFORE preferences ---
+    # The kernel reports such ties as undecidable (SP-18 tie policy
+    # missing); a preference must NEVER override that tie.
+    tied_ids = _detect_deciding_tie(eligible_objs, legs, role,
+                                    decision_bar=decision_bar,
+                                    decision_time=decision_time, axis=axis)
+    if tied_ids:
+        tie_excl = [
+            Exclusion(cid, "X-POL", "R:within-class:knowable_bar",
+                      "not at the deciding key (tied recency)")
+            for cid in eligible_ids if cid not in tied_ids]
+        tie_deps = list(base.dependencies) + list(tied_ids)
+        if role == "origin-of-last-confirmed-leg":
+            for l in legs:
+                if getattr(l, "start_id", None) in tied_ids:
+                    tie_deps.append(l.leg_id)
+        reason = {
+            "code": REASON_MP,
+            "text": ("equal knowable-time/recency tie between "
+                     f"{sorted(tied_ids)} — never order-resolved and never "
+                     "preference-resolved (finding 4)"),
+            "evidence_needed": "declare a tie policy (SP-18)",
+        }
+        return _finish(OUTCOME_UNRESOLVED, None, reason, None,
+                       survivors=tied_ids, extra_excluded=tie_excl,
+                       dependencies=tie_deps)
+
+    # ---- apply documented preferences (findings 2/3 discipline) ---------
+    activated, inactive, conflicts, pref_winner, diag = \
+        apply_expert_preferences(
+            eligible_ids, maps, knowledge, task_id=SRS_TASK_ID, scene=scene)
 
     # ---- step 7a: declared Pi_T role policy resolved the task -----------
     if base.is_justified:
@@ -1117,6 +1257,28 @@ def expert_structural_reference_selection(
     if not survivors:
         reason = {"code": REASON_IC, "text": "no eligible candidates",
                   "evidence_needed": "more history / confirmation"}
+    elif diag.get("incomplete"):
+        # finding 2: missing/incomparable evidence for ANY required
+        # candidate -> UNRESOLVED with explicit reasons (never a subset
+        # comparison, never a silent omission)
+        gaps = diag["incomplete"]
+        has_unknown = any(g["kind"] == "incomparable-values" for g in gaps)
+        gap_txt = "; ".join(
+            f"{g['pref_id']} [{g['kind']}]: " + ", ".join(
+                f"{cid} -> {detail}" for cid, detail in sorted(
+                    g["gaps"].items(), key=str))
+            for g in gaps)
+        reason = {
+            "code": REASON_EP if has_unknown else REASON_IC,
+            "text": ("incomplete/incomparable comparison evidence across "
+                     "the eligible set: " + gap_txt),
+            "evidence_needed": ("supply VALIDATED, comparable evidence for "
+                                "EVERY eligible candidate (declared "
+                                "vocabulary; knowability stamps) or declare "
+                                "a Pi_T policy (SP-18); an unknown value is "
+                                "never an ordinary 'other' category "
+                                "(finding 2)"),
+        }
     elif conflicts:
         reason = {"code": REASON_EP,
                   "text": "conflicting source-grounded preferences: "
@@ -1166,6 +1328,44 @@ def expert_structural_reference_selection(
 
 def _leg_key(l: object) -> tuple:
     return leg_recency_key(l)
+
+
+def _detect_deciding_tie(eligible_objs: Sequence[PointCandidate],
+                         legs: Sequence[LegCandidate], role: str,
+                         *, decision_bar: int,
+                         decision_time: Optional[pd.Timestamp],
+                         axis: Optional[SharedInformationAxis]) -> List[str]:
+    """Independent detection of the kernel's equal-knowable-time tie at the
+    role's deciding key (finding 4): the layer must return UNRESOLVED before
+    applying preferences — a preference never overrides such a tie.
+
+    Mirrors the kernel T-S1 tie rule:
+      * ``last-confirmed-extreme``: identical top knowable stamps;
+      * ``origin-of-last-confirmed-leg``: identical top leg-recency keys
+        with DISTINCT origins.  Returns the tied candidate ids, or [].
+    """
+    if role == "last-confirmed-extreme":
+        if not eligible_objs:
+            return []
+        best = max(_know_stamp(p) for p in eligible_objs)
+        tied = [p.candidate_id for p in eligible_objs
+                if _know_stamp(p) == best]
+        return tied if len(tied) > 1 else []
+    if role == "origin-of-last-confirmed-leg":
+        conf_legs = [l for l in legs
+                     if getattr(l, "completed", False)
+                     and available_at(l, as_of_bar=decision_bar,
+                                      as_of_time=decision_time, axis=axis)]
+        if not conf_legs:
+            return []
+        best_key = max(_leg_key(l) for l in conf_legs)
+        tied_legs = [l for l in conf_legs if _leg_key(l) == best_key]
+        origins: List[str] = []
+        for l in tied_legs:
+            if getattr(l, "start_id", None) not in origins:
+                origins.append(l.start_id)
+        return origins if len(origins) > 1 else []
+    return []
 
 
 # ---------------------------------------------------------------------------

@@ -69,6 +69,36 @@ from trading_system.research.contextual_selection import (  # noqa: E402
     sp03_binding,
 )
 
+def _tzdata_version() -> dict:
+    """Actual timezone-data package version (audit finding 6): try the pip
+    package metadata, then the tzdata module, then the system tzdata.zi
+    header.  Records whichever is ACTUALLY present — never a guess."""
+    try:
+        from importlib import metadata
+        return {"version": metadata.version("tzdata"),
+                "source": "importlib.metadata:tzdata"}
+    except Exception:
+        pass
+    try:
+        import tzdata
+        v = getattr(tzdata, "IANA_VERSION", None) \
+            or getattr(tzdata, "__version__", None)
+        if v:
+            return {"version": str(v), "source": "python-module:tzdata"}
+    except Exception:
+        pass
+    try:
+        zi = Path("/usr/share/zoneinfo/tzdata.zi")
+        if zi.exists():
+            for line in zi.read_text().splitlines()[:3]:
+                if line.startswith("# version"):
+                    return {"version": line.split("version", 1)[1].strip(),
+                            "source": "/usr/share/zoneinfo/tzdata.zi"}
+    except Exception:
+        pass
+    return {"version": "unknown", "source": "not-detectable"}
+
+
 #: Pinned data provenance (audit remediation F6): the mirror commit the
 #: input files come from.  The replay manifest records this commit, the
 #: SHA-256 of BOTH input files, the final source commit and dependency
@@ -348,6 +378,7 @@ def main() -> int:
             "numpy": __import__("numpy").__version__,
             "pandas": pd.__version__,
             "pytest": __import__("pytest").__version__,
+            "tzdata": _tzdata_version(),
         },
         "representation": rep.rep_id,
         "window": [args.start, args.end],
@@ -407,7 +438,15 @@ def main() -> int:
                 "cases": temporal_violations[:20]},
             "revision_behavior": {
                 "n_status_transitions_generated": n_status_transitions,
-                "n_reference_changes_M1": len(revision_events),
+                "n_asymmetric_adjacent_selection_id_changes_M1": (
+                    len(revision_events)),
+                "count_semantics": (
+                    "the reported count is an ASYMMETRIC "
+                    "ADJACENT-SELECTION-ID CHANGE count: consecutive M1 "
+                    "boundaries whose selected IDs differ (a -> b counted "
+                    "once at b).  It is NOT ledger propagation — no "
+                    "InterpretationLedger propagation is run or counted "
+                    "in this replay."),
                 "events": revision_events[:40]},
             "replay_determinism": replay_checks,
             "runtime": {

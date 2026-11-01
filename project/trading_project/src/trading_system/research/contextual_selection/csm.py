@@ -1691,6 +1691,7 @@ def task_s1_structural_reference(points: Sequence[PointCandidate],
                        excluded, state, prov, pregs, rep.rep_id,
                        notes=["equal knowable-time tie: unresolved (never "
                               "order-resolved)"],
+                       dependencies=_deps(*tied_ids),
                        dependents=["T-S5-falsifier", "T-S4-base",
                                    "zone-context", "liquidity-objective"],
                        decision_time=decision_time)
@@ -2236,9 +2237,15 @@ def task_s5_falsifier(claims: Sequence[dict], points: Sequence[PointCandidate],
                                      "supported direction (movement "
                                      "representation); none given"),
                     policy_refs=[], provenance=prov)
+                # AUDIT REMEDIATION (findings 5): the supporting leg ``last``
+                # was actually evaluated (max over the recency key) even
+                # though this exits early as UNRESOLVED — its evaluated ids
+                # are preserved as dependencies, never dropped.
                 return _mk("T-S5", decision_bar, "unresolved", None, resolved,
                            excluded, state, prov, [], "claims",
-                           notes=notes, dependencies=deps, decision_time=decision_time)
+                           notes=notes,
+                           dependencies=deps + [last.start_id, last.leg_id],
+                           decision_time=decision_time)
             if want_dir != last.direction:
                 state = UnresolvedState(
                     state_id=f"{state_id_prefix}-{decision_bar}", task="T-S5",
@@ -2249,9 +2256,12 @@ def task_s5_falsifier(claims: Sequence[dict], points: Sequence[PointCandidate],
                                      f"{last.leg_id} direction {last.direction!r}; "
                                      "re-read the interpretation"),
                     policy_refs=[], provenance=prov)
+                # AUDIT REMEDIATION (findings 5): early UNRESOLVED keeps the
+                # dependencies actually evaluated (``last`` was consumed).
                 return _mk("T-S5", decision_bar, "unresolved", None, resolved,
                            excluded, state, prov, [], "claims",
-                           notes=notes, dependencies=deps,
+                           notes=notes,
+                           dependencies=deps + [last.start_id, last.leg_id],
                            direction=last.direction, decision_time=decision_time)
             resolved.append(last.start_id)
             deps += [last.start_id, last.leg_id]
@@ -2933,6 +2943,12 @@ def _diff_results(old: SelectionResult, new: SelectionResult) -> List[dict]:
         changes.append({"field": "policy_refs",
                         "before": list(old.policy_refs),
                         "after": list(new.policy_refs)})
+    # AUDIT REMEDIATION (findings 5): dependency updates are REAL computed
+    # changes — the ledger's difference accounting reports them explicitly
+    if list(old.dependencies) != list(new.dependencies):
+        changes.append({"field": "dependencies",
+                        "before": list(old.dependencies),
+                        "after": list(new.dependencies)})
     if old.policy_snapshots != new.policy_snapshots:
         pv_old = {k: (v.get("version"), v.get("value"))
                   for k, v in old.policy_snapshots.items()}
