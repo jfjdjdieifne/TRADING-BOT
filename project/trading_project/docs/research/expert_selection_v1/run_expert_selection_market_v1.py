@@ -55,6 +55,8 @@ if DEFAULT_SRC not in sys.path:
     sys.path.insert(0, DEFAULT_SRC)
 
 from trading_system.research.contextual_selection import (  # noqa: E402
+    EVENT_CLOSE_THROUGH,
+    EVENT_WICK_TOUCH,
     KIND_RESEARCH,
     ContextualRelationships,
     PolicyRegistry,
@@ -66,6 +68,12 @@ from trading_system.research.contextual_selection import (  # noqa: E402
     fk_turning_points,
     sp03_binding,
 )
+
+#: Pinned data provenance (audit remediation F6): the mirror commit the
+#: input files come from.  The replay manifest records this commit, the
+#: SHA-256 of BOTH input files, the final source commit and dependency
+#: versions.
+DATASET_COMMIT = "parshant231234-eng/BTCUSDT-Historical-Data@27c9be70"
 
 
 def _sha256_file(p: Path) -> str:
@@ -82,17 +90,31 @@ def _git_head() -> str:
         return "unknown"
 
 
-def load_1m(mirror: Path, months: str, start: str, end: str) -> pd.DataFrame:
+def _locate_month_csv(mirror: Path, month: str) -> Path:
+    flat = mirror / f"BTCUSDT_1m_{month}.csv"
+    if flat.exists():
+        return flat
+    hits = sorted(mirror.rglob(f"BTCUSDT_1m_{month}.csv"))
+    if not hits:
+        raise FileNotFoundError(f"no BTCUSDT_1m_{month}.csv under {mirror}")
+    return hits[0]
+
+
+def load_1m(mirror: Path, months: str, start: str, end: str
+            ) -> tuple[pd.DataFrame, dict]:
     frames = []
+    file_hashes = {}
     for m in months.split(","):
-        f = pd.read_csv(mirror / f"BTCUSDT_1m_{m.strip()}.csv",
+        path = _locate_month_csv(mirror, m.strip())
+        file_hashes[path.name] = _sha256_file(path)
+        f = pd.read_csv(path,
                         usecols=["datetime_utc", "open", "high", "low",
                                  "close", "volume"])
         frames.append(f)
     f = pd.concat(frames, ignore_index=True)
     f["dt"] = pd.to_datetime(f["datetime_utc"])
     f = f[(f["dt"] >= start) & (f["dt"] < end)]
-    return f.set_index("dt").sort_index()
+    return f.set_index("dt").sort_index(), file_hashes
 
 
 def resample_ohlc(f1m: pd.DataFrame, rule: str,
@@ -115,9 +137,11 @@ def derive_test_history(pts, bars: pd.DataFrame, decision_bar: int
     knowability):
       * wick-range touch : level inside [low, high] (exact interval
         containment — no tolerance, no invented threshold);
-      * close crossing   : the EXISTING SP-03 procedure (sp03_binding) on the
+      * close-through    : the EXISTING SP-03 procedure (sp03_binding) on the
         break side (side='high' -> upward close; 'low' -> downward close).
 
+    The two event kinds are DISTINCT observations (finding F3): state only —
+    no rejection, validation or successful reaction is inferred from either.
     An OBSERVED empty list means "observed, no tests"; a missing key means
     "not observable".  Every candidate known at the decision is observed.
     """
@@ -133,11 +157,11 @@ def derive_test_history(pts, bars: pd.DataFrame, decision_bar: int
         j0 = max(p.knowable_bar, 0)
         for j in range(j0, n):
             if lows[j] <= p.level <= highs[j]:
-                events.append({"bar": int(j), "kind": "wick-range-touch",
+                events.append({"bar": int(j), "kind": EVENT_WICK_TOUCH,
                                "ref": "F:interval-containment"})
             side = "up" if p.side == "high" else "down"
             if sp03_binding(float(closes[j]), [p], side):
-                events.append({"bar": int(j), "kind": "close-crossing",
+                events.append({"bar": int(j), "kind": EVENT_CLOSE_THROUGH,
                                "ref": "R:SP-03"})
         rel.test_history[p.candidate_id] = events
     return rel
@@ -159,7 +183,7 @@ def main() -> int:
     t_start = time.perf_counter()
 
     print("[1/6] loading 1m mirror ...", flush=True)
-    f1m = load_1m(mirror, args.months, args.start, args.end)
+    f1m, input_file_sha256 = load_1m(mirror, args.months, args.start, args.end)
     bars = resample_ohlc(f1m, "1h", pd.Timedelta(hours=1))
     print(f"      1m rows={len(f1m)} -> 1h bars={len(bars)} "
           f"({bars.index[0]} .. {bars.index[-1]})", flush=True)
@@ -181,7 +205,7 @@ def main() -> int:
     print(f"[2/6] axis rows={axis.n_rows} rep={rep.rep_id} "
           f"boundaries={len(boundaries)}", flush=True)
 
-    run_id = "EXPERT-SEL-MARKET-V1"
+    run_id = "EXPERT-SEL-MARKET-V1.1"
     sel_records = []
     candidate_rows = []
     reason_hist: Counter = Counter()
@@ -313,14 +337,34 @@ def main() -> int:
     n_m2_sel = sum(1 for r in sel_records
                    if r["mode"] == "M2_preference"
                    and r["outcome"] == "SELECTED")
+    import platform
+    final_source_commit = _git_head()
+    manifest = {
+        "dataset_commit": DATASET_COMMIT,
+        "input_file_sha256": input_file_sha256,
+        "final_source_commit": final_source_commit,
+        "dependency_versions": {
+            "python": platform.python_version(),
+            "numpy": __import__("numpy").__version__,
+            "pandas": pd.__version__,
+            "pytest": __import__("pytest").__version__,
+        },
+        "representation": rep.rep_id,
+        "window": [args.start, args.end],
+        "n_boundaries": len(boundaries),
+    }
     report = {
         "experiment_id": run_id,
-        "supersedes": None,
+        "supersedes": "EXPERT-SEL-MARKET-V1 (V1.1 = audit remediation rerun: "
+                      "relationship-evidence validation, role requirement, "
+                      "nonbinding KP-02/KP-06, tie handling, ledger "
+                      "recompute, pinned dependencies)",
         "research_only": ("selection counts do not prove selection "
                           "correctness; zero temporal violations does not "
                           "prove contextual selection quality"),
+        "manifest": manifest,
         "source_version": {
-            "git_head": _git_head(),
+            "git_head": final_source_commit,
             "information_time_sha256": _sha256_file(
                 Path(DEFAULT_SRC) / "trading_system" / "research"
                 / "information_time.py"),
@@ -385,12 +429,16 @@ def main() -> int:
             "SP-03 close crossings; no tolerance thresholds were invented",
             "no outcome evaluation: selection quality remains "
             "NOT_ESTABLISHED (objective C quarantine)",
-            "cluster/round-number markers (KP-06) not observable in this "
-            "generator output — preference inactive by contract",
+            "cluster/round-number markers (KP-06) are a NONBINDING research "
+            "hypothesis (finding F3) and are not observable in this "
+            "generator output — never used by contract",
         ],
     }
     with open(out_dir / "run_report_v1.json", "w") as fh:
         json.dump(report, fh, indent=2, default=str)
+    # dedicated replay manifest (audit remediation F6)
+    with open(out_dir / "replay_manifest_v1.json", "w") as fh:
+        json.dump(manifest, fh, indent=2, default=str)
 
     print("[6/6] summary", flush=True)
     print(json.dumps(report["summary"], indent=2, default=str))

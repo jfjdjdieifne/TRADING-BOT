@@ -1,26 +1,31 @@
-"""Behavioral tests — EXPERT-GROUNDED CONTEXTUAL SELECTION V1 (T-S1).
+"""Behavioral + adversarial tests — EXPERT-GROUNDED SELECTION V1.1 (T-S1).
 
-Covers the 12 required test categories (task §9), exercising the ACTUAL
-existing interfaces (kernel ``task_s1_structural_reference`` gates, SP-01/13/14,
-``SharedInformationAxis`` over the CLOSED information-time contract,
-``add_transition`` lifecycle, ``InterpretationLedger`` revision retention):
+Covers the 12 required categories (task §9) PLUS the audit-remediation
+acceptance list (findings F1-F5):
 
   1  same scene, different analytical task
-  2  multiple eligible structural references
+  2  multiple eligible structural references (no silent omission)
   3  prominent but task-irrelevant candidate
-  4  source-grounded conditional preference
-  5  conflicting expert preferences (preserved, never auto-resolved)
+  4  source-grounded conditional preference (KP-03; KP-02 is nonbinding)
+  5  conflicting expert preferences preserved (never auto-resolved)
   6  no applicable preference -> UNRESOLVED
-  7  temporally unavailable candidate
-  8  replay determinism (SWS-04d; future data cannot change a past decision)
+  7  temporally unavailable candidates AND relationship evidence
+  8  replay determinism + input-permutation invariance
   9  frozen historical selection
- 10  revision after changed evidence (W8; append-only history + versions)
- 11  sealed foundation integrity (information_time.py hash)
+ 10  revision after changed evidence / REAL ledger propagation
+ 11  sealed foundation integrity
  12  runtime performance
 
-Fixtures follow knowledge_foundation/19_SELECTION_CASES.md §19.2 (W-world:
-ordinal levels, bar labels) — the same golden fixture used by the kernel
-test suite.  No test uses future outcomes; no test invents market thresholds.
+Adversarial (audit acceptance): future/off-grid/unmappable relationship
+evidence, missing/mismatched roles, incomplete comparisons, KP-02 event
+types (wick touch vs close-through; nonbinding proof), equal-knowable ties
+in kernel + expert layer + permutations, real InterpretationLedger
+recomputation through a dependent conclusion, stale/empty recompute never
+counted as success.
+
+All tests exercise the actual interfaces (kernel T-S1 gates, SP-01/13/14,
+SharedInformationAxis over the sealed 6.2A-0 contract, add_transition,
+InterpretationLedger).  No future outcomes; no invented market thresholds.
 """
 from __future__ import annotations
 
@@ -35,6 +40,8 @@ import pandas as pd
 import pytest
 
 from trading_system.research.contextual_selection import (
+    EVENT_CLOSE_THROUGH,
+    EVENT_WICK_TOUCH,
     OUTCOME_SELECTED,
     OUTCOME_UNRESOLVED,
     REASON_EP,
@@ -43,7 +50,6 @@ from trading_system.research.contextual_selection import (
     STATUS_BROKEN,
     ContextualRelationships,
     ExpertPreference,
-    ExpertSelection,
     InterpretationLedger,
     LegCandidate,
     PointCandidate,
@@ -54,16 +60,15 @@ from trading_system.research.contextual_selection import (
     expert_structural_reference_selection,
     fk_turning_points,
     build_legs,
+    task_s1_structural_reference,
 )
 
-# Shared information-time axis for the fixture: bar i -> T0 + i minutes
-# (identical convention to test_contextual_selection_csm).
 T0 = pd.Timestamp("2025-01-01 00:00:00")
 AXIS = SharedInformationAxis(
     "expert-fixture-minute-grid",
     pd.date_range(T0, T0 + pd.Timedelta(minutes=2000), freq="1min"))
 
-K = 5  # declared F-K window for view C (file 19 §19.2)
+K = 5
 
 
 def _rep(view: str, scale: str, family: str = "F-K", **params) -> Representation:
@@ -92,7 +97,7 @@ def _leg(leg_id, rep, start_id, end_id, direction, t0, t1, p0, p1, know):
 
 
 def make_world() -> dict:
-    """Fresh W-world (file 19 §19.2) per test — never shared/mutated."""
+    """Fresh W-world (knowledge_foundation/19 §19.2) per test."""
     coarse = [
         _pt("L_a", REP_C, "low", 10, 10.0, 15),
         _pt("H_a", REP_C, "high", 20, 40.0, 25),
@@ -133,29 +138,40 @@ def test_01_same_scene_different_task():
                     policy_id="P-ORIGIN")
     s_extreme = _sel(w, role="last-confirmed-extreme")
     s_none = _sel(w, role=None)
-    # different declared tasks -> different answers on the SAME scene
-    assert s_origin.outcome == OUTCOME_SELECTED and s_origin.candidate_id == "L_b"
-    assert s_extreme.outcome == OUTCOME_SELECTED and s_extreme.candidate_id == "H_b"
+    assert s_origin.outcome == OUTCOME_SELECTED
+    assert s_origin.candidate_id == "L_b"
+    assert s_extreme.outcome == OUTCOME_SELECTED
+    assert s_extreme.candidate_id == "H_b"
     assert s_origin.candidate_id != s_extreme.candidate_id
-    # with no declared task role the honest answer is not a pick
+    # missing role = invalid task instance: explicit UNRESOLVED (finding F2)
     assert s_none.outcome == OUTCOME_UNRESOLVED and s_none.candidate_id is None
-    # interpretation continuation is task-tagged, one per selection
+    assert s_none.reason["code"] == REASON_MP
+    assert "no valid declared role" in s_none.reason["text"]
     assert s_origin.interpretation["reference"] == "L_b"
     assert s_extreme.interpretation["reference"] == "H_b"
-    assert s_origin.interpretation["conditional_on"]
 
 
 # --------------------------------------------------------------------------
-# 2 — multiple eligible structural references (nothing silently dropped)
+# 2 — multiple eligible references; nothing silently omitted (F2)
 # --------------------------------------------------------------------------
-def test_02_multiple_eligible_references():
+def test_02_multiple_eligible_references_no_silent_omission():
     w = make_world()
-    s = _sel(w, role=None)
-    assert sorted(s.surviving_candidate_ids) == ["H_a", "H_b", "L_a", "L_b"]
-    # every non-survivor carries an exclusion record (X-SCALE for fine views)
+    # a broken candidate that the kernel filters WITHOUT a record: the layer
+    # must surface it (audit: do not silently omit candidates)
+    broken = _pt("H_br", REP_C, "high", 25, 45.0, 30)
+    broken.add_transition(40, STATUS_BROKEN,
+                          info_time=T0 + timedelta(minutes=40),
+                          event_ref="E:br", axis=AXIS)
+    w["points"].append(broken)
+    s = _sel(w, role="last-confirmed-extreme")
+    # justified extreme role: the kernel keeps the winner as the survivor and
+    # records X-POL for the rest — the BROKEN candidate is the silent gap and
+    # must be surfaced by the layer (finding F2)
+    assert s.surviving_candidate_ids == ["H_b"]
     codes = {x.candidate_id: x.code for x in s.excluded}
-    assert set(codes) == {"fA.0", "fA.1"}
-    assert all(c == "X-SCALE" for c in codes.values())
+    assert codes.get("H_br") == "X-STATE"          # surfaced, not omitted
+    assert codes.get("fA.0") == "X-SCALE"
+    assert codes.get("L_a") == "X-POL"
     assert len(s.surviving_candidate_ids) + len(s.excluded) == len(w["points"])
 
 
@@ -164,109 +180,145 @@ def test_02_multiple_eligible_references():
 # --------------------------------------------------------------------------
 def test_03_prominent_but_task_irrelevant():
     w = make_world()
-    # H_b (level 50 — the most prominent extreme) is NOT the origin answer
     s = _sel(w, role="origin-of-last-confirmed-leg", policy_id="P-ORIGIN")
-    assert s.candidate_id == "L_b" and "H_b" != s.candidate_id
-    # and without a declared role and without evidence, prominence never
-    # selects anything (no largest/nearest/newest default anywhere)
+    assert s.candidate_id == "L_b" and s.candidate_id != "H_b"
+    # without a valid role nothing is selected — prominence never decides
     s2 = _sel(w, role=None)
     assert s2.outcome == OUTCOME_UNRESOLVED and s2.candidate_id is None
-    assert "H_b" in s2.surviving_candidate_ids  # kept, not chosen
+    assert "H_b" in s2.surviving_candidate_ids
 
 
 # --------------------------------------------------------------------------
-# 4 — source-grounded conditional preference (KP-02 tested > untested)
+# 4 — source-grounded conditional preference (KP-03, substantiated)
 # --------------------------------------------------------------------------
-def test_04_source_grounded_conditional_preference():
+def test_04_source_grounded_conditional_preference_kp03():
     w = make_world()
-    rel = ContextualRelationships(test_history={
-        "L_b": [{"bar": 33, "kind": "close-cross-binding", "ref": "R:SP-03"}],
-        "L_a": [], "H_a": [], "H_b": [],      # observed: no tests
+    rel = ContextualRelationships(ref_kind={
+        "L_b": {"value": "old-low-htf", "known_bar": 35,
+                "known_time": T0 + timedelta(minutes=35)},
+        "L_a": {"value": "local", "known_bar": 15,
+                "known_time": T0 + timedelta(minutes=15)},
+        "H_a": {"value": "local", "known_bar": 25,
+                "known_time": T0 + timedelta(minutes=25)},
+        "H_b": {"value": "local", "known_bar": 45,
+                "known_time": T0 + timedelta(minutes=45)},
     })
     s = _sel(w, role="origin-of-last-confirmed-leg", policy_id=None, rel=rel)
     assert s.outcome == OUTCOME_SELECTED and s.candidate_id == "L_b"
-    kp02 = [a for a in s.activated_preferences if a["pref_id"] == "KP-02"]
-    assert kp02 and kp02[0]["pairs"]
-    # evidence chain carries the preference with its EXACT source (task §4)
-    pref_items = [e for e in s.evidence if e.name == "preference:KP-02"]
+    kp03 = [a for a in s.activated_preferences if a["pref_id"] == "KP-03"]
+    assert kp03 and kp03[0]["pairs"]
+    pref_items = [e for e in s.evidence if e.name == "preference:KP-03"]
     assert pref_items and pref_items[0].klass == "S"
-    assert "Grimes" in pref_items[0].value or "Grimes" in pref_items[0].detail \
-        or "tested>untested" == pref_items[0].value
-    assert any("Grimes" in a["source"] for a in kp02)
-    assert any("Osler" in a["source"] for a in kp02)
-    assert any("Livermore" in a["source"] for a in kp02)
-    # provenance names the preference resolution
-    assert any(p.startswith("R:preference-resolution") for p in s.provenance)
+    assert "ICT" in pref_items[0].detail or "old-low-htf" == pref_items[0].value
+    assert any("ICT" in a["source"] or "Huddleston" in a["source"]
+               for a in kp03)
+    assert any(p.startswith("R:preference-resolution")
+               for p in s.provenance)
 
 
 # --------------------------------------------------------------------------
-# 5 — conflicting expert preferences preserved (task §7)
+# 5 — conflicting preferences preserved (task §7; F2/F3 compatible)
 # --------------------------------------------------------------------------
-def test_05_conflicting_preferences_preserved():
+def test_05a_policy_vs_preference_tension_preserved():
     w = make_world()
-    rel = ContextualRelationships(
-        test_history={
-            "L_b": [{"bar": 33, "kind": "close-cross-binding"}],
-            "H_b": [], "L_a": [],              # observed: no tests
-        },
-        round_cluster={"L_b": False, "H_b": True})  # Osler marker on H_b
-    s = _sel(w, role="origin-of-last-confirmed-leg", policy_id=None, rel=rel)
-    # KP-02 prefers L_b (tested) over H_b; KP-06 prefers H_b (cluster) over
-    # L_b -> the pair is contested by two source-grounded preferences
-    assert s.outcome == OUTCOME_UNRESOLVED and s.candidate_id is None
-    assert s.reason["code"] == REASON_EP
+    # KP-03 prefers L_a (old-low-htf) but Pi_T role semantics select L_b
+    rel = ContextualRelationships(ref_kind={
+        "L_a": {"value": "old-low-htf", "known_bar": 15,
+                "known_time": T0 + timedelta(minutes=15)},
+        "L_b": {"value": "local", "known_bar": 35,
+                "known_time": T0 + timedelta(minutes=35)},
+        "H_a": {"value": "local", "known_bar": 25,
+                "known_time": T0 + timedelta(minutes=25)},
+        "H_b": {"value": "local", "known_bar": 45,
+                "known_time": T0 + timedelta(minutes=45)},
+    })
+    s = _sel(w, role="origin-of-last-confirmed-leg", policy_id="P-ORIGIN",
+             rel=rel)
+    # documented precedence: Pi_T resolves; the tension is PRESERVED
+    assert s.outcome == OUTCOME_SELECTED and s.candidate_id == "L_b"
     kinds = {c["kind"] for c in s.conflicts}
-    assert "preference-vs-preference" in kinds
-    contested = [c for c in s.conflicts
-                 if c["kind"] == "preference-vs-preference"]
-    assert any(set(c["pref_ids"]) == {"KP-02", "KP-06"} for c in contested)
-    # no winner is hidden through candidate-id ordering: nothing selected
-    assert s.candidate_id is None
-    assert set(s.surviving_candidate_ids) == {"L_a", "H_a", "L_b", "H_b"}
+    assert "policy-vs-preference" in kinds
+    tension = [c for c in s.conflicts if c["kind"] == "policy-vs-preference"]
+    assert any(c["pref_ids"] == ["KP-03"] for c in tension)
+    assert any("SP-12" in c["resolution"] for c in tension)
+
+
+def test_05b_preference_vs_preference_conflict_preserved():
+    ids = ["a", "b"]
+    maps = {"a": {"ref_kind": "old-low-htf", "rank": 1},
+            "b": {"ref_kind": "local", "rank": 2}}
+
+    def rule_htf(l, r):
+        ind = {"old-low-htf", "old-high-reclaimed"}
+        li, ri = l.get("ref_kind") in ind, r.get("ref_kind") in ind
+        return None if li == ri else li
+
+    def rule_rank(l, r):
+        if "rank" not in l or "rank" not in r:
+            return None
+        return None if l["rank"] == r["rank"] else l["rank"] > r["rank"]
+
+    kb = (
+        ExpertPreference(pref_id="T-1", task_id="T-S1", kclass="E",
+                         klass="S", source="test-source-1",
+                         source_family="t", statement="s", context="c",
+                         observable_evidence=("ref_kind",),
+                         licenses="lic-htf", exceptions="", conflict_status="",
+                         provenance_refs=()),
+        ExpertPreference(pref_id="T-2", task_id="T-S1", kclass="E",
+                         klass="S", source="test-source-2",
+                         source_family="t", statement="s", context="c",
+                         observable_evidence=("rank",),
+                         licenses="lic-rank", exceptions="",
+                         conflict_status="", provenance_refs=()),
+    )
+    act, inact, conf, winner, diag = apply_expert_preferences(
+        ids, maps, kb,
+        license_rules={"lic-htf": rule_htf, "lic-rank": rule_rank})
+    # T-1 prefers a; T-2 prefers b -> conflict preserved, NO winner
+    assert winner is None
+    assert conf and any(set(c["pref_ids"]) == {"T-1", "T-2"} for c in conf)
+    assert diag["preferred"] == []
 
 
 # --------------------------------------------------------------------------
-# 6 — no applicable preference -> UNRESOLVED (never a default pick)
+# 6 — no applicable preference -> UNRESOLVED (never a default)
 # --------------------------------------------------------------------------
 def test_06_no_applicable_preference_unresolved():
     w = make_world()
-    s = _sel(w, role=None, rel=ContextualRelationships())
+    s = _sel(w, role="origin-of-last-confirmed-leg", policy_id=None,
+             rel=ContextualRelationships())
     assert s.outcome == OUTCOME_UNRESOLVED
     assert s.reason["code"] == REASON_MP
     assert "Pi_T" in s.reason["evidence_needed"]
     inactive_ids = {i["pref_id"] for i in s.inactive_preferences}
     assert {"KP-02", "KP-03", "KP-05", "KP-06"} <= inactive_ids
-    # KP-05 (F-class) is a documented refusal, never a rule
+    kp02 = [i for i in s.inactive_preferences if i["pref_id"] == "KP-02"][0]
+    assert "never licenses" in kp02["cause"] or "nonbinding" in kp02["cause"]
     kp05 = [i for i in s.inactive_preferences if i["pref_id"] == "KP-05"][0]
-    assert "never binding" in kp05["cause"]
+    assert "never licenses" in kp05["cause"] or "nonbinding" in kp05["cause"]
 
 
 # --------------------------------------------------------------------------
-# 7 — temporally unavailable candidate
+# 7 — temporally unavailable candidates AND relationship evidence (F1)
 # --------------------------------------------------------------------------
 def test_07_temporally_unavailable_candidate():
     w = make_world()
-    late = _pt("H_late", REP_C, "high", 60, 99.0, 70)   # knowable AFTER 52
-    w["points"].append(late)
-    s = _sel(w, role=None)
+    w["points"].append(_pt("H_late", REP_C, "high", 60, 99.0, 70))
+    s = _sel(w, role="last-confirmed-extreme")
     assert "H_late" not in s.surviving_candidate_ids
     excl = {x.candidate_id: x.code for x in s.excluded}
     assert excl.get("H_late") == "X-KNOW"
 
-    # contract (audit F): a PRESENT but off-grid candidate time yields
-    # EXPLICIT UNAVAILABILITY — never used in a comparison, never supports a
-    # positive claim (excluded), and never silently compared
     bad = _pt("H_bad", REP_C, "high", 21, 41.0, 26)
     bad.knowable_time = T0 + timedelta(minutes=26, seconds=30)  # off-grid
     w2 = make_world()
     w2["points"].append(bad)
-    s2 = _sel(w2, role=None)
+    s2 = _sel(w2, role="last-confirmed-extreme")
     assert "H_bad" not in s2.surviving_candidate_ids
     excl2 = {x.candidate_id: x.code for x in s2.excluded}
     assert excl2.get("H_bad") == "X-KNOW"
 
-    # fail-closed write path: an off-grid STATUS-TRANSITION time is INVALID
-    # INPUT and is rejected (never applied)
     p = w["coarse"][0]
     with pytest.raises(ValueError):
         p.add_transition(53, STATUS_BROKEN,
@@ -274,36 +326,101 @@ def test_07_temporally_unavailable_candidate():
                          axis=AXIS)
 
 
+def test_07b_adv_future_relationship_evidence_unavailable():
+    w = make_world()
+    rel_future = ContextualRelationships(test_history={
+        "L_a": [{"bar": 60, "kind": EVENT_WICK_TOUCH}],   # FUTURE (> 52)
+        "L_b": [{"bar": 40, "kind": EVENT_CLOSE_THROUGH}],
+    })
+    rel_none = ContextualRelationships()
+    s_f = _sel(w, role="origin-of-last-confirmed-leg", policy_id=None,
+               rel=rel_future)
+    s_n = _sel(w, role="origin-of-last-confirmed-leg", policy_id=None,
+               rel=rel_none)
+    # the future event must be unavailable and must NOT influence selection
+    assert s_f.to_record()["outcome"] == s_n.to_record()["outcome"]
+    assert s_f.candidate_id == s_n.candidate_id
+    assert any("future" in d["reason"] for d in s_f.dropped_evidence)
+
+
+def test_07c_adv_offgrid_and_unmappable_relationship_evidence():
+    w = make_world()
+    rel = ContextualRelationships(
+        test_history={
+            "L_a": [{"bar": 30, "time": T0 + timedelta(minutes=30, seconds=30),
+                     "kind": EVENT_WICK_TOUCH}],            # off-grid time
+            "L_b": [{"kind": EVENT_WICK_TOUCH}],            # no stamp
+            "H_a": [{"bar": 30, "kind": "some-other-kind"}],  # unknown kind
+        },
+        ref_kind={"H_b": "old-low-htf"},      # plain value: no stamp
+    )
+    s = _sel(w, role="origin-of-last-confirmed-leg", policy_id=None, rel=rel)
+    reasons = " | ".join(d["reason"] for d in s.dropped_evidence)
+    assert "off-grid" in reasons
+    assert "unmappable" in reasons
+    # every dropped fact is unavailable: no preference activated, no pick
+    assert s.outcome == OUTCOME_UNRESOLVED
+    assert not s.activated_preferences
+    # and the plain ref_kind value never reaches evidence
+    assert not any(e.name == "ref_kind" for e in s.evidence)
+
+
+def test_07d_adv_future_declaration_unavailable():
+    w = make_world()
+    rel = ContextualRelationships(ref_kind={
+        "L_a": {"value": "old-low-htf", "known_bar": 60},   # future (> 52)
+        "L_b": {"value": "local", "known_bar": 35},
+    })
+    s = _sel(w, role="origin-of-last-confirmed-leg", policy_id=None, rel=rel)
+    # KP-03 cannot compare: only one side has a valid declaration
+    assert s.outcome == OUTCOME_UNRESOLVED
+    assert not s.activated_preferences
+    assert any("future" in d["reason"] for d in s.dropped_evidence)
+
+
 # --------------------------------------------------------------------------
-# 8 — replay determinism (SWS-04d) + future-data isolation
+# 8 — replay determinism + input-permutation invariance (F4)
 # --------------------------------------------------------------------------
 def test_08_replay_determinism():
     w1, w2 = make_world(), make_world()
-    r1 = _sel(w1, role=None).to_record()
-    r2 = _sel(w2, role=None).to_record()
+    r1 = _sel(w1, role="last-confirmed-extreme").to_record()
+    r2 = _sel(w2, role="last-confirmed-extreme").to_record()
     assert json.dumps(r1, sort_keys=True) == json.dumps(r2, sort_keys=True)
 
-    # future-EVENT isolation (the real leak vector): the SAME candidate
-    # inventory, decided at bar 52, with and without a post-53 status
-    # transition on L_b — the frozen past decision must be identical
     w4 = make_world()
     w4["points"].append(_pt("L_c", REP_C, "low", 48, 28.0, 56))
-    r4 = _sel(w4, role=None, bar=52).to_record()
+    r4 = _sel(w4, role="origin-of-last-confirmed-leg", policy_id="P-ORIGIN",
+              bar=52).to_record()
     w5 = copy.deepcopy(w4)
     w5["coarse"][2].add_transition(53, STATUS_BROKEN,
                                    info_time=T0 + timedelta(minutes=53),
                                    by="E:break", note="close below 20",
                                    event_ref="E:break@53", axis=AXIS)
-    r5 = _sel(w5, role=None, bar=52).to_record()
+    r5 = _sel(w5, role="origin-of-last-confirmed-leg", policy_id="P-ORIGIN",
+              bar=52).to_record()
     assert json.dumps(r5, sort_keys=True) == json.dumps(r4, sort_keys=True)
-    # the extra late candidate never leaks into the past selection either
-    assert r5["outcome"] == r1["outcome"]
-    # and the SAME changed evidence DOES change the decision at bar 56
-    # (revision channel is live: the broken origin is surfaced, not hidden)
-    s56 = _sel(w5, role="origin-of-last-confirmed-leg", policy_id="P-ORIGIN",
-               bar=56)
-    assert s56.outcome == OUTCOME_UNRESOLVED
-    assert s56.reason["code"] == REASON_IC
+
+
+def test_08b_input_permutation_invariance():
+    w = make_world()
+    s_fwd = _sel(w, role="last-confirmed-extreme")
+    w_rev = make_world()
+    w_rev["points"] = list(reversed(w_rev["points"]))
+    w_rev["clegs"] = list(reversed(w_rev["clegs"]))
+    s_rev = _sel(w_rev, role="last-confirmed-extreme")
+    assert s_fwd.outcome == s_rev.outcome
+    assert s_fwd.candidate_id == s_rev.candidate_id
+    assert sorted(s_fwd.surviving_candidate_ids) == \
+        sorted(s_rev.surviving_candidate_ids)
+    assert {x.candidate_id: x.code for x in s_fwd.excluded} == \
+        {x.candidate_id: x.code for x in s_rev.excluded}
+    # preference path is likewise permutation-invariant
+    s_fwd2 = _sel(w, role="origin-of-last-confirmed-leg", policy_id=None)
+    s_rev2 = _sel(w_rev, role="origin-of-last-confirmed-leg", policy_id=None)
+    assert s_fwd2.outcome == s_rev2.outcome
+    assert s_fwd2.reason["code"] == s_rev2.reason["code"]
+    assert sorted(s_fwd2.surviving_candidate_ids) == \
+        sorted(s_rev2.surviving_candidate_ids)
 
 
 # --------------------------------------------------------------------------
@@ -315,61 +432,114 @@ def test_09_frozen_historical_selection():
     rec = s.to_record()
     frozen = json.dumps(rec, sort_keys=True)
     assert json.loads(frozen) == rec
-    # policy snapshots are carried on the frozen record (consolidation V1)
     assert s.base_result.policy_snapshots.get("role", {}).get("value") == \
         "origin-of-last-confirmed-leg"
-    assert "P-ORIGIN" in s.policy_snapshots
-    # historical status is append-only: later events never rewrite the past
     lb = w["coarse"][2]
     lb.add_transition(53, STATUS_BROKEN, info_time=T0 + timedelta(minutes=53),
                       event_ref="E:break@53", axis=AXIS)
     assert lb.status_at(52) == "confirmed"       # frozen past
-    assert lb.status_at(56) == STATUS_BROKEN     # later state
+    assert lb.status_at(56) == STATUS_BROKEN
 
 
 # --------------------------------------------------------------------------
-# 10 — revision after changed evidence (W8) with existing mechanisms
+# 10 — REAL InterpretationLedger recomputation (finding F5)
 # --------------------------------------------------------------------------
-def test_10_revision_after_changed_evidence():
+def test_10_real_ledger_propagation_through_dependent_conclusion():
     w = make_world()
-    ledger = InterpretationLedger()
-    s1 = _sel(w, role="origin-of-last-confirmed-leg", policy_id="P-ORIGIN",
-              bar=52)
-    uid1 = ledger.record(s1.base_result,
-                         s1.ledger_payload(run_id="t10",
-                                           points=w["points"],
-                                           legs=w["clegs"]))
-    assert s1.candidate_id == "L_b"
-
-    # changed evidence: break at 53 (append-only) + a new confirmed leg
-    w["coarse"][2].add_transition(53, STATUS_BROKEN,
-                                  info_time=T0 + timedelta(minutes=53),
-                                  by="E:break@53", note="close below level",
-                                  event_ref="E:break@53", axis=AXIS)
-    lc = _pt("L_c", REP_C, "low", 48, 28.0, 56)
-    w["points"].append(lc)
+    # the evolving world is part of the RECORDED inputs (candidate set is
+    # captured at record time; lifecycle facts apply to the shared objects):
+    # L_c/Leg4 exist but are NOT YET KNOWABLE at the 52 decision
+    w["points"].append(_pt("L_c", REP_C, "low", 48, 28.0, 56))
     w["clegs"].append(_leg("Leg4", REP_C, "H_b", "L_c", "down", 40, 48,
                            50.0, 28.0, 56))
-    s2 = _sel(w, role="origin-of-last-confirmed-leg", policy_id="P-ORIGIN",
-              bar=56)
-    uid2 = ledger.record(s2.base_result,
-                         s2.ledger_payload(run_id="t10",
-                                           points=w["points"],
-                                           legs=w["clegs"]))
+    ledger = InterpretationLedger()
+    rel = ContextualRelationships()
+    s1 = _sel(w, role="origin-of-last-confirmed-leg", policy_id="P-ORIGIN",
+              bar=52, rel=rel)
+    payload1 = s1.ledger_payload(
+        run_id="t10", points=w["points"], legs=w["clegs"], rep=REP_C,
+        policy=w["pol"], role="origin-of-last-confirmed-leg",
+        policy_id="P-ORIGIN", axis=AXIS, relationships=rel,
+        decision_time=T0 + timedelta(minutes=52), state_id_prefix="S1X")
+    # complete serialized inputs (finding F5)
+    assert payload1["input_records"]["points"], "serialized inputs required"
+    assert payload1["input_records"]["relationships"] is not None
+    uid1 = ledger.record(s1.final_result, payload1)
+    assert s1.candidate_id == "L_b"
 
-    # revision: the reference moved L_b -> H_b (origin of the new leg)
-    assert s2.candidate_id == "H_b"
-    assert s2.base_result.direction == "down"
-    # revision dependencies preserved through existing project mechanisms
-    assert "H_b" in s2.base_result.dependencies
-    assert "Leg4" in s2.base_result.dependencies
-    # the old selection is RETAINED as a version (never edited in place)
-    assert uid1 != uid2
-    assert ledger.versions[uid1][0]["result"].selected_id == "L_b"
-    assert ledger.versions[uid2][0]["result"].selected_id == "H_b"
-    # the interpretation carries revision dependencies (task §6.9-6.10)
-    assert s2.interpretation["revision_dependencies"] == \
-        s2.base_result.dependencies
+    # actual dependent conclusion: the T-S5 falsifier of interpretation I1
+    from trading_system.research.contextual_selection import task_s5_falsifier
+    claims = [{"interpretation": "I1", "view": "C",
+               "role": "origin-of-last-confirmed-leg", "direction": "up"}]
+    r5 = task_s5_falsifier(claims, w["points"], w["clegs"], 52,
+                           state_id_prefix="S5X", axis=AXIS,
+                           decision_time=T0 + timedelta(minutes=52))
+    assert r5.selected_id == "L_b"      # falsifier follows the reference
+    # NOTE: no "decision_time" key — the kernel T-S5 recompute then uses the
+    # UPDATE boundary (as-of-update recomputation, SP-20)
+    uid2 = ledger.record(r5, {"kind": "T-S5", "claims": claims,
+                              "points": w["points"], "legs": w["clegs"],
+                              "depends_on_results": [uid1],
+                              "state_id_prefix": "S5X",
+                              "axis": AXIS})
+
+    # changed evidence: a recorded break fact at the update boundary
+    log = ledger.propagate(
+        update_bar=56, changed_ids=["L_b"],
+        changed_states={"L_b": "broken"},
+        update_time=T0 + timedelta(minutes=56), event_ref="E:break@53",
+        axis=AXIS)
+
+    # expert selection: a NEW result version with ACTUAL computed changes
+    v1 = ledger.versions[uid1]
+    assert len(v1) == 2 and v1[-1]["version"] == 2
+    assert v1[-1]["recomputable"] is True and not v1[-1].get("stale", False)
+    change_fields = {c["field"] for c in v1[-1]["computed_changes"]}
+    assert "selected_id" in change_fields
+    assert v1[-1]["result"].selected_id == "H_b"
+    # updated dependencies (L_b/Leg3 replaced by H_b/Leg4)
+    deps = set(v1[-1]["result"].dependencies)
+    assert "Leg4" in deps and "H_b" in deps and "Leg3" not in deps
+
+    # dependent conclusion T-S5 also recomputed (transitive SP-20): per the
+    # documented W8 semantics the falsifier being VIOLATED changes the
+    # interpretation's status — the recomputed dependent conclusion is
+    # honestly unresolved (never patched, never kept as stale-current)
+    v2 = ledger.versions[uid2]
+    assert len(v2) == 2 and v2[-1]["version"] == 2
+    assert v2[-1]["recomputable"] is True and not v2[-1].get("stale", False)
+    assert v2[-1]["result"].status in ("unresolved", "falsified")
+    assert v2[-1]["result"].selected_id != "L_b"
+    assert any(c["field"] in ("selected_id", "status")
+               for c in v2[-1]["computed_changes"])
+    assert any(e.get("kind") == "recomputation" and not e.get("stale")
+               for e in log)
+
+
+def test_10b_stale_or_empty_recompute_is_never_success():
+    w = make_world()
+    ledger = InterpretationLedger()
+    s1 = _sel(w, role="origin-of-last-confirmed-leg", policy_id="P-ORIGIN")
+    # one dependent WITHOUT payload, one with an EMPTY expert payload
+    uid_nopay = ledger.record(s1.final_result, None)
+    uid_empty = ledger.record(
+        s1.final_result,
+        {"kind": "expert_structural_reference_selection"})   # empty inputs
+    log = ledger.propagate(update_bar=53, changed_ids=["L_b"],
+                           changed_states={"L_b": "broken"},
+                           update_time=T0 + timedelta(minutes=53),
+                           axis=AXIS)
+    stale_entries = [e for e in log if e.get("stale")]
+    assert stale_entries, "stale recomputation must be recorded as stale"
+    # NOT success: no new recomputable version was appended
+    assert len(ledger.versions[uid_nopay]) == 1
+    assert len(ledger.versions[uid_empty]) == 1
+    assert ledger.versions[uid_nopay][-1].get("stale") is True
+    assert ledger.versions[uid_empty][-1].get("stale") is True
+    reasons = " ".join(str(e.get("stale_reason", "")) for e in stale_entries)
+    assert "payload" in reasons or "incomplete" in reasons or "empty" in reasons
+    snap = ledger.snapshot()
+    assert snap["n_stale_results"] >= 2
 
 
 # --------------------------------------------------------------------------
@@ -407,37 +577,173 @@ def test_12_runtime_performance():
     bars = _bars_wave(2000)
     pts = fk_turning_points(bars, k=5, rep=REP_C, id_prefix="P|")
     legs = build_legs(pts, REP_C)
-    assert len(pts) >= 100, "fixture must exercise a real candidate set"
+    assert len(pts) >= 100
     pol = PolicyRegistry()
     pol.register("P-ORIGIN", "role", "origin-of-last-confirmed-leg")
     t0 = time.perf_counter()
     for bar in (400, 800, 1200, 1600):
         s = expert_structural_reference_selection(
             points=pts, legs=legs, decision_bar=bar, rep=REP_C, policy=pol,
-            role=None,  # worst case: full preference evaluation over survivors
+            role="origin-of-last-confirmed-leg", policy_id=None,
             relationships=ContextualRelationships())
         assert s.outcome in (OUTCOME_SELECTED, OUTCOME_UNRESOLVED)
     elapsed = time.perf_counter() - t0
-    assert elapsed < 5.0, f"4 selections over {len(pts)} candidates took {elapsed:.2f}s"
+    assert elapsed < 5.0, f"4 selections took {elapsed:.2f}s"
 
 
 # --------------------------------------------------------------------------
-# Bonus contract checks (task §4/§7 discipline)
+# Audit acceptance: roles, ties, KP-02 event types, comparisons
 # --------------------------------------------------------------------------
-def test_f_class_never_binds():
+def test_adv_missing_and_mismatched_roles():
+    w = make_world()
+    for bad_role in (None, "", "origin-of-last-leg", "T-S1", 123):
+        s = _sel(w, role=bad_role)
+        assert s.outcome == OUTCOME_UNRESOLVED and s.candidate_id is None
+        assert s.reason["code"] == REASON_MP
+        assert "no valid declared role" in s.reason["text"]
+        # invalid role never activates preferences (no bypass)
+        assert not s.activated_preferences
+
+
+def test_adv_incomplete_comparison_unresolved():
+    w = make_world()
+    # both candidates carry the indicated reference kind -> no licensed pair
+    rel = ContextualRelationships(ref_kind={
+        "L_a": {"value": "old-low-htf", "known_bar": 15},
+        "L_b": {"value": "old-high-reclaimed", "known_bar": 35},
+    })
+    s = _sel(w, role="origin-of-last-confirmed-leg", policy_id=None, rel=rel)
+    assert s.outcome == OUTCOME_UNRESOLVED
+    assert not s.activated_preferences
+    # one-sided evidence: the comparison cannot be made -> unresolved, and
+    # the candidate lacking evidence is NOT silently omitted
+    rel2 = ContextualRelationships(ref_kind={
+        "L_b": {"value": "old-low-htf", "known_bar": 35}})
+    s2 = _sel(w, role="origin-of-last-confirmed-leg", policy_id=None,
+              rel=rel2)
+    assert s2.outcome == OUTCOME_UNRESOLVED
+    assert set(s2.surviving_candidate_ids) == {"L_a", "H_a", "L_b", "H_b"}
+
+
+def test_adv_kp02_event_types_distinct_and_nonbinding():
+    w = make_world()
+    rel_rich = ContextualRelationships(test_history={
+        "L_b": [{"bar": 33, "kind": EVENT_WICK_TOUCH},
+                {"bar": 34, "kind": EVENT_CLOSE_THROUGH}],
+        "L_a": [{"bar": 20, "kind": EVENT_WICK_TOUCH}],
+        "H_a": [], "H_b": [],
+    })
+    rel_empty = ContextualRelationships(test_history={
+        "L_b": [], "L_a": [], "H_a": [], "H_b": []})
+    s_rich = _sel(w, role="origin-of-last-confirmed-leg", policy_id=None,
+                  rel=rel_rich)
+    s_empty = _sel(w, role="origin-of-last-confirmed-leg", policy_id=None,
+                   rel=rel_empty)
+    # nonbinding proof: test_history presence/value NEVER changes the output
+    assert s_rich.outcome == s_empty.outcome
+    assert s_rich.candidate_id == s_empty.candidate_id
+    assert not s_rich.activated_preferences
+    assert not s_empty.activated_preferences
+    # event types are DISTINCT observations (state only)
+    wick_items = [e for e in s_rich.evidence if e.name == "wick_range_touches"]
+    thru_items = [e for e in s_rich.evidence if e.name == "close_throughs"]
+    assert wick_items and thru_items
+    assert all(e.value for e in wick_items) or any(
+        e.value for e in wick_items)
+    assert "state" in wick_items[0].detail
+    assert "state" in thru_items[0].detail
+    for e in s_rich.evidence:
+        detail = (e.detail or "").lower()
+        for forbidden in ("validated", "rejected", "successful reaction"):
+            assert forbidden not in detail or "no rejection" in detail, \
+                f"inference leaked into evidence: {e.name}"
+    # KP-02 is documented as a nonbinding hypothesis
+    kp02 = [i for i in s_rich.inactive_preferences if i["pref_id"] == "KP-02"]
+    assert kp02 and "nonbinding" in kp02[0]["cause"]
+
+
+def test_adv_equal_knowable_tie_unresolved_kernel_and_layer():
+    # two confirmed points with IDENTICAL knowable stamps
+    tie_world = {
+        "points": [
+            _pt("X_1", REP_C, "low", 30, 20.0, 35),
+            _pt("X_2", REP_C, "high", 31, 40.0, 35),
+        ],
+        "clegs": [],
+        "pol": PolicyRegistry(),
+    }
+    # kernel (delegated) itself: UNRESOLVED, never order-picked
+    k1 = task_s1_structural_reference(
+        tie_world["points"], [], 52, REP_C, "last-confirmed-extreme",
+        tie_world["pol"], decision_time=T0 + timedelta(minutes=52), axis=AXIS)
+    assert k1.status == "unresolved" and k1.selected_id is None
+    assert set(k1.survivors) == {"X_1", "X_2"}
+    assert k1.unresolved.reason_code == REASON_MP
+    assert "tie" in k1.unresolved.evidence_needed
+    # expert layer: same — UNRESOLVED regardless of input order
+    for order in ([0, 1], [1, 0]):
+        w = {"points": [tie_world["points"][i] for i in order],
+             "clegs": [], "pol": PolicyRegistry()}
+        s = _sel(w, role="last-confirmed-extreme")
+        assert s.outcome == OUTCOME_UNRESOLVED and s.candidate_id is None
+        assert set(s.surviving_candidate_ids) == {"X_1", "X_2"}
+
+
+def test_adv_equal_leg_recency_tie_unresolved():
+    # two legs with identical recency stamps but distinct origins
+    pts = [
+        _pt("A_1", REP_C, "low", 10, 10.0, 15),
+        _pt("A_2", REP_C, "high", 20, 40.0, 25),
+        _pt("B_1", REP_C, "low", 30, 20.0, 35),
+        _pt("B_2", REP_C, "high", 40, 50.0, 45),
+    ]
+    leg1 = _leg("T1", REP_C, "A_1", "A_2", "up", 10, 20, 10.0, 40.0, 45)
+    leg2 = _leg("T2", REP_C, "B_1", "B_2", "up", 30, 40, 20.0, 50.0, 45)
+    # identical (knowable_time, t1_time, knowable_bar, t1) stamps:
+    leg2.t1_time = leg1.t1_time
+    leg2.knowable_time = leg1.knowable_time
+    leg2.t1 = leg1.t1
+    pol = PolicyRegistry()
+    pol.register("P-ORIGIN", "role", "origin-of-last-confirmed-leg")
+    k = task_s1_structural_reference(
+        pts, [leg1, leg2], 52, REP_C, "origin-of-last-confirmed-leg", pol,
+        policy_id="P-ORIGIN", decision_time=T0 + timedelta(minutes=52),
+        axis=AXIS)
+    assert k.status == "unresolved" and k.selected_id is None
+    assert set(k.survivors) == {"A_1", "B_1"}
+    assert "tie" in k.unresolved.evidence_needed
+    # permutation invariance of the tie outcome
+    k2 = task_s1_structural_reference(
+        list(reversed(pts)), [leg2, leg1], 52, REP_C,
+        "origin-of-last-confirmed-leg", pol, policy_id="P-ORIGIN",
+        decision_time=T0 + timedelta(minutes=52), axis=AXIS)
+    assert k2.status == "unresolved" and k2.selected_id is None
+    assert set(k2.survivors) == {"A_1", "B_1"}
+
+
+# --------------------------------------------------------------------------
+# Contract checks
+# --------------------------------------------------------------------------
+def test_f_class_never_binds_or_licenses():
     with pytest.raises(ValueError):
         ExpertPreference(
             pref_id="BAD", task_id="T-S1", kclass="F", klass="U",
             source="x", source_family="x", statement="x", context="x",
             observable_evidence=(), licenses="none", exceptions="",
             conflict_status="", provenance_refs=(), binding=True)
+    with pytest.raises(ValueError):
+        ExpertPreference(
+            pref_id="BAD2", task_id="T-S1", kclass="F", klass="U",
+            source="x", source_family="x", statement="x", context="x",
+            observable_evidence=(), licenses="tested>untested",
+            exceptions="", conflict_status="", provenance_refs=())
 
 
 def test_preference_resolution_is_pure_and_replayable():
     ids = ["a", "b", "c"]
-    maps = {"a": {"test_history": [{"bar": 1}]},
-            "b": {"test_history": []},
-            "c": {"test_history": []}}
+    maps = {"a": {"ref_kind": "old-low-htf"},
+            "b": {"ref_kind": "local"},
+            "c": {"ref_kind": "local"}}
     r1 = apply_expert_preferences(ids, maps)
     r2 = apply_expert_preferences(ids, maps)
     assert json.dumps(r1, sort_keys=True, default=str) == \

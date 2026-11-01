@@ -1534,7 +1534,44 @@ def task_s1_structural_reference(points: Sequence[PointCandidate],
             return _ret("T-S1", decision_bar, "unresolved", None,
                        [p.candidate_id for p in confirmed], excluded, state,
                        prov, pregs, rep.rep_id, decision_time=decision_time)
-        last_leg = max(confirmed_legs, key=leg_recency_key)
+        # AUDIT REMEDIATION (finding 4): equal leg-recency (knowable-time)
+        # ties between DISTINCT origins are UNRESOLVED — never order-picked.
+        best_leg_key = max(leg_recency_key(l) for l in confirmed_legs)
+        tied_legs = [l for l in confirmed_legs
+                     if leg_recency_key(l) == best_leg_key]
+        tied_origins: List[str] = []
+        for l in tied_legs:
+            if l.start_id not in tied_origins:
+                tied_origins.append(l.start_id)
+        if len(tied_origins) > 1:
+            for p in confirmed:
+                if p.candidate_id not in tied_origins:
+                    excluded.append(Exclusion(
+                        p.candidate_id, X_POL,
+                        f"O:{policy_id}" if policy_id
+                        else "R:within-class:leg_recency",
+                        "not the origin of a most-recent confirmed leg "
+                        "(tied recency)"))
+            state = UnresolvedState(
+                state_id=f"{state_id_prefix}-{decision_bar}", task="T-S1",
+                decision_bar=decision_bar, survivors=tied_origins,
+                excluded=excluded, reason_code=REASON_MP,
+                evidence_needed=("equal leg-recency (knowable-time) tie "
+                                 "between candidate legs; declare a tie "
+                                 "policy (SP-18)"),
+                policy_refs=pregs, provenance=prov,
+                dependents_blocked=["T-S5", "T-S4"])
+            return _ret("T-S1", decision_bar, "unresolved", None,
+                       tied_origins, excluded, state, prov, pregs,
+                       rep.rep_id,
+                       dependents=["T-S5-falsifier", "T-S4-base",
+                                   "zone-context", "liquidity-objective"],
+                       notes=["equal leg-recency tie: unresolved (never "
+                              "order-resolved)"],
+                       dependencies=_deps(*tied_origins,
+                                          *[l.leg_id for l in tied_legs]),
+                       decision_time=decision_time)
+        last_leg = tied_legs[0]
         target_id = last_leg.start_id  # origin of the most recent confirmed leg
         target = next(p for p in points if p.candidate_id == target_id)
         # audit D5: a broken origin cannot serve as the structural reference;
@@ -1622,7 +1659,42 @@ def task_s1_structural_reference(points: Sequence[PointCandidate],
                 policy_refs=pregs, provenance=prov)
             return _ret("T-S1", decision_bar, "unresolved", None, [], excluded,
                        state, prov, pregs, rep.rep_id, decision_time=decision_time)
-        best = max(confirmed, key=lambda p: p.knowable_bar)
+
+        # AUDIT REMEDIATION (expert-selection V1 audit, finding 4): equal
+        # knowable-time ties are UNRESOLVED — an order-dependent winner is
+        # never implied by max()/list order.  The knowable stamp mirrors
+        # leg_recency_key's verified-time discipline.
+        def _know_stamp(p: object) -> tuple:
+            kt = getattr(p, "knowable_time", None)
+            return (kt is not None,
+                    pd.Timestamp(kt) if kt is not None else _TS_MIN,
+                    p.knowable_bar)
+        best_key = max(_know_stamp(p) for p in confirmed)
+        tied = [p for p in confirmed if _know_stamp(p) == best_key]
+        if len(tied) > 1:
+            tied_ids = [p.candidate_id for p in tied]
+            for p in confirmed:
+                if p.candidate_id not in tied_ids:
+                    excluded.append(Exclusion(
+                        p.candidate_id, X_POL, "R:within-class:knowable_bar",
+                        "less recent confirmed point"))
+            state = UnresolvedState(
+                state_id=f"{state_id_prefix}-{decision_bar}", task="T-S1",
+                decision_bar=decision_bar, survivors=tied_ids,
+                excluded=excluded, reason_code=REASON_MP,
+                evidence_needed=("equal knowable-time tie among confirmed "
+                                 "candidates; declare a tie policy (SP-18)"),
+                policy_refs=pregs, provenance=prov,
+                dependents_blocked=["T-S5-falsifier", "T-S4-base",
+                                    "zone-context", "liquidity-objective"])
+            return _ret("T-S1", decision_bar, "unresolved", None, tied_ids,
+                       excluded, state, prov, pregs, rep.rep_id,
+                       notes=["equal knowable-time tie: unresolved (never "
+                              "order-resolved)"],
+                       dependents=["T-S5-falsifier", "T-S4-base",
+                                   "zone-context", "liquidity-objective"],
+                       decision_time=decision_time)
+        best = tied[0]
         for p in confirmed:
             if p.candidate_id != best.candidate_id:
                 excluded.append(Exclusion(p.candidate_id, X_POL, "R:within-class:knowable_bar",
@@ -2311,6 +2383,21 @@ def task_s5_falsifier(claims: Sequence[dict], points: Sequence[PointCandidate],
 # Interpretation ledger & REAL revision propagation (IC-10, IC-11, SP-20)
 # --------------------------------------------------------------------------
 
+# AUDIT REMEDIATION (expert-selection V1 audit, finding 5): extensible real
+# recomputation.  A payload kind outside the built-in task set may register a
+# handler ``fn(payload, update_bar, update_time) -> SelectionResult`` so the
+# ledger recomputes it from its stored COMPLETE inputs (audit D5) exactly like
+# the built-in kinds — never patched, never claimed without recomputation.
+_RECOMPUTE_HANDLERS: Dict[str, Callable] = {}
+
+
+def register_recompute_handler(kind: str,
+                               fn: Callable[..., "SelectionResult"]) -> None:
+    if not kind or not callable(fn):
+        raise ValueError("recompute handler requires a kind and a callable")
+    _RECOMPUTE_HANDLERS[kind] = fn
+
+
 class InterpretationLedger:
     """Append-only record of selections, events, versions, and propagation.
 
@@ -2338,6 +2425,10 @@ class InterpretationLedger:
         # transitive dependent recomputation along result-dependency edges)
         self._result_deps: Dict[str, set] = {}
         self._uid_seq = 0
+        # AUDIT REMEDIATION (finding 5): per-ledger snapshot of the
+        # registered real-recomputation handlers
+        self._recompute_handlers: Dict[str, Callable] = dict(
+            _RECOMPUTE_HANDLERS)
 
     # ---- recording -----------------------------------------------------
 
@@ -2734,6 +2825,12 @@ class InterpretationLedger:
                 allow_provisional=payload.get("allow_provisional", False),
                 event_ref=payload.get("event_ref"),
                 axis=payload.get("axis"))
+        # AUDIT REMEDIATION (finding 5): registered real-recomputation
+        # handlers for non-built-in kinds (complete-input recompute; an
+        # incomplete payload raises and is marked STALE, never a success).
+        handler = self._recompute_handlers.get(kind)
+        if handler is not None:
+            return handler(payload, update_bar, update_time)
         raise ValueError(f"payload kind {kind!r} not recomputable")
 
     def snapshot(self) -> dict:

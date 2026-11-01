@@ -128,6 +128,9 @@ __all__ = [
 # preferences for STRUCTURAL_REFERENCE_SELECTION (task classification A-F),
 # conflict preservation, evidence + provenance chains.
 from trading_system.research.contextual_selection.expert_selection import (  # noqa: F401
+    EVENT_CLOSE_THROUGH,
+    EVENT_KINDS,
+    EVENT_WICK_TOUCH,
     EXPERT_KNOWLEDGE_SRS_V1,
     EXPERT_ROLE_UNDECLARED,
     KNOWLEDGE_BY_ID,
@@ -135,6 +138,7 @@ from trading_system.research.contextual_selection.expert_selection import (  # n
     OUTCOME_UNRESOLVED,
     SRS_TASK_ID,
     SRS_TASK_NAME,
+    VALID_ROLES,
     ContextualRelationships,
     EvidenceItem,
     ExpertPreference,
@@ -146,6 +150,7 @@ from trading_system.research.contextual_selection.expert_selection import (  # n
 __all__ += [
     "EXPERT_KNOWLEDGE_SRS_V1", "EXPERT_ROLE_UNDECLARED", "KNOWLEDGE_BY_ID",
     "OUTCOME_SELECTED", "OUTCOME_UNRESOLVED", "SRS_TASK_ID", "SRS_TASK_NAME",
+    "VALID_ROLES", "EVENT_KINDS", "EVENT_WICK_TOUCH", "EVENT_CLOSE_THROUGH",
     "ContextualRelationships", "EvidenceItem", "ExpertPreference",
     "ExpertSelection", "apply_expert_preferences",
     "expert_structural_reference_selection",
