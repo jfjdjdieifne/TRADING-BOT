@@ -9,6 +9,15 @@ and does not claim any selection quality (which remains NOT_ESTABLISHED).
 
 ---
 
+> **V1.1 AUDIT REMEDIATION ADDENDUM** (base `f040ffd` → remediation
+> `9bca73b2cf0033a2a39e48d56b351e55b8d47bec`).  All six audit findings are
+> fixed; see the addendum at the end of this report for the per-finding
+> mapping, adversarial-test results and the post-remediation replay
+> manifest.  Sections A-L below describe the V1 build; where V1.1 changes
+> behavior the addendum states the change explicitly.
+
+---
+
 ## A. Verified branch and full HEAD SHA
 
 - Branch: `arena/a41fd997-trading-bot` (session branch; unchanged).
@@ -210,3 +219,111 @@ invented.
    pilot are out of scope for this V1 (single-task constraint).
 8. The prior `causal_trading_intelligence/` research package remains lost
    (session-recorded only) and was not recreated, per instruction.
+
+---
+
+# V1.1 Audit Remediation Addendum
+
+Base: `f040ffd2ee61b5f9bdaf20fb855a8bcb30e9e854` ·
+Remediation commit: **`9bca73b2cf0033a2a39e48d56b351e55b8d47bec`** ·
+Scope: minimal — audit findings only.
+
+## Finding-by-finding mapping
+
+**F1 — relationship-evidence validation.** New `ContextualRelationships.
+validated(decision_bar, decision_time, axis)` validates EVERY fact — test
+events (`test_history`), `ref_kind` and `round_cluster` declarations —
+against the decision boundary through the approved interfaces over the
+sealed 6.2A-0 contract (`SharedInformationAxis.is_on_grid`/`available`).
+Every fact must carry a knowability stamp (`bar`/`time`, or
+`known_bar`/`known_time`). Missing stamp = unmappable; off-grid time; future
+stamp; time-bearing fact without axis/boundary — all **unavailable**, dropped
+AND logged (`ExpertSelection.dropped_evidence` + provenance count). The
+sealed `information_time.py` was neither modified nor duplicated.
+
+**F2 — task/role requirement, eligibility, explicit unresolved, no silent
+omission.** `VALID_ROLES` is enforced: a missing/unknown role yields
+UNRESOLVED (MP) with an explicit "no valid declared role" reason and NEVER
+falls through to preference selection. A missing policy (kernel MP state)
+does not bypass task/role eligibility: comparisons run only over
+gate-eligible candidates (kernel survivors + X-POL role-removed — X-POL is
+the Pi_T decision, not an eligibility gate). Missing evidence or incomplete
+comparisons return UNRESOLVED with explicit reasons/evidence_needed.
+`_account_all_candidates` surfaces every input candidate the kernel filters
+silently (X-STATE for broken/provisional, X-SUPER for superseded).
+
+**F3 — KP-02/KP-06 nonbinding; event types distinct.** `test_history`
+nonempty is removed as binding evidence. Events are kept as two DISTINCT
+state-only observations (`wick-range-touch` vs `close-through`; unknown
+kinds unmappable), and no evidence text infers rejection, validation or
+successful reaction (file 15 §15.4: taken status "establishes state, not
+cause"; touch count cannot establish relevance alone). "tested > untested"
+and "cluster > non-cluster" are reclassified **F — nonbinding research
+hypotheses** (F-class records can never license a comparison; enforced in
+`ExpertPreference.__post_init__`). The only source-substantiated conditional
+comparison is **KP-03** (REF-OLD-LOW-HTF / REF-OLD-HIGH-RECLAIMED;
+knowledge_foundation/05 §5.4a P-R + 15 §15.3 H).
+
+**F4 — equal-knowable-time ties unresolved.** Both kernel T-S1 branches are
+tie-aware (`last-confirmed-extreme`: identical knowable stamps;
+`origin-of-last-confirmed-leg`: identical leg-recency keys with distinct
+origins) and return UNRESOLVED (MP, "declare a tie policy (SP-18)"), never
+an order-picked winner. The expert selector carries an independent tie
+guard (defense in depth). Input-permutation tests prove order invariance.
+
+**F5 — real ledger recomputation.** `InterpretationLedger` gained an
+extensible `register_recompute_handler(kind, fn)` (built-ins unchanged);
+`expert_structural_reference_selection` registers a real handler that
+recomputes from the payload's COMPLETE inputs (live objects + serialized
+`input_records`) as of the update boundary. `ExpertSelection.final_result`
+(mirroring the expert outcome) is the registered SelectionResult. Empty or
+incomplete payloads raise and are marked **stale — never success**. Tested
+through an actual dependent conclusion (T-S5 falsifier of interpretation
+I1): both results get NEW versions with ACTUAL computed changes and updated
+dependencies after a recorded break fact (SP-20 transitive).
+
+**F6 — replay manifest.** `run_artifacts/replay_manifest_v1.json` records:
+dataset commit `parshant231234-eng/BTCUSDT-Historical-Data@27c9be70`; both
+input-file SHA-256 values (`BTCUSDT_1m_2025-08.csv` =
+`15d26d23…1c90a0cf4`, `BTCUSDT_1m_2025-09.csv` = `e1d5c8f3…0d7a48979`);
+final source commit `9bca73b2cf0033a2a39e48d56b351e55b8d47bec`; dependency
+versions python 3.11.2 / **numpy 1.26.4 / pandas 2.2.3 / pytest 8.3.5** (the
+pinned set, installed and used for every run).
+
+## Adversarial tests (25 expert tests total, all green)
+
+future relationship evidence unavailable · off-grid event time unavailable ·
+unmappable event/declaration unavailable · future declaration unavailable ·
+missing/mismatched roles explicit-unresolved (5 shapes) · incomplete
+comparisons (both-sided and one-sided) unresolved with no omission ·
+KP-02 event types distinct + nonbinding proof (identical output across
+test_history variations; no inference words) · equal-knowable tie
+unresolved in kernel AND layer (both orders) · equal leg-recency tie
+unresolved + permutation invariant · input-permutation invariance
+(outcome/selected/survivor-set/exclusion-map) · real ledger propagation
+(expert + T-S5 dependent: version 2, computed_changes, updated deps) ·
+stale/empty recompute rejected as success (no version bump, snapshot counts
+stale) · F-class records can never bind or license.
+
+Focused suites in the pinned environment: **25/25** expert + **26/26**
+kernel/audit = 51 green; **full repo suite exit 0**.
+
+## Post-remediation historical replay (V1.1)
+
+Same real window (2025-08-01 → 2025-09-27, 57 boundaries, 114 opportunities,
+18,615 coverage rows).  M1 role-declared: 56 SELECTED + 1 AI (same-bar
+ambiguity surfaced).  **M2 preference mode: 0 selections, 57 explicit
+UNRESOLVED (MP)** — with KP-02/KP-06 nonbinding and no observable
+ref_kind/cluster declarations in this generator output, nothing can
+legitimately resolve and nothing is forced (V1's single KP-02 selection is
+correctly gone).  Temporal violations 0; 54 reference revisions; replay
+determinism identical ×3; runtime 12.7 s total (173 ms/boundary avg).
+
+## Verification
+
+- `git diff --check`: clean.
+- `information_time.py` sha256 =
+  `72b03ca6d2333080e0df6dc18b1928147e877b41175f132c7bf08eb4e4d74ace`
+  (unchanged; asserted by test 11 and recorded in the run report).
+- No trading, performance or selection-quality claims are made; selection
+  quality remains NOT_ESTABLISHED.  No live trades executed.

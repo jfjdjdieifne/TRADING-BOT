@@ -1,0 +1,20 @@
+{
+  "dataset_commit": "parshant231234-eng/BTCUSDT-Historical-Data@27c9be70",
+  "input_file_sha256": {
+    "BTCUSDT_1m_2025-08.csv": "15d26d2374bce8804e25012ff76e5fad976633a2fde843ffb0f487e1c90a0cf4",
+    "BTCUSDT_1m_2025-09.csv": "e1d5c8f350d83df866ff36c3b4d74f7e5b383db07cde7bca0ee1f200d7a48979"
+  },
+  "final_source_commit": "9bca73b2cf0033a2a39e48d56b351e55b8d47bec",
+  "dependency_versions": {
+    "python": "3.11.2",
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "pytest": "8.3.5"
+  },
+  "representation": "C:F-K(k=5)",
+  "window": [
+    "2025-08-01 00:00:00",
+    "2025-09-27 00:00:00"
+  ],
+  "n_boundaries": 57
+}

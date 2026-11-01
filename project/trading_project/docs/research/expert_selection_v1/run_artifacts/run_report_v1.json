@@ -1,12 +1,32 @@
 {
-  "experiment_id": "EXPERT-SEL-MARKET-V1",
-  "supersedes": null,
+  "experiment_id": "EXPERT-SEL-MARKET-V1.1",
+  "supersedes": "EXPERT-SEL-MARKET-V1 (V1.1 = audit remediation rerun: relationship-evidence validation, role requirement, nonbinding KP-02/KP-06, tie handling, ledger recompute, pinned dependencies)",
   "research_only": "selection counts do not prove selection correctness; zero temporal violations does not prove contextual selection quality",
+  "manifest": {
+    "dataset_commit": "parshant231234-eng/BTCUSDT-Historical-Data@27c9be70",
+    "input_file_sha256": {
+      "BTCUSDT_1m_2025-08.csv": "15d26d2374bce8804e25012ff76e5fad976633a2fde843ffb0f487e1c90a0cf4",
+      "BTCUSDT_1m_2025-09.csv": "e1d5c8f350d83df866ff36c3b4d74f7e5b383db07cde7bca0ee1f200d7a48979"
+    },
+    "final_source_commit": "9bca73b2cf0033a2a39e48d56b351e55b8d47bec",
+    "dependency_versions": {
+      "python": "3.11.2",
+      "numpy": "1.26.4",
+      "pandas": "2.2.3",
+      "pytest": "8.3.5"
+    },
+    "representation": "C:F-K(k=5)",
+    "window": [
+      "2025-08-01 00:00:00",
+      "2025-09-27 00:00:00"
+    ],
+    "n_boundaries": 57
+  },
   "source_version": {
-    "git_head": "4fae301eaeabef14d8159d4eecb8cde1982fbb2a",
+    "git_head": "9bca73b2cf0033a2a39e48d56b351e55b8d47bec",
     "information_time_sha256": "72b03ca6d2333080e0df6dc18b1928147e877b41175f132c7bf08eb4e4d74ace",
-    "expert_selection_sha256": "48dd39e2a03f4feb80b9e55cc0c91a48684c13e874fb88295ee4d1d22e469fe3",
-    "csm_sha256": "6db88bca1f82eafde5d8f4ff8529815895f3c2a79e1fc609706841d19fda05be"
+    "expert_selection_sha256": "e9ad58baabb6e63474b7d8938fe65785d9e9d8db29bea2c72a5f1f79b242f9a9",
+    "csm_sha256": "b6b4b0a112a7e14f839b0406e407a3a8b93f2e200356af0261d8662d89802d86"
   },
   "inputs": {
     "mirror": "parshant231234-eng/BTCUSDT-Historical-Data@27c9be70",
@@ -48,18 +68,16 @@
     "n_candidates_per_boundary_avg": 326.57894736842104,
     "actual_selections": {
       "M1_role": 56,
-      "M2_preference": 1
+      "M2_preference": 0
     },
     "unresolved": {
-      "M2_preference:EP": 56,
+      "M2_preference:MP": 57,
       "M1_role:AI": 1
     },
-    "preference_rules_activated": {
-      "M2_preference:KP-02": 57
-    },
+    "preference_rules_activated": {},
     "preference_inactive_reasons": {
       "KP-01": 114,
-      "KP-02": 57,
+      "KP-02": 114,
       "KP-03": 114,
       "KP-04": 114,
       "KP-05": 114,
@@ -68,9 +86,8 @@
     },
     "conflicts": {},
     "source_provenance_evidence_counts": {
-      "F": 9926,
-      "R": 19255,
-      "S": 1
+      "F": 14767,
+      "R": 19258
     },
     "temporal_violations": {
       "n": 0,
@@ -297,9 +314,9 @@
       }
     ],
     "runtime": {
-      "per_boundary_ms_avg": 179.2708138771902,
-      "per_boundary_ms_max": 498.061215000007,
-      "total_s": 12.65945134499998
+      "per_boundary_ms_avg": 173.2528743157896,
+      "per_boundary_ms_max": 470.4341299998305,
+      "total_s": 12.660718817000088
     },
     "same_bar_ambiguities": 1
   },
@@ -309,6 +326,6 @@
     "fine view / cross-scale selection omitted (single selection task scope)",
     "test-history evidence derived by exact interval containment + SP-03 close crossings; no tolerance thresholds were invented",
     "no outcome evaluation: selection quality remains NOT_ESTABLISHED (objective C quarantine)",
-    "cluster/round-number markers (KP-06) not observable in this generator output \u2014 preference inactive by contract"
+    "cluster/round-number markers (KP-06) are a NONBINDING research hypothesis (finding F3) and are not observable in this generator output \u2014 never used by contract"
   ]
 }
