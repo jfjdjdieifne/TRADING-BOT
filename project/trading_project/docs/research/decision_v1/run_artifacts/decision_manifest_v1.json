@@ -72,6 +72,143 @@
     "n_eval_episodes": 17,
     "no_call": 0
   },
+  "ex_ante_baseline": {
+    "derivation": "computed only from the training-period labels; the evaluation outcomes are unknown at derivation time",
+    "hit_rate": 0.3529,
+    "hits": 6,
+    "method": "train-majority-class (ex-ante)",
+    "misses": 11,
+    "n_eval_episodes": 17,
+    "no_calls": 0,
+    "predicted_class": "E-CONTINUATION",
+    "predictions": [
+      {
+        "as_of": "2025-09-11 00:00:00+00:00",
+        "episode_id": "EP-decision-v1-0041",
+        "hit": false,
+        "predicted": "E-CONTINUATION",
+        "realized": "E-VIOLATION"
+      },
+      {
+        "as_of": "2025-09-12 00:00:00+00:00",
+        "episode_id": "EP-decision-v1-0042",
+        "hit": false,
+        "predicted": "E-CONTINUATION",
+        "realized": "E-VIOLATION"
+      },
+      {
+        "as_of": "2025-09-13 00:00:00+00:00",
+        "episode_id": "EP-decision-v1-0043",
+        "hit": false,
+        "predicted": "E-CONTINUATION",
+        "realized": "E-VIOLATION"
+      },
+      {
+        "as_of": "2025-09-14 00:00:00+00:00",
+        "episode_id": "EP-decision-v1-0044",
+        "hit": true,
+        "predicted": "E-CONTINUATION",
+        "realized": "E-CONTINUATION"
+      },
+      {
+        "as_of": "2025-09-15 00:00:00+00:00",
+        "episode_id": "EP-decision-v1-0045",
+        "hit": true,
+        "predicted": "E-CONTINUATION",
+        "realized": "E-CONTINUATION"
+      },
+      {
+        "as_of": "2025-09-16 00:00:00+00:00",
+        "episode_id": "EP-decision-v1-0046",
+        "hit": false,
+        "predicted": "E-CONTINUATION",
+        "realized": "E-VIOLATION"
+      },
+      {
+        "as_of": "2025-09-17 00:00:00+00:00",
+        "episode_id": "EP-decision-v1-0047",
+        "hit": false,
+        "predicted": "E-CONTINUATION",
+        "realized": "E-VIOLATION"
+      },
+      {
+        "as_of": "2025-09-18 00:00:00+00:00",
+        "episode_id": "EP-decision-v1-0048",
+        "hit": false,
+        "predicted": "E-CONTINUATION",
+        "realized": "E-VIOLATION"
+      },
+      {
+        "as_of": "2025-09-19 00:00:00+00:00",
+        "episode_id": "EP-decision-v1-0049",
+        "hit": false,
+        "predicted": "E-CONTINUATION",
+        "realized": "E-VIOLATION"
+      },
+      {
+        "as_of": "2025-09-20 00:00:00+00:00",
+        "episode_id": "EP-decision-v1-0050",
+        "hit": false,
+        "predicted": "E-CONTINUATION",
+        "realized": "E-VIOLATION"
+      },
+      {
+        "as_of": "2025-09-21 00:00:00+00:00",
+        "episode_id": "EP-decision-v1-0051",
+        "hit": true,
+        "predicted": "E-CONTINUATION",
+        "realized": "E-CONTINUATION"
+      },
+      {
+        "as_of": "2025-09-22 00:00:00+00:00",
+        "episode_id": "EP-decision-v1-0052",
+        "hit": true,
+        "predicted": "E-CONTINUATION",
+        "realized": "E-CONTINUATION"
+      },
+      {
+        "as_of": "2025-09-23 00:00:00+00:00",
+        "episode_id": "EP-decision-v1-0053",
+        "hit": true,
+        "predicted": "E-CONTINUATION",
+        "realized": "E-CONTINUATION"
+      },
+      {
+        "as_of": "2025-09-24 00:00:00+00:00",
+        "episode_id": "EP-decision-v1-0054",
+        "hit": true,
+        "predicted": "E-CONTINUATION",
+        "realized": "E-CONTINUATION"
+      },
+      {
+        "as_of": "2025-09-25 00:00:00+00:00",
+        "episode_id": "EP-decision-v1-0055",
+        "hit": false,
+        "predicted": "E-CONTINUATION",
+        "realized": "E-AMBIGUOUS-SAME-BAR"
+      },
+      {
+        "as_of": "2025-09-26 00:00:00+00:00",
+        "episode_id": "EP-decision-v1-0056",
+        "hit": false,
+        "predicted": "E-CONTINUATION",
+        "realized": "E-VIOLATION"
+      },
+      {
+        "as_of": "2025-09-27 00:00:00+00:00",
+        "episode_id": "EP-decision-v1-0057",
+        "hit": false,
+        "predicted": "E-CONTINUATION",
+        "realized": "E-VIOLATION"
+      }
+    ],
+    "train_label_counts": {
+      "E-CONTINUATION": 14,
+      "E-NONE-IN-HORIZON": 1,
+      "E-VIOLATION": 13
+    }
+  },
+  "horizon_disclosure": "EPISODE_HORIZON_BARS = 24 is NOT source-grounded, NOT owner-approved, and NOT a market rule: it is a declared engineering parameter for bounded episode labeling.  It determines each label as the FIRST predefined observable event whose binding occurs on a completed task-scale bar inside the half-open window (as_of_bar, as_of_bar + 24]; episodes whose window extends past the available data are CENSORED, excluded, and reported \u2014 their labels are never guessed.  Sensitivity across alternative horizon values remains UNTESTED: no other defensible, explicitly declared configuration exists in this project, and no alternative values were invented or searched to improve the result.",
   "provenance": {
     "dataset_commit": "27c9be705ac9280248672c895082c057b979ebff",
     "dataset_mirror": "parshant231234-eng/BTCUSDT-Historical-Data @27c9be705ac9280248672c895082c057b979ebff",
@@ -86,7 +223,7 @@
       "BTCUSDT_1m_2025-08.csv": "15d26d2374bce8804e25012ff76e5fad976633a2fde843ffb0f487e1c90a0cf4",
       "BTCUSDT_1m_2025-09.csv": "e1d5c8f350d83df866ff36c3b4d74f7e5b383db07cde7bca0ee1f200d7a48979"
     },
-    "final_source_commit": "07df71371d5b8cd0a1782ff7ca8de66aa79ee3a8",
+    "final_source_commit": "b4e42fd17e8a766bd8f8b7bdb89aa865a5a79863",
     "hashes_match_expected": {
       "BTCUSDT_1m_2025-08.csv": true,
       "BTCUSDT_1m_2025-09.csv": true
@@ -97,6 +234,7 @@
     },
     "sealed_information_time_sha256": "72b03ca6d2333080e0df6dc18b1928147e877b41175f132c7bf08eb4e4d74ace"
   },
+  "purged_overlapping_train_count": 4,
   "run": {
     "from": "2025-08-01 00:00:00+00:00",
     "mode": "run",
