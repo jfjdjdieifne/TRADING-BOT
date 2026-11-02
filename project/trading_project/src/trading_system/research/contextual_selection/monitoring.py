@@ -681,6 +681,10 @@ class MonitoringLoop:
             "timeline_id": self.stream._timeline_id,
             "study_state": (self.study_layer.state_dict()
                             if self.study_layer is not None else None),
+            "ledger_state": (self.engine.ledger.to_state()
+                             if self.engine is not None and
+                             getattr(self.engine, "ledger", None)
+                             is not None else None),
         }
 
     def save_state(self, path) -> None:
@@ -725,6 +729,9 @@ class MonitoringLoop:
                 loop.engine._load_snapshot(tmp)   # existing mechanism
             finally:
                 os.unlink(tmp)
+        if st.get("ledger_state") and getattr(loop.engine, "ledger",
+                                              None) is not None:
+            loop.engine.ledger.load_state(st["ledger_state"])
         return loop
 
     def engine_snapshot_state(self) -> dict:

@@ -27,6 +27,7 @@ family, learning algorithm, or strategy is introduced:
 """
 from __future__ import annotations
 
+import dataclasses
 from dataclasses import dataclass, field
 from typing import Callable, Dict, Iterable, List, Optional, Sequence, Tuple
 
@@ -2469,6 +2470,90 @@ class InterpretationLedger:
         deps |= {d for d in (result.dependencies or []) if d in self.versions}
         self._result_deps[uid] = deps
         return uid
+
+    # ---- save / resume (extension: full ledger persistence) -----------
+    def to_state(self) -> dict:
+        """Serialize the COMPLETE ledger (results, versions, payloads,
+        events, revisions, uid sequence) so that save/resume preserves
+        every recorded revision and continues uid numbering."""
+        def res_state(r: "SelectionResult") -> dict:
+            d = dataclasses.asdict(r)
+            if d.get("decision_time") is not None:
+                d["decision_time"] = str(d["decision_time"])
+            return d
+
+        def js(o):
+            if isinstance(o, pd.Timestamp):
+                return str(o)
+            if dataclasses.is_dataclass(o) and not isinstance(o, type):
+                return js(dataclasses.asdict(o))
+            if isinstance(o, dict):
+                return {k: js(v) for k, v in o.items()}
+            if isinstance(o, (list, tuple)):
+                return [js(v) for v in o]
+            return o
+
+        versions = {}
+        for uid, vs in self.versions.items():
+            versions[uid] = [
+                {"version": v["version"],
+                 "info_bar": v["info_bar"],
+                 "result": res_state(v["result"]),
+                 "computed_changes": js(v.get("computed_changes", [])),
+                 "recomputable": bool(v.get("recomputable", False))}
+                for v in vs]
+        return {
+            "uid_seq": self._uid_seq,
+            "results": [res_state(r) for r in self.results],
+            "events": js(self.events),
+            "revisions": js(self.revisions),
+            "versions": versions,
+            "payloads": js(self._payloads),
+            "payload_ids": {k: sorted(v) for k, v in
+                            self._payload_ids.items()},
+            "result_deps": {k: sorted(v) for k, v in
+                            self._result_deps.items()},
+        }
+
+    @staticmethod
+    def _result_from_state(d: dict) -> "SelectionResult":
+        d = dict(d)
+        d["excluded"] = [Exclusion(**dict(e))
+                         for e in (d.get("excluded") or [])]
+        u = d.get("unresolved")
+        if u:
+            u = dict(u)
+            u["excluded"] = [Exclusion(**dict(e))
+                             for e in (u.get("excluded") or [])]
+            d["unresolved"] = UnresolvedState(**u)
+        if d.get("decision_time"):
+            d["decision_time"] = pd.Timestamp(d["decision_time"])
+        return SelectionResult(**d)
+
+    def load_state(self, st: dict) -> None:
+        """Restore a ledger previously serialized with ``to_state``.
+        Used by the monitoring loop so a resumed process continues the
+        SAME history (no parallel ledger)."""
+        self.results = [self._result_from_state(d)
+                        for d in st.get("results", [])]
+        self.events = list(st.get("events", []))
+        self.revisions = list(st.get("revisions", []))
+        self.versions = {}
+        for uid, vs in st.get("versions", {}).items():
+            self.versions[uid] = [
+                {"version": v["version"],
+                 "info_bar": v["info_bar"],
+                 "result": self._result_from_state(v["result"]),
+                 "computed_changes": v.get("computed_changes", []),
+                 "recomputable": bool(v.get("recomputable", False))}
+                for v in vs]
+        self._payloads = {k: dict(v) for k, v in
+                          st.get("payloads", {}).items()}
+        self._payload_ids = {k: set(v) for k, v in
+                             st.get("payload_ids", {}).items()}
+        self._result_deps = {k: set(v) for k, v in
+                             st.get("result_deps", {}).items()}
+        self._uid_seq = int(st.get("uid_seq", 0))
 
     def record_event(self, event_bar: int, kind: str, detail: str,
                      affected_ids: Sequence[str],

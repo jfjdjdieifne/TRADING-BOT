@@ -96,6 +96,9 @@ from trading_system.research.contextual_selection.csm import (
     fk_turning_points,
     sp03_binding,
 )
+from trading_system.research.contextual_selection.connected_readings import (
+    ConnectedReadingsEngine,
+)
 
 __all__ = [
     "CORPUS_PATH", "load_corpus", "RELATIONSHIP_REGISTER",
@@ -694,12 +697,14 @@ class StudyReasoningLayer:
     def __init__(self, *, run_id: str = "study-v1", k: int = 2,
                  task_scale: str = "4h",
                  task: str = "trend-continuation",
+                 instrument: str = "UNKNOWN",
                  session_clock: Optional[SessionClockConvention] = None
                  ) -> None:
         self.run_id = run_id
         self.k = k
         self.task_scale = task_scale
         self.task = task
+        self.instrument = instrument
         self.session_clock = session_clock
         self.candidates: List[OBLikeCandidate] = []
         self.hypotheses: List[HigherFrameHypothesis] = []
@@ -717,6 +722,10 @@ class StudyReasoningLayer:
         self._cross_scan_upto = -1
         self._crossed_keys: set = set()
         self._watch_seq = 0
+        # connected readings (multi-timeframe context + FVG + tasks)
+        self.readings = ConnectedReadingsEngine(
+            run_id=f"{run_id}-cr", instrument=instrument,
+            timezone="UTC")
 
     # ---- main hooks (called by the EXISTING MonitoringLoop) ----------
     def on_boundary(self, record, frames: Dict[str, pd.DataFrame],
@@ -732,11 +741,44 @@ class StudyReasoningLayer:
         changes += self._update_roles(record)
         changes += self._scan_reference_crossings(record, bars, world)
         changes += self._update_shift_watches(record, bars, world)
+        # ---- connected readings (FVG + cross-frame links + tasks) ----
+        as_of = pd.Timestamp(record.as_of_time)
+        changes += self.readings.scan_fvgs(frames)
+        changes += self.readings.update_interactions(
+            frames, as_of_time=as_of)
+        changes += self.readings.link_regions(
+            refs=list(world["by_id"].values()), as_of_time=as_of)
+        interacted = set()
+        for w in self.shift_watches:
+            interacted.add(str(w.crossing.get("ref_id")))
+        for c in self.candidates:
+            if any(e.get("kind") in ("revisit_event",
+                                     "state_transition")
+                   for e in c.events[1:]):
+                interacted.add(c.context_ref_id)
+        self.readings.task_reference_for_review(
+            refs=[p for p in world["by_id"].values()
+                  if getattr(p, "status", "") == "confirmed"],
+            as_of_time=as_of, interacted=sorted(interacted))
+        for w in self.shift_watches:
+            self.readings.task_fvg_relevance_for_watch(
+                watch=w.to_record(), as_of_time=as_of)
+        # working interpretations (context + open watches)
+        hf_trend = str(self.hf_context.get("trend"))
+        if hf_trend != "unknown":
+            self.readings.interpretation_for_hf(
+                as_of_time=as_of, trend=hf_trend,
+                evidence=self.hf_context.get("evidence", []),
+                derived_at=self.hf_context.get("established_at"))
+        for w in self.shift_watches:
+            self.readings.interpretation_for_watch(
+                watch=w.to_record(), as_of_time=as_of)
         if ledger is not None:
             for c in self.candidates:
                 self._ledger_sync(c, ledger)
             for w in self.shift_watches:
                 self._ledger_sync_watch(w, ledger)
+            self.readings.sync_ledger(ledger)
         # drop buffer rows older than this boundary's bar interval
         keep_from = _bars_interval(bars, int(record.as_of_bar))[0]
         self._row_buffer = [r for r in self._row_buffer
@@ -1536,6 +1578,37 @@ class StudyReasoningLayer:
                     "established by completed bars",
                 ],
             })
+        for t in self.readings.tasks.values():
+            plan.append({
+                "subject": t.task_id,
+                "kind": "reading task (connected readings)",
+                "state": t.conclusion.get("status"),
+                "watch": [w.get("observable_event", "")
+                          for w in t.watch_next],
+                "revision_conditions": [
+                    "a new candidate or interaction that changes the "
+                    "declared-evidence comparison appends a new "
+                    "conclusion version (old versions preserved)",
+                ],
+                "unknowns": [
+                    "preference is task-scoped evidence, not a "
+                    "prediction",
+                ],
+            })
+        for i in self.readings.interps.values():
+            plan.append({
+                "subject": i.interp_id,
+                "kind": "working interpretation",
+                "state": i.status,
+                "watch": [w.get("observable_event", "")
+                          for w in i.watch],
+                "revision_conditions": [
+                    "relevant new evidence appends a linked version; "
+                    "the prior version is preserved; a weakening "
+                    "hypothesis never flips automatically",
+                ],
+                "unknowns": ["no trade/entry meaning is implied"],
+            })
         return plan
 
     # ---- save / resume ----------------------------------------------
@@ -1551,6 +1624,7 @@ class StudyReasoningLayer:
             "hf_context": self.hf_context,
             "scan_upto": self._scan_upto,
             "cand_seq": self._cand_seq,
+            "readings": self.readings.state_dict(),
             "shift_watches": [w.to_record() for w in self.shift_watches],
             "cross_scan_upto": self._cross_scan_upto,
             "crossed_keys": sorted(f"{k[0]}|{k[1]}"
@@ -1566,6 +1640,11 @@ class StudyReasoningLayer:
     def load_state_dict(self, st: dict) -> None:
         self._scan_upto = int(st.get("scan_upto", -1))
         self._cand_seq = int(st.get("cand_seq", 0))
+        if st.get("readings"):
+            self.readings = ConnectedReadingsEngine(
+                run_id=f"{self.run_id}-cr", instrument=self.instrument,
+                timezone="UTC")
+            self.readings.load_state_dict(st["readings"])
         self._cross_scan_upto = int(st.get("cross_scan_upto", -1))
         self._watch_seq = int(st.get("watch_seq", 0))
         self._crossed_keys = set()
