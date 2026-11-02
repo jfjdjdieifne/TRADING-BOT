@@ -1,5 +1,7 @@
 # 94 — ربط دراسة Huddleston بالمسار السببي القائم (المحرك، مراقبة، سجل التفسير)
 
+> **تحديث 2026-11-02 (تقرير 95)**: بعد مراجعة الأسئلة الخمسة أُلغيت عتبة القرب 1% نهائياً (كانت تكوين بحثي ولا تجوز كتعريف للسوق)، وصار إسناد الأدوار بالدليل لا بالتلقائية، وصُحّح سلوك `OBC-0006` (لم يعد الترتيب المبهم يجمّد المرشَّح)، ووُسمت نسب الاقتباسات (ASR تقريبية ≠ نص شريحة متحقَّق). التفاصيل والأوامر والنتائج في `deliverables/95_STUDY_LINKS_FOLLOWUP_Q1_Q5.md`. الأرقام في هذا التقرير تخصّ التشغيل السابق قبل هذه التصحيحات.
+
 **التاريخ**: 2026-11-02 | **الفرع**: `arena/a41fd997-trading-bot`
 **الحالة**: `selection_quality = NOT_ESTABLISHED` — نجاح الاختبارات ليس حقيقة سوقية.
 
@@ -20,7 +22,7 @@
 
 ## 3) المادة المصدرية وإثباتاتها
 
-(S) الملفان المحفوظان في `docs/research/huddleston_study/`: `EXTENDED_STUDY_FIVE_VIDEOS.md` (الدراسة العربية كاملة — معالجة الصوت كاملة بـ faster-whisper tiny.en على دفعات، ومراجعة إطارات) و`corpus_full_pass.json` (ستة سجلات + `amendments`). (S) كل ادعاء في corpus يحمل صنفاً من المفردات الخمس: `DIRECT_STATEMENT / PARAPHRASE / ENGINEERING_INTERPRETATION / RESEARCH_HYPOTHESIS / UNSUPPORTED_OR_UNAVAILABLE`. (S) نص الـASR = نسبة/تقريب (توقيت تقريبي)؛ نص الشرائح = متحقق بشرياً (شريحة 01:52). (S) التعديل `AMD-01-E03B-DESCRIPTION` مسجَّل في الـcorpus (§8): المادة المنشورة تتضمن رسم دخول افتراضي، لكن التطبيق العام غير محسوم والمحرك لا ينفذ دخول Huddleston مثبتاً.
+(S) الملفان المحفوظان في `docs/research/huddleston_study/`: `EXTENDED_STUDY_FIVE_VIDEOS.md` (الدراسة العربية كاملة — معالجة الصوت كاملة بـ faster-whisper tiny.en على دفعات، ومراجعة إطارات) و`corpus_full_pass.json` (ستة سجلات + `amendments`). (S) كل ادعاء في corpus يحمل صنفاً من المفردات الخمس: `DIRECT_STATEMENT / PARAPHRASE / ENGINEERING_INTERPRETATION / RESEARCH_HYPOTHESIS / UNSUPPORTED_OR_UNAVAILABLE`. (S) **نسب الاقتباسات (تصحيح Q5)**: اقتباس واحد فقط نص شريحة تم فحصه بصرياً ("when the high of the lowest down close candle … is traded through" — شريحة 01:52، متحقق بشرياً)؛ أما "We don't know that yet until at a later time" (~03:21) و"You can't be on your 9.30 candle…" (~75:02) و"I was incorrect by saying all that stuff" (~75:12) و"if it goes above that…" (~11:31) و"I demand more information" (~11:39) فكلها **صياغة ASR تقريبية منسوبة، لم تُدقَّق بالأذن** — ليست اقتباسات حرفية متحقَّقة، وتُذكر هنا كصياغة منسوبة تقريبية. (S) التعديل `AMD-01-E03B-DESCRIPTION` مسجَّل في الـcorpus (§8): المادة المنشورة تتضمن رسم دخول افتراضي، لكن التطبيق العام غير محسوم والمحرك لا ينفذ دخول Huddleston مثبتاً.
 
 | مثال | split | المصدر | الاستعمال هنا |
 |---|---|---|---|
@@ -45,11 +47,11 @@
 
 ## 7) R2 — إثباتات الوقت والإبطال القابل للتصحيح (§3.2 / FVG24-A)
 
-(S) "You can't be on your 9.30 candle, it can only appear at 9.31 or after" + "I was incorrect by saying all that stuff" (≈75:02/75:12). (E) كل اختيار يحمل `timestamp/timezone/bar_convention/timeframe/eligibility` (اختبار D يثبّت وجودها). (E) الإبطال = **تصحيح**: الأصلي محفوظ داخل `revisions`، والسجل يقول صراحة "correction … NOT a fulfilled prediction" (بنفس مبدأ ledger الموجود: تصحيحات 2026-10-14 أُبقيت كسجل). (S/E) قاعدة الساعة `US_INDEX_FIRST_GAP_SESSION_CLOCK` محددة النطاق (جلسة الدرس فقط) والمحرك يعمل بدونها (`session_clock=None` — الاختبار D).
+(S) صياغة ASR تقريبية منسوبة (لم تُدقَّق بالأذن، ~75:02/75:12): "You can't be on your 9.30 candle, it can only appear at 9.31 or after" + "I was incorrect by saying all that stuff". (E) كل اختيار يحمل `timestamp/timezone/bar_convention/timeframe/eligibility` (اختبار D يثبّت وجودها). (E) الإبطال = **تصحيح**: الأصلي محفوظ داخل `revisions`، والسجل يقول صراحة "correction … NOT a fulfilled prediction" (بنفس مبدأ ledger الموجود: تصحيحات 2026-10-14 أُبقيت كسجل). (S/E) قاعدة الساعة `US_INDEX_FIRST_GAP_SESSION_CLOCK` محددة النطاق (جلسة الدرس فقط) والمحرك يعمل بدونها (`session_clock=None` — الاختبار D).
 
 ## 8) R3 — تعليق الفرضية لا انقلابها (§3.3 / E12-A)
 
-(S) "if it goes above that then I'm probably wrong in my analysis" + "I demand more information" (≈11:31/11:39). (E) `HigherFrameHypothesis.review()`: تجاوز مرجع الإخفاق المعلن → `SUSPENDED` + طلب معلومات أكثر، ونص الحدث يقول "no automatic opposite hypothesis is generated" (اختبار E: لا فرضية مقابلة تُنشأ، ولا إعادة تفعيل).
+(S) صياغة ASR تقريبية منسوبة (لم تُدقَّق بالأذن، ~11:31/11:39): "if it goes above that then I'm probably wrong in my analysis" + "I demand more information". (E) `HigherFrameHypothesis.review()`: تجاوز مرجع الإخفاق المعلن → `SUSPENDED` + طلب معلومات أكثر، ونص الحدث يقول "no automatic opposite hypothesis is generated" (اختبار E: لا فرضية مقابلة تُنشأ، ولا إعادة تفعيل).
 
 ## 9) الفصل بين الطبقات الأربع (§4)
 
