@@ -1,0 +1,1969 @@
+{
+ "as_of": "2025-08-14 00:00:00+00:00",
+ "cursor": 18724,
+ "data_capabilities": {
+  "individual_trades": {
+   "detail": "no per-trade records in the input; tick paths are not reconstructible",
+   "kind": "missing",
+   "status": "unavailable"
+  },
+  "live_market_feed": {
+   "detail": "no live read-only data adapter exists in this repository; only replayed streams are provided",
+   "kind": "missing-adapter",
+   "status": "unavailable"
+  },
+  "ohlc_1m": {
+   "detail": "1-minute OHLC bars (timestamp = bucket start, datetime_utc column), verified mirror of parshant231234-eng/BTCUSDT-Historical-Data@27c9be70",
+   "kind": "direct-observation",
+   "status": "available"
+  },
+  "open_position": {
+   "detail": "no authoritative position feed was supplied; no position is inferred from price",
+   "kind": "authoritative-source-required",
+   "status": "absent"
+  },
+  "order_book": {
+   "detail": "no order-book data in the input: resting orders, their size, participant identity and intent CANNOT be established; a prior high/low is at most a source-supported reference for POTENTIAL liquidity",
+   "kind": "missing",
+   "status": "unavailable"
+  },
+  "reported_volume": {
+   "detail": "volume / quote_volume columns: REPORTED aggregates; no inference of trade direction or participant",
+   "kind": "reported-aggregate",
+   "status": "available"
+  },
+  "trade_count_taker_aggregates": {
+   "detail": "trade_count (a COUNT), taker_buy_volume, taker_buy_quote_volume: aggregates only",
+   "kind": "reported-aggregate",
+   "status": "available"
+  }
+ },
+ "lifecycle_state": "INVALIDATED",
+ "live_feed_status": {
+  "adapter": null,
+  "exists": false,
+  "missing": "a live read-only market data adapter (exchange/API client) is NOT present; LiveFeedAdapter below is an interface contract only \u2014 this module never claims live-market monitoring",
+  "tested": false
+ },
+ "relationship_register": [
+  {
+   "claim_class": "ENGINEERING_INTERPRETATION",
+   "engine_interpretation": [
+    "state machine CANDIDATE/AWAITING_CONFIRMATION/CONFIRMED/INVALIDATED/INSUFFICIENT_INFORMATION with ledger-recorded transitions",
+    "role assignment under a declared task (trend-continuation vs reaction/pause) with alternatives and change conditions",
+    "sequence separation with UNKNOWN ordering on unresolvable same-bar events"
+   ],
+   "not_established": [
+    "'near support' operational definition (source leaves open; RESEARCH_CFG constant exists only to exercise tests)",
+    "any universal entry, stop, target, or profitability"
+   ],
+   "relationship_id": "R1-OB-CANDIDATE-LIFECYCLE",
+   "source_examples": [
+    "OB16-A"
+   ],
+   "source_support": [
+    "OB16-A explicit_identification (DIRECT_STATEMENT): slide specifies bullish candidate down-close bar near support, validation by a later bar trading through its high, possible return",
+    "OB16-A short_quotes (DIRECT_STATEMENT, slide 01:52): 'when the high of the lowest down close candle ... is traded through'; 'We don't know that yet until at a later time'",
+    "OB16-A change (DIRECT_STATEMENT): bearish-looking block is NOT a sell cue under bullish higher-frame context"
+   ]
+  },
+  {
+   "claim_class": "ENGINEERING_INTERPRETATION",
+   "engine_interpretation": [
+    "time provenance on every candidate (timestamp, session/timezone, bar convention, timeframe)",
+    "revocation recorded as a CORRECTION with the original selection preserved, never as a fulfilled prediction"
+   ],
+   "not_established": [
+    "the 9:30/9:31 convention beyond its session scope (engine runs without it)"
+   ],
+   "relationship_id": "R2-TIME-PROVENANCE-REVOCABLE-SELECTION",
+   "source_examples": [
+    "FVG24-A"
+   ],
+   "source_support": [
+    "FVG24-A explicit_identification (DIRECT_STATEMENT): the 9:30 candle cannot be the first qualifying gap under his stated convention; first candidate 9:31+",
+    "FVG24-A short_quotes (DIRECT_STATEMENT ~75:02/75:12): 'You can't be on your 9.30 candle...'; 'I was incorrect by saying all that stuff'"
+   ]
+  },
+  {
+   "claim_class": "ENGINEERING_INTERPRETATION",
+   "engine_interpretation": [
+    "failure-reference crossing SUSPENDS the hypothesis and requests more information; no automatic opposite hypothesis is generated"
+   ],
+   "not_established": [
+    "that the speaker's earlier forecast was independently pre-registered (speaker assertion)"
+   ],
+   "relationship_id": "R3-HYPOTHESIS-SUSPENSION",
+   "source_examples": [
+    "E12-A"
+   ],
+   "source_support": [
+    "E12-A short_quotes (DIRECT_STATEMENT ~11:31/11:39): 'if it goes above that then I'm probably wrong in my analysis'; 'I demand more information'",
+    "E12-A change (PARAPHRASE): pause/reassess rather than mechanically reverse"
+   ]
+  }
+ ],
+ "selection_quality": "NOT_ESTABLISHED",
+ "steps": [
+  {
+   "accepted_observations": 18721,
+   "analysis_id": "AN-9f5d9cfb4329",
+   "analysis_version": 78,
+   "as_of": null,
+   "changes": [],
+   "lifecycle_state": "INVALIDATED",
+   "material_change": false,
+   "no_revision_reason": "no completed task-scale bar closed at this observation: incomplete bars are never used and no completed-bar fact changed",
+   "observation_time": "2025-08-14 00:00:00+00:00",
+   "sequence_notes": [],
+   "step": 18721,
+   "trigger": "observation"
+  },
+  {
+   "accepted_observations": 18722,
+   "analysis_id": "AN-9f5d9cfb4329",
+   "analysis_version": 78,
+   "as_of": null,
+   "changes": [],
+   "lifecycle_state": "INVALIDATED",
+   "material_change": false,
+   "no_revision_reason": "no completed task-scale bar closed at this observation: incomplete bars are never used and no completed-bar fact changed",
+   "observation_time": "2025-08-14 00:01:00+00:00",
+   "sequence_notes": [],
+   "step": 18722,
+   "trigger": "observation"
+  },
+  {
+   "accepted_observations": 18723,
+   "analysis_id": "AN-9f5d9cfb4329",
+   "analysis_version": 78,
+   "as_of": null,
+   "changes": [],
+   "lifecycle_state": "INVALIDATED",
+   "material_change": false,
+   "no_revision_reason": "no completed task-scale bar closed at this observation: incomplete bars are never used and no completed-bar fact changed",
+   "observation_time": "2025-08-14 00:02:00+00:00",
+   "sequence_notes": [],
+   "step": 18723,
+   "trigger": "observation"
+  },
+  {
+   "accepted_observations": 18724,
+   "analysis_id": "AN-9f5d9cfb4329",
+   "analysis_version": 78,
+   "as_of": null,
+   "changes": [],
+   "lifecycle_state": "INVALIDATED",
+   "material_change": false,
+   "no_revision_reason": "no completed task-scale bar closed at this observation: incomplete bars are never used and no completed-bar fact changed",
+   "observation_time": "2025-08-14 00:03:00+00:00",
+   "sequence_notes": [],
+   "step": 18724,
+   "trigger": "observation"
+  },
+  {
+   "accepted_observations": 18725,
+   "analysis_id": "AN-9f5d9cfb4329",
+   "analysis_version": 78,
+   "as_of": null,
+   "changes": [],
+   "lifecycle_state": "INVALIDATED",
+   "material_change": false,
+   "no_revision_reason": "no completed task-scale bar closed at this observation: incomplete bars are never used and no completed-bar fact changed",
+   "observation_time": "2025-08-14 00:04:00+00:00",
+   "sequence_notes": [],
+   "step": 18725,
+   "trigger": "observation"
+  }
+ ],
+ "study_state": {
+  "cand_seq": 15,
+  "candidates": [
+   {
+    "ambiguous_bar": null,
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_index": 27,
+    "bar_time": "2025-08-05 16:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0001",
+    "close": 112934.0,
+    "context_ref_id": "PSC:F-K(k=5)|low@2025-08-03T04:00:00+00:00",
+    "context_ref_level": 111920.0,
+    "direction": "bullish",
+    "eligibility": {
+     "definition": "declared research configuration: down-close bar whose low is within 1.00% of the contextual swing low level (source leaves 'near support' open; this constant is NOT a source claim and NOT a market truth)",
+     "known_at_selection": [
+      "context ref PSC:F-K(k=5)|low@2025-08-03T04:00:00+00:00 confirmed at its knowable bar (before this bar)",
+      "bar OHLC at 2025-08-05 16:00:00+00:00"
+     ]
+    },
+    "events": [
+     {
+      "at": "2025-08-05 16:00:00+00:00",
+      "at_bar": 27,
+      "evidence": {
+       "bar": 27,
+       "ohlc": [
+        114827.07,
+        114893.13,
+        112650.0,
+        112934.0
+       ]
+      },
+      "from": "CANDIDATE",
+      "kind": "state_transition",
+      "layer": "DERIVATION",
+      "reason": "shape matched the declared research definition; later-evidence event not yet observed",
+      "to": "AWAITING_CONFIRMATION"
+     },
+     {
+      "at": "2025-08-06 16:00:00+00:00",
+      "at_bar": 33,
+      "evidence": {
+       "bar": 33,
+       "close": 115413.87,
+       "revisit_bar": null,
+       "rule": "later bar traded through the candidate extreme (declared)"
+      },
+      "from": "AWAITING_CONFIRMATION",
+      "kind": "state_transition",
+      "layer": "DERIVATION",
+      "reason": "declared confirmation event observed (later bar traded through the candidate extreme); recorded at the evidence bar, never back-filled",
+      "to": "CONFIRMED"
+     }
+    ],
+    "fine_touches": {},
+    "high": 114893.13,
+    "low": 112650.0,
+    "open": 114827.07,
+    "ordering": null,
+    "role": "TREND_CONTINUATION_REFERENCE",
+    "role_assignments": [
+     {
+      "alternatives": [
+       "REACTION_PAUSE_REFERENCE: also possible as a reaction/pause reference; not preferred for this task"
+      ],
+      "candidate_direction": "bullish",
+      "hf_trend": "up",
+      "preferred": true,
+      "reasons": [
+       "candidate direction agrees with the established higher-frame context for the declared trend-continuation task"
+      ],
+      "role": "TREND_CONTINUATION_REFERENCE",
+      "task": "trend-continuation",
+      "would_change": [
+       "a higher-frame structure change would re-open the trend role evaluation"
+      ]
+     }
+    ],
+    "state": "CONFIRMED",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   {
+    "ambiguous_bar": 33,
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_index": 32,
+    "bar_time": "2025-08-06 12:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0002",
+    "close": 114226.69,
+    "context_ref_id": "PSC:F-K(k=5)|low@2025-08-05T16:00:00+00:00",
+    "context_ref_level": 112650.0,
+    "direction": "bullish",
+    "eligibility": {
+     "definition": "declared research configuration: down-close bar whose low is within 1.00% of the contextual swing low level (source leaves 'near support' open; this constant is NOT a source claim and NOT a market truth)",
+     "known_at_selection": [
+      "context ref PSC:F-K(k=5)|low@2025-08-05T16:00:00+00:00 confirmed at its knowable bar (before this bar)",
+      "bar OHLC at 2025-08-06 12:00:00+00:00"
+     ]
+    },
+    "events": [
+     {
+      "at": "2025-08-06 12:00:00+00:00",
+      "at_bar": 32,
+      "evidence": {
+       "bar": 32,
+       "ohlc": [
+        114227.9,
+        114404.23,
+        113727.57,
+        114226.69
+       ]
+      },
+      "from": "CANDIDATE",
+      "kind": "state_transition",
+      "layer": "DERIVATION",
+      "reason": "shape matched the declared research definition; later-evidence event not yet observed",
+      "to": "AWAITING_CONFIRMATION"
+     },
+     {
+      "at": "2025-08-06 16:00:00+00:00",
+      "bar": 33,
+      "kind": "ordering_unresolved",
+      "layer": "UNKNOWN_UNSUPPORTED",
+      "note": "confirmation and revisit could both have occurred inside this bar; OHLC cannot order them; state stays UNDECIDED and the flattering order is refused"
+     }
+    ],
+    "fine_touches": {
+     "confirm": "2025-08-06 16:00:00+00:00"
+    },
+    "high": 114404.23,
+    "low": 113727.57,
+    "open": 114227.9,
+    "ordering": "UNKNOWN",
+    "role": "REACTION_PAUSE_REFERENCE",
+    "role_assignments": [
+     {
+      "alternatives": [
+       "TREND_CONTINUATION_REFERENCE: excluded FOR THIS TASK by the higher-frame context \u2014 the candidate itself is NOT rejected"
+      ],
+      "candidate_direction": "bullish",
+      "hf_trend": "down",
+      "preferred": true,
+      "reasons": [
+       "candidate direction opposes the established higher-frame context; the trend-continuation role is NOT assigned (OB16-A 25:00-25:43) while the candidate remains a legitimate reaction/pause reference (34:00-35:15)"
+      ],
+      "role": "REACTION_PAUSE_REFERENCE",
+      "task": "trend-continuation",
+      "would_change": [
+       "a higher-frame structure change would re-open the trend role evaluation"
+      ]
+     }
+    ],
+    "state": "AWAITING_CONFIRMATION",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   {
+    "ambiguous_bar": null,
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_index": 33,
+    "bar_time": "2025-08-06 16:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0003",
+    "close": 115413.87,
+    "context_ref_id": "PSC:F-K(k=5)|high@2025-08-04T20:00:00+00:00",
+    "context_ref_level": 115720.0,
+    "direction": "bearish",
+    "eligibility": {
+     "definition": "declared research configuration: up-close bar whose high is within 1.00% of the contextual swing high level (source leaves 'near support' open; this constant is NOT a source claim and NOT a market truth)",
+     "known_at_selection": [
+      "context ref PSC:F-K(k=5)|high@2025-08-04T20:00:00+00:00 confirmed at its knowable bar (before this bar)",
+      "bar OHLC at 2025-08-06 16:00:00+00:00"
+     ]
+    },
+    "events": [
+     {
+      "at": "2025-08-06 16:00:00+00:00",
+      "at_bar": 33,
+      "evidence": {
+       "bar": 33,
+       "ohlc": [
+        114226.68,
+        115515.09,
+        113579.9,
+        115413.87
+       ]
+      },
+      "from": "CANDIDATE",
+      "kind": "state_transition",
+      "layer": "DERIVATION",
+      "reason": "shape matched the declared research definition; later-evidence event not yet observed",
+      "to": "AWAITING_CONFIRMATION"
+     }
+    ],
+    "fine_touches": {},
+    "high": 115515.09,
+    "low": 113579.9,
+    "open": 114226.68,
+    "ordering": null,
+    "role": "TREND_CONTINUATION_REFERENCE",
+    "role_assignments": [
+     {
+      "alternatives": [
+       "REACTION_PAUSE_REFERENCE: also possible as a reaction/pause reference; not preferred for this task"
+      ],
+      "candidate_direction": "bearish",
+      "hf_trend": "down",
+      "preferred": true,
+      "reasons": [
+       "candidate direction agrees with the established higher-frame context for the declared trend-continuation task"
+      ],
+      "role": "TREND_CONTINUATION_REFERENCE",
+      "task": "trend-continuation",
+      "would_change": [
+       "a higher-frame structure change would re-open the trend role evaluation"
+      ]
+     }
+    ],
+    "state": "AWAITING_CONFIRMATION",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   {
+    "ambiguous_bar": null,
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_index": 37,
+    "bar_time": "2025-08-07 08:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0004",
+    "close": 114787.99,
+    "context_ref_id": "PSC:F-K(k=5)|high@2025-08-04T20:00:00+00:00",
+    "context_ref_level": 115720.0,
+    "direction": "bearish",
+    "eligibility": {
+     "definition": "declared research configuration: up-close bar whose high is within 1.00% of the contextual swing high level (source leaves 'near support' open; this constant is NOT a source claim and NOT a market truth)",
+     "known_at_selection": [
+      "context ref PSC:F-K(k=5)|high@2025-08-04T20:00:00+00:00 confirmed at its knowable bar (before this bar)",
+      "bar OHLC at 2025-08-07 08:00:00+00:00"
+     ]
+    },
+    "events": [
+     {
+      "at": "2025-08-07 08:00:00+00:00",
+      "at_bar": 37,
+      "evidence": {
+       "bar": 37,
+       "ohlc": [
+        114546.03,
+        114876.79,
+        114259.0,
+        114787.99
+       ]
+      },
+      "from": "CANDIDATE",
+      "kind": "state_transition",
+      "layer": "DERIVATION",
+      "reason": "shape matched the declared research definition; later-evidence event not yet observed",
+      "to": "AWAITING_CONFIRMATION"
+     }
+    ],
+    "fine_touches": {},
+    "high": 114876.79,
+    "low": 114259.0,
+    "open": 114546.03,
+    "ordering": null,
+    "role": "TREND_CONTINUATION_REFERENCE",
+    "role_assignments": [
+     {
+      "alternatives": [
+       "REACTION_PAUSE_REFERENCE: also possible as a reaction/pause reference; not preferred for this task"
+      ],
+      "candidate_direction": "bearish",
+      "hf_trend": "down",
+      "preferred": true,
+      "reasons": [
+       "candidate direction agrees with the established higher-frame context for the declared trend-continuation task"
+      ],
+      "role": "TREND_CONTINUATION_REFERENCE",
+      "task": "trend-continuation",
+      "would_change": [
+       "a higher-frame structure change would re-open the trend role evaluation"
+      ]
+     }
+    ],
+    "state": "AWAITING_CONFIRMATION",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   {
+    "ambiguous_bar": null,
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_index": 38,
+    "bar_time": "2025-08-07 12:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0005",
+    "close": 116519.53,
+    "context_ref_id": "PSC:F-K(k=5)|high@2025-08-04T20:00:00+00:00",
+    "context_ref_level": 115720.0,
+    "direction": "bearish",
+    "eligibility": {
+     "definition": "declared research configuration: up-close bar whose high is within 1.00% of the contextual swing high level (source leaves 'near support' open; this constant is NOT a source claim and NOT a market truth)",
+     "known_at_selection": [
+      "context ref PSC:F-K(k=5)|high@2025-08-04T20:00:00+00:00 confirmed at its knowable bar (before this bar)",
+      "bar OHLC at 2025-08-07 12:00:00+00:00"
+     ]
+    },
+    "events": [
+     {
+      "at": "2025-08-07 12:00:00+00:00",
+      "at_bar": 38,
+      "evidence": {
+       "bar": 38,
+       "ohlc": [
+        114787.99,
+        116828.93,
+        114787.98,
+        116519.53
+       ]
+      },
+      "from": "CANDIDATE",
+      "kind": "state_transition",
+      "layer": "DERIVATION",
+      "reason": "shape matched the declared research definition; later-evidence event not yet observed",
+      "to": "AWAITING_CONFIRMATION"
+     }
+    ],
+    "fine_touches": {},
+    "high": 116828.93,
+    "low": 114787.98,
+    "open": 114787.99,
+    "ordering": null,
+    "role": "TREND_CONTINUATION_REFERENCE",
+    "role_assignments": [
+     {
+      "alternatives": [
+       "REACTION_PAUSE_REFERENCE: also possible as a reaction/pause reference; not preferred for this task"
+      ],
+      "candidate_direction": "bearish",
+      "hf_trend": "down",
+      "preferred": true,
+      "reasons": [
+       "candidate direction agrees with the established higher-frame context for the declared trend-continuation task"
+      ],
+      "role": "TREND_CONTINUATION_REFERENCE",
+      "task": "trend-continuation",
+      "would_change": [
+       "a higher-frame structure change would re-open the trend role evaluation"
+      ]
+     }
+    ],
+    "state": "AWAITING_CONFIRMATION",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   {
+    "ambiguous_bar": 40,
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_index": 39,
+    "bar_time": "2025-08-07 16:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0006",
+    "close": 116689.81,
+    "context_ref_id": "PSC:F-K(k=5)|high@2025-08-04T20:00:00+00:00",
+    "context_ref_level": 115720.0,
+    "direction": "bearish",
+    "eligibility": {
+     "definition": "declared research configuration: up-close bar whose high is within 1.00% of the contextual swing high level (source leaves 'near support' open; this constant is NOT a source claim and NOT a market truth)",
+     "known_at_selection": [
+      "context ref PSC:F-K(k=5)|high@2025-08-04T20:00:00+00:00 confirmed at its knowable bar (before this bar)",
+      "bar OHLC at 2025-08-07 16:00:00+00:00"
+     ]
+    },
+    "events": [
+     {
+      "at": "2025-08-07 16:00:00+00:00",
+      "at_bar": 39,
+      "evidence": {
+       "bar": 39,
+       "ohlc": [
+        116519.54,
+        116791.11,
+        116035.84,
+        116689.81
+       ]
+      },
+      "from": "CANDIDATE",
+      "kind": "state_transition",
+      "layer": "DERIVATION",
+      "reason": "shape matched the declared research definition; later-evidence event not yet observed",
+      "to": "AWAITING_CONFIRMATION"
+     },
+     {
+      "at": "2025-08-07 20:00:00+00:00",
+      "bar": 40,
+      "kind": "ordering_unresolved",
+      "layer": "UNKNOWN_UNSUPPORTED",
+      "note": "confirmation and revisit could both have occurred inside this bar; OHLC cannot order them; state stays UNDECIDED and the flattering order is refused"
+     },
+     {
+      "at": "2025-08-08 15:40:00+00:00",
+      "confirm_touch": "2025-08-08 15:40:00+00:00",
+      "kind": "ordering_resolved_by_finer_data",
+      "layer": "DIRECT_OBSERVATION",
+      "order": "revisit-first",
+      "revisit_touch": "2025-08-07 20:00:00+00:00"
+     }
+    ],
+    "fine_touches": {
+     "confirm": "2025-08-08 15:40:00+00:00",
+     "revisit": "2025-08-07 20:00:00+00:00"
+    },
+    "high": 116791.11,
+    "low": 116035.84,
+    "open": 116519.54,
+    "ordering": "revisit-first",
+    "role": "TREND_CONTINUATION_REFERENCE",
+    "role_assignments": [
+     {
+      "alternatives": [
+       "REACTION_PAUSE_REFERENCE: also possible as a reaction/pause reference; not preferred for this task"
+      ],
+      "candidate_direction": "bearish",
+      "hf_trend": "down",
+      "preferred": true,
+      "reasons": [
+       "candidate direction agrees with the established higher-frame context for the declared trend-continuation task"
+      ],
+      "role": "TREND_CONTINUATION_REFERENCE",
+      "task": "trend-continuation",
+      "would_change": [
+       "a higher-frame structure change would re-open the trend role evaluation"
+      ]
+     }
+    ],
+    "state": "AWAITING_CONFIRMATION",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   {
+    "ambiguous_bar": null,
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_index": 47,
+    "bar_time": "2025-08-09 00:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0007",
+    "close": 116674.74,
+    "context_ref_id": "PSC:F-K(k=5)|high@2025-08-08T04:00:00+00:00",
+    "context_ref_level": 117630.0,
+    "direction": "bearish",
+    "eligibility": {
+     "definition": "declared research configuration: up-close bar whose high is within 1.00% of the contextual swing high level (source leaves 'near support' open; this constant is NOT a source claim and NOT a market truth)",
+     "known_at_selection": [
+      "context ref PSC:F-K(k=5)|high@2025-08-08T04:00:00+00:00 confirmed at its knowable bar (before this bar)",
+      "bar OHLC at 2025-08-09 00:00:00+00:00"
+     ]
+    },
+    "events": [
+     {
+      "at": "2025-08-09 00:00:00+00:00",
+      "at_bar": 47,
+      "evidence": {
+       "bar": 47,
+       "ohlc": [
+        116453.41,
+        116980.0,
+        116319.06,
+        116674.74
+       ]
+      },
+      "from": "CANDIDATE",
+      "kind": "state_transition",
+      "layer": "DERIVATION",
+      "reason": "shape matched the declared research definition; later-evidence event not yet observed",
+      "to": "AWAITING_CONFIRMATION"
+     },
+     {
+      "at": "2025-08-09 04:00:00+00:00",
+      "at_bar": 48,
+      "evidence": {
+       "bar": 48,
+       "close": 116384.01,
+       "revisit_bar": null,
+       "rule": "later bar traded through the candidate extreme (declared)"
+      },
+      "from": "AWAITING_CONFIRMATION",
+      "kind": "state_transition",
+      "layer": "DERIVATION",
+      "reason": "declared confirmation event observed (later bar traded through the candidate extreme); recorded at the evidence bar, never back-filled",
+      "to": "CONFIRMED"
+     }
+    ],
+    "fine_touches": {},
+    "high": 116980.0,
+    "low": 116319.06,
+    "open": 116453.41,
+    "ordering": null,
+    "role": "REACTION_PAUSE_REFERENCE",
+    "role_assignments": [
+     {
+      "alternatives": [
+       "TREND_CONTINUATION_REFERENCE: excluded FOR THIS TASK by the higher-frame context \u2014 the candidate itself is NOT rejected"
+      ],
+      "candidate_direction": "bearish",
+      "hf_trend": "up",
+      "preferred": true,
+      "reasons": [
+       "candidate direction opposes the established higher-frame context; the trend-continuation role is NOT assigned (OB16-A 25:00-25:43) while the candidate remains a legitimate reaction/pause reference (34:00-35:15)"
+      ],
+      "role": "REACTION_PAUSE_REFERENCE",
+      "task": "trend-continuation",
+      "would_change": [
+       "a higher-frame structure change would re-open the trend role evaluation"
+      ]
+     }
+    ],
+    "state": "CONFIRMED",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   {
+    "ambiguous_bar": null,
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_index": 49,
+    "bar_time": "2025-08-09 08:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0008",
+    "close": 116756.01,
+    "context_ref_id": "PSC:F-K(k=5)|high@2025-08-08T04:00:00+00:00",
+    "context_ref_level": 117630.0,
+    "direction": "bearish",
+    "eligibility": {
+     "definition": "declared research configuration: up-close bar whose high is within 1.00% of the contextual swing high level (source leaves 'near support' open; this constant is NOT a source claim and NOT a market truth)",
+     "known_at_selection": [
+      "context ref PSC:F-K(k=5)|high@2025-08-08T04:00:00+00:00 confirmed at its knowable bar (before this bar)",
+      "bar OHLC at 2025-08-09 08:00:00+00:00"
+     ]
+    },
+    "events": [
+     {
+      "at": "2025-08-09 08:00:00+00:00",
+      "at_bar": 49,
+      "evidence": {
+       "bar": 49,
+       "ohlc": [
+        116384.01,
+        116980.0,
+        116339.45,
+        116756.01
+       ]
+      },
+      "from": "CANDIDATE",
+      "kind": "state_transition",
+      "layer": "DERIVATION",
+      "reason": "shape matched the declared research definition; later-evidence event not yet observed",
+      "to": "AWAITING_CONFIRMATION"
+     }
+    ],
+    "fine_touches": {},
+    "high": 116980.0,
+    "low": 116339.45,
+    "open": 116384.01,
+    "ordering": null,
+    "role": "REACTION_PAUSE_REFERENCE",
+    "role_assignments": [
+     {
+      "alternatives": [
+       "TREND_CONTINUATION_REFERENCE: excluded FOR THIS TASK by the higher-frame context \u2014 the candidate itself is NOT rejected"
+      ],
+      "candidate_direction": "bearish",
+      "hf_trend": "up",
+      "preferred": true,
+      "reasons": [
+       "candidate direction opposes the established higher-frame context; the trend-continuation role is NOT assigned (OB16-A 25:00-25:43) while the candidate remains a legitimate reaction/pause reference (34:00-35:15)"
+      ],
+      "role": "REACTION_PAUSE_REFERENCE",
+      "task": "trend-continuation",
+      "would_change": [
+       "a higher-frame structure change would re-open the trend role evaluation"
+      ]
+     }
+    ],
+    "state": "AWAITING_CONFIRMATION",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   {
+    "ambiguous_bar": null,
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_index": 50,
+    "bar_time": "2025-08-09 12:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0009",
+    "close": 117110.0,
+    "context_ref_id": "PSC:F-K(k=5)|high@2025-08-08T04:00:00+00:00",
+    "context_ref_level": 117630.0,
+    "direction": "bearish",
+    "eligibility": {
+     "definition": "declared research configuration: up-close bar whose high is within 1.00% of the contextual swing high level (source leaves 'near support' open; this constant is NOT a source claim and NOT a market truth)",
+     "known_at_selection": [
+      "context ref PSC:F-K(k=5)|high@2025-08-08T04:00:00+00:00 confirmed at its knowable bar (before this bar)",
+      "bar OHLC at 2025-08-09 12:00:00+00:00"
+     ]
+    },
+    "events": [
+     {
+      "at": "2025-08-09 12:00:00+00:00",
+      "at_bar": 50,
+      "evidence": {
+       "bar": 50,
+       "ohlc": [
+        116756.0,
+        117944.05,
+        116756.0,
+        117110.0
+       ]
+      },
+      "from": "CANDIDATE",
+      "kind": "state_transition",
+      "layer": "DERIVATION",
+      "reason": "shape matched the declared research definition; later-evidence event not yet observed",
+      "to": "AWAITING_CONFIRMATION"
+     },
+     {
+      "at": "2025-08-09 16:00:00+00:00",
+      "at_bar": 51,
+      "evidence": {
+       "bar": 51,
+       "close": 116892.47,
+       "revisit_bar": null,
+       "rule": "later bar traded through the candidate extreme (declared)"
+      },
+      "from": "AWAITING_CONFIRMATION",
+      "kind": "state_transition",
+      "layer": "DERIVATION",
+      "reason": "declared confirmation event observed (later bar traded through the candidate extreme); recorded at the evidence bar, never back-filled",
+      "to": "CONFIRMED"
+     }
+    ],
+    "fine_touches": {},
+    "high": 117944.05,
+    "low": 116756.0,
+    "open": 116756.0,
+    "ordering": null,
+    "role": "REACTION_PAUSE_REFERENCE",
+    "role_assignments": [
+     {
+      "alternatives": [
+       "TREND_CONTINUATION_REFERENCE: excluded FOR THIS TASK by the higher-frame context \u2014 the candidate itself is NOT rejected"
+      ],
+      "candidate_direction": "bearish",
+      "hf_trend": "up",
+      "preferred": true,
+      "reasons": [
+       "candidate direction opposes the established higher-frame context; the trend-continuation role is NOT assigned (OB16-A 25:00-25:43) while the candidate remains a legitimate reaction/pause reference (34:00-35:15)"
+      ],
+      "role": "REACTION_PAUSE_REFERENCE",
+      "task": "trend-continuation",
+      "would_change": [
+       "a higher-frame structure change would re-open the trend role evaluation"
+      ]
+     }
+    ],
+    "state": "CONFIRMED",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   {
+    "ambiguous_bar": null,
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_index": 54,
+    "bar_time": "2025-08-10 04:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0010",
+    "close": 118500.0,
+    "context_ref_id": "PSC:F-K(k=5)|high@2025-08-08T04:00:00+00:00",
+    "context_ref_level": 117630.0,
+    "direction": "bearish",
+    "eligibility": {
+     "definition": "declared research configuration: up-close bar whose high is within 1.00% of the contextual swing high level (source leaves 'near support' open; this constant is NOT a source claim and NOT a market truth)",
+     "known_at_selection": [
+      "context ref PSC:F-K(k=5)|high@2025-08-08T04:00:00+00:00 confirmed at its knowable bar (before this bar)",
+      "bar OHLC at 2025-08-10 04:00:00+00:00"
+     ]
+    },
+    "events": [
+     {
+      "at": "2025-08-10 04:00:00+00:00",
+      "at_bar": 54,
+      "evidence": {
+       "bar": 54,
+       "ohlc": [
+        116462.25,
+        118500.0,
+        116460.63,
+        118500.0
+       ]
+      },
+      "from": "CANDIDATE",
+      "kind": "state_transition",
+      "layer": "DERIVATION",
+      "reason": "shape matched the declared research definition; later-evidence event not yet observed",
+      "to": "AWAITING_CONFIRMATION"
+     }
+    ],
+    "fine_touches": {},
+    "high": 118500.0,
+    "low": 116460.63,
+    "open": 116462.25,
+    "ordering": null,
+    "role": "REACTION_PAUSE_REFERENCE",
+    "role_assignments": [
+     {
+      "alternatives": [
+       "TREND_CONTINUATION_REFERENCE: excluded FOR THIS TASK by the higher-frame context \u2014 the candidate itself is NOT rejected"
+      ],
+      "candidate_direction": "bearish",
+      "hf_trend": "up",
+      "preferred": true,
+      "reasons": [
+       "candidate direction opposes the established higher-frame context; the trend-continuation role is NOT assigned (OB16-A 25:00-25:43) while the candidate remains a legitimate reaction/pause reference (34:00-35:15)"
+      ],
+      "role": "REACTION_PAUSE_REFERENCE",
+      "task": "trend-continuation",
+      "would_change": [
+       "a higher-frame structure change would re-open the trend role evaluation"
+      ]
+     }
+    ],
+    "state": "AWAITING_CONFIRMATION",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   {
+    "ambiguous_bar": null,
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_index": 56,
+    "bar_time": "2025-08-10 12:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0011",
+    "close": 118330.58,
+    "context_ref_id": "PSC:F-K(k=5)|high@2025-08-08T04:00:00+00:00",
+    "context_ref_level": 117630.0,
+    "direction": "bearish",
+    "eligibility": {
+     "definition": "declared research configuration: up-close bar whose high is within 1.00% of the contextual swing high level (source leaves 'near support' open; this constant is NOT a source claim and NOT a market truth)",
+     "known_at_selection": [
+      "context ref PSC:F-K(k=5)|high@2025-08-08T04:00:00+00:00 confirmed at its knowable bar (before this bar)",
+      "bar OHLC at 2025-08-10 12:00:00+00:00"
+     ]
+    },
+    "events": [
+     {
+      "at": "2025-08-10 12:00:00+00:00",
+      "at_bar": 56,
+      "evidence": {
+       "bar": 56,
+       "ohlc": [
+        117808.29,
+        118500.0,
+        117608.01,
+        118330.58
+       ]
+      },
+      "from": "CANDIDATE",
+      "kind": "state_transition",
+      "layer": "DERIVATION",
+      "reason": "shape matched the declared research definition; later-evidence event not yet observed",
+      "to": "AWAITING_CONFIRMATION"
+     }
+    ],
+    "fine_touches": {},
+    "high": 118500.0,
+    "low": 117608.01,
+    "open": 117808.29,
+    "ordering": null,
+    "role": "REACTION_PAUSE_REFERENCE",
+    "role_assignments": [
+     {
+      "alternatives": [
+       "TREND_CONTINUATION_REFERENCE: excluded FOR THIS TASK by the higher-frame context \u2014 the candidate itself is NOT rejected"
+      ],
+      "candidate_direction": "bearish",
+      "hf_trend": "up",
+      "preferred": true,
+      "reasons": [
+       "candidate direction opposes the established higher-frame context; the trend-continuation role is NOT assigned (OB16-A 25:00-25:43) while the candidate remains a legitimate reaction/pause reference (34:00-35:15)"
+      ],
+      "role": "REACTION_PAUSE_REFERENCE",
+      "task": "trend-continuation",
+      "would_change": [
+       "a higher-frame structure change would re-open the trend role evaluation"
+      ]
+     }
+    ],
+    "state": "AWAITING_CONFIRMATION",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   {
+    "ambiguous_bar": null,
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_index": 70,
+    "bar_time": "2025-08-12 20:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0012",
+    "close": 119665.27,
+    "context_ref_id": "PSC:F-K(k=5)|low@2025-08-12T00:00:00+00:00",
+    "context_ref_level": 118050.11,
+    "direction": "bullish",
+    "eligibility": {
+     "definition": "declared research configuration: down-close bar whose low is within 1.00% of the contextual swing low level (source leaves 'near support' open; this constant is NOT a source claim and NOT a market truth)",
+     "known_at_selection": [
+      "context ref PSC:F-K(k=5)|low@2025-08-12T00:00:00+00:00 confirmed at its knowable bar (before this bar)",
+      "bar OHLC at 2025-08-12 20:00:00+00:00"
+     ]
+    },
+    "events": [
+     {
+      "at": "2025-08-12 20:00:00+00:00",
+      "at_bar": 70,
+      "evidence": {
+       "bar": 70,
+       "ohlc": [
+        119933.0,
+        120192.1,
+        119172.62,
+        119665.27
+       ]
+      },
+      "from": "CANDIDATE",
+      "kind": "state_transition",
+      "layer": "DERIVATION",
+      "reason": "shape matched the declared research definition; later-evidence event not yet observed",
+      "to": "AWAITING_CONFIRMATION"
+     },
+     {
+      "at": "2025-08-13 00:00:00+00:00",
+      "at_bar": 71,
+      "evidence": {
+       "bar": 71,
+       "close": 120134.08,
+       "revisit_bar": null,
+       "rule": "later bar traded through the candidate extreme (declared)"
+      },
+      "from": "AWAITING_CONFIRMATION",
+      "kind": "state_transition",
+      "layer": "DERIVATION",
+      "reason": "declared confirmation event observed (later bar traded through the candidate extreme); recorded at the evidence bar, never back-filled",
+      "to": "CONFIRMED"
+     }
+    ],
+    "fine_touches": {},
+    "high": 120192.1,
+    "low": 119172.62,
+    "open": 119933.0,
+    "ordering": null,
+    "role": "REACTION_PAUSE_REFERENCE",
+    "role_assignments": [
+     {
+      "alternatives": [
+       "TREND_CONTINUATION_REFERENCE: excluded FOR THIS TASK by the higher-frame context \u2014 the candidate itself is NOT rejected"
+      ],
+      "candidate_direction": "bullish",
+      "hf_trend": "down",
+      "preferred": true,
+      "reasons": [
+       "candidate direction opposes the established higher-frame context; the trend-continuation role is NOT assigned (OB16-A 25:00-25:43) while the candidate remains a legitimate reaction/pause reference (34:00-35:15)"
+      ],
+      "role": "REACTION_PAUSE_REFERENCE",
+      "task": "trend-continuation",
+      "would_change": [
+       "a higher-frame structure change would re-open the trend role evaluation"
+      ]
+     }
+    ],
+    "state": "CONFIRMED",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   {
+    "ambiguous_bar": null,
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_index": 72,
+    "bar_time": "2025-08-13 04:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0013",
+    "close": 119482.01,
+    "context_ref_id": "PSC:F-K(k=5)|low@2025-08-12T00:00:00+00:00",
+    "context_ref_level": 118050.11,
+    "direction": "bullish",
+    "eligibility": {
+     "definition": "declared research configuration: down-close bar whose low is within 1.00% of the contextual swing low level (source leaves 'near support' open; this constant is NOT a source claim and NOT a market truth)",
+     "known_at_selection": [
+      "context ref PSC:F-K(k=5)|low@2025-08-12T00:00:00+00:00 confirmed at its knowable bar (before this bar)",
+      "bar OHLC at 2025-08-13 04:00:00+00:00"
+     ]
+    },
+    "events": [
+     {
+      "at": "2025-08-13 04:00:00+00:00",
+      "at_bar": 72,
+      "evidence": {
+       "bar": 72,
+       "ohlc": [
+        120134.09,
+        120192.1,
+        119094.28,
+        119482.01
+       ]
+      },
+      "from": "CANDIDATE",
+      "kind": "state_transition",
+      "layer": "DERIVATION",
+      "reason": "shape matched the declared research definition; later-evidence event not yet observed",
+      "to": "AWAITING_CONFIRMATION"
+     },
+     {
+      "at": "2025-08-13 12:00:00+00:00",
+      "at_bar": 74,
+      "evidence": {
+       "bar": 74,
+       "close": 120570.41,
+       "revisit_bar": 73,
+       "rule": "later bar traded through the candidate extreme (declared)"
+      },
+      "from": "AWAITING_CONFIRMATION",
+      "kind": "state_transition",
+      "layer": "DERIVATION",
+      "reason": "declared confirmation event observed (later bar traded through the candidate extreme); recorded at the evidence bar, never back-filled",
+      "to": "CONFIRMED"
+     }
+    ],
+    "fine_touches": {},
+    "high": 120192.1,
+    "low": 119094.28,
+    "open": 120134.09,
+    "ordering": null,
+    "role": "REACTION_PAUSE_REFERENCE",
+    "role_assignments": [
+     {
+      "alternatives": [
+       "TREND_CONTINUATION_REFERENCE: excluded FOR THIS TASK by the higher-frame context \u2014 the candidate itself is NOT rejected"
+      ],
+      "candidate_direction": "bullish",
+      "hf_trend": "down",
+      "preferred": true,
+      "reasons": [
+       "candidate direction opposes the established higher-frame context; the trend-continuation role is NOT assigned (OB16-A 25:00-25:43) while the candidate remains a legitimate reaction/pause reference (34:00-35:15)"
+      ],
+      "role": "REACTION_PAUSE_REFERENCE",
+      "task": "trend-continuation",
+      "would_change": [
+       "a higher-frame structure change would re-open the trend role evaluation"
+      ]
+     }
+    ],
+    "state": "CONFIRMED",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   {
+    "ambiguous_bar": null,
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_index": 75,
+    "bar_time": "2025-08-13 16:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0014",
+    "close": 120920.62,
+    "context_ref_id": "PSC:F-K(k=5)|high@2025-08-11T08:00:00+00:00",
+    "context_ref_level": 122335.16,
+    "direction": "bearish",
+    "eligibility": {
+     "definition": "declared research configuration: up-close bar whose high is within 1.00% of the contextual swing high level (source leaves 'near support' open; this constant is NOT a source claim and NOT a market truth)",
+     "known_at_selection": [
+      "context ref PSC:F-K(k=5)|high@2025-08-11T08:00:00+00:00 confirmed at its knowable bar (before this bar)",
+      "bar OHLC at 2025-08-13 16:00:00+00:00"
+     ]
+    },
+    "events": [
+     {
+      "at": "2025-08-13 16:00:00+00:00",
+      "at_bar": 75,
+      "evidence": {
+       "bar": 75,
+       "ohlc": [
+        120570.41,
+        122200.0,
+        120106.02,
+        120920.62
+       ]
+      },
+      "from": "CANDIDATE",
+      "kind": "state_transition",
+      "layer": "DERIVATION",
+      "reason": "shape matched the declared research definition; later-evidence event not yet observed",
+      "to": "AWAITING_CONFIRMATION"
+     }
+    ],
+    "fine_touches": {},
+    "high": 122200.0,
+    "low": 120106.02,
+    "open": 120570.41,
+    "ordering": null,
+    "role": "TREND_CONTINUATION_REFERENCE",
+    "role_assignments": [
+     {
+      "alternatives": [
+       "REACTION_PAUSE_REFERENCE: also possible as a reaction/pause reference; not preferred for this task"
+      ],
+      "candidate_direction": "bearish",
+      "hf_trend": "down",
+      "preferred": true,
+      "reasons": [
+       "candidate direction agrees with the established higher-frame context for the declared trend-continuation task"
+      ],
+      "role": "TREND_CONTINUATION_REFERENCE",
+      "task": "trend-continuation",
+      "would_change": [
+       "a higher-frame structure change would re-open the trend role evaluation"
+      ]
+     }
+    ],
+    "state": "AWAITING_CONFIRMATION",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   {
+    "ambiguous_bar": null,
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_index": 76,
+    "bar_time": "2025-08-13 20:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0015",
+    "close": 122744.21,
+    "context_ref_id": "PSC:F-K(k=5)|high@2025-08-11T08:00:00+00:00",
+    "context_ref_level": 122335.16,
+    "direction": "bearish",
+    "eligibility": {
+     "definition": "declared research configuration: up-close bar whose high is within 1.00% of the contextual swing high level (source leaves 'near support' open; this constant is NOT a source claim and NOT a market truth)",
+     "known_at_selection": [
+      "context ref PSC:F-K(k=5)|high@2025-08-11T08:00:00+00:00 confirmed at its knowable bar (before this bar)",
+      "bar OHLC at 2025-08-13 20:00:00+00:00"
+     ]
+    },
+    "events": [
+     {
+      "at": "2025-08-13 20:00:00+00:00",
+      "at_bar": 76,
+      "evidence": {
+       "bar": 76,
+       "ohlc": [
+        120920.61,
+        122839.47,
+        120920.61,
+        122744.21
+       ]
+      },
+      "from": "CANDIDATE",
+      "kind": "state_transition",
+      "layer": "DERIVATION",
+      "reason": "shape matched the declared research definition; later-evidence event not yet observed",
+      "to": "AWAITING_CONFIRMATION"
+     }
+    ],
+    "fine_touches": {},
+    "high": 122839.47,
+    "low": 120920.61,
+    "open": 120920.61,
+    "ordering": null,
+    "role": "TREND_CONTINUATION_REFERENCE",
+    "role_assignments": [
+     {
+      "alternatives": [
+       "REACTION_PAUSE_REFERENCE: also possible as a reaction/pause reference; not preferred for this task"
+      ],
+      "candidate_direction": "bearish",
+      "hf_trend": "down",
+      "preferred": true,
+      "reasons": [
+       "candidate direction agrees with the established higher-frame context for the declared trend-continuation task"
+      ],
+      "role": "TREND_CONTINUATION_REFERENCE",
+      "task": "trend-continuation",
+      "would_change": [
+       "a higher-frame structure change would re-open the trend role evaluation"
+      ]
+     }
+    ],
+    "state": "AWAITING_CONFIRMATION",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   }
+  ],
+  "hf_context": {
+   "as_of_bar": 70,
+   "established_at": "2025-08-12 20:00:00+00:00",
+   "evidence": [
+    "SF-DIR-study-replay-v1-70"
+   ],
+   "trend": "down"
+  },
+  "hypotheses": [],
+  "k": 5,
+  "ledger_uids": {
+   "OBC-study-replay-v1-0001": "T-STUDY-CANDIDATE#557",
+   "OBC-study-replay-v1-0002": "T-STUDY-CANDIDATE#558",
+   "OBC-study-replay-v1-0003": "T-STUDY-CANDIDATE#559",
+   "OBC-study-replay-v1-0004": "T-STUDY-CANDIDATE#560",
+   "OBC-study-replay-v1-0005": "T-STUDY-CANDIDATE#561",
+   "OBC-study-replay-v1-0006": "T-STUDY-CANDIDATE#562",
+   "OBC-study-replay-v1-0007": "T-STUDY-CANDIDATE#563",
+   "OBC-study-replay-v1-0008": "T-STUDY-CANDIDATE#564",
+   "OBC-study-replay-v1-0009": "T-STUDY-CANDIDATE#565",
+   "OBC-study-replay-v1-0010": "T-STUDY-CANDIDATE#566",
+   "OBC-study-replay-v1-0011": "T-STUDY-CANDIDATE#567",
+   "OBC-study-replay-v1-0012": "T-STUDY-CANDIDATE#568",
+   "OBC-study-replay-v1-0013": "T-STUDY-CANDIDATE#569",
+   "OBC-study-replay-v1-0014": "T-STUDY-CANDIDATE#570",
+   "OBC-study-replay-v1-0015": "T-STUDY-CANDIDATE#571"
+  },
+  "run_id": "study-replay-v1",
+  "scan_upto": 77,
+  "selection_quality": "NOT_ESTABLISHED",
+  "selections": [],
+  "seq_facts": [
+   {
+    "at": "2025-08-05 16:00:00+00:00",
+    "evidence": [
+     "SF-DIR-study-replay-v1-27"
+    ],
+    "kind": "HF_CONTEXT_ESTABLISHED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "trend": "up"
+   },
+   {
+    "after_hf_context": "2025-08-05 16:00:00+00:00",
+    "at": "2025-08-05 16:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0001",
+    "kind": "CANDIDATE_FORMED",
+    "layer": "DERIVATION"
+   },
+   {
+    "at": "2025-08-05 16:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0001",
+    "kind": "ROLE_EVALUATED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "role": "TREND_CONTINUATION_REFERENCE"
+   },
+   {
+    "at": "2025-08-06 12:00:00+00:00",
+    "evidence": [
+     "SF-DIR-study-replay-v1-32"
+    ],
+    "kind": "HF_CONTEXT_ESTABLISHED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "trend": "down"
+   },
+   {
+    "after_hf_context": "2025-08-06 12:00:00+00:00",
+    "at": "2025-08-06 12:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0002",
+    "kind": "CANDIDATE_FORMED",
+    "layer": "DERIVATION"
+   },
+   {
+    "at": "2025-08-06 12:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0002",
+    "kind": "ROLE_EVALUATED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "role": "REACTION_PAUSE_REFERENCE"
+   },
+   {
+    "after_hf_context": "2025-08-06 12:00:00+00:00",
+    "at": "2025-08-06 16:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0003",
+    "kind": "CANDIDATE_FORMED",
+    "layer": "DERIVATION"
+   },
+   {
+    "at": "2025-08-06 16:00:00+00:00",
+    "bar": 33,
+    "candidate_id": "OBC-study-replay-v1-0001",
+    "kind": "CONFIRMATION_EVENT",
+    "layer": "DIRECT_OBSERVATION"
+   },
+   {
+    "at": "2025-08-06 16:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0003",
+    "kind": "ROLE_EVALUATED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "role": "TREND_CONTINUATION_REFERENCE"
+   },
+   {
+    "after_hf_context": "2025-08-06 12:00:00+00:00",
+    "at": "2025-08-07 08:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0004",
+    "kind": "CANDIDATE_FORMED",
+    "layer": "DERIVATION"
+   },
+   {
+    "at": "2025-08-07 08:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0004",
+    "kind": "ROLE_EVALUATED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "role": "TREND_CONTINUATION_REFERENCE"
+   },
+   {
+    "after_hf_context": "2025-08-06 12:00:00+00:00",
+    "at": "2025-08-07 12:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0005",
+    "kind": "CANDIDATE_FORMED",
+    "layer": "DERIVATION"
+   },
+   {
+    "at": "2025-08-07 12:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0005",
+    "kind": "ROLE_EVALUATED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "role": "TREND_CONTINUATION_REFERENCE"
+   },
+   {
+    "after_hf_context": "2025-08-06 12:00:00+00:00",
+    "at": "2025-08-07 16:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0006",
+    "kind": "CANDIDATE_FORMED",
+    "layer": "DERIVATION"
+   },
+   {
+    "at": "2025-08-07 16:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0006",
+    "kind": "ROLE_EVALUATED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "role": "TREND_CONTINUATION_REFERENCE"
+   },
+   {
+    "at": "2025-08-09 00:00:00+00:00",
+    "evidence": [
+     "SF-DIR-study-replay-v1-47"
+    ],
+    "kind": "HF_CONTEXT_ESTABLISHED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "trend": "up"
+   },
+   {
+    "after_hf_context": "2025-08-09 00:00:00+00:00",
+    "at": "2025-08-09 00:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0007",
+    "kind": "CANDIDATE_FORMED",
+    "layer": "DERIVATION"
+   },
+   {
+    "at": "2025-08-09 00:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0007",
+    "kind": "ROLE_EVALUATED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "role": "REACTION_PAUSE_REFERENCE"
+   },
+   {
+    "at": "2025-08-09 04:00:00+00:00",
+    "bar": 48,
+    "candidate_id": "OBC-study-replay-v1-0007",
+    "kind": "CONFIRMATION_EVENT",
+    "layer": "DIRECT_OBSERVATION"
+   },
+   {
+    "after_hf_context": "2025-08-09 00:00:00+00:00",
+    "at": "2025-08-09 08:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0008",
+    "kind": "CANDIDATE_FORMED",
+    "layer": "DERIVATION"
+   },
+   {
+    "at": "2025-08-09 08:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0008",
+    "kind": "ROLE_EVALUATED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "role": "REACTION_PAUSE_REFERENCE"
+   },
+   {
+    "after_hf_context": "2025-08-09 00:00:00+00:00",
+    "at": "2025-08-09 12:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0009",
+    "kind": "CANDIDATE_FORMED",
+    "layer": "DERIVATION"
+   },
+   {
+    "at": "2025-08-09 12:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0009",
+    "kind": "ROLE_EVALUATED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "role": "REACTION_PAUSE_REFERENCE"
+   },
+   {
+    "at": "2025-08-09 16:00:00+00:00",
+    "bar": 51,
+    "candidate_id": "OBC-study-replay-v1-0009",
+    "kind": "CONFIRMATION_EVENT",
+    "layer": "DIRECT_OBSERVATION"
+   },
+   {
+    "after_hf_context": "2025-08-09 00:00:00+00:00",
+    "at": "2025-08-10 04:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0010",
+    "kind": "CANDIDATE_FORMED",
+    "layer": "DERIVATION"
+   },
+   {
+    "at": "2025-08-10 04:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0010",
+    "kind": "ROLE_EVALUATED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "role": "REACTION_PAUSE_REFERENCE"
+   },
+   {
+    "after_hf_context": "2025-08-09 00:00:00+00:00",
+    "at": "2025-08-10 12:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0011",
+    "kind": "CANDIDATE_FORMED",
+    "layer": "DERIVATION"
+   },
+   {
+    "at": "2025-08-10 12:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0011",
+    "kind": "ROLE_EVALUATED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "role": "REACTION_PAUSE_REFERENCE"
+   },
+   {
+    "at": "2025-08-12 20:00:00+00:00",
+    "evidence": [
+     "SF-DIR-study-replay-v1-70"
+    ],
+    "kind": "HF_CONTEXT_ESTABLISHED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "trend": "down"
+   },
+   {
+    "after_hf_context": "2025-08-12 20:00:00+00:00",
+    "at": "2025-08-12 20:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0012",
+    "kind": "CANDIDATE_FORMED",
+    "layer": "DERIVATION"
+   },
+   {
+    "at": "2025-08-12 20:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0012",
+    "kind": "ROLE_EVALUATED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "role": "REACTION_PAUSE_REFERENCE"
+   },
+   {
+    "at": "2025-08-13 00:00:00+00:00",
+    "bar": 71,
+    "candidate_id": "OBC-study-replay-v1-0012",
+    "kind": "CONFIRMATION_EVENT",
+    "layer": "DIRECT_OBSERVATION"
+   },
+   {
+    "after_hf_context": "2025-08-12 20:00:00+00:00",
+    "at": "2025-08-13 04:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0013",
+    "kind": "CANDIDATE_FORMED",
+    "layer": "DERIVATION"
+   },
+   {
+    "at": "2025-08-13 04:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0013",
+    "kind": "ROLE_EVALUATED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "role": "REACTION_PAUSE_REFERENCE"
+   },
+   {
+    "at": "2025-08-13 12:00:00+00:00",
+    "bar": 74,
+    "candidate_id": "OBC-study-replay-v1-0013",
+    "kind": "CONFIRMATION_EVENT",
+    "layer": "DIRECT_OBSERVATION"
+   },
+   {
+    "after_hf_context": "2025-08-12 20:00:00+00:00",
+    "at": "2025-08-13 16:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0014",
+    "kind": "CANDIDATE_FORMED",
+    "layer": "DERIVATION"
+   },
+   {
+    "at": "2025-08-13 16:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0014",
+    "kind": "ROLE_EVALUATED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "role": "TREND_CONTINUATION_REFERENCE"
+   },
+   {
+    "after_hf_context": "2025-08-12 20:00:00+00:00",
+    "at": "2025-08-13 20:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0015",
+    "kind": "CANDIDATE_FORMED",
+    "layer": "DERIVATION"
+   },
+   {
+    "at": "2025-08-13 20:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0015",
+    "kind": "ROLE_EVALUATED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "role": "TREND_CONTINUATION_REFERENCE"
+   }
+  ],
+  "task": "trend-continuation",
+  "task_scale": "4h"
+ },
+ "watch_plan": [
+  {
+   "kind": "OB-like candidate (R1)",
+   "ordering": null,
+   "revision_conditions": [
+    "higher-frame structure change re-opens role evaluation",
+    "finer data may resolve a same-bar ordering (either direction)"
+   ],
+   "role": "TREND_CONTINUATION_REFERENCE",
+   "state": "CONFIRMED",
+   "subject": "OBC-study-replay-v1-0001",
+   "time_provenance": {
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_time": "2025-08-05 16:00:00+00:00",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   "unknowns": [
+    "no resting-order data: participant positions/intent, resting stops and available liquidity CANNOT be established",
+    "'near support' has no source definition (research-config constant only)"
+   ],
+   "watch": [
+    "trade-through of 114893.13 on a later completed bar -> CONFIRMED (recorded at the evidence bar)",
+    "return to 112650.0 -> revisit event (same-bar with confirmation -> ordering UNKNOWN)",
+    "context reference PSC:F-K(k=5)|low@2025-08-03T04:00:00+00:00 at 111920.0: a completed close through it before confirmation -> role premise failed"
+   ]
+  },
+  {
+   "kind": "OB-like candidate (R1)",
+   "ordering": "UNKNOWN",
+   "revision_conditions": [
+    "higher-frame structure change re-opens role evaluation",
+    "finer data may resolve a same-bar ordering (either direction)"
+   ],
+   "role": "REACTION_PAUSE_REFERENCE",
+   "state": "AWAITING_CONFIRMATION",
+   "subject": "OBC-study-replay-v1-0002",
+   "time_provenance": {
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_time": "2025-08-06 12:00:00+00:00",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   "unknowns": [
+    "no resting-order data: participant positions/intent, resting stops and available liquidity CANNOT be established",
+    "'near support' has no source definition (research-config constant only)"
+   ],
+   "watch": [
+    "trade-through of 114404.23 on a later completed bar -> CONFIRMED (recorded at the evidence bar)",
+    "return to 113727.57 -> revisit event (same-bar with confirmation -> ordering UNKNOWN)",
+    "context reference PSC:F-K(k=5)|low@2025-08-05T16:00:00+00:00 at 112650.0: a completed close through it before confirmation -> role premise failed"
+   ]
+  },
+  {
+   "kind": "OB-like candidate (R1)",
+   "ordering": null,
+   "revision_conditions": [
+    "higher-frame structure change re-opens role evaluation",
+    "finer data may resolve a same-bar ordering (either direction)"
+   ],
+   "role": "TREND_CONTINUATION_REFERENCE",
+   "state": "AWAITING_CONFIRMATION",
+   "subject": "OBC-study-replay-v1-0003",
+   "time_provenance": {
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_time": "2025-08-06 16:00:00+00:00",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   "unknowns": [
+    "no resting-order data: participant positions/intent, resting stops and available liquidity CANNOT be established",
+    "'near support' has no source definition (research-config constant only)"
+   ],
+   "watch": [
+    "trade-through of 113579.9 on a later completed bar -> CONFIRMED (recorded at the evidence bar)",
+    "return to 115515.09 -> revisit event (same-bar with confirmation -> ordering UNKNOWN)",
+    "context reference PSC:F-K(k=5)|high@2025-08-04T20:00:00+00:00 at 115720.0: a completed close through it before confirmation -> role premise failed"
+   ]
+  },
+  {
+   "kind": "OB-like candidate (R1)",
+   "ordering": null,
+   "revision_conditions": [
+    "higher-frame structure change re-opens role evaluation",
+    "finer data may resolve a same-bar ordering (either direction)"
+   ],
+   "role": "TREND_CONTINUATION_REFERENCE",
+   "state": "AWAITING_CONFIRMATION",
+   "subject": "OBC-study-replay-v1-0004",
+   "time_provenance": {
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_time": "2025-08-07 08:00:00+00:00",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   "unknowns": [
+    "no resting-order data: participant positions/intent, resting stops and available liquidity CANNOT be established",
+    "'near support' has no source definition (research-config constant only)"
+   ],
+   "watch": [
+    "trade-through of 114259.0 on a later completed bar -> CONFIRMED (recorded at the evidence bar)",
+    "return to 114876.79 -> revisit event (same-bar with confirmation -> ordering UNKNOWN)",
+    "context reference PSC:F-K(k=5)|high@2025-08-04T20:00:00+00:00 at 115720.0: a completed close through it before confirmation -> role premise failed"
+   ]
+  },
+  {
+   "kind": "OB-like candidate (R1)",
+   "ordering": null,
+   "revision_conditions": [
+    "higher-frame structure change re-opens role evaluation",
+    "finer data may resolve a same-bar ordering (either direction)"
+   ],
+   "role": "TREND_CONTINUATION_REFERENCE",
+   "state": "AWAITING_CONFIRMATION",
+   "subject": "OBC-study-replay-v1-0005",
+   "time_provenance": {
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_time": "2025-08-07 12:00:00+00:00",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   "unknowns": [
+    "no resting-order data: participant positions/intent, resting stops and available liquidity CANNOT be established",
+    "'near support' has no source definition (research-config constant only)"
+   ],
+   "watch": [
+    "trade-through of 114787.98 on a later completed bar -> CONFIRMED (recorded at the evidence bar)",
+    "return to 116828.93 -> revisit event (same-bar with confirmation -> ordering UNKNOWN)",
+    "context reference PSC:F-K(k=5)|high@2025-08-04T20:00:00+00:00 at 115720.0: a completed close through it before confirmation -> role premise failed"
+   ]
+  },
+  {
+   "kind": "OB-like candidate (R1)",
+   "ordering": "revisit-first",
+   "revision_conditions": [
+    "higher-frame structure change re-opens role evaluation",
+    "finer data may resolve a same-bar ordering (either direction)"
+   ],
+   "role": "TREND_CONTINUATION_REFERENCE",
+   "state": "AWAITING_CONFIRMATION",
+   "subject": "OBC-study-replay-v1-0006",
+   "time_provenance": {
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_time": "2025-08-07 16:00:00+00:00",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   "unknowns": [
+    "no resting-order data: participant positions/intent, resting stops and available liquidity CANNOT be established",
+    "'near support' has no source definition (research-config constant only)"
+   ],
+   "watch": [
+    "trade-through of 116035.84 on a later completed bar -> CONFIRMED (recorded at the evidence bar)",
+    "return to 116791.11 -> revisit event (same-bar with confirmation -> ordering UNKNOWN)",
+    "context reference PSC:F-K(k=5)|high@2025-08-04T20:00:00+00:00 at 115720.0: a completed close through it before confirmation -> role premise failed"
+   ]
+  },
+  {
+   "kind": "OB-like candidate (R1)",
+   "ordering": null,
+   "revision_conditions": [
+    "higher-frame structure change re-opens role evaluation",
+    "finer data may resolve a same-bar ordering (either direction)"
+   ],
+   "role": "REACTION_PAUSE_REFERENCE",
+   "state": "CONFIRMED",
+   "subject": "OBC-study-replay-v1-0007",
+   "time_provenance": {
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_time": "2025-08-09 00:00:00+00:00",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   "unknowns": [
+    "no resting-order data: participant positions/intent, resting stops and available liquidity CANNOT be established",
+    "'near support' has no source definition (research-config constant only)"
+   ],
+   "watch": [
+    "trade-through of 116319.06 on a later completed bar -> CONFIRMED (recorded at the evidence bar)",
+    "return to 116980.0 -> revisit event (same-bar with confirmation -> ordering UNKNOWN)",
+    "context reference PSC:F-K(k=5)|high@2025-08-08T04:00:00+00:00 at 117630.0: a completed close through it before confirmation -> role premise failed"
+   ]
+  },
+  {
+   "kind": "OB-like candidate (R1)",
+   "ordering": null,
+   "revision_conditions": [
+    "higher-frame structure change re-opens role evaluation",
+    "finer data may resolve a same-bar ordering (either direction)"
+   ],
+   "role": "REACTION_PAUSE_REFERENCE",
+   "state": "AWAITING_CONFIRMATION",
+   "subject": "OBC-study-replay-v1-0008",
+   "time_provenance": {
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_time": "2025-08-09 08:00:00+00:00",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   "unknowns": [
+    "no resting-order data: participant positions/intent, resting stops and available liquidity CANNOT be established",
+    "'near support' has no source definition (research-config constant only)"
+   ],
+   "watch": [
+    "trade-through of 116339.45 on a later completed bar -> CONFIRMED (recorded at the evidence bar)",
+    "return to 116980.0 -> revisit event (same-bar with confirmation -> ordering UNKNOWN)",
+    "context reference PSC:F-K(k=5)|high@2025-08-08T04:00:00+00:00 at 117630.0: a completed close through it before confirmation -> role premise failed"
+   ]
+  },
+  {
+   "kind": "OB-like candidate (R1)",
+   "ordering": null,
+   "revision_conditions": [
+    "higher-frame structure change re-opens role evaluation",
+    "finer data may resolve a same-bar ordering (either direction)"
+   ],
+   "role": "REACTION_PAUSE_REFERENCE",
+   "state": "CONFIRMED",
+   "subject": "OBC-study-replay-v1-0009",
+   "time_provenance": {
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_time": "2025-08-09 12:00:00+00:00",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   "unknowns": [
+    "no resting-order data: participant positions/intent, resting stops and available liquidity CANNOT be established",
+    "'near support' has no source definition (research-config constant only)"
+   ],
+   "watch": [
+    "trade-through of 116756.0 on a later completed bar -> CONFIRMED (recorded at the evidence bar)",
+    "return to 117944.05 -> revisit event (same-bar with confirmation -> ordering UNKNOWN)",
+    "context reference PSC:F-K(k=5)|high@2025-08-08T04:00:00+00:00 at 117630.0: a completed close through it before confirmation -> role premise failed"
+   ]
+  },
+  {
+   "kind": "OB-like candidate (R1)",
+   "ordering": null,
+   "revision_conditions": [
+    "higher-frame structure change re-opens role evaluation",
+    "finer data may resolve a same-bar ordering (either direction)"
+   ],
+   "role": "REACTION_PAUSE_REFERENCE",
+   "state": "AWAITING_CONFIRMATION",
+   "subject": "OBC-study-replay-v1-0010",
+   "time_provenance": {
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_time": "2025-08-10 04:00:00+00:00",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   "unknowns": [
+    "no resting-order data: participant positions/intent, resting stops and available liquidity CANNOT be established",
+    "'near support' has no source definition (research-config constant only)"
+   ],
+   "watch": [
+    "trade-through of 116460.63 on a later completed bar -> CONFIRMED (recorded at the evidence bar)",
+    "return to 118500.0 -> revisit event (same-bar with confirmation -> ordering UNKNOWN)",
+    "context reference PSC:F-K(k=5)|high@2025-08-08T04:00:00+00:00 at 117630.0: a completed close through it before confirmation -> role premise failed"
+   ]
+  },
+  {
+   "kind": "OB-like candidate (R1)",
+   "ordering": null,
+   "revision_conditions": [
+    "higher-frame structure change re-opens role evaluation",
+    "finer data may resolve a same-bar ordering (either direction)"
+   ],
+   "role": "REACTION_PAUSE_REFERENCE",
+   "state": "AWAITING_CONFIRMATION",
+   "subject": "OBC-study-replay-v1-0011",
+   "time_provenance": {
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_time": "2025-08-10 12:00:00+00:00",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   "unknowns": [
+    "no resting-order data: participant positions/intent, resting stops and available liquidity CANNOT be established",
+    "'near support' has no source definition (research-config constant only)"
+   ],
+   "watch": [
+    "trade-through of 117608.01 on a later completed bar -> CONFIRMED (recorded at the evidence bar)",
+    "return to 118500.0 -> revisit event (same-bar with confirmation -> ordering UNKNOWN)",
+    "context reference PSC:F-K(k=5)|high@2025-08-08T04:00:00+00:00 at 117630.0: a completed close through it before confirmation -> role premise failed"
+   ]
+  },
+  {
+   "kind": "OB-like candidate (R1)",
+   "ordering": null,
+   "revision_conditions": [
+    "higher-frame structure change re-opens role evaluation",
+    "finer data may resolve a same-bar ordering (either direction)"
+   ],
+   "role": "REACTION_PAUSE_REFERENCE",
+   "state": "CONFIRMED",
+   "subject": "OBC-study-replay-v1-0012",
+   "time_provenance": {
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_time": "2025-08-12 20:00:00+00:00",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   "unknowns": [
+    "no resting-order data: participant positions/intent, resting stops and available liquidity CANNOT be established",
+    "'near support' has no source definition (research-config constant only)"
+   ],
+   "watch": [
+    "trade-through of 120192.1 on a later completed bar -> CONFIRMED (recorded at the evidence bar)",
+    "return to 119172.62 -> revisit event (same-bar with confirmation -> ordering UNKNOWN)",
+    "context reference PSC:F-K(k=5)|low@2025-08-12T00:00:00+00:00 at 118050.11: a completed close through it before confirmation -> role premise failed"
+   ]
+  },
+  {
+   "kind": "OB-like candidate (R1)",
+   "ordering": null,
+   "revision_conditions": [
+    "higher-frame structure change re-opens role evaluation",
+    "finer data may resolve a same-bar ordering (either direction)"
+   ],
+   "role": "REACTION_PAUSE_REFERENCE",
+   "state": "CONFIRMED",
+   "subject": "OBC-study-replay-v1-0013",
+   "time_provenance": {
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_time": "2025-08-13 04:00:00+00:00",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   "unknowns": [
+    "no resting-order data: participant positions/intent, resting stops and available liquidity CANNOT be established",
+    "'near support' has no source definition (research-config constant only)"
+   ],
+   "watch": [
+    "trade-through of 120192.1 on a later completed bar -> CONFIRMED (recorded at the evidence bar)",
+    "return to 119094.28 -> revisit event (same-bar with confirmation -> ordering UNKNOWN)",
+    "context reference PSC:F-K(k=5)|low@2025-08-12T00:00:00+00:00 at 118050.11: a completed close through it before confirmation -> role premise failed"
+   ]
+  },
+  {
+   "kind": "OB-like candidate (R1)",
+   "ordering": null,
+   "revision_conditions": [
+    "higher-frame structure change re-opens role evaluation",
+    "finer data may resolve a same-bar ordering (either direction)"
+   ],
+   "role": "TREND_CONTINUATION_REFERENCE",
+   "state": "AWAITING_CONFIRMATION",
+   "subject": "OBC-study-replay-v1-0014",
+   "time_provenance": {
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_time": "2025-08-13 16:00:00+00:00",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   "unknowns": [
+    "no resting-order data: participant positions/intent, resting stops and available liquidity CANNOT be established",
+    "'near support' has no source definition (research-config constant only)"
+   ],
+   "watch": [
+    "trade-through of 120106.02 on a later completed bar -> CONFIRMED (recorded at the evidence bar)",
+    "return to 122200.0 -> revisit event (same-bar with confirmation -> ordering UNKNOWN)",
+    "context reference PSC:F-K(k=5)|high@2025-08-11T08:00:00+00:00 at 122335.16: a completed close through it before confirmation -> role premise failed"
+   ]
+  },
+  {
+   "kind": "OB-like candidate (R1)",
+   "ordering": null,
+   "revision_conditions": [
+    "higher-frame structure change re-opens role evaluation",
+    "finer data may resolve a same-bar ordering (either direction)"
+   ],
+   "role": "TREND_CONTINUATION_REFERENCE",
+   "state": "AWAITING_CONFIRMATION",
+   "subject": "OBC-study-replay-v1-0015",
+   "time_provenance": {
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_time": "2025-08-13 20:00:00+00:00",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   "unknowns": [
+    "no resting-order data: participant positions/intent, resting stops and available liquidity CANNOT be established",
+    "'near support' has no source definition (research-config constant only)"
+   ],
+   "watch": [
+    "trade-through of 120920.61 on a later completed bar -> CONFIRMED (recorded at the evidence bar)",
+    "return to 122839.47 -> revisit event (same-bar with confirmation -> ordering UNKNOWN)",
+    "context reference PSC:F-K(k=5)|high@2025-08-11T08:00:00+00:00 at 122335.16: a completed close through it before confirmation -> role premise failed"
+   ]
+  }
+ ]
+}
