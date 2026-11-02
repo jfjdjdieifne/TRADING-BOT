@@ -59,6 +59,7 @@ from trading_system.research.contextual_selection.study_links import (
     ROLE_REACTION_PAUSE,
     ROLE_TREND,
     ROLE_UNDETERMINED,
+    SHIFT_STATUSES,
     STATE_AWAITING_CONFIRMATION,
     STATE_CANDIDATE,
     STATE_CONFIRMED,
@@ -761,3 +762,202 @@ def test_quote_provenance_is_labeled():
     reg = json.dumps(sl.RELATIONSHIP_REGISTER)
     assert "NOT audited by ear" in reg or "not ear-audited" in reg
     assert "visually checked" in reg
+
+
+# ------------------------------------------------------------------ #
+# S  range positions + candle direction (narrow-predicate fix)         #
+# ------------------------------------------------------------------ #
+def _scene_with_bar10(bar10):
+    scene = list(SCENE_CONFIRM)
+    scene[10] = (10,) + tuple(bar10)
+    return scene
+
+
+def test_S_range_positions_and_candle_direction():
+    """The candidate predicate is RANGE CONTAINMENT
+    (low <= level <= high), NOT 'low <= level':
+      * range contains the level  -> may qualify (with direction +
+        family extreme);
+      * range entirely BELOW the level -> does NOT qualify (it also
+        satisfies low <= level — the mislabeling defect);
+      * range entirely ABOVE the level -> does NOT qualify;
+      * wrong candle direction    -> does NOT qualify.
+    Each check asserts the level-relation wording is precise and that
+    no percentage/candle-count/threshold appears."""
+    lvl = 100.0
+
+    def run(bar10):
+        bars = _bars(_scene_with_bar10(bar10))
+        layer = StudyReasoningLayer(run_id="tS", k=2, task_scale="4h")
+        _run_boundaries(layer, bars, 10, InterpretationLedger(),
+                        direction="up")
+        return layer
+
+    # (d) control: contains + down-close -> qualifies
+    ctl = run((104.0, 104.5, 99.8, 100.8))
+    assert len(ctl.candidates) == 1
+    rel = ctl.candidates[0].eligibility["level_relation"]
+    assert rel["kind"] == "range_contains_level"
+    assert "reported range" in rel["establishes"]
+    assert rel["does_not_establish"], "must state what is NOT known"
+    assert rel["level_entered_range_at_this_bar"] is True
+    assert rel["close_side_of_level"] == "closed_at_or_above_level"
+
+    # (a) entirely below the level (high < level): satisfies low <=
+    # level but the level is NOT in the range -> must NOT qualify
+    below = run((98.5, 99.5, 97.5, 98.0))
+    assert below.candidates == [], \
+        "a bar entirely below the level must not qualify"
+
+    # (b) entirely above the level (low > level) -> must NOT qualify
+    above = run((104.0, 104.5, 100.6, 101.0))
+    assert above.candidates == [], \
+        "a bar entirely above the level must not qualify"
+
+    # (c) contains but WRONG candle direction (up-close) -> no
+    # bullish candidate
+    wrongdir = run((100.2, 101.5, 99.9, 101.0))
+    assert wrongdir.candidates == [], \
+        "wrong candle direction must not qualify"
+
+    # the OBC-0006 regression shape: an up-close bar whose range is
+    # entirely ABOVE a high reference must never qualify on the
+    # bearish side (this is the exact old-OBC-0006 bar vs 115720)
+    scene = [
+        (0, 110.0, 110.5, 108.0, 108.5),
+        (1, 108.5, 109.0, 105.0, 105.5),
+        (2, 105.5, 106.0, 101.0, 101.5),
+        (3, 101.5, 102.0, 100.0, 101.0),
+        (4, 101.0, 104.0, 100.8, 103.5),
+        (5, 103.5, 106.5, 103.0, 106.0),
+        (6, 106.0, 108.5, 105.5, 108.0),
+        (7, 108.0, 111.5, 107.5, 111.0),   # swing high 111.5
+        (8, 107.5, 108.5, 107.0, 108.0),
+        (9, 108.0, 109.0, 107.5, 108.5),
+        (10, 108.6, 109.4, 108.4, 109.0),  # up-close, range entirely
+                                           # ABOVE ref 111.5? no —
+        (11, 109.0, 110.0, 108.5, 109.5),
+    ]
+    # exact old-OBC-0006 numbers scaled to the scene: ref high 111.5,
+    # bar entirely above it (low 112.0 > 111.5), up-close
+    scene[10] = (10, 112.0, 113.2, 112.0, 113.0)
+    bars = _bars(scene)
+    layer = StudyReasoningLayer(run_id="tS2", k=2, task_scale="4h")
+    _run_boundaries(layer, bars, 10, InterpretationLedger(),
+                    direction="down")
+    assert layer.candidates == [], \
+        "old-OBC-0006 shape (range entirely above the high level) " \
+        "must not qualify"
+
+    # two consecutive containing bars: the second records that the
+    # level did NOT enter its range at its own bar
+    scene2 = _scene_with_bar10((104.0, 104.5, 99.9, 100.5))
+    scene2[11] = (11, 100.5, 102.0, 99.4, 99.8)
+    bars2 = _bars(scene2)
+    layer2 = StudyReasoningLayer(run_id="tS3", k=2, task_scale="4h")
+    _run_boundaries(layer2, bars2, 11, InterpretationLedger(),
+                    direction="up")
+    assert len(layer2.candidates) == 2
+    ent = [c.eligibility["level_relation"]
+           ["level_entered_range_at_this_bar"]
+           for c in layer2.candidates]
+    assert ent == [True, False]
+
+    # no threshold language anywhere in the eligibility
+    blob = json.dumps([c.eligibility for c in ctl.candidates])
+    assert "%" not in blob and "0.01" not in blob
+    assert "NOT called" in ctl.candidates[0].eligibility[
+        "source_caveat"] or "not called" in ctl.candidates[0]\
+        .eligibility["source_caveat"]
+
+
+# ------------------------------------------------------------------ #
+# E03 slice — reference-crossing shift-watch (next relationship)       #
+# ------------------------------------------------------------------ #
+SCENE_SHIFT = [
+    (0, 110.0, 110.5, 108.0, 108.5),
+    (1, 108.5, 109.0, 105.0, 105.5),
+    (2, 105.5, 106.0, 101.0, 101.5),
+    (3, 101.5, 102.0, 100.0, 101.0),    # swing low 100
+    (4, 101.0, 104.0, 100.8, 103.5),
+    (5, 103.5, 106.5, 103.0, 106.0),
+    (6, 106.0, 108.5, 105.5, 108.0),
+    (7, 108.0, 111.5, 107.5, 111.0),    # local swing high 111.5
+    (8, 111.0, 111.5, 107.0, 107.5),
+    (9, 107.5, 108.0, 103.5, 104.0),    # high confirmed here
+    (10, 104.0, 104.5, 100.5, 101.0),
+    (11, 101.0, 101.2, 99.0, 99.5),     # close-through 100 (downward)
+    (12, 98.8, 98.9, 97.5, 98.0),       # non-overlap displacement
+    (13, 98.0, 100.0, 97.8, 99.8),
+    (14, 99.8, 112.5, 99.5, 112.0),     # local-swing crossing 111.5
+]
+
+
+def test_E03_shift_watch_slice_no_shift_claim():
+    """E03-A/B slice: a close-to-close transition across an old
+    reference opens a shift-watch (context for WATCHING, never proof);
+    evidence is recorded append-only; there is NO 'shift confirmed'
+    state and NO reversal/trade signal."""
+    bars = _bars(SCENE_SHIFT)
+    layer = StudyReasoningLayer(run_id="tSW", k=2, task_scale="4h")
+    ledger = InterpretationLedger()
+
+    # causality: nothing before the crossing bar
+    _run_boundaries(layer, bars, 10, ledger, direction="up")
+    assert layer.shift_watches == []
+
+    # bar 11: downward close-to-close transition across the level 100
+    _run_boundaries(layer, bars, 11, ledger, direction="up", start=11)
+    assert len(layer.shift_watches) == 1
+    w = layer.shift_watches[0]
+    assert w.status == "WATCHING"
+    assert w.crossing["direction"] == "downward"
+    assert w.crossing["bar"] == 11
+    assert "close-to-close" in w.crossing["transition"]
+    assert "NOT established" in w.crossing["transition"]
+    assert w.local_ref_level == 111.5
+    assert len(w.questions) == 3
+    assert any(q.startswith("do NOT assume") for q in w.questions)
+    kinds = [f["kind"] for f in layer.seq_facts]
+    assert "REFERENCE_CROSSING" in kinds
+    assert "SHIFT_WATCH_OPENED" in kinds
+
+    # bar 12: closed-bar non-overlap displacement -> evidence only
+    _run_boundaries(layer, bars, 12, ledger, direction="up", start=12)
+    assert w.status == "EVIDENCE_NOTED"
+    evs = [e for e in w.evidence
+           if e["kind"] == "displacement_non_overlap"]
+    assert evs and evs[0]["at_bar"] == 12
+    assert "NOT proof of a shift" in evs[0]["note"]
+
+    # bar 14: local-swing crossing -> second evidence item (E03-B)
+    _run_boundaries(layer, bars, 14, ledger, direction="up", start=13)
+    evs2 = [e for e in w.evidence
+            if e["kind"] == "local_swing_crossing"]
+    assert evs2 and evs2[0]["at_bar"] == 14
+    assert w.evidence[0]["at_bar"] == 12   # append-only order kept
+
+    # NO shift/reversal claim anywhere
+    assert w.status in SHIFT_STATUSES
+    assert w.status != "SHIFT_CONFIRMED"
+    for e in w.evidence:
+        assert "no reversal or trade signal" in e["note"]
+
+    # ledger records with revision_of chain
+    watch_entries = [r for r in ledger.results
+                     if r.task_id == "T-STUDY-SHIFT-WATCH"]
+    assert len(watch_entries) >= 2
+    uids = [u for u, p in ledger._payloads.items()
+            if p.get("kind") == "study_shift_watch"]
+    assert len(uids) >= 2
+    assert ledger._payloads[uids[1]]["revision_of"] == uids[0]
+
+    # persistence round-trip
+    st = json.loads(json.dumps(layer.state_dict(), default=str))
+    layer2 = StudyReasoningLayer(run_id="tSW", k=2, task_scale="4h")
+    layer2.load_state_dict(st)
+    assert len(layer2.shift_watches) == len(layer.shift_watches)
+    w2 = layer2.shift_watches[0]
+    assert w2.status == w.status
+    assert len(w2.evidence) == len(w.evidence)
+    assert w2.crossing["bar"] == w.crossing["bar"]

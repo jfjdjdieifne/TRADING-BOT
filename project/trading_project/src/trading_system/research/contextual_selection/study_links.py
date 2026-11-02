@@ -47,17 +47,21 @@ R3  E12-A — higher-frame hypothesis with explicit failure reference:
     the opposite hypothesis.
 
 CANDIDATE–CONTEXT RELATION (no invented distance): the candidate is the
-"lowest down close candle" (order statistic, source wording) that trades
-AT OR THROUGH the contextual reference level (the engine's existing
-exact-level trade relation — the same family as its event/violation
-conditions and as the source's own validation relation "is traded
-through").  NO percentage, NO candle count, NO hidden threshold exists
-anywhere in this module.  The source's "near support" wording is NOT
-operationally resolved by this relation (the corpus marks it
-``UNSUPPORTED_OR_UNAVAILABLE``/ambiguous); that gap is recorded in every
-candidate's ``unknowns``.  The region for "lowest" is taken as the bars
-since the reference's own occurrence bar (an engine-available fact) — an
-ENGINEERING choice, not a source claim.
+"lowest down close candle" (order statistic, source wording) whose
+reported range CONTAINS the contextual reference level
+(``low <= level <= high``).  This is a precise range-position relation:
+a bar entirely BELOW the level also satisfies ``low <= level`` and is
+deliberately EXCLUDED, as is a bar entirely ABOVE it.  Range
+containment establishes ONLY that the level lies within the bar's
+reported range — it does NOT establish the intrabar direction, the
+intrabar sequence, or any orders at the level, and it is NOT called
+"traded at or through".  NO percentage, NO candle count, NO hidden
+threshold exists anywhere in this module.  The source's "near support"
+wording is NOT operationally resolved by this relation (the corpus
+marks it ``UNSUPPORTED_OR_UNAVAILABLE``/ambiguous); that gap is
+recorded in every candidate's ``unknowns``.  The region for "lowest" is
+taken as the bars since the reference's own occurrence bar (an
+engine-available fact) — an ENGINEERING choice, not a source claim.
 
 LAYERS: every record separates DIRECT OBSERVATION / DERIVATION under a
 declared definition / CONTEXTUAL INTERPRETATION / UNKNOWN-UNSUPPORTED
@@ -101,6 +105,7 @@ __all__ = [
     "ROLE_TREND", "ROLE_REACTION_PAUSE", "ROLE_UNDETERMINED",
     "OBLikeCandidate", "HigherFrameHypothesis",
     "TimeProvenanceSelection", "StudyReasoningLayer",
+    "ShiftWatch", "SHIFT_QUESTIONS", "SHIFT_STATUSES",
     "assign_role", "UNKNOWN_ORDERING",
     "LAYER_OBSERVATION", "LAYER_DERIVATION",
     "LAYER_INTERPRETATION", "LAYER_UNKNOWN",
@@ -339,9 +344,12 @@ class OBLikeCandidate:
         return self._step(STATE_CONFIRMED, at_bar=at_bar,
                           at_time=at_time, evidence=evidence,
                           reason="declared confirmation event observed "
-                                 "(a bar traded through the candidate "
-                                 "extreme); recorded at the evidence "
-                                 "bar, never back-filled")
+                                 "(a later bar's reported high exceeds "
+                                 "the candidate extreme — the source's "
+                                 "'is traded through' wording; "
+                                 "intrabar sequence not established); "
+                                 "recorded at the evidence bar, never "
+                                 "back-filled")
 
     def to_invalidated(self, *, at_bar, at_time, evidence, reason) -> dict:
         return self._step(STATE_INVALIDATED, at_bar=at_bar,
@@ -600,6 +608,69 @@ def assign_role(*, candidate_direction: str, hf_trend: str,
 
 
 # --------------------------------------------------------------------- #
+# next relationship slice (E03-A/B) — reference-crossing shift-watch     #
+# --------------------------------------------------------------------- #
+# SOURCE (E03-A, DIRECT/PARAPHRASE): "Crossing an old low/high is a
+# context for WATCHING a possible shift, not proof of one"; a crossing
+# "changes the questions to watch on a smaller timeframe, without
+# creating an automatic reversal/trade signal."
+# SOURCE (E03-B, PARAPHRASE): "monitor next closed-bar
+# displacement/non-overlap as evidence"; the sequence is older-reference
+# crossing -> subsequent local-swing crossing; "do not assume a buy
+# after a low raid; observe whether market supplies evidence."
+#
+# ENGINEERING (declared): a crossing is the engine's existing
+# close-through relation at BAR granularity — a close-to-close
+# transition across the level between two consecutive completed bars
+# (the intrabar path is NOT established).  A crossing OPENS a watch
+# whose status is WATCHING / EVIDENCE_NOTED only — there is NO
+# "shift confirmed" state and NO reversal/trade signal anywhere.
+
+SHIFT_STATUS_WATCHING = "WATCHING"
+SHIFT_STATUS_EVIDENCE = "EVIDENCE_NOTED"
+SHIFT_STATUSES = (SHIFT_STATUS_WATCHING, SHIFT_STATUS_EVIDENCE)
+
+SHIFT_QUESTIONS = [
+    "watch the next closed bars for displacement/non-overlap in the "
+    "crossing direction (E03-B: 'monitor next closed-bar "
+    "displacement/non-overlap as evidence')",
+    "watch for a subsequent crossing of the local swing formed before "
+    "the older reference (E03-B sequence: older-reference crossing -> "
+    "local-swing crossing)",
+    "do NOT assume a reversal or a trade after a raid — observe "
+    "whether the market supplies evidence (E03-B)",
+]
+
+
+@dataclass
+class ShiftWatch:
+    watch_id: str
+    opened_at: pd.Timestamp
+    crossing: Dict[str, Any]      # ref, level, side, bar, close,
+                                  # direction, transition evidence
+    local_ref_id: Optional[str] = None
+    local_ref_level: Optional[float] = None
+    questions: List[str] = field(
+        default_factory=lambda: list(SHIFT_QUESTIONS))
+    evidence: List[dict] = field(default_factory=list)
+    status: str = SHIFT_STATUS_WATCHING
+    scan_floor: int = -1
+
+    def note_evidence(self, *, kind, at, at_bar, detail) -> dict:
+        ev = {"kind": kind, "at": pd.Timestamp(at),
+              "at_bar": int(at_bar), "detail": detail,
+              "note": "evidence item only — NOT proof of a shift; no "
+                      "reversal or trade signal is generated",
+              "layer": LAYER_OBSERVATION}
+        self.evidence.append(ev)
+        self.status = SHIFT_STATUS_EVIDENCE
+        return ev
+
+    def to_record(self) -> dict:
+        return _jsonable(dataclasses.asdict(self))
+
+
+# --------------------------------------------------------------------- #
 # the reasoning layer (flows through the existing monitoring path)       #
 # --------------------------------------------------------------------- #
 def _bars_interval(bars, j: int) -> Tuple[pd.Timestamp, pd.Timestamp]:
@@ -641,6 +712,11 @@ class StudyReasoningLayer:
         self._ledger_sigs: Dict[str, tuple] = {}
         self._cand_seq = 0
         self._row_buffer: List[dict] = []
+        # E03 slice: reference-crossing shift-watches
+        self.shift_watches: List[ShiftWatch] = []
+        self._cross_scan_upto = -1
+        self._crossed_keys: set = set()
+        self._watch_seq = 0
 
     # ---- main hooks (called by the EXISTING MonitoringLoop) ----------
     def on_boundary(self, record, frames: Dict[str, pd.DataFrame],
@@ -654,9 +730,13 @@ class StudyReasoningLayer:
         changes += self._scan_for_candidates(record, bars, world)
         changes += self._update_candidates(record, bars)
         changes += self._update_roles(record)
+        changes += self._scan_reference_crossings(record, bars, world)
+        changes += self._update_shift_watches(record, bars, world)
         if ledger is not None:
             for c in self.candidates:
                 self._ledger_sync(c, ledger)
+            for w in self.shift_watches:
+                self._ledger_sync_watch(w, ledger)
         # drop buffer rows older than this boundary's bar interval
         keep_from = _bars_interval(bars, int(record.as_of_bar))[0]
         self._row_buffer = [r for r in self._row_buffer
@@ -830,6 +910,16 @@ class StudyReasoningLayer:
             for r in refs:
                 if not (int(r.occurrence_bar) < j):
                     continue
+                lvl = float(r.level)
+                # PRECISE range relation (Q2): the reference level lies
+                # WITHIN the bar's reported range: low <= level <= high.
+                # This is NOT "traded at or through": a bar entirely
+                # below the level also satisfies low <= level and is
+                # EXCLUDED here, as is a bar entirely above it.  Range
+                # containment establishes only that the level lies in
+                # the reported range — NOT the intrabar direction, NOT
+                # the intrabar sequence, NOT any orders at the level.
+                contains = (l <= lvl <= h)
                 # order statistic over the SAME candle family since the
                 # reference's occurrence bar (engine-available fact; no
                 # distance/percentage/candle count)
@@ -844,31 +934,40 @@ class StudyReasoningLayer:
                     if r.side == "high" and float(
                             bars["close"].iloc[m]) > mo:
                         family_extremes.append(mh)
-                if r.side == "low" and c < o and l <= float(r.level):
+                if r.side == "low" and c < o and contains:
                     if not family_extremes or l < min(family_extremes):
                         self._add_candidate(
                             direction="bullish", j=j, t=t,
-                            ohlc=(o, h, l, c), ref=r, changes=changes)
-                if r.side == "high" and c > o and h >= float(r.level):
+                            ohlc=(o, h, l, c), ref=r, changes=changes,
+                            bars=bars)
+                if r.side == "high" and c > o and contains:
                     if not family_extremes or h > max(family_extremes):
                         self._add_candidate(
                             direction="bearish", j=j, t=t,
-                            ohlc=(o, h, l, c), ref=r, changes=changes)
+                            ohlc=(o, h, l, c), ref=r, changes=changes,
+                            bars=bars)
         self._scan_upto = max(self._scan_upto, upto)
         return changes
 
-    def _add_candidate(self, *, direction, j, t, ohlc, ref, changes):
+    def _add_candidate(self, *, direction, j, t, ohlc, ref, changes,
+                       bars=None):
         o, h, l, c = ohlc
         self._cand_seq += 1
-        rel = ("low traded at or through the contextual low level"
-               if direction == "bullish" else
-               "high traded at or through the contextual high level")
+        lvl = float(ref.level)
+        # range-position facts (DIRECT derivations from published bars)
+        prev_contains = None
+        if bars is not None and j > 0:
+            pl = float(bars["low"].iloc[j - 1])
+            ph = float(bars["high"].iloc[j - 1])
+            prev_contains = (pl <= lvl <= ph)
+        close_side = "closed_below_level" if c < lvl else \
+            "closed_at_or_above_level"
         cand = OBLikeCandidate(
             candidate_id=f"OBC-{self.run_id}-{self._cand_seq:04d}",
             direction=direction, bar_index=int(j), bar_time=t,
             open=o, high=h, low=l, close=c,
             context_ref_id=ref.candidate_id,
-            context_ref_level=float(ref.level),
+            context_ref_level=lvl,
             timeframe=self.task_scale,
             eligibility={
                 "definition": "declared research definition "
@@ -878,12 +977,26 @@ class StudyReasoningLayer:
                               "-close bar that is the extreme "
                               f"{'low' if direction == 'bullish' else 'high'}"
                               " among its family since the contextual "
-                              f"reference's occurrence bar AND {rel} "
-                              "(exact-level trade relation — the same "
-                              "relation family the engine uses for "
-                              "event conditions and the source uses "
-                              "for validation). NO percentage, NO "
-                              "candle count, NO hidden threshold.",
+                              "reference's occurrence bar AND whose "
+                              "reported range CONTAINS the reference "
+                              "level (low <= level <= high). NO "
+                              "percentage, NO candle count, NO hidden "
+                              "threshold.",
+                "level_relation": {
+                    "kind": "range_contains_level",
+                    "establishes": "the reference level lies within "
+                                   "this bar's reported range",
+                    "does_not_establish": [
+                        "the intrabar direction of the touch",
+                        "the intrabar sequence of events",
+                        "any orders/liquidity at the level",
+                    ],
+                    "level_entered_range_at_this_bar":
+                        (None if prev_contains is None
+                         else (not prev_contains)),
+                    "previous_bar_range_contains_level": prev_contains,
+                    "close_side_of_level": close_side,
+                },
                 "known_at_selection": [
                     f"context ref {ref.candidate_id} confirmed at its "
                     f"knowable bar (before this bar)",
@@ -892,8 +1005,8 @@ class StudyReasoningLayer:
                 "source_caveat": "'near support' is NOT operationally "
                                  "resolved (corpus marks the wording "
                                  "ambiguous); this relation does not "
-                                 "claim to be the speaker's "
-                                 "definition",
+                                 "claim to be the speaker's definition "
+                                 "and is not called 'traded through'",
             })
         cand.to_awaiting(at_bar=j, at_time=t,
                          evidence={"bar": int(j), "ohlc": [o, h, l, c]})
@@ -1068,6 +1181,203 @@ class StudyReasoningLayer:
                             list(verdict.get("alternatives", []))})
         return changes
 
+    # ---- E03 slice: reference crossings -> shift-watches -------------
+    def _scan_reference_crossings(self, record, bars, world
+                                  ) -> List[dict]:
+        """A crossing = a close-to-close transition across a confirmed
+        reference level between two consecutive completed bars (the
+        engine's close-through relation at bar granularity).  It OPENS
+        a shift-watch — it is NOT proof of a shift."""
+        changes: List[dict] = []
+        upto = int(record.as_of_bar)
+        refs = [p for p in world["by_id"].values()
+                if getattr(p, "status", "") == "confirmed"]
+        from_j = max(1, self._cross_scan_upto + 1)
+        for j in range(from_j, upto + 1):
+            close = float(bars["close"].iloc[j])
+            prev_close = float(bars["close"].iloc[j - 1])
+            t = pd.Timestamp(bars.index[j])
+            for r in refs:
+                if not (int(r.occurrence_bar) < j - 1):
+                    continue
+                lvl = float(r.level)
+                down = prev_close > lvl and close <= lvl
+                up = prev_close < lvl and close >= lvl
+                if not (down or up):
+                    continue
+                direction = "downward" if down else "upward"
+                key = (r.candidate_id, direction)
+                if key in self._crossed_keys:
+                    continue
+                self._crossed_keys.add(key)
+                # the local swing of the opposite side formed before
+                # the crossing (E03-B sequence element)
+                local = None
+                for p in refs:
+                    if p.side != r.side and \
+                            int(p.occurrence_bar) < j - 1:
+                        if local is None or int(p.occurrence_bar) > \
+                                int(local.occurrence_bar):
+                            local = p
+                self._watch_seq += 1
+                watch = ShiftWatch(
+                    watch_id=f"SW-{self.run_id}-{self._watch_seq:04d}",
+                    opened_at=t,
+                    crossing={
+                        "ref_id": r.candidate_id,
+                        "ref_side": r.side, "ref_level": lvl,
+                        "bar": int(j), "bar_time": str(t),
+                        "previous_close": prev_close,
+                        "close": close, "direction": direction,
+                        "transition": "close-to-close transition "
+                                      "across the level between two "
+                                      "completed bars (intrabar path "
+                                      "NOT established)",
+                    },
+                    local_ref_id=(local.candidate_id
+                                  if local is not None else None),
+                    local_ref_level=(float(local.level)
+                                     if local is not None else None),
+                    scan_floor=int(j))
+                self.shift_watches.append(watch)
+                self.seq_facts.append({
+                    "kind": "REFERENCE_CROSSING", "at": t,
+                    "ref_id": r.candidate_id, "level": lvl,
+                    "direction": direction, "bar": int(j),
+                    "layer": LAYER_OBSERVATION})
+                self.seq_facts.append({
+                    "kind": "SHIFT_WATCH_OPENED", "at": t,
+                    "watch_id": watch.watch_id,
+                    "note": "crossing an old reference is a context "
+                            "for WATCHING a possible shift, NOT proof "
+                            "of one (E03-A); no reversal/trade signal",
+                    "layer": LAYER_INTERPRETATION})
+                changes.append({
+                    "aspect": "shift_watch", "before": "(none)",
+                    "after": f"{watch.watch_id} {watch.status}",
+                    "reason": "a close-to-close transition across a "
+                              "confirmed reference level opened a "
+                              "shift-watch (context for watching, not "
+                              "proof of a shift)",
+                    "evidence": [watch.watch_id, r.candidate_id,
+                                 str(t)]})
+        self._cross_scan_upto = max(self._cross_scan_upto, upto)
+        return changes
+
+    def _update_shift_watches(self, record, bars, world) -> List[dict]:
+        changes: List[dict] = []
+        upto = int(record.as_of_bar)
+        for w in self.shift_watches:
+            start = max(0, w.scan_floor + 1)
+            cr = w.crossing
+            ch_bar = int(cr["bar"])
+            for j in range(start, upto + 1):
+                o = float(bars["open"].iloc[j])
+                h = float(bars["high"].iloc[j])
+                l = float(bars["low"].iloc[j])
+                c = float(bars["close"].iloc[j])
+                t = pd.Timestamp(bars.index[j])
+                # closed-bar non-overlap in the crossing direction
+                # (E03-B 'displacement/non-overlap'); exact relation
+                ch_h = float(bars["high"].iloc[ch_bar])
+                ch_l = float(bars["low"].iloc[ch_bar])
+                displaced = (l > ch_h) if cr["direction"] == "upward" \
+                    else (h < ch_l)
+                if displaced:
+                    ev = w.note_evidence(
+                        kind="displacement_non_overlap", at=t,
+                        at_bar=j,
+                        detail={"bar": int(j),
+                                "relation": "closed bar does not "
+                                            "overlap the crossing "
+                                            "bar's range"})
+                    self.seq_facts.append({
+                        "kind": "SHIFT_EVIDENCE_NOTED", "at": t,
+                        "watch_id": w.watch_id,
+                        "evidence_kind": ev["kind"], "bar": int(j),
+                        "layer": LAYER_OBSERVATION})
+                    changes.append({
+                        "aspect": "shift_watch", "before":
+                            SHIFT_STATUS_WATCHING,
+                        "after": w.status,
+                        "reason": "closed-bar non-overlap observed in "
+                                  "the crossing direction (evidence "
+                                  "only; not proof of a shift)",
+                        "evidence": [w.watch_id, str(t)]})
+                # local-swing crossing (E03-B sequence element)
+                if w.local_ref_level is not None and j > 0:
+                    pc = float(bars["close"].iloc[j - 1])
+                    lvl = float(w.local_ref_level)
+                    crossed = (pc < lvl <= c) or (pc > lvl >= c)
+                    if crossed:
+                        ev = w.note_evidence(
+                            kind="local_swing_crossing", at=t,
+                            at_bar=j,
+                            detail={"bar": int(j), "level": lvl,
+                                    "local_ref": w.local_ref_id,
+                                    "relation": "close-to-close "
+                                                "transition across "
+                                                "the local swing "
+                                                "level"})
+                        self.seq_facts.append({
+                            "kind": "SHIFT_EVIDENCE_NOTED", "at": t,
+                            "watch_id": w.watch_id,
+                            "evidence_kind": ev["kind"], "bar": int(j),
+                            "layer": LAYER_OBSERVATION})
+                        changes.append({
+                            "aspect": "shift_watch", "before":
+                                SHIFT_STATUS_WATCHING,
+                            "after": w.status,
+                            "reason": "local-swing crossing observed "
+                                      "(E03-B sequence evidence; "
+                                      "still not proof of a shift)",
+                            "evidence": [w.watch_id, str(t)]})
+                w.scan_floor = j
+        return changes
+
+    def _ledger_sync_watch(self, watch: ShiftWatch, ledger) -> None:
+        sig = (watch.status, len(watch.evidence))
+        if self._ledger_sigs.get(watch.watch_id) == sig:
+            return
+        res = SelectionResult(
+            task_id="T-STUDY-SHIFT-WATCH",
+            decision_bar=int(watch.crossing["bar"]),
+            status="unresolved",
+            selected_id=watch.watch_id,
+            survivors=[], excluded=[], unresolved=None,
+            provenance=["E03-A", "E03-B"],
+            policy_refs=["RESEARCH_CONFIG_ONLY"],
+            representation_id="study-links-v1",
+            notes=[f"status={watch.status}",
+                   f"evidence={len(watch.evidence)}",
+                   f"direction={watch.crossing['direction']}"],
+            decision_time=pd.Timestamp(watch.opened_at),
+            direction=watch.crossing["direction"])
+        payload = {
+            "kind": "study_shift_watch",
+            "run_id": self.run_id,
+            "inputs": {"crossing": _jsonable(watch.crossing),
+                       "evidence": _jsonable(watch.evidence),
+                       "questions": list(watch.questions)},
+            "definitions": {"statuses": list(SHIFT_STATUSES),
+                            "semantics": "crossing is a context for "
+                                         "watching a possible shift, "
+                                         "NOT proof of one; no "
+                                         "reversal/trade signal"},
+            "revision_of": self._ledger_uids.get(watch.watch_id),
+            "stale": False, "stale_reason": None,
+            "recompute_supported": False, "recompute": None,
+            "recorded_event_times": [str(e.get("at"))
+                                     for e in watch.evidence],
+            "ledger_version_before": len(ledger.results),
+            "ledger_version_after": None,
+            "depends_on_results": [],
+        }
+        uid = ledger.record(res, payload)
+        payload["ledger_version_after"] = len(ledger.results)
+        self._ledger_uids[watch.watch_id] = uid
+        self._ledger_sigs[watch.watch_id] = sig
+
     # ---- ledger integration (existing InterpretationLedger) ----------
     def _ledger_sync(self, cand: OBLikeCandidate, ledger) -> None:
         # record a NEW version only when something actually changed
@@ -1155,9 +1465,11 @@ class StudyReasoningLayer:
                     "bar_convention": c.bar_convention,
                     "timeframe": c.timeframe},
                 "watch": [
-                    f"trade-through of {confirm_level} on a later "
-                    f"completed bar -> CONFIRMED (recorded at the "
-                    f"evidence bar)",
+                    f"the candidate extreme {confirm_level}: a later "
+                    f"completed bar whose reported high exceeds it "
+                    f"(source wording 'is traded through'; intrabar "
+                    f"sequence not established) -> CONFIRMED at the "
+                    f"evidence bar",
                     f"return to {revisit_level} -> revisit event "
                     f"(same-bar with confirmation -> ordering UNKNOWN "
                     f"for THAT bar only; the candidate stays open)",
@@ -1202,6 +1514,28 @@ class StudyReasoningLayer:
                              "not an independently pre-registered "
                              "forecast record"],
             })
+        for w in self.shift_watches:
+            plan.append({
+                "subject": w.watch_id,
+                "kind": "shift-watch (E03-A/B slice)",
+                "state": w.status,
+                "time_provenance": {
+                    "opened_at": str(w.opened_at),
+                    "crossing_bar": w.crossing.get("bar")},
+                "watch": list(w.questions),
+                "revision_conditions": [
+                    "observed evidence is recorded append-only "
+                    "(displacement/non-overlap; local-swing crossing); "
+                    "there is NO 'shift confirmed' state and NO "
+                    "reversal/trade signal",
+                ],
+                "unknowns": [
+                    "a crossing is context for watching a possible "
+                    "shift, NOT proof of one (E03-A)",
+                    "intrabar path across the level is not "
+                    "established by completed bars",
+                ],
+            })
         return plan
 
     # ---- save / resume ----------------------------------------------
@@ -1217,6 +1551,11 @@ class StudyReasoningLayer:
             "hf_context": self.hf_context,
             "scan_upto": self._scan_upto,
             "cand_seq": self._cand_seq,
+            "shift_watches": [w.to_record() for w in self.shift_watches],
+            "cross_scan_upto": self._cross_scan_upto,
+            "crossed_keys": sorted(f"{k[0]}|{k[1]}"
+                                   for k in self._crossed_keys),
+            "watch_seq": self._watch_seq,
             "ledger_uids": dict(self._ledger_uids),
             "ledger_sigs": {k: list(v) for k, v in
                             self._ledger_sigs.items()},
@@ -1227,6 +1566,25 @@ class StudyReasoningLayer:
     def load_state_dict(self, st: dict) -> None:
         self._scan_upto = int(st.get("scan_upto", -1))
         self._cand_seq = int(st.get("cand_seq", 0))
+        self._cross_scan_upto = int(st.get("cross_scan_upto", -1))
+        self._watch_seq = int(st.get("watch_seq", 0))
+        self._crossed_keys = set()
+        for s in st.get("crossed_keys", []):
+            rid, _, d = s.partition("|")
+            self._crossed_keys.add((rid, d))
+        self.shift_watches = []
+        for d in st.get("shift_watches", []):
+            w = ShiftWatch(
+                watch_id=d["watch_id"],
+                opened_at=pd.Timestamp(d["opened_at"]),
+                crossing=dict(d["crossing"]),
+                local_ref_id=d.get("local_ref_id"),
+                local_ref_level=d.get("local_ref_level"),
+                questions=d.get("questions", list(SHIFT_QUESTIONS)),
+                evidence=d.get("evidence", []),
+                status=d.get("status", SHIFT_STATUS_WATCHING),
+                scan_floor=int(d.get("scan_floor", -1)))
+            self.shift_watches.append(w)
         self.hf_context = dict(st.get("hf_context", {}))
         self._ledger_uids = dict(st.get("ledger_uids", {}))
         self._ledger_sigs = {k: tuple(v) for k, v in
