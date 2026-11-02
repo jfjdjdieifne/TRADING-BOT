@@ -628,6 +628,11 @@ class MonitoringLoop:
                 "completed-bar fact changed", [], None)
             self.journal.append(report.to_record())
             return report
+        if self.study_layer is not None:
+            # the completing row is still an observation: let the study
+            # layer see EVERY row (fine-touch evidence) before the
+            # boundary analysis
+            self.study_layer.on_observation(rec)
         return self._run_boundary(frames, completed_key, rec["time"])
 
     def _completes_task_bar(self, rec: dict) -> bool:

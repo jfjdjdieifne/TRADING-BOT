@@ -14,18 +14,22 @@ R1  OB16-A — candidate order-block-like reference:
       INSUFFICIENT_INFORMATION (needed data unavailable).  Transitions
       carry evidence and are recorded in the ledger — not only comments.
     * higher-frame context changes the candidate's ROLE, not its
-      existence: a visually bearish candidate under a bullish
-      higher-frame context is NOT a bearish trend reference (source:
-      25:00-25:43) but MAY remain a legitimate reaction/pause
-      reference.  The rule is NOT "higher frame bullish => reject
-      bearish"; when the evidence does not justify a preference the
-      engine records UNDETERMINED and does not force a pick.
+      existence.  Role assignment is EVIDENCE-EVALUATED for a declared
+      task: a role is assigned only when positive evidence supports it.
+      Opposition to the higher-frame direction never by itself assigns
+      (or establishes) a reaction/pause role; alignment never by itself
+      assigns a trend role.  Where the evidence does not support a role
+      the verdict is UNDETERMINED with the discriminating evidence that
+      would settle it.  No shape is ever auto-rejected.
     * sequence separation: HF context established -> candidate formed ->
       later confirmation (or absence) -> possible revisit -> revision;
       confirmation is NEVER back-filled into the formation moment; if
       two events may share one bar and OHLC cannot order them, ordering
       is recorded UNKNOWN and the engine refuses to pick the flattering
-      order (finer available data may resolve it later).
+      order.  An ambiguous bar is scoped to THAT bar only: a resolution
+      (by finer data) or an unresolved ordering never freezes the
+      candidate — later independent bars may still confirm (recorded at
+      their own evidence bars).
 
 R2  FVG24-A — time provenance and revocable selection:
     every candidate carries timestamp, session/timezone, bar
@@ -39,17 +43,33 @@ R2  FVG24-A — time provenance and revocable selection:
 
 R3  E12-A — higher-frame hypothesis with explicit failure reference:
     crossing the failure reference SUSPENDS the hypothesis and demands
-    more information ("if it goes above that then I'm probably wrong in
-    my analysis / I demand more information") — suspension semantics,
-    never an automatic flip to the opposite hypothesis.
+    more information — suspension semantics, never an automatic flip to
+    the opposite hypothesis.
+
+CANDIDATE–CONTEXT RELATION (no invented distance): the candidate is the
+"lowest down close candle" (order statistic, source wording) that trades
+AT OR THROUGH the contextual reference level (the engine's existing
+exact-level trade relation — the same family as its event/violation
+conditions and as the source's own validation relation "is traded
+through").  NO percentage, NO candle count, NO hidden threshold exists
+anywhere in this module.  The source's "near support" wording is NOT
+operationally resolved by this relation (the corpus marks it
+``UNSUPPORTED_OR_UNAVAILABLE``/ambiguous); that gap is recorded in every
+candidate's ``unknowns``.  The region for "lowest" is taken as the bars
+since the reference's own occurrence bar (an engine-available fact) — an
+ENGINEERING choice, not a source claim.
 
 LAYERS: every record separates DIRECT OBSERVATION / DERIVATION under a
 declared definition / CONTEXTUAL INTERPRETATION / UNKNOWN-UNSUPPORTED
 (resting stops, participant intent, causes, intra-bar order, trading
 centres, validated trades, "any chart in the world" — all unsupported).
 
-Research configuration constants below are NAMED and declared as such:
-they are NOT source claims, NOT market truths, and NOT owner policy.
+SOURCE QUOTE PROVENANCE: corpus ``short_quotes`` attributions mark which
+wording is visually checked slide text (only OB16-A 01:52) versus
+approximate local ASR wording that was NOT audited by ear (all other
+quotes).  ASR wording is cited here as approximate attributed wording,
+never as verified verbatim quotation.
+
 ``selection_quality = NOT_ESTABLISHED``.
 """
 
@@ -75,14 +95,14 @@ from trading_system.research.contextual_selection.csm import (
 
 __all__ = [
     "CORPUS_PATH", "load_corpus", "RELATIONSHIP_REGISTER",
-    "RESEARCH_CFG_NEAR_SUPPORT_DISTANCE_FRACTION",
     "SessionClockConvention", "US_INDEX_FIRST_GAP_SESSION_CLOCK",
     "STATE_CANDIDATE", "STATE_AWAITING_CONFIRMATION", "STATE_CONFIRMED",
     "STATE_INVALIDATED", "STATE_INSUFFICIENT", "CANDIDATE_STATES",
     "ROLE_TREND", "ROLE_REACTION_PAUSE", "ROLE_UNDETERMINED",
     "OBLikeCandidate", "HigherFrameHypothesis",
     "TimeProvenanceSelection", "StudyReasoningLayer",
-    "UNKNOWN_ORDERING", "LAYER_OBSERVATION", "LAYER_DERIVATION",
+    "assign_role", "UNKNOWN_ORDERING",
+    "LAYER_OBSERVATION", "LAYER_DERIVATION",
     "LAYER_INTERPRETATION", "LAYER_UNKNOWN",
 ]
 
@@ -91,13 +111,15 @@ CORPUS_PATH = (HERE.parents[4] / "docs" / "research" /
                "huddleston_study" / "corpus_full_pass.json")
 
 # --------------------------------------------------------------------- #
-# research configuration — NOT source claims, NOT market truths          #
+# There is deliberately NO proximity threshold in this module.          #
+# A former research-config distance fraction (1%) was removed: an        #
+# invented percentage must not decide market meaning and must not        #
+# resolve the source's open "near support" wording.  Nothing here        #
+# substitutes another percentage, candle count, or hidden threshold —    #
+# the candidate-context relation is the exact-level trade relation plus  #
+# the "lowest down close candle" order statistic (see module            #
+# docstring).                                                           #
 # --------------------------------------------------------------------- #
-# The source explicitly leaves "near support" operationally undefined
-# (OB16-A ambiguities).  This fraction exists ONLY to exercise the
-# candidate path and tests.  It is a declared research configuration,
-# not a source claim, not a market truth, and not owner policy.
-RESEARCH_CFG_NEAR_SUPPORT_DISTANCE_FRACTION = 0.01
 
 UNKNOWN_ORDERING = "UNKNOWN"
 
@@ -105,6 +127,12 @@ LAYER_OBSERVATION = "DIRECT_OBSERVATION"
 LAYER_DERIVATION = "DERIVATION"
 LAYER_INTERPRETATION = "CONTEXTUAL_INTERPRETATION"
 LAYER_UNKNOWN = "UNKNOWN_UNSUPPORTED"
+
+# quote provenance labels (corpus attributions)
+Q_SLIDE = ("slide text, visually checked (on-screen 01:52; ellipsis for "
+           "omitted words)")
+Q_ASR = ("approximate attributed ASR wording, NOT audited by ear "
+         "(local faster-whisper; timings approximate)")
 
 
 # --------------------------------------------------------------------- #
@@ -125,10 +153,11 @@ RELATIONSHIP_REGISTER: List[Dict[str, Any]] = [
             "specifies bullish candidate down-close bar near support, "
             "validation by a later bar trading through its high, "
             "possible return",
-            "OB16-A short_quotes (DIRECT_STATEMENT, slide 01:52): "
-            "'when the high of the lowest down close candle ... is "
-            "traded through'; 'We don't know that yet until at a later "
-            "time'",
+            "OB16-A short_quotes (" + Q_SLIDE + "): 'when the high of "
+            "the lowest down close candle ... is traded through'",
+            "OB16-A short_quotes (" + Q_ASR + ", ~03:21): 'We don't "
+            "know that yet until at a later time' — approximate "
+            "attributed wording, not verbatim",
             "OB16-A change (DIRECT_STATEMENT): bearish-looking block is "
             "NOT a sell cue under bullish higher-frame context",
         ],
@@ -136,14 +165,21 @@ RELATIONSHIP_REGISTER: List[Dict[str, Any]] = [
             "state machine CANDIDATE/AWAITING_CONFIRMATION/CONFIRMED/"
             "INVALIDATED/INSUFFICIENT_INFORMATION with ledger-recorded "
             "transitions",
-            "role assignment under a declared task (trend-continuation "
-            "vs reaction/pause) with alternatives and change conditions",
+            "role assignment is evidence-evaluated for a declared task; "
+            "a role is recorded only when positive evidence supports "
+            "it; opposition alone never establishes a reaction role and "
+            "alignment alone never establishes a trend role",
             "sequence separation with UNKNOWN ordering on unresolvable "
-            "same-bar events",
+            "same-bar events; ambiguity is scoped to its own bar and "
+            "never permanently freezes the candidate",
         ],
         "not_established": [
-            "'near support' operational definition (source leaves open; "
-            "RESEARCH_CFG constant exists only to exercise tests)",
+            "'near support' operational definition (source leaves "
+            "open; NO distance/percentage/candle-count rule is used or "
+            "claimed — the exact-level trade relation is an "
+            "ENGINEERING choice, not Michael's definition)",
+            "the region scope of 'the lowest down close candle' (taken "
+            "as since the reference occurrence — engineering choice)",
             "any universal entry, stop, target, or profitability",
         ],
     },
@@ -155,9 +191,10 @@ RELATIONSHIP_REGISTER: List[Dict[str, Any]] = [
             "FVG24-A explicit_identification (DIRECT_STATEMENT): the "
             "9:30 candle cannot be the first qualifying gap under his "
             "stated convention; first candidate 9:31+",
-            "FVG24-A short_quotes (DIRECT_STATEMENT ~75:02/75:12): "
+            "FVG24-A short_quotes (" + Q_ASR + ", ~75:02/75:12): "
             "'You can't be on your 9.30 candle...'; 'I was incorrect by "
-            "saying all that stuff'",
+            "saying all that stuff' — approximate attributed wording, "
+            "not verbatim",
         ],
         "engine_interpretation": [
             "time provenance on every candidate (timestamp, "
@@ -175,9 +212,10 @@ RELATIONSHIP_REGISTER: List[Dict[str, Any]] = [
         "source_examples": ["E12-A"],
         "claim_class": "ENGINEERING_INTERPRETATION",
         "source_support": [
-            "E12-A short_quotes (DIRECT_STATEMENT ~11:31/11:39): 'if it "
+            "E12-A short_quotes (" + Q_ASR + ", ~11:31/11:39): 'if it "
             "goes above that then I'm probably wrong in my analysis'; "
-            "'I demand more information'",
+            "'I demand more information' — approximate attributed "
+            "wording, not verbatim",
             "E12-A change (PARAPHRASE): pause/reassess rather than "
             "mechanically reverse",
         ],
@@ -221,8 +259,9 @@ US_INDEX_FIRST_GAP_SESSION_CLOCK = SessionClockConvention(
     timezone="America/New_York (platform display, UTC-5)",
     bar_convention="1-minute chart as displayed",
     first_eligible_minute=1,
-    note="DIRECT_STATEMENT FVG24-A ~75:02; session-specific first-gap "
-         "qualification only")
+    note="DIRECT_STATEMENT FVG24-A (~75:02 approximate ASR wording, "
+         "not ear-audited); session-specific first-gap qualification "
+         "only")
 
 
 # --------------------------------------------------------------------- #
@@ -264,11 +303,13 @@ class OBLikeCandidate:
     role: str = ROLE_UNDETERMINED
     role_assignments: List[dict] = field(default_factory=list)
     events: List[dict] = field(default_factory=list)   # ordered facts
-    ordering: Optional[str] = None   # UNKNOWN when same-bar order is
-                                     # not inferable from OHLC
+    ordering: Optional[str] = None   # ordering of the LATEST ambiguous
+                                     # bar; UNKNOWN until finer data
     ambiguous_bar: Optional[int] = None
+    ambiguity_interval: Optional[Tuple[str, str]] = None
     fine_touches: Dict[str, Optional[pd.Timestamp]] = field(
         default_factory=dict)
+    scan_floor: int = -1             # highest bar already adjudicated
 
     def to_record(self) -> dict:
         d = dataclasses.asdict(self)
@@ -298,9 +339,9 @@ class OBLikeCandidate:
         return self._step(STATE_CONFIRMED, at_bar=at_bar,
                           at_time=at_time, evidence=evidence,
                           reason="declared confirmation event observed "
-                                 "(later bar traded through the "
-                                 "candidate extreme); recorded at the "
-                                 "evidence bar, never back-filled")
+                                 "(a bar traded through the candidate "
+                                 "extreme); recorded at the evidence "
+                                 "bar, never back-filled")
 
     def to_invalidated(self, *, at_bar, at_time, evidence, reason) -> dict:
         return self._step(STATE_INVALIDATED, at_bar=at_bar,
@@ -343,8 +384,9 @@ class HigherFrameHypothesis:
                           f"{self.failure_reference_level} "
                           f"(side {self.failure_side})",
               "reason": "failure reference crossed: SUSPEND and demand "
-                        "more information (source semantics, E12-A); "
-                        "no automatic opposite hypothesis is generated",
+                        "more information (source semantics, E12-A — "
+                        "approximate ASR wording); no automatic "
+                        "opposite hypothesis is generated",
               "layer": LAYER_INTERPRETATION}
         self.events.append(ev)
         self.status = "SUSPENDED"
@@ -391,84 +433,191 @@ class TimeProvenanceSelection:
 
 
 # --------------------------------------------------------------------- #
-# the reasoning layer (flows through the existing monitoring path)       #
+# evidence-evaluated role assignment (R1)                                #
 # --------------------------------------------------------------------- #
 def assign_role(*, candidate_direction: str, hf_trend: str,
-                task: str) -> Dict[str, Any]:
-    """Role is evaluated FOR A DECLARED TASK against the higher-frame
-    context — never an automatic accept/reject of a shape.
+                task: str,
+                evidence: Optional[Dict[str, Any]] = None
+                ) -> Dict[str, Any]:
+    """Role is evaluated FOR A DECLARED TASK against the available
+    EVIDENCE — never inferred automatically from direction alignment or
+    opposition alone.
 
-    * direction agrees with hf_trend -> TREND_CONTINUATION_REFERENCE is
-      preferred (with the alternative recorded).
-    * direction opposes hf_trend -> the trend role is NOT assigned, but
-      the candidate remains eligible as REACTION_PAUSE_REFERENCE
-      (source: OB16-A 25:00-25:43 / 34:00-35:15) — this is NOT
-      "higher frame bullish => reject bearish".
-    * no established hf context (or evidence does not discriminate) ->
-      UNDETERMINED with reasons and the discriminating evidence needed.
+    Evidence flags (each recorded with its reference when known):
+      * ``hf_established``   — a higher-frame context established from
+        completed structure before this evaluation;
+      * ``confirmation_event`` — the candidate's declared later-evidence
+        event (a bar trading through its extreme) is observed;
+      * ``reaction_observed`` — an observed return/interaction at the
+        candidate area (a recorded revisit event).
+
+    Rules:
+      * TREND_CONTINUATION_REFERENCE is supported only with
+        hf_established AND direction consistency AND the confirmation
+        event (source caution: 'We don't know that yet until at a later
+        time' — approximate ASR wording).  Alignment alone supports
+        nothing.
+      * REACTION_PAUSE_REFERENCE is supported only with
+        hf_established AND an observed reaction.  Opposition to the
+        higher-frame direction alone NEVER establishes it (the source's
+        25:00-25:43 point is that the trend/sell-cue role is NOT
+        supported — not that a reaction role becomes fact).
+      * Otherwise the verdict is UNDETERMINED with the discriminating
+        evidence that would settle it.  Nothing is forced; nothing is
+        permanently abstained — new evidence re-opens the evaluation.
     """
+    ev = {"hf_established": False, "confirmation_event": False,
+          "reaction_observed": False}
+    refs: Dict[str, Any] = {}
+    if evidence:
+        for k in ev:
+            if k in evidence:
+                ev[k] = bool(evidence[k])
+        refs = dict(evidence.get("refs", {}))
+    out: Dict[str, Any] = {
+        "task": task, "hf_trend": hf_trend,
+        "candidate_direction": candidate_direction,
+        "evidence_used": {k: {"value": v, "ref": refs.get(k)}
+                          for k, v in ev.items()},
+        "alternatives": [], "would_change": [],
+        "supported": False,
+    }
     aligned = (candidate_direction == "bullish" and hf_trend == "up") or \
               (candidate_direction == "bearish" and hf_trend == "down")
-    opposed = (candidate_direction == "bullish" and hf_trend == "down") or \
-              (candidate_direction == "bearish" and hf_trend == "up")
-    out: Dict[str, Any] = {"task": task,
-                           "hf_trend": hf_trend,
-                           "candidate_direction": candidate_direction,
-                           "alternatives": [], "would_change": []}
-    if hf_trend in ("none", "unknown"):
-        out.update(role=ROLE_UNDETERMINED,
-                   reasons=["no established higher-frame context at "
-                            "this as-of; the evidence does not "
-                            "discriminate roles"],
-                   discriminating_evidence_needed=[
-                       "an established higher-frame context (completed "
-                       "structure) before the candidate's evaluation",
-                       "a declared task the reference is evaluated for"])
+
+    if not ev["hf_established"]:
+        out.update(
+            role=ROLE_UNDETERMINED,
+            reasons=["no established higher-frame context at this "
+                     "as-of: the evidence does not support any role"],
+            discriminating_evidence_needed=[
+                "an established higher-frame context (completed "
+                "structure) before this evaluation",
+                "the candidate's declared confirmation event (a later "
+                "bar trading through its extreme)",
+                "an observed reaction at the candidate area, if a "
+                "reaction/pause role is proposed"])
         return out
+
+    trend_supported = aligned and ev["confirmation_event"]
+    trend_excluded = not aligned
+    reaction_supported = ev["reaction_observed"]
+
     if task == "trend-continuation":
-        if aligned:
-            out.update(role=ROLE_TREND,
-                       reasons=["candidate direction agrees with the "
-                                "established higher-frame context for "
-                                "the declared trend-continuation task"],
-                       preferred=True)
+        if trend_supported:
+            out.update(role=ROLE_TREND, supported=True,
+                       reasons=["trend role SUPPORTED by evidence: the "
+                                "candidate direction agrees with the "
+                                "established higher-frame context AND "
+                                "its declared confirmation event is "
+                                "observed"])
+            if reaction_supported:
+                out["alternatives"].append(
+                    f"{ROLE_REACTION_PAUSE}: also supported (an "
+                    f"reaction at the area is observed); not preferred "
+                    f"for the trend-continuation task")
+            else:
+                out["alternatives"].append(
+                    f"{ROLE_REACTION_PAUSE}: possible but NOT "
+                    f"established (no reaction observed at the area)")
+            out["would_change"].append(
+                "a higher-frame structure change or a role-relevant "
+                "event revision re-opens the evaluation")
+            return out
+        if trend_excluded:
+            # source-supported negative only: the trend role is not
+            # supported under the opposing context
+            reasons = ["trend role NOT supported: the candidate "
+                       "direction opposes the established higher-frame "
+                       "context (OB16-A 25:00-25:43) — this does NOT "
+                       "reject the candidate itself"]
+            if reaction_supported:
+                out.update(role=ROLE_REACTION_PAUSE, supported=True,
+                           reasons=reasons + [
+                               "reaction/pause role SUPPORTED by "
+                               "evidence: a reaction at the candidate "
+                               "area is observed (not inferred from "
+                               "opposition)"])
+                out["alternatives"].append(
+                    f"{ROLE_TREND}: excluded for this task by the "
+                    f"higher-frame context")
+            else:
+                out.update(role=ROLE_UNDETERMINED, supported=False,
+                           reasons=reasons + [
+                               "reaction/pause role NOT established: "
+                               "opposition alone does not make it fact "
+                               "— no reaction at the area is observed"],
+                           discriminating_evidence_needed=[
+                               "an observed reaction/revisit at the "
+                               "candidate area (would support a "
+                               "reaction/pause role)",
+                               "a higher-frame structure change (would "
+                               "re-open the trend role)"])
+                out["alternatives"].append(
+                    f"{ROLE_REACTION_PAUSE}: possible but not fact")
+            out["would_change"].append(
+                "a higher-frame structure change re-opens the trend "
+                "role; an observed reaction settles the reaction role")
+            return out
+        # aligned but no confirmation event yet
+        out.update(role=ROLE_UNDETERMINED, supported=False,
+                   reasons=["trend role NOT yet supported: direction "
+                            "agrees with the higher-frame context but "
+                            "the declared confirmation event is not "
+                            "observed ('we don't know that yet until "
+                            "at a later time' — approximate ASR "
+                            "wording)"],
+                   discriminating_evidence_needed=[
+                       "the declared confirmation event: a later bar "
+                       "trading through the candidate extreme"])
+        if reaction_supported:
             out["alternatives"].append(
-                f"{ROLE_REACTION_PAUSE}: also possible as a "
-                f"reaction/pause reference; not preferred for this task")
-        else:
-            # source-guided: NOT a trend reference, BUT still a
-            # legitimate reaction/pause reference — never rejected
-            out.update(role=ROLE_REACTION_PAUSE,
-                       reasons=["candidate direction opposes the "
-                                "established higher-frame context; the "
-                                "trend-continuation role is NOT "
-                                "assigned (OB16-A 25:00-25:43) while "
-                                "the candidate remains a legitimate "
-                                "reaction/pause reference (34:00-35:15)"],
-                       preferred=True)
-            out["alternatives"].append(
-                f"{ROLE_TREND}: excluded FOR THIS TASK by the "
-                f"higher-frame context — the candidate itself is NOT "
-                f"rejected")
+                f"{ROLE_REACTION_PAUSE}: supported by an observed "
+                f"reaction; possible alternative role")
         out["would_change"].append(
-            "a higher-frame structure change would re-open the trend "
-            "role evaluation")
-    else:   # reaction-pause task
-        out.update(role=ROLE_REACTION_PAUSE,
-                   reasons=["declared reaction/pause task: the "
-                            "candidate is monitored as a possible "
-                            "reaction/pause reference"],
-                   preferred=True)
-        trend_note = "eligible" if aligned else "not assigned for this task"
-        out["alternatives"].append(f"{ROLE_TREND}: {trend_note}")
+            "the confirmation event (or its documented absence) "
+            "settles the trend role")
+        return out
+
+    # task == reaction-pause
+    if reaction_supported:
+        out.update(role=ROLE_REACTION_PAUSE, supported=True,
+                   reasons=["reaction/pause role SUPPORTED by "
+                            "evidence: a reaction at the candidate "
+                            "area is observed"])
+    else:
+        out.update(role=ROLE_UNDETERMINED, supported=False,
+                   reasons=["reaction/pause role NOT established: no "
+                            "reaction at the candidate area is "
+                            "observed"],
+                   discriminating_evidence_needed=[
+                       "an observed reaction/revisit at the candidate "
+                       "area"])
+    out["would_change"].append(
+        "an observed reaction (or its documented absence) settles the "
+        "reaction/pause role")
     return out
+
+
+# --------------------------------------------------------------------- #
+# the reasoning layer (flows through the existing monitoring path)       #
+# --------------------------------------------------------------------- #
+def _bars_interval(bars, j: int) -> Tuple[pd.Timestamp, pd.Timestamp]:
+    """Rows of task bar j lie in [index[j-1], index[j]) under the
+    completion-label convention used by the approved frames builder."""
+    end = pd.Timestamp(bars.index[j])
+    if j > 0:
+        start = pd.Timestamp(bars.index[j - 1])
+    else:
+        start = end - pd.Timedelta(hours=4)
+    return start, end
 
 
 class StudyReasoningLayer:
     """Detects OB-like candidates against the causal world of the
-    current boundary, maintains their state machine and roles, runs
-    hypothesis reviews and revocable selections, and records every
-    transition in the EXISTING InterpretationLedger.
+    current boundary, maintains their state machine and evidence-based
+    roles, runs hypothesis reviews and revocable selections, and records
+    every transition in the EXISTING InterpretationLedger.
     """
 
     def __init__(self, *, run_id: str = "study-v1", k: int = 2,
@@ -489,7 +638,9 @@ class StudyReasoningLayer:
                                            "evidence": []}
         self._scan_upto = -1
         self._ledger_uids: Dict[str, str] = {}
+        self._ledger_sigs: Dict[str, tuple] = {}
         self._cand_seq = 0
+        self._row_buffer: List[dict] = []
 
     # ---- main hooks (called by the EXISTING MonitoringLoop) ----------
     def on_boundary(self, record, frames: Dict[str, pd.DataFrame],
@@ -499,98 +650,143 @@ class StudyReasoningLayer:
         axis = SharedInformationAxis(f"{self.run_id}_study",
                                      pd.DatetimeIndex(bars.index))
         world = self._world(bars, record, axis)
-        # (1) higher-frame context (sequence fact #1)
         changes += self._update_hf_context(record)
-        # (2..) candidates: detect new, update existing
         changes += self._scan_for_candidates(record, bars, world)
-        changes += self._update_candidates(record, bars, world)
-        # role evaluation under the established hf context (declared
-        # task; non-forced — records alternatives and change conditions)
-        for c in self.candidates:
-            if c.role_assignments or \
-                    self.hf_context.get("trend") in ("unknown", None):
-                continue
-            verdict = assign_role(candidate_direction=c.direction,
-                                  hf_trend=self.hf_context["trend"],
-                                  task=self.task)
-            c.role = verdict["role"]
-            c.role_assignments.append(verdict)
-            self.seq_facts.append({
-                "kind": "ROLE_EVALUATED", "at":
-                    pd.Timestamp(record.as_of_time),
-                "candidate_id": c.candidate_id, "role": c.role,
-                "layer": LAYER_INTERPRETATION})
-            changes.append({
-                "aspect": "candidate_role", "before": ROLE_UNDETERMINED,
-                "after": c.role,
-                "reason": verdict["reasons"][0],
-                "evidence": [c.candidate_id] +
-                            list(verdict.get("alternatives", []))})
-        # hypothesis reviews + selections are event-driven via helpers
+        changes += self._update_candidates(record, bars)
+        changes += self._update_roles(record)
         if ledger is not None:
             for c in self.candidates:
                 self._ledger_sync(c, ledger)
+        # drop buffer rows older than this boundary's bar interval
+        keep_from = _bars_interval(bars, int(record.as_of_bar))[0]
+        self._row_buffer = [r for r in self._row_buffer
+                            if pd.Timestamp(r["time"]) >= keep_from]
         return changes
 
     def on_observation(self, row: dict) -> List[dict]:
         """Finer-grained re-evaluation on actually available data (the
-        1m observation): resolves same-bar ordering for an ambiguous
-        candidate and confirms on the finer bar when it can."""
+        1m observation).  Touches are scoped to the ambiguous bar's own
+        interval: rows outside it can never resolve its ordering (they
+        are later events).  The resolution is recorded APPEND-ONLY when
+        the second touch's information becomes available."""
         changes: List[dict] = []
         t = pd.Timestamp(row["time"])
+        h, l = float(row["high"]), float(row["low"])
+        self._row_buffer.append({"time": t, "high": h, "low": l})
+        if len(self._row_buffer) > 4000:
+            self._row_buffer = self._row_buffer[-2000:]
         for c in self.candidates:
-            if c.ambiguous_bar is None or c.state != \
-                    STATE_AWAITING_CONFIRMATION:
+            if c.ambiguous_bar is None or \
+                    c.ordering != UNKNOWN_ORDERING:
                 continue
-            if c.ordering != UNKNOWN_ORDERING and \
-                    c.ordering is not None:
+            if c.ambiguity_interval is None:
                 continue
-            # record first fine touches of the confirm level and of the
-            # revisit boundary; ordering becomes known only if the
-            # touches land on DIFFERENT fine bars
+            start = pd.Timestamp(c.ambiguity_interval[0])
+            end = pd.Timestamp(c.ambiguity_interval[1])
+            if not (start <= t < end):
+                # outside the ambiguous bar: later events cannot
+                # resolve its intra-bar ordering (OBC-0006 defect fix)
+                continue
             if c.direction == "bullish":
-                conf_touch = float(row["high"]) > c.high
-                rev_touch = float(row["low"]) <= c.low
+                conf_touch, rev_touch = h > c.high, l <= c.low
             else:
-                conf_touch = float(row["low"]) < c.low
-                rev_touch = float(row["high"]) >= c.high
+                conf_touch, rev_touch = l < c.low, h >= c.high
             if conf_touch and c.fine_touches.get("confirm") is None:
                 c.fine_touches["confirm"] = t
             if rev_touch and c.fine_touches.get("revisit") is None:
                 c.fine_touches["revisit"] = t
-            cf, rv = c.fine_touches.get("confirm"), \
-                c.fine_touches.get("revisit")
-            if cf is not None and rv is not None:
-                if cf == rv:
-                    c.ordering = UNKNOWN_ORDERING
-                    changes.append({
-                        "aspect": "candidate_ordering",
-                        "before": "UNKNOWN", "after": "UNKNOWN",
-                        "reason": "both events share one fine bar: "
-                                  "ordering stays UNKNOWN",
-                        "evidence": [c.candidate_id, str(cf)]})
-                else:
-                    order = "confirmation-first" if cf < rv else \
-                        "revisit-first"
-                    c.ordering = order
-                    c.events.append({
-                        "kind": "ordering_resolved_by_finer_data",
-                        "at": t, "order": order,
-                        "confirm_touch": str(cf),
-                        "revisit_touch": str(rv),
-                        "layer": LAYER_OBSERVATION})
-                    if order == "confirmation-first":
-                        c.to_confirmed(at_bar=c.ambiguous_bar, at_time=t,
-                                       evidence={"fine_bar": str(cf),
-                                                 "order": order})
-                    changes.append({
-                        "aspect": "candidate_ordering",
-                        "before": UNKNOWN_ORDERING,
-                        "after": order,
-                        "reason": "finer observations resolved the "
-                                  "same-bar ordering",
-                        "evidence": [c.candidate_id, str(cf), str(rv)]})
+            changes += self._resolve_ambiguity_if_possible(c)
         return changes
+
+    # ---- ambiguity handling (scoped, append-only, non-freezing) ------
+    def _resolve_ambiguity_if_possible(self, c: OBLikeCandidate,
+                                       recorded_at=None
+                                       ) -> List[dict]:
+        cf = c.fine_touches.get("confirm")
+        rv = c.fine_touches.get("revisit")
+        if cf is None or rv is None:
+            return []
+        resolved_at = max(cf, rv)   # info complete at the later touch
+        if cf == rv:
+            # one fine bar contains both: ordering stays UNKNOWN
+            return []
+        order = "confirmation-first" if cf < rv else "revisit-first"
+        c.ordering = order
+        ev = {"kind": "ordering_resolved_by_finer_data",
+              "at": pd.Timestamp(resolved_at),
+              "recorded_at": pd.Timestamp(recorded_at or resolved_at),
+              "ambiguous_bar": c.ambiguous_bar,
+              "order": order, "confirm_touch": str(cf),
+              "revisit_touch": str(rv),
+              "note": "'at' = when the resolving information became "
+                      "available (the later touch); 'recorded_at' = "
+                      "when the engine learned it; the earlier "
+                      "ordering_unresolved record is preserved "
+                      "(append-only; nothing is rewritten)",
+              "layer": LAYER_OBSERVATION}
+        c.events.append(ev)
+        changes = [{"aspect": "candidate_ordering",
+                    "before": UNKNOWN_ORDERING, "after": order,
+                    "reason": "finer observations within the ambiguous "
+                              "bar resolved its intra-bar ordering",
+                    "evidence": [c.candidate_id, str(cf), str(rv)]}]
+        if order == "confirmation-first":
+            c.to_confirmed(at_bar=c.ambiguous_bar, at_time=cf,
+                           evidence={"fine_bar": str(cf),
+                                     "order": order,
+                                     "revisit_touch": str(rv)})
+            changes.append({"aspect": "candidate", "before":
+                            STATE_AWAITING_CONFIRMATION,
+                            "after": STATE_CONFIRMED,
+                            "reason": "confirmation-first ordering "
+                                      "resolved by finer data",
+                            "evidence": [c.candidate_id, str(cf)]})
+        else:
+            # revisit-first: ONLY the proposed sequence is rejected —
+            # this bar offers no confirmation event; the candidate is
+            # NOT invalidated and later bars may still confirm (the
+            # source establishes no permanent invalidation here)
+            c.events.append({
+                "kind": "sequence_rejected", "at": pd.Timestamp(rv),
+                "ambiguous_bar": c.ambiguous_bar,
+                "note": "the proposed sequence (trade-through before "
+                        "the return within this bar) is rejected; this "
+                        "bar supplies NO confirmation event; the "
+                        "candidate remains open to later confirmation "
+                        "bars (no permanent invalidation is "
+                        "established by the source)",
+                "layer": LAYER_DERIVATION})
+            changes.append({"aspect": "candidate",
+                            "before": STATE_AWAITING_CONFIRMATION,
+                            "after": STATE_AWAITING_CONFIRMATION,
+                            "reason": "revisit-first: this bar's "
+                                      "proposed sequence rejected; "
+                                      "candidate remains open",
+                            "evidence": [c.candidate_id, str(rv)]})
+        return changes
+
+    def _try_buffer_resolution(self, c: OBLikeCandidate, start, end):
+        """Use already-available fine rows inside the ambiguous bar
+        (they streamed BEFORE this boundary) to resolve its ordering at
+        detection time."""
+        conf = rev = None
+        for r in self._row_buffer:
+            t = pd.Timestamp(r["time"])
+            if not (start <= t < end):
+                continue
+            if c.direction == "bullish":
+                conf_touch, rev_touch = (r["high"] > c.high,
+                                         r["low"] <= c.low)
+            else:
+                conf_touch, rev_touch = (r["low"] < c.low,
+                                         r["high"] >= c.high)
+            if conf_touch and conf is None:
+                conf = t
+            if rev_touch and rev is None:
+                rev = t
+        if conf is not None and rev is not None and conf != rev:
+            return conf, rev
+        return None
 
     # ---- hf context (sequence separation #1) -------------------------
     def _update_hf_context(self, record) -> List[dict]:
@@ -622,7 +818,6 @@ class StudyReasoningLayer:
     def _scan_for_candidates(self, record, bars, world) -> List[dict]:
         changes: List[dict] = []
         upto = int(record.as_of_bar)
-        frac = RESEARCH_CFG_NEAR_SUPPORT_DISTANCE_FRACTION
         refs = [p for p in world["by_id"].values()
                 if getattr(p, "status", "") == "confirmed"]
         from_j = max(0, self._scan_upto + 1)
@@ -633,23 +828,41 @@ class StudyReasoningLayer:
                           float(bars["close"].iloc[j]))
             t = pd.Timestamp(bars.index[j])
             for r in refs:
-                near = abs(l - r.level) / max(abs(r.level), 1e-9) <= frac \
-                    if r.side == "low" else \
-                    abs(h - r.level) / max(abs(r.level), 1e-9) <= frac
-                if r.side == "low" and c < o and near:
-                    self._add_candidate(
-                        direction="bullish", j=j, t=t, ohlc=(o, h, l, c),
-                        ref=r, changes=changes)
-                if r.side == "high" and c > o and near:
-                    self._add_candidate(
-                        direction="bearish", j=j, t=t, ohlc=(o, h, l, c),
-                        ref=r, changes=changes)
+                if not (int(r.occurrence_bar) < j):
+                    continue
+                # order statistic over the SAME candle family since the
+                # reference's occurrence bar (engine-available fact; no
+                # distance/percentage/candle count)
+                family_extremes = []
+                for m in range(int(r.occurrence_bar) + 1, j):
+                    mo = float(bars["open"].iloc[m])
+                    ml = float(bars["low"].iloc[m])
+                    mh = float(bars["high"].iloc[m])
+                    if r.side == "low" and float(
+                            bars["close"].iloc[m]) < mo:
+                        family_extremes.append(ml)
+                    if r.side == "high" and float(
+                            bars["close"].iloc[m]) > mo:
+                        family_extremes.append(mh)
+                if r.side == "low" and c < o and l <= float(r.level):
+                    if not family_extremes or l < min(family_extremes):
+                        self._add_candidate(
+                            direction="bullish", j=j, t=t,
+                            ohlc=(o, h, l, c), ref=r, changes=changes)
+                if r.side == "high" and c > o and h >= float(r.level):
+                    if not family_extremes or h > max(family_extremes):
+                        self._add_candidate(
+                            direction="bearish", j=j, t=t,
+                            ohlc=(o, h, l, c), ref=r, changes=changes)
         self._scan_upto = max(self._scan_upto, upto)
         return changes
 
     def _add_candidate(self, *, direction, j, t, ohlc, ref, changes):
         o, h, l, c = ohlc
         self._cand_seq += 1
+        rel = ("low traded at or through the contextual low level"
+               if direction == "bullish" else
+               "high traded at or through the contextual high level")
         cand = OBLikeCandidate(
             candidate_id=f"OBC-{self.run_id}-{self._cand_seq:04d}",
             direction=direction, bar_index=int(j), bar_time=t,
@@ -658,20 +871,29 @@ class StudyReasoningLayer:
             context_ref_level=float(ref.level),
             timeframe=self.task_scale,
             eligibility={
-                "definition": "declared research configuration: "
+                "definition": "declared research definition "
+                              "(ENGINEERING_INTERPRETATION, NOT "
+                              "Michael's definition): a "
                               f"{'down' if direction == 'bullish' else 'up'}"
-                              "-close bar whose "
+                              "-close bar that is the extreme "
                               f"{'low' if direction == 'bullish' else 'high'}"
-                              f" is within {frac_pct()} of the "
-                              "contextual swing "
-                              f"{ref.side} level (source leaves 'near "
-                              "support' open; this constant is NOT a "
-                              "source claim and NOT a market truth)",
+                              " among its family since the contextual "
+                              f"reference's occurrence bar AND {rel} "
+                              "(exact-level trade relation — the same "
+                              "relation family the engine uses for "
+                              "event conditions and the source uses "
+                              "for validation). NO percentage, NO "
+                              "candle count, NO hidden threshold.",
                 "known_at_selection": [
                     f"context ref {ref.candidate_id} confirmed at its "
                     f"knowable bar (before this bar)",
                     f"bar OHLC at {t}",
                 ],
+                "source_caveat": "'near support' is NOT operationally "
+                                 "resolved (corpus marks the wording "
+                                 "ambiguous); this relation does not "
+                                 "claim to be the speaker's "
+                                 "definition",
             })
         cand.to_awaiting(at_bar=j, at_time=t,
                          evidence={"bar": int(j), "ohlc": [o, h, l, c]})
@@ -684,88 +906,176 @@ class StudyReasoningLayer:
         changes.append({
             "aspect": "candidate", "before": "(none)",
             "after": f"{cand.candidate_id} {cand.state}",
-            "reason": "declared research definition matched; awaiting "
-                      "the later-evidence event (never confirmed at "
-                      "formation)",
+            "reason": "declared research definition matched (exact-"
+                      "level relation + order statistic; no invented "
+                      "distance); awaiting the later-evidence event "
+                      "(never confirmed at formation)",
             "evidence": [cand.candidate_id, ref.candidate_id]})
 
     # ---- candidate updates (confirmation / revisit / ordering) ------
-    def _update_candidates(self, record, bars, world) -> List[dict]:
+    def _update_candidates(self, record, bars) -> List[dict]:
         changes: List[dict] = []
         upto = int(record.as_of_bar)
         for c in self.candidates:
             if c.state not in (STATE_CANDIDATE,
                                STATE_AWAITING_CONFIRMATION):
                 continue
-            if c.ordering is not None:
-                # ambiguous (UNKNOWN) or already resolved by finer
-                # data: never re-derive or overwrite at this resolution
-                continue
             if c.state == STATE_CANDIDATE:
                 c.to_awaiting(at_bar=c.bar_index, at_time=c.bar_time,
                               evidence={"bar": c.bar_index})
-            first_confirm = first_revisit = None
-            for j in range(c.bar_index + 1, upto + 1):
+            start = max(c.bar_index + 1, c.scan_floor + 1)
+            for j in range(start, upto + 1):
+                o = float(bars["open"].iloc[j])
                 h = float(bars["high"].iloc[j])
                 l = float(bars["low"].iloc[j])
                 cl = float(bars["close"].iloc[j])
                 t = pd.Timestamp(bars.index[j])
-                conf = h > c.high if c.direction == "bullish" \
-                    else l < c.low
-                # revisit = RETURN to the candidate area's far boundary
-                # (declared definition; both confirm+revisit inside one
-                # bar cannot be ordered from OHLC)
-                rev = (l <= c.low) if c.direction == "bullish" \
-                    else (h >= c.high)
-                if conf and first_confirm is None:
-                    first_confirm = (j, t, cl)
-                if rev and first_revisit is None:
-                    first_revisit = (j, t, cl)
-                if first_confirm and first_revisit:
+                if c.direction == "bullish":
+                    conf, rev = h > c.high, l <= c.low
+                else:
+                    conf, rev = l < c.low, h >= c.high
+                if conf and rev:
+                    # both events possible inside one bar
+                    iv = _bars_interval(bars, j)
+                    res = self._try_buffer_resolution(c, *iv)
+                    if res is not None:
+                        cf, rv = res
+                        c.ambiguous_bar = j
+                        c.ambiguity_interval = (str(iv[0]), str(iv[1]))
+                        c.fine_touches = {"confirm": cf,
+                                          "revisit": rv}
+                        c.ordering = UNKNOWN_ORDERING
+                        c.events.append({
+                            "kind": "ordering_unresolved", "at": t,
+                            "bar": int(j),
+                            "note": "confirmation and revisit could "
+                                    "both have occurred inside this "
+                                    "bar; fine rows were checked at "
+                                    "detection",
+                            "layer": LAYER_UNKNOWN})
+                        c.scan_floor = j
+                        changes += self._resolve_ambiguity_if_possible(
+                            c, recorded_at=pd.Timestamp(
+                                bars.index[int(record.as_of_bar)]))
+                        continue
+                    c.ambiguous_bar = j
+                    c.ambiguity_interval = (str(iv[0]), str(iv[1]))
+                    c.ordering = UNKNOWN_ORDERING
+                    c.fine_touches = {}
+                    c.events.append({
+                        "kind": "ordering_unresolved", "at": t,
+                        "bar": int(j),
+                        "note": "confirmation and revisit could both "
+                                "have occurred inside this bar; OHLC "
+                                "cannot order them; state stays "
+                                "UNDECIDED and the flattering order is "
+                                "refused (scoped to THIS bar only)",
+                        "layer": LAYER_UNKNOWN})
+                    c.scan_floor = j
+                    changes.append({
+                        "aspect": "candidate", "before": c.state,
+                        "after": c.state + " (ordering UNKNOWN)",
+                        "reason": "same-bar confirm/revisit: ordering "
+                                  "unresolvable from OHLC",
+                        "evidence": [c.candidate_id, str(j)]})
+                    continue
+                if conf:
+                    ev = c.to_confirmed(
+                        at_bar=j, at_time=t,
+                        evidence={"bar": int(j), "close": cl,
+                                  "rule": "a bar traded through the "
+                                          "candidate extreme "
+                                          "(declared)",
+                                  "prior_open_ambiguity":
+                                      c.ambiguous_bar})
+                    c.scan_floor = j
+                    self.seq_facts.append({
+                        "kind": "CONFIRMATION_EVENT", "at": t,
+                        "candidate_id": c.candidate_id, "bar": int(j),
+                        "layer": LAYER_OBSERVATION})
+                    changes.append({
+                        "aspect": "candidate",
+                        "before": STATE_AWAITING_CONFIRMATION,
+                        "after": STATE_CONFIRMED,
+                        "reason": ev["reason"],
+                        "evidence": ev["evidence"]})
                     break
-            if first_confirm is None:
+                if rev:
+                    c.events.append({
+                        "kind": "revisit_event", "at": t, "bar": int(j),
+                        "note": "return to the candidate area's far "
+                                "boundary observed",
+                        "layer": LAYER_OBSERVATION})
+                c.scan_floor = j
+        return changes
+
+    # ---- evidence-evaluated roles ------------------------------------
+    def _update_roles(self, record) -> List[dict]:
+        changes: List[dict] = []
+        hf_ok = self.hf_context.get("trend") not in ("unknown", None)
+        for c in self.candidates:
+            evidence = {
+                "hf_established": hf_ok,
+                "confirmation_event": c.state == STATE_CONFIRMED,
+                "reaction_observed": any(
+                    e.get("kind") == "revisit_event" for e in c.events),
+                "refs": {
+                    "hf_established":
+                        self.hf_context.get("established_at"),
+                    "confirmation_event": next(
+                        (str(e.get("at")) for e in c.events
+                         if e.get("kind") == "state_transition"
+                         and e.get("to") == STATE_CONFIRMED), None),
+                    "reaction_observed": next(
+                        (str(e.get("at")) for e in c.events
+                         if e.get("kind") == "revisit_event"), None),
+                },
+            }
+            verdict = assign_role(candidate_direction=c.direction,
+                                  hf_trend=str(self.hf_context.get(
+                                      "trend")),
+                                  task=self.task, evidence=evidence)
+            key = (verdict["role"], verdict["supported"],
+                   verdict["evidence_used"]["confirmation_event"]
+                   ["value"],
+                   verdict["evidence_used"]["reaction_observed"]
+                   ["value"],
+                   verdict["evidence_used"]["hf_established"]["value"])
+            last = c.role_assignments[-1] if c.role_assignments else None
+            last_key = None
+            if last is not None:
+                last_key = (
+                    last["role"], last.get("supported"),
+                    last["evidence_used"]["confirmation_event"]["value"],
+                    last["evidence_used"]["reaction_observed"]["value"],
+                    last["evidence_used"]["hf_established"]["value"])
+            if key == last_key:
                 continue
-            jf, tf, clf = first_confirm
-            jr = first_revisit[0] if first_revisit else None
-            if jr is not None and jf == jr:
-                # same bar: OHLC cannot order confirm vs revisit
-                c.ambiguous_bar = jf
-                c.ordering = UNKNOWN_ORDERING
-                c.events.append({
-                    "kind": "ordering_unresolved",
-                    "at": tf, "bar": int(jf),
-                    "note": "confirmation and revisit could both have "
-                            "occurred inside this bar; OHLC cannot "
-                            "order them; state stays UNDECIDED and the "
-                            "flattering order is refused",
-                    "layer": LAYER_UNKNOWN})
-                changes.append({
-                    "aspect": "candidate", "before": c.state,
-                    "after": c.state + " (ordering UNKNOWN)",
-                    "reason": "same-bar confirm/revisit: ordering "
-                              "unresolvable from OHLC",
-                    "evidence": [c.candidate_id, str(jf)]})
-                continue
-            ev = c.to_confirmed(
-                at_bar=jf, at_time=tf,
-                evidence={"bar": int(jf), "close": clf,
-                          "rule": "later bar traded through the "
-                                  "candidate extreme (declared)",
-                          "revisit_bar": jr})
+            c.role_assignments.append(verdict)
+            c.role = verdict["role"]
             self.seq_facts.append({
-                "kind": "CONFIRMATION_EVENT", "at": tf,
-                "candidate_id": c.candidate_id, "bar": int(jf),
-                "layer": LAYER_OBSERVATION})
+                "kind": "ROLE_EVALUATED", "at":
+                    pd.Timestamp(record.as_of_time),
+                "candidate_id": c.candidate_id, "role": c.role,
+                "supported": verdict["supported"],
+                "layer": LAYER_INTERPRETATION})
             changes.append({
-                "aspect": "candidate", "before": STATE_AWAITING_CONFIRMATION,
-                "after": STATE_CONFIRMED,
-                "reason": ev["reason"], "evidence": ev["evidence"]})
+                "aspect": "candidate_role", "before":
+                    (last["role"] if last else ROLE_UNDETERMINED),
+                "after": c.role,
+                "reason": verdict["reasons"][0],
+                "evidence": [c.candidate_id] +
+                            list(verdict.get("alternatives", []))})
         return changes
 
     # ---- ledger integration (existing InterpretationLedger) ----------
     def _ledger_sync(self, cand: OBLikeCandidate, ledger) -> None:
-        key = f"{cand.candidate_id}#{len(cand.events)}"
-        if self._ledger_uids.get(cand.candidate_id) == key:
+        # record a NEW version only when something actually changed
+        # (genuine revision); the dedupe compares an evidence signature,
+        # never the ledger uid string
+        sig = (len(cand.events), cand.state, str(cand.ordering),
+               cand.role)
+        if self._ledger_sigs.get(cand.candidate_id) == sig:
             return
         status_map = {STATE_CANDIDATE: "justified",
                       STATE_AWAITING_CONFIRMATION: "justified",
@@ -806,6 +1116,7 @@ class StudyReasoningLayer:
         uid = ledger.record(res, payload)
         payload["ledger_version_after"] = len(ledger.results)
         self._ledger_uids[cand.candidate_id] = uid
+        self._ledger_sigs[cand.candidate_id] = sig
 
     # ---- world reconstruction (approved components) ------------------
     def _world(self, bars, record, axis):
@@ -848,7 +1159,8 @@ class StudyReasoningLayer:
                     f"completed bar -> CONFIRMED (recorded at the "
                     f"evidence bar)",
                     f"return to {revisit_level} -> revisit event "
-                    f"(same-bar with confirmation -> ordering UNKNOWN)",
+                    f"(same-bar with confirmation -> ordering UNKNOWN "
+                    f"for THAT bar only; the candidate stays open)",
                     f"context reference {c.context_ref_id} at "
                     f"{c.context_ref_level}: a completed close through "
                     f"it before confirmation -> role premise failed",
@@ -856,15 +1168,19 @@ class StudyReasoningLayer:
                 "revision_conditions": [
                     "higher-frame structure change re-opens role "
                     "evaluation",
-                    "finer data may resolve a same-bar ordering "
-                    "(either direction)",
+                    "finer rows within an ambiguous bar may resolve "
+                    "its ordering (either direction) — recorded when "
+                    "available; later bars may still confirm",
                 ],
                 "unknowns": [
                     "no resting-order data: participant positions/"
                     "intent, resting stops and available liquidity "
                     "CANNOT be established",
-                    "'near support' has no source definition "
-                    "(research-config constant only)",
+                    "the source's 'near support' wording is "
+                    "operationally unresolved; the exact-level "
+                    "relation used here is an ENGINEERING choice "
+                    "(no distance/percentage/candle-count rule exists "
+                    "or is claimed)",
                 ],
             })
         for h in self.hypotheses:
@@ -902,6 +1218,9 @@ class StudyReasoningLayer:
             "scan_upto": self._scan_upto,
             "cand_seq": self._cand_seq,
             "ledger_uids": dict(self._ledger_uids),
+            "ledger_sigs": {k: list(v) for k, v in
+                            self._ledger_sigs.items()},
+            "row_buffer": _jsonable(self._row_buffer[-2000:]),
             "selection_quality": "NOT_ESTABLISHED",
         }
 
@@ -910,7 +1229,10 @@ class StudyReasoningLayer:
         self._cand_seq = int(st.get("cand_seq", 0))
         self.hf_context = dict(st.get("hf_context", {}))
         self._ledger_uids = dict(st.get("ledger_uids", {}))
+        self._ledger_sigs = {k: tuple(v) for k, v in
+                             st.get("ledger_sigs", {}).items()}
         self.seq_facts = list(st.get("seq_facts", []))
+        self._row_buffer = list(st.get("row_buffer", []))
         self.candidates = []
         for d in st.get("candidates", []):
             c = OBLikeCandidate(
@@ -930,9 +1252,13 @@ class StudyReasoningLayer:
                 events=d.get("events", []),
                 ordering=d.get("ordering"),
                 ambiguous_bar=d.get("ambiguous_bar"),
+                ambiguity_interval=(
+                    tuple(d["ambiguity_interval"])
+                    if d.get("ambiguity_interval") else None),
                 fine_touches={k: (pd.Timestamp(v) if v else None)
                               for k, v in
-                              d.get("fine_touches", {}).items()})
+                              d.get("fine_touches", {}).items()},
+                scan_floor=int(d.get("scan_floor", -1)))
             self.candidates.append(c)
         self.hypotheses = []
         for d in st.get("hypotheses", []):
@@ -957,10 +1283,6 @@ class StudyReasoningLayer:
                 status=d.get("status", "SELECTED"),
                 revisions=d.get("revisions", []))
             self.selections.append(s)
-
-
-def frac_pct() -> str:
-    return f"{RESEARCH_CFG_NEAR_SUPPORT_DISTANCE_FRACTION:.2%}"
 
 
 def _jsonable(obj):

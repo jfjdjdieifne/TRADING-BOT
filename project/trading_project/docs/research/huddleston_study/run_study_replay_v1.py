@@ -249,6 +249,31 @@ def _save(out_dir, loop, reports, resumed, watch_plan):
     path = out_dir / f"study_replay_{suffix}_v1.json"
     study_state = (loop.study_layer.state_dict()
                    if loop.study_layer is not None else None)
+    # genuine append-only revisions: the study ledger entries with
+    # their revision_of chains (old records preserved by the ledger)
+    ledger_entries = []
+    ledger = getattr(getattr(loop, "engine", None), "ledger", None)
+    if ledger is not None:
+        for uid, versions in ledger.versions.items():
+            for v in versions:
+                res = v["result"]
+                if getattr(res, "task_id", "") != "T-STUDY-CANDIDATE":
+                    continue
+                payload = ledger._payloads.get(uid, {})
+                ledger_entries.append({
+                    "uid": uid,
+                    "version": v.get("version"),
+                    "status": res.status,
+                    "decision_bar": res.decision_bar,
+                    "notes": list(getattr(res, "notes", [])),
+                    "revision_of": payload.get("revision_of"),
+                    "recorded_event_times":
+                        payload.get("recorded_event_times"),
+                    "ledger_version_before":
+                        payload.get("ledger_version_before"),
+                })
+    ledger_entries.sort(key=lambda e: (e["decision_bar"],
+                                       str(e["uid"])))
     payload = {
         "cursor": loop.stream.position,
         "as_of": str(loop.last_record.as_of_time)
@@ -258,6 +283,7 @@ def _save(out_dir, loop, reports, resumed, watch_plan):
         "steps": [r.to_record() for r in reports],
         "watch_plan": watch_plan,
         "study_state": study_state,
+        "study_ledger_entries": ledger_entries,
         "relationship_register": RELATIONSHIP_REGISTER,
         "live_feed_status": LIVE_FEED_STATUS,
         "data_capabilities": DATA_CAPABILITIES,
