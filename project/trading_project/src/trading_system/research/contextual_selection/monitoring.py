@@ -562,12 +562,18 @@ class MonitoringLoop:
                  engine_factory: Callable[[Dict[str, pd.DataFrame]],
                                           Any],
                  task_scale: str = "4h",
-                 grid_frames: Optional[Dict[str, pd.DataFrame]] = None
+                 grid_frames: Optional[Dict[str, pd.DataFrame]] = None,
+                 study_layer: Optional[Any] = None
                  ) -> None:
         self.stream = stream
         self.frames_builder = frames_builder
         self.engine_factory = engine_factory
         self.task_scale = task_scale
+        # STUDY LINKS (optional): a StudyReasoningLayer observing the
+        # SAME flow — no side channel.  It sees each observation row in
+        # the fast path and each analyzed boundary record; its state is
+        # saved with the loop state.
+        self.study_layer = study_layer
         # APPROVED TIME METADATA: the engine's causal axis is built once
         # from the declared time GRID (labels only — the stream's index).
         # Prices at any step come exclusively from
@@ -594,6 +600,17 @@ class MonitoringLoop:
             # O(1) fast path: this observation completes no task-scale
             # bar and no analysis is pending -> no completed-bar fact
             # can change (incomplete bars are never used)
+            study_changes = []
+            if self.study_layer is not None:
+                study_changes = self.study_layer.on_observation(rec)
+            if study_changes:
+                report = self._report(
+                    "observation", rec["time"], True, study_changes,
+                    "finer observation touched an open study "
+                    "candidate: re-evaluated at the actually "
+                    "available resolution", [], None)
+                self.journal.append(report.to_record())
+                return report
             report = self._report(
                 "observation", rec["time"], False, [],
                 "no completed task-scale bar closed at this "
@@ -657,6 +674,8 @@ class MonitoringLoop:
             "last_analysis": (self.last_record.to_record()
                               if self.last_record is not None else None),
             "timeline_id": self.stream._timeline_id,
+            "study_state": (self.study_layer.state_dict()
+                            if self.study_layer is not None else None),
         }
 
     def save_state(self, path) -> None:
@@ -666,7 +685,8 @@ class MonitoringLoop:
 
     @classmethod
     def load_state(cls, path, *, stream, frames_builder, engine_factory,
-                   task_scale: str = "4h", grid_frames=None
+                   task_scale: str = "4h", grid_frames=None,
+                   study_layer: Optional[Any] = None
                    ) -> "MonitoringLoop":
         """Resume in a FRESH process: the stream advances to the saved
         cursor; the engine restores through the EXISTING snapshot
@@ -677,7 +697,7 @@ class MonitoringLoop:
             st = json.load(fh)
         loop = cls(stream=stream, frames_builder=frames_builder,
                    engine_factory=engine_factory, task_scale=task_scale,
-                   grid_frames=grid_frames)
+                   grid_frames=grid_frames, study_layer=study_layer)
         while loop.stream.position < int(st["cursor"]):
             if loop.stream.next_observation() is None:
                 break
@@ -685,6 +705,8 @@ class MonitoringLoop:
         loop.journal = list(st["journal"])
         if st.get("last_analysis"):
             loop.last_record = _shim(st["last_analysis"])
+        if st.get("study_state") and loop.study_layer is not None:
+            loop.study_layer.load_state_dict(st["study_state"])
         frames = loop._prefix_frames()
         loop.engine = engine_factory(loop._grid_frames)
         loop.engine.frames = frames
@@ -775,6 +797,11 @@ class MonitoringLoop:
         self.engine.frames = frames
         rec = self.engine.analyze(boundary_time)
         changes = _diff_records(self.last_record, rec)
+        if self.study_layer is not None:
+            study_changes = self.study_layer.on_boundary(
+                rec, frames, getattr(self.engine, "ledger", None))
+            if study_changes:
+                changes = list(changes) + list(study_changes)
         notes: List[str] = []
         material = bool(changes)
         if not material:

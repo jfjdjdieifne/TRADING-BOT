@@ -1,0 +1,620 @@
+{
+  "schema_version": "0.2",
+  "status": "INITIAL_RESEARCH_ONLY",
+  "accessed_on": "2026-11-02",
+  "claim_classes": [
+    "DIRECT_STATEMENT",
+    "PARAPHRASE",
+    "ENGINEERING_INTERPRETATION",
+    "RESEARCH_HYPOTHESIS",
+    "UNSUPPORTED_OR_UNAVAILABLE"
+  ],
+  "amendments": [
+    {
+      "amendment_id": "AMD-01-E03B-DESCRIPTION",
+      "date": "2026-11-02",
+      "target_example": "E03-B",
+      "target_field": "condition_entry_invalidation_target_change.entry",
+      "source": "extended study of the five videos (EXTENDED_STUDY_FIVE_VIDEOS.md, 'لماذا هذه أفضل من المرّة السابقة؟')",
+      "original_text": "The wider passage describes a potential gap/order-block entry but this corpus does NOT validate a complete published order-block entry specification; exact executable definition UNKNOWN.",
+      "corrected_description": "Published material DOES include a hypothetical entry illustration: the Orderblocks lesson slide (frame 01:52, definition/validation/entry/risk) explicitly shows a hypothetical bullish entry on a possible return to the candidate's high. This does NOT mean the general application is settled (operational conditions such as 'near support' remain ambiguous), nor that the engine implements a proven Huddleston entry: the engine's entry remains a declared research configuration, and the slide remains a teaching illustration, not a verified trade record.",
+      "edit_kind": "descriptive correction of published-material availability; NOT a change to any engine policy",
+      "audit": "first study claimed no published entry could be verified; extended study inspected the full lesson and the 01:52 slide showing the hypothetical entry example plus the 25:00-25:43 context-rejection passage; original wording preserved above for traceability"
+    }
+  ],
+  "timing_note": "All five source audio tracks were downloaded and transcribed completely by local faster-whisper tiny.en in 10-minute chunks. Segment times are approximate ASR alignment, NOT human-verified speech timestamps. Downloaded original video was sampled for charts across all five lessons; not every video frame was examined. Clips and audio remain research-time only in non-persistent cache.",
+  "examples": [
+    {
+      "id": "E03-A",
+      "split": "DEVELOPMENT",
+      "source_id": "YT_nQfHZ2DEJ8c",
+      "url": "https://www.youtube.com/watch?v=nQfHZ2DEJ8c",
+      "title": "2022 ICT Mentorship Episode 3",
+      "publication_date": "2022-01-25 (YouTube watch-page display; metadata upload date 2022-01-26 conflicts)",
+      "passage": {
+        "start": "00:00:35",
+        "end": "00:04:21",
+        "start_seconds": 35,
+        "end_seconds": 261,
+        "start_link": "https://www.youtube.com/watch?v=nQfHZ2DEJ8c&t=35s",
+        "end_link": "https://www.youtube.com/watch?v=nQfHZ2DEJ8c&t=261s",
+        "precision": "Exact selected video window; speech alignment approximate local-ASR seconds, not audited by ear."
+      },
+      "inspected": {
+        "transcript": "Full local English tiny.en ASR with approximate segment timestamps; YouTube auto-caption text also inspected for comparison; quote wording not human-audited against audio.",
+        "audio": "FULL audio track processed by local tiny.en ASR; I did not independently listen to each utterance.",
+        "chart_images": "frames from downloaded original video at 00:01:05 and 00:01:40, inspected; frame shows final historical chart, not a contemporaneous forecast"
+      },
+      "instrument": "CME E-mini Nasdaq-100 futures March 2022 (chart label)",
+      "timeframes": [
+        "15-minute"
+      ],
+      "chart_date_time": "Jan 21, 2022 visible on chart axis; UTC-5 platform display visible; specific moment of original judgment UNKNOWN",
+      "decision_time_reconstruction": "UNVERIFIED",
+      "explanation_mode": "RETROSPECTIVE",
+      "basis_for_mode": "Jan 21 historical chart with both later low sweep and later high sweep already visible when explained in a lesson watch page dates Jan 25; homework review of prior chart.",
+      "decision_information": [
+        {
+          "class": "PARAPHRASE",
+          "text": "He points to an old 15-minute low and relatively equal highs, preferring the equal highs above an older high as a reference; these earlier references can be seen before their later crossings. Actual pre-crossing chart snapshot with decision-time annotations is unavailable."
+        },
+        {
+          "class": "UNSUPPORTED_OR_UNAVAILABLE",
+          "text": "The sampled video frame already contains subsequent candles; exact information set at original live decision cannot be reconstructed from this slide."
+        }
+      ],
+      "explicit_identification": [
+        {
+          "class": "DIRECT_STATEMENT",
+          "text": "He calls the old low 'sell side liquidity' and the relative equal highs 'buy side liquidity'; these are HIS inferred stop locations, not observed order-book data."
+        }
+      ],
+      "expected_watched_selected": [
+        {
+          "class": "PARAPHRASE",
+          "text": "After price passes either selected reference he says to look for/anticipate an intraday market-structure shift, not force one; he distinguishes an intraday shift from a durable multi-day break."
+        }
+      ],
+      "condition_entry_invalidation_target_change": {
+        "condition": "Crossing an old low/high is a context for WATCHING a possible shift, not proof of one (DIRECT_STATEMENT/PARAPHRASE).",
+        "entry": "UNKNOWN",
+        "invalidation": "UNKNOWN",
+        "target": "UNKNOWN",
+        "change": "He warns an intraday shift can reverse within the same day (PARAPHRASE)."
+      },
+      "post_decision": [
+        {
+          "class": "PARAPHRASE",
+          "text": "On the displayed completed chart price moved below the old low, later rose through the relatively equal highs, and then fell; this is outcome information and was not available before those events."
+        }
+      ],
+      "short_quotes": [
+        {
+          "class": "DIRECT_STATEMENT",
+          "text": "'there's nothing inherently wrong about that'",
+          "attribution": "Huddleston, alternative high reference, within chapter-bounded passage; local ASR alignment checked at passage level, not human-audited"
+        },
+        {
+          "class": "DIRECT_STATEMENT",
+          "text": "'you don't force it'",
+          "attribution": "Huddleston, possible shift, within chapter-bounded passage; local ASR alignment checked at passage level, not human-audited"
+        }
+      ],
+      "ambiguities": [
+        "Caption spells 'cell stops' in places; read as his claimed sell stops, not exchange-confirmed executions.",
+        "Several highs are possible references; he expressly permits an alternative.",
+        "A completed screenshot is not an original decision-time replay."
+      ],
+      "observability": [
+        {
+          "fact": "past lows, near-equal highs, later price crossings",
+          "ohlc_alone": "YES, if historical bars and calendar/contract data are available at the relevant time"
+        },
+        {
+          "fact": "actual resting stops and triggering, institutional intent or identities",
+          "ohlc_alone": "NO; require order/execution data and even then participant intent may be unknowable"
+        },
+        {
+          "fact": "the particular level Michael would select without the lesson",
+          "ohlc_alone": "NO; requires his explicit annotation or selection"
+        }
+      ],
+      "transferable_relationship": {
+        "class": "ENGINEERING_INTERPRETATION",
+        "text": "Maintain multiple causally available swing references and why each is salient; a crossing changes the questions to watch on a smaller timeframe, without creating an automatic reversal/trade signal."
+      }
+    },
+    {
+      "id": "E03-B",
+      "split": "DEVELOPMENT",
+      "source_id": "YT_nQfHZ2DEJ8c",
+      "url": "https://www.youtube.com/watch?v=nQfHZ2DEJ8c",
+      "title": "2022 ICT Mentorship Episode 3",
+      "publication_date": "2022-01-25 (YouTube watch-page display; metadata upload date 2022-01-26 conflicts)",
+      "passage": {
+        "start": "00:04:21",
+        "end": "00:14:28",
+        "start_seconds": 261,
+        "end_seconds": 868,
+        "start_link": "https://www.youtube.com/watch?v=nQfHZ2DEJ8c&t=261s",
+        "end_link": "https://www.youtube.com/watch?v=nQfHZ2DEJ8c&t=868s",
+        "precision": "Exact selected video window; speech alignment approximate local-ASR seconds, not audited by ear."
+      },
+      "inspected": {
+        "transcript": "Full local English tiny.en ASR with approximate segment timestamps; YouTube auto-caption text also inspected for comparison; quote wording not human-audited against audio.",
+        "audio": "FULL audio track processed by local tiny.en ASR; I did not independently listen to each utterance.",
+        "chart_images": "original downloaded video frames at 00:05:30 (unannotated complete 2-minute chart), 00:12:30 and 00:14:10 (annotated completed 2-minute chart), inspected"
+      },
+      "instrument": "CME E-mini Nasdaq-100 futures March 2022 (chart label)",
+      "timeframes": [
+        "15-minute parent reference",
+        "2-minute execution-context chart"
+      ],
+      "chart_date_time": "Jan 21, 2022 visible at 08:30 on 2-minute chart with UTC-5 screen clock; original decision instant UNKNOWN",
+      "decision_time_reconstruction": "UNVERIFIED",
+      "explanation_mode": "RETROSPECTIVE",
+      "basis_for_mode": "He switches from a completed 15-minute homework chart to a completed two-minute chart with both subsequent price legs displayed; annotations include later shift labels.",
+      "decision_information": [
+        {
+          "class": "PARAPHRASE",
+          "text": "He carries the older low / equal-high context from the 15-minute chart into the 2-minute chart; the earlier swing highs and lows can be used only after formed, whereas the screenshot reveals future bars."
+        }
+      ],
+      "explicit_identification": [
+        {
+          "class": "PARAPHRASE",
+          "text": "He identifies a short-term high formed before the low, a move under an older low, then price crossing that short-term high. In the opposite direction he describes a run over relative equal highs and a subsequent short-term low breach."
+        }
+      ],
+      "expected_watched_selected": [
+        {
+          "class": "DIRECT_STATEMENT",
+          "text": "He says the crossing of the short-term high is 'significant only' if the move into the earlier low has occurred; after the crossing he looks for further evidence, including whether a fair value gap appears on later candle close."
+        }
+      ],
+      "condition_entry_invalidation_target_change": {
+        "condition": "Older reference crossing + subsequent local swing crossing; separately, assess whether the later candles leave a fair value gap (PARAPHRASE).",
+        "entry": "The wider passage describes a potential gap/order-block entry but this corpus does NOT validate a complete published order-block entry specification; exact executable definition UNKNOWN.",
+        "invalidation": "UNKNOWN",
+        "target": "He mentions prior highs and opposite-side lows as possible later reference areas, not verified resting-order targets (PARAPHRASE).",
+        "change": "Before the later swing crossing he explicitly says do not assume a buy after a low raid; observe whether market supplies evidence (PARAPHRASE)."
+      },
+      "post_decision": [
+        {
+          "class": "PARAPHRASE",
+          "text": "The completed displayed 2-minute chart subsequently rallies after the low and later declines after trading above earlier highs; these are separately stored outcomes, not available original-decision inputs."
+        }
+      ],
+      "short_quotes": [
+        {
+          "class": "DIRECT_STATEMENT",
+          "text": "'that's significant only if this run down here has traded into sell stops'",
+          "attribution": "Huddleston, lower-timeframe swing-high crossing; untimed auto-caption within bounded passage; local ASR alignment checked at passage level, not human-audited"
+        },
+        {
+          "class": "DIRECT_STATEMENT",
+          "text": "'you anticipate a shift in market structure'",
+          "attribution": "Huddleston, after interaction with selected reference; untimed auto-caption within bounded passage; local ASR alignment checked at passage level, not human-audited"
+        }
+      ],
+      "ambiguities": [
+        "Captions mishear domain terms and may omit/repeat words; no exact quote-second alignment.",
+        "Chart already shows post-event movement; not proof of a live prospective forecast.",
+        "Intrabar ordering and gap formation require appropriate resolution and closed-bar timing.",
+        "His algorithm/stop-order explanations are speaker claims, not demonstrated microstructure facts."
+      ],
+      "observability": [
+        {
+          "fact": "prior swing price levels and subsequent crossing",
+          "ohlc_alone": "YES with sufficient time resolution and strictly past-only swing confirmation"
+        },
+        {
+          "fact": "three-candle non-overlap after last candle has closed",
+          "ohlc_alone": "YES at stated bar resolution, with consistent session/contract construction"
+        },
+        {
+          "fact": "actual stops consumed, trading algorithm identity or intention",
+          "ohlc_alone": "NO; requires order/execution-level evidence; intention remains uncertain"
+        },
+        {
+          "fact": "an entry was genuinely placed at the originally claimed instant",
+          "ohlc_alone": "NO; needs independently timed execution records"
+        }
+      ],
+      "transferable_relationship": {
+        "class": "ENGINEERING_INTERPRETATION",
+        "text": "A smaller-frame crossing carries different interpretive weight depending on a previously selected higher-frame reference and the sequence of interactions; monitor next closed-bar displacement/non-overlap as evidence, and allow no-shift/continuation alternatives. This is not an entry rule."
+      }
+    },
+    {
+      "id": "E12-A",
+      "split": "DEVELOPMENT",
+      "source_id": "YT_8GkQfdAXZP0",
+      "url": "https://www.youtube.com/watch?v=8GkQfdAXZP0",
+      "title": "2022 ICT Mentorship Episode 12",
+      "publication_date": "2022-02-24 watch-page display",
+      "passage": {
+        "start_seconds": 360,
+        "end_seconds": 840,
+        "start": "00:06:00",
+        "end": "00:14:00",
+        "start_link": "https://www.youtube.com/watch?v=8GkQfdAXZP0&t=360s",
+        "end_link": "https://www.youtube.com/watch?v=8GkQfdAXZP0&t=840s",
+        "precision": "selected passage window; local-ASR word/segment timing approximate, not ear-audited"
+      },
+      "inspected": {
+        "transcript": "FULL local tiny.en ASR transcript; sampled surrounding paragraphs reviewed, English ASR errors possible",
+        "audio": "Original entire audio track processed by local ASR, not personally listened to continuously",
+        "chart_images": "Original video frames at 07:00 and 12:00 plus scans across later sections; daily/hourly levels and NQ March 2022 1h chart visible."
+      },
+      "instrument": "CME E-mini Nasdaq-100 futures March 2022",
+      "timeframes": [
+        "daily higher-timeframe context",
+        "hourly chart"
+      ],
+      "chart_date_time": "Historical February 2022 axis visible; exact proposed original decision timestamp UNKNOWN",
+      "decision_time_reconstruction": "UNVERIFIED",
+      "explanation_mode": "RETROSPECTIVE",
+      "basis_for_mode": "He says he previously forecast lower, then returns to a chart already displaying the later decline; prior forecast has NOT been independently retrieved here.",
+      "decision_information": [
+        {
+          "class": "PARAPHRASE",
+          "text": "He places price relative to a daily fair-value gap and on an hourly chart notes price traded slightly above the gap high then back inside. Only the pre-decline subset could have been known at that moment; original snapshot UNKNOWN."
+        }
+      ],
+      "explicit_identification": [
+        {
+          "class": "DIRECT_STATEMENT",
+          "text": "He treats the daily chart as parent to subordinate smaller-frame swings, designating a particular high as a long-term high."
+        }
+      ],
+      "expected_watched_selected": [
+        {
+          "class": "PARAPHRASE",
+          "text": "As long as price stays under that high, he expects weakness and watches rebalancing plus subsequent lower short-term highs; a move above it would make his daily analysis probably wrong."
+        }
+      ],
+      "condition_entry_invalidation_target_change": {
+        "condition": "Daily FVG context and hold below selected long-term high (PARAPHRASE).",
+        "entry": "UNKNOWN for this passage.",
+        "invalidation": "If high is taken, he says he is probably wrong and should seek more information / sit on hands (DIRECT_STATEMENT).",
+        "target": "A lower daily liquidity objective is mentioned elsewhere in this lesson; particular target for this passage UNKNOWN.",
+        "change": "Pause/reassess rather than mechanically reverse when violated (PARAPHRASE)."
+      },
+      "post_decision": [
+        {
+          "class": "PARAPHRASE",
+          "text": "The completed historical chart subsequently trades lower; this is not evidence he had it before a documented original decision."
+        }
+      ],
+      "short_quotes": [
+        {
+          "class": "DIRECT_STATEMENT",
+          "text": "if it goes above that then I'm probably wrong in my analysis",
+          "attribution": "Huddleston approx 11:31, local ASR (not ear-audited)"
+        },
+        {
+          "class": "DIRECT_STATEMENT",
+          "text": "I demand more information",
+          "attribution": "Huddleston approx 11:39, local ASR (not ear-audited)"
+        }
+      ],
+      "ambiguities": [
+        "Earlier forecast is speaker assertion, not an independently timestamped pre-event record here.",
+        "Long-term high designation is speaker-specific and selected on retrospective chart."
+      ],
+      "observability": [
+        {
+          "fact": "past daily/hourly FVG boundaries, future price crossing of a historical high",
+          "ohlc_alone": "YES, if matched as-of each candle close; not proof of resting orders"
+        },
+        {
+          "fact": "speaker previous forecast and real trade position",
+          "ohlc_alone": "NO; original publication/trading records required"
+        },
+        {
+          "fact": "institutional cause",
+          "ohlc_alone": "NO"
+        }
+      ],
+      "transferable_relationship": {
+        "class": "ENGINEERING_INTERPRETATION",
+        "text": "Represent a higher-frame interpretation as a hypothesis with explicit failure reference; when crossed, downgrade or suspend it and ask for more data, without automatically reversing."
+      }
+    },
+    {
+      "id": "OB16-A",
+      "split": "DEVELOPMENT",
+      "source_id": "YT_PIYh0CxoY9c",
+      "url": "https://www.youtube.com/watch?v=PIYh0CxoY9c",
+      "title": "ICT Mentorship Core Content - Month 04 - Orderblocks",
+      "publication_date": "2022-09-07 metadata upload; slide dated December 2016 original lesson",
+      "passage": {
+        "start_seconds": 45,
+        "end_seconds": 300,
+        "start": "00:00:45",
+        "end": "00:05:00",
+        "start_link": "https://www.youtube.com/watch?v=PIYh0CxoY9c&t=45s",
+        "end_link": "https://www.youtube.com/watch?v=PIYh0CxoY9c&t=300s",
+        "precision": "selected passage window; local-ASR word/segment timing approximate, not ear-audited"
+      },
+      "inspected": {
+        "transcript": "FULL local tiny.en ASR transcript; sampled surrounding paragraphs reviewed, English ASR errors possible",
+        "audio": "Original entire audio track processed by local ASR, not personally listened to continuously",
+        "chart_images": "Original 720p frame at 01:52 shows full Reinforcing Orderblock Theory [Selecting & Avoiding] definition/validation/entry/risk slide; frames at 04:00, 07:20, 16:20, 20:10, 24:20, 34:10 inspected."
+      },
+      "instrument": "Stylized generic candles for initial demonstration; later Dollar Index example in same lesson",
+      "timeframes": [
+        "generic schematic, no instrument/timeframe",
+        "later monthly/weekly/daily examples"
+      ],
+      "chart_date_time": "UNKNOWN for stylized drawing; live decision time absent",
+      "decision_time_reconstruction": "UNVERIFIED",
+      "explanation_mode": "RETROSPECTIVE",
+      "basis_for_mode": "Pre-produced instructional slide and schematic, not a dated live forecast.",
+      "decision_information": [
+        {
+          "class": "PARAPHRASE",
+          "text": "Speaker first posits a higher-frame support context, such as an old low or old high retested. A down-close candle near it is only a candidate until a later bar trades above its high."
+        }
+      ],
+      "explicit_identification": [
+        {
+          "class": "DIRECT_STATEMENT",
+          "text": "The slide specifies a bullish candidate down-close price bar near support, validation by a later bar trading through its high, and a possible return to that high."
+        }
+      ],
+      "expected_watched_selected": [
+        {
+          "class": "PARAPHRASE",
+          "text": "He waits for evidence of moving away and a return, rather than buying an isolated down candle; later in the same lesson (25:00–25:43) he explicitly disregards visually available bearish order blocks against a bullish higher-frame context."
+        }
+      ],
+      "condition_entry_invalidation_target_change": {
+        "condition": "Near contextual support, down-close candidate, later traded-through high (DIRECT_STATEMENT).",
+        "entry": "Published lesson explicitly discusses a hypothetical bullish entry on return to candidate high; this research corpus does NOT implement or endorse that execution (DIRECT_STATEMENT).",
+        "invalidation": "Slide describes candidate low as risk reference, not a guaranteed protection; exact universal invalidation UNKNOWN.",
+        "target": "Speaker describes prior high as external-reference objective later in lesson; not proven resting orders (PARAPHRASE).",
+        "change": "In the bullish monthly/weekly/daily worked example, do not treat each bearish-looking block as an opposite-direction sell cue (DIRECT_STATEMENT)."
+      },
+      "post_decision": [
+        {
+          "class": "UNSUPPORTED_OR_UNAVAILABLE",
+          "text": "Schematic shows no dated live entry or later independent outcome for its candidate."
+        }
+      ],
+      "short_quotes": [
+        {
+          "class": "DIRECT_STATEMENT",
+          "text": "when the high of the lowest down close candle ... is traded through",
+          "attribution": "On-screen slide at 01:52; omitted words via ellipsis; human-verified slide text"
+        },
+        {
+          "class": "DIRECT_STATEMENT",
+          "text": "We don't know that yet until at a later time",
+          "attribution": "Huddleston approx 03:21 local ASR, not ear-audited"
+        }
+      ],
+      "ambiguities": [
+        "Slide makes explicit technique, but leaves operational ambiguity in \"near support\", which down-close candidate, and nested timeframes.",
+        "Speaker attributes movement to institutions; OHLC cannot confirm that.",
+        "2016 original lesson date from on-screen December 2016, while platform upload is 2022."
+      ],
+      "observability": [
+        {
+          "fact": "support candidate, candle OHLC, later crossing",
+          "ohlc_alone": "YES, if timeframe, contextual support and bar closure fixed as-of time"
+        },
+        {
+          "fact": "institutional sponsorship/actual orders",
+          "ohlc_alone": "NO"
+        },
+        {
+          "fact": "execution and stop fill",
+          "ohlc_alone": "NO; needs order/fill data"
+        }
+      ],
+      "transferable_relationship": {
+        "class": "ENGINEERING_INTERPRETATION",
+        "text": "Separate candidate formation, post-candidate confirmation and later contextual revisit; do not confuse observable order-block-like bar with a universal trade instruction."
+      }
+    },
+    {
+      "id": "FVG16-A",
+      "split": "DEVELOPMENT",
+      "source_id": "YT_FgacYSN9QEo",
+      "url": "https://www.youtube.com/watch?v=FgacYSN9QEo",
+      "title": "ICT Mentorship Core Content - Month 04 - ICT Fair Value Gaps FVG",
+      "publication_date": "2022-09-10 watch-page display; original slide dated December 2016",
+      "passage": {
+        "start_seconds": 180,
+        "end_seconds": 510,
+        "start": "00:03:00",
+        "end": "00:08:30",
+        "start_link": "https://www.youtube.com/watch?v=FgacYSN9QEo&t=180s",
+        "end_link": "https://www.youtube.com/watch?v=FgacYSN9QEo&t=510s",
+        "precision": "selected passage window; local-ASR word/segment timing approximate, not ear-audited"
+      },
+      "inspected": {
+        "transcript": "FULL local tiny.en ASR transcript; sampled surrounding paragraphs reviewed, English ASR errors possible",
+        "audio": "Original entire audio track processed by local ASR, not personally listened to continuously",
+        "chart_images": "Original 720p daily EUR/USD frames at 04:18, 06:30 and 08:10, with labeled gap and completed movement; five- and fifteen-minute follow-up frames at 10:10, 12:40, 14:10 also inspected."
+      },
+      "instrument": "EUR/USD",
+      "timeframes": [
+        "daily",
+        "4-hour"
+      ],
+      "chart_date_time": "Daily axis visibly spans Nov-Dec 2016; particular chart decision instant UNKNOWN",
+      "decision_time_reconstruction": "UNVERIFIED",
+      "explanation_mode": "RETROSPECTIVE",
+      "basis_for_mode": "Pre-recorded presentation uses already completed gap fill / swing; no independently archived prospective announcement inspected.",
+      "decision_information": [
+        {
+          "class": "PARAPHRASE",
+          "text": "He frames an open daily area between the preceding candle low and following candle high around a strong down candle. A prior low and relatively equal highs on a four-hour chart are also discussed."
+        }
+      ],
+      "explicit_identification": [
+        {
+          "class": "DIRECT_STATEMENT",
+          "text": "He calls the exposed price interval a fair value gap on the chart timeframe; lower timeframe may display a multi-candle liquidity void rather than identical three-candle geometry."
+        }
+      ],
+      "expected_watched_selected": [
+        {
+          "class": "PARAPHRASE",
+          "text": "After price goes below an older low, he discusses a possible rebound toward equal highs and the above-market gap; he describes range-bound holiday context, rather than claiming every gap always fills."
+        }
+      ],
+      "condition_entry_invalidation_target_change": {
+        "condition": "Prior low crossed within described range context, with higher timeframe gap and interim highs as alternative references (PARAPHRASE).",
+        "entry": "This selected passage describes scenario, no independently executed trade; entry UNKNOWN.",
+        "invalidation": "UNKNOWN.",
+        "target": "Described gap / equal highs (PARAPHRASE).",
+        "change": "If the lower timeframe represents a different structure, preserve timeframe provenance instead of asserting identical candle pattern (ENGINEERING_INTERPRETATION)."
+      },
+      "post_decision": [
+        {
+          "class": "PARAPHRASE",
+          "text": "Completed illustrated chart later rises near/into the marked gap, but the statement that a call was made earlier was not independently corroborated."
+        }
+      ],
+      "short_quotes": [
+        {
+          "class": "DIRECT_STATEMENT",
+          "text": "the gap occurs on the timeframe you're looking at",
+          "attribution": "Huddleston approx 05:08 local ASR, not ear-audited"
+        },
+        {
+          "class": "DIRECT_STATEMENT",
+          "text": "because we've already taken the sell side liquidity out",
+          "attribution": "Huddleston approx 07:03 local ASR; this is his inference, not order-data verification"
+        }
+      ],
+      "ambiguities": [
+        "At 07:50 local ASR says \"2006\" but on-screen dates show late 2016; treat ASR year as transcription error and do NOT assert 2006.",
+        "The statement that stops were taken is a trading interpretation, not OHLC evidence of actual orders."
+      ],
+      "observability": [
+        {
+          "fact": "gap interval and old low crossing",
+          "ohlc_alone": "YES for the chosen bars, provided session and timeframe are specified"
+        },
+        {
+          "fact": "actual executed stops / imbalance of buy vs sell executions",
+          "ohlc_alone": "NO; order/trade-level data required"
+        },
+        {
+          "fact": "successful earlier forecast",
+          "ohlc_alone": "NO; need independently timestamped earlier publication"
+        }
+      ],
+      "transferable_relationship": {
+        "class": "ENGINEERING_INTERPRETATION",
+        "text": "Store gap geometry with its originating timeframe and relate it to other previously available references; allow finer-frame representation to differ without promoting a gap to inevitable fill."
+      }
+    },
+    {
+      "id": "FVG24-A",
+      "split": "DEVELOPMENT",
+      "source_id": "YT_HhgWGduQZQY",
+      "url": "https://www.youtube.com/watch?v=HhgWGduQZQY",
+      "title": "ICT 2024 Mentorship \\ How To Trade ICT FVGs Correctly \\ September 16, 2024",
+      "publication_date": "2024-09-16 watch-page metadata",
+      "passage": {
+        "start_seconds": 4380,
+        "end_seconds": 4530,
+        "start": "01:13:00",
+        "end": "01:15:30",
+        "start_link": "https://www.youtube.com/watch?v=HhgWGduQZQY&t=4380s",
+        "end_link": "https://www.youtube.com/watch?v=HhgWGduQZQY&t=4530s",
+        "precision": "selected passage window; local-ASR word/segment timing approximate, not ear-audited"
+      },
+      "inspected": {
+        "transcript": "FULL local tiny.en ASR transcript; sampled surrounding paragraphs reviewed, English ASR errors possible",
+        "audio": "Original entire audio track processed by local ASR, not personally listened to continuously",
+        "chart_images": "Original 360p video sampled throughout at 06:40, 11:20, 18:20, 26:40, 38:20, 51:40, 70:00, 74:10, 74:58, 90:00, 101:30, 108:20, 125:00. At 74:58 1-minute NQ Sep 2024 chart shows marked opening-range-gap and other bands; exact clock labels small."
+      },
+      "instrument": "CME E-mini Nasdaq-100 futures Sep 2024 (chart header)",
+      "timeframes": [
+        "one-minute during this passage; earlier five-minute, hourly and 15-second views"
+      ],
+      "chart_date_time": "Sep 16 2024 indicated in lesson; individual on-screen trade/order timestamps UNKNOWN",
+      "decision_time_reconstruction": "PARTIAL: utterances precede some subsequent on-screen movements, original stream integrity not independently certified",
+      "explanation_mode": "MIXED_INTRADAY_COMMENTARY_AND_LATER_CORRECTION",
+      "basis_for_mode": "While narrating intraday chart he explicitly notices that his earlier \"first FVG\" designation was temporally wrong, corrects it around 75:02; stream-originality / prior edit status not independently checked.",
+      "decision_information": [
+        {
+          "class": "PARAPHRASE",
+          "text": "He considers several different nearer and farther price references during the intraday discussion: first displayed FVG, minor buy-side reference, opening-range-gap quadrants/midpoint. These are choices, not an outcome-proven target."
+        }
+      ],
+      "explicit_identification": [
+        {
+          "class": "DIRECT_STATEMENT",
+          "text": "He retracts a previous identification: a 9:30 candle cannot be the first qualifying gap under the timing convention he states; the first one can only appear at 9:31 or later."
+        }
+      ],
+      "expected_watched_selected": [
+        {
+          "class": "PARAPHRASE",
+          "text": "He distinguishes a nearer, easier objective from a farther one and revises the first-FVG reference when he notices the clock issue."
+        }
+      ],
+      "condition_entry_invalidation_target_change": {
+        "condition": "Time-based qualification for the first FVG: no 9:30 candle, first candidate at/after 9:31 per HIS lesson (DIRECT_STATEMENT); not an arbitrary market-wide law.",
+        "entry": "He discusses hypothetical choices and actual on-screen demonstrations elsewhere, but specific trade entry for this bounded correction passage UNKNOWN.",
+        "invalidation": "Earlier first-FVG classification explicitly withdrawn at ~75:02 (DIRECT_STATEMENT).",
+        "target": "Multiple candidate objectives; he says nearer first gap may suffice and farther ORG midpoint need not be reached (PARAPHRASE).",
+        "change": "Correction changes reference selection even if the chart geometry looks similar; do not preserve the original label as ground truth (ENGINEERING_INTERPRETATION)."
+      },
+      "post_decision": [
+        {
+          "class": "UNSUPPORTED_OR_UNAVAILABLE",
+          "text": "No claim that the corrected reference was reached or that a trade won within this selected passage; later on-screen price action remains separate."
+        }
+      ],
+      "short_quotes": [
+        {
+          "class": "DIRECT_STATEMENT",
+          "text": "You can't be on your 9.30 candle, it can only appear at 9.31 or after",
+          "attribution": "Huddleston approx 75:02 local ASR, not ear-audited"
+        },
+        {
+          "class": "DIRECT_STATEMENT",
+          "text": "I was incorrect by saying all that stuff",
+          "attribution": "Huddleston approx 75:12 local ASR, not ear-audited"
+        }
+      ],
+      "ambiguities": [
+        "Original video is a long intraday exposition and demonstration, not one continuously pre-registered trade hypothesis.",
+        "The precise 9:30/9:31 scope is for this session-specific first-gap convention; do not generalize to any chart or exchange.",
+        "ASR mishears FVG as \"fairytale\" and other terms; chart timestamp details not reliably readable at 360p."
+      ],
+      "observability": [
+        {
+          "fact": "clock-based classification and gap geometry",
+          "ohlc_alone": "YES if session timezone and bar-building convention known"
+        },
+        {
+          "fact": "actual resting stops / broker fills / stream uneditedness",
+          "ohlc_alone": "NO; external evidence required"
+        }
+      ],
+      "transferable_relationship": {
+        "class": "ENGINEERING_INTERPRETATION",
+        "text": "Candidate references need time provenance, semantic qualifiers and revocable selection; a corrected temporal eligibility rule removes a previously marked candidate rather than silently treating it as a fulfilled prediction."
+      }
+    }
+  ],
+  "held_out": {
+    "split": "HELD_OUT",
+    "source_id": "YT_tpPtItWqmlg",
+    "url": "https://www.youtube.com/watch?v=tpPtItWqmlg",
+    "title": "2022 ICT Mentorship Episode 13",
+    "access": "Only watch-page metadata/title/date and auto-generated chapter headings opened to verify episode identity. No audio transcript, chart content or case sequence analyzed; episode remains entirely out of tuning.",
+    "instructions": "Reserve entire episode from implementation and tuning; to evaluate, inspect source and reconstruct before-event information without incorporating results into development. If not done, held-out evaluation is unavailable.",
+    "publication_date": "2022-02-25 (YouTube watch-page display)"
+  }
+}
