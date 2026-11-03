@@ -1,0 +1,71 @@
+{
+ "phase": "eval",
+ "window": [
+  "2025-02-01",
+  "2025-03-01"
+ ],
+ "gate": "b0",
+ "gate_stats": {
+  "decisions": 480,
+  "strict_pref": 384,
+  "gate_pass": 384,
+  "plans_created": 4,
+  "no_plan": 96
+ },
+ "plan_evaluation": {
+  "n_plans": 4,
+  "final_states": {
+   "HYPOTHETICAL_ENTRY_MET": 2,
+   "INVALIDATED": 2
+  },
+  "hypothetical_outcomes": {
+   "objective_before_invalidation": 2,
+   "invalidated_after_entry": 0,
+   "invalidated_before_entry": 2,
+   "missed": 0,
+   "open_at_run_end": 0
+  },
+  "note": "hypothetical plan MECHANICS only: 'objective' means one completed confirmed structural leg \u2014 NOT a profit, NOT a return; losses, misses, invalidations and open cases are all reported; nothing here is trained on wins"
+ },
+ "cases_total": 104,
+ "cases_by_kind": {
+  "no-plan": 96,
+  "plan": 4,
+  "plan-opened": 4
+ },
+ "outcomes": {
+  "no-entry": 2,
+  "win": 2
+ },
+ "episodes_fitted": 0,
+ "note": "eval never trains",
+ "source_agreement": {
+  "scope": "definition-level agreement only; NOT a performance or accuracy claim",
+  "rows": [
+   {
+    "component": "entry",
+    "source_position": "SRC-EX-01: ICT entry technique = trade away from the OB then return to its high (directly-stated)",
+    "plan_position": "the first completed task-scale bar whose CLOSE is strictly beyond the last confirmed leg's END extreme in the leg's direction (SP-03 close binding of the leg-end reference)",
+    "verdict": "differs (engine uses the scenario's discriminating binding; the OB-return technique is NOT implemented \u2014 G-OB-P not runnable: P-N/P-W unset in the foundation and no owner policy exists)"
+   },
+   {
+    "component": "invalidation",
+    "source_position": "SRC-EX-01 stop at the OB low (directly-stated); SRC-EX-02: ICT-primary invalidation-by-close NOT in primary text (P-K)",
+    "plan_position": "the first completed task-scale bar whose CLOSE is strictly beyond the falsifier reference level on its falsifying side (SP-03 close violation)",
+    "verdict": "partially aligned (stop-at-structural-extreme concept present in source; the close-based falsifier operationalization is engineering/community-influenced, not ICT-primary)"
+   },
+   {
+    "component": "objective",
+    "source_position": "SRC-EX-03: no target definition in verified primary text; liquidity target explicitly not selectable",
+    "plan_position": "one completed, causally confirmed task-scale F-K leg in the scenario direction whose knowable time is after the entry bar",
+    "verdict": "not stated in verified material (declared research configuration used; identified as such)"
+   }
+  ]
+ },
+ "limitations": [
+  "selection_quality = NOT_ESTABLISHED",
+  "research/paper record only \u2014 no live orders",
+  "close-based hypothetical fills at ask/bid of the actual 5m quotes; commission NOT provided by this dataset (never invented); slippage not modeled",
+  "same-bar level-touch ambiguity preserved as AMBIGUOUS"
+ ]
+}

@@ -199,17 +199,21 @@ def engine_factory(task_scale=TASK_SCALE):
 
 # ------------------------------------------------------- outcome harness
 
-def fill_price(bidask, ts, direction):
-    """Hypothetical fill at the CLOSE of the decision bar: buy at ask,
-    sell at bid (the actual two-sided quote at that bar's last 5m row).
-    RESEARCH SIMULATION — not an executable fill claim."""
+def fill_price(bidask, ts, direction, side="entry"):
+    """Hypothetical fill at the CLOSE of the decision bar, from the
+    actual two-sided quote at that bar's last 5m row: a BUY enters at
+    ASK and exits at BID; a SELL enters at BID and exits at ASK (the
+    spread is actually paid in the simulation).  RESEARCH SIMULATION —
+    not an executable fill claim."""
     sub = bidask[bidask.index <= ts]
     if sub.empty:
         return None, None
     row = sub.iloc[-1]
     if direction == "up":
-        return float(row.AskClose), str(sub.index[-1])
-    return float(row.BidClose), str(sub.index[-1])
+        px = row.AskClose if side == "entry" else row.BidClose
+    else:
+        px = row.BidClose if side == "entry" else row.AskClose
+    return float(px), str(sub.index[-1])
 
 
 def same_bar_ambiguity(bidask, t_entry, t_exit, level_a, level_b):
@@ -246,8 +250,9 @@ def outcome_for(plan, bidask, direction):
     final = plan.current.state
     exit_v = versions[-1]
     t_exit = pd.Timestamp(exit_v["as_of_time"])
-    entry_px, t_fill = fill_price(bidask, t_entry, direction)
-    exit_px, _ = fill_price(bidask, t_exit, direction)
+    entry_px, t_fill = fill_price(bidask, t_entry, direction,
+                                  side="entry")
+    exit_px, _ = fill_price(bidask, t_exit, direction, side="exit")
     if entry_px is None or exit_px is None:
         return {"outcome": "censored", "final_state": final,
                 "reason": "no quote rows at fill/exit time"}
@@ -325,6 +330,7 @@ def run_phase(args, phase: str) -> int:
     plan_seq = 0
     decision_seq = 0
     episodes = []
+    pending_eps = []
     active_plan = None
     gate_stats = {"decisions": 0, "strict_pref": 0, "gate_pass": 0,
                   "plans_created": 0, "no_plan": 0}
@@ -339,6 +345,31 @@ def run_phase(args, phase: str) -> int:
             return False, ("decision has no strict evidence-supported "
                            "preference: " + dec.state)
         rt = study.readings.tasks.get("RT-REF-REVIEW")
+        # categorical connected CONTRADICTION (declared research
+        # configuration; ENGINEERING interpretation — no thresholds):
+        # hold the attempt while the connected readings hold an
+        # EVIDENCE_PREFERRED FVG whose region direction OPPOSES the
+        # decision's scenario direction.  This is recorded
+        # contradicting evidence — not a prediction and not a rule
+        # from the source material.
+        ctx_dir = str(dec.context.get("direction"))
+        for tid2, t2 in study.readings.tasks.items():
+            c2 = t2.conclusion or {}
+            pref = c2.get("preferred")
+            if c2.get("status") == "EVIDENCE_PREFERRED" and pref:
+                reg = study.readings.regions.get(pref)
+                if reg is not None and ctx_dir in ("up", "down"):
+                    oppose = ((reg.direction == "downward"
+                               and ctx_dir == "up")
+                              or (reg.direction == "upward"
+                                  and ctx_dir == "down"))
+                    if oppose:
+                        return False, (
+                            "connected readings hold EVIDENCE_PREFERRED "
+                            f"FVG {pref} ({reg.direction}) opposing the "
+                            "scenario direction (" + ctx_dir
+                            + ") — recorded contradicting evidence; "
+                            "the attempt is held while this holds")
         if rt is not None and rt.conclusion:
             st = rt.conclusion.get("status")
             if st == "UNRESOLVED_NO_EDGE":
@@ -371,15 +402,25 @@ def run_phase(args, phase: str) -> int:
                   f"({rec.as_of_time}) cases={len(cases)} "
                   f"t={time.time() - t_start:.0f}s", flush=True)
         decision_seq += 1
-        # dev: training episode extraction is SAMPLED every 5th task
-        # boundary (compute-bound research configuration — declared);
-        # labels use future bars and windows are cut at fit time.  ALL
-        # decision cases and plan events are recorded at EVERY boundary.
-        # The FK world reconstruction is O(prefix); it is computed
-        # lazily ONLY where a plan actually needs it.
-        if phase == "dev" and decision_seq % 5 == 0:
+        # dev: training episodes are extracted at EVERY task boundary.
+        # CHRONOLOGICAL PROTOCOL (no label-window overlap): at the
+        # decision at time T the model contains ONLY episodes whose
+        # label windows CLOSED strictly before T.  Labels use future
+        # bars and are never features.  ALL decision cases and plan
+        # events are recorded at EVERY boundary.  The FK world is
+        # computed lazily ONLY where a plan needs it.
+        if phase == "dev":
             ep = extractor.extract(rec, run_id=phase, seq=decision_seq)
             episodes.append(ep)
+            pending_eps.append(ep)
+            t_now = pd.Timestamp(rec.as_of_time)
+            ready = [e for e in pending_eps
+                     if e.window_end_time is not None
+                     and pd.Timestamp(e.window_end_time) < t_now]
+            if ready:
+                model.fit(ready)
+                for e in ready:
+                    pending_eps.remove(e)
         dec = decide(record=rec, model=model, decision_seq=decision_seq)
         gate_stats["decisions"] += 1
         strict = not (dec.primary_is_baseline
@@ -466,17 +507,17 @@ def run_phase(args, phase: str) -> int:
     # complete strictly inside the dev period (no overlap with eval) ----
     if phase == "dev":
         dev_end = pd.Timestamp(t1, tz="UTC")
-        usable = [e for e in episodes
+        usable = [e for e in pending_eps
                   if e.label is not None and e.exclusion_reason is None
                   and e.window_end_time is not None
                   and pd.Timestamp(e.window_end_time) <= dev_end]
         censored = [e for e in episodes if e.exclusion_reason]
-        model.fit_before(usable, cutoff_time=dev_end)
+        model.fit(usable)
         Path(args["model"]).write_text(json.dumps(
             model_state(model), indent=1))
         summary_extra = {
             "episodes_total": len(episodes),
-            "episodes_fitted": len(usable),
+            "episodes_fitted": model.n_episodes,
             "episodes_censored_or_excluded": len(censored),
             "label_windows_inside_dev": True,
             "trained_through": str(model.trained_through),
@@ -512,9 +553,9 @@ def run_phase(args, phase: str) -> int:
             "same-bar level-touch ambiguity preserved as AMBIGUOUS",
         ],
     }
-    (out_dir / f"cases_{phase}.jsonl").write_text(
+    (out_dir / f"cases_{phase}_{args.get('gate', 'v1')}.jsonl").write_text(
         "\n".join(json.dumps(c, default=str) for c in cases))
-    (out_dir / f"summary_{phase}.json").write_text(
+    (out_dir / f"summary_{phase}_{args.get('gate', 'v1')}.json").write_text(
         json.dumps(summary, indent=1, default=str))
     print(f"== {phase} done in {time.time() - t_start:.1f}s; "
           f"cases={len(cases)} gate={gate_stats} ==", flush=True)
