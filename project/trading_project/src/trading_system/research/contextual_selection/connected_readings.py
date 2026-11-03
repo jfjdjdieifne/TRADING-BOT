@@ -762,11 +762,13 @@ class ConnectedReadingsEngine:
         task._ctx_key = ctx_key
         if not hasattr(task, "_cand_map") or task._cand_map is None:
             task._cand_map = {}
+        any_changed = False
         for rid, region in sorted(self.regions.items()):
             n_inter = len(region.interactions)
             prev = task._cand_map.get(rid)
             if prev is not None and prev[0] == n_inter:
                 continue                     # unchanged: keep candidate
+            any_changed = True
             crit = {
                 "observable_after_crossing":
                     (str(region.observability_time) > str(cross_time))
@@ -874,42 +876,38 @@ class ConnectedReadingsEngine:
                 "conflict_note": conflict_note,
                 "all_criteria_met": all(crit.values())}
             task._cand_map[rid] = (n_inter, _cand)
-        task.candidates = [task._cand_map[rid][1]
-                           for rid in sorted(task._cand_map)]
-        # relevance accounting: counts BEFORE and AFTER display
-        # filtering; nothing is removed from the record
-        n_total = len(task.candidates)
-        by_support = {0: 0, 1: 0, 2: 0, 3: 0}
-        for c in task.candidates:
-            by_support[sum(bool(v) for v in
-                           c["criteria"].values())] += 1
-        material = [c for c in task.candidates
-                    if sum(bool(v) for v in c["criteria"].values()) >= 1
-                    or c.get("conflict_note")]
-        task.comparison = {
-            "rule": "candidates are COMPARED by the declared criteria "
-                    "and the recorded evidence breakdown above",
-            "candidates_before_filtering": n_total,
-            "by_support_count": by_support,
-            "materially_relevant_rule": "at least one declared "
-                                        "criterion met OR conflicting "
-                                        "evidence recorded (categorical "
-                                        "— no numerical threshold)",
-            "candidates_after_filtering": len(material),
-            "removed_from_record": 0,
-            "resource_limit": "none enforced; every observable region "
-                              "is evaluated (counts reported above)",
-        }
+        if any_changed:
+            task.candidates = [task._cand_map[rid][1]
+                               for rid in sorted(task._cand_map)]
+            # relevance accounting: counts BEFORE and AFTER display
+            # filtering; nothing is removed from the record
+            n_total = len(task.candidates)
+            by_support = {0: 0, 1: 0, 2: 0, 3: 0}
+            for c in task.candidates:
+                by_support[sum(bool(v) for v in
+                               c["criteria"].values())] += 1
+            material = [c for c in task.candidates
+                        if sum(bool(v) for v in
+                               c["criteria"].values()) >= 1
+                        or c.get("conflict_note")]
+            task.comparison = {
+                "rule": "candidates are COMPARED by the declared "
+                        "criteria and the recorded evidence breakdown "
+                        "above",
+                "candidates_before_filtering": n_total,
+                "by_support_count": by_support,
+                "materially_relevant_rule": "at least one declared "
+                                            "criterion met OR "
+                                            "conflicting evidence "
+                                            "recorded (categorical — no "
+                                            "numerical threshold)",
+                "candidates_after_filtering": len(material),
+                "removed_from_record": 0,
+                "resource_limit": "none enforced; every observable "
+                                  "region is evaluated (counts "
+                                  "reported above)",
+            }
         met = [c for c in task.candidates if c["all_criteria_met"]]
-        alts = [{"candidate_id": c["candidate_id"],
-                 "why_not_preferred":
-                     "declared criteria not all met: " +
-                     ", ".join(k for k, v in c["criteria"].items()
-                               if not v),
-                 "supporting": len(c["supporting_evidence"]),
-                 "counterevidence": len(c["counterevidence"]),
-                 "conflict": bool(c.get("conflict_note"))}
-                for c in task.candidates if not c["all_criteria_met"]]
         prev_uid = self._ledger_uids.get(tid)
         if len(met) == 1:
             new_status, new_pref = (CONCLUSION_EVIDENCE_PREFERRED,
@@ -924,6 +922,15 @@ class ConnectedReadingsEngine:
                 old.get("preferred") == new_pref and task.versions:
             self.tasks[tid] = task
             return task
+        alts = [{"candidate_id": c["candidate_id"],
+                 "why_not_preferred":
+                     "declared criteria not all met: " +
+                     ", ".join(k for k, v in c["criteria"].items()
+                               if not v),
+                 "supporting": len(c["supporting_evidence"]),
+                 "counterevidence": len(c["counterevidence"]),
+                 "conflict": bool(c.get("conflict_note"))}
+                for c in task.candidates if not c["all_criteria_met"]]
         if len(met) == 1:
             task.conclude(
                 status=CONCLUSION_EVIDENCE_PREFERRED,

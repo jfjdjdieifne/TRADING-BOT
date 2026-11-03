@@ -802,8 +802,14 @@ class StudyReasoningLayer:
             as_of_time=as_of, interacted=sorted(interacted),
             hf_trend=str(self.hf_context.get("trend")))
         for w in self.shift_watches:
+            # memoized to_record (asdict): identical content while the
+            # watch is unchanged — a real per-boundary hot path
+            wkey = (w.status, len(w.evidence), str(w.crossing))
+            if getattr(w, "_rec_key", None) != wkey:
+                w._rec_cache = w.to_record()
+                w._rec_key = wkey
             self.readings.task_fvg_relevance_for_watch(
-                watch=w.to_record(), as_of_time=as_of,
+                watch=w._rec_cache, as_of_time=as_of,
                 hf_trend=str(self.hf_context.get("trend")))
         # working interpretations (context + open watches)
         hf_trend = str(self.hf_context.get("trend"))
@@ -814,7 +820,7 @@ class StudyReasoningLayer:
                 derived_at=self.hf_context.get("established_at"))
         for w in self.shift_watches:
             self.readings.interpretation_for_watch(
-                watch=w.to_record(), as_of_time=as_of)
+                watch=w._rec_cache, as_of_time=as_of)
         if ledger is not None:
             for c in self.candidates:
                 self._ledger_sync(c, ledger)

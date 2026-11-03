@@ -411,20 +411,34 @@ class ReplayObservationStream:
         )
 
 
+def _last_available(rows: pd.DataFrame) -> Optional[pd.Timestamp]:
+    if len(rows) == 0:
+        return None
+    idx = pd.DatetimeIndex(rows.index)
+    step = pd.Series(idx).diff().median()
+    if pd.isna(step) or step is pd.Timedelta(0):
+        step = pd.Timedelta(minutes=1)
+    return pd.Timestamp(idx[-1]) + step
+
+
 def completed_bars_only(df: pd.DataFrame, rows: pd.DataFrame
                         ) -> pd.DataFrame:
     """ONLY completed bars count as completed.  A bucket is kept iff its
     completion label is at or before the last available observation's
     own completion time; incomplete higher-timeframe bars are never
     used (their final high/low/close are not observations)."""
-    if len(df) == 0 or len(rows) == 0:
+    return completed_bars_only_at(df, _last_available(rows))
+
+
+def completed_bars_only_at(df: pd.DataFrame,
+                           last_avail: Optional[pd.Timestamp]
+                           ) -> pd.DataFrame:
+    if len(df) == 0 or last_avail is None:
         return df
-    idx = pd.DatetimeIndex(rows.index)
-    step = pd.Series(idx).diff().median()
-    if pd.isna(step) or step is pd.Timedelta(0):
-        step = pd.Timedelta(minutes=1)
-    last_avail = pd.Timestamp(idx[-1]) + step
-    return df[pd.DatetimeIndex(df.index) <= last_avail]
+    # searchsorted (O(log n); identical result for sorted indexes)
+    didx = pd.DatetimeIndex(df.index)
+    j = int(didx.searchsorted(last_avail, side="right"))
+    return df.iloc[:j]
 
 
 # --------------------------------------------------------------------- #
@@ -821,8 +835,11 @@ class MonitoringLoop:
     def _prefix_frames(self) -> Dict[str, pd.DataFrame]:
         rows = self.stream.prefix_rows()
         frames = self.frames_builder(rows)
-        # causal rule: incomplete bars are never used as completed bars
-        return {k: completed_bars_only(v, rows)
+        # causal rule: incomplete bars are never used as completed bars.
+        # The availability time is computed ONCE per call (identical
+        # semantics; it was re-derived per frame before).
+        last_avail = _last_available(rows)
+        return {k: completed_bars_only_at(v, last_avail)
                 for k, v in frames.items()}
 
     def _report(self, trigger, obs_time, material, changes, reason,
