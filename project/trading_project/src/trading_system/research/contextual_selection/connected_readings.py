@@ -279,6 +279,7 @@ class ReadingTask:
     conclusion: Dict[str, Any] = field(default_factory=dict)
     watch_next: List[dict] = field(default_factory=list)
     versions: List[dict] = field(default_factory=list)
+    comparison: Dict[str, Any] = field(default_factory=dict)
 
     def conclude(self, *, status, preferred, reasons,
                  discriminating_evidence, alternatives,
@@ -632,13 +633,17 @@ class ConnectedReadingsEngine:
 
     # ---- reading tasks ------------------------------------------------
     def task_fvg_relevance_for_watch(self, *, watch: Dict[str, Any],
-                                     as_of_time: pd.Timestamp
+                                     as_of_time: pd.Timestamp,
+                                     hf_trend: Optional[str] = None
                                      ) -> Optional[ReadingTask]:
         """Declared task: which completed FVG region (if any) is the
         displacement/non-overlap evidence to attach to an open
-        shift-watch (E03-B)?  Preference requires ALL declared
-        discriminating criteria; equal candidates stay UNRESOLVED (no
-        input-order tie-break)."""
+        shift-watch (E03-B)?  The evaluation rule below is an
+        ENGINEERING choice of this engine (a conjunction of declared
+        criteria), NOT a source statement and NOT presented as anyone's
+        universal method; conflicting evidence is recorded per
+        candidate (supporting vs counterevidence) and partial-support
+        candidates are never deleted."""
         tid = f"RT-WATCH-{watch.get('watch_id')}"
         crossing = dict(watch.get("crossing", {}))
         cross_dir = crossing.get("direction")
@@ -665,10 +670,29 @@ class ConnectedReadingsEngine:
                             "reference level (exact relation)",
                  "class": "ENGINEERING_INTERPRETATION"},
             ],
+            "evaluation_rule": {
+                "kind": "ENGINEERING_INTERPRETATION",
+                "rule": "all declared criteria must hold "
+                        "(conjunction) for a single-candidate "
+                        "preference",
+                "source_status": "NOT a source statement; the source "
+                                 "material does not specify this "
+                                 "evaluation, and other evaluation "
+                                 "rules remain possible",
+                "conflict_handling": "criteria not met are recorded "
+                                     "as counterevidence with the "
+                                     "observed facts; partial-support "
+                                     "candidates remain in the "
+                                     "candidate list and in the "
+                                     "alternatives; no numerical "
+                                     "score, ranking, or confidence "
+                                     "percentage is used",
+            },
         }
         task = self.tasks.get(tid) or ReadingTask(
             task_id=tid, question=declared["question"],
             declared=declared)
+        task.declared = declared
         task.candidates = []
         for rid, region in sorted(self.regions.items()):
             crit = {
@@ -694,6 +718,74 @@ class ConnectedReadingsEngine:
                               "as the FVG's observability")
             else:
                 chronology = "fvg_observable_before_crossing"
+            # evidence breakdown: what supports, what contradicts, what
+            # cannot be evaluated yet (recorded, never guessed)
+            supporting = []
+            counterevidence = []
+            unknowns = []
+            if not cross_time:
+                unknowns.append("crossing time unknown: "
+                                "observable_after_crossing cannot be "
+                                "evaluated")
+            elif crit["observable_after_crossing"]:
+                supporting.append(
+                    "observable_after_crossing: region observable at "
+                    + str(region.observability_time) + " is later than "
+                    "the crossing at " + str(cross_time))
+            else:
+                counterevidence.append(
+                    "observable_after_crossing: region observable at "
+                    + str(region.observability_time) + " vs crossing at "
+                    + str(cross_time) + " — chronology: " + chronology)
+            if crit["direction_consistent"]:
+                supporting.append(
+                    "direction_consistent: region direction "
+                    + str(region.direction) + " matches the crossing "
+                    "direction (" + str(cross_dir) + ")")
+            else:
+                counterevidence.append(
+                    "direction_consistent: region direction "
+                    + str(region.direction) + " vs crossing direction "
+                    + str(cross_dir) + " — mismatch observed")
+            if cross_level is None:
+                unknowns.append("crossed level unknown: "
+                                "interval_contains_crossed_level "
+                                "cannot be evaluated")
+            elif crit["interval_contains_crossed_level"]:
+                supporting.append(
+                    "interval_contains_crossed_level: ["
+                    + str(region.lower_bound) + ", "
+                    + str(region.upper_bound) + "] contains "
+                    + str(cross_level))
+            else:
+                counterevidence.append(
+                    "interval_contains_crossed_level: ["
+                    + str(region.lower_bound) + ", "
+                    + str(region.upper_bound) + "] does not contain "
+                    + str(cross_level))
+            relation_to_context = {
+                "hf_trend": hf_trend,
+                "region_vs_context":
+                    ("unknown (no higher-frame context established)"
+                     if not hf_trend or hf_trend == "unknown" else
+                     ("aligned" if
+                      (region.direction == "upward") ==
+                      (hf_trend == "up") else "counter")),
+                "prior_events": {
+                    "crossing": {"ref_id": crossing.get("ref_id"),
+                                 "bar_time": cross_time,
+                                 "direction": cross_dir},
+                    "chronology": chronology,
+                    "interactions_observed": len(region.interactions),
+                },
+            }
+            conflict_note = None
+            if supporting and counterevidence:
+                conflict_note = ("conflicting evidence: partial "
+                                 "support only; the declared "
+                                 "conjunction is not satisfied; this "
+                                 "candidate remains recorded as an "
+                                 "alternative (never deleted)")
             task.candidates.append({
                 "candidate_id": rid, "kind": "FVG region",
                 "timeframe": region.timeframe,
@@ -703,13 +795,45 @@ class ConnectedReadingsEngine:
                                  "competing_reference", "monitor",
                                  "irrelevant", "unresolved"],
                 "criteria": crit,
+                "supporting_evidence": supporting,
+                "counterevidence": counterevidence,
+                "unknowns": unknowns,
+                "relation_to_context": relation_to_context,
+                "conflict_note": conflict_note,
                 "all_criteria_met": all(crit.values())})
+        # relevance accounting: counts BEFORE and AFTER display
+        # filtering; nothing is removed from the record
+        n_total = len(task.candidates)
+        by_support = {0: 0, 1: 0, 2: 0, 3: 0}
+        for c in task.candidates:
+            by_support[sum(bool(v) for v in
+                           c["criteria"].values())] += 1
+        material = [c for c in task.candidates
+                    if sum(bool(v) for v in c["criteria"].values()) >= 1
+                    or c.get("conflict_note")]
+        task.comparison = {
+            "rule": "candidates are COMPARED by the declared criteria "
+                    "and the recorded evidence breakdown above",
+            "candidates_before_filtering": n_total,
+            "by_support_count": by_support,
+            "materially_relevant_rule": "at least one declared "
+                                        "criterion met OR conflicting "
+                                        "evidence recorded (categorical "
+                                        "— no numerical threshold)",
+            "candidates_after_filtering": len(material),
+            "removed_from_record": 0,
+            "resource_limit": "none enforced; every observable region "
+                              "is evaluated (counts reported above)",
+        }
         met = [c for c in task.candidates if c["all_criteria_met"]]
         alts = [{"candidate_id": c["candidate_id"],
                  "why_not_preferred":
                      "declared criteria not all met: " +
                      ", ".join(k for k, v in c["criteria"].items()
-                               if not v)}
+                               if not v),
+                 "supporting": len(c["supporting_evidence"]),
+                 "counterevidence": len(c["counterevidence"]),
+                 "conflict": bool(c.get("conflict_note"))}
                 for c in task.candidates if not c["all_criteria_met"]]
         prev_uid = self._ledger_uids.get(tid)
         if len(met) == 1:
@@ -785,12 +909,14 @@ class ConnectedReadingsEngine:
 
     def task_reference_for_review(self, *, refs: List[Any],
                                   as_of_time: pd.Timestamp,
-                                  interacted: List[str]
+                                  interacted: List[str],
+                                  hf_trend: Optional[str] = None
                                   ) -> ReadingTask:
         """Declared task: which structural reference matters for
         reviewing the current higher-frame interpretation?  Evidence:
         an interaction (close-to-close transition / range relation) has
-        actually been observed at that reference before as_of."""
+        actually been observed at that reference before as_of.  The
+        evaluation rule is ENGINEERING (not a source statement)."""
         tid = "RT-REF-REVIEW"
         declared = {
             "question": "which reference's interaction matters for "
@@ -804,23 +930,78 @@ class ConnectedReadingsEngine:
             "no_automatic_selection": "largest/nearest/newest/"
                                       "most-obvious references are "
                                       "NOT auto-selected",
+            "evaluation_rule": {
+                "kind": "ENGINEERING_INTERPRETATION",
+                "rule": "exactly one candidate with an observed "
+                        "interaction is required for a preference; "
+                        "equal or absent evidence stays UNRESOLVED",
+                "source_status": "NOT a source statement; an "
+                                 "evaluation choice of this engine",
+                "conflict_handling": "absence of an observed "
+                                     "interaction is recorded as "
+                                     "'not observed' (an absence, NOT "
+                                     "proof that no interaction "
+                                     "exists); every candidate stays "
+                                     "in the record",
+            },
         }
         task = self.tasks.get(tid) or ReadingTask(
             task_id=tid, question=declared["question"],
             declared=declared)
+        task.declared = declared
         task.candidates = []
+        seen_inter = set(interacted)
         for ref in refs:
             rid = str(getattr(ref, "candidate_id", ref))
+            observed = rid in seen_inter
             task.candidates.append({
                 "candidate_id": rid,
                 "kind": "structural reference (F-K point)",
                 "timeframe": "task frame",
+                "level": float(getattr(ref, "level", float("nan"))),
                 "availability": str(getattr(ref, "knowable_bar", "")),
-                "criteria": {"interaction_observed":
-                             rid in set(interacted)},
+                "criteria": {"interaction_observed": observed},
+                "supporting_evidence":
+                    (["an interaction with this reference is "
+                      "recorded at or before " + str(as_of_time)]
+                     if observed else []),
+                "counterevidence": [],
+                "unknowns":
+                    (["no interaction with this reference has been "
+                      "OBSERVED yet as of " + str(as_of_time) +
+                      " — an absence of observation, not proof that "
+                      "no interaction exists"] if not observed else []),
+                "relation_to_context": {
+                    "hf_trend": hf_trend,
+                    "prior_events":
+                        ("interaction recorded before " +
+                         str(as_of_time)) if observed else
+                        ("no interaction recorded before " +
+                         str(as_of_time)),
+                },
                 "alternatives_note": "other references remain "
                                      "possible until their own "
                                      "interaction is observed"})
+        n_total = len(task.candidates)
+        task.comparison = {
+            "rule": "candidates are COMPARED by observed interaction "
+                    "(single declared criterion; engineering choice)",
+            "candidates_before_filtering": n_total,
+            "by_support_count":
+                {"1": sum(1 for c in task.candidates
+                          if c["criteria"]["interaction_observed"]),
+                 "0": sum(1 for c in task.candidates
+                          if not c["criteria"]["interaction_observed"])},
+            "materially_relevant_rule": "an interaction is recorded "
+                                        "(categorical — no numerical "
+                                        "threshold)",
+            "candidates_after_filtering":
+                sum(1 for c in task.candidates
+                    if c["criteria"]["interaction_observed"]),
+            "removed_from_record": 0,
+            "resource_limit": "none enforced; every confirmed "
+                              "reference is evaluated",
+        }
         obs = [c for c in task.candidates
                if c["criteria"]["interaction_observed"]]
         prev_uid = self._ledger_uids.get(tid)
@@ -1117,7 +1298,8 @@ class ConnectedReadingsEngine:
                             candidates=d.get("candidates", []),
                             conclusion=d.get("conclusion", {}),
                             watch_next=d.get("watch_next", []),
-                            versions=d.get("versions", []))
+                            versions=d.get("versions", []),
+                            comparison=d.get("comparison", {}))
             self.tasks[tid] = t
         self.interps = {}
         for iid, d in st.get("interps", {}).items():

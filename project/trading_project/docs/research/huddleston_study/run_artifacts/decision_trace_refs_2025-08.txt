@@ -1,0 +1,111 @@
+== paused at 2025-08-07 08:00:00+00:00 (observations consumed: 9119) ==
+
+========================================================================
+== DECISION TRACE at 2025-08-07 08:00:00+00:00 (pause disclosed; window chosen for the demo)
+========================================================================
+[1] HIGHER-FRAME CONTEXT: trend=down
+    available/established at (data time): 2025-08-06 12:00:00+00:00
+    evidence: ['SF-DIR-connected-read-v1-32']
+    source/engineering: the trend is the engine's derived direction (ENGINEERING), from completed structure only
+
+[2] DECLARED TASK RT-REF-REVIEW: which reference's interaction matters for reviewing the current higher-frame reading
+    evaluation rule: exactly one candidate with an observed interaction is required for a preference; equal or absent evidence stays UNRESOLVED
+    rule class: ENGINEERING_INTERPRETATION — NOT a source statement; an evaluation choice of this engine
+    conflict handling: absence of an observed interaction is recorded as 'not observed' (an absence, NOT proof that no interaction exists); every candidate stays in the record
+    criteria applied (and why):
+      - interaction_observed [ENGINEERING_INTERPRETATION]: an interaction with the reference is recorded at or before the analysis time
+
+[3] CANDIDATE COMPARISON (this is a comparison, not a collection)
+    candidates before filtering: 3
+    by support count (criteria met): {'1': 0, '0': 3}
+    relevance rule (display filter): an interaction is recorded (categorical — no numerical threshold)
+    candidates after filtering (shown in detail): 0
+    removed from the record: 0 (never silently removed; all remain in task.candidates)
+    resource limits: none enforced; every confirmed reference is evaluated
+
+    display rule (disclosed; DISPLAY batching only, not an analytical threshold): candidates meeting >=2 criteria shown in full; each lower-support group contributes up to 3 examples; the rest reported as counts; removed from record: 0
+    materially relevant competing candidates (0 near-satisfying + 3 examples):
+      * PSC:F-K(k=5)|low@2025-08-03T04:00:00+00:00 [structural reference (F-K point)] tf=task frame level=111920.0 available_at=17
+        relation to context: hf_trend=down → no interaction recorded before 2025-08-07 08:00:00+00:00
+        unknowns: no interaction with this reference has been OBSERVED yet as of 2025-08-07 08:00:00+00:00 — an absence of observation, not proof that no interaction exists
+      * PSC:F-K(k=5)|high@2025-08-04T20:00:00+00:00 [structural reference (F-K point)] tf=task frame level=115720.0 available_at=27
+        relation to context: hf_trend=down → no interaction recorded before 2025-08-07 08:00:00+00:00
+        unknowns: no interaction with this reference has been OBSERVED yet as of 2025-08-07 08:00:00+00:00 — an absence of observation, not proof that no interaction exists
+      * PSC:F-K(k=5)|low@2025-08-05T16:00:00+00:00 [structural reference (F-K point)] tf=task frame level=112650.0 available_at=32
+        relation to context: hf_trend=down → no interaction recorded before 2025-08-07 08:00:00+00:00
+        unknowns: no interaction with this reference has been OBSERVED yet as of 2025-08-07 08:00:00+00:00 — an absence of observation, not proof that no interaction exists
+
+[4] CONCLUSION: UNRESOLVED_NO_EDGE
+    preferred: None
+    reason: no interaction observed yet at any reference; nothing justifies a preference
+    why unresolved: the declared evidence does not single out one candidate (or none qualifies) — no winner is forced and no permanent abstention is declared: a later version may prefer
+    alternatives in THIS conclusion version (as recorded when the version was written): 0
+    current candidate set (rebuilt each boundary): 3 (all kept; none deleted)
+
+[5] EXACTLY WHAT IS WATCHED NEXT (conditional observation — NOT a prediction):
+    interpretation INT-HF-CONTEXT watches: a completed structural change on the higher frame (the engine's I-primary direction revision)
+    ledger records for RT-REF-REVIEW (at pause): 1 record(s)
+      uid=T-STUDY-READING#3 revision_of=None
+        notes: ['status=UNRESOLVED_NO_EDGE', 'preferred=None']
+        decision_time (PROCESSING wall clock): 2026-11-03 09:01:19.724302+00:00
+
+========================================================================
+== STEP 1: task-scale boundary 2025-08-07 12:00:00+00:00 (processed at wall clock 2026-11-03T09:01:29+00:00)
+========================================================================
+  decision RT-REF-REVIEW: CHANGED → conclusion v2 (revision_of=T-STUDY-READING#3) recorded_at=2025-08-07 12:00:00+00:00 (data time of this boundary)
+    new status=EVIDENCE_PREFERRED preferred=PSC:F-K(k=5)|high@2025-08-04T20:00:00+00:00
+    new reason: an interaction is actually observed at this reference and at no other (for the declared review task)
+    OLD conclusion v1 (preserved unchanged): status=UNRESOLVED_NO_EDGE preferred=None
+    ledger records for RT-REF-REVIEW (old + new): 2 record(s)
+      uid=T-STUDY-READING#3 revision_of=None
+        notes: ['status=UNRESOLVED_NO_EDGE', 'preferred=None']
+        decision_time (PROCESSING wall clock): 2026-11-03 09:01:19.724302+00:00
+      uid=T-STUDY-READING#84 revision_of=T-STUDY-READING#3
+        notes: ['status=EVIDENCE_PREFERRED', 'preferred=PSC:F-K(k=5)|high@2025-08-04T20:00:00+00:00']
+        decision_time (PROCESSING wall clock): 2026-11-03 09:01:29.488105+00:00
+  candidates: before=3 after=1 (removed=0)
+  support distribution: {'1': 1, '0': 2}
+  other task RT-WATCH-SW-connected-read-v1-0001: UNRESOLVED_NO_EDGE preferred=None candidates=208 v1
+
+========================================================================
+== STEP 2: task-scale boundary 2025-08-07 16:00:00+00:00 (processed at wall clock 2026-11-03T09:01:29+00:00)
+========================================================================
+  decision RT-REF-REVIEW: NO relevant change — conclusion still v2 (EVIDENCE_PREFERRED); nothing was forced
+  candidates: before=3 after=1 (removed=0)
+  support distribution: {'1': 1, '0': 2}
+  other task RT-WATCH-SW-connected-read-v1-0001: EVIDENCE_PREFERRED preferred=FVG-connected-read-v1-cr-4h-39 candidates=211 v2
+
+========================================================================
+== CADENCE TRACE (completion vs processing vs recording)
+========================================================================
+engine cadence (from monitoring.py, verified code):
+  - 1m observations stream one by one; a 15m or 1h bar is PUBLISHED to its frame as soon as its last 1m row completes (completion-labelled resample)
+  - the connected-reading pipeline runs ONLY inside on_boundary, i.e. when a TASK-SCALE (4h) bar completes
+  - between 4h boundaries only on_observation runs (fine-touch evidence); it does not scan FVGs or change interpretations
+  - therefore: a 15m bar closing at T is FIRST CONSUMED by the connected reading at the next 4h boundary processing; a recorded interpretation can change only at that processing point
+
+  boundary as_of (DATA time of the completing 4h bar): 2025-08-06 12:00:00+00:00
+    processing/recording (WALL clock): 2026-11-03T09:01:27+00:00
+    15m bars consumed at this boundary: 16 (completion labels e.g. ['2025-08-06 08:15:00+00:00', '2025-08-06 08:30:00+00:00', '…', '2025-08-06 11:45:00+00:00', '2025-08-06 12:00:00+00:00'])
+
+  boundary as_of (DATA time of the completing 4h bar): 2025-08-06 16:00:00+00:00
+    processing/recording (WALL clock): 2026-11-03T09:01:27+00:00
+    15m bars consumed at this boundary: 16 (completion labels e.g. ['2025-08-06 12:15:00+00:00', '2025-08-06 12:30:00+00:00', '…', '2025-08-06 15:45:00+00:00', '2025-08-06 16:00:00+00:00'])
+
+  boundary as_of (DATA time of the completing 4h bar): 2025-08-06 20:00:00+00:00
+    processing/recording (WALL clock): 2026-11-03T09:01:28+00:00
+    15m bars consumed at this boundary: 16 (completion labels e.g. ['2025-08-06 16:15:00+00:00', '2025-08-06 16:30:00+00:00', '…', '2025-08-06 19:45:00+00:00', '2025-08-06 20:00:00+00:00'])
+
+  boundary as_of (DATA time of the completing 4h bar): 2025-08-07 00:00:00+00:00
+    processing/recording (WALL clock): 2026-11-03T09:01:28+00:00
+    15m bars consumed at this boundary: 16 (completion labels e.g. ['2025-08-06 20:15:00+00:00', '2025-08-06 20:30:00+00:00', '…', '2025-08-06 23:45:00+00:00', '2025-08-07 00:00:00+00:00'])
+
+  boundary as_of (DATA time of the completing 4h bar): 2025-08-07 04:00:00+00:00
+    processing/recording (WALL clock): 2026-11-03T09:01:28+00:00
+    15m bars consumed at this boundary: 16 (completion labels e.g. ['2025-08-07 00:15:00+00:00', '2025-08-07 00:30:00+00:00', '…', '2025-08-07 03:45:00+00:00', '2025-08-07 04:00:00+00:00'])
+
+  boundary as_of (DATA time of the completing 4h bar): 2025-08-07 08:00:00+00:00
+    processing/recording (WALL clock): 2026-11-03T09:01:29+00:00
+    15m bars consumed at this boundary: 16 (completion labels e.g. ['2025-08-07 04:15:00+00:00', '2025-08-07 04:30:00+00:00', '…', '2025-08-07 07:45:00+00:00', '2025-08-07 08:00:00+00:00'])
+
+  recorded timestamps: region observability_time / facts 'at' / conclusion recorded_at = DATA times (completion labels); ledger result decision_time = PROCESSING wall clock. Both are stored; they are never mixed.

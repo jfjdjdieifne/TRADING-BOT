@@ -534,3 +534,136 @@ def test_J_source_engineering_unknowns_distinguishable():
     rec = reg.to_record()
     assert rec["source_note"].startswith("FVG geometry per external")
     assert rec["unknowns"] == list(FVG_UNKNOWNS)
+
+
+# ------------------------------------------------- K/L/M (comparison)
+
+def test_K_evidence_breakdown_support_counter_unknown_conflict():
+    eng = ConnectedReadingsEngine(run_id="tK", instrument="TEST",
+                                  timezone="UTC")
+    eng.scan_fvgs({"4h": _up_fvg_frame()})
+    eng.update_interactions({"4h": _up_fvg_frame()})
+    as_of = pd.Timestamp("2025-09-10 12:00", tz="UTC")
+    # crossing AFTER the FVG was observable, opposite direction, level
+    # outside the interval → all three criteria fail with recorded
+    # counterevidence
+    w = {
+        "watch_id": "W-K",
+        "crossing": {"ref_id": "R-1", "ref_level": 90.0,
+                     "bar": 4,
+                     "bar_time": str(pd.Timestamp(
+                         "2025-09-10 12:00", tz="UTC")),
+                     "direction": "down"},
+        "evidence": [],
+    }
+    t = eng.task_fvg_relevance_for_watch(watch=w, as_of_time=as_of,
+                                         hf_trend="down")
+    c = t.candidates[0]
+    assert c["supporting_evidence"] == []
+    assert len(c["counterevidence"]) == 3       # each names a fact
+    for ce in c["counterevidence"]:
+        assert ":" in ce                         # criterion + observed
+    assert c["unknowns"] == []
+    assert c["relation_to_context"]["hf_trend"] == "down"
+    assert c["relation_to_context"]["region_vs_context"] == "counter"
+    assert c["relation_to_context"]["prior_events"]["chronology"]
+    # partial support → conflict note present, candidate NOT deleted
+    w2 = {
+        "watch_id": "W-K2",
+        "crossing": {"ref_id": "R-1", "ref_level": 100.05,
+                     "bar": 4,
+                     "bar_time": str(pd.Timestamp(
+                         "2025-09-10 12:00", tz="UTC")),
+                     "direction": "up"},
+        "evidence": [],
+    }
+    t2 = eng.task_fvg_relevance_for_watch(watch=w2, as_of_time=as_of,
+                                          hf_trend="down")
+    c2 = t2.candidates[0]
+    assert c2["supporting_evidence"] and c2["counterevidence"]
+    assert c2["conflict_note"] and "never deleted" in c2["conflict_note"]
+    assert t2.comparison["removed_from_record"] == 0
+    # evaluation rule explicitly labeled as engineering, not source
+    rule = t2.declared["evaluation_rule"]
+    assert rule["kind"] == "ENGINEERING_INTERPRETATION"
+    assert "NOT a source statement" in rule["source_status"]
+    assert "alternatives" in t2.conclusion or t2.conclusion
+    alltxt = json.dumps(t2.to_record()).lower()
+    assert "universal method" not in alltxt or "not" in alltxt
+    assert "confidence" in rule["conflict_handling"]
+
+
+def test_L_relevance_counts_before_after_filtering_no_deletion():
+    eng = ConnectedReadingsEngine(run_id="tL", instrument="TEST",
+                                  timezone="UTC")
+    f = _up_fvg_frame()
+    eng.scan_fvgs({"4h": f})
+    # second region on another frame (competing)
+    idx = pd.date_range("2025-09-10 00:00", periods=5, freq="1h",
+                        tz="UTC")
+    f1h = _frame(idx,
+                 highs=[100.0, 100.8, 101.6, 101.4, 101.2],
+                 lows=[99.0, 100.0, 101.0, 100.6, 100.4])
+    eng.scan_fvgs({"4h": f, "1h": f1h})
+    assert len(eng.regions) == 2
+    as_of = pd.Timestamp("2025-09-10 12:00", tz="UTC")
+    w = {
+        "watch_id": "W-L",
+        "crossing": {"ref_id": "R-1", "ref_level": 100.05,
+                     "bar": 2,
+                     "bar_time": str(pd.Timestamp(
+                         "2025-09-10 04:00", tz="UTC")),
+                     "direction": "up"},
+        "evidence": [],
+    }
+    t = eng.task_fvg_relevance_for_watch(watch=w, as_of_time=as_of)
+    comp = t.comparison
+    assert comp["candidates_before_filtering"] == 2
+    assert sum(comp["by_support_count"].values()) == 2
+    assert comp["candidates_after_filtering"] <= 2
+    assert comp["removed_from_record"] == 0
+    assert "none enforced" in comp["resource_limit"]
+    # filtering is display-level: the full candidate list survives
+    assert len(t.candidates) == 2
+    # reference task comparison summary
+    ref = _Ref("R-A", 100.05, "swing_low",
+               pd.Timestamp("2025-09-10 00:00", tz="UTC"))
+    ref2 = _Ref("R-B", 100.02, "swing_low",
+                pd.Timestamp("2025-09-10 01:00", tz="UTC"))
+    t2 = eng.task_reference_for_review(refs=[ref, ref2],
+                                       as_of_time=as_of,
+                                       interacted=["R-A"])
+    assert t2.comparison["candidates_before_filtering"] == 2
+    assert t2.comparison["candidates_after_filtering"] == 1
+    b = {c["candidate_id"]: c for c in t2.candidates}
+    assert b["R-A"]["supporting_evidence"]
+    assert b["R-B"]["unknowns"] and "not proof" in b["R-B"]["unknowns"][0]
+    assert b["R-A"]["relation_to_context"]["prior_events"]
+
+
+def test_M_evidence_breakdown_future_invariance_and_resume():
+    f = _up_fvg_frame()
+    t_cut = pd.Timestamp("2025-09-10 08:00", tz="UTC")
+    w = {
+        "watch_id": "W-M",
+        "crossing": {"ref_id": "R-1", "ref_level": 100.05,
+                     "bar": 3, "bar_time": str(t_cut),
+                     "direction": "up"},
+        "evidence": [],
+    }
+    e1 = ConnectedReadingsEngine(run_id="tM", instrument="TEST",
+                                 timezone="UTC")
+    e1.scan_fvgs({"4h": f.iloc[:3]})
+    t1 = e1.task_fvg_relevance_for_watch(watch=w, as_of_time=t_cut,
+                                         hf_trend="up")
+    # the breakdown is part of the persisted record and round-trips
+    st = json.loads(json.dumps(e1.state_dict(), default=str))
+    e2 = ConnectedReadingsEngine(run_id="tM", instrument="TEST",
+                                 timezone="UTC")
+    e2.load_state_dict(st)
+    t2b = list(e2.tasks.values())[0]
+    assert json.dumps(t2b.candidates, sort_keys=True, default=str) == \
+        json.dumps(json.loads(json.dumps(t1.candidates, default=str)),
+                   sort_keys=True)
+    assert t2b.comparison == json.loads(
+        json.dumps(t1.comparison, default=str))

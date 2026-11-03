@@ -759,10 +759,12 @@ class StudyReasoningLayer:
         self.readings.task_reference_for_review(
             refs=[p for p in world["by_id"].values()
                   if getattr(p, "status", "") == "confirmed"],
-            as_of_time=as_of, interacted=sorted(interacted))
+            as_of_time=as_of, interacted=sorted(interacted),
+            hf_trend=str(self.hf_context.get("trend")))
         for w in self.shift_watches:
             self.readings.task_fvg_relevance_for_watch(
-                watch=w.to_record(), as_of_time=as_of)
+                watch=w.to_record(), as_of_time=as_of,
+                hf_trend=str(self.hf_context.get("trend")))
         # working interpretations (context + open watches)
         hf_trend = str(self.hf_context.get("trend"))
         if hf_trend != "unknown":
