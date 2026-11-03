@@ -749,8 +749,24 @@ class ConnectedReadingsEngine:
             task_id=tid, question=declared["question"],
             declared=declared)
         task.declared = declared
-        task.candidates = []
+        # PERFORMANCE (identical content): per-region candidates are
+        # recomputed ONLY when that region's own inputs change (new
+        # region, new interactions on it, or a changed crossing/trend
+        # context).  Each candidate dict is a deterministic function of
+        # those inputs, so incremental updates produce byte-identical
+        # records to a full rebuild (save/resume tests verify).
+        ctx_key = (str(hf_trend), str(cross_time), str(cross_dir),
+                   str(cross_level))
+        if getattr(task, "_ctx_key", None) != ctx_key:
+            task._cand_map = {}
+        task._ctx_key = ctx_key
+        if not hasattr(task, "_cand_map") or task._cand_map is None:
+            task._cand_map = {}
         for rid, region in sorted(self.regions.items()):
+            n_inter = len(region.interactions)
+            prev = task._cand_map.get(rid)
+            if prev is not None and prev[0] == n_inter:
+                continue                     # unchanged: keep candidate
             crit = {
                 "observable_after_crossing":
                     (str(region.observability_time) > str(cross_time))
@@ -842,7 +858,7 @@ class ConnectedReadingsEngine:
                                  "conjunction is not satisfied; this "
                                  "candidate remains recorded as an "
                                  "alternative (never deleted)")
-            task.candidates.append({
+            _cand = {
                 "candidate_id": rid, "kind": "FVG region",
                 "timeframe": region.timeframe,
                 "availability": str(region.observability_time),
@@ -856,7 +872,10 @@ class ConnectedReadingsEngine:
                 "unknowns": unknowns,
                 "relation_to_context": relation_to_context,
                 "conflict_note": conflict_note,
-                "all_criteria_met": all(crit.values())})
+                "all_criteria_met": all(crit.values())}
+            task._cand_map[rid] = (n_inter, _cand)
+        task.candidates = [task._cand_map[rid][1]
+                           for rid in sorted(task._cand_map)]
         # relevance accounting: counts BEFORE and AFTER display
         # filtering; nothing is removed from the record
         n_total = len(task.candidates)
@@ -1255,13 +1274,20 @@ class ConnectedReadingsEngine:
 
     def sync_ledger(self, ledger) -> None:
         for tid, task in self.tasks.items():
+            notes = [f"status={task.conclusion.get('status')}",
+                     f"preferred={task.conclusion.get('preferred')}"]
+            # PERFORMANCE (identical semantics): the sig check inside
+            # _ledger_sync would still EVALUATE the payload argument
+            # (a full task.to_record() asdict) on every boundary — the
+            # dominant quadratic cost.  Skip BEFORE building payloads.
+            if self._ledger_sigs.get(tid) == tuple(notes):
+                continue
             self._ledger_sync(
                 tid, "study_reading_task", "T-STUDY-READING",
                 int(task.declared.get("decision_bar", 0)) if
                 isinstance(task.declared.get("decision_bar"), int)
                 else 0,
-                [f"status={task.conclusion.get('status')}",
-                 f"preferred={task.conclusion.get('preferred')}"],
+                notes,
                 {"task": task.to_record()},
                 {"conclusions": [CONCLUSION_EVIDENCE_PREFERRED,
                                  CONCLUSION_PROVISIONAL,
@@ -1271,12 +1297,14 @@ class ConnectedReadingsEngine:
                               "candidates stay unresolved"},
                 ledger, ["E03-A", "E03-B", "FVG16-A"])
         for iid, interp in self.interps.items():
+            notes = [f"status={interp.status}",
+                     f"versions={len(interp.versions)}",
+                     interp.statement[:60]]
+            if self._ledger_sigs.get(iid) == tuple(notes):
+                continue
             self._ledger_sync(
                 iid, "study_interpretation", "T-STUDY-INTERPRETATION",
-                0,
-                [f"status={interp.status}",
-                 f"versions={len(interp.versions)}",
-                 interp.statement[:60]],
+                0, notes,
                 {"interpretation": interp.to_record()},
                 {"statuses": list(INTERP_STATUSES),
                  "semantics": "append-only versions; no automatic "

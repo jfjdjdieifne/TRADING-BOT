@@ -111,16 +111,71 @@ def load_bidask(bidask_dir: Path, t0: str, t1: str):
     return df
 
 
+_FRAMES_CACHE: dict = {"rows": None, "frames": None}
+_FRAME_RULES = (("1D", "1D", 1440), ("4h", "4h", 240),
+                ("1h", "1h", 60), ("15m", "15min", 15))
+
+
 def frames_builder(rows: pd.DataFrame):
-    def _resample(rule, minutes):
-        f = rows.resample(rule).agg({"open": "first", "high": "max",
-                                     "low": "min", "close": "last",
-                                     "volume": "sum"})
-        f = f.dropna(subset=["open"])
-        f.index = f.index + pd.Timedelta(minutes=minutes)
-        return f
-    return {"1D": _resample("1D", 1440), "4h": _resample("4h", 240),
-            "1h": _resample("1h", 60), "15m": _resample("15min", 15)}
+    """Completion-labelled resample of the 5m mid rows (1D/4h/1h/15m).
+
+    PERFORMANCE (mathematically identical to a from-scratch resample of
+    ``rows``): the monitoring loop calls this with GROWING prefixes of
+    one series.  A bucket that closed before the prefix frontier
+    aggregates exactly the same rows as in the full scan (all of its
+    rows lie inside the prefix), so closed buckets are taken from a
+    cached full resample and only the frontier bucket is re-aggregated
+    from the prefix's own rows."""
+    def _empty():
+        return {name: pd.DataFrame(columns=["open", "high", "low",
+                                            "close", "volume"])
+                for name, _, _ in _FRAME_RULES}
+
+    if len(rows) == 0:
+        return _empty()
+    cache = _FRAMES_CACHE
+    prefix_of_cache = (
+        cache["frames"] is not None
+        and 0 < len(rows) <= len(cache["rows"])
+        and rows.index[0] == cache["rows"].index[0]
+        and rows.index[-1] == cache["rows"].index[len(rows) - 1])
+    if not prefix_of_cache:
+        # first call, a longer series, or a different series: full scan
+        frames = {}
+        for name, rule, minutes in _FRAME_RULES:
+            f = rows.resample(rule).agg({"open": "first", "high": "max",
+                                         "low": "min", "close": "last",
+                                         "volume": "sum"})
+            f = f.dropna(subset=["open"])
+            f.index = f.index + pd.Timedelta(minutes=minutes)
+            frames[name] = f
+        cache["rows"] = rows
+        cache["frames"] = frames
+        return frames
+    last = rows.index[-1]
+    full_rows = cache["rows"]
+    out = {}
+    for name, rule, minutes in _FRAME_RULES:
+        f = cache["frames"][name]
+        width = pd.Timedelta(minutes=minutes)
+        frontier_label = pd.Timestamp(last).floor(width) + width
+        frontier_start = frontier_label - width
+        j = int(f.index.searchsorted(frontier_label, side="left"))
+        closed = f.iloc[:j]
+        i0 = int(rows.index.searchsorted(frontier_start, side="left"))
+        tail = rows.iloc[i0:]
+        if len(tail):
+            frontier = pd.DataFrame([{
+                "open": float(tail["open"].iloc[0]),
+                "high": float(tail["high"].max()),
+                "low": float(tail["low"].min()),
+                "close": float(tail["close"].iloc[-1]),
+                "volume": float(tail["volume"].sum())}])
+            frontier.index = pd.DatetimeIndex([frontier_label])
+            out[name] = pd.concat([closed, frontier])
+        else:
+            out[name] = closed
+    return out
 
 
 def mid_rows(bidask: pd.DataFrame) -> pd.DataFrame:
@@ -311,19 +366,18 @@ def run_phase(args, phase: str) -> int:
         if r.trigger != "task-boundary" or loop.last_record is None:
             continue
         rec = loop.last_record
-        frames = loop._prefix_frames()
         if decision_seq % 500 == 0:
             print(f"  … {decision_seq} task boundaries "
                   f"({rec.as_of_time}) cases={len(cases)} "
                   f"t={time.time() - t_start:.0f}s", flush=True)
-        world = resolve_world(frames=frames, record=rec, k=K,
-                              task_scale=TASK_SCALE,
-                              axis=loop.engine.axis)
         decision_seq += 1
-        # dev: extract training episode (labels use future bars; the
-        # label window must complete inside the dev period — enforced
-        # at fit time below)
-        if phase == "dev":
+        # dev: training episode extraction is SAMPLED every 5th task
+        # boundary (compute-bound research configuration — declared);
+        # labels use future bars and windows are cut at fit time.  ALL
+        # decision cases and plan events are recorded at EVERY boundary.
+        # The FK world reconstruction is O(prefix); it is computed
+        # lazily ONLY where a plan actually needs it.
+        if phase == "dev" and decision_seq % 5 == 0:
             ep = extractor.extract(rec, run_id=phase, seq=decision_seq)
             episodes.append(ep)
         dec = decide(record=rec, model=model, decision_seq=decision_seq)
@@ -334,9 +388,17 @@ def run_phase(args, phase: str) -> int:
         ok, gate_reason = gate(dec, study)
         gate_stats["gate_pass"] += int(ok and strict)
 
+        def _world_now():
+            fr = loop._prefix_frames()
+            return resolve_world(frames=fr, record=rec, k=K,
+                                 task_scale=TASK_SCALE,
+                                 axis=loop.engine.axis)
+
         if active_plan is not None and active_plan.active:
-            v = observe_plan(plan=active_plan, record=rec, world=world,
-                             frames=frames, run_context="historical-replay",
+            v = observe_plan(plan=active_plan, record=rec,
+                             world=_world_now(),
+                             frames=loop._prefix_frames(),
+                             run_context="historical-replay",
                              decision_id=dec.decision_id,
                              task_scale=TASK_SCALE)
             if not active_plan.active:
@@ -352,8 +414,9 @@ def run_phase(args, phase: str) -> int:
         elif ok and strict and active_plan is None:
             plan_seq += 1
             plan, reason = create_plan(
-                record=rec, decision=dec, world=world,
-                run_id=RUN_ID, seq=plan_seq, frames=frames,
+                record=rec, decision=dec, world=_world_now(),
+                run_id=RUN_ID, seq=plan_seq,
+                frames=loop._prefix_frames(),
                 run_context="historical-replay",
                 task_scale=TASK_SCALE, instrument="EURUSD")
             if plan is None:
