@@ -563,12 +563,18 @@ class MonitoringLoop:
                                           Any],
                  task_scale: str = "4h",
                  grid_frames: Optional[Dict[str, pd.DataFrame]] = None,
-                 study_layer: Optional[Any] = None
+                 study_layer: Optional[Any] = None,
+                 readings_scale: Optional[str] = None
                  ) -> None:
         self.stream = stream
         self.frames_builder = frames_builder
         self.engine_factory = engine_factory
         self.task_scale = task_scale
+        # READINGS SCALE (optional): when a bar of this frame completes
+        # between task-scale boundaries, the connected readings
+        # pipeline runs at that completion (lower-frame evidence is
+        # never held back until the next task boundary).
+        self.readings_scale = readings_scale
         # STUDY LINKS (optional): a StudyReasoningLayer observing the
         # SAME flow — no side channel.  It sees each observation row in
         # the fast path and each analyzed boundary record; its state is
@@ -595,6 +601,20 @@ class MonitoringLoop:
         if rec is None:
             return self._report("observation", None, False, [],
                                 "stream exhausted", [], None)
+        # readings-scale boundary: a genuinely available lower-timeframe
+        # bar just completed between task-scale boundaries → run the
+        # connected readings NOW (never held back).  The completing row
+        # is still an observation (fine-touch hook) first.
+        if (self.readings_scale and self.study_layer is not None
+                and not self._completes_task_bar(rec)
+                and self._completes_scale_bar(rec, self.readings_scale)):
+            self.study_layer.on_observation(rec)
+            frames = self._prefix_frames()
+            hours = {"4h": 4, "1h": 1, "15m": 0.25,
+                     "5m": 5.0 / 60.0}.get(self.readings_scale, 0.25)
+            width = pd.Timedelta(hours=hours)
+            label = pd.Timestamp(rec["time"]).floor(width) + width
+            return self._run_readings_boundary(frames, label, rec["time"])
         if not self._completes_task_bar(rec) and \
                 self.last_record is not None:
             # O(1) fast path: this observation completes no task-scale
@@ -643,11 +663,53 @@ class MonitoringLoop:
         i = rec["index"]
         if i >= len(times) - 1:
             return True
-        hours = {"4h": 4, "1h": 1, "15m": 0.25}.get(self.task_scale, 4)
+        hours = {"4h": 4, "1h": 1, "15m": 0.25, "5m": 5.0 / 60.0}.get(
+            self.task_scale, 4)
         width = pd.Timedelta(hours=hours)
         b_now = pd.Timestamp(times[i]).floor(width)
         b_next = pd.Timestamp(times[i + 1]).floor(width)
         return b_next != b_now
+
+    def _completes_scale_bar(self, rec: dict, scale: str) -> bool:
+        times = self.stream._times
+        i = rec["index"]
+        if i >= len(times) - 1:
+            return True
+        hours = {"4h": 4, "1h": 1, "15m": 0.25, "5m": 5.0 / 60.0}.get(
+            scale, 4)
+        width = pd.Timedelta(hours=hours)
+        b_now = pd.Timestamp(times[i]).floor(width)
+        b_next = pd.Timestamp(times[i + 1]).floor(width)
+        return b_next != b_now
+
+    def _run_readings_boundary(self, frames, boundary_time, obs_time
+                               ) -> StepReport:
+        """Connected-reading re-evaluation at a lower-timeframe bar
+        completion.  Prices come only from the prefix frames; the
+        reference set is the one confirmed at the last completed
+        task-scale boundary (never later).  ``boundary_time`` is the
+        completion label (DATA time); the ledger's decision_time is the
+        PROCESSING time."""
+        if self.engine is None:
+            self.engine = self.engine_factory(
+                self._grid_frames if self._grid_frames is not None
+                else frames)
+        self.engine.frames = frames
+        changes: List[dict] = []
+        if self.study_layer is not None:
+            changes = self.study_layer.on_readings_boundary(
+                self.last_record, frames,
+                getattr(self.engine, "ledger", None),
+                boundary_time=boundary_time)
+        material = bool(changes)
+        reason = ("readings-scale boundary: connected readings consumed "
+                  "the newly completed lower-timeframe bars" if material
+                  else "readings-scale boundary: no connected-reading "
+                       "fact changed (nothing forced)")
+        report = self._report("readings-boundary", obs_time, material,
+                              changes, reason, [], boundary_time)
+        self.journal.append(report.to_record())
+        return report
 
     def step_completed_bar(self) -> StepReport:
         """Advance observations until the next task-scale completion."""
@@ -695,7 +757,8 @@ class MonitoringLoop:
     @classmethod
     def load_state(cls, path, *, stream, frames_builder, engine_factory,
                    task_scale: str = "4h", grid_frames=None,
-                   study_layer: Optional[Any] = None
+                   study_layer: Optional[Any] = None,
+                   readings_scale: Optional[str] = None
                    ) -> "MonitoringLoop":
         """Resume in a FRESH process: the stream advances to the saved
         cursor; the engine restores through the EXISTING snapshot
@@ -706,7 +769,8 @@ class MonitoringLoop:
             st = json.load(fh)
         loop = cls(stream=stream, frames_builder=frames_builder,
                    engine_factory=engine_factory, task_scale=task_scale,
-                   grid_frames=grid_frames, study_layer=study_layer)
+                   grid_frames=grid_frames, study_layer=study_layer,
+                   readings_scale=readings_scale)
         while loop.stream.position < int(st["cursor"]):
             if loop.stream.next_observation() is None:
                 break

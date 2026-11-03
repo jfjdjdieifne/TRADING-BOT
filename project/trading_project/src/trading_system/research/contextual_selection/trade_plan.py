@@ -474,6 +474,8 @@ def _limitations(run_context: str) -> List[str]:
 def create_plan(*, record, decision, world: Dict[str, Any],
                 run_id: str, seq: int, frames: Dict[str, pd.DataFrame],
                 run_context: str = "historical-replay",
+                task_scale: str = "4h",
+                instrument: str = "BTCUSDT",
                 ) -> Tuple[Optional["TradePlan"], dict]:
     """Create a plan record from a decision with an evidence-supported
     preference — or return NO_JUSTIFIED_PLAN with the SPECIFIC missing
@@ -525,7 +527,7 @@ def create_plan(*, record, decision, world: Dict[str, Any],
         "plan_direction": direction}
 
     # entry already observed in the as-of history? (never a pre-event plan)
-    bars = frames["4h"]
+    bars = frames.get(task_scale, frames.get("4h"))
     hist_entry, hist_inval = _scan_bindings(
         bars, 0, int(record.as_of_bar), levels, scenario)
     observed_before = bool(hist_entry)
@@ -552,7 +554,7 @@ def create_plan(*, record, decision, world: Dict[str, Any],
                   comps["entry"].definition)
 
     plan = TradePlan(plan_id=f"PLAN-{run_id}-{seq:04d}", run_id=run_id,
-                     instrument="BTCUSDT", task_scale="4h")
+                     instrument=instrument, task_scale=task_scale)
     v = PlanVersion(
         version=1, revises=None, as_of_time=pd.Timestamp(record.as_of_time),
         as_of_bar=int(record.as_of_bar), state=state,
@@ -636,7 +638,8 @@ def _objective_exists(legs: Sequence[Any], direction: str,
 
 def observe_plan(*, plan: TradePlan, record, world: Dict[str, Any],
                  frames: Dict[str, pd.DataFrame], run_context: str,
-                 decision_id: str) -> Optional[PlanVersion]:
+                 decision_id: str,
+                 task_scale: str = "4h") -> Optional[PlanVersion]:
     """Observe new evidence at a decision boundary; append an immutable
     version when the observable state changes.  Returns the new version
     (or None when nothing changed)."""
@@ -645,7 +648,7 @@ def observe_plan(*, plan: TradePlan, record, world: Dict[str, Any],
     cur = plan.current
     if cur.state in _TERMINAL:
         return None
-    bars = frames["4h"]
+    bars = frames.get(task_scale, frames.get("4h"))
     creation_bar = int(plan.versions[0].as_of_bar)
     j0 = plan.scanned_through_bar + 1
     j1 = int(record.as_of_bar)

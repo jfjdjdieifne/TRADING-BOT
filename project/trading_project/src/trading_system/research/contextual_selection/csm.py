@@ -2489,9 +2489,21 @@ class InterpretationLedger:
                 return js(dataclasses.asdict(o))
             if isinstance(o, dict):
                 return {k: js(v) for k, v in o.items()}
-            if isinstance(o, (list, tuple)):
-                return [js(v) for v in o]
-            return o
+            if isinstance(o, (list, tuple, set)):
+                return [js(v) for v in (sorted(o, key=repr)
+                                        if isinstance(o, set) else o)]
+            if isinstance(o, (str, int, float, bool)) or o is None:
+                return o
+            item = getattr(o, "item", None)      # numpy scalars
+            if callable(item):
+                try:
+                    return js(item())
+                except Exception:
+                    pass
+            # live objects (axis/policy/…): STABLE type marker — an
+            # object repr with a memory address would break save/resume
+            # determinism without carrying any recorded evidence
+            return f"<nonserializable:{type(o).__name__}>"
 
         versions = {}
         for uid, vs in self.versions.items():

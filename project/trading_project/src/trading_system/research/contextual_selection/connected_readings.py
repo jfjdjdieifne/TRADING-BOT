@@ -392,6 +392,8 @@ class ConnectedReadingsEngine:
         self._ledger_uids: Dict[str, str] = {}
         self._ledger_sigs: Dict[str, tuple] = {}
         self._seen_links: set = set()
+        self._linked_region_ids: set = set()
+        self._linked_ref_ids: set = set()
 
     # ---- FVG scanning (completed bars only; never before b3 closes) --
     def scan_fvgs(self, frames: Dict[str, pd.DataFrame]
@@ -538,14 +540,26 @@ class ConnectedReadingsEngine:
         overlap).  ``intervals_disjoint`` is a STATED non-relationship
         recorded only for pairs explicitly passed in ``compare_pairs``
         (e.g. a task's competing candidates) — trivial disjointness
-        between unrelated pairs is not noise-worthy."""
+        between unrelated pairs is not noise-worthy.
+
+        Incremental pairing (performance; identical link set): a NEW
+        region is paired against every existing region and reference; a
+        NEW reference against every existing region; already-linked
+        pairs are never re-walked."""
         changes: List[dict] = []
-        for rid, region in self.regions.items():
+        new_regions = [rid for rid in sorted(self.regions)
+                       if rid not in self._linked_region_ids]
+        new_refs = [ref for ref in refs
+                    if str(getattr(ref, "candidate_id", ref))
+                    not in self._linked_ref_ids]
+        # (a) NEW regions vs every existing ref and region
+        for rid in new_regions:
+            region = self.regions[rid]
             for ref in refs:
                 lvl = float(getattr(ref, "level", -1))
                 if not (region.lower_bound <= lvl <= region.upper_bound):
                     continue
-                key = (rid, getattr(ref, "candidate_id", str(ref)),
+                key = (rid, str(getattr(ref, "candidate_id", ref)),
                        "level_in_interval")
                 if self._link_seen(key):
                     continue
@@ -574,53 +588,95 @@ class ConnectedReadingsEngine:
                               "reference level (exact relation; no "
                               "origin/significance equivalence)",
                     "evidence": [link.link_id, str(lvl)]})
-        ids = sorted(self.regions)
-        explicit = {frozenset(p) for p in (compare_pairs or [])}
-        for i, a in enumerate(ids):
-            ra = self.regions[a]
-            for b in ids[i + 1:]:
-                rb = self.regions[b]
-                if ra.timeframe == rb.timeframe:
+            for oid in sorted(self.regions):
+                if oid == rid:
                     continue
-                overlap = (ra.lower_bound <= rb.upper_bound and
-                           rb.lower_bound <= ra.upper_bound)
-                # order-independent key (dict order may change across
-                # save/resume; pairs must not duplicate)
-                lo_id, hi_id = (a, b) if a <= b else (b, a)
-                rel = ("intervals_overlap" if overlap
-                       else "intervals_disjoint")
-                # disjointness between UNRELATED pairs is trivial noise
-                # (O(n^2)); a non-relationship is stated only for pairs
-                # explicitly compared (task candidates).  Meaningful
-                # links (overlap) are always recorded.
-                if not overlap and frozenset((a, b)) not in explicit:
+                changes += self._pair_regions(rid, oid, as_of_time,
+                                              set())
+            self._linked_region_ids.add(rid)
+        # (b) NEW refs vs every existing region
+        for ref in new_refs:
+            rid_key = str(getattr(ref, "candidate_id", ref))
+            lvl = float(getattr(ref, "level", -1))
+            for rid, region in sorted(self.regions.items()):
+                if not (region.lower_bound <= lvl <= region.upper_bound):
                     continue
-                key = (lo_id, hi_id, rel)
+                key = (rid, rid_key, "level_in_interval")
                 if self._link_seen(key):
                     continue
                 self._link_seq += 1
                 link = FrameLink(
                     link_id=f"FL-{self.run_id}-{self._link_seq:04d}",
-                    subject_id=a, subject_frame=ra.timeframe,
-                    other_id=b, other_frame=rb.timeframe,
-                    relation=("intervals_overlap" if overlap
-                              else "intervals_disjoint"),
+                    subject_id=rid, subject_frame=region.timeframe,
+                    other_id=rid_key,
+                    other_frame="task-frame reference (F-K points)",
+                    relation="interval_contains_level",
                     established_at=pd.Timestamp(as_of_time),
-                    note="different timeframes keep different "
-                         "representations (FVG16-A): overlap or "
-                         "disjointness is recorded; the regions are "
-                         "NOT the same object and share no assumed "
-                         "origin, significance, or future",
-                    evidence={"a": [ra.lower_bound, ra.upper_bound],
-                              "b": [rb.lower_bound, rb.upper_bound]})
+                    evidence={"level": lvl,
+                              "interval": [region.lower_bound,
+                                           region.upper_bound]})
                 self.links.append(link)
                 self._mark_link(key)
+                self.seq_facts.append({
+                    "kind": "CROSS_FRAME_LINK", "at":
+                        pd.Timestamp(as_of_time),
+                    "link_id": link.link_id, "relation": link.relation,
+                    "layer": "DERIVATION"})
                 changes.append({
                     "aspect": "frame_link", "before": "(none)",
                     "after": link.link_id,
-                    "reason": f"{ra.timeframe} vs {rb.timeframe}: "
-                              f"{link.relation} (not an equivalence)",
-                    "evidence": [link.link_id]})
+                    "reason": "the region's interval contains the "
+                              "reference level (exact relation; no "
+                              "origin/significance equivalence)",
+                    "evidence": [link.link_id, str(lvl)]})
+            self._linked_ref_ids.add(rid_key)
+        # (c) explicitly compared pairs (may state non-relationship)
+        explicit = {frozenset(p) for p in (compare_pairs or [])}
+        for pair in explicit:
+            if len(pair) != 2:
+                continue
+            a, b = sorted(pair)
+            if a in self.regions and b in self.regions:
+                changes += self._pair_regions(a, b, as_of_time, explicit)
+        return changes
+
+    def _pair_regions(self, a: str, b: str, as_of_time,
+                      explicit: set) -> List[dict]:
+        changes: List[dict] = []
+        ra, rb = self.regions[a], self.regions[b]
+        if ra.timeframe == rb.timeframe:
+            return changes
+        overlap = (ra.lower_bound <= rb.upper_bound and
+                   rb.lower_bound <= ra.upper_bound)
+        lo_id, hi_id = (a, b) if a <= b else (b, a)
+        rel = ("intervals_overlap" if overlap else "intervals_disjoint")
+        if not overlap and frozenset((a, b)) not in explicit:
+            return changes
+        key = (lo_id, hi_id, rel)
+        if self._link_seen(key):
+            return changes
+        self._link_seq += 1
+        link = FrameLink(
+            link_id=f"FL-{self.run_id}-{self._link_seq:04d}",
+            subject_id=a, subject_frame=ra.timeframe,
+            other_id=b, other_frame=rb.timeframe,
+            relation=rel,
+            established_at=pd.Timestamp(as_of_time),
+            note="different timeframes keep different "
+                 "representations (FVG16-A): overlap or "
+                 "disjointness is recorded; the regions are "
+                 "NOT the same object and share no assumed "
+                 "origin, significance, or future",
+            evidence={"a": [ra.lower_bound, ra.upper_bound],
+                      "b": [rb.lower_bound, rb.upper_bound]})
+        self.links.append(link)
+        self._mark_link(key)
+        changes.append({
+            "aspect": "frame_link", "before": "(none)",
+            "after": link.link_id,
+            "reason": f"{ra.timeframe} vs {rb.timeframe}: "
+                      f"{link.relation} (not an equivalence)",
+            "evidence": [link.link_id]})
         return changes
 
     _seen_links: set = set()   # per-instance; reset in __init__
@@ -1245,6 +1301,8 @@ class ConnectedReadingsEngine:
             "ledger_sigs": {k: list(v) for k, v in
                             self._ledger_sigs.items()},
             "seen_links": [list(k) for k in sorted(self._seen_links)],
+            "linked_region_ids": sorted(self._linked_region_ids),
+            "linked_ref_ids": sorted(self._linked_ref_ids),
             "selection_quality": "NOT_ESTABLISHED",
         }
 
@@ -1263,6 +1321,8 @@ class ConnectedReadingsEngine:
                 self._seen_links.add(tuple(str(x) for x in s))
             else:                      # legacy pipe-joined string
                 self._seen_links.add(tuple(str(s).split("|")))
+        self._linked_region_ids = set(st.get("linked_region_ids", []))
+        self._linked_ref_ids = set(st.get("linked_ref_ids", []))
         self.seq_facts = list(st.get("seq_facts", []))
         self.regions = {}
         for rid, d in st.get("regions", {}).items():

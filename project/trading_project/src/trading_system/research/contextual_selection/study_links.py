@@ -687,6 +687,30 @@ def _bars_interval(bars, j: int) -> Tuple[pd.Timestamp, pd.Timestamp]:
     return start, end
 
 
+class _RefRecordView:
+    """Read-only view over a serialized reference record (readings
+    boundaries + resume path).  The readings pipeline reads only
+    candidate_id/level/side/status/knowable_bar/occurrence_* /kind."""
+
+    def __init__(self, d: dict) -> None:
+        self._d = dict(d)
+
+    def __getattr__(self, k):
+        try:
+            return self._d[k]
+        except KeyError:
+            raise AttributeError(k)
+
+
+def _ref_records(world: dict) -> List[dict]:
+    out = []
+    for p in world.get("by_id", {}).values():
+        out.append({k: getattr(p, k, None) for k in (
+            "candidate_id", "level", "side", "status", "kind",
+            "knowable_bar", "occurrence_bar", "occurrence_time")})
+    return out
+
+
 class StudyReasoningLayer:
     """Detects OB-like candidates against the causal world of the
     current boundary, maintains their state machine and evidence-based
@@ -726,6 +750,7 @@ class StudyReasoningLayer:
         self.readings = ConnectedReadingsEngine(
             run_id=f"{run_id}-cr", instrument=instrument,
             timezone="UTC")
+        self._last_ref_records: List[dict] = []
 
     # ---- main hooks (called by the EXISTING MonitoringLoop) ----------
     def on_boundary(self, record, frames: Dict[str, pd.DataFrame],
@@ -743,6 +768,21 @@ class StudyReasoningLayer:
         changes += self._update_shift_watches(record, bars, world)
         # ---- connected readings (FVG + cross-frame links + tasks) ----
         as_of = pd.Timestamp(record.as_of_time)
+        self._last_ref_records = _ref_records(world)
+        changes += self._run_readings(as_of, frames, world, ledger)
+        # drop buffer rows older than this boundary's bar interval
+        keep_from = _bars_interval(bars, int(record.as_of_bar))[0]
+        self._row_buffer = [r for r in self._row_buffer
+                            if pd.Timestamp(r["time"]) >= keep_from]
+        return changes
+
+    def _run_readings(self, as_of, frames, world, ledger) -> List[dict]:
+        """Connected-readings pipeline (FVG scan, interactions, links,
+        reading tasks, working interpretations, ledger sync).  Runs at
+        task-scale boundaries AND at readings-scale boundaries (when a
+        genuinely available lower-timeframe bar completes) — evidence
+        is never held back until the next task boundary."""
+        changes: List[dict] = []
         changes += self.readings.scan_fvgs(frames)
         changes += self.readings.update_interactions(
             frames, as_of_time=as_of)
@@ -781,11 +821,25 @@ class StudyReasoningLayer:
             for w in self.shift_watches:
                 self._ledger_sync_watch(w, ledger)
             self.readings.sync_ledger(ledger)
-        # drop buffer rows older than this boundary's bar interval
-        keep_from = _bars_interval(bars, int(record.as_of_bar))[0]
-        self._row_buffer = [r for r in self._row_buffer
-                            if pd.Timestamp(r["time"]) >= keep_from]
         return changes
+
+    def on_readings_boundary(self, record, frames: Dict[str, pd.DataFrame],
+                             ledger=None, boundary_time=None
+                             ) -> List[dict]:
+        """Relevant connected re-evaluation when a lower-timeframe
+        (readings-scale) bar completes BETWEEN task-scale boundaries.
+
+        Causality: ``boundary_time`` is the completion label of the
+        just-completed lower-frame bar; only frames prefix data is
+        consumed; references are the ones confirmed at the last
+        completed TASK-scale boundary (never later data).  Processing
+        and recording happen at this call (see ledger decision_time);
+        the recorded facts carry the DATA times."""
+        as_of = pd.Timestamp(boundary_time if boundary_time is not None
+                             else record.as_of_time)
+        world = {"by_id": {r["candidate_id"]: _RefRecordView(r)
+                           for r in self._last_ref_records}}
+        return self._run_readings(as_of, frames, world, ledger)
 
     def on_observation(self, row: dict) -> List[dict]:
         """Finer-grained re-evaluation on actually available data (the
@@ -1627,6 +1681,7 @@ class StudyReasoningLayer:
             "scan_upto": self._scan_upto,
             "cand_seq": self._cand_seq,
             "readings": self.readings.state_dict(),
+            "last_ref_records": [dict(r) for r in self._last_ref_records],
             "shift_watches": [w.to_record() for w in self.shift_watches],
             "cross_scan_upto": self._cross_scan_upto,
             "crossed_keys": sorted(f"{k[0]}|{k[1]}"
@@ -1647,6 +1702,8 @@ class StudyReasoningLayer:
                 run_id=f"{self.run_id}-cr", instrument=self.instrument,
                 timezone="UTC")
             self.readings.load_state_dict(st["readings"])
+        self._last_ref_records = [dict(r) for r in
+                                  st.get("last_ref_records", [])]
         self._cross_scan_upto = int(st.get("cross_scan_upto", -1))
         self._watch_seq = int(st.get("watch_seq", 0))
         self._crossed_keys = set()
