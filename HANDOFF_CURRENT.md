@@ -19,6 +19,26 @@ file is kept untouched.
   remains at `e06e22c` unless a maintainer fast-forwards it (the new
   commit is a fast-forward candidate).
 
+## Branch history
+
+`2b4d23e` -> `2befb6c` -> `e06e22c` (`arena/a41fd997-trading-bot`)
+-> `43a1b56` (`arena/e6974afe-trading-bot`).
+
+- `2b4d23e` — forex-intraday-loop-v1: initial causally-evaluated
+  baseline (report 99); EURUSD 5m bid/ask, dev/eval split, V1 vs B0.
+- `2befb6c` — unify Forex branch with Builder fixes; intended-direction
+  gate fix; causal `next_open` exits.
+- `e06e22c` — fix intrabar ambiguity test fixture; mark reports 101–103
+  as unreproduced.
+- `43a1b56` (`43a1b5630be893b8fd11d1f641530b5380352010`) — docs and test
+  hardening after the independent audit; this handoff file added.
+
+`arena/a41fd997-trading-bot` stayed at `e06e22c` because the session
+could not push to it (sessions are bound to their own branch).
+`43a1b56` is a direct child of `e06e22c` on
+`arena/e6974afe-trading-bot`, so it is a fast-forward candidate for
+`arena/a41fd997-trading-bot` if a maintainer chooses to advance it.
+
 ## What was verified, and how
 
 Independent read-only audit round (at `e06e22c`, all code read via
@@ -102,20 +122,24 @@ only.**
 ## First-message template for new chats
 
 ```text
-Work ONLY on branch arena/a41fd997-trading-bot (or the Arena session
-branch bound to your chat, if the platform binds you to one — never
-push to any other branch).
+Sessions on Arena are bound to their OWN branch (shown by
+`git branch --show-current`); you cannot push to any other branch.
 
-Fetch explicitly first:
-  git fetch origin refs/heads/arena/a41fd997-trading-bot:refs/remotes/origin/arena/a41fd997-trading-bot
-  git rev-parse origin/arena/a41fd997-trading-bot
-Sync your index to that ref WITHOUT `reset --hard` (verify equality or
-fast-forward only). Read code via `git show <ref>:<path>` when auditing.
+Start by syncing to the LAST KNOWN GOOD COMMIT HASH provided by the
+user — pin by hash, never by branch name:
+  git fetch origin <last-known-good-commit-hash>
+  git rev-parse HEAD    # must equal that hash; sync the working
+                        # tree/index WITHOUT `reset --hard` (verify
+                        # equality or fast-forward only); if it cannot
+                        # be matched, stop and report.
 
-Never use `git add -A`; stage by explicit path. Commit and push EVERY
-turn that changes files. Never modify the protected time-contract file
-(information_time.py); verify its SHA-256 and size only (see
-HANDOFF_CURRENT.md). Do not install packages or run anything needing
-EUR/USD market data unless explicitly asked; a throwaway venv lives
-outside the repo.
+Work, then commit and push to YOUR OWN session branch every turn that
+changes files. Never use `git add -A`; stage by explicit path only.
+
+Never modify the protected time-contract file (information_time.py);
+verify its SHA-256 and size only (see the Protected file rule section).
+
+END EVERY REPLY by printing:
+  git branch --show-current
+  git rev-parse HEAD
 ```
