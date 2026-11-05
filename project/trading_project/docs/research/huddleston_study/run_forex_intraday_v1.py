@@ -199,12 +199,49 @@ def engine_factory(task_scale=TASK_SCALE):
 
 # ------------------------------------------------------- outcome harness
 
+def _intended_direction(pid, ctx_dir):
+    """Interpretation-direction helper (ported from the Builder branch,
+    module level by design).  Map interpretation id + context direction
+    to the INTENDED trade direction:
+      I-primary / I-scenario -> continuation: same side as the context
+      I-alt                  -> reversal: opposite side of the context
+      anything unknown       -> None (no determinable intended direction)
+    """
+    if ctx_dir not in ("up", "down"):
+        return None
+    if pid in ("I-primary", "I-scenario"):
+        return ctx_dir
+    if pid == "I-alt":
+        return "down" if ctx_dir == "up" else "up"
+    return None
+
+
+def fill_price_next_open(bidask, ts, direction, side="entry"):
+    """CAUSAL next_open fill: the fill happens at the OPEN of the NEXT
+    5m bar strictly after ``ts`` (gap handling: next available row — a
+    bar starting at or before ts is never used).  Both entry AND exit
+    use next-open fills:  long entry / short exit use ASK;  short
+    entry / long exit use BID.  RESEARCH SIMULATION — not an
+    executable fill claim."""
+    sub = bidask[bidask.index > ts]
+    if sub.empty:
+        return None, None
+    row = sub.iloc[0]
+    if direction == "up":
+        px = row.AskOpen if side == "entry" else row.BidOpen
+    else:
+        px = row.BidOpen if side == "entry" else row.AskOpen
+    return float(px), str(sub.index[0])
+
+
 def fill_price(bidask, ts, direction, side="entry"):
-    """Hypothetical fill at the CLOSE of the decision bar, from the
+    """EXPLICITLY LABELED NON-CAUSAL COMPARISON MODE (bar_close): a
+    hypothetical fill at the CLOSE of the event bar itself, from the
     actual two-sided quote at that bar's last 5m row: a BUY enters at
     ASK and exits at BID; a SELL enters at BID and exits at ASK (the
-    spread is actually paid in the simulation).  RESEARCH SIMULATION —
-    not an executable fill claim."""
+    spread is actually paid in the simulation).  Kept only for
+    comparison against the causal next_open mode; NOT the default.
+    RESEARCH SIMULATION — not an executable fill claim."""
     sub = bidask[bidask.index <= ts]
     if sub.empty:
         return None, None
@@ -235,10 +272,18 @@ def same_bar_ambiguity(bidask, t_entry, t_exit, level_a, level_b):
     return False
 
 
-def outcome_for(plan, bidask, direction):
+def outcome_for(plan, bidask, direction, fill_mode="next_open"):
     """Measure the hypothetical outcome of an entered plan from the
-    5m bid/ask record.  Close-based plan states decide winner/loser;
-    same-bar level ambiguity yields AMBIGUOUS (censored)."""
+    5m bid/ask record.  fill_mode="next_open" (DEFAULT, causal): both
+    entry and exit fill at the NEXT 5m bar open after their events
+    (long entry/short exit at ask; short entry/long exit at bid).
+    fill_mode="bar_close": EXPLICITLY LABELED NON-CAUSAL comparison
+    mode filling at the event bar's close.  Same-bar stop/target
+    double-touch (5m quotes inside one task bar) yields
+    AMBIGUOUS_CENSORED — the ordering is never resolved in favour of
+    the trade."""
+    if fill_mode not in ("next_open", "bar_close"):
+        raise ValueError("fill_mode must be 'next_open' or 'bar_close'")
     versions = plan.to_record()["versions"]
     ent = next((v for v in versions
                 if v["state"] == PLAN_HYPOTHETICAL_ENTRY_MET), None)
@@ -250,9 +295,15 @@ def outcome_for(plan, bidask, direction):
     final = plan.current.state
     exit_v = versions[-1]
     t_exit = pd.Timestamp(exit_v["as_of_time"])
-    entry_px, t_fill = fill_price(bidask, t_entry, direction,
-                                  side="entry")
-    exit_px, _ = fill_price(bidask, t_exit, direction, side="exit")
+    if fill_mode == "next_open":
+        entry_px, t_fill = fill_price_next_open(bidask, t_entry,
+                                                direction, side="entry")
+        exit_px, _ = fill_price_next_open(bidask, t_exit, direction,
+                                          side="exit")
+    else:
+        entry_px, t_fill = fill_price(bidask, t_entry, direction,
+                                      side="entry")
+        exit_px, _ = fill_price(bidask, t_exit, direction, side="exit")
     if entry_px is None or exit_px is None:
         return {"outcome": "censored", "final_state": final,
                 "reason": "no quote rows at fill/exit time"}
@@ -263,14 +314,23 @@ def outcome_for(plan, bidask, direction):
                              obj_level)
     pips = (exit_px - entry_px) * (1 if direction == "up" else -1) * 1e4
     out = {
+        "fill_mode": fill_mode,
         "entry_time": str(t_entry), "fill_time": t_fill,
         "entry_fill": entry_px, "exit_time": str(t_exit),
         "exit_fill": exit_px, "pips_gross": round(pips, 2),
         "final_state": final,
         "ambiguity_same_bar_touch": amb,
-        "notes": ["hypothetical close-based simulation; buy at ask / "
-                  "sell at bid from actual 5m quotes; no commission "
-                  "data exists in this dataset (not invented)"],
+        "notes": (["causal next_open simulation: both legs fill at "
+                   "the next 5m bar open after their events; long "
+                   "entry/short exit at ask, short entry/long exit "
+                   "at bid (spread actually paid)"]
+                  if fill_mode == "next_open" else
+                  ["NON-CAUSAL bar_close comparison mode (explicitly "
+                   "labeled): both legs fill at the event bar's close "
+                   "long entry/short exit at ask, short entry/long "
+                   "exit at bid (spread actually paid)"])
+                 + ["no commission data exists in this dataset "
+                    "(not invented)"],
     }
     if amb:
         out["outcome"] = "AMBIGUOUS_CENSORED"
@@ -349,25 +409,35 @@ def run_phase(args, phase: str) -> int:
         # configuration; ENGINEERING interpretation — no thresholds):
         # hold the attempt while the connected readings hold an
         # EVIDENCE_PREFERRED FVG whose region direction OPPOSES the
-        # decision's scenario direction.  This is recorded
-        # contradicting evidence — not a prediction and not a rule
-        # from the source material.
+        # INTENDED trade direction (interpretation-direction helper:
+        # continuation follows the context, reversal opposes it — the
+        # legacy gate wrongly compared against the raw context
+        # direction and blocked profitable reversals).  This is
+        # recorded contradicting evidence — not a prediction and not a
+        # rule from the source material.
         ctx_dir = str(dec.context.get("direction"))
+        pid = getattr(dec, "primary_interpretation_id", None)
+        intended = _intended_direction(pid, ctx_dir)
+        if intended is None:
+            return False, (
+                "decision has no determinable intended direction: "
+                "pid=" + str(pid) + " ctx_dir=" + str(ctx_dir))
         for tid2, t2 in study.readings.tasks.items():
             c2 = t2.conclusion or {}
             pref = c2.get("preferred")
             if c2.get("status") == "EVIDENCE_PREFERRED" and pref:
                 reg = study.readings.regions.get(pref)
-                if reg is not None and ctx_dir in ("up", "down"):
+                if reg is not None and intended in ("up", "down"):
                     oppose = ((reg.direction == "downward"
-                               and ctx_dir == "up")
+                               and intended == "up")
                               or (reg.direction == "upward"
-                                  and ctx_dir == "down"))
+                                  and intended == "down"))
                     if oppose:
                         return False, (
                             "connected readings hold EVIDENCE_PREFERRED "
                             f"FVG {pref} ({reg.direction}) opposing the "
-                            "scenario direction (" + ctx_dir
+                            "intended direction (" + intended
+                            + " from pid=" + str(pid) + " ctx=" + ctx_dir
                             + ") — recorded contradicting evidence; "
                             "the attempt is held while this holds")
         if rt is not None and rt.conclusion:
@@ -444,7 +514,9 @@ def run_phase(args, phase: str) -> int:
                              task_scale=TASK_SCALE)
             if not active_plan.active:
                 oc = outcome_for(active_plan, bidask,
-                                 active_plan.current.direction)
+                                 active_plan.current.direction,
+                                 fill_mode=args.get("fill_mode",
+                                                    "next_open"))
                 case = {"kind": "plan", "plan": active_plan.to_record(),
                         "outcome": oc,
                         "decision_state": dec.state,
@@ -495,7 +567,8 @@ def run_phase(args, phase: str) -> int:
 
     if active_plan is not None:
         oc = outcome_for(active_plan, bidask,
-                         active_plan.current.direction)
+                         active_plan.current.direction,
+                         fill_mode=args.get("fill_mode", "next_open"))
         cases.append({"kind": "plan", "plan": active_plan.to_record(),
                       "outcome": oc,
                       "decision_state": "open-at-data-end",
@@ -530,6 +603,7 @@ def run_phase(args, phase: str) -> int:
     summary = {
         "phase": phase, "window": [t0, t1],
         "gate": args.get("gate", "v1"),
+        "fill_mode": args.get("fill_mode", "next_open"),
         "gate_stats": gate_stats,
         "plan_evaluation": ev,
         "cases_total": len(cases),
@@ -656,6 +730,12 @@ def main(argv=None) -> int:
     ap.add_argument("--gate", choices=["v1", "b0"], default="v1",
                     help="v1 = connected gate; b0 = explicitly defined "
                          "simple baseline (no connected gate)")
+    ap.add_argument("--fill-mode", choices=["next_open", "bar_close"],
+                    default="next_open",
+                    help="next_open (DEFAULT, causal): both legs fill "
+                         "at the next 5m bar open after their events; "
+                         "bar_close: EXPLICITLY LABELED NON-CAUSAL "
+                         "comparison mode (event bar close)")
     args = vars(ap.parse_args(argv))
     if args["phase"] == "pause":
         return pause_and_step(args)

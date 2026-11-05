@@ -1,0 +1,513 @@
+{
+  "artifact": "coverage_report_v1",
+  "dataset_id": "ICT_CHART_APPLICATION_LEARNING_DATASET_V1",
+  "generated_utc": "2026-10-11",
+  "description": "Extraction / selection / interpretation coverage for the genuinely executable dataset records, computed with the repository's OWN public engines (zones.fvg.gap_events_v1 via CausalFVGEngine = 4.2A V1.1; orderflow.volume_delta CausalVolumeDeltaEngine = 3.1 V1.1). No new detectors. No importance scores. Swing-dependent engines were deliberately NOT run (owner swing policy missing).",
+  "full_artifact": {
+    "path_outside_dataset": "/home/user/work/coverage_executable_v1.json",
+    "sha256": "34c300bff5604e6e9ef5604ab0e723665ac44a3084e555bef8c60b7277b4b67f",
+    "note": "Full engine output with complete candidate lists and per-input data hashes."
+  },
+  "engines_used": [
+    "trading_system.zones.fvg.CausalFVGEngine (4.2A V1.1)",
+    "trading_system.orderflow.volume_delta.CausalVolumeDeltaEngine (3.1 V1.1)"
+  ],
+  "engines_deliberately_not_run": {
+    "2.1A/2.1B/2.1C/2.2/4.1/4.2B": "swing-dependent; owner swing-policy declaration missing (field_run_config swing_quantile=null => NOT_CONFIGURED). No parameters invented.",
+    "5.1/5.2/MUF/trajectory": "require full contract/artifact stacks beyond this probe's scope"
+  },
+  "inputs_hashes": {
+    "BTCUSDT_1m_2025-09": {
+      "sha256": "e1d5c8f350d83df866ff36c3b4d74f7e5b383db07cde7bca0ee1f200d7a48979",
+      "source_url": "https://github.com/parshant231234-eng/BTCUSDT-Historical-Data (1m/2025/09/BTCUSDT_1m_2025-09.csv)",
+      "rows": null
+    },
+    "BTCUSDT_1m_2025-08": {
+      "sha256": "15d26d2374bce8804e25012ff76e5fad976633a2fde843ffb0f487e1c90a0cf4",
+      "source_url": "https://github.com/parshant231234-eng/BTCUSDT-Historical-Data (1m/2025/08/BTCUSDT_1m_2025-08.csv)",
+      "rows": null
+    },
+    "NQ_1m_vendor_sample": {
+      "sha256": "1b182cd151bcc285c05f90037e9b5184e9a5436e903793637d6b43b7754c86b2",
+      "source_url": "https://github.com/getdata-finance/nq-1m-ohlcv-stocks-historical-data (NQ_1m.csv, release sample-2026-07-31)",
+      "rows": null
+    }
+  },
+  "btc_4h_aggregation_rule": "4h UTC-anchored bins (origin 00:00 UTC), OHLCV standard aggregation; declared approximation of the source's TradingView 4h bars",
+  "coverage_rows": {
+    "RCA-2025-SEP25-SXM-007": {
+      "extraction": {
+        "status": "CANDIDATE_PRESENT (family level)",
+        "detail": "4.2A over 4h UTC-anchored bins (declared aggregation, not necessarily TradingView's): 366 bars, 81 FVGs created in 2025-08-01..09-30 (40 bullish / 41 bearish); 73 created before the decision day; 33 of those overlap the 110k-114k band."
+      },
+      "selection": {
+        "status": "CANDIDATE_PRESENT_BUT_SELECTION_UNAVAILABLE + AMBIGUOUS_MATCH",
+        "detail": "No candidate chooser exists in the stack (constraint); the source states no gap coordinates \u2192 no unique binding. Family-level presence only."
+      },
+      "interpretation": {
+        "status": "GAP",
+        "detail": "'fp.fvg' and the 'raid-and-reject inside the gap' qualifier have no repository counterpart (4.2A lifecycle facts only). 90min BTC/ETH SMT has no producer."
+      },
+      "candidates_asof_decision_day_overlapping_110k_114k": [
+        {
+          "creation_position": 10,
+          "origin_position": 8,
+          "direction": "BEARISH_FVG_CANDIDATE",
+          "zone_low": 113420.0,
+          "zone_high": 113425.58,
+          "midpoint": 113422.79000000001,
+          "creation_time_utc": "2025-08-02 16:00:00+00:00",
+          "origin_time_utc": "2025-08-02 08:00:00+00:00"
+        },
+        {
+          "creation_position": 13,
+          "origin_position": 11,
+          "direction": "BULLISH_FVG_CANDIDATE",
+          "zone_low": 113058.82,
+          "zone_high": 113341.06,
+          "midpoint": 113199.94,
+          "creation_time_utc": "2025-08-03 04:00:00+00:00",
+          "origin_time_utc": "2025-08-02 20:00:00+00:00"
+        },
+        {
+          "creation_position": 28,
+          "origin_position": 26,
+          "direction": "BEARISH_FVG_CANDIDATE",
+          "zone_low": 113763.27,
+          "zone_high": 113928.87,
+          "midpoint": 113846.07,
+          "creation_time_utc": "2025-08-05 16:00:00+00:00",
+          "origin_time_utc": "2025-08-05 08:00:00+00:00"
+        },
+        {
+          "creation_position": 112,
+          "origin_position": 110,
+          "direction": "BEARISH_FVG_CANDIDATE",
+          "zone_low": 113897.58,
+          "zone_high": 114804.0,
+          "midpoint": 114350.79000000001,
+          "creation_time_utc": "2025-08-19 16:00:00+00:00",
+          "origin_time_utc": "2025-08-19 08:00:00+00:00"
+        },
+        {
+          "creation_position": 124,
+          "origin_position": 122,
+          "direction": "BEARISH_FVG_CANDIDATE",
+          "zone_low": 112969.47,
+          "zone_high": 113000.0,
+          "midpoint": 112984.735,
+          "creation_time_utc": "2025-08-21 16:00:00+00:00",
+          "origin_time_utc": "2025-08-21 08:00:00+00:00"
+        },
+        {
+          "creation_position": 130,
+          "origin_position": 128,
+          "direction": "BULLISH_FVG_CANDIDATE",
+          "zone_low": 113319.3,
+          "zone_high": 116116.0,
+          "midpoint": 114717.65,
+          "creation_time_utc": "2025-08-22 16:00:00+00:00",
+          "origin_time_utc": "2025-08-22 08:00:00+00:00"
+        },
+        {
+          "creation_position": 143,
+          "origin_position": 141,
+          "direction": "BEARISH_FVG_CANDIDATE",
+          "zone_low": 113692.97,
+          "zone_high": 114350.57,
+          "midpoint": 114021.77,
+          "creation_time_utc": "2025-08-24 20:00:00+00:00",
+          "origin_time_utc": "2025-08-24 12:00:00+00:00"
+        },
+        {
+          "creation_position": 146,
+          "origin_position": 144,
+          "direction": "BEARISH_FVG_CANDIDATE",
+          "zone_low": 111850.13,
+          "zone_high": 112159.0,
+          "midpoint": 112004.565,
+          "creation_time_utc": "2025-08-25 08:00:00+00:00",
+          "origin_time_utc": "2025-08-25 00:00:00+00:00"
+        },
+        {
+          "creation_position": 150,
+          "origin_position": 148,
+          "direction": "BEARISH_FVG_CANDIDATE",
+          "zone_low": 110111.98,
+          "zone_high": 110655.01,
+          "midpoint": 110383.495,
+          "creation_time_utc": "2025-08-26 00:00:00+00:00",
+          "origin_time_utc": "2025-08-25 16:00:00+00:00"
+        },
+        {
+          "creation_position": 155,
+          "origin_position": 153,
+          "direction": "BULLISH_FVG_CANDIDATE",
+          "zone_low": 110818.6,
+          "zone_high": 110918.26,
+          "midpoint": 110868.43,
+          "creation_time_utc": "2025-08-26 20:00:00+00:00",
+          "origin_time_utc": "2025-08-26 12:00:00+00:00"
+        },
+        {
+          "creation_position": 160,
+          "origin_position": 158,
+          "direction": "BULLISH_FVG_CANDIDATE",
+          "zone_low": 111374.45,
+          "zone_high": 111541.23,
+          "midpoint": 111457.84,
+          "creation_time_utc": "2025-08-27 16:00:00+00:00",
+          "origin_time_utc": "2025-08-27 08:00:00+00:00"
+        },
+        {
+          "creation_position": 164,
+          "origin_position": 162,
+          "direction": "BULLISH_FVG_CANDIDATE",
+          "zone_low": 112042.04,
+          "zone_high": 112826.22,
+          "midpoint": 112434.13,
+          "creation_time_utc": "2025-08-28 08:00:00+00:00",
+          "origin_time_utc": "2025-08-28 00:00:00+00:00"
+        },
+        {
+          "creation_position": 169,
+          "origin_position": 167,
+          "direction": "BEARISH_FVG_CANDIDATE",
+          "zone_low": 111850.56,
+          "zone_high": 111872.06,
+          "midpoint": 111861.31,
+          "creation_time_utc": "2025-08-29 04:00:00+00:00",
+          "origin_time_utc": "2025-08-28 20:00:00+00:00"
+        },
+        {
+          "creation_position": 170,
+          "origin_position": 168,
+          "direction": "BEARISH_FVG_CANDIDATE",
+          "zone_low": 110270.3,
+          "zone_high": 111302.27,
+          "midpoint": 110786.285,
+          "creation_time_utc": "2025-08-29 08:00:00+00:00",
+          "origin_time_utc": "2025-08-29 00:00:00+00:00"
+        },
+        {
+          "creation_position": 193,
+          "origin_position": 191,
+          "direction": "BULLISH_FVG_CANDIDATE",
+          "zone_low": 109442.95,
+          "zone_high": 110000.0,
+          "midpoint": 109721.475,
+          "creation_time_utc": "2025-09-02 04:00:00+00:00",
+          "origin_time_utc": "2025-09-01 20:00:00+00:00"
+        },
+        {
+          "creation_position": 205,
+          "origin_position": 203,
+          "direction": "BEARISH_FVG_CANDIDATE",
+          "zone_low": 111318.84,
+          "zone_high": 111613.98,
+          "midpoint": 111466.41,
+          "creation_time_utc": "2025-09-04 04:00:00+00:00",
+          "origin_time_utc": "2025-09-03 20:00:00+00:00"
+        },
+        {
+          "creation_position": 208,
+          "origin_position": 206,
+          "direction": "BEARISH_FVG_CANDIDATE",
+          "zone_low": 110218.39,
+          "zone_high": 110415.72,
+          "midpoint": 110317.055,
+          "creation_time_utc": "2025-09-04 16:00:00+00:00",
+          "origin_time_utc": "2025-09-04 08:00:00+00:00"
+        },
+        {
+          "creation_position": 210,
+          "origin_position": 208,
+          "direction": "BULLISH_FVG_CANDIDATE",
+          "zone_low": 110218.39,
+          "zone_high": 110435.75,
+          "midpoint": 110327.07,
+          "creation_time_utc": "2025-09-05 00:00:00+00:00",
+          "origin_time_utc": "2025-09-04 16:00:00+00:00"
+        },
+        {
+          "creation_position": 212,
+          "origin_position": 210,
+          "direction": "BULLISH_FVG_CANDIDATE",
+          "zone_low": 111482.09,
+          "zone_high": 112131.02,
+          "midpoint": 111806.555,
+          "creation_time_utc": "2025-09-05 08:00:00+00:00",
+          "origin_time_utc": "2025-09-05 00:00:00+00:00"
+        },
+        {
+          "creation_position": 214,
+          "origin_position": 212,
+          "direction": "BEARISH_FVG_CANDIDATE",
+          "zone_low": 111627.51,
+          "zone_high": 112131.02,
+          "midpoint": 111879.265,
+          "creation_time_utc": "2025-09-05 16:00:00+00:00",
+          "origin_time_utc": "2025-09-05 08:00:00+00:00"
+        },
+        {
+          "creation_position": 220,
+          "origin_position": 218,
+          "direction": "BEARISH_FVG_CANDIDATE",
+          "zone_low": 110402.0,
+          "zone_high": 110675.58,
+          "midpoint": 110538.79000000001,
+          "creation_time_utc": "2025-09-06 16:00:00+00:00",
+          "origin_time_utc": "2025-09-06 08:00:00+00:00"
+        },
+        {
+          "creation_position": 221,
+          "origin_position": 219,
+          "direction": "BEARISH_FVG_CANDIDATE",
+          "zone_low": 110282.82,
+          "zone_high": 110358.11,
+          "midpoint": 110320.465,
+          "creation_time_utc": "2025-09-06 20:00:00+00:00",
+          "origin_time_utc": "2025-09-06 12:00:00+00:00"
+        },
+        {
+          "creation_position": 223,
+          "origin_position": 221,
+          "direction": "BULLISH_FVG_CANDIDATE",
+          "zone_low": 110282.82,
+          "zone_high": 110463.1,
+          "midpoint": 110372.96,
+          "creation_time_utc": "2025-09-07 04:00:00+00:00",
+          "origin_time_utc": "2025-09-06 20:00:00+00:00"
+        },
+        {
+          "creation_position": 225,
+          "origin_position": 223,
+          "direction": "BULLISH_FVG_CANDIDATE",
+          "zone_low": 110911.42,
+          "zone_high": 111042.6,
+          "midpoint": 110977.01000000001,
+          "creation_time_utc": "2025-09-07 12:00:00+00:00",
+          "origin_time_utc": "2025-09-07 04:00:00+00:00"
+        },
+        {
+          "creation_position": 231,
+          "origin_position": 229,
+          "direction": "BULLISH_FVG_CANDIDATE",
+          "zone_low": 111609.04,
+          "zone_high": 111877.64,
+          "midpoint": 111743.34,
+          "creation_time_utc": "2025-09-08 12:00:00+00:00",
+          "origin_time_utc": "2025-09-08 04:00:00+00:00"
+        },
+        {
+          "creation_position": 236,
+          "origin_position": 234,
+          "direction": "BULLISH_FVG_CANDIDATE",
+          "zone_low": 112104.41,
+          "zone_high": 112403.91,
+          "midpoint": 112254.16,
+          "creation_time_utc": "2025-09-09 08:00:00+00:00",
+          "origin_time_utc": "2025-09-09 00:00:00+00:00"
+        },
+        {
+          "creation_position": 238,
+          "origin_position": 236,
+          "direction": "BEARISH_FVG_CANDIDATE",
+          "zone_low": 111388.04,
+          "zone_high": 112403.91,
+          "midpoint": 111895.975,
+          "creation_time_utc": "2025-09-09 16:00:00+00:00",
+          "origin_time_utc": "2025-09-09 08:00:00+00:00"
+        },
+        {
+          "creation_position": 242,
+          "origin_position": 240,
+          "direction": "BULLISH_FVG_CANDIDATE",
+          "zone_low": 111586.26,
+          "zone_high": 112097.2,
+          "midpoint": 111841.73,
+          "creation_time_utc": "2025-09-10 08:00:00+00:00",
+          "origin_time_utc": "2025-09-10 00:00:00+00:00"
+        },
+        {
+          "creation_position": 244,
+          "origin_position": 242,
+          "direction": "BULLISH_FVG_CANDIDATE",
+          "zone_low": 112859.8,
+          "zone_high": 113155.03,
+          "midpoint": 113007.41500000001,
+          "creation_time_utc": "2025-09-10 16:00:00+00:00",
+          "origin_time_utc": "2025-09-10 08:00:00+00:00"
+        },
+        {
+          "creation_position": 314,
+          "origin_position": 312,
+          "direction": "BEARISH_FVG_CANDIDATE",
+          "zone_low": 112976.02,
+          "zone_high": 114150.0,
+          "midpoint": 113563.01000000001,
+          "creation_time_utc": "2025-09-22 08:00:00+00:00",
+          "origin_time_utc": "2025-09-22 00:00:00+00:00"
+        },
+        {
+          "creation_position": 323,
+          "origin_position": 321,
+          "direction": "BEARISH_FVG_CANDIDATE",
+          "zone_low": 112220.54,
+          "zone_high": 112496.61,
+          "midpoint": 112358.575,
+          "creation_time_utc": "2025-09-23 20:00:00+00:00",
+          "origin_time_utc": "2025-09-23 12:00:00+00:00"
+        },
+        {
+          "creation_position": 327,
+          "origin_position": 325,
+          "direction": "BULLISH_FVG_CANDIDATE",
+          "zone_low": 112779.37,
+          "zone_high": 112808.0,
+          "midpoint": 112793.685,
+          "creation_time_utc": "2025-09-24 12:00:00+00:00",
+          "origin_time_utc": "2025-09-24 04:00:00+00:00"
+        },
+        {
+          "creation_position": 328,
+          "origin_position": 326,
+          "direction": "BULLISH_FVG_CANDIDATE",
+          "zone_low": 113162.17,
+          "zone_high": 113163.21,
+          "midpoint": 113162.69,
+          "creation_time_utc": "2025-09-24 16:00:00+00:00",
+          "origin_time_utc": "2025-09-24 08:00:00+00:00"
+        }
+      ]
+    },
+    "RCA-2025-SEP25-SXM-008": {
+      "extraction": {
+        "status": "CANDIDATE_PRESENT (FVG family) + OHLC-FACT VERIFIED (liquidity band)",
+        "detail": "4.2A 1m 2025-09-24..26: 1786 gaps created (912B/874B); 564 created on the trade date; 306 before 13:00 UTC \u2014 the intraday selection problem is quantified. Raw-OHLC fact: 108,5xx prior-lows band touched 5 trading days 2025-08-29..09-02 (see anchor_alignment)."
+      },
+      "selection": {
+        "status": "AMBIGUOUS_MATCH",
+        "detail": "564 same-day candidates; 'fp.fvg' undefined \u2192 no binding; none declared correct."
+      },
+      "interpretation": {
+        "status": "GAP",
+        "detail": "No DOL entity; 2.2 liquidity extraction blocked (owner swing policy)."
+      }
+    },
+    "RCA-2026-APR13-MARCUS-009": {
+      "extraction": {
+        "status": "PARTIAL \u2014 session universe computed; anchor matching OUT_OF_DATA_SLICE_COVERAGE",
+        "detail": "Vendor NQ slice 2026-04-13: 405 RTH bars; 4.2A created 81 in-session FVGs. 3.1 OHLCV_PROXY: 405 rows (contract excludes divergence/CVD semantics)."
+      },
+      "selection": {
+        "status": "OUT_OF_DATA_SLICE_COVERAGE",
+        "detail": "Decision 08:24 NY precedes the slice's first daily bar (RTH-only feed); posted prices below slice session range \u2192 feed alignment NOT established \u2192 no price matching."
+      },
+      "interpretation": {
+        "status": "OUT_OF_CONTRACT",
+        "detail": "'CVD divergence' outside 3.1 V1.1 scope and every other contract; invalidation-reference entity absent."
+      }
+    },
+    "RCA-2026-APR14-MARCUS-010": {
+      "extraction": {
+        "status": "PARTIAL \u2014 same as -009",
+        "detail": "4.2A created 92 in-session FVGs on 2026-04-14."
+      },
+      "selection": {
+        "status": "OUT_OF_DATA_SLICE_COVERAGE",
+        "detail": "Decision 07:54 NY pre-slice; feed alignment not established."
+      },
+      "interpretation": {
+        "status": "OUT_OF_CONTRACT",
+        "detail": "CVD/STDV/VP outside all contracts."
+      }
+    },
+    "RCA-2026-JUN30-SXM-011": {
+      "extraction": {
+        "status": "NOT_APPLICABLE",
+        "detail": "Principles-level record: no coordinates; excluded from extraction-coverage denominators."
+      },
+      "selection": {
+        "status": "NOT_APPLICABLE",
+        "detail": null
+      },
+      "interpretation": {
+        "status": "EVIDENCE_ONLY",
+        "detail": "Feeds the interpretation-fidelity axis ('structure over SMT' precedence not representable in the stack)."
+      }
+    }
+  },
+  "anchor_alignment": {
+    "RCA-2025-SEP25-SXM-008": {
+      "exit_price_claimed": 108500,
+      "binance_day_low_2025_09_25": 108631.51,
+      "binance_day_high_2025_09_25": 113510.23,
+      "binance_day_open_2025_09_25": 113307.01,
+      "exit_vs_day_low_abs": 131.50999999999476,
+      "old_low_zone_1085xx_touch_days_2025_08_29_to_09_02": [
+        2025,
+        8,
+        29,
+        30,
+        31,
+        9,
+        1,
+        2
+      ],
+      "note": "108,5xx was an established prior-low band (touched 2025-08-29..09-02) matching the posted exit 108,500; venue differs (journal: Bybit/TradingView feed; slice: Binance Spot) \u2014 proxy declared"
+    },
+    "RCA-2025-SEP25-SXM-008_entry_price_verbatim": {
+      "posted": "11555",
+      "status": "UNRESOLVED",
+      "candidate_readings": [
+        "113,55x (day open 113,307 / day high 113,510 on 2025-09-25 \u2014 digit dropped)",
+        "115,550 (touched only on 2025-09-11..13 in the slice \u2014 swing-short reading)"
+      ],
+      "resolution": "NOT resolved; no reading adopted"
+    },
+    "RCA-2026-APR13-MARCUS-009": {
+      "entry": 25120.5,
+      "stop_loss": 25112.25,
+      "take_profit": 25142.5,
+      "claimed_time_ny": "08:24",
+      "slice_session_low": 25441.0,
+      "slice_session_high": 25840.75,
+      "slice_first_bar_utc": "2026-04-13T13:30:00+00:00 (09:30 ET; slice has NO pre-market rows)",
+      "entry_vs_session_low_offset": -320.5,
+      "rr_check": "risk 8.25 pts / reward 22.00 pts = 2.667 vs posted RR 1:2.6 \u2014 self-consistent",
+      "status": "FEED_ALIGNMENT_NOT_ESTABLISHED (posted prices sit below slice session range; cash-CFD-vs-futures-basis hypothesis noted, NOT adopted)"
+    },
+    "RCA-2026-APR14-MARCUS-010": {
+      "entry": 25662.25,
+      "stop_loss": 25651.5,
+      "take_profit": 25712.75,
+      "claimed_time_ny": "07:54",
+      "slice_session_low": 25937.0,
+      "slice_session_high": 26284.25,
+      "entry_vs_session_low_offset": -274.75,
+      "rr_check": "risk 10.75 pts / reward 50.50 pts = 4.698 vs posted 'initially 1:4.7' \u2014 self-consistent",
+      "status": "FEED_ALIGNMENT_NOT_ESTABLISHED"
+    }
+  },
+  "slice_verification": {
+    "NQ_vendor_sample": {
+      "internal": "55,440 rows; monotonic unique timestamps; 0 OHLC geometry violations; RTH pattern 13:30-20:14 UTC (405 bars/day) with coverage anomalies (2026-09-01 full-day)",
+      "external_anchors": [
+        "nasdaq.com 'April 2026 Review and Outlook': Nasdaq-100 +15.7% in April 2026 (best month in 23 years); vendor April first-open->last-close = +13.68% (futures, partial-month endpoints)",
+        "businessinsider NDX snapshot (pageAge 2026-10-09): 90-day low 27,176.03; vendor JUL-2026 session low 27,201.5 (25.5 pts apart)",
+        "businessinsider NDX snapshot: 52-week low 22,841.42 (~Oct-2025, outside sample)",
+        "Robinhood/ForecastEX Jun-26 NQ settle strikes for 2026-04-13 (>25,200/>25,300/>25,400 traded ~0.79-0.84) \u2014 compatible with vendor Apr-13 RTH 25,441-25,840; non-discriminating vs Marcus scale"
+      ],
+      "verdict": "CONSISTENT_WITH_EXTERNAL_ANCHORS_PARTIAL \u2014 usable as an NQ-family slice; per-record feed alignment separate"
+    },
+    "BTC_mirror": {
+      "internal": "43,200 rows/month (complete 1-min), monotonic, geometry clean",
+      "external_anchors": [
+        "journal RCA-2025-SEP25-SXM-008 independent claim: short exit 108,500 on 2025-09-25; slice day low 108,631.51 (0.12% apart across venues)",
+        "journal pre-event claim 'expect today's news drivers to expand price lower' + slice day path 113,307->108,631 (-3.8%) same day"
+      ],
+      "verdict": "CONSISTENT_WITH_INDEPENDENT_JOURNAL_CLAIMS \u2014 usable with declared venue proxy (Binance Spot vs journal's Bybit/TradingView)"
+    }
+  }
+}
