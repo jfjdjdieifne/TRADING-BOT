@@ -230,11 +230,19 @@ def test_intrabar_double_touch_is_ambiguous():
     bidask = _mk_bidask(start="2025-03-03 10:00", periods=40)
     t_entry = pd.Timestamp("2025-03-03 10:05", tz="UTC")
     t_exit = pd.Timestamp("2025-03-03 11:05", tz="UTC")
-    # both levels inside the SAME 1h bar's 5m range between entry/exit
-    win = bidask[(bidask.index > t_entry)
-                 & (bidask.index <= t_exit)]
-    lo = float(win.BidLow.min())
-    hi = float(win.AskHigh.max())
+    # FIXTURE FIX (2026-11-05): both levels must lie inside the SAME 1h
+    # evaluation batch (the 10:00 task bar).  The engine resolves
+    # stop/target at the task-bar CLOSE (trade_plan.py definitions:
+    # "the first completed task-scale bar whose CLOSE is strictly
+    # beyond ..."), so two 5m touches inside ONE batch cannot be
+    # ordered -> ambiguous.  The earlier fixture took its extremes from
+    # a window spanning TWO 1h batches (monotonic series), so no single
+    # batch touched both levels and the rule correctly stayed silent.
+    batch = bidask[(bidask.index > t_entry)
+                   & (bidask.index
+                      < pd.Timestamp("2025-03-03 11:00", tz="UTC"))]
+    lo = float(batch.BidLow.min())
+    hi = float(batch.AskHigh.max())
     plan = _fake_plan(t_entry, t_exit,
                       levels={"reference": {"level": lo},
                               "leg_end": {"level": hi}},
@@ -242,6 +250,17 @@ def test_intrabar_double_touch_is_ambiguous():
     out = mod.outcome_for(plan, bidask, "up")
     assert out["ambiguity_same_bar_touch"] is True
     assert out["outcome"] == "AMBIGUOUS_CENSORED"
+    # control case (kept from the in-memory verification, now as an
+    # assertion): when EVERY 1h batch spans both levels, the rule fires
+    # as well and the outcome stays censored-ambiguous.
+    flat = bidask.copy()
+    flat["BidLow"] = 1.0
+    flat["BidHigh"] = 2.0
+    flat["AskLow"] = 1.0
+    flat["AskHigh"] = 2.0
+    out2 = mod.outcome_for(plan, flat, "up")
+    assert out2["ambiguity_same_bar_touch"] is True
+    assert out2["outcome"] == "AMBIGUOUS_CENSORED"
 
 
 # ---------------------------------------------------------------------
