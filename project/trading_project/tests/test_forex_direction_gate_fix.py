@@ -16,8 +16,13 @@ Covers:
   * bar_close remains available as an explicitly labeled NON-CAUSAL
     comparison mode;
   * intrabar stop/target double-touch stays AMBIGUOUS_CENSORED (never
-    resolved in favour of the trade).
+    resolved in favour of the trade), with a NEGATIVE control: levels
+    touched in two different 1h batches are NOT ambiguous;
+  * context extraction yields direction ONLY from I-primary (the
+    assumption that keeps the I-scenario/create_plan mapping mismatch
+    from silently mattering).
 """
+import __future__ as _future
 import ast as _ast
 import importlib.util
 import json
@@ -29,6 +34,9 @@ from pathlib import Path
 _HERE = Path(__file__).resolve()
 _MOD_PATH = (_HERE.parents[1] / "docs" / "research" / "huddleston_study"
              / "run_forex_intraday_v1.py")
+_DECISION_LAYER_PATH = (_HERE.parents[1] / "src" / "trading_system"
+                        / "research" / "contextual_selection"
+                        / "decision_layer.py")
 
 try:
     import pandas as pd
@@ -87,6 +95,59 @@ def test_intended_direction_mapping():
     assert mod._intended_direction(None, "up") is None
     assert mod._intended_direction("I-primary", "sideways") is None
     assert mod._intended_direction("I-primary", None) is None
+
+
+# ---------------------------------------------------------------------
+# 1b. context extraction yields direction ONLY from I-primary
+# ---------------------------------------------------------------------
+def _load_extract_context():
+    """Pure-python AST extraction of decision_layer.extract_context (the
+    same pattern as the no-pandas fallback in _load_module): the function
+    body reads only record attributes and builtins, so it executes here
+    without pandas and without any market data."""
+    tree = _ast.parse(_DECISION_LAYER_PATH.read_text())
+    fn = next(n for n in tree.body
+              if isinstance(n, _ast.FunctionDef)
+              and n.name == "extract_context")
+    ns = {}
+    # decision_layer.py declares `from __future__ import annotations`;
+    # compile with the same flag so annotations stay lazy strings and
+    # typing names (Dict, ...) are never evaluated at def time.
+    exec(compile(_ast.Module([fn], []), str(_DECISION_LAYER_PATH), "exec",
+                 flags=_future.annotations.compiler_flag), ns)
+    return ns["extract_context"]
+
+
+def test_context_direction_only_from_i_primary():
+    # LOCKS THE ASSUMPTION that neutralizes the latent mapping mismatch:
+    # _intended_direction treats I-scenario as continuation while
+    # create_plan treats any pid != "I-primary" as reversal. Because
+    # extract_context reads the direction ONLY from I-primary, an
+    # I-scenario-only (or I-alt-only) record yields direction "none",
+    # the gate's _intended_direction returns None, and the attempt is
+    # held — so a plan with a gate-validated side opposite to the plan
+    # layer's side can never be created through that path. If context
+    # extraction ever starts reading I-scenario, THIS test must fail and
+    # the gate/plan mapping must be reconciled first.
+    extract_context = _load_extract_context()
+
+    def mk(interp_id, direction):
+        return types.SimpleNamespace(
+            interpretations=[types.SimpleNamespace(
+                interpretation_id=interp_id,
+                data={"direction": direction})],
+            reference_status={"status": "confirmed"},
+            structural_facts=[],
+            forecasts=[])
+
+    # positive controls: I-primary direction passes through
+    assert extract_context(mk("I-primary", "up"))["direction"] == "up"
+    assert extract_context(mk("I-primary", "down"))["direction"] == "down"
+    # the locked assumption: no other interpretation feeds direction
+    assert extract_context(mk("I-scenario", "up"))["direction"] == "none"
+    assert extract_context(mk("I-alt", "down"))["direction"] == "none"
+    # and the runner-level consequence: ctx "none" -> no intended side
+    assert mod._intended_direction("I-scenario", "none") is None
 
 
 # ---------------------------------------------------------------------
@@ -261,6 +322,31 @@ def test_intrabar_double_touch_is_ambiguous():
     out2 = mod.outcome_for(plan, flat, "up")
     assert out2["ambiguity_same_bar_touch"] is True
     assert out2["outcome"] == "AMBIGUOUS_CENSORED"
+
+
+def test_intrabar_double_touch_negative_control_two_batches():
+    """NEGATIVE CONTROL (added after the independent audit): when the
+    two levels are touched in two DIFFERENT 1h batches, the rule must
+    stay silent. On this MONOTONIC synthetic series the extremes of the
+    whole (entry, exit] window fall in different hours — lo in the 10:00
+    batch, hi in the 11:00 batch — so no single batch touches both.
+    (This is exactly the construction of the pre-fix fixture, now with
+    the CORRECT expectation: not ambiguous.)"""
+    _needs_pandas()
+    bidask = _mk_bidask(start="2025-03-03 10:00", periods=40)
+    t_entry = pd.Timestamp("2025-03-03 10:05", tz="UTC")
+    t_exit = pd.Timestamp("2025-03-03 11:05", tz="UTC")
+    win = bidask[(bidask.index > t_entry)
+                 & (bidask.index <= t_exit)]
+    lo = float(win.BidLow.min())   # earliest bar -> 10:00 hour batch
+    hi = float(win.AskHigh.max())  # latest bar   -> 11:00 hour batch
+    plan = _fake_plan(t_entry, t_exit,
+                      levels={"reference": {"level": lo},
+                              "leg_end": {"level": hi}},
+                      objective_seen=True)
+    out = mod.outcome_for(plan, bidask, "up")
+    assert out["ambiguity_same_bar_touch"] is False
+    assert out["outcome"] != "AMBIGUOUS_CENSORED"
 
 
 # ---------------------------------------------------------------------
