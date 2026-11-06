@@ -1,9 +1,10 @@
 # COVERAGE — mechanical keyword counts only
 
-Corpus counted: 280 FULL-tier stored text files (excerpt records are excluded from these counts).
-Counting method: Python `re.search` case-insensitive over the raw stored file text, one hit per file per pattern. No interpretation; a mention is not evidence that the file endorses or explains the term.
+Method: Python `re.search`, case-insensitive, one hit per file per pattern, over the **stored file text as committed** (not over the withheld full pages). A count says only that the string appears; it says nothing about meaning, correctness or endorsement.
 
-| keyword family (regex used) | files mentioning | % of files |
+## A. GitHub full-text files (280 files, FULL tier only)
+
+| keyword family (regex) | files | % |
 |---|---|---|
 | liquidity / draw (`liquidit|draw on liquid`) | 155 | 55.4% |
 | stops (stop / stop loss) (`\bstops?\b|stop[- ]?loss`) | 131 | 46.8% |
@@ -13,14 +14,14 @@ Counting method: Python `re.search` case-insensitive over the raw stored file te
 | market structure shift / displacement (`market structure shift|\bmss\b|displacement`) | 74 | 26.4% |
 | dealing range (`dealing range`) | 22 | 7.9% |
 | premium / discount / equilibrium (`premium|discount|equilibrium`) | 101 | 36.1% |
-| killzone / time of day (`kill ?zone|killzone|time of day|session time`) | 92 | 32.9% |
+| killzone / time of day (`kill ?zone|time of day|session time`) | 92 | 32.9% |
 | target / objective (`\btarget|objective`) | 110 | 39.3% |
 | stop / invalidation (`invalidat`) | 53 | 18.9% |
 | entry (`\bentry\b|entries`) | 158 | 56.4% |
 | no-trade (`no[- ]?trade`) | 20 | 7.1% |
 | being wrong (`being wrong|wrong\b`) | 52 | 18.6% |
 
-## Same counts split by source_kind (files only, not percentages)
+### A2. Same counts split by source_kind (file counts)
 
 | keyword family | CODE_REPO | EXPLAINER | BOOK_OR_COURSE |
 |---|---|---|---|
@@ -38,3 +39,26 @@ Counting method: Python `re.search` case-insensitive over the raw stored file te
 | entry | 41 | 2 | 115 |
 | no-trade | 7 | 1 | 12 |
 | being wrong | 12 | 0 | 40 |
+
+## B. Web records (10 files, EXCERPT/INDEX_ONLY tier)
+
+| keyword family | records |
+|---|---|
+| liquidity / draw | 5 |
+| stops (stop / stop loss) | 1 |
+| equal highs / equal lows | 0 |
+| imbalance / FVG / rebalance | 8 |
+| order block | 7 |
+| market structure shift / displacement | 2 |
+| dealing range | 1 |
+| premium / discount / equilibrium | 3 |
+| killzone / time of day | 2 |
+| target / objective | 0 |
+| stop / invalidation | 0 |
+| entry | 3 |
+| no-trade | 0 |
+| being wrong | 0 |
+
+## C. Not counted
+
+- Files withheld for licence reasons (see `ERRORS.md` section E): their text was never stored, so counting it here would describe text this repository does not contain.

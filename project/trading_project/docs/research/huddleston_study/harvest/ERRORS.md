@@ -148,13 +148,39 @@ For each repository: `GET /repos/{full_name}` (200), `GET /repos/{full_name}/com
 
 No repository download failed. Every tarball returned HTTP 200.
 
-## D. Web pages attempted with the session `fetch_page` tool
+## D. Web attempts (session `fetch_page` / `web_search`)
 
-| URL | result |
-|---|---|
-| https://en.wikipedia.org/wiki/Market_trends | success (title "Market trend - Wikipedia", 17 chunks, Markdown returned) — reachability probe only, not ICT content, not stored |
-| https://www.babypips.com/learn/forex | success (title "Learn Forex Trading at School of Pipsology - Babypips.com", 3 chunks) — reachability probe only, not stored |
-| https://www.innercircletrader.com/ | `{"error":"Failed to fetch page","status":"error"}` — no HTTP code exposed by the tool |
+| # | URL | attempted with | result | stored as |
+|---|---|---|---|---|
+| 1 | https://en.wikipedia.org/wiki/Market_trends | fetch_page | success — title "Market trend - Wikipedia", 17 chunks | not stored (reachability probe only; not ICT content) |
+| 2 | https://www.babypips.com/learn/forex | fetch_page | success — title "Learn Forex Trading at School of Pipsology - Babypips.com", 3 chunks | not stored (reachability probe only) |
+| 3 | https://www.innercircletrader.com/ | fetch_page | `{"error":"Failed to fetch page","status":"error"}` (no HTTP code exposed) | nothing — see `web/pages/008_*` sibling record |
+| 4 | https://innercircletraders.net/ict-fair-value-gap/ | fetch_page | success — chunk 0 of 3 | `web/pages/001_*` (EXCERPT) |
+| 5 | https://michaeljhuddleston.org/notes/inner-circle-trader-ict-who-is-michael-huddleston/ | fetch_page | success — chunk 0 of 3 | `web/pages/002_*` (EXCERPT) |
+| 6 | https://www.tradiecapital.com/blog/ict-trading | fetch_page | success — chunk 0 of 3 | `web/pages/003_*` (EXCERPT) |
+| 7 | https://nqbacktest.online/learn/inner-circle-trader | fetch_page | success — complete page, 1 chunk | `web/pages/004_*` (EXCERPT) |
+| 8 | https://www.forexfactory.com/thread/post/15293056 | fetch_page | success but **only the page title returned** (`ICT system \| Page 2 \| Forex Factory`); posts are client-side | `web/pages/006_*` (INDEX_ONLY, no text) |
+| 9 | https://www.reddit.com/r/InnerCircleTraders/comments/1bhekzl/ict_2022_model/ | fetch_page | `Failed to fetch page (HTTP 403)` | failed — nothing stored |
+| 10 | https://old.reddit.com/r/InnerCircleTraders/comments/1bhekzl/ict_2022_model/ | fetch_page | `Failed to fetch page (HTTP 403)` | failed — nothing stored |
+| 11 | https://innercircletrader.net/tutorials/ict-order-block/ | fetch_page | success — chunk 0 of 4 | `web/pages/005_*` (EXCERPT) |
+| 12 | https://web.archive.org/web/2021/https://www.innercircletrader.com/ | fetch_page | success but body contains only archive chrome and `Too many requests` | `web/pages/008_*` (INDEX_ONLY, no content) |
+| 13 | https://www.theinnercircletraders.com/fvg-vs-order-block/ | fetch_page | success — chunk 0 of 3 | `web/pages/007_*` (EXCERPT) |
+| 14 | https://propnavi.io/en/blog/ict-trading-strategy/ | fetch_page | success — complete page, 1 chunk | `web/pages/009_*` (EXCERPT) |
+| 15 | https://captain-trading.com/en/blog/ict-inner-circle-trader | fetch_page | success — chunk 0 of 3 | `web/pages/010_*` (EXCERPT) |
+
+### Search queries used to find those URLs (12 calls, all `status: success`)
+
+`Inner Circle Trader Michael Huddleston order block fair value gap notes`; `inner circle trader fair value gap explanation blog article ICT concepts`; `forexfactory thread "inner circle trader" ICT concepts discussion`; `reddit r/InnerCircleTraders wiki order block fair value gap explanation`; `"Michael Huddleston" ICT written interview quotes "Inner Circle Trader" text article`.
+
+`web_search` returns extracted page text for each hit (often long). That text was **not** stored as file content: only page-fetch results were used for the stored records, and where a page could not be fetched the URL was logged here instead.
+
+### Leads found but not fetched (not YouTube)
+
+- `https://www.scribd.com/document/348443220/i-Ct-Material-Reference` — search result titled "ICT Trading Strategies by Michael Huddleston" (dated 2017); a Scribd document that appears to be an ICT material reference/glossary. Not fetched (document sites require accounts and the search extract already showed it is a compiled reference).
+- `https://medium.com/@lattebun/ict-trading-method-the-complete-guide-to-michael-huddlestons-inner-circle-trader-13bd46afd68a` — not fetched (Medium returned a search extract only).
+- `https://chartinglens.com/blog/ict-trading-strategy-guide`, `https://www.signalforge-ai.com/blog/ict-trading-strategy/`, `https://www.forexfactory.com/thread/1348196-mastering-the-ict-weekly-range-expansion-tflab`, `https://www.forexfactory.com/thread/1347487-how-to-trade-the-asian-session-using-icts`, `https://innercircletrader.net/opinion/who-is-inner-circle-trader-ict/` — not fetched; only their search extracts were seen.
+
+- `https://www.ictpdf.com/` (paid PDF course) and `https://icttradingcourse.com/` (paid course) — advertised on the retrieved pages; not accessed.
 
 ## E. Text not stored in full because of licence (not an error, a decision)
 

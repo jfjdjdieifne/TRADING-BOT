@@ -47,8 +47,9 @@ harvest/
 - [x] 74 repositories: metadata + pinned commit SHA + recursive tree + tarball + per-file sha256 (`github/inventory.jsonl`, 2700+ lines).
 - [x] Full text stored for 37 permissively licensed repos; quotes extracted for the rest.
 - [x] `INDEX.jsonl`, `MANIFEST.md`, `COVERAGE.md`, `DEDUPE.md`, `ERRORS.md`, `UNFETCHED_LEADS.md`.
-- [ ] Web harvest with `fetch_page` (in progress — see Section D of `ERRORS.md` for what succeeded/failed).
-- [ ] Final integrity check of `project/trading_project/src/trading_system/research/information_time.py`.
+- [x] Web harvest with `fetch_page`: 10 page records in `web/pages/` (6 substantive article bodies, 1 partial, 2 no-content, 1 index-only). Reddit/forexfactory/own-site blocks recorded in `ERRORS.md` section D.
+- [x] Final integrity check of `project/trading_project/src/trading_system/research/information_time.py`: sha256 `72b03ca6d2333080e0df6dc18b1928147e877b41175f132c7bf08eb4e4d74ace`, size 12216 — unchanged.
+- State at last commit: 32344540103eade3eb64f4d4223f10f2b1d341ac
 
 ## Rules that must not be broken by a resuming session
 
