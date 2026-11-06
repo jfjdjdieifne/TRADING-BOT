@@ -23,11 +23,11 @@ No engine code, no market data, no fetch of any video.
 |---|---|---|
 | 0 setup | DONE | branch printed; HEAD realigned to `origin/arena/e6974afe-trading-bot` with `git reset --mixed` after proving worktree identical (645 files, 0 missing, 0 mismatch, 0 extra); corpus downloaded |
 | Task 0 discovery | DONE | 13,813 grams kept, 2,764 definition windows, 116 directed phrase probes (**0 zero-hit**), 66 concepts selected across A/B/C/D, 13,761 terms excluded-or-deferred with reasons |
-| Task 1 cards | IN_PROGRESS | see `concepts.jsonl` / `cards_done.txt` |
-| Task 2 comparisons | NOT_STARTED | |
-| Task 3 story pairing | NOT_STARTED | |
-| Task 4 gaps | NOT_STARTED | |
-| final audit | NOT_STARTED | |
+| Task 1 cards | DONE | 21 cards, 15 windows each (315), 0 THIN, 136 claims, 76 NOT_IN_SOURCES sections |
+| Task 2 comparisons | DONE | 18 comparison records, 19 comparative claims (1 unreduced), 3000 raw windows, degree_words.md |
+| Task 3 story pairing | DONE | 71 dated candidates (35 DESIGN/36 VALIDATION), 13 pairing cards, 18 narrated events, 6 EURUSD-usable |
+| Task 4 gaps | DONE | gaps.md: deixis, 4 parallel conflicts, image-only list, per-concept unknowns |
+| final audit | DONE | AUDIT.md; verifier 136/136 = 100%, 117 soft CHECK 2 warnings |
 
 ## Important correction recorded during Task 0
 
@@ -62,3 +62,17 @@ to `NONE` for 6,456 lower-frequency rows for the same reason (872 KB → 364 KB)
 2. `python3 tools/corpus_engine.py windows --concept X --phrase "..." --n 15` then author claims.
 3. Verify: `DR=$CORPUS python3 tools/verify_claims.py claims.jsonl --report reports/verify.md`.
 4. Protected file checked **only at the end**.
+
+## Round status: COMPLETE for the coverage reached
+
+359 windows logged across 166 distinct transcripts. 21 of the 66 selected concepts were carded;
+**45 are deferred, not absent** (listed in AUDIT.md §5 and gaps.md §6). Nothing is pending inside the
+covered set. A later session should take the deferred concept list, reduce more of
+`comparisons_raw.jsonl`, and extend pairing beyond the 13 transcripts done here.
+
+### Commits
+- phase0+task0: `d4d61765de08df2852a6faf22bd328f33796de7b`
+- task1 batch1: `4db951460774b079876bad2d45b36b16bcc66b60`
+- task1 all groups: `5641d13685d4db8995d0c3fa33aaa238e77960b5`
+- task1 cards + task2: `a16486e5a6133a284a014b094ec9ddac49a6f5ac`
+- task3 + task4 + audit: see `git log -1 --format=%H`

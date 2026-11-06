@@ -1,0 +1,14 @@
+file	date	split	pair_stated	windows_read	narrated_events_count	usable_for_EURUSD_test
+transcriptions/2023-Forex-Reviews/ICT-Forex-Review-January-09-2023-001.json	2023-01-09	DESIGN	DXY	6	2	no
+transcriptions/2023-ICT-Mentorship/February-25-2023-Market-Commentary-001.json	2023-02-25	DESIGN	EURUSD+GBPUSD	3	1	yes
+transcriptions/2023-ICT-Mentorship/February-25-2023-Market-Commentary-002.json	2023-02-25	DESIGN	EURUSD	3	1	yes
+transcriptions/2023-ICT-Mentorship/ICT-ES-Futures-Review-January-09-2023-001.json	2023-01-09	DESIGN	DXY/ES	4	1	no
+transcriptions/2023-ICT-Mentorship/ICT-Mentorship-ES-Market-Review-January-26-2023-001.json	2023-01-26	VALIDATION	EURUSD+GBPUSD+DXY	4	1	yes
+transcriptions/2023-ICT-Mentorship/ICT-Premarket-Commentary-for-Week-Ending-01-20-23-001.json	2023-01-20	VALIDATION	EURUSD	3	2	yes
+transcriptions/2023-ICT-Mentorship/Market-Review-February-07-2023-001.json	2023-02-07	DESIGN	DXY	4	2	no
+transcriptions/2023-ICT-Mentorship/Market-Review-February-08-2023-001.json	2023-02-08	VALIDATION	DXY	3	1	no
+transcriptions/2023-ICT-Mentorship/Market-Review-February-08-2023-002.json	2023-02-08	VALIDATION	UNKNOWN	3	1	unknown
+transcriptions/2023-ICT-Mentorship/Market-Review-February-09-2023-002.json	2023-02-09	DESIGN	EUR historic analogy	3	1	no
+transcriptions/2023-ICT-Mentorship/Tuesday-May-23-2023-Forex-&-Spooz-Market-Review-001.json	2023-05-23	DESIGN	EURUSD+DXY+ES	3	1	yes
+transcriptions/2023-ICT-Mentorship/Tuesday-May-23-2023-Forex-&-Spooz-Market-Review-002.json	2023-05-23	DESIGN	UNKNOWN	3	2	unknown
+transcriptions/2023-ICT-Mentorship/Wednesday-May-24-2023-Forex-&-Spooz-Market-Review-001.json	2023-05-24	VALIDATION	EURUSD+DXY+ES	5	2	yes
