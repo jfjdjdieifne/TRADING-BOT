@@ -1,0 +1,23 @@
+{
+ "seed": 20261106,
+ "total_lines": 1635,
+ "sample_size": 100,
+ "full": {
+  "ok": 1612,
+  "ok_raw": 1062,
+  "ok_extracted": 550,
+  "missing": 0,
+  "sha_mismatch": 0,
+  "quote_missing": 23,
+  "quote_too_long": 0
+ },
+ "sample": {
+  "ok": 99,
+  "ok_raw": 67,
+  "ok_extracted": 32,
+  "missing": 0,
+  "sha_mismatch": 0,
+  "quote_missing": 1,
+  "quote_too_long": 0
+ }
+}
