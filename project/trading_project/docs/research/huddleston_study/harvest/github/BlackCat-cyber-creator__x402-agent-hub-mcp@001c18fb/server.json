@@ -1,0 +1,18 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.BlackCat-cyber-creator/x402-agent-hub",
+  "title": "x402 Agent Hub",
+  "description": "Onchain reads, SEC company financials, company & people enrichment, token verdicts via x402 USDC",
+  "version": "1.6.0",
+  "websiteUrl": "https://tryponcho.com/m/x402-agent-hub.x402-agent-hub.workers.dev",
+  "repository": {
+    "source": "github",
+    "url": "https://github.com/BlackCat-cyber-creator/x402-agent-hub-mcp"
+  },
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://x402-agent-hub.x402-agent-hub.workers.dev/mcp"
+    }
+  ]
+}

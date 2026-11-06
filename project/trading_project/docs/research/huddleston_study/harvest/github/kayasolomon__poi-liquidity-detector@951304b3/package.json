@@ -1,0 +1,55 @@
+{
+  "name": "poi-liquidity-detector",
+  "version": "0.1.0",
+  "description": "Non-repainting POI and liquidity detection: order blocks, fair value gaps, equal highs/lows, liquidity sweeps",
+  "keywords": [
+    "trading",
+    "order-block",
+    "fair-value-gap",
+    "fvg",
+    "liquidity",
+    "sweep",
+    "smart-money",
+    "technical-analysis"
+  ],
+  "author": "Kaya Solomon <kaya.solomon24@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kayasolomon/poi-liquidity-detector.git"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts --clean",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "demo": "tsx demo/run.ts"
+  },
+  "dependencies": {
+    "market-structure-engine": "github:kayasolomon/market-structure-engine"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.1",
+    "tsup": "^8.3.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^3.0.5"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
