@@ -17,12 +17,11 @@ Base commit `462bb61068e6b184478b831dd8295a189dfeabc5`. Every base file was read
 - Files opened: 9 transcripts + 1 library-adjacent source set; **1,841 of the 1,871 text files were NOT opened** this
   round (hit ranking only). The highest-density non-transcript hits were LLM-flagged repos
   (`Yousef-Diab/the-algorithm` index.html, `SrsBlack` audit reports) — deliberately not mined as speaker text.
-- Per question: QA 6 windows · QB 3 · QC 5 · QD 3 · QE 4 · QF 3 · QG 3 · QH 3 · QI 1 · QJ 3 · QK 5 · QL 12 (shared) ·
-  QM 4. Several windows serve two questions; the count above double-counts shared windows.
+- Per question: windows per question: QA 2 · QB 0 · QC 2 · QD 2 · QE 2 · QF 0 · QG 2 · QH 2 · QI 1 · QJ 4 · QK 2 · QL 0 · QM 2. Every window is tagged with exactly one question id, so these sum to 21.
 
 ## Claims (phase C)
 - **50 claims** in `claims_r2.jsonl`: SAID 37, DEFINED 4, USED_IN_EXAMPLE 3, DEMONSTRATED 5, AMBIGUOUS 1.
-- Per question: QA 5 · QB 3 · QC 5 · QD 3 · QE 5 · QF 4 · QG 3 · QH 4 · QI 1 · QJ 3 · QK 5 · QL 9 · QM 4.
+- Per question: claims per question: QA 5 · QB 3 · QC 5 · QD 3 · QE 3 · QF 4 · QG 3 · QH 3 · QI 1 · QJ 3 · QK 5 · QL 8 · QM 4 (sum = 50).
 - CHECK 1 (verbatim quote, ≤25 words): **50/50 pass (100%)**. 7 authored claims were rejected by the verifier before
   any file was written (3 attribution errors, 3 word-level misquotes, 1 path bug) — see `corrections.md`.
 - CHECK 2 (statement content words absent from ±100-word surroundings): **48 warnings / 50 claims**, listed in full in
