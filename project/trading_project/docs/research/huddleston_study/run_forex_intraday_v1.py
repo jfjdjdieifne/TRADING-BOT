@@ -261,7 +261,10 @@ def same_bar_ambiguity(bidask, t_entry, t_exit, level_a, level_b):
     win = bidask[(bidask.index > t_entry) & (bidask.index <= t_exit)]
     if win.empty:
         return False
-    bybar = win.groupby(win.index.floor("1h"))
+    # group by the TASK-scale bar, derived from the module constant
+    # (TASK_SCALE == "1h" here) so a future scale change cannot silently
+    # desynchronize the ambiguity batches from the plan layer.
+    bybar = win.groupby(win.index.floor(TASK_SCALE))
     for _, g in bybar:
         hi = float(g.AskHigh.max())
         lo = float(g.BidLow.min())
@@ -621,8 +624,13 @@ def run_phase(args, phase: str) -> int:
         "limitations": [
             "selection_quality = NOT_ESTABLISHED",
             "research/paper record only — no live orders",
-            "close-based hypothetical fills at ask/bid of the actual 5m "
-            "quotes; commission NOT provided by this dataset (never "
+            ("causal next_open hypothetical fills: both legs at the OPEN "
+             "of the next 5m bar strictly after their events, at ask/bid "
+             "of the actual quotes"
+             if args.get("fill_mode", "next_open") == "next_open" else
+             "NON-CAUSAL bar_close comparison fills at the CLOSE of the "
+             "event bar itself, at ask/bid of the actual quotes")
+            + "; commission NOT provided by this dataset (never "
             "invented); slippage not modeled",
             "same-bar level-touch ambiguity preserved as AMBIGUOUS",
         ],

@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Predestinato FX — Curso de Iniciación</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --dark:    #080810;
+  --dark2:   #0c0c18;
+  --dark3:   #111120;
+  --card:    #0f0f1e;
+  --border:  #1a1a30;
+  --gold:    #c9a84c;
+  --gold2:   #e8c96a;
+  --gold3:   #f5e0a0;
+  --green:   #2ecc71;
+  --red:     #e74c3c;
+  --blue:    #3a8fd4;
+  --white:   #f0f0ee;
+  --muted:   #666688;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--dark);
+  color: var(--white);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ── NOISE TEXTURE ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity: 0.4;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── HEADER ── */
+header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 16px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(8,8,16,0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+
+.logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.logo span { color: var(--white); font-weight: 300; }
+
+nav a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 13px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-left: 32px;
+  transition: color 0.2s;
+}
+nav a:hover { color: var(--gold); }
+
+/* ── HERO ── */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 120px 48px 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 4px;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  opacity: 0.8;
+}
+
+.hero h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(48px, 8vw, 96px);
+  font-weight: 300;
+  line-height: 1.05;
+  letter-spacing: -1px;
+  margin-bottom: 8px;
+}
+
+.hero h1 em {
+  font-style: italic;
+  color: var(--gold);
+  font-weight: 400;
+}
+
+.hero-sub {
+  font-size: 18px;
+  color: var(--muted);
+  max-width: 560px;
+  margin: 24px auto 48px;
+  font-weight: 300;
+}
+
+.btn-gold {
+  display: inline-block;
+  padding: 14px 40px;
+  background: linear-gradient(135deg, var(--gold), var(--gold2));
+  color: var(--dark);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.btn-gold:hover { opacity: 0.9; transform: translateY(-1px); }
+
+/* ── PROGRESS NAV ── */
+.progress-nav {
+  position: fixed;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.prog-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--border);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.prog-dot:hover, .prog-dot.active { background: var(--gold); transform: scale(1.5); }
+
+/* ── SECTIONS ── */
+.section {
+  padding: 100px 0;
+  position: relative;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 48px;
+}
+
+.section-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 4px;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  opacity: 0.7;
+}
+
+.section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(36px, 4vw, 56px);
+  font-weight: 400;
+  line-height: 1.1;
+  margin-bottom: 24px;
+}
+
+.section-title em { font-style: italic; color: var(--gold); }
+
+.section-body {
+  font-size: 17px;
+  color: #aaaacc;
+  max-width: 680px;
+  line-height: 1.75;
+  font-weight: 300;
+}
+
+/* ── DIVIDER ── */
+.divider {
+  width: 60px;
+  height: 1px;
+  background: var(--gold);
+  margin: 32px 0;
+  opacity: 0.5;
+}
+
+/* ── CONCEPT CARDS ── */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  margin-top: 60px;
+}
+
+.concept-card {
+  background: var(--card);
+  padding: 40px 32px;
+  transition: background 0.2s;
+}
+.concept-card:hover { background: #141428; }
+
+.card-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--gold);
+  opacity: 0.6;
+  margin-bottom: 16px;
+  letter-spacing: 2px;
+}
+
+.card-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--white);
+}
+
+.card-body {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+/* ── SVG DIAGRAMS ── */
+.diagram-wrap {
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 40px;
+  margin: 48px 0;
+  position: relative;
+}
+
+.diagram-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  opacity: 0.7;
+}
+
+/* ── CHART EMBED ── */
+.chart-wrap {
+  background: var(--card);
+  border: 1px solid var(--border);
+  margin: 48px 0;
+  overflow: hidden;
+}
+
+.chart-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.chart-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--gold);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.chart-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--green);
+  background: rgba(46,204,113,0.1);
+  padding: 4px 10px;
+  border-radius: 20px;
+  letter-spacing: 1px;
+}
+
+/* ── STEP LIST ── */
+.step-list {
+  margin-top: 48px;
+}
+
+.step {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 32px;
+  margin-bottom: 32px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--border);
+}
+
+.step:last-child { border-bottom: none; }
+
+.step-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 48px;
+  font-weight: 300;
+  color: var(--gold);
+  opacity: 0.3;
+  line-height: 1;
+}
+
+.step-content h4 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--white);
+}
+
+.step-content p {
+  font-size: 15px;
+  color: #aaaacc;
+  line-height: 1.7;
+}
+
+/* ── RULE GRID ── */
+.rule-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  margin-top: 48px;
+}
+
+.rule-item {
+  background: var(--card);
+  padding: 28px;
+}
+
+.rule-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  opacity: 0.7;
+}
+
+.rule-value {
+  font-size: 15px;
+  color: var(--white);
+  font-weight: 500;
+}
+
+.rule-note {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 4px;
+  font-style: italic;
+}
+
+/* ── TABLE ── */
+.fib-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 40px;
+  font-size: 14px;
+}
+.fib-table th {
+  background: #111122;
+  color: var(--gold);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 14px 20px;
+  text-align: left;
+  border-bottom: 1px solid var(--gold);
+  font-weight: 400;
+}
+.fib-table td {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  color: #aaaacc;
+}
+.fib-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+.fib-table .highlight td { color: var(--gold2); font-weight: 500; background: rgba(201,168,76,0.05) !important; }
+.fib-table td:first-child { color: var(--white); font-family: 'DM Mono', monospace; font-size: 15px; }
+
+/* ── QUOTE ── */
+.quote-block {
+  border-left: 2px solid var(--gold);
+  padding: 24px 32px;
+  margin: 48px 0;
+  background: rgba(201,168,76,0.04);
+}
+
+.quote-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-style: italic;
+  color: var(--white);
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.quote-source {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--gold);
+  letter-spacing: 2px;
+  opacity: 0.7;
+}
+
+/* ── CALLOUT ── */
+.callout {
+  background: rgba(201,168,76,0.06);
+  border: 1px solid rgba(201,168,76,0.2);
+  padding: 24px 28px;
+  margin: 32px 0;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.callout-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+.callout-text { font-size: 15px; color: #bbbbcc; line-height: 1.65; }
+.callout-text strong { color: var(--gold2); }
+
+.callout.red {
+  background: rgba(231,76,60,0.06);
+  border-color: rgba(231,76,60,0.2);
+}
+.callout.green {
+  background: rgba(46,204,113,0.06);
+  border-color: rgba(46,204,113,0.2);
+}
+
+/* ── ALT SECTION ── */
+.section-alt { background: var(--dark2); }
+.section-alt2 { background: var(--dark3); }
+
+/* ── TWO COL ── */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: start;
+  margin-top: 60px;
+}
+
+/* ── CHECKLIST ── */
+.checklist { margin-top: 24px; }
+.check-item {
+  display: flex;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 15px;
+  color: #aaaacc;
+  align-items: center;
+}
+.check-item:last-child { border-bottom: none; }
+.check-icon { color: var(--green); font-size: 14px; flex-shrink: 0; }
+.check-icon.red { color: var(--red); }
+
+/* ── FOOTER ── */
+footer {
+  padding: 60px 48px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+footer p {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+footer .gold-text { color: var(--gold); }
+
+/* ── MOBILE ── */
+@media (max-width: 768px) {
+  header { padding: 16px 24px; }
+  nav { display: none; }
+  .hero { padding: 100px 24px 60px; }
+  .container { padding: 0 24px; }
+  .cards-grid { grid-template-columns: 1fr; }
+  .rule-grid { grid-template-columns: 1fr; }
+  .two-col { grid-template-columns: 1fr; gap: 40px; }
+  .progress-nav { display: none; }
+  .section { padding: 60px 0; }
+}
+
+/* ── SCROLL ANIMATIONS ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">Predestinato <span>FX</span></div>
+  <nav>
+    <a href="#fundamentos">Fundamentos</a>
+    <a href="#amd">AMD</a>
+    <a href="#fibonacci">Fibonacci</a>
+    <a href="#confluencia">Confluencia</a>
+    <a href="#protocolo">Protocolo</a>
+    <a href="#riesgo">Riesgo</a>
+  </nav>
+</header>
+
+<!-- PROGRESS NAV -->
+<div class="progress-nav">
+  <div class="prog-dot active" onclick="scrollToSection(0)"></div>
+  <div class="prog-dot" onclick="scrollToSection(1)"></div>
+  <div class="prog-dot" onclick="scrollToSection(2)"></div>
+  <div class="prog-dot" onclick="scrollToSection(3)"></div>
+  <div class="prog-dot" onclick="scrollToSection(4)"></div>
+  <div class="prog-dot" onclick="scrollToSection(5)"></div>
+  <div class="prog-dot" onclick="scrollToSection(6)"></div>
+</div>
+
+<!-- HERO -->
+<section class="hero" id="inicio">
+  <p class="hero-eyebrow">Predestinato FX · Curso de Iniciación</p>
+  <h1>El sistema que<br>opera <em>institucional</em></h1>
+  <p class="hero-sub">Aprende a leer el mercado como lo hacen los grandes. Liquidez, Fibonacci y confluencia multi-activo aplicados al oro.</p>
+  <a href="#fundamentos" class="btn-gold">Comenzar el curso</a>
+</section>
+
+<!-- ─────────────────────────────────────────────
+     SECCIÓN 1 — FUNDAMENTOS
+───────────────────────────────────────────── -->
+<section class="section" id="fundamentos">
+<div class="container">
+
+  <div class="reveal">
+    <p class="section-tag">01 — Fundamentos</p>
+    <h2 class="section-title">Por qué el precio<br>no se mueve <em>al azar</em></h2>
+    <div class="divider"></div>
+    <p class="section-body">El mercado no es caótico. Detrás de cada movimiento hay una lógica institucional: los grandes participantes mueven el precio para tomar liquidez antes de ir en la dirección real. Tu ventaja como trader es identificar ese patrón antes de que ocurra.</p>
+  </div>
+
+  <div class="cards-grid reveal" style="margin-top:60px;">
+    <div class="concept-card">
+      <p class="card-num">001</p>
+      <h3 class="card-title">Liquidez</h3>
+      <p class="card-body">Las órdenes acumuladas de traders retail son el combustible que mueven los institucionales. Los stops, los Equal Highs y Equal Lows son objetivos, no barreras.</p>
+    </div>
+    <div class="concept-card">
+      <p class="card-num">002</p>
+      <h3 class="card-title">Manipulación</h3>
+      <p class="card-body">Antes del movimiento real, el precio hace un movimiento falso para barrer esa liquidez. Aprender a identificar ese engaño es la clave del sistema.</p>
+    </div>
+    <div class="concept-card">
+      <p class="card-num">003</p>
+      <h3 class="card-title">Distribución</h3>
+      <p class="card-body">Una vez tomada la liquidez, el precio va en la dirección donde los institucionales ya tienen sus posiciones abiertas. Ahí entramos nosotros.</p>
+    </div>
+  </div>
+
+  <div class="callout reveal" style="margin-top:48px;">
+    <span class="callout-icon">💡</span>
+    <p class="callout-text"><strong>El activo que operamos es XAUUSD — Oro vs Dólar americano.</strong> Es el instrumento más líquido del mundo en metales, con spreads ajustados, movimientos claros y alta respuesta a niveles técnicos institucionales. Todo el sistema está calibrado específicamente para este activo.</p>
+  </div>
+
+  <!-- CHART 1 — XAUUSD overview -->
+  <div class="chart-wrap reveal">
+    <div class="chart-header">
+      <span class="chart-title">XAUUSD · Gráfico en tiempo real</span>
+      <span class="chart-badge">● LIVE</span>
+    </div>
+    <div class="tradingview-widget-container" style="height:500px;">
+      <div id="tradingview_chart1" style="height:100%;"></div>
+      <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+      <script type="text/javascript">
+      new TradingView.widget({
+        autosize: true, symbol: "PEPPERSTONE:XAUUSD",
+        interval: "60", timezone: "Europe/London",
+        theme: "dark", style: "1", locale: "es",
+        toolbar_bg: "#0f0f1e", enable_publishing: false,
+        hide_top_toolbar: false, hide_legend: false,
+        save_image: false, container_id: "tradingview_chart1",
+        backgroundColor: "#0f0f1e", gridColor: "#1a1a30",
+        studies: ["STD;Smoothed Moving Average"]
+      });
+      </script>
+    </div>
+  </div>
+
+</div>
+</section>
+
+<!-- ─────────────────────────────────────────────
+     SECCIÓN 2 — AMD
+───────────────────────────────────────────── -->
+<section class="section section-alt" id="amd">
+<div class="container">
+
+  <div class="reveal">
+    <p class="section-tag">02 — Modelo AMD</p>
+    <h2 class="section-title">Acumulación,<br><em>Manipulación,</em> Distribución</h2>
+    <div class="divider"></div>
+    <p class="section-body">El modelo AMD es el marco que explica el ciclo completo del precio. Cada sesión de trading — y cada día — tiene sus tres fases. Reconocerlas te dice exactamente en qué momento del ciclo estás y qué esperar a continuación.</p>
+  </div>
+
+  <!-- AMD DIAGRAM SVG -->
+  <div class="diagram-wrap reveal">
+    <p class="diagram-label">Diagrama AMD — Ciclo completo del precio</p>
+    <svg viewBox="0 0 900 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-height:320px;">
+      <!-- Background zones -->
+      <rect x="0" y="0" width="300" height="320" fill="rgba(58,143,212,0.06)" rx="0"/>
+      <rect x="300" y="0" width="300" height="320" fill="rgba(201,168,76,0.06)" rx="0"/>
+      <rect x="600" y="0" width="300" height="320" fill="rgba(46,204,113,0.06)" rx="0"/>
+
+      <!-- Zone labels -->
+      <text x="150" y="28" text-anchor="middle" fill="#3a8fd4" font-family="DM Mono, monospace" font-size="11" letter-spacing="3" opacity="0.8">ACUMULACIÓN</text>
+      <text x="450" y="28" text-anchor="middle" fill="#c9a84c" font-family="DM Mono, monospace" font-size="11" letter-spacing="3" opacity="0.8">MANIPULACIÓN</text>
+      <text x="750" y="28" text-anchor="middle" fill="#2ecc71" font-family="DM Mono, monospace" font-size="11" letter-spacing="3" opacity="0.8">DISTRIBUCIÓN</text>
+
+      <!-- Zone dividers -->
+      <line x1="300" y1="0" x2="300" y2="320" stroke="#1a1a30" stroke-width="1" stroke-dasharray="4,4"/>
+      <line x1="600" y1="0" x2="600" y2="320" stroke="#1a1a30" stroke-width="1" stroke-dasharray="4,4"/>
+
+      <!-- Candlesticks — Accumulation (lateral) -->
+      <rect x="30" y="130" width="12" height="40" fill="#2ecc71" rx="1"/>
+      <line x1="36" y1="125" x2="36" y2="175" stroke="#2ecc71" stroke-width="1.5"/>
+      <rect x="55" y="125" width="12" height="35" fill="#e74c3c" rx="1"/>
+      <line x1="61" y1="118" x2="61" y2="165" stroke="#e74c3c" stroke-width="1.5"/>
+      <rect x="80" y="132" width="12" height="38" fill="#2ecc71" rx="1"/>
+      <line x1="86" y1="126" x2="86" y2="178" stroke="#2ecc71" stroke-width="1.5"/>
+      <rect x="105" y="128" width="12" height="42" fill="#e74c3c" rx="1"/>
+      <line x1="111" y1="122" x2="111" y2="175" stroke="#e74c3c" stroke-width="1.5"/>
+      <rect x="130" y="133" width="12" height="36" fill="#2ecc71" rx="1"/>
+      <line x1="136" y1="128" x2="136" y2="174" stroke="#2ecc71" stroke-width="1.5"/>
+      <rect x="155" y="127" width="12" height="40" fill="#e74c3c" rx="1"/>
+      <line x1="161" y1="120" x2="161" y2="172" stroke="#e74c3c" stroke-width="1.5"/>
+      <rect x="180" y="130" width="12" height="38" fill="#2ecc71" rx="1"/>
+      <line x1="186" y1="125" x2="186" y2="173" stroke="#2ecc71" stroke-width="1.5"/>
+      <rect x="205" y="126" width="12" height="44" fill="#e74c3c" rx="1"/>
+      <line x1="211" y1="120" x2="211" y2="176" stroke="#e74c3c" stroke-width="1.5"/>
+      <rect x="230" y="131" width="12" height="37" fill="#2ecc71" rx="1"/>
+      <line x1="236" y1="127" x2="236" y2="172" stroke="#2ecc71" stroke-width="1.5"/>
+      <rect x="255" y="128" width="12" height="40" fill="#e74c3c" rx="1"/>
+      <line x1="261" y1="122" x2="261" y2="173" stroke="#e74c3c" stroke-width="1.5"/>
+
+      <!-- Asian range box -->
+      <rect x="28" y="115" width="244" height="76" fill="none" stroke="#3a8fd4" stroke-width="1" stroke-dasharray="5,3" opacity="0.5"/>
+      <text x="150" y="210" text-anchor="middle" fill="#3a8fd4" font-size="11" font-family="DM Sans, sans-serif" opacity="0.7">Rango Asiático</text>
+      <text x="150" y="225" text-anchor="middle" fill="#3a8fd4" font-size="10" font-family="DM Mono, monospace" opacity="0.5">01:00 — 08:00 BST</text>
+
+      <!-- Judas Swing — Up then reversal -->
+      <rect x="315" y="88" width="14" height="50" fill="#2ecc71" rx="1"/>
+      <line x1="322" y1="80" x2="322" y2="142" stroke="#2ecc71" stroke-width="1.5"/>
+      <rect x="342" y="68" width="14" height="55" fill="#2ecc71" rx="1"/>
+      <line x1="349" y1="58" x2="349" y2="128" stroke="#2ecc71" stroke-width="1.5"/>
+      <!-- Judas peak -->
+      <rect x="369" y="52" width="14" height="40" fill="#2ecc71" rx="1"/>
+      <line x1="376" y1="44" x2="376" y2="96" stroke="#2ecc71" stroke-width="1.5"/>
+      <!-- Reversal candles -->
+      <rect x="396" y="65" width="14" height="58" fill="#e74c3c" rx="1"/>
+      <line x1="403" y1="55" x2="403" y2="130" stroke="#e74c3c" stroke-width="2"/>
+      <rect x="423" y="90" width="14" height="62" fill="#e74c3c" rx="1"/>
+      <line x1="430" y1="82" x2="430" y2="158" stroke="#e74c3c" stroke-width="1.5"/>
+      <rect x="450" y="118" width="14" height="55" fill="#e74c3c" rx="1"/>
+      <line x1="457" y1="110" x2="457" y2="178" stroke="#e74c3c" stroke-width="1.5"/>
+      <rect x="477" y="140" width="14" height="50" fill="#e74c3c" rx="1"/>
+      <line x1="484" y1="134" x2="484" y2="195" stroke="#e74c3c" stroke-width="1.5"/>
+      <rect x="504" y="155" width="14" height="42" fill="#e74c3c" rx="1"/>
+      <line x1="511" y1="149" x2="511" y2="200" stroke="#e74c3c" stroke-width="1.5"/>
+      <rect x="531" y="162" width="14" height="45" fill="#e74c3c" rx="1"/>
+      <line x1="538" y1="156" x2="538" y2="212" stroke="#e74c3c" stroke-width="1.5"/>
+      <rect x="558" y="170" width="14" height="48" fill="#e74c3c" rx="1"/>
+      <line x1="565" y1="164" x2="565" y2="222" stroke="#e74c3c" stroke-width="1.5"/>
+
+      <!-- Judas annotation -->
+      <text x="376" y="36" text-anchor="middle" fill="#c9a84c" font-size="10" font-family="DM Mono, monospace" opacity="0.9">JUDAS SWING ↑</text>
+      <text x="376" y="48" text-anchor="middle" fill="#c9a84c" font-size="9" font-family="DM Mono, monospace" opacity="0.6">Barre stops</text>
+
+      <!-- Liquidity swept -->
+      <line x1="300" y1="104" x2="600" y2="104" stroke="#c9a84c" stroke-width="0.8" stroke-dasharray="6,3" opacity="0.4"/>
+      <text x="450" y="100" text-anchor="middle" fill="#c9a84c" font-size="9" font-family="DM Sans, sans-serif" opacity="0.5">Liquidez barrida</text>
+
+      <!-- Distribution — Strong down move -->
+      <rect x="618" y="165" width="14" height="62" fill="#e74c3c" rx="1"/>
+      <line x1="625" y1="155" x2="625" y2="232" stroke="#e74c3c" stroke-width="2"/>
+      <rect x="646" y="195" width="14" height="65" fill="#e74c3c" rx="1"/>
+      <line x1="653" y1="185" x2="653" y2="265" stroke="#e74c3c" stroke-width="2"/>
+      <rect x="674" y="225" width="14" height="52" fill="#2ecc71" rx="1"/>
+      <line x1="681" y1="220" x2="681" y2="280" stroke="#2ecc71" stroke-width="1.5"/>
+      <rect x="702" y="238" width="14" height="58" fill="#e74c3c" rx="1"/>
+      <line x1="709" y1="230" x2="709" y2="300" stroke="#e74c3c" stroke-width="2"/>
+      <rect x="730" y="258" width="14" height="48" fill="#e74c3c" rx="1"/>
+      <line x1="737" y1="252" x2="737" y2="308" stroke="#e74c3c" stroke-width="1.5"/>
+      <rect x="758" y="268" width="14" height="44" fill="#e74c3c" rx="1"/>
+      <line x1="765" y1="260" x2="765" y2="314" stroke="#e74c3c" stroke-width="1.5"/>
+      <rect x="786" y="278" width="14" height="36" fill="#2ecc71" rx="1"/>
+      <line x1="793" y1="272" x2="793" y2="316" stroke="#2ecc71" stroke-width="1.5"/>
+      <rect x="814" y="282" width="14" height="30" fill="#e74c3c" rx="1"/>
+      <line x1="821" y1="275" x2="821" y2="314" stroke="#e74c3c" stroke-width="1.5"/>
+      <rect x="842" y="276" width="14" height="34" fill="#e74c3c" rx="1"/>
+      <line x1="849" y1="269" x2="849" y2="312" stroke="#e74c3c" stroke-width="1.5"/>
+
+      <!-- Entry arrow -->
+      <polygon points="616,182 608,170 624,170" fill="#2ecc71" opacity="0.9"/>
+      <text x="616" y="162" text-anchor="middle" fill="#2ecc71" font-size="10" font-family="DM Mono, monospace">ENTRY</text>
+
+      <!-- Session labels -->
+      <text x="150" y="300" text-anchor="middle" fill="#3a8fd4" font-size="12" font-family="DM Sans, sans-serif" opacity="0.6">🌏 Asia</text>
+      <text x="450" y="300" text-anchor="middle" fill="#c9a84c" font-size="12" font-family="DM Sans, sans-serif" opacity="0.6">🇬🇧 Londres</text>
+      <text x="750" y="300" text-anchor="middle" fill="#2ecc71" font-size="12" font-family="DM Sans, sans-serif" opacity="0.6">🗽 Nueva York</text>
+    </svg>
+  </div>
+
+  <div class="two-col reveal">
+    <div>
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:28px;margin-bottom:20px;">El Rango Asiático</h3>
+      <p style="color:#aaaacc;font-size:15px;line-height:1.75;">Entre las 01:00 y las 08:00 BST, el mercado forma el rango asiático — el máximo y mínimo de esas 7 horas. Estos dos niveles son los más importantes del día. Los institucionales los usan como referencia para colocar sus órdenes.</p>
+      <p style="color:#aaaacc;font-size:15px;line-height:1.75;margin-top:16px;">Antes de las 07:45 BST marcamos el máximo y mínimo asiático en el chart. Todo el análisis del día parte de ahí.</p>
+    </div>
+    <div>
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:28px;margin-bottom:20px;">El Judas Swing</h3>
+      <p style="color:#aaaacc;font-size:15px;line-height:1.75;">Al abrir Londres (08:00 BST), el precio hace un movimiento falso — sube para barrer el máximo asiático o baja para barrer el mínimo. Este movimiento activa los stops de los traders que operaron durante Asia.</p>
+      <p style="color:#aaaacc;font-size:15px;line-height:1.75;margin-top:16px;">Una vez barrida la liquidez, el precio revierte con fuerza en la dirección contraria. Esa es nuestra ventana de entrada.</p>
+    </div>
+  </div>
+
+</div>
+</section>
+
+<!-- ─────────────────────────────────────────────
+     SECCIÓN 3 — FVG Y ESTRUCTURA
+───────────────────────────────────────────── -->
+<section class="section" id="fvg">
+<div class="container">
+
+  <div class="reveal">
+    <p class="section-tag">03 — Estructura del mercado</p>
+    <h2 class="section-title">FVG, BOS <em>y CHoCH</em></h2>
+    <div class="divider"></div>
+    <p class="section-body">Antes de entrar, necesitamos confirmar la estructura del mercado. Tres herramientas nos dan esa confirmación: los Fair Value Gaps, los Break of Structure y los Change of Character.</p>
+  </div>
+
+  <!-- FVG DIAGRAM -->
+  <div class="diagram-wrap reveal">
+    <p class="diagram-label">Fair Value Gap (FVG) — Cómo se forma</p>
+    <svg viewBox="0 0 700 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-height:280px;">
+
+      <!-- Left: Bearish FVG -->
+      <text x="175" y="22" text-anchor="middle" fill="#e74c3c" font-family="DM Mono,monospace" font-size="11" letter-spacing="2" opacity="0.8">FVG BAJISTA</text>
+
+      <!-- Vela 1 (green) -->
+      <rect x="80" y="60" width="28" height="80" fill="#2ecc71" rx="1"/>
+      <line x1="94" y1="50" x2="94" y2="145" stroke="#2ecc71" stroke-width="1.5"/>
+      <text x="94" y="178" text-anchor="middle" fill="#666688" font-size="10" font-family="DM Mono,monospace">Vela [2]</text>
+
+      <!-- FVG zone arrow -->
+      <rect x="135" y="140" width="80" height="32" fill="rgba(231,76,60,0.15)" stroke="#e74c3c" stroke-width="1" stroke-dasharray="4,2" rx="2"/>
+      <text x="175" y="161" text-anchor="middle" fill="#e74c3c" font-size="10" font-family="DM Sans,sans-serif">Gap — FVG</text>
+
+      <!-- Vela 2 (big red) -->
+      <rect x="135" y="50" width="28" height="88" fill="#e74c3c" rx="1"/>
+      <line x1="149" y1="40" x2="149" y2="145" stroke="#e74c3c" stroke-width="1.5"/>
+      <text x="149" y="178" text-anchor="middle" fill="#666688" font-size="10" font-family="DM Mono,monospace">Vela [1]</text>
+
+      <!-- Vela 3 (small green) -->
+      <rect x="190" y="148" width="28" height="46" fill="#2ecc71" rx="1"/>
+      <line x1="204" y1="140" x2="204" y2="200" stroke="#2ecc71" stroke-width="1.5"/>
+      <text x="204" y="218" text-anchor="middle" fill="#666688" font-size="10" font-family="DM Mono,monospace">Vela [0]</text>
+
+      <!-- Annotation lines -->
+      <line x1="80" y1="140" x2="245" y2="140" stroke="#e74c3c" stroke-width="0.8" stroke-dasharray="4,3" opacity="0.5"/>
+      <line x1="80" y1="172" x2="245" y2="172" stroke="#e74c3c" stroke-width="0.8" stroke-dasharray="4,3" opacity="0.5"/>
+      <text x="255" y="144" fill="#e74c3c" font-size="10" font-family="DM Mono,monospace" opacity="0.7">Low [2]</text>
+      <text x="255" y="176" fill="#e74c3c" font-size="10" font-family="DM Mono,monospace" opacity="0.7">High [0]</text>
+
+      <!-- Right: Bullish FVG -->
+      <text x="530" y="22" text-anchor="middle" fill="#2ecc71" font-family="DM Mono,monospace" font-size="11" letter-spacing="2" opacity="0.8">FVG ALCISTA</text>
+
+      <rect x="440" y="130" width="28" height="80" fill="#e74c3c" rx="1"/>
+      <line x1="454" y1="120" x2="454" y2="218" stroke="#e74c3c" stroke-width="1.5"/>
+      <text x="454" y="245" text-anchor="middle" fill="#666688" font-size="10" font-family="DM Mono,monospace">Vela [2]</text>
+
+      <rect x="495" y="88" width="28" height="46" fill="#2ecc71" rx="1"/>
+      <line x1="509" y1="78" x2="509" y2="140" stroke="#2ecc71" stroke-width="1.5"/>
+      <text x="509" y="245" text-anchor="middle" fill="#666688" font-size="10" font-family="DM Mono,monospace">Vela [1]</text>
+
+      <!-- FVG zone bullish -->
+      <rect x="495" y="134" width="78" height="32" fill="rgba(46,204,113,0.15)" stroke="#2ecc71" stroke-width="1" stroke-dasharray="4,2" rx="2"/>
+      <text x="534" y="155" text-anchor="middle" fill="#2ecc71" font-size="10" font-family="DM Sans,sans-serif">Gap — FVG</text>
+
+      <rect x="550" y="60" width="28" height="76" fill="#2ecc71" rx="1"/>
+      <line x1="564" y1="50" x2="564" y2="142" stroke="#2ecc71" stroke-width="1.5"/>
+      <text x="564" y="245" text-anchor="middle" fill="#666688" font-size="10" font-family="DM Mono,monospace">Vela [0]</text>
+
+      <line x1="440" y1="134" x2="610" y2="134" stroke="#2ecc71" stroke-width="0.8" stroke-dasharray="4,3" opacity="0.5"/>
+      <line x1="440" y1="166" x2="610" y2="166" stroke="#2ecc71" stroke-width="0.8" stroke-dasharray="4,3" opacity="0.5"/>
+      <text x="618" y="138" fill="#2ecc71" font-size="10" font-family="DM Mono,monospace" opacity="0.7">Low [0]</text>
+      <text x="618" y="170" fill="#2ecc71" font-size="10" font-family="DM Mono,monospace" opacity="0.7">High [2]</text>
+    </svg>
+  </div>
+
+  <div class="two-col reveal">
+    <div>
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:26px;margin-bottom:16px;color:var(--gold)">BOS — Break of Structure</h3>
+      <p style="color:#aaaacc;font-size:15px;line-height:1.75;">El precio rompe un máximo anterior (tendencia alcista) o un mínimo anterior (tendencia bajista). Confirma que la tendencia continúa y que el movimiento tiene momentum real detrás.</p>
+      <div class="callout" style="margin-top:20px;">
+        <span class="callout-icon">📌</span>
+        <p class="callout-text">Un BOS bajista durante el Judas Swing confirma que los institucionales están vendiendo con fuerza. Es una señal verde para buscar entrada Sell.</p>
+      </div>
+    </div>
+    <div>
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:26px;margin-bottom:16px;color:var(--gold)">CHoCH — Change of Character</h3>
+      <p style="color:#aaaacc;font-size:15px;line-height:1.75;">El precio rompe en la dirección contraria a la tendencia actual. Es la primera señal de que el Order Flow está cambiando. En nuestro sistema, el CHoCH en M5 tras el Judas Swing es la confirmación definitiva de entrada.</p>
+      <div class="callout" style="margin-top:20px;">
+        <span class="callout-icon">📌</span>
+        <p class="callout-text">Primero el Judas barre la liquidez. Luego el CHoCH confirma la reversión. Sin CHoCH, no hay entrada.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHART 2 — XAUUSD M5 showing structure -->
+  <div class="chart-wrap reveal">
+    <div class="chart-header">
+      <span class="chart-title">XAUUSD M5 · Estructura del mercado en tiempo real</span>
+      <span class="chart-badge">● LIVE</span>
+    </div>
+    <div class="tradingview-widget-container" style="height:450px;">
+      <div id="tradingview_chart2" style="height:100%;"></div>
+      <script>
+      new TradingView.widget({
+        autosize: true, symbol: "PEPPERSTONE:XAUUSD",
+        interval: "5", timezone: "Europe/London",
+        theme: "dark", style: "1", locale: "es",
+        toolbar_bg: "#0f0f1e", enable_publishing: false,
+        hide_top_toolbar: false, save_image: false,
+        container_id: "tradingview_chart2",
+        backgroundColor: "#0f0f1e", gridColor: "#1a1a30",
+      });
+      </script>
+    </div>
+  </div>
+
+</div>
+</section>
+
+<!-- ─────────────────────────────────────────────
+     SECCIÓN 4 — FIBONACCI
+───────────────────────────────────────────── -->
+<section class="section section-alt2" id="fibonacci">
+<div class="container">
+
+  <div class="reveal">
+    <p class="section-tag">04 — Fibonacci</p>
+    <h2 class="section-title">Los retrocesos que<br>respetan los <em>institucionales</em></h2>
+    <div class="divider"></div>
+    <p class="section-body">El Fibonacci Retracement divide un movimiento del precio en niveles matemáticamente significativos. Los grandes participantes del mercado tienen sus órdenes concentradas en esos niveles, especialmente en el 0.618 — la Proporción Áurea.</p>
+  </div>
+
+  <!-- FIBONACCI DIAGRAM -->
+  <div class="diagram-wrap reveal">
+    <p class="diagram-label">Fibonacci Retracement — Niveles y zonas de entrada</p>
+    <svg viewBox="0 0 900 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-height:360px;">
+
+      <!-- The move: bearish impulse -->
+      <text x="60" y="30" fill="#c9a84c" font-family="DM Mono,monospace" font-size="11" letter-spacing="2">0 (INICIO DEL SWING)</text>
+      <line x1="50" y1="40" x2="850" y2="40" stroke="#c9a84c" stroke-width="1" stroke-dasharray="5,4" opacity="0.4"/>
+      <text x="860" y="44" fill="#c9a84c" font-family="DM Mono,monospace" font-size="10" opacity="0.6">0.0</text>
+
+      <!-- 0.236 -->
+      <line x1="50" y1="92" x2="850" y2="92" stroke="#666688" stroke-width="0.8" stroke-dasharray="4,4" opacity="0.4"/>
+      <text x="860" y="96" fill="#666688" font-family="DM Mono,monospace" font-size="10">0.236</text>
+
+      <!-- 0.382 -->
+      <line x1="50" y1="133" x2="850" y2="133" stroke="#aaaacc" stroke-width="1" stroke-dasharray="4,3" opacity="0.5"/>
+      <text x="860" y="137" fill="#aaaacc" font-family="DM Mono,monospace" font-size="10">0.382</text>
+      <rect x="50" y="124" width="800" height="18" fill="rgba(58,143,212,0.06)" rx="0"/>
+
+      <!-- 0.5 -->
+      <line x1="50" y1="168" x2="850" y2="168" stroke="#aaaacc" stroke-width="1" stroke-dasharray="4,3" opacity="0.5"/>
+      <text x="860" y="172" fill="#aaaacc" font-family="DM Mono,monospace" font-size="10">0.500</text>
+      <rect x="50" y="160" width="800" height="18" fill="rgba(58,143,212,0.06)" rx="0"/>
+
+      <!-- 0.618 — GOLDEN -->
+      <rect x="50" y="196" width="800" height="28" fill="rgba(201,168,76,0.12)" rx="0"/>
+      <line x1="50" y1="210" x2="850" y2="210" stroke="#c9a84c" stroke-width="1.5" opacity="0.8"/>
+      <text x="860" y="214" fill="#c9a84c" font-family="DM Mono,monospace" font-size="11" font-weight="bold">0.618 ⭐</text>
+      <text x="120" y="208" fill="#c9a84c" font-family="DM Sans,sans-serif" font-size="11" opacity="0.7">Golden Ratio — Zona de entrada principal</text>
+
+      <!-- 0.65 -->
+      <line x1="50" y1="227" x2="850" y2="227" stroke="#c9a84c" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.4"/>
+      <text x="860" y="231" fill="#c9a84c" font-family="DM Mono,monospace" font-size="10">0.650</text>
+
+      <!-- 0.786 -->
+      <line x1="50" y1="258" x2="850" y2="258" stroke="#e74c3c" stroke-width="1" stroke-dasharray="4,3" opacity="0.5"/>
+      <text x="860" y="262" fill="#e74c3c" font-family="DM Mono,monospace" font-size="10">0.786</text>
+      <rect x="50" y="250" width="800" height="18" fill="rgba(231,76,60,0.06)" rx="0"/>
+
+      <!-- 1.0 -->
+      <text x="60" y="310" fill="#e74c3c" font-family="DM Mono,monospace" font-size="11" letter-spacing="2" opacity="0.7">1.0 (MÍNIMO DEL SWING)</text>
+      <line x1="50" y1="300" x2="850" y2="300" stroke="#e74c3c" stroke-width="1" stroke-dasharray="5,4" opacity="0.35"/>
+      <text x="860" y="304" fill="#e74c3c" font-family="DM Mono,monospace" font-size="10" opacity="0.6">1.0</text>
+
+      <!-- SL label -->
+      <rect x="50" y="286" width="800" height="28" fill="rgba(231,76,60,0.06)" rx="0"/>
+      <text x="350" y="302" fill="#e74c3c" font-family="DM Sans,sans-serif" font-size="11" opacity="0.6">SL por debajo de aquí — Setup invalidado</text>
+
+      <!-- Entry arrow -->
+      <polygon points="160,202 148,188 172,188" fill="#2ecc71"/>
+      <text x="190" y="193" fill="#2ecc71" font-family="DM Mono,monospace" font-size="11" opacity="0.9">ENTRADA BUY</text>
+    </svg>
+  </div>
+
+  <table class="fib-table reveal">
+    <thead>
+      <tr><th>Nivel</th><th>Significado</th><th>Uso en el sistema</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>0.236</td><td>Retroceso superficial</td><td>TP rápido en tendencias muy fuertes</td></tr>
+      <tr><td>0.382</td><td>Primera zona relevante</td><td>TP1 escalonado</td></tr>
+      <tr><td>0.500</td><td>Zona de equilibrio</td><td>TP2 escalonado</td></tr>
+      <tr class="highlight"><td>0.618 ⭐</td><td>Proporción Áurea — Zona institucional</td><td>ENTRADA PRINCIPAL — zona de mayor probabilidad</td></tr>
+      <tr><td>0.650</td><td>Extensión del 0.618</td><td>Zona de entrada de seguridad si perfora el 0.618</td></tr>
+      <tr><td>0.786</td><td>Retroceso profundo</td><td>Última zona de entrada válida</td></tr>
+      <tr><td>1.000</td><td>Retorno completo</td><td>SL por debajo — setup invalidado</td></tr>
+    </tbody>
+  </table>
+
+  <div class="quote-block reveal">
+    <p class="quote-text">"El 0.618 no es un número arbitrario. Aparece en la espiral de una caracola, en las proporciones del cuerpo humano, en la arquitectura griega. Los institucionales no inventaron este nivel — lo respetan porque el mercado lo respeta."</p>
+    <p class="quote-source">— Predestinato FX</p>
+  </div>
+
+  <!-- MACRO vs MICRO -->
+  <div class="rule-grid reveal">
+    <div class="rule-item">
+      <p class="rule-label">Fibonacci Macro</p>
+      <p class="rule-value">Desde el mínimo/máximo más significativo del mes o año hasta su extremo opuesto</p>
+      <p class="rule-note">Define los niveles estructurales del año. El 0.618 macro es una zona de reversión mayor.</p>
+    </div>
+    <div class="rule-item">
+      <p class="rule-label">Fibonacci Micro</p>
+      <p class="rule-value">Desde el extremo del Judas Swing hasta el inicio del movimiento del día</p>
+      <p class="rule-note">Da los niveles exactos de entrada y TPs para la sesión actual.</p>
+    </div>
+    <div class="rule-item">
+      <p class="rule-label">Confluencia</p>
+      <p class="rule-value">Cuando el 0.618 micro coincide con el 0.382 macro (o cualquier combinación)</p>
+      <p class="rule-note">La probabilidad se multiplica. Estas son las entradas de mayor calidad.</p>
+    </div>
+    <div class="rule-item">
+      <p class="rule-label">+ FVG</p>
+      <p class="rule-value">Si en el nivel de Fibonacci hay también un FVG activo</p>
+      <p class="rule-note">Triple confluencia: Fibonacci + FVG + Judas Swing. El setup más sólido del sistema.</p>
+    </div>
+  </div>
+
+</div>
+</section>
+
+<!-- ─────────────────────────────────────────────
+     SECCIÓN 5 — CONFLUENCIA TRIPLE
+───────────────────────────────────────────── -->
+<section class="section" id="confluencia">
+<div class="container">
+
+  <div class="reveal">
+    <p class="section-tag">05 — Confluencia Triple</p>
+    <h2 class="section-title">XAU + DXY + XAG:<br>cuando los tres <em>confirman</em></h2>
+    <div class="divider"></div>
+    <p class="section-body">El setup de máxima probabilidad ocurre cuando tres instrumentos correlacionados llegan simultáneamente a sus zonas de Fibonacci. No es coincidencia — es estructura institucional moviéndose en sincronía.</p>
+  </div>
+
+  <!-- CORRELATIONS DIAGRAM -->
+  <div class="diagram-wrap reveal">
+    <p class="diagram-label">Correlaciones entre activos</p>
+    <svg viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-height:200px;">
+
+      <!-- XAU circle -->
+      <circle cx="200" cy="100" r="65" fill="rgba(201,168,76,0.08)" stroke="#c9a84c" stroke-width="1.5" opacity="0.8"/>
+      <text x="200" y="95" text-anchor="middle" fill="#c9a84c" font-family="Cormorant Garamond,serif" font-size="22" font-weight="bold">XAUUSD</text>
+      <text x="200" y="115" text-anchor="middle" fill="#c9a84c" font-family="DM Mono,monospace" font-size="10" opacity="0.6">Oro</text>
+
+      <!-- DXY circle -->
+      <circle cx="600" cy="60" r="55" fill="rgba(58,143,212,0.08)" stroke="#3a8fd4" stroke-width="1.5" opacity="0.8"/>
+      <text x="600" y="55" text-anchor="middle" fill="#3a8fd4" font-family="Cormorant Garamond,serif" font-size="20" font-weight="bold">DXY</text>
+      <text x="600" y="72" text-anchor="middle" fill="#3a8fd4" font-family="DM Mono,monospace" font-size="10" opacity="0.6">Índice Dólar</text>
+
+      <!-- XAG circle -->
+      <circle cx="600" cy="148" r="48" fill="rgba(170,170,204,0.08)" stroke="#aaaacc" stroke-width="1.5" opacity="0.6"/>
+      <text x="600" y="143" text-anchor="middle" fill="#aaaacc" font-family="Cormorant Garamond,serif" font-size="20" font-weight="bold">XAGUSD</text>
+      <text x="600" y="160" text-anchor="middle" fill="#aaaacc" font-family="DM Mono,monospace" font-size="10" opacity="0.6">Plata</text>
+
+      <!-- Arrows -->
+      <line x1="267" y1="82" x2="548" y2="48" stroke="#e74c3c" stroke-width="1.5" stroke-dasharray="5,3" opacity="0.7"/>
+      <text x="400" y="54" text-anchor="middle" fill="#e74c3c" font-family="DM Sans,sans-serif" font-size="11" opacity="0.8">↔ Inversa</text>
+      <text x="400" y="42" text-anchor="middle" fill="#e74c3c" font-family="DM Mono,monospace" font-size="9" opacity="0.6">DXY sube → XAU baja</text>
+
+      <line x1="267" y1="118" x2="554" y2="143" stroke="#2ecc71" stroke-width="1.5" stroke-dasharray="5,3" opacity="0.7"/>
+      <text x="400" y="138" text-anchor="middle" fill="#2ecc71" font-family="DM Sans,sans-serif" font-size="11" opacity="0.8">↔ Directa</text>
+      <text x="400" y="152" text-anchor="middle" fill="#2ecc71" font-family="DM Mono,monospace" font-size="9" opacity="0.6">XAG sube → XAU sube</text>
+    </svg>
+  </div>
+
+  <div class="cards-grid reveal">
+    <div class="concept-card">
+      <p class="card-num">XAUUSD</p>
+      <h3 class="card-title">Oro en 0.618</h3>
+      <p class="card-body">El precio del oro llega al nivel de Fibonacci con FVG de demanda o resistencia. Mecha de absorción visible en M5. Primer filtro confirmado.</p>
+    </div>
+    <div class="concept-card">
+      <p class="card-num">DXY</p>
+      <h3 class="card-title">Dólar frenando</h3>
+      <p class="card-body">El Índice del Dólar llega a su zona de FVG/Fibonacci simultáneamente. Si buscamos Buy en oro, el DXY debe estar frenando en resistencia. Correlación inversa confirmada.</p>
+    </div>
+    <div class="concept-card">
+      <p class="card-num">XAGUSD</p>
+      <h3 class="card-title">Plata confirmando</h3>
+      <p class="card-body">La plata llega a su nivel Fibonacci equivalente al mismo tiempo. La plata y el oro se mueven juntos — cuando ambos rebotan desde el mismo nivel, la señal es institucional.</p>
+    </div>
+  </div>
+
+  <div class="callout green reveal" style="margin-top:48px;">
+    <span class="callout-icon">⚡</span>
+    <p class="callout-text"><strong>Regla de la confluencia triple:</strong> Si solo el oro está en su zona pero el DXY y la plata no confirman, la probabilidad baja significativamente. No hay atajos — los tres deben confirmar para considerar el setup de máxima calidad. Un setup con confluencia parcial tiene menor tamaño de posición.</p>
+  </div>
+
+  <!-- CHART 3 — DXY -->
+  <div class="chart-wrap reveal">
+    <div class="chart-header">
+      <span class="chart-title">DXY · Índice del Dólar — Correlación con el oro</span>
+      <span class="chart-badge">● LIVE</span>
+    </div>
+    <div class="tradingview-widget-container" style="height:380px;">
+      <div id="tradingview_dxy" style="height:100%;"></div>
+      <script>
+      new TradingView.widget({
+        autosize: true, symbol: "CAPITALCOM:DXY",
+        interval: "15", timezone: "Europe/London",
+        theme: "dark", style: "1", locale: "es",
+        toolbar_bg: "#0f0f1e", enable_publishing: false,
+        hide_top_toolbar: false, save_image: false,
+        container_id: "tradingview_dxy",
+        backgroundColor: "#0f0f1e", gridColor: "#1a1a30",
+      });
+      </script>
+    </div>
+  </div>
+
+</div>
+</section>
+
+<!-- ─────────────────────────────────────────────
+     SECCIÓN 6 — PROTOCOLO DE ENTRADA
+───────────────────────────────────────────── -->
+<section class="section section-alt" id="protocolo">
+<div class="container">
+
+  <div class="reveal">
+    <p class="section-tag">06 — Protocolo de entrada</p>
+    <h2 class="section-title">El proceso exacto,<br>paso a <em>paso</em></h2>
+    <div class="divider"></div>
+    <p class="section-body">No existe el setup perfecto que te llega en un instante. Existe un proceso que sigues cada día, sin excepción. Este es el protocolo completo desde que suena el despertador hasta que cierras el ordenador.</p>
+  </div>
+
+  <div class="step-list reveal">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-content">
+        <h4>07:45 BST — Preparación pre-mercado</h4>
+        <p>Marcas el máximo y mínimo del rango asiático (01:00-08:00 BST) en el chart. Revisas el DXY y XAGUSD para ver su estructura general. En este momento ya tienes el mapa del día — sabes dónde está la liquidez que el mercado irá a buscar.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-content">
+        <h4>08:00 BST — Apertura de Londres</h4>
+        <p>Observas la dirección inicial. ¿Está el precio subiendo hacia el máximo asiático o bajando hacia el mínimo? No entras. Solo observas. El mercado te está mostrando hacia dónde va la manipulación.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-content">
+        <h4>Identificar el Judas Swing</h4>
+        <p>El precio barre el máximo o mínimo asiático con una vela clara y con mecha. Si hay un FVG de resistencia (para Sell) o de demanda (para Buy) en esa zona, la confluencia se fortalece. Trazas el Fibonacci desde el extremo del Judas.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">04</div>
+      <div class="step-content">
+        <h4>Verificar la confluencia triple</h4>
+        <p>Abres DXY y XAGUSD. ¿Están también en sus zonas de Fibonacci? Si los tres confirman simultáneamente, tienes el setup de máxima calidad. Si solo uno o dos confirman, reduces el tamaño de posición o esperas.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">05</div>
+      <div class="step-content">
+        <h4>Confirmación en M5 — CHoCH</h4>
+        <p>Esperas una vela de confirmación en M5: mecha larga en la dirección del Judas Swing, cierre en la dirección contraria, y CHoCH visible. Sin esta vela de confirmación, no hay entrada aunque todo lo demás esté perfecto.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">06</div>
+      <div class="step-content">
+        <h4>Entrada, SL y gestión</h4>
+        <p>Entras con el lotaje correcto según el SL. El Stop Loss se coloca siempre antes de los 3 primeros minutos. Mueves a Breakeven cuando el precio confirma la dirección. Los TPs están en los niveles de Fibonacci escalonados.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">07</div>
+      <div class="step-content">
+        <h4>Antes de las 10:30 BST — Decisión final</h4>
+        <p>Si no ha aparecido el setup antes de las 10:30, el ordenador se cierra. No hay setup, no hay trading. Si has ganado en Londres, el día está cerrado — no se opera Nueva York. El capital ganado se protege siempre.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHART 4 — XAGUSD -->
+  <div class="chart-wrap reveal">
+    <div class="chart-header">
+      <span class="chart-title">XAGUSD · Plata — Confluencia con el oro</span>
+      <span class="chart-badge">● LIVE</span>
+    </div>
+    <div class="tradingview-widget-container" style="height:380px;">
+      <div id="tradingview_xag" style="height:100%;"></div>
+      <script>
+      new TradingView.widget({
+        autosize: true, symbol: "CAPITALCOM:SILVER",
+        interval: "15", timezone: "Europe/London",
+        theme: "dark", style: "1", locale: "es",
+        toolbar_bg: "#0f0f1e", enable_publishing: false,
+        hide_top_toolbar: false, save_image: false,
+        container_id: "tradingview_xag",
+        backgroundColor: "#0f0f1e", gridColor: "#1a1a30",
+      });
+      </script>
+    </div>
+  </div>
+
+</div>
+</section>
+
+<!-- ─────────────────────────────────────────────
+     SECCIÓN 7 — GESTIÓN DE RIESGO
+───────────────────────────────────────────── -->
+<section class="section" id="riesgo">
+<div class="container">
+
+  <div class="reveal">
+    <p class="section-tag">07 — Gestión de riesgo</p>
+    <h2 class="section-title">Las reglas que<br><em>protegen</em> tu capital</h2>
+    <div class="divider"></div>
+    <p class="section-body">La gestión de riesgo no es opcional. Es lo que separa a los traders que sobreviven de los que queman cuentas. Cada regla tiene una razón exacta detrás — no son restricciones arbitrarias.</p>
+  </div>
+
+  <div class="rule-grid reveal">
+    <div class="rule-item">
+      <p class="rule-label">Riesgo máximo por sesión</p>
+      <p class="rule-value">1-2% del balance total</p>
+      <p class="rule-note">Un día malo no puede arruinar semanas de trabajo.</p>
+    </div>
+    <div class="rule-item">
+      <p class="rule-label">Stop Loss obligatorio</p>
+      <p class="rule-value">En los primeros 3 minutos tras la entrada</p>
+      <p class="rule-note">Sin SL = no hay trade. Sin excepción, sin negociación.</p>
+    </div>
+    <div class="rule-item">
+      <p class="rule-label">Ratio Riesgo/Recompensa</p>
+      <p class="rule-value">Mínimo 1:2 — preferible 1:3 o superior</p>
+      <p class="rule-note">Si el TP potencial no dobla el SL, el setup no es válido.</p>
+    </div>
+    <div class="rule-item">
+      <p class="rule-label">Breakeven</p>
+      <p class="rule-value">Obligatorio cuando el precio confirma dirección</p>
+      <p class="rule-note">El trade queda libre de riesgo. El peor resultado es cero.</p>
+    </div>
+    <div class="rule-item">
+      <p class="rule-label">Regla de Londres</p>
+      <p class="rule-value">Si Londres ganó, el día está cerrado</p>
+      <p class="rule-note">No se opera Nueva York tras un día positivo en Londres.</p>
+    </div>
+    <div class="rule-item">
+      <p class="rule-label">Noticias macro</p>
+      <p class="rule-value">Ordenador cerrado antes de Fed, Powell, NFP, PCE</p>
+      <p class="rule-note">El mercado se vuelve impredecible. El capital se protege.</p>
+    </div>
+  </div>
+
+  <!-- ERRORS -->
+  <div style="margin-top:64px;" class="reveal">
+    <h3 style="font-family:'Cormorant Garamond',serif;font-size:32px;margin-bottom:32px;">Los errores que debes evitar</h3>
+    <div class="checklist">
+      <div class="check-item"><span class="check-icon red">✗</span>Entrar sin confluencia completa — el análisis parcial genera pérdidas consistentes</div>
+      <div class="check-item"><span class="check-icon red">✗</span>Mover el SL para dar más margen — el mercado no te debe nada</div>
+      <div class="check-item"><span class="check-icon red">✗</span>Cerrar antes del TP por miedo — si el análisis era correcto, respeta el plan</div>
+      <div class="check-item"><span class="check-icon red">✗</span>Revenge trading — perder y entrar inmediatamente para recuperar</div>
+      <div class="check-item"><span class="check-icon red">✗</span>Sobreoperar — la calidad siempre supera a la cantidad</div>
+      <div class="check-item"><span class="check-icon red">✗</span>Ignorar el DXY y la plata — operar el oro sin las correlaciones es operar ciego</div>
+      <div class="check-item"><span class="check-icon red">✗</span>Operar durante noticias macro de alto impacto</div>
+      <div class="check-item"><span class="check-icon red">✗</span>Cambiar de sistema cada semana — sin datos estadísticos no hay mejora posible</div>
+    </div>
+  </div>
+
+  <div style="margin-top:48px;" class="reveal">
+    <h3 style="font-family:'Cormorant Garamond',serif;font-size:32px;margin-bottom:32px;">Los hábitos que construyen consistencia</h3>
+    <div class="checklist">
+      <div class="check-item"><span class="check-icon">✓</span>Bitácora diaria — documenta cada trade con el setup, la entrada, el resultado y la lección</div>
+      <div class="check-item"><span class="check-icon">✓</span>Backtesting semanal — revisa el histórico para mejorar el sistema con datos reales</div>
+      <div class="check-item"><span class="check-icon">✓</span>Revisar DXY y XAGUSD antes de cada sesión de Londres</div>
+      <div class="check-item"><span class="check-icon">✓</span>Marcar el rango asiático antes de las 07:45 BST</div>
+      <div class="check-item"><span class="check-icon">✓</span>Respetar el horario — la ventana 08:00-10:30 BST es donde está el edge</div>
+      <div class="check-item"><span class="check-icon">✓</span>Tratar cada día como independiente — las pérdidas de ayer no cambian el setup de hoy</div>
+    </div>
+  </div>
+
+  <div class="quote-block reveal">
+    <p class="quote-text">"No buscamos ganar todos los días. Buscamos que cuando ganemos, ganemos más de lo que perdemos. Eso es todo lo que necesita un sistema rentable."</p>
+    <p class="quote-source">— Predestinato FX · Londres, 2026</p>
+  </div>
+
+</div>
+</section>
+
+<!-- ─────────────────────────────────────────────
+     FOOTER
+───────────────────────────────────────────── -->
+<footer>
+  <p class="gold-text" style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:400;letter-spacing:3px;margin-bottom:16px;">El Camino del Predestinato</p>
+  <p style="margin-bottom:8px;">"Todo lo que hace, prosperará." — Salmos 1:3</p>
+  <p style="margin-top:24px;">© 2026 Predestinato FX · Londres, UK · Contenido educativo. No constituye asesoramiento financiero.</p>
+</footer>
+
+<script>
+// Reveal on scroll
+const revealElements = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+revealElements.forEach(el => observer.observe(el));
+
+// Progress dots
+const sections = ['inicio','fundamentos','fvg','fibonacci','confluencia','protocolo','riesgo'];
+const dots = document.querySelectorAll('.prog-dot');
+
+function scrollToSection(i) {
+  document.getElementById(sections[i])?.scrollIntoView({ behavior: 'smooth' });
+}
+
+window.addEventListener('scroll', () => {
+  const scrollY = window.scrollY;
+  sections.forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const top = el.offsetTop - 200;
+    const bottom = top + el.offsetHeight;
+    if (scrollY >= top && scrollY < bottom) {
+      dots.forEach(d => d.classList.remove('active'));
+      dots[i]?.classList.add('active');
+    }
+  });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,57 @@
+# =============================================================================
+# Core Trading Framework Dependencies
+# =============================================================================
+
+# NautilusTrader - High-performance algorithmic trading platform
+nautilus_trader==1.221.0
+
+# Data Processing
+pandas>=2.2.0
+numpy>=1.26.0
+pyarrow>=14.0.0  # Required for Parquet data catalog
+
+# Market Data Provider
+databento>=0.40.0
+databento-dbn>=0.20.0
+
+# Configuration and Environment
+python-dotenv>=1.0.0
+
+# Date/Time Handling
+python-dateutil>=2.8.0
+pytz>=2024.1
+
+# =============================================================================
+# Jupyter Notebook Support
+# =============================================================================
+
+jupyterlab>=4.0.0
+ipykernel>=6.20.0
+ipython>=8.10.0
+notebook>=7.0.0
+
+# Visualization
+matplotlib>=3.8.0
+plotly>=5.18.0
+
+# =============================================================================
+# Testing and Development
+# =============================================================================
+
+pytest>=7.4.0
+pytest-cov>=4.1.0
+
+# Type Checking
+pandas-stubs>=2.1.0
+types-python-dateutil>=2.8.0
+types-pytz>=2024.1.0
+
+# =============================================================================
+# Utilities
+# =============================================================================
+
+# Data compression for catalog storage
+zstandard>=0.21.0
+
+# Progress bars
+tqdm>=4.65.0

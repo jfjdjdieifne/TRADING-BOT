@@ -1,0 +1,133 @@
+![Thumbnail (1920x1080)](https://i.ytimg.com/vi/PIYh0CxoY9c/maxresdefault.jpg)
+# [ICT Mentorship Core Content - Month 04 - Orderblocks](https://www.youtube.com/watch?v=PIYh0CxoY9c)
+
+**Visibility**: Public
+**Uploaded by**: [The Inner Circle Trader](https://www.youtube.com/@InnerCircleTrader)
+**Uploaded at**: 2022-09-07
+**Published at**: 
+**Length**: 35:47
+**Views**: 992326
+**Likes**: 19465
+**Category**: Education
+
+## Description
+
+```
+2016 Premium ICT Mentorship Core Content Video Lectures
+Audio and visuals are exactly as they were distributed in December 2016. 
+
+CFTC RULE 4.41 – HYPOTHETICAL OR SIMULATED PERFORMANCE RESULTS HAVE CERTAIN LIMITATIONS. UNLIKE AN ACTUAL PERFORMANCE RECORD, SIMULATED RESULTS DO NOT REPRESENT ACTUAL TRADING. ALSO, SINCE THE TRADES HAVE NOT BEEN EXECUTED, THE RESULTS MAY HAVE UNDER-OR-OVER COMPENSATED FOR THE IMPACT, IF ANY, OF CERTAIN MARKET FACTORS, SUCH AS LACK OF LIQUIDITY. SIMULATED TRADING PROGRAMS IN GENERAL ARE ALSO SUBJECT TO THE FACT THAT THEY ARE DESIGNED WITH THE BENEFIT OF HINDSIGHT. NO REPRESENTATION IS BEING MADE THAT ANY ACCOUNT WILL OR IS LIKELY TO ACHIEVE PROFIT OR LOSSES SIMILAR TO THOSE SHOWN
+
+Trading performance displayed herein is hypothetical. Hypothetical performance results have many inherent limitations, some of which are described below. No representation is being made that any account will or is likely to achieve profits or losses similar to those shown. In fact, there are frequently sharp differences between hypothetical performance results and the actual results subsequently achieved by any particular trading program. One of the limitations of hypothetical performance trading results is that they are generally prepared with the benefit of hindsight. In addition, hypothetical trading does not involve financial risk, and no hypothetical trading record can completely account for the impact of financial risk in actual trading. For example, the ability to withstand losses or to adhere to a particular trading program in spite of trading losses are material points which can also adversely affect actual trading results. There are numerous other factors related to the markets in general or to the implementation of any specific trading program which cannot be fully accounted for in the preparation of hypothetical performance results and all of which can adversely affect actual trading results.
+
+U.S. Government Required Disclaimer – Commodity Futures Trading Commission Futures and Options trading has large potential rewards, but also large potential risk. You must be aware of the risks and be willing to accept them in order to invest in the futures and options markets. Don’t trade with money you can’t afford to lose. This is neither a solicitation nor an offer to Buy/Sell futures or options. No representation is being made that any account will or is likely to achieve profits or losses similar to those discussed on this web site. The past performance of any trading system or methodology is not necessarily indicative of future results.
+
+Trade at your own risk. The information provided here is of the nature of a general comment only and neither purports nor intends to be, specific trading advice. It has been prepared without regard to any particular person’s investment objectives, financial situation and particular needs. Information should not be considered as an offer or enticement to buy, sell or trade.
+
+You should seek appropriate advice from your broker, or licensed investment advisor, before taking any action. Past performance does not guarantee future results. Simulated performance results contain inherent limitations. Unlike actual performance records the results may under or over compensate for such factors such as lack of liquidity. No representation is being made that any account will or is likely to achieve profits or losses to those shown.
+
+The risk of loss in trading can be substantial. You should therefore carefully consider whether such trading is suitable for you in light of your financial condition.
+
+If you purchase or sell Equities, Futures, Currencies or Options you may sustain a total loss of the initial margin funds and any additional funds that you deposit with your broker to establish or maintain your position. If the market moves against your position, you may be called upon by your broker to deposit a substantial amount of additional margin funds, on short notice in order to maintain your position. If you do not provide the required funds within the prescribed time, your position may be liquidated at a loss, and you may be liable for any resulting deficit in your account.
+
+Under certain market conditions, you may find it difficult or impossible to liquidate a position. This can occur, for example, when the market makes a “limit move.” The placement of contingent orders by you, such as a “stop-loss” or “stop-limit” order, will not necessarily limit your losses to the intended amounts, since market conditions may make it impossible to execute such orders.
+```
+
+## Transcript
+
+welcome back folks this is
+the third teaching of eight from the
+december content of the ict mentorship
+we'll be talking about reinforcing order
+block theory
+selecting and avoiding
+and we're going to first talk about
+the
+bullish order block everything i say
+here you'll just reverse for a bearish
+order block to save time
+definition of a bullish order block is
+the lowest candle
+or price bar
+with a down close
+that has the most range
+between open to close
+and is near a support level
+validation of a bullish order block is
+when the high
+of the lowest down candle or price bar
+is traded through by a later formed
+candle or price bar
+entry techniques using a bullet shorter
+block
+when price trades higher
+away from the bullish order block and
+then returns to the bullish order block
+candle or price bar high
+this is bullish and can be used for a
+bullish entry
+defining risk with bullish order block
+the low of the bullish order block is
+the location of a relatively safe stop
+loss placement
+just below the 50 percent of the order
+block total range
+is also considered to be a good location
+to raise the stop loss after price runs
+away from the bullish order block to
+reduce risk when applicable
+okay let's take a look at a supposed
+support line now that can be in the form
+of a old low on a long term or higher
+time frame chart
+it could be an old high where price has
+moved above recently and now we're
+trying back down into it so simple
+support resistance ideas are just enough
+here but the main thing is you want to
+be using it on a higher time frame
+charts like a monthly weekly or daily
+and eventually you'll see price trade
+down into this
+level that you identified as a support
+level
+once price trades down into the support
+level and it could trade to it or just
+through it doesn't make a difference but
+what we're doing is we're waiting for
+price to show us indications
+that smart money or a large body of
+big flows or those individuals that are
+on an institutional level they have a
+whole lot more collectively than we do
+in terms of money when they participate
+in a move it'll be seen in price action
+so when we have this down candle we have
+already
+assuming
+that this may be a bullish order block
+we don't know that yet
+until at a later time when another
+candle trades through it what are we
+specifically aiming for
+we're identifying our focus
+the down candle is high when that is
+violated
+with a new candle and it trades through
+that high now we have a validated
+bullish order block
+this candle validates the down candle as
+a bullish order block
+now this moment
+if we trade back down once that down
+candle or suspected bullish order blocks
+highs violated
+we can now highlight that candle's high
+and even in the very candle that broke
+that down candle's high if it trades
+back down to that down candle's high or
+the voltage order blocks high
+that could be a retraded
+price that which we could day trade off
+of or enter our longs early in other
+words we don't h

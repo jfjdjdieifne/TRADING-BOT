@@ -1,0 +1,385 @@
+<title>NIFTY SMC Playbook Access</title>
+<style>
+  :root {
+    --bg: #f3f4f0;
+    --surface: #ffffff;
+    --border: #dde1dc;
+    --ink: #16201c;
+    --ink-muted: #5b6660;
+    --accent: #147a56;
+    --accent-ink: #f3fbf7;
+    --warn: #a66a1e;
+    --warn-bg: #f7ecdb;
+    --danger: #b23b3b;
+    --danger-bg: #f8e6e4;
+    --ok-bg: #e2f3ea;
+    --code-bg: #0f1613;
+    --code-ink: #d9ecdf;
+    --shadow: 0 1px 2px rgba(20, 30, 25, 0.06), 0 8px 24px rgba(20, 30, 25, 0.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0a100d;
+      --surface: #12211a;
+      --border: #24352c;
+      --ink: #e7efe9;
+      --ink-muted: #9db0a5;
+      --accent: #2fbe85;
+      --accent-ink: #071510;
+      --warn: #e3a94a;
+      --warn-bg: #241c0f;
+      --danger: #e3665f;
+      --danger-bg: #271413;
+      --ok-bg: #10281c;
+      --code-bg: #060b08;
+      --code-ink: #bfe0cc;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0a100d;
+    --surface: #12211a;
+    --border: #24352c;
+    --ink: #e7efe9;
+    --ink-muted: #9db0a5;
+    --accent: #2fbe85;
+    --accent-ink: #071510;
+    --warn: #e3a94a;
+    --warn-bg: #241c0f;
+    --danger: #e3665f;
+    --danger-bg: #271413;
+    --ok-bg: #10281c;
+    --code-bg: #060b08;
+    --code-ink: #bfe0cc;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .serif {
+    font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+  }
+  .mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  a { color: var(--accent); }
+
+  .wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 0 20px 64px;
+  }
+
+  header.masthead {
+    padding: 28px 0 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .brand {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  .brand .dot { color: var(--accent); }
+  .ticker {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .hero { padding: 40px 0 8px; }
+  .eyebrow {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--ok-bg);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 5px 12px;
+    margin-bottom: 18px;
+  }
+  h1 {
+    font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+    font-size: clamp(30px, 7vw, 42px);
+    line-height: 1.12;
+    margin: 0 0 10px;
+    text-wrap: balance;
+    letter-spacing: -0.01em;
+  }
+  .lede {
+    font-size: 17px;
+    color: var(--ink-muted);
+    margin: 0 0 28px;
+    max-width: 52ch;
+  }
+
+  .cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 13px 20px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    transition: transform 0.15s ease, filter 0.15s ease;
+  }
+  .btn-primary { background: var(--accent); color: var(--accent-ink); }
+  .btn-secondary { background: transparent; color: var(--ink); border-color: var(--border); }
+  .btn:hover { filter: brightness(1.06); }
+  @media (hover: hover) {
+    .btn:hover { transform: translateY(-1px); }
+  }
+  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .fineprint { font-size: 12.5px; color: var(--ink-muted); margin: 14px 0 0; }
+
+  section { padding: 36px 0; border-top: 1px solid var(--border); }
+  h2 {
+    font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+    font-size: 22px;
+    margin: 0 0 6px;
+    letter-spacing: -0.005em;
+  }
+  .section-note { color: var(--ink-muted); font-size: 14.5px; margin: 0 0 20px; max-width: 56ch; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    padding: 18px 20px;
+  }
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px 18px;
+  }
+  .meta-item .k {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-muted);
+    margin-bottom: 3px;
+  }
+  .meta-item .v { font-size: 15px; font-weight: 600; }
+
+  ol.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 16px; }
+  ol.steps li {
+    display: grid;
+    grid-template-columns: 30px 1fr;
+    gap: 12px;
+    align-items: start;
+  }
+  ol.steps .num {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--ok-bg);
+    color: var(--accent);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  ol.steps .step-body b { display: block; margin-bottom: 2px; }
+  ol.steps .step-body span { color: var(--ink-muted); font-size: 14.5px; }
+  ol.steps code {
+    background: var(--code-bg);
+    color: var(--code-ink);
+    padding: 1px 6px;
+    border-radius: 5px;
+    font-size: 13px;
+  }
+
+  .seq-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .seq-list li {
+    display: flex; gap: 12px; align-items: baseline;
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .seq-list .tag {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px; font-weight: 700;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  .seq-list .desc { font-size: 14.5px; }
+  .seq-list .desc b { display: block; font-size: 15px; }
+
+  .grade-grid { display: flex; flex-direction: column; gap: 12px; }
+  .grade {
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    padding: 16px 18px;
+  }
+  .grade .head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .grade .chip {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px; font-weight: 800;
+    padding: 3px 9px;
+    border-radius: 6px;
+  }
+  .grade .title { font-weight: 700; font-size: 15.5px; }
+  .grade p { margin: 0; font-size: 14.5px; color: var(--ink-muted); }
+  .grade-a { background: var(--ok-bg); }
+  .grade-a .chip { background: var(--accent); color: var(--accent-ink); }
+  .grade-b { background: var(--warn-bg); }
+  .grade-b .chip { background: var(--warn); color: #1a1206; }
+  .grade-n { background: var(--danger-bg); }
+  .grade-n .chip { background: var(--danger); color: #2a0d0b; }
+
+  .disclaimer {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--ink-muted);
+    border-radius: 10px;
+    padding: 18px 20px;
+    font-size: 13.5px;
+    color: var(--ink-muted);
+  }
+  .disclaimer .label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 28px 0 0;
+    font-size: 13px;
+    color: var(--ink-muted);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    justify-content: space-between;
+  }
+  footer a { color: var(--ink-muted); }
+
+  @media (max-width: 420px) {
+    .meta-grid { grid-template-columns: 1fr 1fr; }
+    .cta-row .btn { flex: 1 1 auto; justify-content: center; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="brand">NBL <span class="dot">·</span> TRADING</div>
+    <div class="ticker">NSE — NIFTY 50 SMC DESK</div>
+  </header>
+
+  <div class="hero">
+    <span class="eyebrow">Free &amp; Permanent — Playbook Readers</span>
+    <h1>NIFTY SMC Visual Trading Playbook</h1>
+    <p class="lede">Free TradingView Pine Script — the companion indicator for the playbook. Paste it into TradingView in under a minute.</p>
+
+    <div class="cta-row">
+      <a class="btn btn-primary" href="https://github.com/nbl1960/Superb-instructional-smc/blob/main/SUPERB_v0.7.pine">Get the Pine Script →</a>
+      <a class="btn btn-secondary" href="https://github.com/nbl1960/Superb-instructional-smc">View Repository</a>
+    </div>
+    <p class="fineprint">Open source · MIT licensed · No signup, no paywall, no expiry.</p>
+  </div>
+
+  <section id="script">
+    <h2>What you're getting</h2>
+    <p class="section-note">One indicator, free forever. This is the exact engine referenced throughout the playbook.</p>
+    <div class="card meta-grid">
+      <div class="meta-item"><div class="k">TradingView title</div><div class="v">SUPERB v0.7 — Institutional SMC Suite</div></div>
+      <div class="meta-item"><div class="k">Pine version</div><div class="v">v6</div></div>
+      <div class="meta-item"><div class="k">Type</div><div class="v">Overlay indicator</div></div>
+      <div class="meta-item"><div class="k">License</div><div class="v">MIT — free &amp; open source</div></div>
+    </div>
+  </section>
+
+  <section id="install">
+    <h2>Installing on TradingView</h2>
+    <p class="section-note">Works on any TradingView plan, on NIFTY, BANKNIFTY, or any other symbol.</p>
+    <div class="card">
+      <ol class="steps">
+        <li><span class="num">1</span><span class="step-body"><b>Get the script</b><span>Tap "Get the Pine Script" above, then use GitHub's <code>Copy raw file</code> button to copy the full source.</span></span></li>
+        <li><span class="num">2</span><span class="step-body"><b>Open Pine Editor</b><span>In TradingView, open any NIFTY chart → bottom panel → <code>Pine Editor</code>.</span></span></li>
+        <li><span class="num">3</span><span class="step-body"><b>New blank script</b><span>Click <code>Open</code> → <code>New blank indicator</code>, then delete the placeholder code.</span></span></li>
+        <li><span class="num">4</span><span class="step-body"><b>Paste &amp; save</b><span>Paste the copied script, then click <code>Save</code> and give it a name.</span></span></li>
+        <li><span class="num">5</span><span class="step-body"><b>Add to chart</b><span>Click <code>Add to chart</code>. The zones, structure labels, and dashboard will appear on your NIFTY chart.</span></span></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="sequence">
+    <h2>The NBL Sequence</h2>
+    <p class="section-note">Every signal the script considers is built from the same seven-part confluence check taught in the playbook — no single signal fires alone.</p>
+    <ul class="seq-list">
+      <li><span class="tag">01</span><span class="desc"><b>Higher-timeframe bias</b>4H trend direction agrees with the trade direction.</span></li>
+      <li><span class="tag">02</span><span class="desc"><b>Liquidity swept</b>Buy-side or sell-side liquidity has just been taken.</span></li>
+      <li><span class="tag">03</span><span class="desc"><b>Structure shift</b>A confirmed CHoCH or BOS follows the sweep.</span></li>
+      <li><span class="tag">04</span><span class="desc"><b>Zone strength</b>Price is reacting from a demand/supply zone above the strength threshold.</span></li>
+      <li><span class="tag">05</span><span class="desc"><b>Fair value gap quality</b>A high-quality FVG supports the move.</span></li>
+      <li><span class="tag">06</span><span class="desc"><b>Order block</b>An order block aligns with the setup.</span></li>
+      <li><span class="tag">07</span><span class="desc"><b>Volume confirmation</b>Participation is above its rolling average.</span></li>
+    </ul>
+  </section>
+
+  <section id="grading">
+    <h2>Reading the grade: A+ / B / NO-TRADE</h2>
+    <p class="section-note">The script surfaces a live 0–100 confidence score and a count of how many NBL Sequence conditions are met. The playbook teaches you to translate that into three plain decisions:</p>
+    <div class="grade-grid">
+      <div class="grade grade-a">
+        <div class="head"><span class="chip">A+</span><span class="title">High confluence</span></div>
+        <p>All seven NBL Sequence conditions align and the confidence score sits in its upper range. The playbook's full checklist is met — still not a guarantee, but the highest-quality setup the framework defines.</p>
+      </div>
+      <div class="grade grade-b">
+        <div class="head"><span class="chip">B</span><span class="title">Partial confluence</span></div>
+        <p>Most, but not all, conditions are met. The playbook treats this as a caution zone — smaller size, tighter risk, or wait for the missing condition to confirm.</p>
+      </div>
+      <div class="grade grade-n">
+        <div class="head"><span class="chip">NO-TRADE</span><span class="title">Low confluence</span></div>
+        <p>Few conditions align, or signals conflict. The playbook's rule here is simple: stand aside and wait for the next sequence.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="disclaimer">
+    <div class="disclaimer">
+      <span class="label">Disclaimer</span>
+      This indicator is decision-support software for educational purposes. It does not predict markets, guarantee entries, or guarantee profits. Trading involves substantial risk.
+    </div>
+  </section>
+
+  <footer>
+    <span>© NBL Trading — companion to the NIFTY SMC Visual Trading Playbook</span>
+    <span><a href="https://github.com/nbl1960/Superb-instructional-smc/blob/main/LICENSE">MIT License</a></span>
+  </footer>
+
+</div>
