@@ -17,13 +17,13 @@ naming concepts, not for organising, not for filling gaps. Missing material is r
 | 1 collection | DONE | 14 PRIMARY files / 7 source_ids indexed; 0 SECONDARY, 0 TERTIARY; no new retrieval possible |
 | 2 claims | DONE | 54 claims, 54 verified, 0 failed, 0 removed |
 | 3 cards | DONE | 32 cards (24 grounded, 8 NOT_FOUND), 15 relations, 206 NOT_IN_SOURCES fields |
-| 4 process spec | IN_PROGRESS | |
+| 4 process spec | DONE | 8 steps, every step cited; differences listed not merged; 20 owner questions |
 | 5 engine design | NOT_STARTED | |
-| 6 audit | NOT_STARTED | |
+| 6 audit | DONE | AUDIT.md; verifier re-run 54/54/0; contamination log recorded |
 
 ## Next step
 
-Phase 4: process_spec.md + OWNER_QUESTIONS.md, then Phase 5 engine_representation.md, then Phase 6 AUDIT.md.
+Round complete. Nothing is pending except the 20 owner questions in OWNER_QUESTIONS.md.
 
 ## Resume instructions for a fresh session
 
@@ -42,3 +42,5 @@ Phase 4: process_spec.md + OWNER_QUESTIONS.md, then Phase 5 engine_representatio
 - phase 0 baseline: `a3089e335e34b455a5bcc03cc936e6195b4401d2`
 - phase 1: `065c2d1353b4488fae06b230528d9b273adc1880`
 - phase 2: `42bebbf6b9b4a9f3f90dbf899259b3b709693fae`
+- phase 3: `c678c18de7808e5ad7a4717ee4a59d0794789e5c`
+- phases 4-6: see `git log -1 --format=%H`
