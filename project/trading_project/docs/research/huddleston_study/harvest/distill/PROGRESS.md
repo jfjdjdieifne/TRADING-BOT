@@ -1,39 +1,28 @@
-# PROGRESS — knowledge distillation round (resume file)
+# PROGRESS — distillation round (resume file)
 
-Branch: `arena/e91e69b1-trading-bot`. Session start HEAD was `e06e22c` (the base commit) with the
-harvest folder present on disk but untracked; `git merge --ff-only origin/arena/e91e69b1-trading-bot`
-fast-forwarded the branch to `782c9f6` after verifying that all 443 harvest files on disk were
-byte-identical to that commit (`git show <commit>:<path> | sha256sum` per file: identical=443, diff=0).
+Branch: `arena/e91e69b1-trading-bot`. HARVEST_HASH: `90629a8f97ec323d9c5430b61f0ca9b2d265f45b`.
+Read everything through `git show HARVEST_HASH:<path>`. Never touch data dated 2025-05-01 or later.
 
-- **HARVEST_HASH = `90629a8f97ec323d9c5430b61f0ca9b2d265f45b`** (`git log --all -1 --format=%H -- .../harvest/INDEX.jsonl`).
-  The branch tip `782c9f6` adds only `harvest/FILES_CREATED.txt` on top of it.
-- All harvest content is read through `git show HARVEST_HASH:<path>` / `git show 782c9f6:<path>`.
-
-## Phase status
-
-| phase | state | artefacts |
+| phase | status | artefact |
 |---|---|---|
-| 0 verify | DONE | `phase0_report.md`, `phase0_excerpt_verify.json`, `tools/verify_excerpts.py` |
-| 1 inventory | TODO | `transcript_inventory.tsv`, `authorship_flags.tsv` |
-| 2 selection | TODO | `selection.md`, `/tmp` window dumps |
-| 3 claims | TODO | `claims.jsonl`, `tools/verify_claims.py`, `phase3_verify_report.md` |
-| 4 conflicts | TODO | `conflicts.jsonl`, `agreement.md` |
-| 5 cards/process/questions | TODO | `cards/*.md`, `process_spec.md`, `OWNER_QUESTIONS.md` |
-| 6 knowledge pack | TODO | `knowledge_pack*.jsonl` |
-| 7 audit | TODO | `AUDIT.md` |
+| 0 | DONE | `phase0_report.md`, `phase0_excerpt_verify.json` (326/326 hashes, 31 repos, seed 20261106) |
+| 1 | DONE | `transcript_inventory.tsv` (490), `authorship_flags.tsv` (74) |
+| 2 | DONE | `selection.md` (1392 files scored), `read_log.jsonl` (32 windows) |
+| 3 | DONE | `claims.jsonl` (100 claims), `phase3_verify_report.md` (100/100 pass, 29 check-2 warnings) |
+| 4 | DONE | `conflicts.jsonl` (8 conflicts / 18 options), `agreement.md` |
+| 5 | DONE | `cards/` (13), `process_spec.md`, `OWNER_QUESTIONS.md` (12 gaps) |
+| 6 | DONE | `knowledge_pack.jsonl` (111), `.michael_only.jsonl` (39), `.no_llm_flagged.jsonl` (64) |
+| 7 | DONE | `AUDIT.md` |
 
-## Resume instructions (zero-context)
+## Tools
+`tools/phase1_inventory.py`, `phase2_select.py`, `read_window.py`, `verify_claims.py`, `mkclaims.py`
+(excerpt-repo claims, resolves files under /tmp/dr at pinned commits), `mkclaims_web.py` (harvest web records).
 
-1. `git fetch --all`; `HARVEST_HASH=90629a8`; read harvest files via `git show`.
-2. Re-download excerpt repos to `/tmp/dr/<owner>__<repo>` from
-   `https://codeload.github.com/<full_name>/tar.gz/<commit_sha>` (commit SHAs are in
-   `harvest/github/repos_meta.jsonl`). If `/tmp` is gone, re-run:
-   `python3 project/trading_project/docs/research/huddleston_study/harvest/distill/tools/verify_excerpts.py`
-   after downloading; it reports missing repos explicitly.
-3. Only quotes that pass `tools/verify_claims.py` may appear in claims/cards/pack.
-
-## Hard rules in force
-
-- No invention; every statement traced to a verified quote; temptations logged in `AUDIT.md`.
-- Never store full text of EXCERPT repos; quotes ≤25 words + pinned commit + path only.
-- Nothing outside `harvest/distill/` is created or modified.
+## If resuming
+1. `/tmp/dr/` is ephemeral: re-download `https://codeload.github.com/<full_name>/tar.gz/<commit_sha>` from
+   `harvest/github/repos_meta.jsonl`.
+2. `python3 tools/verify_claims.py claims.jsonl --report phase3_verify_report.md` must stay at 100% pass.
+3. To add claims: author JSON list, run `mk claims.py` (or `mkclaims_web.py` for `web/pages/*`), quotes <=25 words and
+   verbatim from the file.
+4. Open work: the 458 unread transcripts, the library's bias-invalidation / silver-bullet / breaker files, and the 12
+   owner questions. Nothing further should be operationalised until the owner answers Q1–Q12.
