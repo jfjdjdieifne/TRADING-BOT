@@ -17,7 +17,7 @@ Base commit `462bb61068e6b184478b831dd8295a189dfeabc5`. Every base file was read
 - Files opened: 9 transcripts + 1 library-adjacent source set; **1,841 of the 1,871 text files were NOT opened** this
   round (hit ranking only). The highest-density non-transcript hits were LLM-flagged repos
   (`Yousef-Diab/the-algorithm` index.html, `SrsBlack` audit reports) — deliberately not mined as speaker text.
-- Per question: windows per question: QA 2 · QB 0 · QC 2 · QD 2 · QE 2 · QF 0 · QG 2 · QH 2 · QI 1 · QJ 4 · QK 2 · QL 0 · QM 2. Every window is tagged with exactly one question id, so these sum to 21.
+- Per question: windows by *surfacing* question (the `question` field in `read_log.jsonl`): QJ 4 · QA 2 · QC 2 · QD 2 · QE 2 · QG 2 · QH 2 · QK 2 · QM 2 · QI 1 = 21. Two questions (QF, QL) have no window of their own: their claims come from windows already read for other questions (W012, W018, W010, W011, W015, W020). This is recorded rather than hidden — no claim cites a window that was not printed and logged.
 
 ## Claims (phase C)
 - **50 claims** in `claims_r2.jsonl`: SAID 37, DEFINED 4, USED_IN_EXAMPLE 3, DEMONSTRATED 5, AMBIGUOUS 1.

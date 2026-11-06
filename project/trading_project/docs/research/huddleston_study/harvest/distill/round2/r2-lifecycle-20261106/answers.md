@@ -2,13 +2,13 @@
 
 Every verdict is followed by the claims that carry it. Verdict vocabulary: **ANSWERED_BY_SOURCE**, **CONFLICTING** (options listed, never resolved), **STILL_UNANSWERED**.
 
-Windows read this session: 21 (+/-200 words each side = ~400 words per window), all logged in `read_log.jsonl` with file, pattern, word offsets and sha256. Claims: 50.
+Windows read this session: 21 (+/-200 words each side = ~400 words per window), all logged in `read_log.jsonl` with file, pattern, word offsets and sha256. Claims: 50. Note: the `question` field in `read_log.jsonl` is the search that surfaced the window, not every question the window later answered — W012 surfaced under QG but supplied QF/QD/QL claims, W018 surfaced under QE but supplied QF/QC claims.
 
 ## QA — Q1 — stop placement and any buffer beyond the extreme
 
 ANSWERED_BY_SOURCE (partly) — four distinct stop rules are stated by the speaker: below the OB low; raised to just below 50% of the OB range; trailed below the lowest low of the last 40 trading days (position trades); a comfortable stop below 75% of an already-rebalanced range. A fifth, from a worked plan, is a fixed 4-point static stop.
 CONFLICTING — structural (WS-based) vs static-fixed (ES4 plan) stop coexist; kept as separate options, nothing resolved here. See also round-1 CF-07.
-STILL_UNANSWERED — no window gives a numeric buffer (pips/ATR) beyond an extreme; the only numbers are the fixed 4 points of one plan. 5 claims, 6 windows on this question.
+STILL_UNANSWERED — no window gives a numeric buffer (pips/ATR) beyond an extreme; the only numbers are the fixed 4 points of one plan. 5 claims, drawn from windows W003/W004 (surfaced by the QA search) and W013/W014/W017/W018 (surfaced by other searches).
 
 | claim | type | statement | quote | source (file: window) |
 |---|---|---|---|---|
@@ -34,7 +34,7 @@ STILL_UNANSWERED — whether he personally defaults to limit or stop for intrada
 
 ANSWERED_BY_SOURCE — worked sizing examples only: 1% of a 5,000 account per trade with 3:1 R:R and a 30% hit-rate arithmetic; a 2% variant; one e-mini contract per trade, no pyramiding, on a 25,000 account with 4 dollar commissions; 'the first thing I care about is what am I gonna risk'.
 CONFLICTING — 1% vs 2% appear as two hypotheticals in the same lecture; no rule about which to use.
-STILL_UNANSWERED — daily loss limit, per-day trade cap beyond 'one setup and done', and what happens after a losing streak (referenced as another module that was not read). 6 claims.
+STILL_UNANSWERED — daily loss limit, per-day trade cap beyond 'one setup and done', and what happens after a losing streak (referenced as another module that was not read). 5 claims.
 
 | claim | type | statement | quote | source (file: window) |
 |---|---|---|---|---|
@@ -70,7 +70,7 @@ STILL_UNANSWERED — no window describes a live stop-out and what he does immedi
 
 CONFLICTING — four incompatible definitions of the trading windows: (a) 'my ict new york kill zone' starting 07:00 New York and extending to 10:00; (b) the library table NY AM 08:00–11:00 (round 1); (c) the operating sessions of the four-opportunity plan, 09:30–11:30 and 13:30–15:30 New York local time; (d) the four-name list London / NY AM / NY Lunch / NY PM (round 1). All options kept.
 ANSWERED_BY_SOURCE — the time zone question: 'new york time' / 'New York local time' is stated for (a) and (c).
-STILL_UNANSWERED — the time zone for the minute-group timings (round-1 Q9) is still not given by any window read. 4 claims (2 QF + 2 QF-adjacent).
+STILL_UNANSWERED — the time zone for the minute-group timings (round-1 Q9) is still not given by any window read. 4 claims, taken from W012 (surfaced by the QG search) and W018 (surfaced by the QE search).
 
 | claim | type | statement | quote | source (file: window) |
 |---|---|---|---|---|
@@ -141,7 +141,7 @@ STILL_UNANSWERED — no fixed ladder; the choice is explicitly left to the trade
 ## QL — PROCESS from blank chart to exit, as demonstrated
 
 ANSWERED_BY_SOURCE — an ordered routine is stated and demonstrated: day of the week first; monthly/weekly/daily analysis before the four-hour view; HTF bias then direction per weekday; wait for participation evidence at the HTF level; validate the array (OB needs a trade through its high); wait for the shift; choose the FVG that fits the stop; target external liquidity/liquidity pool. 21 windows across 9 transcripts and 2 sequences files built from these quotes.
-STILL_UNANSWERED — the exit leg is under-demonstrated: only the ES4 plan gives a fixed target (5.25 points) and the round-1 claims give external liquidity; no window shows a full trade exit with reasoning. 11 claims.
+STILL_UNANSWERED — the exit leg is under-demonstrated: only the ES4 plan gives a fixed target (5.25 points) and the round-1 claims give external liquidity; no window shows a full trade exit with reasoning. 8 claims, drawn from 10 windows across 6 transcripts; 3 sequence files in `sequences/`.
 
 | claim | type | statement | quote | source (file: window) |
 |---|---|---|---|---|
@@ -157,7 +157,7 @@ STILL_UNANSWERED — the exit leg is under-demonstrated: only the ES4 plan gives
 ## QM — dealing range and premium/discount — demonstrated use
 
 ANSWERED_BY_SOURCE — demonstrated twice: the high-to-low leg is named 'your dealing range', the reaction is attributed to half of it; and on another chart equilibrium is set between a high and a low with the requirement to enter short only below it (a discount array). A third window states the Fibonacci tool is used only to illustrate equilibrium.
-STILL_UNANSWERED — how the leg is selected when several swings qualify (round-1 Q2/Q3 remain open). 6 claims.
+STILL_UNANSWERED — how the leg is selected when several swings qualify (round-1 Q2/Q3 remain open). 4 claims.
 
 | claim | type | statement | quote | source (file: window) |
 |---|---|---|---|---|
