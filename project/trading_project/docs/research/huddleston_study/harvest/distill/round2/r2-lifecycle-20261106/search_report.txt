@@ -1,0 +1,183 @@
+# corpus: 1871 files with text (all /tmp/dr downloads)
+
+## QA
+48	SrsBlack/ict-knowledge-library::concepts/32-risk-management/stop-placement-by-pd-array.md
+34	Yousef-Diab/the-algorithm::index.html
+29	newsqlguru/ict-index::transcriptions/2023-ICT-Mentorship/ICT-Mentorship-2023-August-18-2023-Live-trade-Walkthrough-001.json
+27	SrsBlack/ict-knowledge-library::meta/audit-2026-10-08/ote-risk.md
+24	SrsBlack/ict-knowledge-library::raw/ICT-2022-MENTORSHIP-CORE-CONTENT-MONTH-05-POSITION-TRADE-MANAGEMENT-okN5p701T7Y/report.md
+23	Klout9/ict-strat::Month 05 - IPDA Quarterly Shifts/18_Position_Trade_Management.md
+23	newsqlguru/ict-index::transcriptions/2017-ICT-Private-Mentorship-Core-Content-Month-05/ICT-Mentorship-Core-Content-Month-05-Position-Trade-Management-001.json
+23	newsqlguru/ict-index::transcriptions/Ends-Series/2022-ICT-Mentorship-Ends-Series-Part-4-of-4-001.json
+20	SrsBlack/ict-knowledge-library::meta/audit-2026-10-08/review-ote-risk.md
+16	Kyle2077/ict-2022-skill-bundle::books/ict-2022-mentorship/source/fulltext.txt
+15	Klout9/ict-strat::Month 11 - Charter Price Action Models/05_Model_2_Trade_Plan_Algorithmic_Theory.md
+15	Klout9/ict-strat::Month 11 - Charter Price Action Models/07_Model_3_Trade_Plan_Algorithmic_Theory.md
+
+## QB
+302	Yousef-Diab/the-algorithm::index.html
+112	Yousef-Diab/the-algorithm::docs/content-audit.md
+59	Mehranrostamy/ICT-Mentorship-2016-Month-1::index.html
+54	SrsBlack/ict-knowledge-library::raw/ICT-2022-MENTORSHIP-CORE-CONTENT-MONTH-05-DEFINING-OPEN-FLOAT-vqtA1S9JH34/report.md
+49	SrsBlack/ict-knowledge-library::raw/ICT-2022-MENTORSHIP-CORE-CONTENT-MONTH-03-INSTITUTIONAL-SPONSORSHIP-t2VNzJZ4hK4/report.md
+48	Kyle2077/ict-2022-skill-bundle::books/ict-2022-mentorship/source/fulltext.txt
+47	SrsBlack/ict-knowledge-library::raw/ICT-2022-MENTORSHIP-CORE-CONTENT-MONTH-05-OPEN-FLOAT-BkmZgjuYREU/report.md
+41	kwpark090288-pixel/ICT-AutoTrader::CandleChart.numbered.txt
+41	kwpark090288-pixel/ICT-AutoTrader::CandleChart.tsx.txt
+39	SrsBlack/ict-knowledge-library::raw/ICT-2022-MENTORSHIP-CORE-CONTENT-MONTH-02-MARKET-MAKER-TRAP-pv2-R-STviA/report.md
+38	SrsBlack/ict-knowledge-library::meta/audit-2026-10-08/liquidity.md
+37	SrsBlack/ict-knowledge-library::raw/ICT-2022-MENTORSHIP-CORE-CONTENT-MONTH-04-LIQUIDITY-POOLS-Gnw54f9v6SA/report.md
+
+## QC
+120	SrsBlack/ict-knowledge-library::meta/audit-2026-10-08/m22-captions/ep41.2XhDi5GoNUI.txt
+120	newsqlguru/ict-index::transcriptions/2022-ICT-Mentorship/2022-ICT-Mentorship-Episode-41-&-Final-001.json
+75	Klout9/ict-strat::Month 02 - Growing Small Accounts/04_No_Fear_Of_Losing.md
+75	newsqlguru/ict-index::transcriptions/2016-ICT-Private-Mentorship-Core-Content-Month-02/ICT-Mentorship-Core-Content-Month-02-No-Fear-Of-Losing-001.json
+71	Yousef-Diab/the-algorithm::index.html
+67	SrsBlack/ict-knowledge-library::concepts/32-risk-management/risk-per-trade.md
+60	Klout9/ict-strat::Month 02 - Growing Small Accounts/05_How_To_Mitigate_Losing_Trades_Effectively.md
+60	newsqlguru/ict-index::transcriptions/2016-ICT-Private-Mentorship-Core-Content-Month-02/ICT-Mentorship-Core-Content-Month-02-How-To-Mitigate-Losing-Trades-Effectively-001.json
+55	Klout9/ict-strat::Month 02 - Growing Small Accounts/01_Growing_Small_Accounts.md
+55	newsqlguru/ict-index::transcriptions/2016-ICT-Private-Mentorship-Core-Content-Month-02/ICT-Mentorship-Core-Content-Month-02-Growing-Small-Accounts-001.json
+46	Klout9/ict-strat::Month 05 - IPDA Quarterly Shifts/13_Money_Management.md
+46	newsqlguru/ict-index::transcriptions/2017-ICT-Private-Mentorship-Core-Content-Month-05/ICT-Mentorship-Core-Content-Month-05-Money-Management-001.json
+
+## QD
+115	Yousef-Diab/the-algorithm::index.html
+101	Kyle2077/ict-2022-skill-bundle::books/ict-2022-mentorship/source/fulltext.txt
+46	Yousef-Diab/the-algorithm::docs/content-audit.md
+34	newsqlguru/ict-index::transcriptions/ICT-Forex-Trading-Plan-Development-Series/ICT-Trading-Plan-Development-6-001.json
+33	Mehranrostamy/ICT-Mentorship-2016-Month-1::index.html
+29	newsqlguru/ict-index::transcriptions/2023-ICT-Mentorship/ICT-Mentorship-2023-T-G-I-F-Setup-001.json
+24	newsqlguru/ict-index::transcriptions/2023-ICT-Mentorship/2023-ICT-Mentorship-Deep-Dive-Into-Institutional-Order-Flow-002.json
+24	newsqlguru/ict-index::transcriptions/2023-ICT-Mentorship/ICT-Mentorship-2023-Deep-Dive-Into-Institutional-Order-Flow-002.json
+22	SrsBlack/ict-knowledge-library::SOURCES.md
+22	newsqlguru/ict-index::transcriptions/ICT-Forex-What-Every-New-&-Or-Aspiring-Forex-Traders-Wants-To-Know/ICT-W-E-N-T-Series-Part-3-of-5-002.json
+21	Klout9/ict-strat::Month 05 - IPDA Quarterly Shifts/03_Using_IPDA_Data_Ranges.md
+21	SrsBlack/ict-knowledge-library::raw/ICT-2022-MENTORSHIP-CORE-CONTENT-MONTH-05-USING-IPDA-DATA-LRKtiysz4nA/report.md
+
+## QE
+22	SrsBlack/ict-knowledge-library::concepts/17-optimal-trade-entry/ote-failure.md
+20	SrsBlack/ict-knowledge-library::concepts/25-htf-bias/bias-invalidation.md
+19	Yousef-Diab/the-algorithm::index.html
+15	SrsBlack/ict-knowledge-library::concepts/32-risk-management/stop-placement-by-pd-array.md
+13	Kyle2077/ict-2022-skill-bundle::books/ict-2022-mentorship/source/fulltext.txt
+11	SrsBlack/ict-knowledge-library::concepts/28-fibonacci-levels/fib-79.md
+10	SrsBlack/ict-knowledge-library::concepts/08-breaker-blocks/failed-breaker.md
+10	SrsBlack/ict-knowledge-library::concepts/16-smt-divergence/smt-failure.md
+9	SrsBlack/ict-knowledge-library::concepts/07-order-blocks/propulsion-block.md
+8	newsqlguru/ict-index::transcriptions/2023-ICT-Mentorship/ICT-Mentorship-2023-August-18-2023-Live-trade-Walkthrough-001.json
+7	Yousef-Diab/the-algorithm::docs/content-audit.md
+7	kwpark090288-pixel/ICT-AutoTrader::docs/spec/FVG_COVERAGE_MATRIX_v1.1.2.md
+
+## QF
+270	Kyle2077/ict-2022-skill-bundle::books/ict-2022-mentorship/source/fulltext.txt
+180	Yousef-Diab/the-algorithm::index.html
+128	SrsBlack/ict-knowledge-library::concepts/15-sessions/bond-split-session-rules.md
+117	SrsBlack/ict-knowledge-library::meta/audit-2026-10-08/time-bias.md
+106	SrsBlack/ict-knowledge-library::concepts/15-sessions/session-vs-killzone.md
+102	Mehranrostamy/ICT-Mentorship-2016-Month-1::index.html
+99	SrsBlack/ict-knowledge-library::INDEX.md
+96	SrsBlack/ict-knowledge-library::concepts/04-time-cycles/ipda-true-day.md
+95	SrsBlack/ict-knowledge-library::concepts/10-killzones/killzone-overview.md
+91	SrsBlack/ict-knowledge-library::TIMELINE.md
+90	SrsBlack/ict-knowledge-library::raw/ICT-2022-MENTORSHIP-CORE-CONTENT-MONTH-10-BOND-TRADING-SPLIT-JpV-J31mxhg/report.md
+89	Klout9/ict-strat::Month 10 - Multi Asset Analysis/07_Bond_Trading_Split_Session_Rules.md
+
+## QG
+482	Yousef-Diab/the-algorithm::index.html
+147	Kyle2077/ict-2022-skill-bundle::books/ict-2022-mentorship/source/fulltext.txt
+108	Yousef-Diab/the-algorithm::docs/content-audit.md
+96	SrsBlack/ict-knowledge-library::meta/audit-2026-10-08/structure.md
+79	SrsBlack/ict-knowledge-library::meta/audit-2026-10-08/gaps.md
+71	SrsBlack/ict-knowledge-library::concepts/09-displacement/displacement-definition.md
+63	newsqlguru/ict-index::transcriptions/Ends-Series/2022-ICT-Mentorship-Ends-Series-Part-4-of-4-001.json
+57	SrsBlack/ict-knowledge-library::meta/audit-2026-10-08/m22-captions/ep40.koN1ge8bewI.txt
+57	newsqlguru/ict-index::transcriptions/2022-ICT-Mentorship/2022-ICT-Mentorship-Episode-40-001.json
+57	SrsBlack/ict-knowledge-library::concepts/09-displacement/displacement-strength-criteria.md
+56	Yousef-Diab/the-algorithm::content/s2-2022-mentorship/summary.html
+54	SrsBlack/ict-knowledge-library::concepts/26-imbalance/imbalance-definition.md
+
+## QH
+393	Yousef-Diab/the-algorithm::index.html
+187	Yousef-Diab/the-algorithm::docs/content-audit.md
+76	Klout9/ict-strat::Month 11 - Charter Price Action Models/32_Model_12_Scalping_Intraday_Model.md
+75	Kyle2077/ict-2022-skill-bundle::books/ict-2022-mentorship/source/fulltext.txt
+74	SrsBlack/ict-knowledge-library::raw/ICT-2022-MENTORSHIP-CORE-CONTENT-MONTH-04-ORDERBLOCKS-PIYh0CxoY9c/report.md
+72	Klout9/ict-strat::Month 04 - Order Blocks Liquidity/03_Orderblocks.md
+72	newsqlguru/ict-index::transcriptions/2016-ICT-Private-Mentorship-Core-Content-Month-04/ICT-Mentorship-Core-Content-Month-04-Orderblocks-001.json
+67	SrsBlack/ict-knowledge-library::SOURCES.md
+67	newsqlguru/ict-index::transcriptions/ICT-Forex-Precision-Trading-Concepts-Series/ICT-Precision-Trading-Concepts-2-001.json
+61	SrsBlack/ict-knowledge-library::raw/ICT-2022-MENTORSHIP-CORE-CONTENT-MONTH-06-HIGH-PROBABILITY-SWING-soY9zX3gt2U/report.md
+57	newsqlguru/ict-index::transcriptions/2023-ICT-Mentorship/Tuesday-May-23-2023-Forex-&-Spooz-Market-Review-001.json
+56	SrsBlack/ict-knowledge-library::raw/ICT-2022-MENTORSHIP-CORE-CONTENT-MONTH-12-INTRADAY-TOP-DOWN-Oec_0NM_OeY/report.md
+
+## QI
+95	SrsBlack/ict-knowledge-library::meta/audit-2026-10-08/structure.md
+66	SrsBlack/ict-knowledge-library::concepts/01-market-structure/mss.md
+57	SrsBlack/ict-knowledge-library::meta/audit-2026-10-08/verify-index.md
+50	SrsBlack/ict-knowledge-library::concepts/01-market-structure/choch-bullish.md
+49	Rouen007/ict-2022-study-room::ICT_2022_全37讲_图文精读手册.md
+48	SrsBlack/ict-knowledge-library::concepts/01-market-structure/mss-vs-choch.md
+43	kwpark090288-pixel/ICT-AutoTrader::CandleChart.numbered.txt
+43	kwpark090288-pixel/ICT-AutoTrader::CandleChart.tsx.txt
+42	SrsBlack/ict-knowledge-library::concepts/01-market-structure/choch-bearish.md
+42	SrsBlack/ict-knowledge-library::meta/audit-2026-10-08/blocks.md
+37	SrsBlack/ict-knowledge-library::concepts/07-order-blocks/reversal-order-block.md
+32	Yousef-Diab/the-algorithm::index.html
+
+## QJ
+403	Yousef-Diab/the-algorithm::index.html
+363	Mehranrostamy/ICT-Mentorship-2016-Month-1::index.html
+280	Kyle2077/ict-2022-skill-bundle::books/ict-2022-mentorship/source/fulltext.txt
+230	Yousef-Diab/the-algorithm::docs/content-audit.md
+180	SrsBlack/ict-knowledge-library::raw/ICT-2022-MENTORSHIP-CORE-CONTENT-MONTH-1-EQUILIBRIUM-VS-DISCOUNT-qC0LogyIk2I/report.md
+161	Klout9/ict-strat::Month 01 - Elements Of A Trade Setup/04_Equilibrium_Vs_Discount.md
+143	newsqlguru/ict-index::transcriptions/2016-ICT-Private-Mentorship-Core-Content-Month-01/ICT-Mentorship-Core-Content-Month-1-Equilibrium-Vs-Discount-001.json
+124	Klout9/ict-strat::Month 07 - Short Term Trading/01_Short_Term_Trading_Monthly_Weekly_Ranges.md
+124	SrsBlack/ict-knowledge-library::raw/ICT-2022-MENTORSHIP-CORE-CONTENT-MONTH-07-SHORT-TERM-TRADING-mQA8jCem9d0/report.md
+124	newsqlguru/ict-index::transcriptions/2017-ICT-Private-Mentorship-Core-Content-Month-07/ICT-Mentorship-Core-Content-Month-07-Short-Term-Trading-Using-Monthly-&-Weekly-Ranges-001.json
+123	SrsBlack/ict-knowledge-library::raw/ICT-2022-MENTORSHIP-CORE-CONTENT-MONTH-07-SHORT-TERM-TRADING-y0lVKWLsZeM/report.md
+113	SrsBlack/ict-knowledge-library::SOURCES.md
+
+## QK
+49	newsqlguru/ict-index::transcriptions/2023-ICT-Mentorship/ICT-Mentorship-2023-September-12-2023-NQ-Algorithmic-Price-Delivery-001.json
+41	kwpark090288-pixel/ICT-AutoTrader::CandleChart.numbered.txt
+41	kwpark090288-pixel/ICT-AutoTrader::CandleChart.tsx.txt
+34	Kyle2077/ict-2022-skill-bundle::books/ict-2022-mentorship/source/fulltext.txt
+32	newsqlguru/ict-index::transcriptions/2017-ICT-Private-Mentorship-Core-Content-Month-12/ICT-Mentorship-Core-Content-Month-12-Intraday-Top-Down-Analysis-001.json
+32	newsqlguru/ict-index::transcriptions/2023-ICT-Mentorship/Tuesday-May-23-2023-Forex-&-Spooz-Market-Review-001.json
+31	newsqlguru/ict-index::transcriptions/2023-ICT-Mentorship/ICT-Mentorship-2023-Ep-01-001.json
+30	SrsBlack/ict-knowledge-library::raw/ICT-2022-MENTORSHIP-CORE-CONTENT-MONTH-12-INTRADAY-TOP-DOWN-Oec_0NM_OeY/report.md
+28	newsqlguru/ict-index::transcriptions/2023-ICT-Mentorship/ICT-Mentorship-2023-Immediate-Rebalance-&-Institutional-Order-Flow-002.json
+27	newsqlguru/ict-index::transcriptions/2023-ICT-Mentorship/ICT-Mentorship-2023-August-14-2023-NQ-Futures-Review-001.json
+25	newsqlguru/ict-index::transcriptions/2022-ICT-Mentorship/2022-ICT-Mentorship-Episode-18-001.json
+25	newsqlguru/ict-index::transcriptions/2023-ICT-Mentorship/ICT-Mentorship-2023-September-12-2023-NQ-Algorithmic-Price-Delivery-002.json
+
+## QL
+289	Yousef-Diab/the-algorithm::index.html
+183	Yousef-Diab/the-algorithm::docs/content-audit.md
+175	Kyle2077/ict-2022-skill-bundle::books/ict-2022-mentorship/source/fulltext.txt
+140	Mehranrostamy/ICT-Mentorship-2016-Month-1::index.html
+108	SrsBlack/ict-knowledge-library::raw/ICT-2022-MENTORSHIP-CORE-CONTENT-MONTH-03-TIMEFRAME-SELECTION-DEFINING-UF5J0nEBc0E/report.md
+107	Klout9/ict-strat::Month 03 - Timeframe Selection/01_Timeframe_Selection_Defining_Setups.md
+107	newsqlguru/ict-index::transcriptions/2016-ICT-Private-Mentorship-Core-Content-Month-03/ICT-Mentorship-Core-Content-Month-03-Timeframe-Selection-&-Defining-Setups-001.json
+90	SrsBlack/ict-knowledge-library::raw/ICT-2022-MENTORSHIP-CORE-CONTENT-MONTH-05-USING-IPDA-DATA-LRKtiysz4nA/report.md
+88	Klout9/ict-strat::Month 05 - IPDA Quarterly Shifts/03_Using_IPDA_Data_Ranges.md
+75	SrsBlack/ict-knowledge-library::meta/audit-2026-10-08/m22-captions/ep18.eai0nHhAC8w.txt
+74	newsqlguru/ict-index::transcriptions/2023-ICT-Mentorship/Tuesday-May-23-2023-Forex-&-Spooz-Market-Review-001.json
+70	SrsBlack/ict-knowledge-library::meta/audit-2026-10-08/m22-captions/ep12.8GkQfdAXZP0.txt
+
+## QM
+340	Mehranrostamy/ICT-Mentorship-2016-Month-1::index.html
+318	Yousef-Diab/the-algorithm::index.html
+233	Kyle2077/ict-2022-skill-bundle::books/ict-2022-mentorship/source/fulltext.txt
+167	SrsBlack/ict-knowledge-library::raw/ICT-2022-MENTORSHIP-CORE-CONTENT-MONTH-1-EQUILIBRIUM-VS-DISCOUNT-qC0LogyIk2I/report.md
+160	Klout9/ict-strat::Month 01 - Elements Of A Trade Setup/04_Equilibrium_Vs_Discount.md
+142	newsqlguru/ict-index::transcriptions/2016-ICT-Private-Mentorship-Core-Content-Month-01/ICT-Mentorship-Core-Content-Month-1-Equilibrium-Vs-Discount-001.json
+124	Klout9/ict-strat::Month 07 - Short Term Trading/01_Short_Term_Trading_Monthly_Weekly_Ranges.md
+124	SrsBlack/ict-knowledge-library::raw/ICT-2022-MENTORSHIP-CORE-CONTENT-MONTH-07-SHORT-TERM-TRADING-mQA8jCem9d0/report.md
+124	newsqlguru/ict-index::transcriptions/2017-ICT-Private-Mentorship-Core-Content-Month-07/ICT-Mentorship-Core-Content-Month-07-Short-Term-Trading-Using-Monthly-&-Weekly-Ranges-001.json
+101	SrsBlack/ict-knowledge-library::SOURCES.md
+100	SrsBlack/ict-knowledge-library::raw/ICT-2022-MENTORSHIP-CORE-CONTENT-MONTH-07-SHORT-TERM-TRADING-hbE8S5FSdtQ/report.md
+99	Klout9/ict-strat::Month 06 - Swing Trading/03_Classic_Swing_Trading_Approach.md
