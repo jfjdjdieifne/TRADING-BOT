@@ -1,0 +1,85 @@
+{
+  "generated_at_utc": "2026-11-06T13:46:43.758485+00:00",
+  "transcripts": [
+    {
+      "source_id": "YT_8GkQfdAXZP0",
+      "part": "part_0.txt",
+      "source_tmp_path": "/tmp/persistence_recovery/YT_8GkQfdAXZP0/part_0.txt",
+      "repo_path": "project/trading_project/docs/research/huddleston_study/source_corpus_v2/transcripts_full/YT_8GkQfdAXZP0/part_0.txt",
+      "bytes": 8000,
+      "sha256": "8c047d9ed2a8a106f1ab2f45cbcf04fb82511971b5a7787c281e7e7a86744bca",
+      "source_copy_identical": true
+    },
+    {
+      "source_id": "YT_Bkt8B3kLATQ",
+      "part": "part_0.txt",
+      "source_tmp_path": "/tmp/persistence_recovery/YT_Bkt8B3kLATQ/part_0.txt",
+      "repo_path": "project/trading_project/docs/research/huddleston_study/source_corpus_v2/transcripts_full/YT_Bkt8B3kLATQ/part_0.txt",
+      "bytes": 8000,
+      "sha256": "30ec11aa8ac612c982c5fc4134ac5c968f4bace0eeda28024a910ffe6443b0ba",
+      "source_copy_identical": true
+    },
+    {
+      "source_id": "YT_FgacYSN9QEo",
+      "part": "part_0.txt",
+      "source_tmp_path": "/tmp/persistence_recovery/YT_FgacYSN9QEo/part_0.txt",
+      "repo_path": "project/trading_project/docs/research/huddleston_study/source_corpus_v2/transcripts_full/YT_FgacYSN9QEo/part_0.txt",
+      "bytes": 8022,
+      "sha256": "9b12d5be9c1ad364f0be3d78d7270d9b16e5f177a5aa060d2b8741f5738460c3",
+      "source_copy_identical": true
+    },
+    {
+      "source_id": "YT_HhgWGduQZQY",
+      "part": "part_0.txt",
+      "source_tmp_path": "/tmp/persistence_recovery/YT_HhgWGduQZQY/part_0.txt",
+      "repo_path": "project/trading_project/docs/research/huddleston_study/source_corpus_v2/transcripts_full/YT_HhgWGduQZQY/part_0.txt",
+      "bytes": 8022,
+      "sha256": "7805c695658572dc6f7880c3cbb3522aabd1f4b609546c9077f750ffee4ac40f",
+      "source_copy_identical": true
+    },
+    {
+      "source_id": "YT_PIYh0CxoY9c",
+      "part": "part_0.txt",
+      "source_tmp_path": "/tmp/persistence_recovery/YT_PIYh0CxoY9c/part_0.txt",
+      "repo_path": "project/trading_project/docs/research/huddleston_study/source_corpus_v2/transcripts_full/YT_PIYh0CxoY9c/part_0.txt",
+      "bytes": 8022,
+      "sha256": "01634c631421f66a3340c98424b53fa8151f3480ea0e9a1cbcea3541e68bda7a",
+      "source_copy_identical": true
+    },
+    {
+      "source_id": "YT_nQfHZ2DEJ8c",
+      "part": "part_0.txt",
+      "source_tmp_path": "/tmp/persistence_recovery/YT_nQfHZ2DEJ8c/part_0.txt",
+      "repo_path": "project/trading_project/docs/research/huddleston_study/source_corpus_v2/transcripts_full/YT_nQfHZ2DEJ8c/part_0.txt",
+      "bytes": 8000,
+      "sha256": "c4070d2f97d7ea2ebe4cbb0b4e11c50237c54ac7a03fa371bd27fa53bd5fe1d9",
+      "source_copy_identical": true
+    }
+  ],
+  "artifacts": [
+    {
+      "name": "coding.patch",
+      "source_tmp_path": "/tmp/arena-workspace/coding.patch",
+      "repo_path": "project/trading_project/docs/research/huddleston_study/source_corpus_v2/session_artifacts/coding.patch",
+      "bytes": 121427,
+      "sha256": "e23e78e6ec5349046d74a30420a7f8f1687f0da5775299ff6063b7f4c212eb32",
+      "source_copy_identical": true
+    },
+    {
+      "name": "coding.diff",
+      "source_tmp_path": "/tmp/arena-workspace/coding.diff",
+      "repo_path": "project/trading_project/docs/research/huddleston_study/source_corpus_v2/session_artifacts/coding.diff",
+      "bytes": 121427,
+      "sha256": "e23e78e6ec5349046d74a30420a7f8f1687f0da5775299ff6063b7f4c212eb32",
+      "source_copy_identical": true
+    },
+    {
+      "name": "coding-numstat.txt",
+      "source_tmp_path": "/tmp/arena-workspace/coding-numstat.txt",
+      "repo_path": "project/trading_project/docs/research/huddleston_study/source_corpus_v2/session_artifacts/coding-numstat.txt",
+      "bytes": 1867,
+      "sha256": "b5e9fd6da0624f12ba8b0ecf7a694d586ea433881d12847a69fcc603c9ffc1f2",
+      "source_copy_identical": true
+    }
+  ]
+}
