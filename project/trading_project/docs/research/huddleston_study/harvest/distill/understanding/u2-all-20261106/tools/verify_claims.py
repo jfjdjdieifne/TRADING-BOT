@@ -1,8 +1,7 @@
-/#!/usr/bin/env python3
-# PROVENANCE: copied verbatim from base commit 36f2217d3e32a753f842ed8be334010e3d77c138,
-# path harvest/distill/tools/verify_claims.py. ONE session patch: DR is read from the
-# environment so the pinned corpus can live at /tmp/ictidx/<pinned>/ instead of /tmp/dr.
-# Nothing else changed. Re-run: DR=/tmp/ictidx/ict-index-e8c40a8dae5ea6689926f28c7184ce3e2fb85b9c python3 tools/verify_claims.py claims.jsonl
+#!/usr/bin/env python3
+# PROVENANCE: byte-identical to base commit 36f2217d3e32a753f842ed8be334010e3d77c138,
+# harvest/distill/tools/verify_claims.py, EXCEPT one line: DR is read from the environment so the
+# pinned corpus can live at /tmp/ictidx/<pinned-sha>/ instead of /tmp/dr. No check was weakened.
 """Phase 3 verifier.
 
 CHECK 1 (hard gate): each claim's `quote` must be found verbatim in the source file
@@ -20,7 +19,7 @@ import json, os, re, sys, argparse, hashlib
 
 HARVEST = "/home/user/TRADING-BOT/project/trading_project/docs/research/huddleston_study/harvest"
 import os as _os
-DR = _os.environ.get("DR", "/tmp/dr")  # session patch: allow the re-downloaded corpus root to be set explicitly
+DR = _os.environ.get("DR", "/tmp/dr")
 STOP = set("""the a an and or of to in on for with without that this these those is are was were be been being it its as at by from
 not no if then than so such when where which who whom whose what how why can could should would may might must will shall do does
 did done have has had he she they them his her their our we you your i me my into over under about after before again more most

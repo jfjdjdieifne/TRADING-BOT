@@ -41,7 +41,7 @@ def append(fn, rows):
             f.write(json.dumps(r, ensure_ascii=False) + '\n')
 
 
-def windows_for(phrases, n, per_file, concept):
+def windows_for(phrases, n, per_file, concept, nex=2):
     corp = load()
     pats = [re.compile(r'(?<![a-z])' + re.escape(p) + r'(?![a-z])', re.I) for p in phrases]
     scored = []
@@ -123,7 +123,7 @@ def windows_for(phrases, n, per_file, concept):
                 if any(abs(a - pa) < 15 for pa, pb, pq in picked):
                     continue
                 picked.append((a, b, qt))
-                if len(picked) == 2:
+                if len(picked) == nex:
                     break
             shown.append(dict(window_id=rec['window_id'], path=rel, hit=wi,
                               excerpts=[dict(words=[a, b], text=qt) for a, b, qt in picked]))
@@ -195,13 +195,14 @@ def main():
     w.add_argument('--phrase', action='append', required=True)
     w.add_argument('--n', type=int, default=15)
     w.add_argument('--per-file', type=int, default=2)
+    w.add_argument('--excerpts', type=int, default=2)
     a = sub.add_parser('add')
     a.add_argument('--json', required=True)
     c = sub.add_parser('compare')
     c.add_argument('--n', type=int, default=400)
     args = ap.parse_args()
     if args.cmd == 'windows':
-        windows_for(args.phrase, args.n, args.per_file, args.concept)
+        windows_for(args.phrase, args.n, args.per_file, args.concept, args.excerpts)
     elif args.cmd == 'add':
         add_claims(json.loads(args.json))
     elif args.cmd == 'compare':
