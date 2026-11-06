@@ -1,0 +1,31 @@
+{
+ "raw_windows": 3000,
+ "classified": 836,
+ "shortlisted": 240,
+ "printed_and_looked_at": 240,
+ "reduced": 31,
+ "not_reduced": 2969,
+ "by_bucket": {
+  "entry_choice": 6,
+  "timeframe_choice": 5,
+  "stop_choice": 2,
+  "target_choice": 4,
+  "stand_aside": 10,
+  "priority": 4
+ },
+ "by_concept": {
+  "breaker_block": 1,
+  "equilibrium": 2,
+  "order_block": 2,
+  "timeframe": 5,
+  "stop_loss": 1,
+  "risk": 2,
+  "sell_side_liquidity": 1,
+  "premium_discount": 3,
+  "liquidity_pool": 1,
+  "no_trade": 8,
+  "process": 3,
+  "time_of_day": 1,
+  "target_choice": 1
+ }
+}
