@@ -168,7 +168,8 @@ def add_claims(new):
             rejected.append((r['quote'][:60], 'over 25 words'))
             continue
         wi = len(t[:pos].split())
-        w = next((x for x in wins if x['path'] == rel and x['window_words'][0] <= wi <= x['window_words'][1]), None)
+        cand = [x for x in wins if x['path'] == rel and x['window_words'][0] <= wi <= x['window_words'][1]]
+        w = next((x for x in cand if x['concept'] == r['concept']), cand[0] if cand else None)
         if w is None:
             rejected.append((r['quote'][:60], 'hit outside every logged window'))
             continue
