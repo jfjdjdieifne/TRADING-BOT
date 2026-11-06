@@ -1,0 +1,139 @@
+{
+  "cards": 32,
+  "grounded_cards": 24,
+  "not_found_cards": 8,
+  "relations": 15,
+  "cross_concept_citations": [
+    {
+      "card": "market narrative",
+      "field": "Relations to other concepts",
+      "claim_id": "C003",
+      "claim_concept": "liquidity"
+    },
+    {
+      "card": "liquidity",
+      "field": "Relations to other concepts",
+      "claim_id": "C045",
+      "claim_concept": "equal highs"
+    },
+    {
+      "card": "market structure",
+      "field": "Relations to other concepts",
+      "claim_id": "C019",
+      "claim_concept": "target"
+    },
+    {
+      "card": "market structure",
+      "field": "Relations to other concepts",
+      "claim_id": "C022",
+      "claim_concept": "market structure shift"
+    },
+    {
+      "card": "context",
+      "field": "Context in which he uses it",
+      "claim_id": "C007",
+      "claim_concept": "higher vs lower timeframe"
+    },
+    {
+      "card": "intermediate term high",
+      "field": "What he says makes it wrong/invalid",
+      "claim_id": "C051",
+      "claim_concept": "being wrong"
+    },
+    {
+      "card": "no-trade",
+      "field": "What he says makes it wrong/invalid",
+      "claim_id": "C051",
+      "claim_concept": "being wrong"
+    },
+    {
+      "card": "order block",
+      "field": "Properties he mentions",
+      "claim_id": "C035",
+      "claim_concept": "displacement"
+    },
+    {
+      "card": "order block",
+      "field": "Relations to other concepts",
+      "claim_id": "C018",
+      "claim_concept": "fair value gap"
+    },
+    {
+      "card": "order block",
+      "field": "Relations to other concepts",
+      "claim_id": "C030",
+      "claim_concept": "entry"
+    },
+    {
+      "card": "order block",
+      "field": "Worked examples in the sources",
+      "claim_id": "C018",
+      "claim_concept": "fair value gap"
+    },
+    {
+      "card": "order block",
+      "field": "Worked examples in the sources",
+      "claim_id": "C029",
+      "claim_concept": "entry"
+    },
+    {
+      "card": "order block",
+      "field": "Worked examples in the sources",
+      "claim_id": "C030",
+      "claim_concept": "entry"
+    },
+    {
+      "card": "fair value gap",
+      "field": "Relations to other concepts",
+      "claim_id": "C054",
+      "claim_concept": "discount"
+    },
+    {
+      "card": "entry",
+      "field": "Relations to other concepts",
+      "claim_id": "C031",
+      "claim_concept": "stop"
+    },
+    {
+      "card": "imbalance",
+      "field": "Relations to other concepts",
+      "claim_id": "C010",
+      "claim_concept": "intermediate term high"
+    }
+  ],
+  "not_in_sources_fields_per_card": {
+    "market narrative": 6,
+    "liquidity": 4,
+    "draw on liquidity": 7,
+    "market structure": 6,
+    "higher vs lower timeframe": 4,
+    "context": 8,
+    "retail ideas": 7,
+    "intermediate term high": 4,
+    "intermediate term low": 7,
+    "no-trade": 3,
+    "being wrong": 5,
+    "order block": 3,
+    "fair value gap": 5,
+    "target": 5,
+    "market structure shift": 6,
+    "entry": 4,
+    "stop": 6,
+    "institutional order flow": 7,
+    "displacement": 6,
+    "bias": 6,
+    "imbalance": 7,
+    "time of day": 7,
+    "equal highs": 5,
+    "discount": 6,
+    "dealing range": 9,
+    "premium": 9,
+    "equilibrium": 9,
+    "equal lows": 9,
+    "invalidation": 9,
+    "sit on hands": 9,
+    "kill zone": 9,
+    "objective": 9
+  },
+  "total_not_in_sources_fields": 206
+}

@@ -1,0 +1,15 @@
+{"from_concept": "imbalance", "relation": "every rebalance of an old imbalance", "to_concept": "intermediate term high", "claim_id": "C010"}
+{"from_concept": "imbalance", "relation": "it trades back up to rebalance and imbalance", "to_concept": "intermediate term high", "claim_id": "C028"}
+{"from_concept": "order block", "relation": "inside that range I can be hunting", "to_concept": "fair value gap", "claim_id": "C018"}
+{"from_concept": "market structure shift", "relation": "then you see price go up into that imbalance", "to_concept": "imbalance", "claim_id": "C026"}
+{"from_concept": "equal highs", "relation": "relative equal highs above that is buy stops", "to_concept": "liquidity", "claim_id": "C045"}
+{"from_concept": "market structure", "relation": "that range is going to be used for targeting purposes", "to_concept": "target", "claim_id": "C019"}
+{"from_concept": "higher vs lower timeframe", "relation": "all minor lower time frame swings are going to be subordinate to it", "to_concept": "market structure", "claim_id": "C013"}
+{"from_concept": "entry", "relation": "the classic return back to an order block", "to_concept": "order block", "claim_id": "C030"}
+{"from_concept": "entry", "relation": "where's your stop Above This candle's High", "to_concept": "stop", "claim_id": "C031"}
+{"from_concept": "intermediate term high", "relation": "your trade ideas probably flawed", "to_concept": "being wrong", "claim_id": "C051"}
+{"from_concept": "being wrong", "relation": "wait for Market structure to get back in sync", "to_concept": "no-trade", "claim_id": "C052"}
+{"from_concept": "displacement", "relation": "the last two up close candles before the displacement here", "to_concept": "order block", "claim_id": "C035"}
+{"from_concept": "fair value gap", "relation": "typically confirmed with a", "to_concept": "lower time frame", "claim_id": "C049"}
+{"from_concept": "discount", "relation": "the discount level of the low end of that fair value Gap", "to_concept": "fair value gap", "claim_id": "C054"}
+{"from_concept": "intermediate term high", "relation": "it should not trade above that high", "to_concept": "being wrong", "claim_id": "C053"}
