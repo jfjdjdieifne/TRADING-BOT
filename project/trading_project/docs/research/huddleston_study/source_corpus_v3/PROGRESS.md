@@ -14,17 +14,16 @@ naming concepts, not for organising, not for filling gaps. Missing material is r
 | phase | status | note |
 |---|---|---|
 | 0 setup | DONE | HEAD == pin == origin; worktree clean; no `reset` of any kind needed |
-| 1 collection | IN_PROGRESS | reachability probing + indexing of already-stored PRIMARY text |
-| 2 claims | NOT_STARTED | |
-| 3 cards | NOT_STARTED | |
+| 1 collection | DONE | 14 PRIMARY files / 7 source_ids indexed; 0 SECONDARY, 0 TERTIARY; no new retrieval possible |
+| 2 claims | DONE | 54 claims, 54 verified, 0 failed, 0 removed |
+| 3 cards | IN_PROGRESS | |
 | 4 process spec | NOT_STARTED | |
 | 5 engine design | NOT_STARTED | |
 | 6 audit | NOT_STARTED | |
 
 ## Next step
 
-Phase 1: record exact reachability results, copy already-stored PRIMARY text into `primary/` unmodified,
-build INDEX.jsonl + MANIFEST.md.
+Phase 3: build concept cards from claims only, then relations.jsonl.
 
 ## Resume instructions for a fresh session
 
@@ -41,3 +40,4 @@ build INDEX.jsonl + MANIFEST.md.
 ## Commit log (this round)
 
 - phase 0 baseline: `a3089e335e34b455a5bcc03cc936e6195b4401d2`
+- phase 1: `065c2d1353b4488fae06b230528d9b273adc1880`
