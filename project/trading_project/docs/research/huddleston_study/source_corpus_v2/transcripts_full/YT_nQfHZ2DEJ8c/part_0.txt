@@ -1,0 +1,282 @@
+![Thumbnail (1920x1080)](https://i.ytimg.com/vi/nQfHZ2DEJ8c/maxresdefault.jpg)
+# [2022 ICT Mentorship Episode 3](https://www.youtube.com/watch?v=nQfHZ2DEJ8c)
+
+**Visibility**: Public
+**Uploaded by**: [The Inner Circle Trader](https://www.youtube.com/@InnerCircleTrader)
+**Uploaded at**: 2022-01-26
+**Published at**: 
+**Length**: 52:27
+**Views**: 2979714
+**Likes**: 46465
+**Category**: Education
+
+## Description
+
+```
+Internal Range Liquidity & Market Structure Shifts
+
+There is RISK in Trading.  Past Performance is not indicative of future results.
+```
+
+## Transcript
+
+all right folks welcome back
+all right so this is the tuesday january
+25th 2022
+ict mentorship on the youtube channel
+all right so
+this is the internal range liquidity and
+market structure shift lecture
+all right so i gave you homework on the
+community tab if you have not been
+paying attention to that that's where
+i'm kind of keeping you abreast as to
+what you should be expecting next or
+something that just comes to mind that i
+feel like sharing so this is the link i
+sent out the other day
+and i wanted you to go through
+this particular chart
+and look for reasons that provided the
+market structure shift and the buy side
+and sell side liquidity
+so if you have not done that please stop
+the video
+and do that now otherwise you're
+cheating yourself of learning
+opportunity
+all right so here is that chart
+again 15 minute time frame on the e-mini
+nasdaq 100 futures contract for march
+delivery 2022.
+and take your attention over here
+okay this old low
+and these relative equal highs see that
+old low below that is cell stops
+and relative equal highs above that is
+buy stops
+now you could have used this high here
+there's nothing inherently wrong about
+that but whenever i see
+equal highs like this might and if it's
+higher than an old high over here i'm
+going to use that so that way there's a
+little bit of insight for you for your
+study journal
+the sell side liquidity
+you can see that the market trades down
+hits that runs through it
+then rallies all the way back up
+clearing equal highs
+so the buy stops have been taken here
+okay so at both of these price points
+here
+and here
+that's the
+i guess the point at which you'll look
+for or anticipate a market structure
+shift
+you don't force it okay i see a lot of
+people try to teach my concepts it'll
+talk about market structure breaks or
+shifts and we'll use that term
+interchangeably
+but
+for
+intraday i want you to think about
+intraday market structure shifts because
+it's not necessarily a
+break in market structure that leads to
+prolonged
+multi-day
+movement okay
+what do i mean by that
+if you see a market structure that's
+bearish
+and it's broken to the downside
+intraday that may just lead to an
+intraday price leg that may eventually
+see that high be taken out in the same
+day so that's why i'm using the term
+market structure shift
+not market structure break
+for our conversation here on this
+mentorship just know that when i'm
+gonna lean on that term market structure
+break
+it means a little bit more in context
+versus an intraday shift in market
+structure just means that there's likely
+a downside
+draw
+or an upside draw intraday by saying the
+term shift okay so there's a little bit
+of semantics there
+all right so we have
+both of these areas
+here
+and here where there would be a
+likelihood of a market structure shift
+up here we look for a fake run above
+here
+so that fake run above how do we know
+it's going to be a market structure
+shift that's bearish
+i get that question a lot even from
+mentorship students
+what you're looking for is the evidence
+i'm going to show you here tonight okay
+forget everything else everybody else
+says about market structure breaks and
+shifts and all that stuff
+this is it okay this is the brass tacks
+there's absolutely nothing else that you
+need to know about it i promise you if
+they add anything to it it's just
+because they want to sound and look
+different but this is the algorithmic
+perspective of a market structure shift
+in today
+now keep
+this price level in mind so it's
+essentially fourteen thousand six
+hundred
+and fourteen thousand eight twenty we're
+just eyeballing it okay
+now dropping all the way down into a two
+minute chart
+this is that same particular day
+here's those relative equal highs
+and
+this run down here
+okay
+if you recall
+14 6
+and around that 14 860 or so okay
+if you look at this
+market structure
+without having the levels on your chart
+it's easy to get lost
+in all the quote unquote noise the
+uninitiated and i know it's going to
+razz the people that don't care to
+really learn here
+but the uninitiated folks that will
+watch a video or listen to some of the
+lectures i'll put out
+they're trying to bring something in
+they're trying to bring in their
+preconceived notions and ideas about
+what they think they understand about
+markets or technical analysis or
+something
+in price action
+and i want to kind of like
+allow you to just put that aside for a
+moment and just imagine
+this chart
+is the first time you looked at price
+action for the first time and that's
+hard but kind of like strip away
+everything else that you want to
+bring to the conversation no order block
+discussion no breaker no none of that
+stuff okay supply and demand elliott
+wave all that garbage if you look at
+this price action here
+when we had this low form
+right before this low was formed there's
+a swing high right there
+now in the first mentorship video i gave
+you i mentioned that
+high frequency trading algorithms
+will use
+market structure on a three minute two
+minute and one minute chart many times
+sub one minute that would be like
+45 second
+30 second 15 second intervals
+okay
+what the algorithms are actually doing
+and
+this is also going to correct a lot of
+people out there because they put out
+misinformation it's so nonsensical but
+i'm challenging you to go into your
+charts and see if this is not what's
+actually going on because it happens
+every day if high frequency algorithms
+are operating every single day then
+these signatures will be in the chart
+okay
+if you look at this short term high here
+right before this low formed
+when this
+high is taken out right there on that
+candle
+that's significant
+only
+if this run down here
+has traded into
+sell stops
+okay below an old love some kind it
+could be a
+a double bottom it could be a single low
+okay but it's got to be trading under
+some
+retail idea that would be viewed as
+support
+up here the same thing
+we're trading above
+highs
+so we know that above old highs
+a neophyte perspective will be
+these are unknown orders so therefore
+that's a flawed perspective on price
+action how do you know there's liquidity
+up there how do you know there's buy
+stops up there it's just logic
+it's simple look at the chart
+everybody's trying to do something based
+on some kind of
+theory logic whatever some system
+there's buyers and sellers coming in at
+all times
+their buying and selling quote unquote
+strength or pressure has absolutely no
+bearing
+on where these prices are going to go
+i know that
+may shake individuals that think they
+know something about the markets oh i
+have an uncle that used to be on the
+floor of the chicago board of trade and
+blah blah blah the mercantile exchange
+guys say this i don't care okay i don't
+care what any of those folks say because
+they didn't design the algorithm
+so
+again
+put all those
+you know talking points and everybody
+else's opinion you've adopted because
+you probably heard someone else talk
+about it
+and you subscribe to the review because
+it's easier just to do that instead of
+going and looking at it for yourself and
+that's what i'm asking you to do
+i'm telling you this is my personal
+belief
+you're going to see proof of these
+things
+in a live account execution
+but i want you to see the logic behind
+it because if you can see this
+you'll be light years ahead of everyone
+else
+and you'll laugh
+in the face of all these people that are
+going to tell you you're wasting your
+time trying to learn this i promise you
+this lesson is goi
