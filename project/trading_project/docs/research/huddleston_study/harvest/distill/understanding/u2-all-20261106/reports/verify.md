@@ -1,9 +1,9 @@
 # verify.md
 
-- claims checked: **69**
-- CHECK 1 pass (quote verbatim, <=25 words): **69** (100.0%)
+- claims checked: **136**
+- CHECK 1 pass (quote verbatim, <=25 words): **136** (100.0%)
 - CHECK 1 fail: **0**
-- CHECK 2 warnings (statement content word absent from +/-100-word surroundings): **63**
+- CHECK 2 warnings (statement content word absent from +/-100-word surroundings): **117**
 
 
 ## CHECK 2 warnings
@@ -71,6 +71,60 @@
 - `U0067` missing: price, rallying, shows
 - `U0068` missing: price
 - `U0069` missing: divergence, points
+- `U0070` missing: answers, asked
+- `U0071` missing: candidate, rejects
+- `U0072` missing: wants
+- `U0073` missing: price, wants
+- `U0074` missing: looks, works
+- `U0075` missing: inside
+- `U0076` missing: sell, waits
+- `U0077` missing: asks
+- `U0078` missing: uses
+- `U0079` missing: refers
+- `U0082` missing: drops
+- `U0084` missing: works
+- `U0086` missing: live
+- `U0087` missing: refers
+- `U0088` missing: carrying, charge, deferred, different, sense, word
+- `U0089` missing: says
+- `U0090` missing: elsewhere, says, teaches
+- `U0092` missing: gives
+- `U0093` missing: formed
+- `U0094` missing: declines
+- `U0095` missing: gives, instead, says, wider, window
+- `U0096` missing: treats, usable
+- `U0097` missing: relies
+- `U0098` missing: takes
+- `U0099` missing: seen
+- `U0100` missing: allows, expected
+- `U0104` missing: cannot
+- `U0105` missing: filtering, gives
+- `U0106` missing: wants
+- `U0107` missing: goes, setup
+- `U0108` missing: applying
+- `U0109` missing: placement
+- `U0110` missing: wants
+- `U0111` missing: uses
+- `U0112` missing: different, entry, goes, type
+- `U0113` missing: calling, tries
+- `U0114` missing: says
+- `U0116` missing: elsewhere, price
+- `U0119` missing: taken, trader
+- `U0120` missing: declines, outline
+- `U0121` missing: executed
+- `U0122` missing: holds, stakes
+- `U0123` missing: lead, says
+- `U0124` missing: keys, reviewing
+- `U0125` missing: misses
+- `U0126` missing: happens, says
+- `U0128` missing: badly, risking, warns
+- `U0129` missing: offers
+- `U0130` missing: names, running
+- `U0131` missing: changes, taking
+- `U0132` missing: behaviour, expected
+- `U0134` missing: gets, never
+- `U0135` missing: branches, plan
+- `U0136` missing: described, event
 
 ## How the checks work
 
