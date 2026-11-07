@@ -9,8 +9,8 @@ Corpus: `newsqlguru/ict-index` @ `e8c40a8dae5ea6689926f28c7184ce3e2fb85b9c`, tar
 |---|---|---|
 | 1 comparisons | **DONE** | `comparisons/` (31 records, 240 windows looked at as 25-word windows) |
 | 1b expanded | **DONE** | 7 windows opened at ±300 words → 11 more records; total 42, verifier 42/42 |
-| 2 concepts | NOT STARTED (waiting for "continue") | `concepts/` (even positions of the 45 deferred concepts) |
-| final | NOT STARTED | `AUDIT.md` will be extended; protected-file check |
+| 2 concepts | **DONE (all 23 THIN)** | `concepts/` 23 cards, 39 claims, 58 windows, index.md |
+| final | **DONE** | `AUDIT.md` extended; protected file checked |
 
 Tools copied unmodified from u2: `tools/corpus_engine.py`, `tools/probe_terms.py`, `tools/verify_claims.py`,
 `tools/read_window.py`. New in K2: `tools/reduce_comparisons.py` (bucket classifier over u2's 3,000 raw windows).

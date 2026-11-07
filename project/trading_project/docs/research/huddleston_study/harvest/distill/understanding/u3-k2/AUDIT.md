@@ -65,3 +65,53 @@
   the stop-out/re-entry logic (K2C-033, K2C-034) only makes sense with the paragraph before it, and the rejection of
   other teachers' 50-level entry (K2C-038) needs the whole sentence to see whose view he is rejecting.
 - Still thin after 1b: `priority` (4), `timeframe_choice` (5). `stop_choice` is now the strongest bucket (8).
+
+
+## Phase 2 (concept cards)
+- Deferred set derived mechanically: u2 `kept_concepts.tsv` has 66 concepts, u2 shipped 21 cards, so **46 deferred**
+  (gaps.md says 45 — the difference is one concept whose card name and tsv name differ by suffix). Even positions of the
+  alphabetical sort = **23 concepts**.
+- **23 cards** in `concepts/cards/`, index in `concepts/index.md`, **39 claims** in `concepts/claims.jsonl`
+  (ids `K2P-001…039`), **58 probe windows** logged in `concepts/read_log.jsonl` (±85–90 words each).
+- **Every card is marked THIN.** The brief asked for ≥15 windows per concept; the actual is 2–3. I did not pad the
+  cards to look complete: sections that no window supports say `NOT_IN_WINDOWS_READ (this session)`.
+- Verifier on the phase-2 claims: **39/39 CHECK 1 pass = 100%**, **CHECK 2 = 0 warnings**.
+  Two planned quotes could not be recovered verbatim from the logged windows (`inefficiency`, `pd_array` second quote);
+  those concepts still carry one verified claim each, and the missing quote was dropped rather than paraphrased.
+
+## Totals for the session (both phases)
+| item | phase 1 | phase 1b | phase 2 | total |
+|---|---|---|---|---|
+| windows read | 240 (25-word) | 7 (±300) | 58 (±85–90) | 305 |
+| verified claims | 31 | 11 | 39 | **81** |
+| records/cards | 31 | 11 | 23 cards | 42 records + 23 cards |
+| CHECK 1 pass | 31/31 | 11/11 | 39/39 | **81/81 = 100%** |
+| CHECK 2 warnings | 0 | 0 | 0 | **0** (u2 baseline: 117) |
+
+## More temptations (phase 2), all refused
+8. **"Silver bullet = 10:00–11:00 NY window."** The window I read uses "silver bullet" only as a dismissive metaphor
+   for a secret weapon (K2P-037). No time, no pattern, nothing added.
+9. **"Judas swing = the first candle of the session always."** I know the phrase; the windows give it as manipulation
+   driven by a news event (K2P-019/020). Mechanism not added.
+10. **"Asian range = midnight–02:00."** No clock times in the Asian-range windows read. The two clock facts I do have
+    come from other windows (midnight drop, 8pm projection) and are recorded as those, not generalised.
+11. **"Volume imbalance = the gap between bodies."** The window says the magnet behaviour holds while no body is laid
+    across it (K2P-048/049). I did not define its geometry.
+12. **"Money management = 1–2% rule."** The window is about interest-rate triads and professional money movement
+    (K2P-028/029); no sizing rule appears in it, and none was written.
+13. **"Time distortion = X bars."** No number exists in the window (K2P-045/046).
+14. **Ordering the seasonal-tendency inversion.** The quote gives the inversion for one pair; I did not turn it into a
+    general rule for all USD pairs.
+
+## Weaknesses (session overall)
+- **The ±300 expansion asked for 240 windows and got 7.** The reason is reading budget; the effect is that 233
+  shortlisted windows were never seen beyond 25 words, so comparisons they contained remain unreduced.
+- **Phase-2 cards are stubs.** One or two windows per concept cannot carry PURPOSE→VARIANTS; nine of the ten required
+  sections are `NOT_IN_WINDOWS_READ` on most cards. Treat them as placeholders that point at real quotes, not as cards.
+- **`non_farm_payroll` has exactly 1 corpus hit**, so its card rests on a single window by necessity; `long_term_high`
+  has 10 hits and `time_distortion` 34 — these concepts are thin *in the corpus*, not only in my reading.
+- **Probe windows are chosen by first-match in alphabetical file order**, which biases every card toward the 2016
+  mentorship folder. A better card needs random or era-stratified sampling.
+- **No chart, no data, no engine code** — as instructed. Nothing here was tested against price.
+- **/tmp is wiped between calls in this sandbox**; every reading call re-downloaded the corpus and verified its tarball
+  SHA first (`tools/ensure_corpus.sh`). If it is wiped again, re-run that script.
