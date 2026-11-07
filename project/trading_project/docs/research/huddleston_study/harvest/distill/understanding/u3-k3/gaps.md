@@ -1,83 +1,55 @@
-# TASK 4 — GAPS
+# GAPS — Understanding Round v3, Session `u3-k3`
 
-Everything here is a gap, not an answer. Nothing below is filled from memory.
+Everything documented here is an explicit corpus or visual-context gap, conflict kept parallel, or unrecovered threshold from the 345 windows (`W0001..W0345`) read in session `u3-k3`. Nothing below is filled from memory or external trading lore.
 
-## 1. Deixis: "here", "this high", "that low" without a named level
+## 1. Deixis: "this high", "that low", "in here" without a named price in the transcript
 
-This is the dominant gap in the corpus and it is structural, not incidental. He narrates against a
-chart the reader cannot see. Concrete instances from windows read this session:
+Because the speaker narrates over live or recorded TradingView / Barchart screens, specific candles and swing points are often pointed to with the cursor rather than spoken by price or timestamp:
 
-| claim | wording | what is missing |
-|---|---|---|
-| `U0051` | "even though this is not an order block by" | the criterion after "by" is outside the window — the actual rejection rule is unrecovered |
-| `U0045` | "the order block really begins at this candle's opening not this last one" | which candle is "this" — needs the chart image |
-| `U0071` | "i want to use this most recent one and this is my dealing range" | which two legs were on screen |
-| `U0063` | "which one's the shift in market structure well i'm playing the run up here" | the two candidate breaks are not identified in text |
-| `W0335` (pairing) | "we have a higher low and then we have this low here so we Wick down into this" | three separate deictic lows, none named |
-| `W0347` (pairing) | "between the scandals high and this candle is low" | which candle; also an ASR corruption |
-| `U0009` | "Right Above This high would be buy side liquidity" | the high is not named |
+| claim | concept | verbatim quote | what is missing without the video frame |
+|---|---|---|---|
+| `U3K3-035` | `directional_bias` | `"when price goes below the low in mid-september and rejects..."` | the exact mid-September candle date and price level on the daily chart |
+| `U3K3-042` | `higher_time_frame` | `"you have to use the swing high that starts from here down to that low"` | the specific higher-timeframe swing high and low anchors on screen |
+| `U3K3-061` | `inversion_fair_value_gap` | `"look at the bodies of these candles here nothing goes above..."` | which sibling candles inside the inversion FVG are being compared |
+| `U3K3-173` | `opening_price` | `"with this short-term High it breaks above it so there's a shift in Market structure there"` | the exact intraday candle timestamp of the short-term high break |
+| `U3K3-190` | `premium` | `"It's Already Done three stages a low that went below here this one over here"` | the three visual downward stage lows pointed to on the E-mini S&P chart |
+| `U3K3-207` | `rejection_block` | `"so you use like the rejection block here which is this price that closing price right there"` | which specific candle body close in the cluster around 4112.50 was selected |
+| `U3K3-218` | `run_on_stops` | `"do we view it as a run on stops that rejects and goes back above here"` | the exact breaker boundary price on the intraday chart |
 
-**Only a chart image would settle these.** The transcripts carry `RefLink` YouTube URLs with
-`&t=` seconds, so the frame is in principle locatable — but frame extraction was out of scope and was
-not run.
+## 2. Parallel Definitions & Conflicts Kept Separate (Never Merged or Averaged)
 
-## 2. Concepts with no comparison language found in the windows read
+In accordance with session rules, wherever the speaker uses multiple boundaries, definitions, or operational rules across different eras or asset classes, all positions are preserved in parallel in the `VARIANTS` and `OBSERVABLES` sections:
 
-`purpose` is empty for most cards (7 purpose claims across 21 concepts). Concepts where no
-comparative/preference statement was recovered at all:
+1. **`asian_range` time window**:
+   - `U3K3-010` (`W0010`): `"from 7:00 in the evening till midnight New York time"` (`19:00–00:00` NY).
+   - `U3K3-012` (`W0014`): `"whether you use an eight o'clock to midnight..."` (`20:00–00:00` NY, also extending to `02:00` NY in earlier FX tutorials).
+   - Kept parallel as a parameterized session start (`19:00` or `20:00` America/New_York to `00:00` America/New_York).
+2. **`consequent_encroachment` vs `mean_threshold`**:
+   - `U3K3-014` (`W0019`): explicitly distinguishes `"mean threshold"` (50% of a candle body / order block) from `"consequent encroachment"` (50% of a gap or wick).
+   - `U3K3-025` (`W0021`): uses `"consequent encroachment"` loosely in live narration to refer to the midpoint of a bullish order block (`"didn't even get to consequent encroachment of the bullish order block"`). Both usages are preserved.
+3. **`inefficiency` vs `liquidity_void`**:
+   - `U3K3-094` (`W0112`, 2016): defines `"liquidity void"` as a multi-candle momentum run requiring multiple passes to fill, contrasted with a single-candle fair value gap.
+   - `U3K3-059` (`W0075`, 2022): states `"when you see a fair value gap what you're seeing is what I taught years ago as a liquidity void"` while preferring the directional labels `"bisi"` and `"sibi"`.
+4. **`opening_price` and `midnight` anchors**:
+   - Daily intraday open: `00:00` America/New_York midnight candle open (`U3K3-118`, `U3K3-168`), with fallback to `08:30` NY when a strong trend fails to retrace across the midnight open (`U3K3-127`), or `09:30` NY for equity indices (`U3K3-172`).
+   - Weekly open: tracks both Sunday's natural opening price and Monday's `00:00` NY midnight opening price in parallel (`U3K3-128`, `U3K3-174`).
+   - Candle-structure open: also uses `"opening price"` to mean the open of the down-close or up-close order-block candle extended horizontally (`U3K3-172`, `W0221`, `W0223`).
+5. **`premium` and `money_management` dual senses**:
+   - `premium`: dealing-range valuation above the 50% equilibrium (`U3K3-189`) vs futures term-structure backwardation where the front month trades above the deferred month (`U3K3-197`).
+   - `money_management`: trader equity/risk-percentage sizing (`U3K3-131`, `U3K3-133`) vs institutional capital rotation across the 5Y/10Y/30Y Treasury yield triad (`U3K3-140`).
+6. **`non_farm_payroll` execution stance**:
+   - Standard rule (`U3K3-143`, `W0184`, `W0185`): NFP and FOMC days are `"no setup"` days; students stop trading after Wednesday's NY session of NFP week.
+   - Parallel exceptions (`U3K3-146`, `U3K3-152`, `W0181`, `W0182`): late-Friday position entry after an NFP Judas swing confirmed by SMT and seasonal tendency, or live ultra-short-term demonstration scalps.
+7. **`short_term_high` body vs wick measurement**:
+   - Measured at candle bodies (where the bulk of the volume resides) when anchoring Fibonacci OTE ranges (`U3K3-224`, `U3K3-230`), but measured at the wick extreme for buy-stop sweeps, market structure breaks, and protective stop-loss placement (`U3K3-221`, `U3K3-225`).
 
-- `equilibrium` — he defines and locates it, never ranks two equilibria in the windows read.
-- `being_wrong` — no ranking of two ways of being wrong.
-- `time_of_day` — overlap is described, but no statement of which window wins over another.
-- `sell_side_liquidity` has comparative wording about persistence but none ranking two pools.
-- `stop_loss` compares order types, not two candidate stop levels.
+## 3. Literal-Phrase Scarcity (`THIN` Flags on Exact Unhyphenated String)
 
-## 3. Conflicts kept parallel (never merged, never averaged)
+Two of the 23 concepts have fewer than 15 occurrences of the literal unhyphenated singular string in `kept_concepts.tsv` across the 490 transcripts, due to ASR hyphenation and pluralization:
 
-1. **Order block start** — `U0045` "really begins at this candle's opening not this last one" vs
-   `U0046` "this last up candle that's the bearish order block". Both quoted. Unresolved.
-2. **London kill zone start** — `U0088` "begins at 1am New York time" vs `U0089`/`U0090` "two o'clock"
-   / "2 a.m.". Both quoted. Unresolved. Note `U0094` explicitly *declines* to call the New York session
-   a kill zone at all, and `U0092` gives a wider 8:30 window as "not the ict new york kill zone".
-3. **Break-even trigger** — `U0114` "after first profit is taking never before" vs `U0115` "at 75% of
-   the expected profit objective stop must be at break even"; and `U0112`/`U0113` say to *resist*
-   moving to break even on higher time frames. Three positions, all kept.
-4. **"premium"** — range position (`U0082`) vs carrying-charge market (`U0087`). Same word, different
-   observable; the second needs contract data, not candles.
+- `non_farm_payroll`: literal `"non farm payroll"` occurs **1 time in 1 file** (`W0181`), whereas `"non-farm payroll"` / `"nonfarm payroll"` occur **145 times across 52 files**. Marked `thin: true` on the literal unhyphenated string, and supplemented with 14 era-stratified windows (`W0182..W0195`) of the hyphenated/compound spellings so all 15 windows are read and verified.
+- `long_term_high`: literal `"long term high"` occurs **10 times in 8 files** (`W0121..W0128`), whereas `"long-term high"` / `"long term highs"` / `"long-term highs"` occur **25 times across 14 files**. Marked `thin: true` on the literal unhyphenated singular string, and supplemented with 7 era-stratified windows (`W0129..W0135`) across 7 additional files to reach 15 distinct transcripts.
 
-## 4. What only a chart image (or the video) would settle
+## 4. Cumulative Coverage Status Across `u2` + `u3-k1` + `u3-k3`
 
-- Every deictic reference in §1.
-- Whether "very clean equal highs" (`U0022`) means near-identical price, few intervening bars, or both.
-- What "energetic" displacement looks like relative to neighbouring candles (`U0055`) — he gives the
-  contrast ("lethargic") but no measurable criterion.
-- Which of two fair value gaps he favoured (`U0040`) — the preference is stated, the two objects are not.
-- What the "logical levels" for partials are in a given instance (`U0120`).
-
-## 5. Per-concept unknowns that block a deterministic recogniser
-
-| concept | the specific unknown |
-|---|---|
-| `order_block` | the rejection criterion cut off at "not an order block by" |
-| `displacement` | no measurable definition of energetic; only a contrast |
-| `shift_in_market_structure` | no tie-break when two candidate breaks exist |
-| `dealing_range` | "market structure has provided a means for a trading opportunity" is not reduced to candles |
-| `fair_value_gap` | his "five handles" remark is chart-specific; generalising it would be invention |
-| `partials` | quantity explicitly left to the trader (`U0118`, `U0119`) — no number exists to recover |
-| `kill_zone` | conflicting bounds; also a stated refusal of the label for New York |
-| `bias` | non-exclusive: a bias to buy does not forbid the other side working (`U0103`) |
-| `risk` | no single percentage he applies universally; the 2% remark is a warning about exceeding it |
-| `being_wrong` | he says to identify the characteristics, but does not enumerate them in the windows read |
-
-## 6. Coverage gaps of this session (not of the corpus)
-
-- 66 concepts were selected in `kept_concepts.tsv`; **21** received cards. The other **45** are
-  deferred, not absent — including `breaker`, `mitigation_block`, `rejection_block`,
-  `consequent_encroachment`, `optimal_trade_entry`, `imbalance`, `inefficiency`, `liquidity_void`,
-  `turtle_soup`, `silver_bullet`, `judas_swing`, `smt_divergence`, `market_maker`, `mean_threshold`,
-  `ipda`, `data_range`, the swing-hierarchy terms and `money_management`.
-- Task 2 mined 3000 comparative windows mechanically but only **18** were reduced to
-  things_compared/which_wins records; the rest are uninterpreted in `comparisons_raw.jsonl`.
-- Task 3 detected 71 dated candidates; only 13 got pairing cards and only 6 are EURUSD-usable.
-- 76 card sections are `NOT_IN_SOURCES`. The thinnest cards are `risk` (6 empty), and
-  `being_wrong`, `break_even`, `equilibrium`, `kill_zone` (5 each).
+With the completion of the 23 concept cards in `u3-k3`, **all 66 concepts in `kept_concepts.tsv` are now 100% covered** by full, `>=15`-window verified concept cards across `u2` (21 cards), `u3-k1` (23 cards), and `u3-k3` (23 cards, including dedicated standalone cards for both `premium` and the 6 other concepts that K1/K2's 45-vs-46 index shift previously missed).
