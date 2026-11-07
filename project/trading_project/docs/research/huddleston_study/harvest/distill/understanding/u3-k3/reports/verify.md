@@ -1,7 +1,7 @@
 # verify.md
 
-- claims checked: **117**
-- CHECK 1 pass (quote verbatim, <=25 words): **117** (100.0%)
+- claims checked: **174**
+- CHECK 1 pass (quote verbatim, <=25 words): **174** (100.0%)
 - CHECK 1 fail: **0**
 - CHECK 2 warnings (statement content word absent from +/-100-word surroundings): **0**
 

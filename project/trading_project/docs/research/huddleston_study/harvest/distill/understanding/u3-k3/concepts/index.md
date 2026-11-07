@@ -1,6 +1,6 @@
 # Concept Cards — Session `u3-k3`
 
-Completed cards so far: **10** / **23** (`TODO` set).
+Completed cards so far: **15** / **23** (`TODO` set).
 
 | # | Concept | Windows Read (`±100`w) | Exact / Variant | Distinct Files | Eras | Claims | Status |
 |---:|---|---:|---|---:|---:|---:|---|
@@ -14,3 +14,8 @@ Completed cards so far: **10** / **23** (`TODO` set).
 | 8 | [liquidity_void](liquidity_void.md) | 15 | 15 / 0 | 15 | 4 | 12 | FULL (≥15w) |
 | 9 | [long_term_high](long_term_high.md) | 15 | 8 / 7 | 15 | 4 | 11 | THIN (exact phrase) |
 | 10 | [market_maker](market_maker.md) | 15 | 15 / 0 | 15 | 5 | 12 | FULL (≥15w) |
+| 11 | [midnight](midnight.md) | 15 | 15 / 0 | 15 | 5 | 11 | FULL (≥15w) |
+| 12 | [money_management](money_management.md) | 15 | 15 / 0 | 15 | 5 | 12 | FULL (≥15w) |
+| 13 | [non_farm_payroll](non_farm_payroll.md) | 15 | 1 / 14 | 15 | 5 | 12 | THIN (exact phrase) |
+| 14 | [old_low](old_low.md) | 15 | 15 / 0 | 15 | 5 | 11 | FULL (≥15w) |
+| 15 | [opening_price](opening_price.md) | 15 | 15 / 0 | 15 | 5 | 11 | FULL (≥15w) |
