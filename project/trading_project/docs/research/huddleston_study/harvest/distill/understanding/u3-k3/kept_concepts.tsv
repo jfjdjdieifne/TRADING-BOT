@@ -1,0 +1,67 @@
+group	concept	phrase	probe_count	probe_files
+A	buy_side_liquidity	buy side liquidity	219	112
+A	sell_side_liquidity	sell side liquidity	188	110
+A	equal_highs	equal highs	543	187
+A	equal_lows	equal lows	409	169
+A	relative_equal_highs	relative equal highs	300	125
+A	old_high	old high	629	207
+A	old_low	old low	457	168
+A	run_on_stops	run on stops	24	23
+A	draw_on_liquidity	draw on liquidity	210	108
+A	liquidity_pool	liquidity pool	232	100
+A	short_term_high	short term high	147	85
+A	intermediate_term_high	intermediate term high	36	19
+A	long_term_high	long term high	10	8
+A	swing_high	swing high	423	130
+A	swing_low	swing low	412	135
+A	data_range	data range	103	26
+A	ipda	ipda	3	3
+B	displacement	displacement	274	114
+B	shift_in_market_structure	shift in market structure	202	100
+B	fair_value_gap	fair value gap	2025	287
+B	order_block	order block	2012	310
+B	breaker	breaker	755	143
+B	mitigation_block	mitigation block	105	42
+B	rejection_block	rejection block	179	60
+B	consequent_encroachment	consequent encroachment	416	111
+B	imbalance	imbalance	724	177
+B	inefficiency	inefficiency	785	123
+B	rebalance	rebalance	138	57
+B	volume_imbalance	volume imbalance	101	49
+B	liquidity_void	liquidity void	202	73
+B	inversion_fair_value_gap	inversion fair value gap	97	34
+B	optimal_trade_entry	optimal trade entry	600	158
+B	2022_model	2022 model	57	29
+C	dealing_range	dealing range	164	56
+C	equilibrium	equilibrium	540	123
+C	premium	premium	1409	222
+C	discount	discount	1379	226
+C	pd_array	pd array	489	112
+C	kill_zone	kill zone	195	66
+C	asian_range	asian range	368	48
+C	london_session	london session	233	90
+C	new_york_session	new york session	403	146
+C	time_of_day	time of day	333	149
+C	midnight	midnight	398	89
+C	opening_price	opening price	1012	156
+C	bias	bias	911	250
+C	directional_bias	directional bias	205	105
+C	higher_time_frame	higher time frame	1058	243
+C	lower_time_frame	lower time frame	299	151
+C	seasonal_tendency	seasonal tendency	353	53
+C	mean_threshold	mean threshold	305	99
+C	time_distortion	time distortion	34	12
+C	non_farm_payroll	non farm payroll	1	1
+D	risk	risk	1752	280
+D	stop_loss	stop loss	746	207
+D	break_even	break even	83	58
+D	partials	partials	199	73
+D	no_trade	no trade	24	18
+D	being_wrong	being wrong	38	29
+D	money_management	money management	111	60
+D	one_shot_one_kill	one shot one kill	154	58
+D	turtle_soup	turtle soup	134	70
+D	silver_bullet	silver bullet	182	56
+D	judas_swing	judas swing	109	60
+D	smt_divergence	smt divergence	101	45
+D	market_maker	market maker	351	84
