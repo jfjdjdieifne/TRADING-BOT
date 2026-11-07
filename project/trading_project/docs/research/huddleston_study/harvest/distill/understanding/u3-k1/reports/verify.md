@@ -1,0 +1,132 @@
+# verify.md
+
+- claims checked: **228**
+- CHECK 1 pass (quote verbatim, <=25 words): **228** (100.0%)
+- CHECK 1 fail: **0**
+- CHECK 2 warnings (statement content word absent from +/-100-word surroundings): **117**
+
+
+## CHECK 2 warnings
+
+- `U0001` missing: knowing, location, requirement, says
+- `U0002` missing: locating, reading, reduces, task, whole
+- `U0003` missing: holding, locating, ranks
+- `U0004` missing: candidates, named
+- `U0005` missing: itself, looks, named, unfilled
+- `U0006` missing: arrival, identified, next, promise, tendency
+- `U0007` missing: held, insists
+- `U0008` missing: resides
+- `U0009` missing: market
+- `U0010` missing: delivery, enumeration, inefficiency, reduces, sell
+- `U0011` missing: looks
+- `U0012` missing: locates, says
+- `U0013` missing: runs, wick
+- `U0014` missing: example, shown, timeframe, worked
+- `U0015` missing: says, taken, used
+- `U0016` missing: anticipated
+- `U0017` missing: named, place, reaches
+- `U0018` missing: contrasts
+- `U0019` missing: waits
+- `U0020` missing: asks
+- `U0021` missing: calls, couples
+- `U0022` missing: ones, ties
+- `U0023` missing: says
+- `U0024` missing: calls
+- `U0025` missing: become, dropping, says
+- `U0027` missing: equates
+- `U0028` missing: clears, price, reverses, sequence, worked
+- `U0029` missing: creates, says
+- `U0030` missing: classified, reaches
+- `U0031` missing: preference, states
+- `U0032` missing: reside, sell
+- `U0033` missing: points
+- `U0034` missing: example, expects, price
+- `U0035` missing: counts, touches
+- `U0036` missing: answers, asks
+- `U0037` missing: gives, says, width
+- `U0038` missing: hunts
+- `U0039` missing: having, makes
+- `U0040` missing: gaps
+- `U0042` missing: names, says, uses
+- `U0043` missing: names, price
+- `U0044` missing: says
+- `U0045` missing: rejects
+- `U0046` missing: calls, elsewhere
+- `U0048` missing: describes, violating
+- `U0049` missing: trading
+- `U0050` missing: gives, needed, takes
+- `U0051` missing: allows, explicitly, trades
+- `U0052` missing: dropping, shows
+- `U0053` missing: price
+- `U0054` missing: near, sets
+- `U0055` missing: cannot
+- `U0056` missing: close, gives
+- `U0057` missing: alone
+- `U0059` missing: looks
+- `U0062` missing: points
+- `U0063` missing: answers, asks, candidates, facing
+- `U0064` missing: says
+- `U0065` missing: comes
+- `U0066` missing: calls, notes
+- `U0067` missing: price, rallying, shows
+- `U0068` missing: price
+- `U0069` missing: divergence, points
+- `U0070` missing: answers, asked
+- `U0071` missing: candidate, rejects
+- `U0072` missing: wants
+- `U0073` missing: price, wants
+- `U0074` missing: looks, works
+- `U0075` missing: inside
+- `U0076` missing: sell, waits
+- `U0077` missing: asks
+- `U0078` missing: uses
+- `U0079` missing: refers
+- `U0082` missing: drops
+- `U0084` missing: works
+- `U0086` missing: live
+- `U0087` missing: refers
+- `U0088` missing: carrying, charge, deferred, different, sense, word
+- `U0089` missing: says
+- `U0090` missing: elsewhere, says, teaches
+- `U0092` missing: gives
+- `U0093` missing: formed
+- `U0094` missing: declines
+- `U0095` missing: gives, instead, says, wider, window
+- `U0096` missing: treats, usable
+- `U0097` missing: relies
+- `U0098` missing: takes
+- `U0099` missing: seen
+- `U0100` missing: allows, expected
+- `U0104` missing: cannot
+- `U0105` missing: filtering, gives
+- `U0106` missing: wants
+- `U0107` missing: goes, setup
+- `U0108` missing: applying
+- `U0109` missing: placement
+- `U0110` missing: wants
+- `U0111` missing: uses
+- `U0112` missing: different, entry, goes, type
+- `U0113` missing: calling, tries
+- `U0114` missing: says
+- `U0116` missing: elsewhere, price
+- `U0119` missing: taken, trader
+- `U0120` missing: declines, outline
+- `U0121` missing: executed
+- `U0122` missing: holds, stakes
+- `U0123` missing: lead, says
+- `U0124` missing: keys, reviewing
+- `U0125` missing: misses
+- `U0126` missing: happens, says
+- `U0128` missing: badly, risking, warns
+- `U0129` missing: offers
+- `U0130` missing: names, running
+- `U0131` missing: changes, taking
+- `U0132` missing: behaviour, expected
+- `U0134` missing: gets, never
+- `U0135` missing: branches, plan
+- `U0136` missing: described, event
+
+## How the checks work
+
+CHECK 1 is a hard gate: the quote is searched in the source file after lowercasing and whitespace collapse only — no punctuation normalisation, no edit distance, no fuzzy match. A claim whose quote is not found is not written to `claims.jsonl`.
+CHECK 2 is soft and reported, never silently fixed: it lists statement content words (len>=4, not stop-words) that do not appear in the +/-100-word source window around the quote. A warning means the statement added vocabulary the source window does not contain; the wording in `claims.jsonl` is the version that passed CHECK 1, and every warning is listed above.
