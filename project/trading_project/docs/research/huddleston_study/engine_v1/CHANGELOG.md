@@ -1,21 +1,35 @@
-# Changelog
+# سجل التغييرات
 
-## M0 — before timestamp diagnostic results
+## قبل تشخيص الزمن في المرحلة الصفرية
 
-- Imported the assigned project tree without reset or merge.
-- Added the annual-file allowlist, immediate 2025-05-01 cutoff, immutable candle
-  values, and bar-end availability semantics.
-- Added an executable prefix-invariance harness and fixed its output contract.
-- Fixed the timestamp diagnostic protocol in `PARAMETERS.md` before running it.
+- استوردت شجرة المشروع المعينة من دون إعادة ضبط صلبة أو دمج.
+- أضيفت قائمة السنوات المسموحة، والحد الزمني الفوري، والشموع غير القابلة للتغيير، ودلالات الإتاحة عند نهاية الشمعة.
+- أضيفت أداة تنفيذية لثبات المقدمات وثُبّت عقد مخرجاتها.
+- ثُبّت بروتوكول التشخيص الزمني قبل قراءة نتيجته.
 
-- Synthetic-only correction before inspecting real event alignment: replaced the
-  invalid universal first-Friday schedule heuristic with the 24 explicit BLS
-  dates (March 2023 was 10 March); corrected a float assertion in its unit test.
+## تصحيحات اصطناعية قبل نتيجة المحاذاة الحقيقية
 
-- Ran the fixed diagnostic on 2022/2023: 23/24 release-labelled bars were the
-  largest of the four offsets; 2022-03-04 was the disclosed +5m exception.
-  Added documentation and an opt-in regression test for this pinned evidence.
-  No protocol value, loader rule, or engine behaviour was changed after seeing
-  the real alignment result.
+- استُبدل اشتقاق أول جمعة غير الصالح بجدول رسمي صريح يضم 24 موعداً، بعدما تبين أن مارس 2023 كان يوم 10 مارس.
+- صُحح اختبار مساواة عشرية في الشيفرة الاصطناعية.
 
-No story test has been run. No result-driven engine change has been made.
+## بعد تشخيص المرحلة الصفرية
+
+- كانت شمعة الإصدار الأكبر بين الإزاحات الأربع في 23 من 24 موعداً، مع استثناء 2022-03-04 المعلن.
+- أضيف توثيق واختبار ثبات اختياري لهذا الدليل المثبت، ولم يتغير أي بروتوكول أو قاعدة تحميل بعد رؤية النتيجة.
+
+## قبل المرحلة الأولى
+
+- صُنفت 60,711 صفاً عديم الحجم إلى 60,508 من حشو نهاية الأسبوع و203 من التسطيح داخل الأسبوع وصفر غير مصنّف.
+- أضيفت حالة سببية «لا سوق» لا تعتمد على أي صف لاحق، وأضيف ملف إصدارات دقيقة.
+- استُعيد مؤشر الفرع المحلي إلى النسخة البعيدة الحافظة للمرحلة الصفرية بعد ظهوره على نقطة قديمة، مع إبقاء ملفات العمل ومن دون إعادة ضبط صلبة أو دمج.
+
+## المرحلة الأولى قبل أي نتائج تطوير
+
+- أضيفت المفاهيم الأولية والمتغيرات المتوازية والإحالات وسجل «بانتظار».
+- أثبتت الاختبارات اليدوية ثبات المقدمات وتطابق التشغيلين.
+- أثناء الاختبار الاصطناعي ظهرت ثلاثة إخفاقات: اثنان من المساواة العشرية، وواحد كشف أن المطابقة الآلية تعطي 46 اسماً غير مطابق لا 45. صُححت الاختبارات ووُثّق سبب الفرق.
+- في المراجعة الساكنة صُحح موضع مصدر التأرجح، وفُصل الصفر غير المحسوم عن «لا سوق»، وأصبح حساب 75٪ عشرياً.
+- سُحب ترتيب كامل مفترض للأطر؛ لا يظهر إلا تفوق اليومي على الإطار الأدنى المؤيد بالبطاقة، وتبقى المقارنات الأوسع غير محسومة.
+- النتيجة النهائية 73 اختباراً ناجحاً من 73 في الحزمة، و1,906 من 1,906 في المشروع كله.
+
+لم تُشاهد أي نتيجة تطوير على بيانات 2022، ولم تُشغّل نتائج 2023، ولم يُختبر ربح أو قصة. أي تغيير لاحق لمشاهدة نتائج التطوير سيُسجل هنا مع سببه والضعف الذي يستهدفه.
