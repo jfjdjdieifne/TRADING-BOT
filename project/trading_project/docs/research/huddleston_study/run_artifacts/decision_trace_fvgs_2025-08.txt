@@ -1,0 +1,122 @@
+== paused at 2025-08-07 12:00:00+00:00 (observations consumed: 9359) ==
+
+========================================================================
+== DECISION TRACE at 2025-08-07 12:00:00+00:00 (pause disclosed; window chosen for the demo)
+========================================================================
+[1] HIGHER-FRAME CONTEXT: trend=down
+    available/established at (data time): 2025-08-06 12:00:00+00:00
+    evidence: ['SF-DIR-connected-read-v1-32']
+    source/engineering: the trend is the engine's derived direction (ENGINEERING), from completed structure only
+
+[2] DECLARED TASK RT-WATCH-SW-connected-read-v1-0001: which FVG region is the displacement/non-overlap evidence for this shift-watch
+    evaluation rule: all declared criteria must hold (conjunction) for a single-candidate preference
+    rule class: ENGINEERING_INTERPRETATION — NOT a source statement; the source material does not specify this evaluation, and other evaluation rules remain possible
+    conflict handling: criteria not met are recorded as counterevidence with the observed facts; partial-support candidates remain in the candidate list and in the alternatives; no numerical score, ranking, or confidence percentage is used
+    criteria applied (and why):
+      - observable_after_crossing [ENGINEERING_INTERPRETATION]: region observability_time is later than the crossing bar's time (chronology actually established)
+      - direction_consistent [ENGINEERING_INTERPRETATION]: region direction matches the crossing direction (E03-B displacement reading)
+      - interval_contains_crossed_level [ENGINEERING_INTERPRETATION]: the interval contains the crossed reference level (exact relation)
+
+[3] CANDIDATE COMPARISON (this is a comparison, not a collection)
+    candidates before filtering: 208
+    by support count (criteria met): {0: 90, 1: 116, 2: 2, 3: 0}
+    relevance rule (display filter): at least one declared criterion met OR conflicting evidence recorded (categorical — no numerical threshold)
+    candidates after filtering (shown in detail): 118
+    removed from the record: 0 (never silently removed; all remain in task.candidates)
+    resource limits: none enforced; every observable region is evaluated (counts reported above)
+
+    display rule (disclosed; DISPLAY batching only, not an analytical threshold): candidates meeting >=2 criteria shown in full; each lower-support group contributes up to 3 examples; the rest reported as counts; removed from record: 0
+    materially relevant competing candidates (2 near-satisfying + 6 examples):
+      * FVG-connected-read-v1-cr-15m-618 [FVG region] tf=15m available_at=2025-08-07 10:45:00+00:00
+        relation to context: hf_trend=down → counter
+        supporting: direction_consistent: region direction upward matches the crossing direction (upward)
+        supporting: interval_contains_crossed_level: [115566.78, 115839.71] contains 115720.0
+        counterevidence: observable_after_crossing: region observable at 2025-08-07 10:45:00+00:00 vs crossing at 2025-08-07 12:00:00+00:00 — chronology: fvg_observable_before_crossing
+        conflict: conflicting evidence: partial support only; the declared conjunction is not satisfied; this candidate remains recorded as an alternative (never deleted)
+      * FVG-connected-read-v1-cr-1h-155 [FVG region] tf=1h available_at=2025-08-07 12:00:00+00:00
+        relation to context: hf_trend=down → counter
+        supporting: direction_consistent: region direction upward matches the crossing direction (upward)
+        supporting: interval_contains_crossed_level: [115077.37, 116347.23] contains 115720.0
+        counterevidence: observable_after_crossing: region observable at 2025-08-07 12:00:00+00:00 vs crossing at 2025-08-07 12:00:00+00:00 — chronology: unorderable_at_boundary: the crossing bar labels the same completion boundary as the FVG's observability
+        conflict: conflicting evidence: partial support only; the declared conjunction is not satisfied; this candidate remains recorded as an alternative (never deleted)
+      * FVG-connected-read-v1-cr-15m-109 [FVG region] tf=15m available_at=2025-08-02 03:30:00+00:00
+        relation to context: hf_trend=down → counter
+        supporting: direction_consistent: region direction upward matches the crossing direction (upward)
+        counterevidence: observable_after_crossing: region observable at 2025-08-02 03:30:00+00:00 vs crossing at 2025-08-07 12:00:00+00:00 — chronology: fvg_observable_before_crossing
+        counterevidence: interval_contains_crossed_level: [113720.01, 113765.41] does not contain 115720.0
+        conflict: conflicting evidence: partial support only; the declared conjunction is not satisfied; this candidate remains recorded as an alternative (never deleted)
+      * FVG-connected-read-v1-cr-15m-11 [FVG region] tf=15m available_at=2025-08-01 03:00:00+00:00
+        relation to context: hf_trend=down → counter
+        supporting: direction_consistent: region direction upward matches the crossing direction (upward)
+        counterevidence: observable_after_crossing: region observable at 2025-08-01 03:00:00+00:00 vs crossing at 2025-08-07 12:00:00+00:00 — chronology: fvg_observable_before_crossing
+        counterevidence: interval_contains_crossed_level: [115810.71, 115843.42] does not contain 115720.0
+        conflict: conflicting evidence: partial support only; the declared conjunction is not satisfied; this candidate remains recorded as an alternative (never deleted)
+      * FVG-connected-read-v1-cr-15m-114 [FVG region] tf=15m available_at=2025-08-02 04:45:00+00:00
+        relation to context: hf_trend=down → counter
+        supporting: direction_consistent: region direction upward matches the crossing direction (upward)
+        counterevidence: observable_after_crossing: region observable at 2025-08-02 04:45:00+00:00 vs crossing at 2025-08-07 12:00:00+00:00 — chronology: fvg_observable_before_crossing
+        counterevidence: interval_contains_crossed_level: [113936.09, 113993.56] does not contain 115720.0
+        conflict: conflicting evidence: partial support only; the declared conjunction is not satisfied; this candidate remains recorded as an alternative (never deleted)
+      * FVG-connected-read-v1-cr-15m-102 [FVG region] tf=15m available_at=2025-08-02 01:45:00+00:00
+        relation to context: hf_trend=down → aligned
+        counterevidence: observable_after_crossing: region observable at 2025-08-02 01:45:00+00:00 vs crossing at 2025-08-07 12:00:00+00:00 — chronology: fvg_observable_before_crossing
+        counterevidence: direction_consistent: region direction downward vs crossing direction upward — mismatch observed
+        counterevidence: interval_contains_crossed_level: [113637.27, 113670.82] does not contain 115720.0
+      * FVG-connected-read-v1-cr-15m-121 [FVG region] tf=15m available_at=2025-08-02 06:30:00+00:00
+        relation to context: hf_trend=down → aligned
+        counterevidence: observable_after_crossing: region observable at 2025-08-02 06:30:00+00:00 vs crossing at 2025-08-07 12:00:00+00:00 — chronology: fvg_observable_before_crossing
+        counterevidence: direction_consistent: region direction downward vs crossing direction upward — mismatch observed
+        counterevidence: interval_contains_crossed_level: [113834.74, 113917.0] does not contain 115720.0
+      * FVG-connected-read-v1-cr-15m-122 [FVG region] tf=15m available_at=2025-08-02 06:45:00+00:00
+        relation to context: hf_trend=down → aligned
+        counterevidence: observable_after_crossing: region observable at 2025-08-02 06:45:00+00:00 vs crossing at 2025-08-07 12:00:00+00:00 — chronology: fvg_observable_before_crossing
+        counterevidence: direction_consistent: region direction downward vs crossing direction upward — mismatch observed
+        counterevidence: interval_contains_crossed_level: [113654.73, 113823.85] does not contain 115720.0
+
+    background candidates kept in the record (200; shown as counts, not dumped): support distribution {1: 113, 0: 87}
+    (each keeps its full evidence breakdown in task.candidates)
+
+[4] CONCLUSION: UNRESOLVED_NO_EDGE
+    preferred: None
+    reason: no candidate meets the declared discriminating criteria; no preference is forced
+    why unresolved: the declared evidence does not single out one candidate (or none qualifies) — no winner is forced and no permanent abstention is declared: a later version may prefer
+    alternatives in THIS conclusion version (as recorded when the version was written): 208
+    current candidate set (rebuilt each boundary): 208 (all kept; none deleted)
+      - FVG-connected-read-v1-cr-15m-102: declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level [supporting=0 counterevidence=3 conflict=False]
+      - FVG-connected-read-v1-cr-15m-109: declared criteria not all met: observable_after_crossing, interval_contains_crossed_level [supporting=1 counterevidence=2 conflict=True]
+      - FVG-connected-read-v1-cr-15m-11: declared criteria not all met: observable_after_crossing, interval_contains_crossed_level [supporting=1 counterevidence=2 conflict=True]
+      - FVG-connected-read-v1-cr-15m-114: declared criteria not all met: observable_after_crossing, interval_contains_crossed_level [supporting=1 counterevidence=2 conflict=True]
+      - FVG-connected-read-v1-cr-15m-115: declared criteria not all met: observable_after_crossing, interval_contains_crossed_level [supporting=1 counterevidence=2 conflict=True]
+      - FVG-connected-read-v1-cr-15m-121: declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level [supporting=0 counterevidence=3 conflict=False]
+      … 202 more alternatives in the record
+
+[5] EXACTLY WHAT IS WATCHED NEXT (conditional observation — NOT a prediction):
+    observable event: a further completed region on a watched frame whose geometry meets the declared criteria
+      would change: re-open the comparison as a new version
+      would weaken/suspend: if the watch itself is closed without evidence
+      alternative remains: every non-preferred candidate
+      cannot establish: which region (if any) represents actual institutional activity
+    interpretation INT-HF-CONTEXT watches: a completed structural change on the higher frame (the engine's I-primary direction revision)
+    interpretation INT-WATCH-SW-connected-read-v1-0001 watches: the declared watch questions' observables (displacement/non-overlap bars; local-swing crossing; a completed FVG meeting the task criteria)
+    ledger records for RT-WATCH-SW-connected-read-v1-0001 (at pause): 1 record(s)
+      uid=T-STUDY-READING#85 revision_of=None
+        notes: ['status=UNRESOLVED_NO_EDGE', 'preferred=None']
+        decision_time (PROCESSING wall clock): 2026-11-03 09:00:21.184416+00:00
+
+========================================================================
+== STEP 1: task-scale boundary 2025-08-07 16:00:00+00:00 (processed at wall clock 2026-11-03T09:00:21+00:00)
+========================================================================
+  decision RT-WATCH-SW-connected-read-v1-0001: CHANGED → conclusion v2 (revision_of=T-STUDY-READING#85) recorded_at=2025-08-07 16:00:00+00:00 (data time of this boundary)
+    new status=EVIDENCE_PREFERRED preferred=FVG-connected-read-v1-cr-4h-39
+    new reason: the declared discriminating criteria are all met by this candidate and by no other (evidence distinguishes it for THIS task); the sequence crossing_before_fvg_observable is recorded as established; the region is relevant evidence only — NOT proof of a shift (E03-A/B) and never a trade signal
+    OLD conclusion v1 (preserved unchanged): status=UNRESOLVED_NO_EDGE preferred=None
+    ledger records for RT-WATCH-SW-connected-read-v1-0001 (old + new): 2 record(s)
+      uid=T-STUDY-READING#85 revision_of=None
+        notes: ['status=UNRESOLVED_NO_EDGE', 'preferred=None']
+        decision_time (PROCESSING wall clock): 2026-11-03 09:00:21.184416+00:00
+      uid=T-STUDY-READING#89 revision_of=T-STUDY-READING#85
+        notes: ['status=EVIDENCE_PREFERRED', 'preferred=FVG-connected-read-v1-cr-4h-39']
+        decision_time (PROCESSING wall clock): 2026-11-03 09:00:21.510814+00:00
+  candidates: before=211 after=121 (removed=0)
+  support distribution: {0: 90, 1: 117, 2: 3, 3: 1}
+  other task RT-REF-REVIEW: EVIDENCE_PREFERRED preferred=PSC:F-K(k=5)|high@2025-08-04T20:00:00+00:00 candidates=3 v2

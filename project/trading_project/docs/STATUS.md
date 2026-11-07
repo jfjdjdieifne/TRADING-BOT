@@ -154,6 +154,18 @@ Module 6.2B-1 V1.1 is CLOSED with history `V1 -> PATCH REQUIRED; V1.1 -> ACCEPTE
 
 6.2B-1 does not certify predictive edge, predictive SUPPORT, feature importance, learned confluence weights, a qualification objective or threshold, probability, profitability, statistical independence, effective independent sample size, untouched OOS from caller-reported access counts, geometry, entry/stop/target, execution/fills, signals, PnL/WIN/LOSS, or future live performance. The QualificationObjective remains undefined (RESEARCH-DEBT-020). `RESEARCH-DEBT-020`, `RESEARCH-DEBT-021`, `RESEARCH-DEBT-023`, and `RESEARCH-DEBT-024` remain open and are not claimed solved. No 6.2B-2, geometry, execution, model, or scorer work has started.
 
+### Bounded FVG contextual-relevance research pilot V1 — CLOSED (separate from Module 6.2B-2)
+
+```text
+V1 IMPLEMENTED — PENDING AUDIT
+Independent audit: PASS — ACCEPTED FOR CLOSURE SCOPE
+V1 CLOSED — accepted pilot scope only
+```
+
+The closure decision was supplied with the user's explicit closure authorization; the release record documents the audit-evidence limits. This separate pilot certifies only decision-visible FVG candidate enumeration under the declared Stage 4B-2 source contract; candidate/question coverage accounting; append-only provisional assessments; source-backed factual revision evidence; raw/verified ledger separation; verified coverage-key validation; historical snapshot immutability; future-append causal invariance; and explicit deferral/restoration accounting. Its exact accepted commit, source/test hashes, validation environment, open debts, and non-certifications are recorded in `docs/releases/MILESTONE_FVG_CONTEXTUAL_RELEVANCE_PILOT_V1_CLOSED.md` and `docs/releases/FVG_CONTEXTUAL_RELEVANCE_PILOT_V1_ACCEPTED_SRC_TESTS.sha256`.
+
+This pilot does not certify contextual intelligence, empirically validated relevance, predictive edge, strategy, ICT semantic truth, profitability, live execution, durable timeline retrieval, or full pandas 3 compatibility. S8 `COMPETING_BOUNDARY_FIRST_PASSAGE` and S9 `SATISFY_CONSTRAINT` remain blocked. Module 6.2B-2 remains `NOT AUTHORIZED / NOT STARTED`; no module or downstream scope is advanced by this pilot.
+
 ### Module 6.2B-0 exact closure history
 
 ```text

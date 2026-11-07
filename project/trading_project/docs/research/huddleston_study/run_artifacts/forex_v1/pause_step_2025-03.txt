@@ -1,0 +1,28 @@
+== PAUSE at 2025-03-04 12:00:00+00:00 (window 2025-03-01->2025-03-06 disclosed; pause demo-chosen) ==
+[context] hf trend=down established_at=2025-03-04 11:00:00+00:00
+[references] confirmed refs used by readings: 19
+[FVG regions] 38 (by tf: {'15m': 28, '1h': 8, '4h': 2})
+[task RT-REF-REVIEW] UNRESOLVED_NO_EDGE preferred=None candidates=5 comparison={'1': 2, '0': 3}
+[task RT-WATCH-SW-fx-intraday-v1-0001] EVIDENCE_PREFERRED preferred=FVG-fx-intraday-v1-cr-1h-35 candidates=38 comparison={0: 13, 1: 22, 2: 2, 3: 1}
+[task RT-WATCH-SW-fx-intraday-v1-0002] UNRESOLVED_NO_EDGE preferred=None candidates=38 comparison={0: 13, 1: 23, 2: 2, 3: 0}
+[shift watches] 2
+  SW-fx-intraday-v1-0001 [WATCHING] crossing={'ref_id': 'PSC:F-K(k=5)|high@2025-03-03T16:00:00+00:00', 'ref_side': 'high', 'ref_level': 1.0503850000000001, 'bar': 34, 'bar_time': '2025-03-04 09:00:00+00:00', 'previous_close': 1.049315, 'close': 1.051905, 'direction': 'upward', 'transition': 'close-to-close transition across the level between two completed bars (intrabar path NOT established)'}
+  SW-fx-intraday-v1-0002 [WATCHING] crossing={'ref_id': 'PSC:F-K(k=5)|high@2025-03-04T02:00:00+00:00', 'ref_side': 'high', 'ref_level': 1.049615, 'bar': 34, 'bar_time': '2025-03-04 09:00:00+00:00', 'previous_close': 1.049315, 'close': 1.051905, 'direction': 'upward', 'transition': 'close-to-close transition across the level between two completed bars (intrabar path NOT established)'}
+
+-- step 1: 2025-03-04 13:00:00+00:00 (trigger=task-boundary) --
+  task RT-REF-REVIEW: no change (honest)
+  task RT-WATCH-SW-fx-intraday-v1-0001: no change (honest)
+  task RT-WATCH-SW-fx-intraday-v1-0002: no change (honest)
+  interpretation INT-HF-CONTEXT: 3 revision(s); latest: higher-frame context changed from up to down on new completed structure
+
+-- step 2: 2025-03-04 14:00:00+00:00 (trigger=task-boundary) --
+  task RT-REF-REVIEW: no change (honest)
+  task RT-WATCH-SW-fx-intraday-v1-0001: no change (honest)
+  task RT-WATCH-SW-fx-intraday-v1-0002: no change (honest)
+  interpretation INT-HF-CONTEXT: 3 revision(s); latest: higher-frame context changed from up to down on new completed structure
+
+-- step 3: 2025-03-04 15:00:00+00:00 (trigger=task-boundary) --
+  task RT-REF-REVIEW: no change (honest)
+  task RT-WATCH-SW-fx-intraday-v1-0001: no change (honest)
+  task RT-WATCH-SW-fx-intraday-v1-0002: no change (honest)
+  interpretation INT-HF-CONTEXT: 3 revision(s); latest: higher-frame context changed from up to down on new completed structure

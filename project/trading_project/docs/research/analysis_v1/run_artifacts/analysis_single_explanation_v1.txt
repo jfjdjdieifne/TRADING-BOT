@@ -1,0 +1,28 @@
+### AN-9f5d9cfb4329 v1 — as of 2025-08-14 00:00:00+00:00 (UTC)  [reconstructed]
+lifecycle: CONDITION_ALREADY_OBSERVED
+observed state: last completed 4h bar: 2025-08-14 00:00:00+00:00 close=123306
+fact [engineering-interpretation] SF-DIR-analysis-v1-77: the most recent completed task-scale leg C:F-K(k=5)|leg2025-08-11T08:00:00+00:00-2025-08-12T00:00:00+00:00 (PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00->PTC:F-K(k=5)|low@2025-08-12T00:00:00+00:00) moved down (the last completed 5-confirmation leg on the 4h task scale (F-K k=5, scale relative to the declared task))
+fact [engineering-interpretation] SF-AVL-1h-analysis-v1-77: 312 completed 1h bars and 32 completed 1h legs are available at this boundary (availability = completion time; any incomplete higher-timeframe bar is never used)
+fact [engineering-interpretation] SF-AVL-15m-analysis-v1-77: 1248 completed 15m bars and 121 completed 15m legs are available at this boundary (availability = completion time; any incomplete higher-timeframe bar is never used)
+fact [engineering-interpretation] SF-SP05-1h-analysis-v1-77: the last completed 1h leg C:F-K(k=5)|leg2025-08-12T21:00:00+00:00-2025-08-13T06:00:00+00:00 is 'disjoint' inside the task-scale leg C:F-K(k=5)|leg2025-08-11T08:00:00+00:00-2025-08-12T00:00:00+00:00 (SP-05, verified timestamps; TIE-BOUNDARIES-INCLUSIVE-V1)
+fact [engineering-interpretation] SF-SP05-15m-analysis-v1-77: the last completed 15m leg C:F-K(k=5)|leg2025-08-13T14:15:00+00:00-2025-08-13T15:30:00+00:00 is 'disjoint' inside the task-scale leg C:F-K(k=5)|leg2025-08-11T08:00:00+00:00-2025-08-12T00:00:00+00:00 (SP-05, verified timestamps; TIE-BOUNDARIES-INCLUSIVE-V1)
+interpretation I-primary (invalidated, [engineering-interpretation]): the completed task-scale leg moved down (C:F-K(k=5)|leg2025-08-11T08:00:00+00:00-2025-08-12T00:00:00+00:00); the current interpretation is that the origin-of-last-confirmed-leg = PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00 continues to define the boundary of that claim at this as-of (research configuration)
+    supports: SF-DIR-analysis-v1-77
+    supports: SF-AVL-1h-analysis-v1-77
+    supports: SF-AVL-15m-analysis-v1-77
+    opposed : SP-03 close violation of PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00 (2 event(s))
+    alternative: the down leg is exhausted and a up structure develops (monitored as I-alt)
+    falsifier reference: PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00
+    next discriminating observation: the next completed 4h bar's CLOSE relative to PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00
+interpretation I-alt (alternative-monitoring, [research-hypothesis]): materially different alternative: the down structure is exhausted and price develops an active up structure from the current boundary
+    opposed : SF-DIR-analysis-v1-77
+    alternative: continuation of the down structure (I-primary)
+    next discriminating observation: the next completed 4h leg's direction
+forecast FC-analysis-v1-0001 v1 [already_observed, observed_before_record=True]
+    if: close-based violation of PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00 (level 122335) on the up side  then: interpretation I-primary LOSES SUPPORT (SP-04: the falsifier reference is violated; the interpretation's status changes, not its wording)
+reference: {"status": "selected", "selected": "PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00", "role": "origin-of-last-confirmed-leg", "selection_task": "T-S1", "selection_status": "SELECTED", "selection_evidence": [{"name": "side", "class": "F", "value": "high", "source_ref": "F:candidate", "detail": "turning-point side"}, {"name": "level", "class": "F", "value": 122335.16, "source_ref": "F:candidate", "detail": "declared representation level"}, {"name": "knowable", "class": "F", "value": {"knowable_bar": 66, "knowable_time": "2025-08-12 04:00:00+00:00"}, "source_ref": "R:SP-01", "detail": "knowable at or before the decision"}, {"name": "status_at_decision", "class": "F", "value": "confirmed", "source_ref": "R:SP-13", "detail": "append-only status history (audit D3)"}, {"name": "leg_role", "class": "F", "value": ["C:F-K(k=5)|leg2025-08-11T08:00:00+00:00-2025-08-12T00:00:00+00:00"], "source_ref": "R:SP-14", "detail": "endpoint of these legs"}, {"name": "gate_facts", "class": "F", "value": {"confirmed": true, "knowable_at_decision": true, "in_view": true}, "source_ref": "R:SP-01/R:SP-13/R:SP-02", "detail": "survived the kernel's existing eligibility gates"}], "interpretations": ["I-primary", "I-alt"]}
+next awaited observation: the next completed 4h leg's direction
+position status: absent (no authoritative position feed was supplied; no position is inferred from price structure)
+selection_quality = NOT_ESTABLISHED
+unresolved: unavailable evidence: frame:1h rows after 2025-08-14 00:00:00+00:00 — future: rows completing after the as-of boundary are unavailable by construction (availability = completion time)
+unresolved: unavailable evidence: frame:15m rows after 2025-08-14 00:00:00+00:00 — future: rows completing after the as-of boundary are unavailable by construction (availability = completion time)

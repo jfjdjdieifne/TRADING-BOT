@@ -1,0 +1,65 @@
+{
+ "as_of": "2025-08-14 04:00:00+00:00",
+ "cursor": 18960,
+ "data_capabilities": {
+  "individual_trades": {
+   "detail": "no per-trade records in the input; tick paths are not reconstructible",
+   "kind": "missing",
+   "status": "unavailable"
+  },
+  "live_market_feed": {
+   "detail": "no live read-only data adapter exists in this repository; only replayed streams are provided",
+   "kind": "missing-adapter",
+   "status": "unavailable"
+  },
+  "ohlc_1m": {
+   "detail": "1-minute OHLC bars (timestamp = bucket start, datetime_utc column), verified mirror of parshant231234-eng/BTCUSDT-Historical-Data@27c9be70",
+   "kind": "direct-observation",
+   "status": "available"
+  },
+  "open_position": {
+   "detail": "no authoritative position feed was supplied; no position is inferred from price",
+   "kind": "authoritative-source-required",
+   "status": "absent"
+  },
+  "order_book": {
+   "detail": "no order-book data in the input: resting orders, their size, participant identity and intent CANNOT be established; a prior high/low is at most a source-supported reference for POTENTIAL liquidity",
+   "kind": "missing",
+   "status": "unavailable"
+  },
+  "reported_volume": {
+   "detail": "volume / quote_volume columns: REPORTED aggregates; no inference of trade direction or participant",
+   "kind": "reported-aggregate",
+   "status": "available"
+  },
+  "trade_count_taker_aggregates": {
+   "detail": "trade_count (a COUNT), taker_buy_volume, taker_buy_quote_volume: aggregates only",
+   "kind": "reported-aggregate",
+   "status": "available"
+  }
+ },
+ "lifecycle_state": "INVALIDATED",
+ "live_feed_status": {
+  "adapter": null,
+  "exists": false,
+  "missing": "a live read-only market data adapter (exchange/API client) is NOT present; LiveFeedAdapter below is an interface contract only \u2014 this module never claims live-market monitoring",
+  "tested": false
+ },
+ "selection_quality": "NOT_ESTABLISHED",
+ "steps": [
+  {
+   "accepted_observations": 18961,
+   "analysis_id": "AN-9f5d9cfb4329",
+   "analysis_version": 79,
+   "as_of": null,
+   "changes": [],
+   "lifecycle_state": "INVALIDATED",
+   "material_change": false,
+   "no_revision_reason": "no completed task-scale bar closed at this observation: incomplete bars are never used and no completed-bar fact changed",
+   "observation_time": "2025-08-14 04:00:00+00:00",
+   "sequence_notes": [],
+   "step": 18961,
+   "trigger": "observation"
+  }
+ ]
+}

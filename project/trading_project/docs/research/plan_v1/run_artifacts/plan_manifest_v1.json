@@ -1,0 +1,103 @@
+{
+  "artifact": "contextual-trade-plan-layer-v1",
+  "claims": {
+    "components": "entry/objective = declared research configuration; invalidation = engineering interpretation of project falsifier semantics; the ICT OB entry technique is source-stated but NOT implemented (G-OB-P not runnable: P-N/P-W unset; no owner policy; none invented)",
+    "identity": "NOT Michael Huddleston; no exact replication, no accuracy or profitability claim",
+    "outcomes": "hypothetical plan mechanics only \u2014 not profits",
+    "plans": "hypothetical analytical records \u2014 NOT orders; no execution connectivity exists"
+  },
+  "config": {
+    "episode_horizon_bars": 24,
+    "k": 5,
+    "plan_states": [
+      "MONITORING",
+      "CONDITION_OBSERVED",
+      "HYPOTHETICAL_ENTRY_MET",
+      "INVALIDATED",
+      "MISSED",
+      "NO_JUSTIFIED_PLAN"
+    ],
+    "task_scale": "4h",
+    "train_fraction": 0.6666666666666666
+  },
+  "plan_summary": {
+    "final_states": {
+      "CONDITION_OBSERVED": 6,
+      "HYPOTHETICAL_ENTRY_MET": 6,
+      "INVALIDATED": 20
+    },
+    "hypothetical_outcomes": {
+      "invalidated_after_entry": 1,
+      "invalidated_before_entry": 19,
+      "missed": 0,
+      "objective_before_invalidation": 5,
+      "open_at_run_end": 7
+    },
+    "n_plans": 32,
+    "note": "hypothetical plan MECHANICS only: 'objective' means one completed confirmed structural leg \u2014 NOT a profit, NOT a return; losses, misses, invalidations and open cases are all reported; nothing here is trained on wins"
+  },
+  "provenance": {
+    "dataset_commit": "27c9be705ac9280248672c895082c057b979ebff",
+    "dataset_mirror": "parshant231234-eng/BTCUSDT-Historical-Data @27c9be705ac9280248672c895082c057b979ebff",
+    "dependency_versions": {
+      "numpy": "1.26.4",
+      "pandas": "2.2.3",
+      "pytest": "8.3.5",
+      "python": "3.11.2",
+      "tzdata": "2026.6"
+    },
+    "expected_sha256": {
+      "BTCUSDT_1m_2025-08.csv": "15d26d2374bce8804e25012ff76e5fad976633a2fde843ffb0f487e1c90a0cf4",
+      "BTCUSDT_1m_2025-09.csv": "e1d5c8f350d83df866ff36c3b4d74f7e5b383db07cde7bca0ee1f200d7a48979"
+    },
+    "final_source_commit": "750d99d00229cc9957c5f3f0828b2fef8d30939c",
+    "hashes_match_expected": {
+      "BTCUSDT_1m_2025-08.csv": true,
+      "BTCUSDT_1m_2025-09.csv": true
+    },
+    "input_sha256": {
+      "BTCUSDT_1m_2025-08.csv": "15d26d2374bce8804e25012ff76e5fad976633a2fde843ffb0f487e1c90a0cf4",
+      "BTCUSDT_1m_2025-09.csv": "e1d5c8f350d83df866ff36c3b4d74f7e5b383db07cde7bca0ee1f200d7a48979"
+    },
+    "sealed_information_time_sha256": "72b03ca6d2333080e0df6dc18b1928147e877b41175f132c7bf08eb4e4d74ace",
+    "source_material": {
+      "examples": [
+        "SRC-EX-01-OB-ENTRY-STOP",
+        "SRC-EX-02-INVALIDATION-GAP",
+        "SRC-EX-03-NO-TARGET-IN-VERIFIED-TEXT"
+      ],
+      "pinned_knowledge": "jfjdjdieifne/test@6c8bf6fd10e9581322849485d175e825cea5a27f",
+      "source_commit_note": "the pinned repository's default branch has moved; this path reads the pinned commit 6c8bf6fd only"
+    }
+  },
+  "run": {
+    "from": "2025-08-01 00:00:00+00:00",
+    "n_boundaries": 60,
+    "run_context": "historical-replay",
+    "to": "2025-09-30 00:00:00+00:00"
+  },
+  "selection_quality": "NOT_ESTABLISHED",
+  "source_agreement": {
+    "rows": [
+      {
+        "component": "entry",
+        "plan_position": "the first completed task-scale bar whose CLOSE is strictly beyond the last confirmed leg's END extreme in the leg's direction (SP-03 close binding of the leg-end reference)",
+        "source_position": "SRC-EX-01: ICT entry technique = trade away from the OB then return to its high (directly-stated)",
+        "verdict": "differs (engine uses the scenario's discriminating binding; the OB-return technique is NOT implemented \u2014 G-OB-P not runnable: P-N/P-W unset in the foundation and no owner policy exists)"
+      },
+      {
+        "component": "invalidation",
+        "plan_position": "the first completed task-scale bar whose CLOSE is strictly beyond the falsifier reference level on its falsifying side (SP-03 close violation)",
+        "source_position": "SRC-EX-01 stop at the OB low (directly-stated); SRC-EX-02: ICT-primary invalidation-by-close NOT in primary text (P-K)",
+        "verdict": "partially aligned (stop-at-structural-extreme concept present in source; the close-based falsifier operationalization is engineering/community-influenced, not ICT-primary)"
+      },
+      {
+        "component": "objective",
+        "plan_position": "one completed, causally confirmed task-scale F-K leg in the scenario direction whose knowable time is after the entry bar",
+        "source_position": "SRC-EX-03: no target definition in verified primary text; liquidity target explicitly not selectable",
+        "verdict": "not stated in verified material (declared research configuration used; identified as such)"
+      }
+    ],
+    "scope": "definition-level agreement only; NOT a performance or accuracy claim"
+  }
+}

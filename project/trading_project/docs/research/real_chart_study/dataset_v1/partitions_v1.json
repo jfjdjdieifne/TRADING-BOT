@@ -1,0 +1,59 @@
+{
+  "artifact": "partitions_v1",
+  "dataset_id": "ICT_CHART_APPLICATION_LEARNING_DATASET_V1",
+  "generated_utc": "2026-10-11",
+  "design_principle": "Split by SOURCE FAMILY and by CHRONOLOGICAL PERIOD. Development material is older and mentorship/journal-2025 based; evaluation material is a chronological holdout (2026) from different authors. No lesson, trade, or decision cycle contributes records to both partitions.",
+  "partitions": {
+    "DEV": {
+      "purpose": "Learning / development: rich contextual-selection material with explicit alternatives and decision-time availability.",
+      "record_ids": [
+        "RCA-2022-EP3-001",
+        "RCA-2022-EP3-002",
+        "RCA-2022-EP3-EP12-003",
+        "RCA-2022-EP3-004",
+        "RCA-2022-EP3-005",
+        "RCA-2024-SEP16-006",
+        "RCA-2025-SEP25-SXM-007",
+        "RCA-2025-SEP25-SXM-008"
+      ],
+      "sources": [
+        "ICT official 2022 mentorship (Ep.3, Ep.12) via youtube + notes layer",
+        "ICT 2024 live lesson via community notes",
+        "SXM journal (ictsharks forum), 2025-09"
+      ],
+      "period": "2022-01 .. 2025-09"
+    },
+    "EVAL": {
+      "purpose": "Evaluation / chronological holdout: distinct authors, 2026 period, post-dates every DEV record. Includes both positive selection acts and documented management/selection deviations.",
+      "record_ids": [
+        "RCA-2026-APR13-MARCUS-009",
+        "RCA-2026-APR14-MARCUS-010",
+        "RCA-2026-JUN30-SXM-011"
+      ],
+      "sources": [
+        "Marcus journal (ictsharks forum), 2026-04",
+        "SXM journal 2026-06 notes"
+      ],
+      "period": "2026-04 .. 2026-06"
+    }
+  },
+  "near_duplicate_policy": {
+    "rules": [
+      "All five Ep.3-derived records share one lesson/chart-day and stay together in DEV (they encode different element types / alternatives of the same selection event — they are facets, not duplicates).",
+      "SXM-2025-09-25 posts -007 and -008 are one decision cycle (analysis + trade log) and stay together in DEV.",
+      "Marcus 2026-04-13 / 2026-04-14 are consecutive-day same-template logs and stay together in EVAL.",
+      "No record appears in both partitions; no source author spans both partitions except SXM, and SXM's records are split by period (2025 in DEV, 2026 notes in EVAL) — the 2026 notes are a different content type (principles, not trades), so they are not near-duplicates of the 2025 trade records."
+    ],
+    "verification": "Record-level dedupe check performed at dataset assembly: 11 unique record_ids; no price-coordinate pair repeated across partitions for the same trade."
+  },
+  "evaluability_by_partition": {
+    "DEV": {"genuinely_executable": ["RCA-2025-SEP25-SXM-007", "RCA-2025-SEP25-SXM-008"], "not_executable": ["RCA-2022-EP3-001", "RCA-2022-EP3-002", "RCA-2022-EP3-EP12-003", "RCA-2022-EP3-004", "RCA-2022-EP3-005", "RCA-2024-SEP16-006"]},
+    "EVAL": {"partially_executable": ["RCA-2026-APR13-MARCUS-009", "RCA-2026-APR14-MARCUS-010"], "not_executable": ["RCA-2026-JUN30-SXM-011"]}
+  },
+  "usage_rules": [
+    "DEV may be used to fit/choose selection logic; EVAL must not be used to tune anything in this V1 (it is the honest default test set once a selection model exists).",
+    "Both partitions carry the same label contract: the human-selected candidate is the SOURCE'S task-correct answer for its stated act — never 'the true/best element'.",
+    "Outcome fields (Win/BEP/Profit) are context only and must never be used as labels.",
+    "Extraction-coverage denominators count only coordinate-bearing records (all except RCA-2026-JUN30-SXM-011)."
+  ]
+}

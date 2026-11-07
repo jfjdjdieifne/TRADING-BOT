@@ -1,0 +1,57 @@
+{
+  "artifact": "contextual-market-analysis-v1",
+  "claims": {
+    "engine_identity": "analytical lifecycle over existing approved components; NOT Michael Huddleston; no accuracy claim",
+    "methodological_direction": "Michael Huddleston's publicly documented work; only verified material is attributed"
+  },
+  "config": {
+    "fine_scale": "1h",
+    "finest_scale": "15m",
+    "instrument": "BTCUSDT",
+    "k": 5,
+    "policy_id": "P-ORIGIN-RESEARCH",
+    "policy_kind": "research_configuration (NOT owner-approved)",
+    "role": "origin-of-last-confirmed-leg",
+    "task_scale": "4h"
+  },
+  "provenance": {
+    "dataset_commit": "27c9be705ac9280248672c895082c057b979ebff",
+    "dataset_mirror": "parshant231234-eng/BTCUSDT-Historical-Data @27c9be705ac9280248672c895082c057b979ebff",
+    "dependency_versions": {
+      "numpy": "1.26.4",
+      "pandas": "2.2.3",
+      "pytest": "8.3.5",
+      "python": "3.11.2",
+      "tzdata": "2026.6"
+    },
+    "expected_sha256": {
+      "BTCUSDT_1m_2025-08.csv": "15d26d2374bce8804e25012ff76e5fad976633a2fde843ffb0f487e1c90a0cf4",
+      "BTCUSDT_1m_2025-09.csv": "e1d5c8f350d83df866ff36c3b4d74f7e5b383db07cde7bca0ee1f200d7a48979"
+    },
+    "final_source_commit": "f1702e9ccbee630d0564ab21bf3421009d8f67ad",
+    "hashes_match_expected": {
+      "BTCUSDT_1m_2025-08.csv": true,
+      "BTCUSDT_1m_2025-09.csv": true
+    },
+    "input_sha256": {
+      "BTCUSDT_1m_2025-08.csv": "15d26d2374bce8804e25012ff76e5fad976633a2fde843ffb0f487e1c90a0cf4",
+      "BTCUSDT_1m_2025-09.csv": "e1d5c8f350d83df866ff36c3b4d74f7e5b383db07cde7bca0ee1f200d7a48979"
+    },
+    "sealed_information_time_sha256": "72b03ca6d2333080e0df6dc18b1928147e877b41175f132c7bf08eb4e4d74ace"
+  },
+  "run": {
+    "boundaries": 60,
+    "elapsed_s": 11.1,
+    "from": "2025-08-01 00:00:00+00:00",
+    "mode": "replay",
+    "snapshot": "/home/user/TRADING-BOT/project/trading_project/docs/research/analysis_v1/run_artifacts/analysis_snapshot_v1.json",
+    "states": {
+      "CONDITION_ALREADY_OBSERVED": 16,
+      "INSUFFICIENT_CONTEXT": 4,
+      "INVALIDATED": 9,
+      "PENDING_CONDITION": 31
+    },
+    "to": "2025-09-30 00:00:00+00:00"
+  },
+  "selection_quality": "NOT_ESTABLISHED"
+}

@@ -1,0 +1,36 @@
+{
+ "pause_at": "2025-08-07 16:00:00+00:00",
+ "task": "RT-REF-REVIEW",
+ "conclusion": {
+  "status": "EVIDENCE_PREFERRED",
+  "preferred": "PSC:F-K(k=5)|high@2025-08-04T20:00:00+00:00",
+  "reasons": [
+   "an interaction is actually observed at this reference and at no other (for the declared review task)"
+  ],
+  "discriminating_evidence": [
+   "interaction_observed"
+  ],
+  "alternatives": [
+   {
+    "candidate_id": "PSC:F-K(k=5)|low@2025-08-03T04:00:00+00:00",
+    "why_not_preferred": "no interaction observed yet (still monitored)"
+   },
+   {
+    "candidate_id": "PSC:F-K(k=5)|low@2025-08-05T16:00:00+00:00",
+    "why_not_preferred": "no interaction observed yet (still monitored)"
+   }
+  ]
+ },
+ "comparison": {
+  "rule": "candidates are COMPARED by observed interaction (single declared criterion; engineering choice)",
+  "candidates_before_filtering": 3,
+  "by_support_count": {
+   "1": 1,
+   "0": 2
+  },
+  "materially_relevant_rule": "an interaction is recorded (categorical \u2014 no numerical threshold)",
+  "candidates_after_filtering": 1,
+  "removed_from_record": 0,
+  "resource_limit": "none enforced; every confirmed reference is evaluated"
+ }
+}

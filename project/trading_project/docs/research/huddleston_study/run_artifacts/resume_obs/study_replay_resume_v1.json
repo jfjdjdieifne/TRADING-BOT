@@ -1,0 +1,4356 @@
+{
+ "as_of": "2025-08-14 00:00:00+00:00",
+ "cursor": 18724,
+ "data_capabilities": {
+  "individual_trades": {
+   "detail": "no per-trade records in the input; tick paths are not reconstructible",
+   "kind": "missing",
+   "status": "unavailable"
+  },
+  "live_market_feed": {
+   "detail": "no live read-only data adapter exists in this repository; only replayed streams are provided",
+   "kind": "missing-adapter",
+   "status": "unavailable"
+  },
+  "ohlc_1m": {
+   "detail": "1-minute OHLC bars (timestamp = bucket start, datetime_utc column), verified mirror of parshant231234-eng/BTCUSDT-Historical-Data@27c9be70",
+   "kind": "direct-observation",
+   "status": "available"
+  },
+  "open_position": {
+   "detail": "no authoritative position feed was supplied; no position is inferred from price",
+   "kind": "authoritative-source-required",
+   "status": "absent"
+  },
+  "order_book": {
+   "detail": "no order-book data in the input: resting orders, their size, participant identity and intent CANNOT be established; a prior high/low is at most a source-supported reference for POTENTIAL liquidity",
+   "kind": "missing",
+   "status": "unavailable"
+  },
+  "reported_volume": {
+   "detail": "volume / quote_volume columns: REPORTED aggregates; no inference of trade direction or participant",
+   "kind": "reported-aggregate",
+   "status": "available"
+  },
+  "trade_count_taker_aggregates": {
+   "detail": "trade_count (a COUNT), taker_buy_volume, taker_buy_quote_volume: aggregates only",
+   "kind": "reported-aggregate",
+   "status": "available"
+  }
+ },
+ "lifecycle_state": "INVALIDATED",
+ "live_feed_status": {
+  "adapter": null,
+  "exists": false,
+  "missing": "a live read-only market data adapter (exchange/API client) is NOT present; LiveFeedAdapter below is an interface contract only \u2014 this module never claims live-market monitoring",
+  "tested": false
+ },
+ "relationship_register": [
+  {
+   "claim_class": "ENGINEERING_INTERPRETATION",
+   "engine_interpretation": [
+    "state machine CANDIDATE/AWAITING_CONFIRMATION/CONFIRMED/INVALIDATED/INSUFFICIENT_INFORMATION with ledger-recorded transitions",
+    "role assignment is evidence-evaluated for a declared task; a role is recorded only when positive evidence supports it; opposition alone never establishes a reaction role and alignment alone never establishes a trend role",
+    "sequence separation with UNKNOWN ordering on unresolvable same-bar events; ambiguity is scoped to its own bar and never permanently freezes the candidate"
+   ],
+   "not_established": [
+    "'near support' operational definition (source leaves open; NO distance/percentage/candle-count rule is used or claimed \u2014 the exact-level trade relation is an ENGINEERING choice, not Michael's definition)",
+    "the region scope of 'the lowest down close candle' (taken as since the reference occurrence \u2014 engineering choice)",
+    "any universal entry, stop, target, or profitability"
+   ],
+   "relationship_id": "R1-OB-CANDIDATE-LIFECYCLE",
+   "source_examples": [
+    "OB16-A"
+   ],
+   "source_support": [
+    "OB16-A explicit_identification (DIRECT_STATEMENT): slide specifies bullish candidate down-close bar near support, validation by a later bar trading through its high, possible return",
+    "OB16-A short_quotes (slide text, visually checked (on-screen 01:52; ellipsis for omitted words)): 'when the high of the lowest down close candle ... is traded through'",
+    "OB16-A short_quotes (approximate attributed ASR wording, NOT audited by ear (local faster-whisper; timings approximate), ~03:21): 'We don't know that yet until at a later time' \u2014 approximate attributed wording, not verbatim",
+    "OB16-A change (DIRECT_STATEMENT): bearish-looking block is NOT a sell cue under bullish higher-frame context"
+   ]
+  },
+  {
+   "claim_class": "ENGINEERING_INTERPRETATION",
+   "engine_interpretation": [
+    "time provenance on every candidate (timestamp, session/timezone, bar convention, timeframe)",
+    "revocation recorded as a CORRECTION with the original selection preserved, never as a fulfilled prediction"
+   ],
+   "not_established": [
+    "the 9:30/9:31 convention beyond its session scope (engine runs without it)"
+   ],
+   "relationship_id": "R2-TIME-PROVENANCE-REVOCABLE-SELECTION",
+   "source_examples": [
+    "FVG24-A"
+   ],
+   "source_support": [
+    "FVG24-A explicit_identification (DIRECT_STATEMENT): the 9:30 candle cannot be the first qualifying gap under his stated convention; first candidate 9:31+",
+    "FVG24-A short_quotes (approximate attributed ASR wording, NOT audited by ear (local faster-whisper; timings approximate), ~75:02/75:12): 'You can't be on your 9.30 candle...'; 'I was incorrect by saying all that stuff' \u2014 approximate attributed wording, not verbatim"
+   ]
+  },
+  {
+   "claim_class": "ENGINEERING_INTERPRETATION",
+   "engine_interpretation": [
+    "failure-reference crossing SUSPENDS the hypothesis and requests more information; no automatic opposite hypothesis is generated"
+   ],
+   "not_established": [
+    "that the speaker's earlier forecast was independently pre-registered (speaker assertion)"
+   ],
+   "relationship_id": "R3-HYPOTHESIS-SUSPENSION",
+   "source_examples": [
+    "E12-A"
+   ],
+   "source_support": [
+    "E12-A short_quotes (approximate attributed ASR wording, NOT audited by ear (local faster-whisper; timings approximate), ~11:31/11:39): 'if it goes above that then I'm probably wrong in my analysis'; 'I demand more information' \u2014 approximate attributed wording, not verbatim",
+    "E12-A change (PARAPHRASE): pause/reassess rather than mechanically reverse"
+   ]
+  }
+ ],
+ "selection_quality": "NOT_ESTABLISHED",
+ "steps": [
+  {
+   "accepted_observations": 18721,
+   "analysis_id": "AN-9f5d9cfb4329",
+   "analysis_version": 78,
+   "as_of": null,
+   "changes": [],
+   "lifecycle_state": "INVALIDATED",
+   "material_change": false,
+   "no_revision_reason": "no completed task-scale bar closed at this observation: incomplete bars are never used and no completed-bar fact changed",
+   "observation_time": "2025-08-14 00:00:00+00:00",
+   "sequence_notes": [],
+   "step": 18721,
+   "trigger": "observation"
+  },
+  {
+   "accepted_observations": 18722,
+   "analysis_id": "AN-9f5d9cfb4329",
+   "analysis_version": 78,
+   "as_of": null,
+   "changes": [],
+   "lifecycle_state": "INVALIDATED",
+   "material_change": false,
+   "no_revision_reason": "no completed task-scale bar closed at this observation: incomplete bars are never used and no completed-bar fact changed",
+   "observation_time": "2025-08-14 00:01:00+00:00",
+   "sequence_notes": [],
+   "step": 18722,
+   "trigger": "observation"
+  },
+  {
+   "accepted_observations": 18723,
+   "analysis_id": "AN-9f5d9cfb4329",
+   "analysis_version": 78,
+   "as_of": null,
+   "changes": [],
+   "lifecycle_state": "INVALIDATED",
+   "material_change": false,
+   "no_revision_reason": "no completed task-scale bar closed at this observation: incomplete bars are never used and no completed-bar fact changed",
+   "observation_time": "2025-08-14 00:02:00+00:00",
+   "sequence_notes": [],
+   "step": 18723,
+   "trigger": "observation"
+  },
+  {
+   "accepted_observations": 18724,
+   "analysis_id": "AN-9f5d9cfb4329",
+   "analysis_version": 78,
+   "as_of": null,
+   "changes": [],
+   "lifecycle_state": "INVALIDATED",
+   "material_change": false,
+   "no_revision_reason": "no completed task-scale bar closed at this observation: incomplete bars are never used and no completed-bar fact changed",
+   "observation_time": "2025-08-14 00:03:00+00:00",
+   "sequence_notes": [],
+   "step": 18724,
+   "trigger": "observation"
+  },
+  {
+   "accepted_observations": 18725,
+   "analysis_id": "AN-9f5d9cfb4329",
+   "analysis_version": 78,
+   "as_of": null,
+   "changes": [],
+   "lifecycle_state": "INVALIDATED",
+   "material_change": false,
+   "no_revision_reason": "no completed task-scale bar closed at this observation: incomplete bars are never used and no completed-bar fact changed",
+   "observation_time": "2025-08-14 00:04:00+00:00",
+   "sequence_notes": [],
+   "step": 18725,
+   "trigger": "observation"
+  }
+ ],
+ "study_ledger_entries": [],
+ "study_state": {
+  "cand_seq": 6,
+  "candidates": [
+   {
+    "ambiguity_interval": null,
+    "ambiguous_bar": null,
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_index": 38,
+    "bar_time": "2025-08-07 12:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0001",
+    "close": 116519.53,
+    "context_ref_id": "PSC:F-K(k=5)|high@2025-08-04T20:00:00+00:00",
+    "context_ref_level": 115720.0,
+    "direction": "bearish",
+    "eligibility": {
+     "definition": "declared research definition (ENGINEERING_INTERPRETATION, NOT Michael's definition): a up-close bar that is the extreme high among its family since the contextual reference's occurrence bar AND whose reported range CONTAINS the reference level (low <= level <= high). NO percentage, NO candle count, NO hidden threshold.",
+     "known_at_selection": [
+      "context ref PSC:F-K(k=5)|high@2025-08-04T20:00:00+00:00 confirmed at its knowable bar (before this bar)",
+      "bar OHLC at 2025-08-07 12:00:00+00:00"
+     ],
+     "level_relation": {
+      "close_side_of_level": "closed_at_or_above_level",
+      "does_not_establish": [
+       "the intrabar direction of the touch",
+       "the intrabar sequence of events",
+       "any orders/liquidity at the level"
+      ],
+      "establishes": "the reference level lies within this bar's reported range",
+      "kind": "range_contains_level",
+      "level_entered_range_at_this_bar": true,
+      "previous_bar_range_contains_level": false
+     },
+     "source_caveat": "'near support' is NOT operationally resolved (corpus marks the wording ambiguous); this relation does not claim to be the speaker's definition and is not called 'traded through'"
+    },
+    "events": [
+     {
+      "at": "2025-08-07 12:00:00+00:00",
+      "at_bar": 38,
+      "evidence": {
+       "bar": 38,
+       "ohlc": [
+        114787.99,
+        116828.93,
+        114787.98,
+        116519.53
+       ]
+      },
+      "from": "CANDIDATE",
+      "kind": "state_transition",
+      "layer": "DERIVATION",
+      "reason": "shape matched the declared research definition; later-evidence event not yet observed",
+      "to": "AWAITING_CONFIRMATION"
+     },
+     {
+      "at": "2025-08-07 20:00:00+00:00",
+      "bar": 40,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-08 00:00:00+00:00",
+      "bar": 41,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-08 04:00:00+00:00",
+      "bar": 42,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-08 08:00:00+00:00",
+      "bar": 43,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-08 12:00:00+00:00",
+      "bar": 44,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-08 16:00:00+00:00",
+      "bar": 45,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-08 20:00:00+00:00",
+      "bar": 46,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-09 00:00:00+00:00",
+      "bar": 47,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-09 08:00:00+00:00",
+      "bar": 49,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-09 12:00:00+00:00",
+      "bar": 50,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-09 16:00:00+00:00",
+      "bar": 51,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-09 20:00:00+00:00",
+      "bar": 52,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-10 00:00:00+00:00",
+      "bar": 53,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-10 04:00:00+00:00",
+      "bar": 54,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-10 08:00:00+00:00",
+      "bar": 55,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-10 12:00:00+00:00",
+      "bar": 56,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-10 16:00:00+00:00",
+      "bar": 57,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-10 20:00:00+00:00",
+      "bar": 58,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-11 00:00:00+00:00",
+      "bar": 59,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-11 04:00:00+00:00",
+      "bar": 60,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-11 08:00:00+00:00",
+      "bar": 61,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-11 12:00:00+00:00",
+      "bar": 62,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-11 16:00:00+00:00",
+      "bar": 63,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-11 20:00:00+00:00",
+      "bar": 64,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-12 00:00:00+00:00",
+      "bar": 65,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-12 04:00:00+00:00",
+      "bar": 66,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-12 08:00:00+00:00",
+      "bar": 67,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-12 12:00:00+00:00",
+      "bar": 68,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-12 16:00:00+00:00",
+      "bar": 69,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-12 20:00:00+00:00",
+      "bar": 70,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-13 00:00:00+00:00",
+      "bar": 71,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-13 04:00:00+00:00",
+      "bar": 72,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-13 08:00:00+00:00",
+      "bar": 73,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-13 12:00:00+00:00",
+      "bar": 74,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-13 16:00:00+00:00",
+      "bar": 75,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-13 20:00:00+00:00",
+      "bar": 76,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-14 00:00:00+00:00",
+      "bar": 77,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     }
+    ],
+    "fine_touches": {},
+    "high": 116828.93,
+    "low": 114787.98,
+    "open": 114787.99,
+    "ordering": null,
+    "role": "UNDETERMINED",
+    "role_assignments": [
+     {
+      "alternatives": [],
+      "candidate_direction": "bearish",
+      "discriminating_evidence_needed": [
+       "the declared confirmation event: a later bar trading through the candidate extreme"
+      ],
+      "evidence_used": {
+       "confirmation_event": {
+        "ref": null,
+        "value": false
+       },
+       "hf_established": {
+        "ref": "2025-08-06 12:00:00+00:00",
+        "value": true
+       },
+       "reaction_observed": {
+        "ref": null,
+        "value": false
+       }
+      },
+      "hf_trend": "down",
+      "reasons": [
+       "trend role NOT yet supported: direction agrees with the higher-frame context but the declared confirmation event is not observed ('we don't know that yet until at a later time' \u2014 approximate ASR wording)"
+      ],
+      "role": "UNDETERMINED",
+      "supported": false,
+      "task": "trend-continuation",
+      "would_change": [
+       "the confirmation event (or its documented absence) settles the trend role"
+      ]
+     },
+     {
+      "alternatives": [
+       "REACTION_PAUSE_REFERENCE: supported by an observed reaction; possible alternative role"
+      ],
+      "candidate_direction": "bearish",
+      "discriminating_evidence_needed": [
+       "the declared confirmation event: a later bar trading through the candidate extreme"
+      ],
+      "evidence_used": {
+       "confirmation_event": {
+        "ref": null,
+        "value": false
+       },
+       "hf_established": {
+        "ref": "2025-08-06 12:00:00+00:00",
+        "value": true
+       },
+       "reaction_observed": {
+        "ref": "2025-08-07 20:00:00+00:00",
+        "value": true
+       }
+      },
+      "hf_trend": "down",
+      "reasons": [
+       "trend role NOT yet supported: direction agrees with the higher-frame context but the declared confirmation event is not observed ('we don't know that yet until at a later time' \u2014 approximate ASR wording)"
+      ],
+      "role": "UNDETERMINED",
+      "supported": false,
+      "task": "trend-continuation",
+      "would_change": [
+       "the confirmation event (or its documented absence) settles the trend role"
+      ]
+     },
+     {
+      "alternatives": [
+       "TREND_CONTINUATION_REFERENCE: excluded for this task by the higher-frame context"
+      ],
+      "candidate_direction": "bearish",
+      "evidence_used": {
+       "confirmation_event": {
+        "ref": null,
+        "value": false
+       },
+       "hf_established": {
+        "ref": "2025-08-09 00:00:00+00:00",
+        "value": true
+       },
+       "reaction_observed": {
+        "ref": "2025-08-07 20:00:00+00:00",
+        "value": true
+       }
+      },
+      "hf_trend": "up",
+      "reasons": [
+       "trend role NOT supported: the candidate direction opposes the established higher-frame context (OB16-A 25:00-25:43) \u2014 this does NOT reject the candidate itself",
+       "reaction/pause role SUPPORTED by evidence: a reaction at the candidate area is observed (not inferred from opposition)"
+      ],
+      "role": "REACTION_PAUSE_REFERENCE",
+      "supported": true,
+      "task": "trend-continuation",
+      "would_change": [
+       "a higher-frame structure change re-opens the trend role; an observed reaction settles the reaction role"
+      ]
+     },
+     {
+      "alternatives": [
+       "REACTION_PAUSE_REFERENCE: supported by an observed reaction; possible alternative role"
+      ],
+      "candidate_direction": "bearish",
+      "discriminating_evidence_needed": [
+       "the declared confirmation event: a later bar trading through the candidate extreme"
+      ],
+      "evidence_used": {
+       "confirmation_event": {
+        "ref": null,
+        "value": false
+       },
+       "hf_established": {
+        "ref": "2025-08-12 20:00:00+00:00",
+        "value": true
+       },
+       "reaction_observed": {
+        "ref": "2025-08-07 20:00:00+00:00",
+        "value": true
+       }
+      },
+      "hf_trend": "down",
+      "reasons": [
+       "trend role NOT yet supported: direction agrees with the higher-frame context but the declared confirmation event is not observed ('we don't know that yet until at a later time' \u2014 approximate ASR wording)"
+      ],
+      "role": "UNDETERMINED",
+      "supported": false,
+      "task": "trend-continuation",
+      "would_change": [
+       "the confirmation event (or its documented absence) settles the trend role"
+      ]
+     }
+    ],
+    "scan_floor": 77,
+    "state": "AWAITING_CONFIRMATION",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   {
+    "ambiguity_interval": null,
+    "ambiguous_bar": null,
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_index": 40,
+    "bar_time": "2025-08-07 20:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0002",
+    "close": 117461.98,
+    "context_ref_id": "PSC:F-K(k=5)|high@2025-08-04T20:00:00+00:00",
+    "context_ref_level": 115720.0,
+    "direction": "bearish",
+    "eligibility": {
+     "definition": "declared research definition (ENGINEERING_INTERPRETATION, NOT Michael's definition): a up-close bar that is the extreme high among its family since the contextual reference's occurrence bar AND whose reported range CONTAINS the reference level (low <= level <= high). NO percentage, NO candle count, NO hidden threshold.",
+     "known_at_selection": [
+      "context ref PSC:F-K(k=5)|high@2025-08-04T20:00:00+00:00 confirmed at its knowable bar (before this bar)",
+      "bar OHLC at 2025-08-07 20:00:00+00:00"
+     ],
+     "level_relation": {
+      "close_side_of_level": "closed_at_or_above_level",
+      "does_not_establish": [
+       "the intrabar direction of the touch",
+       "the intrabar sequence of events",
+       "any orders/liquidity at the level"
+      ],
+      "establishes": "the reference level lies within this bar's reported range",
+      "kind": "range_contains_level",
+      "level_entered_range_at_this_bar": true,
+      "previous_bar_range_contains_level": false
+     },
+     "source_caveat": "'near support' is NOT operationally resolved (corpus marks the wording ambiguous); this relation does not claim to be the speaker's definition and is not called 'traded through'"
+    },
+    "events": [
+     {
+      "at": "2025-08-07 20:00:00+00:00",
+      "at_bar": 40,
+      "evidence": {
+       "bar": 40,
+       "ohlc": [
+        116689.8,
+        117520.0,
+        115632.31,
+        117461.98
+       ]
+      },
+      "from": "CANDIDATE",
+      "kind": "state_transition",
+      "layer": "DERIVATION",
+      "reason": "shape matched the declared research definition; later-evidence event not yet observed",
+      "to": "AWAITING_CONFIRMATION"
+     },
+     {
+      "at": "2025-08-08 00:00:00+00:00",
+      "bar": 41,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-08 04:00:00+00:00",
+      "bar": 42,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-09 12:00:00+00:00",
+      "bar": 50,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-10 04:00:00+00:00",
+      "bar": 54,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-10 08:00:00+00:00",
+      "bar": 55,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-10 12:00:00+00:00",
+      "bar": 56,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-10 16:00:00+00:00",
+      "bar": 57,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-10 20:00:00+00:00",
+      "bar": 58,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-11 00:00:00+00:00",
+      "bar": 59,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-11 04:00:00+00:00",
+      "bar": 60,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-11 08:00:00+00:00",
+      "bar": 61,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-11 12:00:00+00:00",
+      "bar": 62,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-11 16:00:00+00:00",
+      "bar": 63,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-11 20:00:00+00:00",
+      "bar": 64,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-12 00:00:00+00:00",
+      "bar": 65,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-12 04:00:00+00:00",
+      "bar": 66,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-12 08:00:00+00:00",
+      "bar": 67,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-12 12:00:00+00:00",
+      "bar": 68,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-12 16:00:00+00:00",
+      "bar": 69,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-12 20:00:00+00:00",
+      "bar": 70,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-13 00:00:00+00:00",
+      "bar": 71,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-13 04:00:00+00:00",
+      "bar": 72,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-13 08:00:00+00:00",
+      "bar": 73,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-13 12:00:00+00:00",
+      "bar": 74,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-13 16:00:00+00:00",
+      "bar": 75,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-13 20:00:00+00:00",
+      "bar": 76,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-14 00:00:00+00:00",
+      "bar": 77,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     }
+    ],
+    "fine_touches": {},
+    "high": 117520.0,
+    "low": 115632.31,
+    "open": 116689.8,
+    "ordering": null,
+    "role": "UNDETERMINED",
+    "role_assignments": [
+     {
+      "alternatives": [],
+      "candidate_direction": "bearish",
+      "discriminating_evidence_needed": [
+       "the declared confirmation event: a later bar trading through the candidate extreme"
+      ],
+      "evidence_used": {
+       "confirmation_event": {
+        "ref": null,
+        "value": false
+       },
+       "hf_established": {
+        "ref": "2025-08-06 12:00:00+00:00",
+        "value": true
+       },
+       "reaction_observed": {
+        "ref": null,
+        "value": false
+       }
+      },
+      "hf_trend": "down",
+      "reasons": [
+       "trend role NOT yet supported: direction agrees with the higher-frame context but the declared confirmation event is not observed ('we don't know that yet until at a later time' \u2014 approximate ASR wording)"
+      ],
+      "role": "UNDETERMINED",
+      "supported": false,
+      "task": "trend-continuation",
+      "would_change": [
+       "the confirmation event (or its documented absence) settles the trend role"
+      ]
+     },
+     {
+      "alternatives": [
+       "REACTION_PAUSE_REFERENCE: supported by an observed reaction; possible alternative role"
+      ],
+      "candidate_direction": "bearish",
+      "discriminating_evidence_needed": [
+       "the declared confirmation event: a later bar trading through the candidate extreme"
+      ],
+      "evidence_used": {
+       "confirmation_event": {
+        "ref": null,
+        "value": false
+       },
+       "hf_established": {
+        "ref": "2025-08-06 12:00:00+00:00",
+        "value": true
+       },
+       "reaction_observed": {
+        "ref": "2025-08-08 00:00:00+00:00",
+        "value": true
+       }
+      },
+      "hf_trend": "down",
+      "reasons": [
+       "trend role NOT yet supported: direction agrees with the higher-frame context but the declared confirmation event is not observed ('we don't know that yet until at a later time' \u2014 approximate ASR wording)"
+      ],
+      "role": "UNDETERMINED",
+      "supported": false,
+      "task": "trend-continuation",
+      "would_change": [
+       "the confirmation event (or its documented absence) settles the trend role"
+      ]
+     },
+     {
+      "alternatives": [
+       "TREND_CONTINUATION_REFERENCE: excluded for this task by the higher-frame context"
+      ],
+      "candidate_direction": "bearish",
+      "evidence_used": {
+       "confirmation_event": {
+        "ref": null,
+        "value": false
+       },
+       "hf_established": {
+        "ref": "2025-08-09 00:00:00+00:00",
+        "value": true
+       },
+       "reaction_observed": {
+        "ref": "2025-08-08 00:00:00+00:00",
+        "value": true
+       }
+      },
+      "hf_trend": "up",
+      "reasons": [
+       "trend role NOT supported: the candidate direction opposes the established higher-frame context (OB16-A 25:00-25:43) \u2014 this does NOT reject the candidate itself",
+       "reaction/pause role SUPPORTED by evidence: a reaction at the candidate area is observed (not inferred from opposition)"
+      ],
+      "role": "REACTION_PAUSE_REFERENCE",
+      "supported": true,
+      "task": "trend-continuation",
+      "would_change": [
+       "a higher-frame structure change re-opens the trend role; an observed reaction settles the reaction role"
+      ]
+     },
+     {
+      "alternatives": [
+       "REACTION_PAUSE_REFERENCE: supported by an observed reaction; possible alternative role"
+      ],
+      "candidate_direction": "bearish",
+      "discriminating_evidence_needed": [
+       "the declared confirmation event: a later bar trading through the candidate extreme"
+      ],
+      "evidence_used": {
+       "confirmation_event": {
+        "ref": null,
+        "value": false
+       },
+       "hf_established": {
+        "ref": "2025-08-12 20:00:00+00:00",
+        "value": true
+       },
+       "reaction_observed": {
+        "ref": "2025-08-08 00:00:00+00:00",
+        "value": true
+       }
+      },
+      "hf_trend": "down",
+      "reasons": [
+       "trend role NOT yet supported: direction agrees with the higher-frame context but the declared confirmation event is not observed ('we don't know that yet until at a later time' \u2014 approximate ASR wording)"
+      ],
+      "role": "UNDETERMINED",
+      "supported": false,
+      "task": "trend-continuation",
+      "would_change": [
+       "the confirmation event (or its documented absence) settles the trend role"
+      ]
+     }
+    ],
+    "scan_floor": 77,
+    "state": "AWAITING_CONFIRMATION",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   {
+    "ambiguity_interval": null,
+    "ambiguous_bar": null,
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_index": 50,
+    "bar_time": "2025-08-09 12:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0003",
+    "close": 117110.0,
+    "context_ref_id": "PSC:F-K(k=5)|high@2025-08-08T04:00:00+00:00",
+    "context_ref_level": 117630.0,
+    "direction": "bearish",
+    "eligibility": {
+     "definition": "declared research definition (ENGINEERING_INTERPRETATION, NOT Michael's definition): a up-close bar that is the extreme high among its family since the contextual reference's occurrence bar AND whose reported range CONTAINS the reference level (low <= level <= high). NO percentage, NO candle count, NO hidden threshold.",
+     "known_at_selection": [
+      "context ref PSC:F-K(k=5)|high@2025-08-08T04:00:00+00:00 confirmed at its knowable bar (before this bar)",
+      "bar OHLC at 2025-08-09 12:00:00+00:00"
+     ],
+     "level_relation": {
+      "close_side_of_level": "closed_below_level",
+      "does_not_establish": [
+       "the intrabar direction of the touch",
+       "the intrabar sequence of events",
+       "any orders/liquidity at the level"
+      ],
+      "establishes": "the reference level lies within this bar's reported range",
+      "kind": "range_contains_level",
+      "level_entered_range_at_this_bar": true,
+      "previous_bar_range_contains_level": false
+     },
+     "source_caveat": "'near support' is NOT operationally resolved (corpus marks the wording ambiguous); this relation does not claim to be the speaker's definition and is not called 'traded through'"
+    },
+    "events": [
+     {
+      "at": "2025-08-09 12:00:00+00:00",
+      "at_bar": 50,
+      "evidence": {
+       "bar": 50,
+       "ohlc": [
+        116756.0,
+        117944.05,
+        116756.0,
+        117110.0
+       ]
+      },
+      "from": "CANDIDATE",
+      "kind": "state_transition",
+      "layer": "DERIVATION",
+      "reason": "shape matched the declared research definition; later-evidence event not yet observed",
+      "to": "AWAITING_CONFIRMATION"
+     },
+     {
+      "at": "2025-08-09 16:00:00+00:00",
+      "at_bar": 51,
+      "evidence": {
+       "bar": 51,
+       "close": 116892.47,
+       "prior_open_ambiguity": null,
+       "rule": "a bar traded through the candidate extreme (declared)"
+      },
+      "from": "AWAITING_CONFIRMATION",
+      "kind": "state_transition",
+      "layer": "DERIVATION",
+      "reason": "declared confirmation event observed (a later bar's reported high exceeds the candidate extreme \u2014 the source's 'is traded through' wording; intrabar sequence not established); recorded at the evidence bar, never back-filled",
+      "to": "CONFIRMED"
+     }
+    ],
+    "fine_touches": {},
+    "high": 117944.05,
+    "low": 116756.0,
+    "open": 116756.0,
+    "ordering": null,
+    "role": "TREND_CONTINUATION_REFERENCE",
+    "role_assignments": [
+     {
+      "alternatives": [
+       "REACTION_PAUSE_REFERENCE: possible but not fact"
+      ],
+      "candidate_direction": "bearish",
+      "discriminating_evidence_needed": [
+       "an observed reaction/revisit at the candidate area (would support a reaction/pause role)",
+       "a higher-frame structure change (would re-open the trend role)"
+      ],
+      "evidence_used": {
+       "confirmation_event": {
+        "ref": null,
+        "value": false
+       },
+       "hf_established": {
+        "ref": "2025-08-09 00:00:00+00:00",
+        "value": true
+       },
+       "reaction_observed": {
+        "ref": null,
+        "value": false
+       }
+      },
+      "hf_trend": "up",
+      "reasons": [
+       "trend role NOT supported: the candidate direction opposes the established higher-frame context (OB16-A 25:00-25:43) \u2014 this does NOT reject the candidate itself",
+       "reaction/pause role NOT established: opposition alone does not make it fact \u2014 no reaction at the area is observed"
+      ],
+      "role": "UNDETERMINED",
+      "supported": false,
+      "task": "trend-continuation",
+      "would_change": [
+       "a higher-frame structure change re-opens the trend role; an observed reaction settles the reaction role"
+      ]
+     },
+     {
+      "alternatives": [
+       "REACTION_PAUSE_REFERENCE: possible but not fact"
+      ],
+      "candidate_direction": "bearish",
+      "discriminating_evidence_needed": [
+       "an observed reaction/revisit at the candidate area (would support a reaction/pause role)",
+       "a higher-frame structure change (would re-open the trend role)"
+      ],
+      "evidence_used": {
+       "confirmation_event": {
+        "ref": "2025-08-09 16:00:00+00:00",
+        "value": true
+       },
+       "hf_established": {
+        "ref": "2025-08-09 00:00:00+00:00",
+        "value": true
+       },
+       "reaction_observed": {
+        "ref": null,
+        "value": false
+       }
+      },
+      "hf_trend": "up",
+      "reasons": [
+       "trend role NOT supported: the candidate direction opposes the established higher-frame context (OB16-A 25:00-25:43) \u2014 this does NOT reject the candidate itself",
+       "reaction/pause role NOT established: opposition alone does not make it fact \u2014 no reaction at the area is observed"
+      ],
+      "role": "UNDETERMINED",
+      "supported": false,
+      "task": "trend-continuation",
+      "would_change": [
+       "a higher-frame structure change re-opens the trend role; an observed reaction settles the reaction role"
+      ]
+     },
+     {
+      "alternatives": [
+       "REACTION_PAUSE_REFERENCE: possible but NOT established (no reaction observed at the area)"
+      ],
+      "candidate_direction": "bearish",
+      "evidence_used": {
+       "confirmation_event": {
+        "ref": "2025-08-09 16:00:00+00:00",
+        "value": true
+       },
+       "hf_established": {
+        "ref": "2025-08-12 20:00:00+00:00",
+        "value": true
+       },
+       "reaction_observed": {
+        "ref": null,
+        "value": false
+       }
+      },
+      "hf_trend": "down",
+      "reasons": [
+       "trend role SUPPORTED by evidence: the candidate direction agrees with the established higher-frame context AND its declared confirmation event is observed"
+      ],
+      "role": "TREND_CONTINUATION_REFERENCE",
+      "supported": true,
+      "task": "trend-continuation",
+      "would_change": [
+       "a higher-frame structure change or a role-relevant event revision re-opens the evaluation"
+      ]
+     }
+    ],
+    "scan_floor": 51,
+    "state": "CONFIRMED",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   {
+    "ambiguity_interval": null,
+    "ambiguous_bar": null,
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_index": 54,
+    "bar_time": "2025-08-10 04:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0004",
+    "close": 118500.0,
+    "context_ref_id": "PSC:F-K(k=5)|high@2025-08-08T04:00:00+00:00",
+    "context_ref_level": 117630.0,
+    "direction": "bearish",
+    "eligibility": {
+     "definition": "declared research definition (ENGINEERING_INTERPRETATION, NOT Michael's definition): a up-close bar that is the extreme high among its family since the contextual reference's occurrence bar AND whose reported range CONTAINS the reference level (low <= level <= high). NO percentage, NO candle count, NO hidden threshold.",
+     "known_at_selection": [
+      "context ref PSC:F-K(k=5)|high@2025-08-08T04:00:00+00:00 confirmed at its knowable bar (before this bar)",
+      "bar OHLC at 2025-08-10 04:00:00+00:00"
+     ],
+     "level_relation": {
+      "close_side_of_level": "closed_at_or_above_level",
+      "does_not_establish": [
+       "the intrabar direction of the touch",
+       "the intrabar sequence of events",
+       "any orders/liquidity at the level"
+      ],
+      "establishes": "the reference level lies within this bar's reported range",
+      "kind": "range_contains_level",
+      "level_entered_range_at_this_bar": true,
+      "previous_bar_range_contains_level": false
+     },
+     "source_caveat": "'near support' is NOT operationally resolved (corpus marks the wording ambiguous); this relation does not claim to be the speaker's definition and is not called 'traded through'"
+    },
+    "events": [
+     {
+      "at": "2025-08-10 04:00:00+00:00",
+      "at_bar": 54,
+      "evidence": {
+       "bar": 54,
+       "ohlc": [
+        116462.25,
+        118500.0,
+        116460.63,
+        118500.0
+       ]
+      },
+      "from": "CANDIDATE",
+      "kind": "state_transition",
+      "layer": "DERIVATION",
+      "reason": "shape matched the declared research definition; later-evidence event not yet observed",
+      "to": "AWAITING_CONFIRMATION"
+     },
+     {
+      "at": "2025-08-10 08:00:00+00:00",
+      "bar": 55,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-10 12:00:00+00:00",
+      "bar": 56,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-10 16:00:00+00:00",
+      "bar": 57,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-10 20:00:00+00:00",
+      "bar": 58,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-11 00:00:00+00:00",
+      "bar": 59,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-11 04:00:00+00:00",
+      "bar": 60,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-11 08:00:00+00:00",
+      "bar": 61,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-11 12:00:00+00:00",
+      "bar": 62,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-11 16:00:00+00:00",
+      "bar": 63,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-11 20:00:00+00:00",
+      "bar": 64,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-12 00:00:00+00:00",
+      "bar": 65,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-12 04:00:00+00:00",
+      "bar": 66,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-12 08:00:00+00:00",
+      "bar": 67,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-12 12:00:00+00:00",
+      "bar": 68,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-12 16:00:00+00:00",
+      "bar": 69,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-12 20:00:00+00:00",
+      "bar": 70,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-13 00:00:00+00:00",
+      "bar": 71,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-13 04:00:00+00:00",
+      "bar": 72,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-13 08:00:00+00:00",
+      "bar": 73,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-13 12:00:00+00:00",
+      "bar": 74,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-13 16:00:00+00:00",
+      "bar": 75,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-13 20:00:00+00:00",
+      "bar": 76,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     },
+     {
+      "at": "2025-08-14 00:00:00+00:00",
+      "bar": 77,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     }
+    ],
+    "fine_touches": {},
+    "high": 118500.0,
+    "low": 116460.63,
+    "open": 116462.25,
+    "ordering": null,
+    "role": "UNDETERMINED",
+    "role_assignments": [
+     {
+      "alternatives": [
+       "REACTION_PAUSE_REFERENCE: possible but not fact"
+      ],
+      "candidate_direction": "bearish",
+      "discriminating_evidence_needed": [
+       "an observed reaction/revisit at the candidate area (would support a reaction/pause role)",
+       "a higher-frame structure change (would re-open the trend role)"
+      ],
+      "evidence_used": {
+       "confirmation_event": {
+        "ref": null,
+        "value": false
+       },
+       "hf_established": {
+        "ref": "2025-08-09 00:00:00+00:00",
+        "value": true
+       },
+       "reaction_observed": {
+        "ref": null,
+        "value": false
+       }
+      },
+      "hf_trend": "up",
+      "reasons": [
+       "trend role NOT supported: the candidate direction opposes the established higher-frame context (OB16-A 25:00-25:43) \u2014 this does NOT reject the candidate itself",
+       "reaction/pause role NOT established: opposition alone does not make it fact \u2014 no reaction at the area is observed"
+      ],
+      "role": "UNDETERMINED",
+      "supported": false,
+      "task": "trend-continuation",
+      "would_change": [
+       "a higher-frame structure change re-opens the trend role; an observed reaction settles the reaction role"
+      ]
+     },
+     {
+      "alternatives": [
+       "TREND_CONTINUATION_REFERENCE: excluded for this task by the higher-frame context"
+      ],
+      "candidate_direction": "bearish",
+      "evidence_used": {
+       "confirmation_event": {
+        "ref": null,
+        "value": false
+       },
+       "hf_established": {
+        "ref": "2025-08-09 00:00:00+00:00",
+        "value": true
+       },
+       "reaction_observed": {
+        "ref": "2025-08-10 08:00:00+00:00",
+        "value": true
+       }
+      },
+      "hf_trend": "up",
+      "reasons": [
+       "trend role NOT supported: the candidate direction opposes the established higher-frame context (OB16-A 25:00-25:43) \u2014 this does NOT reject the candidate itself",
+       "reaction/pause role SUPPORTED by evidence: a reaction at the candidate area is observed (not inferred from opposition)"
+      ],
+      "role": "REACTION_PAUSE_REFERENCE",
+      "supported": true,
+      "task": "trend-continuation",
+      "would_change": [
+       "a higher-frame structure change re-opens the trend role; an observed reaction settles the reaction role"
+      ]
+     },
+     {
+      "alternatives": [
+       "REACTION_PAUSE_REFERENCE: supported by an observed reaction; possible alternative role"
+      ],
+      "candidate_direction": "bearish",
+      "discriminating_evidence_needed": [
+       "the declared confirmation event: a later bar trading through the candidate extreme"
+      ],
+      "evidence_used": {
+       "confirmation_event": {
+        "ref": null,
+        "value": false
+       },
+       "hf_established": {
+        "ref": "2025-08-12 20:00:00+00:00",
+        "value": true
+       },
+       "reaction_observed": {
+        "ref": "2025-08-10 08:00:00+00:00",
+        "value": true
+       }
+      },
+      "hf_trend": "down",
+      "reasons": [
+       "trend role NOT yet supported: direction agrees with the higher-frame context but the declared confirmation event is not observed ('we don't know that yet until at a later time' \u2014 approximate ASR wording)"
+      ],
+      "role": "UNDETERMINED",
+      "supported": false,
+      "task": "trend-continuation",
+      "would_change": [
+       "the confirmation event (or its documented absence) settles the trend role"
+      ]
+     }
+    ],
+    "scan_floor": 77,
+    "state": "AWAITING_CONFIRMATION",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   {
+    "ambiguity_interval": null,
+    "ambiguous_bar": null,
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_index": 76,
+    "bar_time": "2025-08-13 20:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0005",
+    "close": 122744.21,
+    "context_ref_id": "PSC:F-K(k=5)|high@2025-08-11T08:00:00+00:00",
+    "context_ref_level": 122335.16,
+    "direction": "bearish",
+    "eligibility": {
+     "definition": "declared research definition (ENGINEERING_INTERPRETATION, NOT Michael's definition): a up-close bar that is the extreme high among its family since the contextual reference's occurrence bar AND whose reported range CONTAINS the reference level (low <= level <= high). NO percentage, NO candle count, NO hidden threshold.",
+     "known_at_selection": [
+      "context ref PSC:F-K(k=5)|high@2025-08-11T08:00:00+00:00 confirmed at its knowable bar (before this bar)",
+      "bar OHLC at 2025-08-13 20:00:00+00:00"
+     ],
+     "level_relation": {
+      "close_side_of_level": "closed_at_or_above_level",
+      "does_not_establish": [
+       "the intrabar direction of the touch",
+       "the intrabar sequence of events",
+       "any orders/liquidity at the level"
+      ],
+      "establishes": "the reference level lies within this bar's reported range",
+      "kind": "range_contains_level",
+      "level_entered_range_at_this_bar": true,
+      "previous_bar_range_contains_level": false
+     },
+     "source_caveat": "'near support' is NOT operationally resolved (corpus marks the wording ambiguous); this relation does not claim to be the speaker's definition and is not called 'traded through'"
+    },
+    "events": [
+     {
+      "at": "2025-08-13 20:00:00+00:00",
+      "at_bar": 76,
+      "evidence": {
+       "bar": 76,
+       "ohlc": [
+        120920.61,
+        122839.47,
+        120920.61,
+        122744.21
+       ]
+      },
+      "from": "CANDIDATE",
+      "kind": "state_transition",
+      "layer": "DERIVATION",
+      "reason": "shape matched the declared research definition; later-evidence event not yet observed",
+      "to": "AWAITING_CONFIRMATION"
+     },
+     {
+      "at": "2025-08-14 00:00:00+00:00",
+      "bar": 77,
+      "kind": "revisit_event",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "return to the candidate area's far boundary observed"
+     }
+    ],
+    "fine_touches": {},
+    "high": 122839.47,
+    "low": 120920.61,
+    "open": 120920.61,
+    "ordering": null,
+    "role": "UNDETERMINED",
+    "role_assignments": [
+     {
+      "alternatives": [],
+      "candidate_direction": "bearish",
+      "discriminating_evidence_needed": [
+       "the declared confirmation event: a later bar trading through the candidate extreme"
+      ],
+      "evidence_used": {
+       "confirmation_event": {
+        "ref": null,
+        "value": false
+       },
+       "hf_established": {
+        "ref": "2025-08-12 20:00:00+00:00",
+        "value": true
+       },
+       "reaction_observed": {
+        "ref": null,
+        "value": false
+       }
+      },
+      "hf_trend": "down",
+      "reasons": [
+       "trend role NOT yet supported: direction agrees with the higher-frame context but the declared confirmation event is not observed ('we don't know that yet until at a later time' \u2014 approximate ASR wording)"
+      ],
+      "role": "UNDETERMINED",
+      "supported": false,
+      "task": "trend-continuation",
+      "would_change": [
+       "the confirmation event (or its documented absence) settles the trend role"
+      ]
+     },
+     {
+      "alternatives": [
+       "REACTION_PAUSE_REFERENCE: supported by an observed reaction; possible alternative role"
+      ],
+      "candidate_direction": "bearish",
+      "discriminating_evidence_needed": [
+       "the declared confirmation event: a later bar trading through the candidate extreme"
+      ],
+      "evidence_used": {
+       "confirmation_event": {
+        "ref": null,
+        "value": false
+       },
+       "hf_established": {
+        "ref": "2025-08-12 20:00:00+00:00",
+        "value": true
+       },
+       "reaction_observed": {
+        "ref": "2025-08-14 00:00:00+00:00",
+        "value": true
+       }
+      },
+      "hf_trend": "down",
+      "reasons": [
+       "trend role NOT yet supported: direction agrees with the higher-frame context but the declared confirmation event is not observed ('we don't know that yet until at a later time' \u2014 approximate ASR wording)"
+      ],
+      "role": "UNDETERMINED",
+      "supported": false,
+      "task": "trend-continuation",
+      "would_change": [
+       "the confirmation event (or its documented absence) settles the trend role"
+      ]
+     }
+    ],
+    "scan_floor": 77,
+    "state": "AWAITING_CONFIRMATION",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   {
+    "ambiguity_interval": null,
+    "ambiguous_bar": null,
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_index": 77,
+    "bar_time": "2025-08-14 00:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0006",
+    "close": 123306.43,
+    "context_ref_id": "PSC:F-K(k=5)|high@2025-08-11T08:00:00+00:00",
+    "context_ref_level": 122335.16,
+    "direction": "bearish",
+    "eligibility": {
+     "definition": "declared research definition (ENGINEERING_INTERPRETATION, NOT Michael's definition): a up-close bar that is the extreme high among its family since the contextual reference's occurrence bar AND whose reported range CONTAINS the reference level (low <= level <= high). NO percentage, NO candle count, NO hidden threshold.",
+     "known_at_selection": [
+      "context ref PSC:F-K(k=5)|high@2025-08-11T08:00:00+00:00 confirmed at its knowable bar (before this bar)",
+      "bar OHLC at 2025-08-14 00:00:00+00:00"
+     ],
+     "level_relation": {
+      "close_side_of_level": "closed_at_or_above_level",
+      "does_not_establish": [
+       "the intrabar direction of the touch",
+       "the intrabar sequence of events",
+       "any orders/liquidity at the level"
+      ],
+      "establishes": "the reference level lies within this bar's reported range",
+      "kind": "range_contains_level",
+      "level_entered_range_at_this_bar": false,
+      "previous_bar_range_contains_level": true
+     },
+     "source_caveat": "'near support' is NOT operationally resolved (corpus marks the wording ambiguous); this relation does not claim to be the speaker's definition and is not called 'traded through'"
+    },
+    "events": [
+     {
+      "at": "2025-08-14 00:00:00+00:00",
+      "at_bar": 77,
+      "evidence": {
+       "bar": 77,
+       "ohlc": [
+        122744.22,
+        123667.79,
+        122298.2,
+        123306.43
+       ]
+      },
+      "from": "CANDIDATE",
+      "kind": "state_transition",
+      "layer": "DERIVATION",
+      "reason": "shape matched the declared research definition; later-evidence event not yet observed",
+      "to": "AWAITING_CONFIRMATION"
+     }
+    ],
+    "fine_touches": {},
+    "high": 123667.79,
+    "low": 122298.2,
+    "open": 122744.22,
+    "ordering": null,
+    "role": "UNDETERMINED",
+    "role_assignments": [
+     {
+      "alternatives": [],
+      "candidate_direction": "bearish",
+      "discriminating_evidence_needed": [
+       "the declared confirmation event: a later bar trading through the candidate extreme"
+      ],
+      "evidence_used": {
+       "confirmation_event": {
+        "ref": null,
+        "value": false
+       },
+       "hf_established": {
+        "ref": "2025-08-12 20:00:00+00:00",
+        "value": true
+       },
+       "reaction_observed": {
+        "ref": null,
+        "value": false
+       }
+      },
+      "hf_trend": "down",
+      "reasons": [
+       "trend role NOT yet supported: direction agrees with the higher-frame context but the declared confirmation event is not observed ('we don't know that yet until at a later time' \u2014 approximate ASR wording)"
+      ],
+      "role": "UNDETERMINED",
+      "supported": false,
+      "task": "trend-continuation",
+      "would_change": [
+       "the confirmation event (or its documented absence) settles the trend role"
+      ]
+     }
+    ],
+    "scan_floor": -1,
+    "state": "AWAITING_CONFIRMATION",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   }
+  ],
+  "cross_scan_upto": 77,
+  "crossed_keys": [
+   "PSC:F-K(k=5)|high@2025-08-04T20:00:00+00:00|upward",
+   "PSC:F-K(k=5)|high@2025-08-08T04:00:00+00:00|upward",
+   "PSC:F-K(k=5)|high@2025-08-11T08:00:00+00:00|upward"
+  ],
+  "hf_context": {
+   "as_of_bar": 70,
+   "established_at": "2025-08-12 20:00:00+00:00",
+   "evidence": [
+    "SF-DIR-study-replay-v1-70"
+   ],
+   "trend": "down"
+  },
+  "hypotheses": [],
+  "k": 5,
+  "ledger_sigs": {
+   "OBC-study-replay-v1-0001": [
+    38,
+    "AWAITING_CONFIRMATION",
+    "None",
+    "UNDETERMINED"
+   ],
+   "OBC-study-replay-v1-0002": [
+    28,
+    "AWAITING_CONFIRMATION",
+    "None",
+    "UNDETERMINED"
+   ],
+   "OBC-study-replay-v1-0003": [
+    2,
+    "CONFIRMED",
+    "None",
+    "TREND_CONTINUATION_REFERENCE"
+   ],
+   "OBC-study-replay-v1-0004": [
+    24,
+    "AWAITING_CONFIRMATION",
+    "None",
+    "UNDETERMINED"
+   ],
+   "OBC-study-replay-v1-0005": [
+    2,
+    "AWAITING_CONFIRMATION",
+    "None",
+    "UNDETERMINED"
+   ],
+   "OBC-study-replay-v1-0006": [
+    1,
+    "AWAITING_CONFIRMATION",
+    "None",
+    "UNDETERMINED"
+   ],
+   "SW-study-replay-v1-0001": [
+    "EVIDENCE_NOTED",
+    24
+   ],
+   "SW-study-replay-v1-0002": [
+    "EVIDENCE_NOTED",
+    14
+   ],
+   "SW-study-replay-v1-0003": [
+    "WATCHING",
+    0
+   ]
+  },
+  "ledger_uids": {
+   "OBC-study-replay-v1-0001": "T-STUDY-CANDIDATE#288",
+   "OBC-study-replay-v1-0002": "T-STUDY-CANDIDATE#289",
+   "OBC-study-replay-v1-0003": "T-STUDY-CANDIDATE#238",
+   "OBC-study-replay-v1-0004": "T-STUDY-CANDIDATE#290",
+   "OBC-study-replay-v1-0005": "T-STUDY-CANDIDATE#291",
+   "OBC-study-replay-v1-0006": "T-STUDY-CANDIDATE#292",
+   "SW-study-replay-v1-0001": "T-STUDY-SHIFT-WATCH#293",
+   "SW-study-replay-v1-0002": "T-STUDY-SHIFT-WATCH#294",
+   "SW-study-replay-v1-0003": "T-STUDY-SHIFT-WATCH#285"
+  },
+  "row_buffer": [
+   {
+    "high": 122821.28,
+    "low": 122704.03,
+    "time": "2025-08-13 20:00:00+00:00"
+   },
+   {
+    "high": 122776.85,
+    "low": 122696.51,
+    "time": "2025-08-13 20:01:00+00:00"
+   },
+   {
+    "high": 122776.85,
+    "low": 122625.55,
+    "time": "2025-08-13 20:02:00+00:00"
+   },
+   {
+    "high": 122700.17,
+    "low": 122570.37,
+    "time": "2025-08-13 20:03:00+00:00"
+   },
+   {
+    "high": 122605.76,
+    "low": 122464.34,
+    "time": "2025-08-13 20:04:00+00:00"
+   },
+   {
+    "high": 122589.61,
+    "low": 122464.34,
+    "time": "2025-08-13 20:05:00+00:00"
+   },
+   {
+    "high": 122638.82,
+    "low": 122582.64,
+    "time": "2025-08-13 20:06:00+00:00"
+   },
+   {
+    "high": 122630.0,
+    "low": 122591.54,
+    "time": "2025-08-13 20:07:00+00:00"
+   },
+   {
+    "high": 122700.0,
+    "low": 122591.54,
+    "time": "2025-08-13 20:08:00+00:00"
+   },
+   {
+    "high": 122815.0,
+    "low": 122699.99,
+    "time": "2025-08-13 20:09:00+00:00"
+   },
+   {
+    "high": 122842.72,
+    "low": 122778.84,
+    "time": "2025-08-13 20:10:00+00:00"
+   },
+   {
+    "high": 122778.85,
+    "low": 122666.93,
+    "time": "2025-08-13 20:11:00+00:00"
+   },
+   {
+    "high": 122708.12,
+    "low": 122642.36,
+    "time": "2025-08-13 20:12:00+00:00"
+   },
+   {
+    "high": 122730.61,
+    "low": 122642.78,
+    "time": "2025-08-13 20:13:00+00:00"
+   },
+   {
+    "high": 122842.72,
+    "low": 122730.61,
+    "time": "2025-08-13 20:14:00+00:00"
+   },
+   {
+    "high": 122802.28,
+    "low": 122750.0,
+    "time": "2025-08-13 20:15:00+00:00"
+   },
+   {
+    "high": 122750.01,
+    "low": 122638.81,
+    "time": "2025-08-13 20:16:00+00:00"
+   },
+   {
+    "high": 122699.99,
+    "low": 122606.0,
+    "time": "2025-08-13 20:17:00+00:00"
+   },
+   {
+    "high": 122740.75,
+    "low": 122679.4,
+    "time": "2025-08-13 20:18:00+00:00"
+   },
+   {
+    "high": 122740.0,
+    "low": 122665.86,
+    "time": "2025-08-13 20:19:00+00:00"
+   },
+   {
+    "high": 122769.46,
+    "low": 122739.99,
+    "time": "2025-08-13 20:20:00+00:00"
+   },
+   {
+    "high": 122757.56,
+    "low": 122726.69,
+    "time": "2025-08-13 20:21:00+00:00"
+   },
+   {
+    "high": 122726.7,
+    "low": 122686.88,
+    "time": "2025-08-13 20:22:00+00:00"
+   },
+   {
+    "high": 122721.19,
+    "low": 122675.24,
+    "time": "2025-08-13 20:23:00+00:00"
+   },
+   {
+    "high": 122675.25,
+    "low": 122570.41,
+    "time": "2025-08-13 20:24:00+00:00"
+   },
+   {
+    "high": 122594.0,
+    "low": 122559.0,
+    "time": "2025-08-13 20:25:00+00:00"
+   },
+   {
+    "high": 122594.0,
+    "low": 122576.99,
+    "time": "2025-08-13 20:26:00+00:00"
+   },
+   {
+    "high": 122635.28,
+    "low": 122593.99,
+    "time": "2025-08-13 20:27:00+00:00"
+   },
+   {
+    "high": 122636.0,
+    "low": 122618.0,
+    "time": "2025-08-13 20:28:00+00:00"
+   },
+   {
+    "high": 122618.01,
+    "low": 122613.38,
+    "time": "2025-08-13 20:29:00+00:00"
+   },
+   {
+    "high": 122708.7,
+    "low": 122613.39,
+    "time": "2025-08-13 20:30:00+00:00"
+   },
+   {
+    "high": 122771.23,
+    "low": 122696.41,
+    "time": "2025-08-13 20:31:00+00:00"
+   },
+   {
+    "high": 122771.23,
+    "low": 122697.34,
+    "time": "2025-08-13 20:32:00+00:00"
+   },
+   {
+    "high": 122729.3,
+    "low": 122699.37,
+    "time": "2025-08-13 20:33:00+00:00"
+   },
+   {
+    "high": 122756.37,
+    "low": 122708.71,
+    "time": "2025-08-13 20:34:00+00:00"
+   },
+   {
+    "high": 122781.86,
+    "low": 122704.86,
+    "time": "2025-08-13 20:35:00+00:00"
+   },
+   {
+    "high": 122800.0,
+    "low": 122767.21,
+    "time": "2025-08-13 20:36:00+00:00"
+   },
+   {
+    "high": 122795.69,
+    "low": 122708.23,
+    "time": "2025-08-13 20:37:00+00:00"
+   },
+   {
+    "high": 122771.01,
+    "low": 122708.23,
+    "time": "2025-08-13 20:38:00+00:00"
+   },
+   {
+    "high": 122771.01,
+    "low": 122757.88,
+    "time": "2025-08-13 20:39:00+00:00"
+   },
+   {
+    "high": 122802.52,
+    "low": 122757.89,
+    "time": "2025-08-13 20:40:00+00:00"
+   },
+   {
+    "high": 122790.2,
+    "low": 122772.0,
+    "time": "2025-08-13 20:41:00+00:00"
+   },
+   {
+    "high": 122794.9,
+    "low": 122772.0,
+    "time": "2025-08-13 20:42:00+00:00"
+   },
+   {
+    "high": 122794.9,
+    "low": 122786.8,
+    "time": "2025-08-13 20:43:00+00:00"
+   },
+   {
+    "high": 122807.27,
+    "low": 122755.4,
+    "time": "2025-08-13 20:44:00+00:00"
+   },
+   {
+    "high": 122818.28,
+    "low": 122799.99,
+    "time": "2025-08-13 20:45:00+00:00"
+   },
+   {
+    "high": 122866.0,
+    "low": 122798.04,
+    "time": "2025-08-13 20:46:00+00:00"
+   },
+   {
+    "high": 122872.75,
+    "low": 122818.34,
+    "time": "2025-08-13 20:47:00+00:00"
+   },
+   {
+    "high": 122896.0,
+    "low": 122855.44,
+    "time": "2025-08-13 20:48:00+00:00"
+   },
+   {
+    "high": 122940.0,
+    "low": 122895.99,
+    "time": "2025-08-13 20:49:00+00:00"
+   },
+   {
+    "high": 122944.66,
+    "low": 122926.0,
+    "time": "2025-08-13 20:50:00+00:00"
+   },
+   {
+    "high": 122944.66,
+    "low": 122936.0,
+    "time": "2025-08-13 20:51:00+00:00"
+   },
+   {
+    "high": 122965.64,
+    "low": 122944.65,
+    "time": "2025-08-13 20:52:00+00:00"
+   },
+   {
+    "high": 122973.0,
+    "low": 122949.43,
+    "time": "2025-08-13 20:53:00+00:00"
+   },
+   {
+    "high": 122970.0,
+    "low": 122949.43,
+    "time": "2025-08-13 20:54:00+00:00"
+   },
+   {
+    "high": 122962.06,
+    "low": 122906.04,
+    "time": "2025-08-13 20:55:00+00:00"
+   },
+   {
+    "high": 122972.59,
+    "low": 122944.48,
+    "time": "2025-08-13 20:56:00+00:00"
+   },
+   {
+    "high": 122972.59,
+    "low": 122942.77,
+    "time": "2025-08-13 20:57:00+00:00"
+   },
+   {
+    "high": 122942.78,
+    "low": 122855.8,
+    "time": "2025-08-13 20:58:00+00:00"
+   },
+   {
+    "high": 122923.26,
+    "low": 122904.0,
+    "time": "2025-08-13 20:59:00+00:00"
+   },
+   {
+    "high": 122948.82,
+    "low": 122904.01,
+    "time": "2025-08-13 21:00:00+00:00"
+   },
+   {
+    "high": 122944.66,
+    "low": 122791.45,
+    "time": "2025-08-13 21:01:00+00:00"
+   },
+   {
+    "high": 122826.0,
+    "low": 122777.88,
+    "time": "2025-08-13 21:02:00+00:00"
+   },
+   {
+    "high": 122804.0,
+    "low": 122752.48,
+    "time": "2025-08-13 21:03:00+00:00"
+   },
+   {
+    "high": 122778.0,
+    "low": 122750.68,
+    "time": "2025-08-13 21:04:00+00:00"
+   },
+   {
+    "high": 122804.0,
+    "low": 122751.07,
+    "time": "2025-08-13 21:05:00+00:00"
+   },
+   {
+    "high": 122877.99,
+    "low": 122801.72,
+    "time": "2025-08-13 21:06:00+00:00"
+   },
+   {
+    "high": 122973.0,
+    "low": 122831.69,
+    "time": "2025-08-13 21:07:00+00:00"
+   },
+   {
+    "high": 123000.0,
+    "low": 122804.0,
+    "time": "2025-08-13 21:08:00+00:00"
+   },
+   {
+    "high": 122944.66,
+    "low": 122796.81,
+    "time": "2025-08-13 21:09:00+00:00"
+   },
+   {
+    "high": 122839.55,
+    "low": 122781.7,
+    "time": "2025-08-13 21:10:00+00:00"
+   },
+   {
+    "high": 122887.34,
+    "low": 122802.2,
+    "time": "2025-08-13 21:11:00+00:00"
+   },
+   {
+    "high": 122873.15,
+    "low": 122809.01,
+    "time": "2025-08-13 21:12:00+00:00"
+   },
+   {
+    "high": 122840.98,
+    "low": 122678.7,
+    "time": "2025-08-13 21:13:00+00:00"
+   },
+   {
+    "high": 122749.13,
+    "low": 122666.32,
+    "time": "2025-08-13 21:14:00+00:00"
+   },
+   {
+    "high": 122885.92,
+    "low": 122723.76,
+    "time": "2025-08-13 21:15:00+00:00"
+   },
+   {
+    "high": 122931.14,
+    "low": 122824.81,
+    "time": "2025-08-13 21:16:00+00:00"
+   },
+   {
+    "high": 122944.66,
+    "low": 122926.0,
+    "time": "2025-08-13 21:17:00+00:00"
+   },
+   {
+    "high": 122932.47,
+    "low": 122760.68,
+    "time": "2025-08-13 21:18:00+00:00"
+   },
+   {
+    "high": 122876.34,
+    "low": 122754.65,
+    "time": "2025-08-13 21:19:00+00:00"
+   },
+   {
+    "high": 122925.54,
+    "low": 122781.3,
+    "time": "2025-08-13 21:20:00+00:00"
+   },
+   {
+    "high": 122824.07,
+    "low": 122758.67,
+    "time": "2025-08-13 21:21:00+00:00"
+   },
+   {
+    "high": 122878.43,
+    "low": 122809.83,
+    "time": "2025-08-13 21:22:00+00:00"
+   },
+   {
+    "high": 122851.73,
+    "low": 122787.37,
+    "time": "2025-08-13 21:23:00+00:00"
+   },
+   {
+    "high": 122820.0,
+    "low": 122759.49,
+    "time": "2025-08-13 21:24:00+00:00"
+   },
+   {
+    "high": 122770.17,
+    "low": 122684.0,
+    "time": "2025-08-13 21:25:00+00:00"
+   },
+   {
+    "high": 122823.99,
+    "low": 122731.28,
+    "time": "2025-08-13 21:26:00+00:00"
+   },
+   {
+    "high": 122801.22,
+    "low": 122749.67,
+    "time": "2025-08-13 21:27:00+00:00"
+   },
+   {
+    "high": 122749.68,
+    "low": 122702.0,
+    "time": "2025-08-13 21:28:00+00:00"
+   },
+   {
+    "high": 122715.87,
+    "low": 122689.18,
+    "time": "2025-08-13 21:29:00+00:00"
+   },
+   {
+    "high": 122721.85,
+    "low": 122681.12,
+    "time": "2025-08-13 21:30:00+00:00"
+   },
+   {
+    "high": 122830.0,
+    "low": 122721.84,
+    "time": "2025-08-13 21:31:00+00:00"
+   },
+   {
+    "high": 122819.04,
+    "low": 122747.32,
+    "time": "2025-08-13 21:32:00+00:00"
+   },
+   {
+    "high": 122756.63,
+    "low": 122716.79,
+    "time": "2025-08-13 21:33:00+00:00"
+   },
+   {
+    "high": 122815.02,
+    "low": 122716.57,
+    "time": "2025-08-13 21:34:00+00:00"
+   },
+   {
+    "high": 122808.08,
+    "low": 122741.48,
+    "time": "2025-08-13 21:35:00+00:00"
+   },
+   {
+    "high": 122741.49,
+    "low": 122638.81,
+    "time": "2025-08-13 21:36:00+00:00"
+   },
+   {
+    "high": 122696.73,
+    "low": 122644.91,
+    "time": "2025-08-13 21:37:00+00:00"
+   },
+   {
+    "high": 122696.73,
+    "low": 122585.05,
+    "time": "2025-08-13 21:38:00+00:00"
+   },
+   {
+    "high": 122649.03,
+    "low": 122585.05,
+    "time": "2025-08-13 21:39:00+00:00"
+   },
+   {
+    "high": 122649.03,
+    "low": 122591.34,
+    "time": "2025-08-13 21:40:00+00:00"
+   },
+   {
+    "high": 122600.0,
+    "low": 122553.79,
+    "time": "2025-08-13 21:41:00+00:00"
+   },
+   {
+    "high": 122600.0,
+    "low": 122554.71,
+    "time": "2025-08-13 21:42:00+00:00"
+   },
+   {
+    "high": 122590.05,
+    "low": 122562.6,
+    "time": "2025-08-13 21:43:00+00:00"
+   },
+   {
+    "high": 122590.0,
+    "low": 122450.02,
+    "time": "2025-08-13 21:44:00+00:00"
+   },
+   {
+    "high": 122583.7,
+    "low": 122465.17,
+    "time": "2025-08-13 21:45:00+00:00"
+   },
+   {
+    "high": 122593.49,
+    "low": 122494.38,
+    "time": "2025-08-13 21:46:00+00:00"
+   },
+   {
+    "high": 122530.43,
+    "low": 122483.55,
+    "time": "2025-08-13 21:47:00+00:00"
+   },
+   {
+    "high": 122529.97,
+    "low": 122461.25,
+    "time": "2025-08-13 21:48:00+00:00"
+   },
+   {
+    "high": 122496.74,
+    "low": 122390.0,
+    "time": "2025-08-13 21:49:00+00:00"
+   },
+   {
+    "high": 122424.23,
+    "low": 122315.3,
+    "time": "2025-08-13 21:50:00+00:00"
+   },
+   {
+    "high": 122400.0,
+    "low": 122306.74,
+    "time": "2025-08-13 21:51:00+00:00"
+   },
+   {
+    "high": 122389.4,
+    "low": 122298.2,
+    "time": "2025-08-13 21:52:00+00:00"
+   },
+   {
+    "high": 122509.76,
+    "low": 122331.68,
+    "time": "2025-08-13 21:53:00+00:00"
+   },
+   {
+    "high": 122536.88,
+    "low": 122477.97,
+    "time": "2025-08-13 21:54:00+00:00"
+   },
+   {
+    "high": 122638.82,
+    "low": 122536.87,
+    "time": "2025-08-13 21:55:00+00:00"
+   },
+   {
+    "high": 122612.6,
+    "low": 122547.39,
+    "time": "2025-08-13 21:56:00+00:00"
+   },
+   {
+    "high": 122547.4,
+    "low": 122511.17,
+    "time": "2025-08-13 21:57:00+00:00"
+   },
+   {
+    "high": 122536.88,
+    "low": 122464.18,
+    "time": "2025-08-13 21:58:00+00:00"
+   },
+   {
+    "high": 122561.16,
+    "low": 122464.18,
+    "time": "2025-08-13 21:59:00+00:00"
+   },
+   {
+    "high": 122638.82,
+    "low": 122561.16,
+    "time": "2025-08-13 22:00:00+00:00"
+   },
+   {
+    "high": 122841.66,
+    "low": 122625.67,
+    "time": "2025-08-13 22:01:00+00:00"
+   },
+   {
+    "high": 122937.2,
+    "low": 122750.68,
+    "time": "2025-08-13 22:02:00+00:00"
+   },
+   {
+    "high": 122776.41,
+    "low": 122663.87,
+    "time": "2025-08-13 22:03:00+00:00"
+   },
+   {
+    "high": 122809.47,
+    "low": 122740.76,
+    "time": "2025-08-13 22:04:00+00:00"
+   },
+   {
+    "high": 122825.89,
+    "low": 122793.81,
+    "time": "2025-08-13 22:05:00+00:00"
+   },
+   {
+    "high": 122900.0,
+    "low": 122825.88,
+    "time": "2025-08-13 22:06:00+00:00"
+   },
+   {
+    "high": 122950.0,
+    "low": 122891.88,
+    "time": "2025-08-13 22:07:00+00:00"
+   },
+   {
+    "high": 122937.74,
+    "low": 122899.0,
+    "time": "2025-08-13 22:08:00+00:00"
+   },
+   {
+    "high": 122937.74,
+    "low": 122935.2,
+    "time": "2025-08-13 22:09:00+00:00"
+   },
+   {
+    "high": 122942.78,
+    "low": 122880.49,
+    "time": "2025-08-13 22:10:00+00:00"
+   },
+   {
+    "high": 122966.83,
+    "low": 122880.49,
+    "time": "2025-08-13 22:11:00+00:00"
+   },
+   {
+    "high": 122943.98,
+    "low": 122882.25,
+    "time": "2025-08-13 22:12:00+00:00"
+   },
+   {
+    "high": 122927.47,
+    "low": 122902.24,
+    "time": "2025-08-13 22:13:00+00:00"
+   },
+   {
+    "high": 122970.86,
+    "low": 122912.19,
+    "time": "2025-08-13 22:14:00+00:00"
+   },
+   {
+    "high": 122999.0,
+    "low": 122952.77,
+    "time": "2025-08-13 22:15:00+00:00"
+   },
+   {
+    "high": 122989.77,
+    "low": 122944.65,
+    "time": "2025-08-13 22:16:00+00:00"
+   },
+   {
+    "high": 122956.2,
+    "low": 122932.36,
+    "time": "2025-08-13 22:17:00+00:00"
+   },
+   {
+    "high": 122932.37,
+    "low": 122900.11,
+    "time": "2025-08-13 22:18:00+00:00"
+   },
+   {
+    "high": 122931.62,
+    "low": 122911.22,
+    "time": "2025-08-13 22:19:00+00:00"
+   },
+   {
+    "high": 123046.61,
+    "low": 122931.61,
+    "time": "2025-08-13 22:20:00+00:00"
+   },
+   {
+    "high": 123034.3,
+    "low": 122843.86,
+    "time": "2025-08-13 22:21:00+00:00"
+   },
+   {
+    "high": 122997.3,
+    "low": 122902.26,
+    "time": "2025-08-13 22:22:00+00:00"
+   },
+   {
+    "high": 122997.3,
+    "low": 122842.8,
+    "time": "2025-08-13 22:23:00+00:00"
+   },
+   {
+    "high": 122937.78,
+    "low": 122842.8,
+    "time": "2025-08-13 22:24:00+00:00"
+   },
+   {
+    "high": 122937.78,
+    "low": 122855.22,
+    "time": "2025-08-13 22:25:00+00:00"
+   },
+   {
+    "high": 122937.78,
+    "low": 122870.97,
+    "time": "2025-08-13 22:26:00+00:00"
+   },
+   {
+    "high": 122944.65,
+    "low": 122870.97,
+    "time": "2025-08-13 22:27:00+00:00"
+   },
+   {
+    "high": 122950.22,
+    "low": 122926.99,
+    "time": "2025-08-13 22:28:00+00:00"
+   },
+   {
+    "high": 122962.56,
+    "low": 122931.51,
+    "time": "2025-08-13 22:29:00+00:00"
+   },
+   {
+    "high": 122941.93,
+    "low": 122918.65,
+    "time": "2025-08-13 22:30:00+00:00"
+   },
+   {
+    "high": 122944.75,
+    "low": 122910.62,
+    "time": "2025-08-13 22:31:00+00:00"
+   },
+   {
+    "high": 122964.41,
+    "low": 122922.52,
+    "time": "2025-08-13 22:32:00+00:00"
+   },
+   {
+    "high": 122984.0,
+    "low": 122964.4,
+    "time": "2025-08-13 22:33:00+00:00"
+   },
+   {
+    "high": 123009.77,
+    "low": 122974.58,
+    "time": "2025-08-13 22:34:00+00:00"
+   },
+   {
+    "high": 123028.22,
+    "low": 122974.58,
+    "time": "2025-08-13 22:35:00+00:00"
+   },
+   {
+    "high": 123046.61,
+    "low": 122978.38,
+    "time": "2025-08-13 22:36:00+00:00"
+   },
+   {
+    "high": 123046.61,
+    "low": 122990.73,
+    "time": "2025-08-13 22:37:00+00:00"
+   },
+   {
+    "high": 123046.61,
+    "low": 123041.65,
+    "time": "2025-08-13 22:38:00+00:00"
+   },
+   {
+    "high": 123046.61,
+    "low": 123022.82,
+    "time": "2025-08-13 22:39:00+00:00"
+   },
+   {
+    "high": 123069.33,
+    "low": 123032.51,
+    "time": "2025-08-13 22:40:00+00:00"
+   },
+   {
+    "high": 123584.41,
+    "low": 123069.32,
+    "time": "2025-08-13 22:41:00+00:00"
+   },
+   {
+    "high": 123568.17,
+    "low": 123352.44,
+    "time": "2025-08-13 22:42:00+00:00"
+   },
+   {
+    "high": 123454.4,
+    "low": 123305.0,
+    "time": "2025-08-13 22:43:00+00:00"
+   },
+   {
+    "high": 123518.77,
+    "low": 123429.58,
+    "time": "2025-08-13 22:44:00+00:00"
+   },
+   {
+    "high": 123518.76,
+    "low": 123418.54,
+    "time": "2025-08-13 22:45:00+00:00"
+   },
+   {
+    "high": 123528.55,
+    "low": 123387.45,
+    "time": "2025-08-13 22:46:00+00:00"
+   },
+   {
+    "high": 123582.34,
+    "low": 123471.47,
+    "time": "2025-08-13 22:47:00+00:00"
+   },
+   {
+    "high": 123600.0,
+    "low": 123503.82,
+    "time": "2025-08-13 22:48:00+00:00"
+   },
+   {
+    "high": 123637.68,
+    "low": 123518.86,
+    "time": "2025-08-13 22:49:00+00:00"
+   },
+   {
+    "high": 123547.33,
+    "low": 123502.4,
+    "time": "2025-08-13 22:50:00+00:00"
+   },
+   {
+    "high": 123505.01,
+    "low": 123459.97,
+    "time": "2025-08-13 22:51:00+00:00"
+   },
+   {
+    "high": 123459.98,
+    "low": 123341.04,
+    "time": "2025-08-13 22:52:00+00:00"
+   },
+   {
+    "high": 123352.45,
+    "low": 123333.28,
+    "time": "2025-08-13 22:53:00+00:00"
+   },
+   {
+    "high": 123334.03,
+    "low": 123301.84,
+    "time": "2025-08-13 22:54:00+00:00"
+   },
+   {
+    "high": 123301.85,
+    "low": 123194.66,
+    "time": "2025-08-13 22:55:00+00:00"
+   },
+   {
+    "high": 123226.1,
+    "low": 123132.05,
+    "time": "2025-08-13 22:56:00+00:00"
+   },
+   {
+    "high": 123164.63,
+    "low": 123008.73,
+    "time": "2025-08-13 22:57:00+00:00"
+   },
+   {
+    "high": 123031.91,
+    "low": 122903.85,
+    "time": "2025-08-13 22:58:00+00:00"
+   },
+   {
+    "high": 122966.32,
+    "low": 122927.36,
+    "time": "2025-08-13 22:59:00+00:00"
+   },
+   {
+    "high": 123046.61,
+    "low": 122907.05,
+    "time": "2025-08-13 23:00:00+00:00"
+   },
+   {
+    "high": 123039.4,
+    "low": 122950.0,
+    "time": "2025-08-13 23:01:00+00:00"
+   },
+   {
+    "high": 123063.66,
+    "low": 122947.8,
+    "time": "2025-08-13 23:02:00+00:00"
+   },
+   {
+    "high": 123052.39,
+    "low": 122980.01,
+    "time": "2025-08-13 23:03:00+00:00"
+   },
+   {
+    "high": 123176.85,
+    "low": 123052.38,
+    "time": "2025-08-13 23:04:00+00:00"
+   },
+   {
+    "high": 123154.89,
+    "low": 123084.23,
+    "time": "2025-08-13 23:05:00+00:00"
+   },
+   {
+    "high": 123124.23,
+    "low": 123046.6,
+    "time": "2025-08-13 23:06:00+00:00"
+   },
+   {
+    "high": 123158.39,
+    "low": 123077.88,
+    "time": "2025-08-13 23:07:00+00:00"
+   },
+   {
+    "high": 123137.55,
+    "low": 123077.88,
+    "time": "2025-08-13 23:08:00+00:00"
+   },
+   {
+    "high": 123137.55,
+    "low": 123066.52,
+    "time": "2025-08-13 23:09:00+00:00"
+   },
+   {
+    "high": 123079.68,
+    "low": 123004.0,
+    "time": "2025-08-13 23:10:00+00:00"
+   },
+   {
+    "high": 123015.99,
+    "low": 123003.31,
+    "time": "2025-08-13 23:11:00+00:00"
+   },
+   {
+    "high": 123003.3,
+    "low": 122944.65,
+    "time": "2025-08-13 23:12:00+00:00"
+   },
+   {
+    "high": 122985.45,
+    "low": 122956.53,
+    "time": "2025-08-13 23:13:00+00:00"
+   },
+   {
+    "high": 123000.0,
+    "low": 122957.01,
+    "time": "2025-08-13 23:14:00+00:00"
+   },
+   {
+    "high": 123048.1,
+    "low": 122957.02,
+    "time": "2025-08-13 23:15:00+00:00"
+   },
+   {
+    "high": 123062.23,
+    "low": 123046.6,
+    "time": "2025-08-13 23:16:00+00:00"
+   },
+   {
+    "high": 123062.23,
+    "low": 123059.99,
+    "time": "2025-08-13 23:17:00+00:00"
+   },
+   {
+    "high": 123075.15,
+    "low": 123019.54,
+    "time": "2025-08-13 23:18:00+00:00"
+   },
+   {
+    "high": 123146.35,
+    "low": 123074.43,
+    "time": "2025-08-13 23:19:00+00:00"
+   },
+   {
+    "high": 123200.0,
+    "low": 123129.99,
+    "time": "2025-08-13 23:20:00+00:00"
+   },
+   {
+    "high": 123200.0,
+    "low": 123154.86,
+    "time": "2025-08-13 23:21:00+00:00"
+   },
+   {
+    "high": 123285.11,
+    "low": 123181.88,
+    "time": "2025-08-13 23:22:00+00:00"
+   },
+   {
+    "high": 123296.13,
+    "low": 123285.11,
+    "time": "2025-08-13 23:23:00+00:00"
+   },
+   {
+    "high": 123296.13,
+    "low": 123279.16,
+    "time": "2025-08-13 23:24:00+00:00"
+   },
+   {
+    "high": 123293.55,
+    "low": 123281.34,
+    "time": "2025-08-13 23:25:00+00:00"
+   },
+   {
+    "high": 123281.35,
+    "low": 123263.34,
+    "time": "2025-08-13 23:26:00+00:00"
+   },
+   {
+    "high": 123273.95,
+    "low": 123264.78,
+    "time": "2025-08-13 23:27:00+00:00"
+   },
+   {
+    "high": 123310.63,
+    "low": 123264.78,
+    "time": "2025-08-13 23:28:00+00:00"
+   },
+   {
+    "high": 123310.63,
+    "low": 123310.62,
+    "time": "2025-08-13 23:29:00+00:00"
+   },
+   {
+    "high": 123407.48,
+    "low": 123310.62,
+    "time": "2025-08-13 23:30:00+00:00"
+   },
+   {
+    "high": 123430.0,
+    "low": 123376.23,
+    "time": "2025-08-13 23:31:00+00:00"
+   },
+   {
+    "high": 123465.75,
+    "low": 123429.99,
+    "time": "2025-08-13 23:32:00+00:00"
+   },
+   {
+    "high": 123460.0,
+    "low": 123400.0,
+    "time": "2025-08-13 23:33:00+00:00"
+   },
+   {
+    "high": 123429.0,
+    "low": 123400.0,
+    "time": "2025-08-13 23:34:00+00:00"
+   },
+   {
+    "high": 123528.01,
+    "low": 123428.99,
+    "time": "2025-08-13 23:35:00+00:00"
+   },
+   {
+    "high": 123575.8,
+    "low": 123528.0,
+    "time": "2025-08-13 23:36:00+00:00"
+   },
+   {
+    "high": 123580.0,
+    "low": 123491.77,
+    "time": "2025-08-13 23:37:00+00:00"
+   },
+   {
+    "high": 123667.79,
+    "low": 123500.01,
+    "time": "2025-08-13 23:38:00+00:00"
+   },
+   {
+    "high": 123559.05,
+    "low": 123525.63,
+    "time": "2025-08-13 23:39:00+00:00"
+   },
+   {
+    "high": 123625.88,
+    "low": 123551.15,
+    "time": "2025-08-13 23:40:00+00:00"
+   },
+   {
+    "high": 123659.46,
+    "low": 123566.98,
+    "time": "2025-08-13 23:41:00+00:00"
+   },
+   {
+    "high": 123588.44,
+    "low": 123529.38,
+    "time": "2025-08-13 23:42:00+00:00"
+   },
+   {
+    "high": 123588.44,
+    "low": 123556.33,
+    "time": "2025-08-13 23:43:00+00:00"
+   },
+   {
+    "high": 123556.34,
+    "low": 123446.72,
+    "time": "2025-08-13 23:44:00+00:00"
+   },
+   {
+    "high": 123541.56,
+    "low": 123454.39,
+    "time": "2025-08-13 23:45:00+00:00"
+   },
+   {
+    "high": 123537.98,
+    "low": 123443.78,
+    "time": "2025-08-13 23:46:00+00:00"
+   },
+   {
+    "high": 123516.11,
+    "low": 123480.41,
+    "time": "2025-08-13 23:47:00+00:00"
+   },
+   {
+    "high": 123530.0,
+    "low": 123491.92,
+    "time": "2025-08-13 23:48:00+00:00"
+   },
+   {
+    "high": 123573.83,
+    "low": 123525.88,
+    "time": "2025-08-13 23:49:00+00:00"
+   },
+   {
+    "high": 123554.03,
+    "low": 123515.36,
+    "time": "2025-08-13 23:50:00+00:00"
+   },
+   {
+    "high": 123515.37,
+    "low": 123418.32,
+    "time": "2025-08-13 23:51:00+00:00"
+   },
+   {
+    "high": 123430.81,
+    "low": 123393.2,
+    "time": "2025-08-13 23:52:00+00:00"
+   },
+   {
+    "high": 123393.21,
+    "low": 123363.68,
+    "time": "2025-08-13 23:53:00+00:00"
+   },
+   {
+    "high": 123388.58,
+    "low": 123373.6,
+    "time": "2025-08-13 23:54:00+00:00"
+   },
+   {
+    "high": 123373.61,
+    "low": 123373.6,
+    "time": "2025-08-13 23:55:00+00:00"
+   },
+   {
+    "high": 123373.61,
+    "low": 123359.66,
+    "time": "2025-08-13 23:56:00+00:00"
+   },
+   {
+    "high": 123359.67,
+    "low": 123307.4,
+    "time": "2025-08-13 23:57:00+00:00"
+   },
+   {
+    "high": 123336.7,
+    "low": 123300.0,
+    "time": "2025-08-13 23:58:00+00:00"
+   },
+   {
+    "high": 123317.57,
+    "low": 123280.1,
+    "time": "2025-08-13 23:59:00+00:00"
+   },
+   {
+    "high": 123329.44,
+    "low": 123251.9,
+    "time": "2025-08-14 00:00:00+00:00"
+   },
+   {
+    "high": 123366.4,
+    "low": 123270.71,
+    "time": "2025-08-14 00:01:00+00:00"
+   },
+   {
+    "high": 123488.34,
+    "low": 123355.37,
+    "time": "2025-08-14 00:02:00+00:00"
+   },
+   {
+    "high": 123536.89,
+    "low": 123485.71,
+    "time": "2025-08-14 00:03:00+00:00"
+   },
+   {
+    "high": 123584.77,
+    "low": 123499.41,
+    "time": "2025-08-14 00:04:00+00:00"
+   }
+  ],
+  "run_id": "study-replay-v1",
+  "scan_upto": 77,
+  "selection_quality": "NOT_ESTABLISHED",
+  "selections": [],
+  "seq_facts": [
+   {
+    "at": "2025-08-05 16:00:00+00:00",
+    "evidence": [
+     "SF-DIR-study-replay-v1-27"
+    ],
+    "kind": "HF_CONTEXT_ESTABLISHED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "trend": "up"
+   },
+   {
+    "at": "2025-08-06 12:00:00+00:00",
+    "evidence": [
+     "SF-DIR-study-replay-v1-32"
+    ],
+    "kind": "HF_CONTEXT_ESTABLISHED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "trend": "down"
+   },
+   {
+    "after_hf_context": "2025-08-06 12:00:00+00:00",
+    "at": "2025-08-07 12:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0001",
+    "kind": "CANDIDATE_FORMED",
+    "layer": "DERIVATION"
+   },
+   {
+    "at": "2025-08-07 12:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0001",
+    "kind": "ROLE_EVALUATED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "role": "UNDETERMINED",
+    "supported": false
+   },
+   {
+    "at": "2025-08-07 12:00:00+00:00",
+    "bar": 38,
+    "direction": "upward",
+    "kind": "REFERENCE_CROSSING",
+    "layer": "DIRECT_OBSERVATION",
+    "level": 115720.0,
+    "ref_id": "PSC:F-K(k=5)|high@2025-08-04T20:00:00+00:00"
+   },
+   {
+    "at": "2025-08-07 12:00:00+00:00",
+    "kind": "SHIFT_WATCH_OPENED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "note": "crossing an old reference is a context for WATCHING a possible shift, NOT proof of one (E03-A); no reversal/trade signal",
+    "watch_id": "SW-study-replay-v1-0001"
+   },
+   {
+    "after_hf_context": "2025-08-06 12:00:00+00:00",
+    "at": "2025-08-07 20:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0002",
+    "kind": "CANDIDATE_FORMED",
+    "layer": "DERIVATION"
+   },
+   {
+    "at": "2025-08-07 20:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0001",
+    "kind": "ROLE_EVALUATED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "role": "UNDETERMINED",
+    "supported": false
+   },
+   {
+    "at": "2025-08-07 20:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0002",
+    "kind": "ROLE_EVALUATED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "role": "UNDETERMINED",
+    "supported": false
+   },
+   {
+    "at": "2025-08-08 00:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0002",
+    "kind": "ROLE_EVALUATED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "role": "UNDETERMINED",
+    "supported": false
+   },
+   {
+    "at": "2025-08-08 00:00:00+00:00",
+    "bar": 41,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0001"
+   },
+   {
+    "at": "2025-08-09 00:00:00+00:00",
+    "evidence": [
+     "SF-DIR-study-replay-v1-47"
+    ],
+    "kind": "HF_CONTEXT_ESTABLISHED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "trend": "up"
+   },
+   {
+    "at": "2025-08-09 00:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0001",
+    "kind": "ROLE_EVALUATED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "role": "REACTION_PAUSE_REFERENCE",
+    "supported": true
+   },
+   {
+    "at": "2025-08-09 00:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0002",
+    "kind": "ROLE_EVALUATED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "role": "REACTION_PAUSE_REFERENCE",
+    "supported": true
+   },
+   {
+    "after_hf_context": "2025-08-09 00:00:00+00:00",
+    "at": "2025-08-09 12:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0003",
+    "kind": "CANDIDATE_FORMED",
+    "layer": "DERIVATION"
+   },
+   {
+    "at": "2025-08-09 12:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0003",
+    "kind": "ROLE_EVALUATED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "role": "UNDETERMINED",
+    "supported": false
+   },
+   {
+    "at": "2025-08-09 16:00:00+00:00",
+    "bar": 51,
+    "candidate_id": "OBC-study-replay-v1-0003",
+    "kind": "CONFIRMATION_EVENT",
+    "layer": "DIRECT_OBSERVATION"
+   },
+   {
+    "at": "2025-08-09 16:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0003",
+    "kind": "ROLE_EVALUATED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "role": "UNDETERMINED",
+    "supported": false
+   },
+   {
+    "after_hf_context": "2025-08-09 00:00:00+00:00",
+    "at": "2025-08-10 04:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0004",
+    "kind": "CANDIDATE_FORMED",
+    "layer": "DERIVATION"
+   },
+   {
+    "at": "2025-08-10 04:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0004",
+    "kind": "ROLE_EVALUATED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "role": "UNDETERMINED",
+    "supported": false
+   },
+   {
+    "at": "2025-08-10 04:00:00+00:00",
+    "bar": 54,
+    "direction": "upward",
+    "kind": "REFERENCE_CROSSING",
+    "layer": "DIRECT_OBSERVATION",
+    "level": 117630.0,
+    "ref_id": "PSC:F-K(k=5)|high@2025-08-08T04:00:00+00:00"
+   },
+   {
+    "at": "2025-08-10 04:00:00+00:00",
+    "kind": "SHIFT_WATCH_OPENED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "note": "crossing an old reference is a context for WATCHING a possible shift, NOT proof of one (E03-A); no reversal/trade signal",
+    "watch_id": "SW-study-replay-v1-0002"
+   },
+   {
+    "at": "2025-08-10 08:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0004",
+    "kind": "ROLE_EVALUATED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "role": "REACTION_PAUSE_REFERENCE",
+    "supported": true
+   },
+   {
+    "at": "2025-08-10 08:00:00+00:00",
+    "bar": 55,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0001"
+   },
+   {
+    "at": "2025-08-10 12:00:00+00:00",
+    "bar": 56,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0001"
+   },
+   {
+    "at": "2025-08-10 16:00:00+00:00",
+    "bar": 57,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0001"
+   },
+   {
+    "at": "2025-08-10 20:00:00+00:00",
+    "bar": 58,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0001"
+   },
+   {
+    "at": "2025-08-11 00:00:00+00:00",
+    "bar": 59,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0001"
+   },
+   {
+    "at": "2025-08-11 04:00:00+00:00",
+    "bar": 60,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0001"
+   },
+   {
+    "at": "2025-08-11 04:00:00+00:00",
+    "bar": 60,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0002"
+   },
+   {
+    "at": "2025-08-11 08:00:00+00:00",
+    "bar": 61,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0001"
+   },
+   {
+    "at": "2025-08-11 08:00:00+00:00",
+    "bar": 61,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0002"
+   },
+   {
+    "at": "2025-08-11 12:00:00+00:00",
+    "bar": 62,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0001"
+   },
+   {
+    "at": "2025-08-11 12:00:00+00:00",
+    "bar": 62,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0002"
+   },
+   {
+    "at": "2025-08-11 16:00:00+00:00",
+    "bar": 63,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0001"
+   },
+   {
+    "at": "2025-08-11 16:00:00+00:00",
+    "bar": 63,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0002"
+   },
+   {
+    "at": "2025-08-11 20:00:00+00:00",
+    "bar": 64,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0001"
+   },
+   {
+    "at": "2025-08-11 20:00:00+00:00",
+    "bar": 64,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0002"
+   },
+   {
+    "at": "2025-08-12 00:00:00+00:00",
+    "bar": 65,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0001"
+   },
+   {
+    "at": "2025-08-12 04:00:00+00:00",
+    "bar": 66,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0001"
+   },
+   {
+    "at": "2025-08-12 04:00:00+00:00",
+    "bar": 66,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0002"
+   },
+   {
+    "at": "2025-08-12 08:00:00+00:00",
+    "bar": 67,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0001"
+   },
+   {
+    "at": "2025-08-12 12:00:00+00:00",
+    "bar": 68,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0001"
+   },
+   {
+    "at": "2025-08-12 16:00:00+00:00",
+    "bar": 69,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0001"
+   },
+   {
+    "at": "2025-08-12 20:00:00+00:00",
+    "evidence": [
+     "SF-DIR-study-replay-v1-70"
+    ],
+    "kind": "HF_CONTEXT_ESTABLISHED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "trend": "down"
+   },
+   {
+    "at": "2025-08-12 20:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0001",
+    "kind": "ROLE_EVALUATED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "role": "UNDETERMINED",
+    "supported": false
+   },
+   {
+    "at": "2025-08-12 20:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0002",
+    "kind": "ROLE_EVALUATED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "role": "UNDETERMINED",
+    "supported": false
+   },
+   {
+    "at": "2025-08-12 20:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0003",
+    "kind": "ROLE_EVALUATED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "role": "TREND_CONTINUATION_REFERENCE",
+    "supported": true
+   },
+   {
+    "at": "2025-08-12 20:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0004",
+    "kind": "ROLE_EVALUATED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "role": "UNDETERMINED",
+    "supported": false
+   },
+   {
+    "at": "2025-08-12 20:00:00+00:00",
+    "bar": 70,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0001"
+   },
+   {
+    "at": "2025-08-12 20:00:00+00:00",
+    "bar": 70,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0002"
+   },
+   {
+    "at": "2025-08-13 00:00:00+00:00",
+    "bar": 71,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0001"
+   },
+   {
+    "at": "2025-08-13 00:00:00+00:00",
+    "bar": 71,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0002"
+   },
+   {
+    "at": "2025-08-13 04:00:00+00:00",
+    "bar": 72,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0001"
+   },
+   {
+    "at": "2025-08-13 04:00:00+00:00",
+    "bar": 72,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0002"
+   },
+   {
+    "at": "2025-08-13 08:00:00+00:00",
+    "bar": 73,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0001"
+   },
+   {
+    "at": "2025-08-13 08:00:00+00:00",
+    "bar": 73,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0002"
+   },
+   {
+    "at": "2025-08-13 12:00:00+00:00",
+    "bar": 74,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0001"
+   },
+   {
+    "at": "2025-08-13 12:00:00+00:00",
+    "bar": 74,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0002"
+   },
+   {
+    "at": "2025-08-13 16:00:00+00:00",
+    "bar": 75,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0001"
+   },
+   {
+    "at": "2025-08-13 16:00:00+00:00",
+    "bar": 75,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0002"
+   },
+   {
+    "after_hf_context": "2025-08-12 20:00:00+00:00",
+    "at": "2025-08-13 20:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0005",
+    "kind": "CANDIDATE_FORMED",
+    "layer": "DERIVATION"
+   },
+   {
+    "at": "2025-08-13 20:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0005",
+    "kind": "ROLE_EVALUATED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "role": "UNDETERMINED",
+    "supported": false
+   },
+   {
+    "at": "2025-08-13 20:00:00+00:00",
+    "bar": 76,
+    "direction": "upward",
+    "kind": "REFERENCE_CROSSING",
+    "layer": "DIRECT_OBSERVATION",
+    "level": 122335.16,
+    "ref_id": "PSC:F-K(k=5)|high@2025-08-11T08:00:00+00:00"
+   },
+   {
+    "at": "2025-08-13 20:00:00+00:00",
+    "kind": "SHIFT_WATCH_OPENED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "note": "crossing an old reference is a context for WATCHING a possible shift, NOT proof of one (E03-A); no reversal/trade signal",
+    "watch_id": "SW-study-replay-v1-0003"
+   },
+   {
+    "at": "2025-08-13 20:00:00+00:00",
+    "bar": 76,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0001"
+   },
+   {
+    "at": "2025-08-13 20:00:00+00:00",
+    "bar": 76,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0002"
+   },
+   {
+    "after_hf_context": "2025-08-12 20:00:00+00:00",
+    "at": "2025-08-14 00:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0006",
+    "kind": "CANDIDATE_FORMED",
+    "layer": "DERIVATION"
+   },
+   {
+    "at": "2025-08-14 00:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0005",
+    "kind": "ROLE_EVALUATED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "role": "UNDETERMINED",
+    "supported": false
+   },
+   {
+    "at": "2025-08-14 00:00:00+00:00",
+    "candidate_id": "OBC-study-replay-v1-0006",
+    "kind": "ROLE_EVALUATED",
+    "layer": "CONTEXTUAL_INTERPRETATION",
+    "role": "UNDETERMINED",
+    "supported": false
+   },
+   {
+    "at": "2025-08-14 00:00:00+00:00",
+    "bar": 77,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0001"
+   },
+   {
+    "at": "2025-08-14 00:00:00+00:00",
+    "bar": 77,
+    "evidence_kind": "displacement_non_overlap",
+    "kind": "SHIFT_EVIDENCE_NOTED",
+    "layer": "DIRECT_OBSERVATION",
+    "watch_id": "SW-study-replay-v1-0002"
+   }
+  ],
+  "shift_watches": [
+   {
+    "crossing": {
+     "bar": 38,
+     "bar_time": "2025-08-07 12:00:00+00:00",
+     "close": 116519.53,
+     "direction": "upward",
+     "previous_close": 114787.99,
+     "ref_id": "PSC:F-K(k=5)|high@2025-08-04T20:00:00+00:00",
+     "ref_level": 115720.0,
+     "ref_side": "high",
+     "transition": "close-to-close transition across the level between two completed bars (intrabar path NOT established)"
+    },
+    "evidence": [
+     {
+      "at": "2025-08-08 00:00:00+00:00",
+      "at_bar": 41,
+      "detail": {
+       "bar": 41,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-10 08:00:00+00:00",
+      "at_bar": 55,
+      "detail": {
+       "bar": 55,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-10 12:00:00+00:00",
+      "at_bar": 56,
+      "detail": {
+       "bar": 56,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-10 16:00:00+00:00",
+      "at_bar": 57,
+      "detail": {
+       "bar": 57,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-10 20:00:00+00:00",
+      "at_bar": 58,
+      "detail": {
+       "bar": 58,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-11 00:00:00+00:00",
+      "at_bar": 59,
+      "detail": {
+       "bar": 59,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-11 04:00:00+00:00",
+      "at_bar": 60,
+      "detail": {
+       "bar": 60,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-11 08:00:00+00:00",
+      "at_bar": 61,
+      "detail": {
+       "bar": 61,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-11 12:00:00+00:00",
+      "at_bar": 62,
+      "detail": {
+       "bar": 62,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-11 16:00:00+00:00",
+      "at_bar": 63,
+      "detail": {
+       "bar": 63,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-11 20:00:00+00:00",
+      "at_bar": 64,
+      "detail": {
+       "bar": 64,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-12 00:00:00+00:00",
+      "at_bar": 65,
+      "detail": {
+       "bar": 65,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-12 04:00:00+00:00",
+      "at_bar": 66,
+      "detail": {
+       "bar": 66,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-12 08:00:00+00:00",
+      "at_bar": 67,
+      "detail": {
+       "bar": 67,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-12 12:00:00+00:00",
+      "at_bar": 68,
+      "detail": {
+       "bar": 68,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-12 16:00:00+00:00",
+      "at_bar": 69,
+      "detail": {
+       "bar": 69,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-12 20:00:00+00:00",
+      "at_bar": 70,
+      "detail": {
+       "bar": 70,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-13 00:00:00+00:00",
+      "at_bar": 71,
+      "detail": {
+       "bar": 71,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-13 04:00:00+00:00",
+      "at_bar": 72,
+      "detail": {
+       "bar": 72,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-13 08:00:00+00:00",
+      "at_bar": 73,
+      "detail": {
+       "bar": 73,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-13 12:00:00+00:00",
+      "at_bar": 74,
+      "detail": {
+       "bar": 74,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-13 16:00:00+00:00",
+      "at_bar": 75,
+      "detail": {
+       "bar": 75,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-13 20:00:00+00:00",
+      "at_bar": 76,
+      "detail": {
+       "bar": 76,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-14 00:00:00+00:00",
+      "at_bar": 77,
+      "detail": {
+       "bar": 77,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     }
+    ],
+    "local_ref_id": "PSC:F-K(k=5)|low@2025-08-05T16:00:00+00:00",
+    "local_ref_level": 112650.0,
+    "opened_at": "2025-08-07 12:00:00+00:00",
+    "questions": [
+     "watch the next closed bars for displacement/non-overlap in the crossing direction (E03-B: 'monitor next closed-bar displacement/non-overlap as evidence')",
+     "watch for a subsequent crossing of the local swing formed before the older reference (E03-B sequence: older-reference crossing -> local-swing crossing)",
+     "do NOT assume a reversal or a trade after a raid \u2014 observe whether the market supplies evidence (E03-B)"
+    ],
+    "scan_floor": 77,
+    "status": "EVIDENCE_NOTED",
+    "watch_id": "SW-study-replay-v1-0001"
+   },
+   {
+    "crossing": {
+     "bar": 54,
+     "bar_time": "2025-08-10 04:00:00+00:00",
+     "close": 118500.0,
+     "direction": "upward",
+     "previous_close": 116462.25,
+     "ref_id": "PSC:F-K(k=5)|high@2025-08-08T04:00:00+00:00",
+     "ref_level": 117630.0,
+     "ref_side": "high",
+     "transition": "close-to-close transition across the level between two completed bars (intrabar path NOT established)"
+    },
+    "evidence": [
+     {
+      "at": "2025-08-11 04:00:00+00:00",
+      "at_bar": 60,
+      "detail": {
+       "bar": 60,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-11 08:00:00+00:00",
+      "at_bar": 61,
+      "detail": {
+       "bar": 61,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-11 12:00:00+00:00",
+      "at_bar": 62,
+      "detail": {
+       "bar": 62,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-11 16:00:00+00:00",
+      "at_bar": 63,
+      "detail": {
+       "bar": 63,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-11 20:00:00+00:00",
+      "at_bar": 64,
+      "detail": {
+       "bar": 64,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-12 04:00:00+00:00",
+      "at_bar": 66,
+      "detail": {
+       "bar": 66,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-12 20:00:00+00:00",
+      "at_bar": 70,
+      "detail": {
+       "bar": 70,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-13 00:00:00+00:00",
+      "at_bar": 71,
+      "detail": {
+       "bar": 71,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-13 04:00:00+00:00",
+      "at_bar": 72,
+      "detail": {
+       "bar": 72,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-13 08:00:00+00:00",
+      "at_bar": 73,
+      "detail": {
+       "bar": 73,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-13 12:00:00+00:00",
+      "at_bar": 74,
+      "detail": {
+       "bar": 74,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-13 16:00:00+00:00",
+      "at_bar": 75,
+      "detail": {
+       "bar": 75,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-13 20:00:00+00:00",
+      "at_bar": 76,
+      "detail": {
+       "bar": 76,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     },
+     {
+      "at": "2025-08-14 00:00:00+00:00",
+      "at_bar": 77,
+      "detail": {
+       "bar": 77,
+       "relation": "closed bar does not overlap the crossing bar's range"
+      },
+      "kind": "displacement_non_overlap",
+      "layer": "DIRECT_OBSERVATION",
+      "note": "evidence item only \u2014 NOT proof of a shift; no reversal or trade signal is generated"
+     }
+    ],
+    "local_ref_id": "PSC:F-K(k=5)|low@2025-08-05T16:00:00+00:00",
+    "local_ref_level": 112650.0,
+    "opened_at": "2025-08-10 04:00:00+00:00",
+    "questions": [
+     "watch the next closed bars for displacement/non-overlap in the crossing direction (E03-B: 'monitor next closed-bar displacement/non-overlap as evidence')",
+     "watch for a subsequent crossing of the local swing formed before the older reference (E03-B sequence: older-reference crossing -> local-swing crossing)",
+     "do NOT assume a reversal or a trade after a raid \u2014 observe whether the market supplies evidence (E03-B)"
+    ],
+    "scan_floor": 77,
+    "status": "EVIDENCE_NOTED",
+    "watch_id": "SW-study-replay-v1-0002"
+   },
+   {
+    "crossing": {
+     "bar": 76,
+     "bar_time": "2025-08-13 20:00:00+00:00",
+     "close": 122744.21,
+     "direction": "upward",
+     "previous_close": 120920.62,
+     "ref_id": "PSC:F-K(k=5)|high@2025-08-11T08:00:00+00:00",
+     "ref_level": 122335.16,
+     "ref_side": "high",
+     "transition": "close-to-close transition across the level between two completed bars (intrabar path NOT established)"
+    },
+    "evidence": [],
+    "local_ref_id": "PSC:F-K(k=5)|low@2025-08-12T00:00:00+00:00",
+    "local_ref_level": 118050.11,
+    "opened_at": "2025-08-13 20:00:00+00:00",
+    "questions": [
+     "watch the next closed bars for displacement/non-overlap in the crossing direction (E03-B: 'monitor next closed-bar displacement/non-overlap as evidence')",
+     "watch for a subsequent crossing of the local swing formed before the older reference (E03-B sequence: older-reference crossing -> local-swing crossing)",
+     "do NOT assume a reversal or a trade after a raid \u2014 observe whether the market supplies evidence (E03-B)"
+    ],
+    "scan_floor": 77,
+    "status": "WATCHING",
+    "watch_id": "SW-study-replay-v1-0003"
+   }
+  ],
+  "task": "trend-continuation",
+  "task_scale": "4h",
+  "watch_seq": 3
+ },
+ "watch_plan": [
+  {
+   "kind": "OB-like candidate (R1)",
+   "ordering": null,
+   "revision_conditions": [
+    "higher-frame structure change re-opens role evaluation",
+    "finer rows within an ambiguous bar may resolve its ordering (either direction) \u2014 recorded when available; later bars may still confirm"
+   ],
+   "role": "UNDETERMINED",
+   "state": "AWAITING_CONFIRMATION",
+   "subject": "OBC-study-replay-v1-0001",
+   "time_provenance": {
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_time": "2025-08-07 12:00:00+00:00",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   "unknowns": [
+    "no resting-order data: participant positions/intent, resting stops and available liquidity CANNOT be established",
+    "the source's 'near support' wording is operationally unresolved; the exact-level relation used here is an ENGINEERING choice (no distance/percentage/candle-count rule exists or is claimed)"
+   ],
+   "watch": [
+    "the candidate extreme 114787.98: a later completed bar whose reported high exceeds it (source wording 'is traded through'; intrabar sequence not established) -> CONFIRMED at the evidence bar",
+    "return to 116828.93 -> revisit event (same-bar with confirmation -> ordering UNKNOWN for THAT bar only; the candidate stays open)",
+    "context reference PSC:F-K(k=5)|high@2025-08-04T20:00:00+00:00 at 115720.0: a completed close through it before confirmation -> role premise failed"
+   ]
+  },
+  {
+   "kind": "OB-like candidate (R1)",
+   "ordering": null,
+   "revision_conditions": [
+    "higher-frame structure change re-opens role evaluation",
+    "finer rows within an ambiguous bar may resolve its ordering (either direction) \u2014 recorded when available; later bars may still confirm"
+   ],
+   "role": "UNDETERMINED",
+   "state": "AWAITING_CONFIRMATION",
+   "subject": "OBC-study-replay-v1-0002",
+   "time_provenance": {
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_time": "2025-08-07 20:00:00+00:00",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   "unknowns": [
+    "no resting-order data: participant positions/intent, resting stops and available liquidity CANNOT be established",
+    "the source's 'near support' wording is operationally unresolved; the exact-level relation used here is an ENGINEERING choice (no distance/percentage/candle-count rule exists or is claimed)"
+   ],
+   "watch": [
+    "the candidate extreme 115632.31: a later completed bar whose reported high exceeds it (source wording 'is traded through'; intrabar sequence not established) -> CONFIRMED at the evidence bar",
+    "return to 117520.0 -> revisit event (same-bar with confirmation -> ordering UNKNOWN for THAT bar only; the candidate stays open)",
+    "context reference PSC:F-K(k=5)|high@2025-08-04T20:00:00+00:00 at 115720.0: a completed close through it before confirmation -> role premise failed"
+   ]
+  },
+  {
+   "kind": "OB-like candidate (R1)",
+   "ordering": null,
+   "revision_conditions": [
+    "higher-frame structure change re-opens role evaluation",
+    "finer rows within an ambiguous bar may resolve its ordering (either direction) \u2014 recorded when available; later bars may still confirm"
+   ],
+   "role": "TREND_CONTINUATION_REFERENCE",
+   "state": "CONFIRMED",
+   "subject": "OBC-study-replay-v1-0003",
+   "time_provenance": {
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_time": "2025-08-09 12:00:00+00:00",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   "unknowns": [
+    "no resting-order data: participant positions/intent, resting stops and available liquidity CANNOT be established",
+    "the source's 'near support' wording is operationally unresolved; the exact-level relation used here is an ENGINEERING choice (no distance/percentage/candle-count rule exists or is claimed)"
+   ],
+   "watch": [
+    "the candidate extreme 116756.0: a later completed bar whose reported high exceeds it (source wording 'is traded through'; intrabar sequence not established) -> CONFIRMED at the evidence bar",
+    "return to 117944.05 -> revisit event (same-bar with confirmation -> ordering UNKNOWN for THAT bar only; the candidate stays open)",
+    "context reference PSC:F-K(k=5)|high@2025-08-08T04:00:00+00:00 at 117630.0: a completed close through it before confirmation -> role premise failed"
+   ]
+  },
+  {
+   "kind": "OB-like candidate (R1)",
+   "ordering": null,
+   "revision_conditions": [
+    "higher-frame structure change re-opens role evaluation",
+    "finer rows within an ambiguous bar may resolve its ordering (either direction) \u2014 recorded when available; later bars may still confirm"
+   ],
+   "role": "UNDETERMINED",
+   "state": "AWAITING_CONFIRMATION",
+   "subject": "OBC-study-replay-v1-0004",
+   "time_provenance": {
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_time": "2025-08-10 04:00:00+00:00",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   "unknowns": [
+    "no resting-order data: participant positions/intent, resting stops and available liquidity CANNOT be established",
+    "the source's 'near support' wording is operationally unresolved; the exact-level relation used here is an ENGINEERING choice (no distance/percentage/candle-count rule exists or is claimed)"
+   ],
+   "watch": [
+    "the candidate extreme 116460.63: a later completed bar whose reported high exceeds it (source wording 'is traded through'; intrabar sequence not established) -> CONFIRMED at the evidence bar",
+    "return to 118500.0 -> revisit event (same-bar with confirmation -> ordering UNKNOWN for THAT bar only; the candidate stays open)",
+    "context reference PSC:F-K(k=5)|high@2025-08-08T04:00:00+00:00 at 117630.0: a completed close through it before confirmation -> role premise failed"
+   ]
+  },
+  {
+   "kind": "OB-like candidate (R1)",
+   "ordering": null,
+   "revision_conditions": [
+    "higher-frame structure change re-opens role evaluation",
+    "finer rows within an ambiguous bar may resolve its ordering (either direction) \u2014 recorded when available; later bars may still confirm"
+   ],
+   "role": "UNDETERMINED",
+   "state": "AWAITING_CONFIRMATION",
+   "subject": "OBC-study-replay-v1-0005",
+   "time_provenance": {
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_time": "2025-08-13 20:00:00+00:00",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   "unknowns": [
+    "no resting-order data: participant positions/intent, resting stops and available liquidity CANNOT be established",
+    "the source's 'near support' wording is operationally unresolved; the exact-level relation used here is an ENGINEERING choice (no distance/percentage/candle-count rule exists or is claimed)"
+   ],
+   "watch": [
+    "the candidate extreme 120920.61: a later completed bar whose reported high exceeds it (source wording 'is traded through'; intrabar sequence not established) -> CONFIRMED at the evidence bar",
+    "return to 122839.47 -> revisit event (same-bar with confirmation -> ordering UNKNOWN for THAT bar only; the candidate stays open)",
+    "context reference PSC:F-K(k=5)|high@2025-08-11T08:00:00+00:00 at 122335.16: a completed close through it before confirmation -> role premise failed"
+   ]
+  },
+  {
+   "kind": "OB-like candidate (R1)",
+   "ordering": null,
+   "revision_conditions": [
+    "higher-frame structure change re-opens role evaluation",
+    "finer rows within an ambiguous bar may resolve its ordering (either direction) \u2014 recorded when available; later bars may still confirm"
+   ],
+   "role": "UNDETERMINED",
+   "state": "AWAITING_CONFIRMATION",
+   "subject": "OBC-study-replay-v1-0006",
+   "time_provenance": {
+    "bar_convention": "closed bars only; source rows resampled to the task scale (completion-labelled)",
+    "bar_time": "2025-08-14 00:00:00+00:00",
+    "timeframe": "4h",
+    "timezone": "UTC"
+   },
+   "unknowns": [
+    "no resting-order data: participant positions/intent, resting stops and available liquidity CANNOT be established",
+    "the source's 'near support' wording is operationally unresolved; the exact-level relation used here is an ENGINEERING choice (no distance/percentage/candle-count rule exists or is claimed)"
+   ],
+   "watch": [
+    "the candidate extreme 122298.2: a later completed bar whose reported high exceeds it (source wording 'is traded through'; intrabar sequence not established) -> CONFIRMED at the evidence bar",
+    "return to 123667.79 -> revisit event (same-bar with confirmation -> ordering UNKNOWN for THAT bar only; the candidate stays open)",
+    "context reference PSC:F-K(k=5)|high@2025-08-11T08:00:00+00:00 at 122335.16: a completed close through it before confirmation -> role premise failed"
+   ]
+  },
+  {
+   "kind": "shift-watch (E03-A/B slice)",
+   "revision_conditions": [
+    "observed evidence is recorded append-only (displacement/non-overlap; local-swing crossing); there is NO 'shift confirmed' state and NO reversal/trade signal"
+   ],
+   "state": "EVIDENCE_NOTED",
+   "subject": "SW-study-replay-v1-0001",
+   "time_provenance": {
+    "crossing_bar": 38,
+    "opened_at": "2025-08-07 12:00:00+00:00"
+   },
+   "unknowns": [
+    "a crossing is context for watching a possible shift, NOT proof of one (E03-A)",
+    "intrabar path across the level is not established by completed bars"
+   ],
+   "watch": [
+    "watch the next closed bars for displacement/non-overlap in the crossing direction (E03-B: 'monitor next closed-bar displacement/non-overlap as evidence')",
+    "watch for a subsequent crossing of the local swing formed before the older reference (E03-B sequence: older-reference crossing -> local-swing crossing)",
+    "do NOT assume a reversal or a trade after a raid \u2014 observe whether the market supplies evidence (E03-B)"
+   ]
+  },
+  {
+   "kind": "shift-watch (E03-A/B slice)",
+   "revision_conditions": [
+    "observed evidence is recorded append-only (displacement/non-overlap; local-swing crossing); there is NO 'shift confirmed' state and NO reversal/trade signal"
+   ],
+   "state": "EVIDENCE_NOTED",
+   "subject": "SW-study-replay-v1-0002",
+   "time_provenance": {
+    "crossing_bar": 54,
+    "opened_at": "2025-08-10 04:00:00+00:00"
+   },
+   "unknowns": [
+    "a crossing is context for watching a possible shift, NOT proof of one (E03-A)",
+    "intrabar path across the level is not established by completed bars"
+   ],
+   "watch": [
+    "watch the next closed bars for displacement/non-overlap in the crossing direction (E03-B: 'monitor next closed-bar displacement/non-overlap as evidence')",
+    "watch for a subsequent crossing of the local swing formed before the older reference (E03-B sequence: older-reference crossing -> local-swing crossing)",
+    "do NOT assume a reversal or a trade after a raid \u2014 observe whether the market supplies evidence (E03-B)"
+   ]
+  },
+  {
+   "kind": "shift-watch (E03-A/B slice)",
+   "revision_conditions": [
+    "observed evidence is recorded append-only (displacement/non-overlap; local-swing crossing); there is NO 'shift confirmed' state and NO reversal/trade signal"
+   ],
+   "state": "WATCHING",
+   "subject": "SW-study-replay-v1-0003",
+   "time_provenance": {
+    "crossing_bar": 76,
+    "opened_at": "2025-08-13 20:00:00+00:00"
+   },
+   "unknowns": [
+    "a crossing is context for watching a possible shift, NOT proof of one (E03-A)",
+    "intrabar path across the level is not established by completed bars"
+   ],
+   "watch": [
+    "watch the next closed bars for displacement/non-overlap in the crossing direction (E03-B: 'monitor next closed-bar displacement/non-overlap as evidence')",
+    "watch for a subsequent crossing of the local swing formed before the older reference (E03-B sequence: older-reference crossing -> local-swing crossing)",
+    "do NOT assume a reversal or a trade after a raid \u2014 observe whether the market supplies evidence (E03-B)"
+   ]
+  }
+ ]
+}
