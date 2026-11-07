@@ -1,7 +1,7 @@
 # verify_cmp.md
 
-- claims checked: **31**
-- CHECK 1 pass (quote verbatim, <=25 words): **31** (100.0%)
+- claims checked: **42**
+- CHECK 1 pass (quote verbatim, <=25 words): **42** (100.0%)
 - CHECK 1 fail: **0**
 - CHECK 2 warnings (statement content word absent from +/-100-word surroundings): **0**
 

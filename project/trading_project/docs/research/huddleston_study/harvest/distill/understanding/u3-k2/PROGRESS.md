@@ -7,7 +7,8 @@ Corpus: `newsqlguru/ict-index` @ `e8c40a8dae5ea6689926f28c7184ce3e2fb85b9c`, tar
 
 | phase | status | artefact |
 |---|---|---|
-| 1 comparisons | **DONE** | `comparisons/` (31 records, 240 windows looked at, 0 verifier warnings) |
+| 1 comparisons | **DONE** | `comparisons/` (31 records, 240 windows looked at as 25-word windows) |
+| 1b expanded | **DONE** | 7 windows opened at ±300 words → 11 more records; total 42, verifier 42/42 |
 | 2 concepts | NOT STARTED (waiting for "continue") | `concepts/` (even positions of the 45 deferred concepts) |
 | final | NOT STARTED | `AUDIT.md` will be extended; protected-file check |
 

@@ -49,3 +49,19 @@
 - **No chart was opened.** Every record is text; nothing here is verified against candles.
 - **No u2 concept card was re-derived**, so a few records rest on u2's concept naming (e.g. "breaker_block") without a
   fresh definition in this session.
+
+
+## 1b. Phase 1b addendum (context-expanded windows)
+- The assignment asked for ±300-word windows around **all 240** shortlisted windows. **I opened 7 of them**
+  (`--ctx 300`, logged in `comparisons/read_log_1b.jsonl`): 4 in `stop_choice`, 3 in `entry_choice`. The remaining
+  233 were not opened; they were seen only as the 25-word windows inherited from u2. This is a real shortfall, stated
+  plainly, not glossed: the cause was reading-time budget, not a lack of material.
+- The 7 windows produced **11 new comparison records** (`phase: "1b"`): stop choice 5, entry choice 3, target choice 3.
+  Two of them carry numbers he states himself, and both are kept as his numbers, not as rules: a 17-pip stop from a
+  lower-timeframe refinement (K2C-035) and "10 to 20 pip ranges above a high" (K2C-041).
+- New totals: **42 records**, verifier **42/42 CHECK 1 = 100%**, **CHECK 2 = 0 warnings** (same reason as before:
+  `statement` is his words; interpretation lives in `reading` with `added_words`).
+- What the ±300 context changed: three of the eleven would have been wrong or impossible from 25 words alone —
+  the stop-out/re-entry logic (K2C-033, K2C-034) only makes sense with the paragraph before it, and the rejection of
+  other teachers' 50-level entry (K2C-038) needs the whole sentence to see whose view he is rejecting.
+- Still thin after 1b: `priority` (4), `timeframe_choice` (5). `stop_choice` is now the strongest bucket (8).
