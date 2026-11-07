@@ -1,6 +1,6 @@
 # Concept Cards — Session `u3-k3`
 
-Completed cards so far: **20** / **23** (`TODO` set).
+Completed cards so far: **23** / **23** (`TODO` set).
 
 | # | Concept | Windows Read (`±100`w) | Exact / Variant | Distinct Files | Eras | Claims | Status |
 |---:|---|---:|---|---:|---:|---:|---|
@@ -24,3 +24,6 @@ Completed cards so far: **20** / **23** (`TODO` set).
 | 18 | [rejection_block](rejection_block.md) | 15 | 15 / 0 | 15 | 4 | 11 | FULL (≥15w) |
 | 19 | [run_on_stops](run_on_stops.md) | 15 | 15 / 0 | 15 | 5 | 11 | FULL (≥15w) |
 | 20 | [short_term_high](short_term_high.md) | 15 | 15 / 0 | 15 | 5 | 11 | FULL (≥15w) |
+| 21 | [smt_divergence](smt_divergence.md) | 15 | 15 / 0 | 15 | 5 | 12 | FULL (≥15w) |
+| 22 | [swing_low](swing_low.md) | 15 | 15 / 0 | 15 | 5 | 12 | FULL (≥15w) |
+| 23 | [turtle_soup](turtle_soup.md) | 15 | 15 / 0 | 15 | 5 | 12 | FULL (≥15w) |
