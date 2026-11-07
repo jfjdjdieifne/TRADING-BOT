@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import replace
 from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
 
@@ -11,7 +12,7 @@ from trading_system.ict_diagnostics.direction import (
     random_entry_index,
     resolve_barriers,
 )
-from trading_system.ict_diagnostics.post_stop import analyze_post_stop_case
+from trading_system.ict_diagnostics.post_stop import analyze_post_stop_case, target_audit
 from trading_system.ict_diagnostics.prediction_v2 import (
     _pair_choice,
     _random_pool,
@@ -254,6 +255,21 @@ def test_entry_pair_partial_ranking_and_stand_aside_excursion():
     assert rows[0]["mfe"] == pytest.approx(0.001)
     assert rows[0]["mae"] == pytest.approx(0.003)
     assert rows[0]["terminal"] == pytest.approx(0.0)
+
+
+def test_same_timeframe_age_priority_is_not_mislabeled_as_replay_mismatch():
+    candles = [candle(0), candle(1)]
+    context = context_for(candles)
+    context = replace(
+        context,
+        active_pools=(
+            pool("pool:target", 1.03, "M5"),
+            pool("pool:near", 1.02, "M5"),
+        ),
+    )
+    audit = target_audit(context, REFERENCE)
+    assert audit["selected_is_nearest"] is False
+    assert audit["rule_consequence"] == "SAME_TIMEFRAME_AGE_PRIORITY_BUG_CANDIDATE"
 
 
 def test_2023_is_rejected_before_open(tmp_path):

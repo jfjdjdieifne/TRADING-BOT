@@ -89,14 +89,24 @@ def target_audit(context: EntryContext, variant: EngineVariant) -> dict[str, Any
     target_distance = pool_distance(target, context.direction, entry)
     nearest_distance = pool_distance(nearest, context.direction, entry)
     is_nearest = target.pool_id == nearest.pool_id
+    tied = [
+        pool
+        for pool in candidates
+        if pool_distance(pool, context.direction, entry) == nearest_distance
+    ]
     if is_nearest:
         consequence = "SELECTED_IS_NEAREST"
-    elif variant.target_ranking is TargetRanking.DAILY_THEN_DISTANCE and target.timeframe == "DAILY":
-        consequence = "DAILY_PRIORITY_RULE_CONSEQUENCE"
+    elif len(tied) > 1 and target_distance == nearest_distance:
+        consequence = "DISTANCE_TIE_RULE_CONSEQUENCE"
     elif variant.target_ranking is TargetRanking.DISTANCE_ONLY:
-        # Equal-distance ordering also includes formation time inside rank_draws.
-        tied = [pool for pool in candidates if pool_distance(pool, context.direction, entry) == nearest_distance]
-        consequence = "DISTANCE_TIE_RULE_CONSEQUENCE" if len(tied) > 1 and target_distance == nearest_distance else "REPLAY_MISMATCH_NEEDS_AUDIT"
+        consequence = "REPLAY_MISMATCH_NEEDS_AUDIT"
+    elif target.timeframe == nearest.timeframe:
+        # select_target puts the significance rank before distance. rank_draws
+        # assigns different ranks by formation time even within one timeframe;
+        # this is an implementation-effect candidate, not a replay mismatch.
+        consequence = "SAME_TIMEFRAME_AGE_PRIORITY_BUG_CANDIDATE"
+    elif target.timeframe == "DAILY" and nearest.timeframe == "M5":
+        consequence = "DAILY_PRIORITY_RULE_CONSEQUENCE"
     else:
         consequence = "REPLAY_MISMATCH_NEEDS_AUDIT"
     return {
