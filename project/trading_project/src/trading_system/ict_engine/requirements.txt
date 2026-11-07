@@ -1,0 +1,10 @@
+iniconfig==2.2
+numpy==1.26.4
+packaging==26.3
+pandas==2.3.3
+pluggy==1.7.0
+pygments==2.21.0
+pytest==9.2.0
+python-dateutil==4.0.0
+pytz==2026.6
+tzdata==2026.6

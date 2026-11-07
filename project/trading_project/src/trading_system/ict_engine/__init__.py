@@ -1,7 +1,8 @@
 """Deterministic, card-grounded ICT reading engine.
 
-Stage M0 contains only the bounded EURUSD data loader and causal-test contract.
-Recognizers and narrative output deliberately do not exist yet.
+The bounded data loader, causal market/filler status, and prefix-invariance
+contract are shared infrastructure. Recognizers and narrative output are added
+only at their approved milestones.
 """
 
 from .causal import PrefixInvarianceError, assert_prefix_invariance
