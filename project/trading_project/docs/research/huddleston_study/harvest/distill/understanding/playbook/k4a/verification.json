@@ -1,0 +1,57 @@
+{
+  "quote_passed": 95,
+  "quote_total": 95,
+  "windows": {
+    "Q01": {
+      "requested": 8,
+      "opened": 5
+    },
+    "Q02": {
+      "requested": 8,
+      "opened": 5
+    },
+    "Q03": {
+      "requested": 8,
+      "opened": 5
+    },
+    "Q04": {
+      "requested": 8,
+      "opened": 5
+    },
+    "Q05": {
+      "requested": 10,
+      "opened": 7
+    },
+    "Q06": {
+      "requested": 8,
+      "opened": 5
+    },
+    "Q07": {
+      "requested": 8,
+      "opened": 5
+    },
+    "Q08": {
+      "requested": 12,
+      "opened": 9
+    },
+    "Q09": {
+      "requested": 10,
+      "opened": 7
+    },
+    "Q10": {
+      "requested": 14,
+      "opened": 11
+    }
+  },
+  "distinct_opened_transcripts": 33,
+  "era_distribution": {
+    "E1_EARLY_SERIES": 10,
+    "E2_2016": 13,
+    "E3_2017": 16,
+    "E4_2019_2022": 13,
+    "E5_2023_2024": 12
+  },
+  "manifest_ok": true,
+  "gaps_ok": true,
+  "failures": []
+}
