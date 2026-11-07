@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import fields
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
+import re
 
 import pytest
 
@@ -145,6 +146,24 @@ def test_narration_covers_m1_event_families_without_promoting_candidates() -> No
     assert any("رصد لا حكم فشل" in text for text in texts) or any(
         "فجوة" in text for text in texts
     )
+
+
+def test_all_visible_narrative_fields_are_arabic_not_raw_enum_values() -> None:
+    daily = market_series(
+        [(1.10, 1.12, 1.09, 1.11), (1.11, 1.13, 1.10, 1.12)],
+        origin=datetime(2022, 1, 3, 23, 55, tzinfo=UTC),
+    )
+    for candles in (setup_candles(), setup_candles(mirror=True), daily):
+        for variant in VARIANTS:
+            for reading in reading_trace(candles, variant):
+                visible = [event.text for event in reading.narration]
+                visible += [decision.reason for decision in reading.decisions]
+                visible += [
+                    text
+                    for prediction in reading.predictions
+                    for text in (prediction.expectation, prediction.invalidation)
+                ]
+                assert all(not re.search(r"[A-Za-z]", text) for text in visible)
 
 
 def test_daily_close_is_narrated_and_becomes_a_candidate_pool() -> None:

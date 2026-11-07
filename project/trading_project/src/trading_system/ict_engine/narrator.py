@@ -26,7 +26,13 @@ from .liquidity import (
     pool_draw,
     rank_draws,
 )
-from .management import BreakEvenContext, BreakEvenState, break_even_states
+from .management import (
+    BreakEvenContext,
+    BreakEvenState,
+    BreakEvenVariant,
+    ManagementAction,
+    break_even_states,
+)
 from .market_status import MarketStatus, market_status
 from .order_blocks import (
     OrderBlockDirection,
@@ -102,6 +108,40 @@ def _claims(*groups: str | tuple[str, ...]) -> tuple[str, ...]:
 
 def _price(value: float) -> str:
     return format(value, ".12g")
+
+
+_MANAGEMENT_VARIANT_TEXT = {
+    BreakEvenVariant.AFTER_FIRST_PROFIT: "بعد أول ربح",
+    BreakEvenVariant.AT_75_PERCENT_OBJECTIVE: "عند 75٪ من الهدف",
+    BreakEvenVariant.LONDON_ELIGIBILITY_ONLY: "أهلية لندن فقط",
+    BreakEvenVariant.HIGHER_TIMEFRAME_RESIST: "مقاومة الإطار الأعلى",
+    BreakEvenVariant.NO_RUSH_TRIGGER_WAITING: "انتظار المحفز بلا استعجال",
+}
+_MANAGEMENT_ACTION_TEXT = {
+    ManagementAction.MOVE_TO_BREAK_EVEN: "نقل الوقف إلى التعادل",
+    ManagementAction.DO_NOT_MOVE: "عدم نقل الوقف",
+    ManagementAction.ELIGIBLE_BUT_TRIGGER_SEPARATE: "مؤهل مع فصل المحفز",
+    ManagementAction.WAITING: "انتظار",
+}
+_TIMEFRAME_TEXT = {
+    HigherTimeframe.DAILY: "اليومية",
+    HigherTimeframe.WEEKLY: "الأسبوعية",
+    HigherTimeframe.MONTHLY: "الشهرية",
+}
+_ANCHOR_TEXT = {
+    CalendarAnchor.UTC: "التوقيت العالمي",
+    CalendarAnchor.NEW_YORK: "نيويورك",
+}
+_CLOCK_TEXT = {
+    ClockDefinition.LONDON_START_0100_OPEN_END: "بداية لندن 01:00 بنهاية مفتوحة",
+    ClockDefinition.LONDON_START_0200_OPEN_END: "بداية لندن 02:00 بنهاية مفتوحة",
+    ClockDefinition.EURO_0200_0500: "نافذة اليورو 02:00–05:00",
+    ClockDefinition.LONDON_CLOSE_1000_1200: "إغلاق لندن 10:00–12:00",
+    ClockDefinition.NEW_YORK_SESSION_NOT_KILLZONE: "جلسة نيويورك لا منطقة قتل",
+    ClockDefinition.WIDE_0830_NOT_NY_KILLZONE_OPEN_END: (
+        "النافذة الواسعة 08:30 لا افتتاح منطقة قتل نيويورك"
+    ),
+}
 
 
 def _narration(
@@ -463,8 +503,9 @@ def _setup_at_first_touch(
             "target_choice",
             _claims(target.claim_ids, ranking_claims, target_choice_claims),
             (
-                f"اختير {target.pool_id} بترتيب {ranked_target.distance_rank} للمسافة "
-                f"وترتيب الإطار {ranked_target.timeframe_significance_rank}."
+f"اختير مستوى السيولة {_price(target.level)} بترتيب "
+                            f"{ranked_target.distance_rank} للمسافة وترتيب الإطار "
+                            f"{ranked_target.timeframe_significance_rank}."
             ),
             prediction_id,
         ),
@@ -507,7 +548,10 @@ def _setup_at_first_touch(
             source_id + f":management:{state.variant.value}",
             "break_even_management",
             state.claim_ids,
-            f"حالة إدارة التعادل {state.variant.value}: {state.action.value}.",
+            (
+                f"حالة إدارة التعادل {_MANAGEMENT_VARIANT_TEXT[state.variant]}: "
+                f"{_MANAGEMENT_ACTION_TEXT[state.action]}."
+            ),
         )
         for state in management
     )
@@ -624,7 +668,8 @@ def reading_trace(
                     displacement.claim_ids,
                     (
                         f"إزاحة برتبة مدى {displacement.range_rank} وإغلاق خلف "
-                        f"{displacement.broken_swing.side.value} عند {_price(displacement.broken_swing.price)}."
+                        f"{'قمة' if displacement.broken_swing.side is SwingSide.HIGH else 'قاع'} "
+                        f"عند {_price(displacement.broken_swing.price)}."
                     ),
                 )
             )
@@ -887,8 +932,9 @@ def reading_trace(
                         "higher_timeframe_close",
                         ("U0012", "U0024", "U0025", "U0052", "U0053"),
                         (
-                            f"اكتملت شمعة {timeframe.value} بمرساة {anchor.value}: "
-                            f"{_price(completed.bid_low)} إلى {_price(completed.bid_high)} على العرض."
+                            f"اكتملت الشمعة {_TIMEFRAME_TEXT[timeframe]} بمرساة "
+                            f"{_ANCHOR_TEXT[anchor]}: {_price(completed.bid_low)} إلى "
+                            f"{_price(completed.bid_high)} على العرض."
                         ),
                     )
                 )
@@ -918,8 +964,9 @@ def reading_trace(
                             "session_clock",
                             session_claims,
                             (
-                                f"بدأت نافذة {clock.definition_id.value} بنيويورك؛ "
-                                f"سماح تسميتها منطقة قتل: {clock.killzone_label_allowed}."
+                                f"بدأت نافذة {_CLOCK_TEXT[clock.definition_id]} بنيويورك؛ "
+                                "سماح تسميتها منطقة قتل: "
+                                f"{'مسموح' if clock.killzone_label_allowed else 'غير مسموح'}."
                             ),
                         )
                     )
