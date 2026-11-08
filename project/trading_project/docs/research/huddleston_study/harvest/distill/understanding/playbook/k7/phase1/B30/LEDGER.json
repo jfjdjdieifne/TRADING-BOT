@@ -1,0 +1,146 @@
+{
+ "batch_id": "B30",
+ "pilot": "B",
+ "chunks_total": 25,
+ "chunks_read_full": 16,
+ "words_total": 27102,
+ "words_read_full": 17143,
+ "not_read_chunk_ids": [
+  "F0172#005",
+  "F0172#006",
+  "F0172#007",
+  "F0172#008",
+  "F0172#009",
+  "F0173#001",
+  "F0173#002",
+  "F0173#003",
+  "F0173#004"
+ ],
+ "per_file": [
+  {
+   "file_id": "F0168",
+   "top_folder": "2022-ICT-Mentorship",
+   "title": "2022-ICT-Mentorship-Episode-8",
+   "file_chunks_total": 1,
+   "file_chunks_read_full": 1,
+   "chunks_total_in_file": 2,
+   "chunk_ids_this_batch": [
+    "F0168#002"
+   ],
+   "chunk_ids_read": [
+    "F0168#002"
+   ],
+   "words_read": 773,
+   "words_in_batch_for_file": 773
+  },
+  {
+   "file_id": "F0169",
+   "top_folder": "2022-ICT-Mentorship",
+   "title": "2022-ICT-Mentorship-Episode-9",
+   "file_chunks_total": 4,
+   "file_chunks_read_full": 4,
+   "chunks_total_in_file": 4,
+   "chunk_ids_this_batch": [
+    "F0169#001",
+    "F0169#002",
+    "F0169#003",
+    "F0169#004"
+   ],
+   "chunk_ids_read": [
+    "F0169#001",
+    "F0169#002",
+    "F0169#003",
+    "F0169#004"
+   ],
+   "words_read": 4847,
+   "words_in_batch_for_file": 4847
+  },
+  {
+   "file_id": "F0170",
+   "top_folder": "2022-ICT-Mentorship",
+   "title": "ICT-Mentorship-2022-Introduction",
+   "file_chunks_total": 5,
+   "file_chunks_read_full": 5,
+   "chunks_total_in_file": 5,
+   "chunk_ids_this_batch": [
+    "F0170#001",
+    "F0170#002",
+    "F0170#003",
+    "F0170#004",
+    "F0170#005"
+   ],
+   "chunk_ids_read": [
+    "F0170#001",
+    "F0170#002",
+    "F0170#003",
+    "F0170#004",
+    "F0170#005"
+   ],
+   "words_read": 5301,
+   "words_in_batch_for_file": 5301
+  },
+  {
+   "file_id": "F0171",
+   "top_folder": "2023-Forex-Reviews",
+   "title": "ICT-Forex-Review-January-09-2023",
+   "file_chunks_total": 2,
+   "file_chunks_read_full": 2,
+   "chunks_total_in_file": 2,
+   "chunk_ids_this_batch": [
+    "F0171#001",
+    "F0171#002"
+   ],
+   "chunk_ids_read": [
+    "F0171#001",
+    "F0171#002"
+   ],
+   "words_read": 1372,
+   "words_in_batch_for_file": 1372
+  },
+  {
+   "file_id": "F0172",
+   "top_folder": "2023-ICT-Mentorship",
+   "title": "2023-ICT-Mentorship-Deep-Dive-Into-Institutional-Order-Flow",
+   "file_chunks_total": 9,
+   "file_chunks_read_full": 4,
+   "chunks_total_in_file": 9,
+   "chunk_ids_this_batch": [
+    "F0172#001",
+    "F0172#002",
+    "F0172#003",
+    "F0172#004",
+    "F0172#005",
+    "F0172#006",
+    "F0172#007",
+    "F0172#008",
+    "F0172#009"
+   ],
+   "chunk_ids_read": [
+    "F0172#001",
+    "F0172#002",
+    "F0172#003",
+    "F0172#004"
+   ],
+   "words_read": 4850,
+   "words_in_batch_for_file": 9930
+  },
+  {
+   "file_id": "F0173",
+   "top_folder": "2023-ICT-Mentorship",
+   "title": "2023-ICT-Mentorship-Deep-Dive-Into-Institutional-Order-Flow",
+   "file_chunks_total": 4,
+   "file_chunks_read_full": 0,
+   "chunks_total_in_file": 9,
+   "chunk_ids_this_batch": [
+    "F0173#001",
+    "F0173#002",
+    "F0173#003",
+    "F0173#004"
+   ],
+   "chunk_ids_read": [],
+   "words_read": 0,
+   "words_in_batch_for_file": 4879
+  }
+ ],
+ "note_on_shared_files": "F0168 and F0172/F0173 belong to files whose other chunks are in other batches; the ledger counts only B30 chunks."
+}
