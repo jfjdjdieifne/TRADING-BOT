@@ -1,0 +1,5 @@
+{"file_id": "F0120", "file_chunks_total": 6, "batch_chunks_total": 1, "READ_FULL": 1, "NOT_READ": [], "outside_batch": ["F0120#001", "F0120#002", "F0120#003", "F0120#004", "F0120#005"]}
+{"file_id": "F0121", "file_chunks_total": 8, "batch_chunks_total": 8, "READ_FULL": 1, "NOT_READ": ["F0121#002", "F0121#003", "F0121#004", "F0121#005", "F0121#006", "F0121#007", "F0121#008"], "outside_batch": []}
+{"file_id": "F0122", "file_chunks_total": 3, "batch_chunks_total": 3, "READ_FULL": 0, "NOT_READ": ["F0122#001", "F0122#002", "F0122#003"], "outside_batch": []}
+{"file_id": "F0123", "file_chunks_total": 5, "batch_chunks_total": 5, "READ_FULL": 0, "NOT_READ": ["F0123#001", "F0123#002", "F0123#003", "F0123#004", "F0123#005"], "outside_batch": []}
+{"file_id": "F0124", "file_chunks_total": 8, "batch_chunks_total": 8, "READ_FULL": 0, "NOT_READ": ["F0124#001", "F0124#002", "F0124#003", "F0124#004", "F0124#005", "F0124#006", "F0124#007", "F0124#008"], "outside_batch": []}
