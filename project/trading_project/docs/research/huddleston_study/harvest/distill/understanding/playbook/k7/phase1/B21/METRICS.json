@@ -1,0 +1,95 @@
+{
+  "verification": {
+    "batch_id": "B21",
+    "read_full": 2,
+    "total": 25,
+    "not_read": [
+      "F0121#002",
+      "F0121#003",
+      "F0121#004",
+      "F0121#005",
+      "F0121#006",
+      "F0121#007",
+      "F0121#008",
+      "F0122#001",
+      "F0122#002",
+      "F0122#003",
+      "F0123#001",
+      "F0123#002",
+      "F0123#003",
+      "F0123#004",
+      "F0123#005",
+      "F0124#001",
+      "F0124#002",
+      "F0124#003",
+      "F0124#004",
+      "F0124#005",
+      "F0124#006",
+      "F0124#007",
+      "F0124#008"
+    ],
+    "quotes_verified": 126,
+    "quotes_total": 126,
+    "condition_quotes_total": 6,
+    "content_type": {
+      "TEACHING_CONCEPT": 1,
+      "REVIEW_EXAMPLE": 1
+    },
+    "kind": {
+      "PREREQUISITE": 4,
+      "CONFIRMER": 13,
+      "DEFINITION": 8,
+      "ACTION_STEP": 3,
+      "CONDITIONAL_RULE": 2,
+      "WARNING_OR_INVALIDATOR": 3,
+      "DISCRETION_STATEMENT": 1
+    },
+    "vague_total": 23,
+    "vague_named": 5,
+    "vague_none": 18,
+    "open_slots": 17,
+    "refs": 19,
+    "spans_boundary": 0,
+    "speakers": {
+      "MICHAEL_BY_CONTEXT": 34
+    },
+    "low_confidence_statements": 15,
+    "low_confidence_content_type": 1,
+    "words_read": 1423,
+    "errors": [],
+    "technical_checks_passed": true,
+    "batch_complete": false
+  },
+  "recall": {
+    "unique_existing_quotes_in_batch": 147,
+    "recalled": 2,
+    "misses": 145,
+    "existing_in_read_chunks": 8,
+    "new_statements_positional": 32,
+    "statements_total": 34,
+    "excluded": {
+      "K2:quote_without_resolved_corpus_path": 128,
+      "K5:quote_without_resolved_corpus_path": 16,
+      "U2:quote_without_resolved_corpus_path": 54
+    },
+    "batch_file_quotes_not_located_in_batch": 92,
+    "note": "Positional coverage only, not semantic recall. Unread chunks retained in denominator."
+  },
+  "readings_committed_before_comparison": "ab5dbba06eb480b539177ef9d46cec3613a400e9",
+  "reference_commits": {
+    "K1": "441a963032db7d2568898a9fbdb89fa0f2b65bba",
+    "K2": "ffe7add4a187d3fb25c27458751b722e3430fb53",
+    "K3": "567460bf4fa0773ef1633738b72a61399cfcf3e3",
+    "U2": "88a06d68ab3f6badbc10e80d12739f3c403dabfa",
+    "K4a": "e1befae64a1d025e39f816796b557402bf762405",
+    "K4b": "54185cc1d6693eec716a84fc64ee3dd80c3cff03",
+    "K5": "a3eb25e4c59190651ea2603c4e5ebd5fc3aa029d"
+  },
+  "independent_audit": "NOT_PERFORMED",
+  "audit_sample": [
+    "F0122#002",
+    "F0123#003",
+    "F0121#007"
+  ],
+  "external_manifest_sha256": "97a17d26223a2541fe2451789cc7d3f9df55a7829fec081768fc0d2847ed5024"
+}
