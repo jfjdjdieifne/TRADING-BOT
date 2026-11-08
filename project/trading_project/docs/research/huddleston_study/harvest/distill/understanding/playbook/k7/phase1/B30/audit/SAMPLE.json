@@ -1,0 +1,97 @@
+{
+ "batch_id": "B30",
+ "audit": "K7 PHASE 1 BLIND AUDIT — stratified re-read sample",
+ "date": "2026-11-08",
+ "seed": 20261108,
+ "rng_rule": "fresh random.Random(seed) per stratum; lexicographically sorted chunk ids within stratum; random.sample; strata processed alphabetically; selections sorted ascending",
+ "population": {
+  "source": "k7/phase1/B30/LEDGER.json per_file chunk_ids_read",
+  "size": 16,
+  "chunk_ids": [
+   "F0168#002",
+   "F0169#001",
+   "F0169#002",
+   "F0169#003",
+   "F0169#004",
+   "F0170#001",
+   "F0170#002",
+   "F0170#003",
+   "F0170#004",
+   "F0170#005",
+   "F0171#001",
+   "F0171#002",
+   "F0172#001",
+   "F0172#002",
+   "F0172#003",
+   "F0172#004"
+  ]
+ },
+ "strata": {
+  "2022-ICT-Mentorship": {
+   "population": [
+    "F0168#002",
+    "F0169#001",
+    "F0169#002",
+    "F0169#003",
+    "F0169#004",
+    "F0170#001",
+    "F0170#002",
+    "F0170#003",
+    "F0170#004",
+    "F0170#005"
+   ],
+   "population_size": 10,
+   "draw": 2,
+   "selected": [
+    "F0170#001",
+    "F0170#003"
+   ],
+   "selected_words": [
+    1213,
+    1145
+   ]
+  },
+  "2023-Forex-Reviews": {
+   "population": [
+    "F0171#001",
+    "F0171#002"
+   ],
+   "population_size": 2,
+   "draw": 1,
+   "selected": [
+    "F0171#002"
+   ],
+   "selected_words": [
+    195
+   ]
+  },
+  "2023-ICT-Mentorship": {
+   "population": [
+    "F0172#001",
+    "F0172#002",
+    "F0172#003",
+    "F0172#004"
+   ],
+   "population_size": 4,
+   "draw": 2,
+   "selected": [
+    "F0172#002",
+    "F0172#003"
+   ],
+   "selected_words": [
+    1127,
+    1279
+   ]
+  }
+ },
+ "sample": [
+  "F0170#001",
+  "F0170#003",
+  "F0171#002",
+  "F0172#002",
+  "F0172#003"
+ ],
+ "words_in_sample": 4959,
+ "blindness_note": "Blindness is by instruction only and cannot be proven: the auditor is the same kind of AI as the original reader, in a session that later (after the audit records are pushed) sees the originals.",
+ "integrity": "This file is committed BEFORE any sample chunk text is read."
+}
