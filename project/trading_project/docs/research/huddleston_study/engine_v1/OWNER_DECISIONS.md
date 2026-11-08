@@ -36,3 +36,4 @@ An unverified pasted text claims that a source says equal highs are judged visua
 ## D2 research
 
 - **Records, counts and pages checked for Q1–Q7:** [external_sources/l_open_questions.md](external_sources/l_open_questions.md) — one section per open question, with TEACHING and IMPLEMENTATION_CODE kept separate.
+- **Full step-by-step ICT specification, every line carrying a source symbol:** [external_sources/s_ict_spec_sources_only.md](external_sources/s_ict_spec_sources_only.md) — candle elements, strength numbers with their denominators, swing, liquidity, sweep, MSS, FVG, order block, breaker, entry, stop, target, invalids, and a closed list of the points where the sources give nothing.
