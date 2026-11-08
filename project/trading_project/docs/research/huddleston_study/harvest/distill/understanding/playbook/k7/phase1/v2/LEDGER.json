@@ -1,0 +1,1 @@
+{"batch_id": "v2-targeted", "gaps": ["Q11","Q13","Q09"], "chunks_read_full": ["F0038#001","F0068#003","F0106#003"], "chunks_read_words": 3229, "chunks_not_read": 2437, "control_sample": ["F0313#002","F0414#001","F0240#002","F0292#001","F0358#006","F0026#002","F0396#003","F0109#001","F0396#001","F0134#003","F0002#001","F0347#004"], "status": "PARTIAL_CAPACITY_REACHED"}
