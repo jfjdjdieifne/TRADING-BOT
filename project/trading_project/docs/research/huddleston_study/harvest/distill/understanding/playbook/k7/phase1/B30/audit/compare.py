@@ -41,7 +41,7 @@ JOINED = sys.argv[1] if len(sys.argv) > 1 else "/home/user/k7_audit/joined"
 B30 = os.path.abspath(os.path.join(HERE, ".."))
 
 SAMPLE = json.load(open(os.path.join(HERE, "SAMPLE.json"), encoding="utf-8"))
-SAMPLE_IDS = SAMPLE["sample_chunks"]
+SAMPLE_IDS = SAMPLE["sample"]
 
 CI = {}
 with open(os.path.join(K7, "CHUNK_INDEX.jsonl"), encoding="utf-8") as f:
