@@ -12,8 +12,8 @@
 | I1 | https://tradingstrategyguides.com/ict-concepts/ | مجهول؛ Trading Strategy Guides | UNKNOWN | 2026-09 (كما في نتيجة البحث) | بلا هوية كاتب؛ موقع تعليمي ضخم؛ الوقف/الهدف واضحان («beyond the swing… draw on liquidity»)؛ لا دليل نتائج |
 | I2 | https://myprimusmarkets.com/ict-smart-money-concepts/ | مجهول؛ Primus Markets | UNKNOWN (بروكر) | 2026-10-08 | بروكر؛ نبرة حذرة؛ يذكر «Stops commonly sit beyond the sweep's extreme; the target is usually the opposing liquidity pool» (مقتبس حرفيًا) |
 | I3 | https://quantum-algo.com/blog/guides/ict-2022-model-complete-guide/ | «ILY» — Quantum Algo (مراجعة «Quant») | THIRD_PARTY | 2026-08-13 | اسم ظاهر ودور مراجعة معلن؛ يبيع بوت تداول (تضارب مصلحة)؛ يورد نموذج 2022 بخطواته الخمس؛ لا دليل نتائج مستقل |
-| I4 | https://innercircletrader.net/tutorials/intraday-profiles/ و https://innercircletrader.net/tutorials/ict-bearish-order-block/ | Ayub Rana | THIRD_PARTY | مُحدّثتان 2026-10-28 سابقًا | نفس نطاق B1؛ يبيع دورة ($149)؛ يضيف أرقامًا مجتمعية («50–70 pip» و«10–20 pips above the OB high») **لا تُنسب لمايكل** |
-| I5 | https://www.ictkillzone.com/ict-order-block | Michael Phillips | THIRD_PARTY | 2026-05-05 | اسم ظاهر؛ يعرض «Stops belong beyond the full candle wick, not just beyond the body»؛ تقسيمه T1/T2/T3 تجاري |
+| I4 | https://innercircletrader.net/tutorials/intraday-profiles/ و https://innercircletrader.net/tutorials/ict-bearish-order-block/ | Ayub Rana | THIRD_PARTY | (كما في الجولات) | نفس نطاق B1؛ يبيع دورة ($149)؛ **ملاحظة التحقق:** صفحة bearish-order-block تُثبت «around the 50% retracement level» حرفيًا؛ الأرقام «50–70 pip» و«10–20 pips» **لم تُتحقق في النص المفحوص — حُذفت الاقتباسات، لا يُستند إليها** |
+| I5 | https://www.ictkillzone.com/ict-order-block | Michael Phillips | THIRD_PARTY | 2026-05-05 | اسم ظاهر؛ يثبت حرفيًا «Stops go beyond the full candle wick in both cases» (نص الصورة المشروحة)؛ تقسيمه T1/T2/T3 تجاري |
 | I6 | https://quartersequence.com/the-study/ict-liquidity/ (جزئية المداخل) | مجهول؛ «The Study» | UNKNOWN | مُحدّثة ~2026-10-28 | ملاحظات دراسة؛ ينقل قول مايكل: «partials, internal range, external range, your trade» (19:03) كتقسيم لمخارج تجاه الهدف |
 
 **ملاحظة الاستقلال والنسخ:** I4 كلا الصفحتين من Ayub Rana على نطاق واحد — **مصدرًا واحدًا**. لا نسخ بين I1/I2/I3/I4/I5/I6.
@@ -23,8 +23,8 @@
 - **I1 — نعم.** «Place the stop-loss strictly above or below the swing point that performed the initial liquidity raid»؛ «Target the draw on liquidity… partial or full profits at opposing resting liquidity pools» — يربط الوقف/الهدف بمستويات الرسم لا بأرقام.
 - **I2 — نعم.** «Stops commonly sit beyond the sweep's extreme; the target is usually the opposing liquidity pool.» — موضعان محددان بالرسم.
 - **I3 — نعم.** «the stop-loss goes beyond the sweep wick»؛ «the target is usually the opposite liquidity pool in the model» — يعيد إنتاج نموذج 2022: جرف + FVG، وقف وراء الفتيل، هدف السيولة المقابلة.
-- **I4 — نعم جزئيًا + أرقام مبتدعة.** Bearish OB: «stop-loss strictly above the bearish order block»؛ Intraday: «profit targets to the previous day's high or the next DOL»؛ يضيف «10–20 pips above the OB high» — **إضافة مجتمعية**؛ و«50–70 pip default target» في صفحات أخرى — **إضافة مجتمعية**.
-- **I5 — نعم.** «Stops belong beyond the full candle wick, not just beyond the body»؛ ويشترط وفاء الوقف بانتظار «4. Mitigation: a full body-close beyond the zone's far edge counts as full mitigation» للإبطال.
+- **I4 — نعم جزئيًا + أرقام مبتدعة.** Bearish OB: «the last bullish candle before the bearish impulse move»؛ الدخول عند «around the 50% retracement level»؛ الأرقام المتداولة (50–70 نقطة وغيرها) **لم تُتحقق — حُذفت ولا تُستعمل** (انظر سطر I4 في الجدول).
+- **I5 — نعم.** «Stops go beyond the full candle wick» (نص الصفحة حرفيًا)؛ و«Only a candle body closing beyond the zone boundary constitutes full mitigation»؛ ويشترط جرفًا سابقًا للكتلة.
 - **I6 — نعم جزئيًا.** ترتيب الأهداف كسلّم: IRL أولًا ثم ERL (full trade)؛ جزئيات ثم «external range» — موقع الهدف على الرسم لا رقم.
 
 كل اقتباس أعلاه ≤ 25 كلمة.
