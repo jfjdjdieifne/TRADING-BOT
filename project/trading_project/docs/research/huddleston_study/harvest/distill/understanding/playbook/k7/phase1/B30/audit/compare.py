@@ -84,7 +84,10 @@ def locate(joined, ch, spans, quote):
     cs, ce, _ = res
     e1 = KC.entry_at(spans, ch["char_start"] + cs)
     e2 = KC.entry_at(spans, ch["char_start"] + max(ce - 1, cs))
-    return cs, ce, (e1[0] if e1 else None), (e2[0] if e2 else None)
+    # span rows are [char_start, char_end, offsetMS, ...]; the entry index is
+    # the row position in the spans list (checked against original records'
+    # entry_index fields, which count rows from 0)
+    return cs, ce, (spans.index(e1) if e1 else None), (spans.index(e2) if e2 else None)
 
 
 def load_records(side):
