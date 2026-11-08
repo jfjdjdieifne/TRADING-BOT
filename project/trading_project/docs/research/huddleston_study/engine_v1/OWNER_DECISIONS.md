@@ -32,3 +32,7 @@ An unverified chatbot suggestion of “0.2 × ATR” is rejected because the num
 An unverified pasted text claims that a source says equal highs are judged visually, with no pip number. This is an idea to verify, not a source.
 
 - **External search record:** [Numeric EQH/EQL public-source search](external_sources/k_equal_highs.md).
+
+## D2 research
+
+- **Records, counts and pages checked for Q1–Q7:** [external_sources/l_open_questions.md](external_sources/l_open_questions.md) — one section per open question, with TEACHING and IMPLEMENTATION_CODE kept separate.
