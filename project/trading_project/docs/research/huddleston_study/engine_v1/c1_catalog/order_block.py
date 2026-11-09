@@ -41,6 +41,7 @@ from common import (
     STATUS_UNDEFINED,
     TIER,
     as_candles,
+    dimension_gaps,
     gap,
     require_choice,
 )
@@ -108,6 +109,16 @@ CLAIM_IDS = {
     "V-OB-16": ("C-OB-29", "C-OB-33", "C-OB-36"),
 }
 
+# Honest labels of the dimensions that are not computed here (C1b spec §5):
+# V-OB-13/14/15 are caller evidence, never a break/FVG/sweep computed in this tree,
+# and V-OB-3 is implemented as the "last opposing candle" reading only.
+VARIANT_STATUS_LABEL = {
+    "V-OB-3": "PARTIAL_LAST_CANDLE_ONLY",
+    "V-OB-13": "CALLER_INPUT_NOT_COMPUTED",
+    "V-OB-14": "CALLER_INPUT_NOT_COMPUTED",
+    "V-OB-15": "CALLER_INPUT_NOT_COMPUTED",
+}
+
 VERDICT_VALID = "VALID"
 VERDICT_INVALIDATED = "INVALIDATED"
 VERDICT_FILTER_FAILED = "FILTER_FAILED"
@@ -168,10 +179,33 @@ def _record(**kwargs) -> dict:
         "numbers": None,
         "filters": [],
         "invalidation": None,
+        "cluster_notice": None,
+        "dimension_gaps": dimension_gaps(CONCEPT),
         "gaps": [],
     }
     base.update(kwargs)
     return base
+
+
+def _opposing_run(rows, block_index, direction) -> int:
+    """How many adjacent opposing candles end at `block_index` (the block included).
+
+    The spec (OB-D3, C1b spec §6.2) does not bound a cluster, so the count is printed
+    and its bounds stay an open gap; only the run that touches the block is counted.
+    """
+
+    count = 1
+    index = block_index - 1
+    while index >= 0:
+        candle = rows[index]
+        is_opposing = (
+            candle.close < candle.open if direction == DIR_BULLISH else candle.close > candle.open
+        )
+        if not is_opposing:
+            break
+        count += 1
+        index -= 1
+    return count
 
 
 def order_block_at(
@@ -261,6 +295,7 @@ def order_block_at(
                 },
                 variant_ids=variant_ids,
                 claim_ids=claims_of(claims),
+                cluster_notice={"count": None, "gap_printed": False},
                 gaps=[gap("GAP_OB_MOVE_BOUNDS"), gap("GAP_DOJI_BLOCK")],
             )
         is_opposing = candle.close < candle.open if direction == DIR_BULLISH else candle.close > candle.open
@@ -281,20 +316,25 @@ def order_block_at(
             },
             variant_ids=variant_ids,
             claim_ids=claims_of(claims),
+            cluster_notice={"count": None, "gap_printed": False},
             gaps=[gap("GAP_OB_MOVE_BOUNDS")],
         )
 
     block_index = opposing["index"]
     block = opposing["candle"]
 
+    # The cluster notice (coverage E-10, C1b spec §6.2): more than one adjacent
+    # opposing candle means the cluster exists and its bounds are an open gap, so
+    # the gap line is printed and the count is reported.
+    run_length = _opposing_run(rows, block_index, direction)
+    cluster_notice = {
+        "count": run_length,
+        "gap_printed": run_length > 1,
+        "bounds": "UNDEFINED_KNOWLEDGE_GAP",
+    }
     gaps = [gap("GAP_OB_MOVE_BOUNDS")]
-    if block_index >= 1:
-        previous = rows[block_index - 1]
-        previous_is_opposing = (
-            previous.close < previous.open if direction == DIR_BULLISH else previous.close > previous.open
-        )
-        if previous_is_opposing:
-            gaps.append(gap("GAP_CLUSTER_BOUND"))
+    if cluster_notice["gap_printed"]:
+        gaps.append(gap("GAP_CLUSTER_BOUND"))
 
     # 2. boundaries
     if boundaries == BOUNDARY_FULL_RANGE:
@@ -413,6 +453,7 @@ def order_block_at(
             },
         },
         filters=filters,
+        cluster_notice=cluster_notice,
         invalidation={
             "id": invalidation,
             "invalidated": invalidated,

@@ -1,20 +1,34 @@
-"""Displacement — TIER2 third-party definitions, no reference chosen by results.
+"""Displacement — TIER2 third-party definitions, no reference variant (owner decision D2).
 
-Rule text: BUILD_STEP_C1_SPEC.md §5, built from
+Rule text: BUILD_STEP_C1_SPEC.md §5 and BUILD_STEP_C1b_SPEC.md §1–§3, built from
   BUILD_STEP_B1_DESIGN_V2.md §8 (claims F1 … F6, variants V-D-01 … V-D-04)
   external_sources/f_displacement.md (the same claims with their quotes)
+  external_sources/l_open_questions.md (records Q1-01, Q1-02, Q1-13)
+  OWNER_DECISIONS_D2.md (D2: no reference definition; families V-D-A / V-D-B / V-D-C)
 
 Nothing here is attributed to any person. The tier is TIER2 and every result
 prints its variant id, claim ids and the source numbers it used.
 
+**There is no reference variant.** OWNER_DECISIONS_D2.md records the owner decision
+that displacement has no reference definition, so `reference_variant` is printed as
+NONE_PER_OWNER_D2 in every result and no variant is preferred. The C1 constant
+`REFERENCE_VARIANT` is gone.
+
 Coded named variants, each switchable, none selected by results:
-  V-D-01  body / range at or above the printed lower bound 60 (claim F1)
-  V-D-02  body / range above the printed 75, and range at least 2 x the average
-          of a caller-named previous window (claim F2)
-  V-D-03  body at least 2 x the average body of the previous ten candles (claim F5)
-  V-D-04  the gap requirement of claim F1: returns UNDEFINED because the word
-          "gap" has no written definition in the catalog
-  V-D-Q   the qualitative family of F3 / F4 / F6: returns UNDEFINED, no number
+  V-D-01  body / range above the printed lower bound 60 (claim F1);
+          equality returns UNDECIDED                          [COMPUTED]
+  V-D-02  body / range above the printed 75, and range above 2 x the average
+          of a caller-named previous window (claim F2)         [COMPUTED]
+  V-D-03  body above 2 x the average body of the previous ten candles (claim F5);
+          equality returns UNDECIDED                          [COMPUTED]
+  V-D-04  the gap requirement of claim F1                            [UNDEFINED_ALWAYS]
+  V-D-C   body at least 1.5 x ATR(14) (records Q1-01 and Q1-02)      [UNDEFINED_ATR_FORMULA]
+  V-D-Q   the qualitative family of F3 / F4 / F6                     [UNDEFINED_ALWAYS]
+
+V-D-C is accepted as a named variant of owner decision D2 and returns UNDEFINED with
+KNOWLEDGE_GAP: ATR formula.  The sources print the multiple (1.5) and the length (14)
+and never say how ATR or true range is computed, so no formula is taken from outside
+knowledge and no ATR is computed here.
 
 The engine never chooses one of the printed numbers over another:
   * the range comparison of F2 prints "3–5" previous candles, so the window is an
@@ -32,6 +46,7 @@ from common import (
     STATUS_UNDEFINED,
     TIER,
     as_candles,
+    dimension_gaps,
     gap,
     require_choice,
     require_index,
@@ -43,8 +58,28 @@ V_D_01 = "V-D-01"
 V_D_02 = "V-D-02"
 V_D_03 = "V-D-03"
 V_D_04 = "V-D-04"
+V_D_C = "V-D-C"
 V_D_QUALITATIVE = "V-D-Q"
-VARIANTS = (V_D_01, V_D_02, V_D_03, V_D_04, V_D_QUALITATIVE)
+VARIANTS = (V_D_01, V_D_02, V_D_03, V_D_04, V_D_C, V_D_QUALITATIVE)
+
+# Honest status label of every variant (C1b spec §5).  A label is not a result:
+# it names what the code does with the id, so no entry is described as computed
+# while it is not.
+VARIANT_STATUS_LABEL = {
+    V_D_01: "COMPUTED",
+    V_D_02: "COMPUTED",
+    V_D_03: "COMPUTED",
+    V_D_04: "UNDEFINED_ALWAYS",
+    V_D_C: "UNDEFINED_ATR_FORMULA",
+    V_D_QUALITATIVE: "UNDEFINED_ALWAYS",
+}
+
+# Owner decision D2: no reference variant exists.  The string below is printed with
+# every result instead of a variant id.
+REFERENCE_VARIANT_NONE = "NONE_PER_OWNER_D2"
+FLAG_NO_REFERENCE = "OWNER_DECISION_D2_NO_REFERENCE_VARIANT"
+
+GAP_D_ATR_FORMULA = "GAP_D_ATR_FORMULA"
 
 ANSWER_YES = "YES"
 ANSWER_NO = "NO"
@@ -61,19 +96,21 @@ BODY_TO_AVERAGE_BODY_UPPER = 3.0  # SOURCE_NUMBER F5 "two to three times"
 PREVIOUS_BODY_COUNT = 10  # SOURCE_NUMBER F5 "the previous ten candles"
 PREVIOUS_WINDOWS_PRINTED = (3, 4, 5, 10)  # SOURCE_NUMBER F2 "3–5", F5 "ten"
 
+# V-D-C numbers, both printed by the sources and both unused for computation:
+# the ATR formula itself is an open gap (KNOWLEDGE_GAP: ATR formula).
+BODY_TO_ATR_MULTIPLE = 1.5  # SOURCE_NUMBER Q1-01 "at least 1.5 times", Q1-02 "at least 1.5 times"
+ATR_PERIOD = 14  # SOURCE_NUMBER Q1-01 "of the prior 14 candles", Q1-02 "14-period"
+
 CLAIM_IDS = {
     V_D_01: ("F1",),
     V_D_02: ("F2",),
     V_D_03: ("F5",),
     V_D_04: ("F1",),
+    # Q1-13 records NO_NUMBER ("What qualifies is judged by eye, not by a formula"),
+    # so it is not a claim of the 1.5 x ATR(14) number.
+    V_D_C: ("Q1-01", "Q1-02"),
     V_D_QUALITATIVE: ("F3", "F4", "F6"),
 }
-
-# ENGINEERING_CHOICE declared in BUILD_STEP_C1_SPEC.md §6 before any code:
-# fewest computation inputs, tie -> lowest variant id; reason "simplicity of
-# computation, not claimed better".  Flagged for owner override, and used only
-# so one dimension at a time can be compared.
-REFERENCE_VARIANT = V_D_01
 
 
 def _record(**kwargs):
@@ -87,9 +124,10 @@ def _record(**kwargs):
         "claim_ids": [],
         "source_numbers": [],
         "numbers": None,
+        "dimension_gaps": dimension_gaps(CONCEPT),
         "gaps": [],
-        "reference_variant": REFERENCE_VARIANT,
-        "flags": ["FLAGGED_FOR_OWNER_OVERRIDE"],
+        "reference_variant": REFERENCE_VARIANT_NONE,
+        "flags": [FLAG_NO_REFERENCE],
     }
     base.update(kwargs)
     return base
@@ -127,6 +165,11 @@ def _source_numbers_for(variant, window=None):
         ]
     if variant == V_D_04:
         return [entry("gap_requirement", "without a gap there is no ICT displacement", "F1")]
+    if variant == V_D_C:
+        return [
+            entry("body_to_atr_multiple", str(BODY_TO_ATR_MULTIPLE), "Q1-01"),
+            entry("atr_period", str(ATR_PERIOD), "Q1-02"),
+        ]
     return []
 
 
@@ -151,6 +194,30 @@ def displacement_at(candles, t, variant, previous_window=None):
 
     claim_ids = sorted(CLAIM_IDS[variant])
     target = rows[t]
+
+    if variant == V_D_C:
+        # Owner decision D2, family V-D-C.  The sources print 1.5 and 14 but never the
+        # formula of ATR or of true range, so nothing is computed: a closed candle
+        # returns UNDEFINED with the formula gap, an unclosed one returns PENDING.
+        if not target.closed:
+            return _record(
+                status=STATUS_PENDING,
+                answer=None,
+                variant_id=variant,
+                candle_indices={"target": t, "previous_window": None},
+                claim_ids=claim_ids,
+                source_numbers=_source_numbers_for(variant),
+                gaps=[],
+            )
+        return _record(
+            status=STATUS_UNDEFINED,
+            answer=None,
+            variant_id=variant,
+            candle_indices={"target": t, "previous_window": None},
+            claim_ids=claim_ids,
+            source_numbers=_source_numbers_for(variant),
+            gaps=_concept_gaps() + [gap(GAP_D_ATR_FORMULA)],
+        )
 
     if variant in (V_D_04, V_D_QUALITATIVE):
         gap_id = "GAP_D_GAP_DEFINITION" if variant == V_D_04 else "GAP_D_QUALITATIVE"

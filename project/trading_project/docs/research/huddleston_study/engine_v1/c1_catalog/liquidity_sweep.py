@@ -19,8 +19,15 @@ Named variant (V-E-01, one unit: E1 type two, opposed explicitly by E3):
 Not coded, and why:
   V-E-EQH  equal highs/lows: the candle record of this tree has no ask/bid, so
            the 1 x spread of D1 cannot be computed, and the pairing lookback is
-           an open gap.  It returns UNDEFINED with its gap.
+           an open gap.  It returns UNDEFINED with its gap.  Its honest label is
+           ACCEPTED_RETURNS_UNDEFINED (coverage E-7), not "not coded": the id is
+           accepted by VARIANTS and answers UNDEFINED.
   E2       "a sharp spike with a long wick" gives no closing rule and no number.
+
+C1b naming (coverage E-9): the level of a swing-based sweep is the wick of the middle
+candle of the three (V-A-00).  `swing_index` is kept unchanged for compatibility and
+keeps meaning the confirming third candle; `level_candle_index` and
+`confirm_candle_index` are printed next to it so no reader has to guess.
 
 No number is invented here: the sweep has no SOURCE_NUMBER at all, and its
 distance/speed dimension is a printed gap.
@@ -34,6 +41,7 @@ from common import (
     STATUS_UNDEFINED,
     TIER,
     as_candles,
+    dimension_gaps,
     gap,
     require_choice,
     require_index,
@@ -62,6 +70,13 @@ VERSION_MARGINAL_BODY = "V-E-01"
 VERSION_EQH = "V-E-EQH"
 VARIANTS = (VERSION_REFERENCE, VERSION_MARGINAL_BODY, VERSION_EQH)
 
+# Honest labels of C1b spec §5: the table holds the variants whose label was wrong
+# (coverage E-7).  V-E-00 and V-E-01 are computed by construction and carry no
+# correction; listing them would add nothing that the code does not already do.
+VARIANT_STATUS_LABEL = {
+    VERSION_EQH: "ACCEPTED_RETURNS_UNDEFINED",
+}
+
 ANSWER_YES = "YES"
 ANSWER_NO = "NO"
 ANSWER_UNDECIDED = "UNDECIDED"
@@ -77,12 +92,16 @@ LEVEL_BASIS_OWNER_SWING = "OWNER_DECISION_D1_SWING_V-A-00"
 OWNER_CLAIM = "OWNER-D1"
 
 
-def latest_swing_level(candles, before_index, side):
-    """The most recent V-A-00 swing level strictly before `before_index`.
+def latest_swing_reference(candles, before_index, side):
+    """The most recent V-A-00 swing level strictly before `before_index`, named.
 
     OWNER_DECISIONS.md §D1 makes this the sweep level.  Nothing is looked up
     after `before_index - 1`, and no lookback number is needed: the scan walks
     backwards and stops at the first confirmed swing.
+
+    Returns {"level", "level_candle_index", "confirm_candle_index"} or
+    {"level": None, ...}.  The level comes from the wick of the middle candle of
+    the three (the swing point of V-A-00), and the third candle only confirms it.
     """
 
     if side not in (SIDE_HIGH, SIDE_LOW):
@@ -100,8 +119,19 @@ def latest_swing_level(candles, before_index, side):
             # `index` is the confirming third candle, so the wick is index - 1.
             swing_candle = candles[index - 1]
             level = swing_candle.high if side == SIDE_HIGH else swing_candle.low
-            return level, index
-    return None, None
+            return {
+                "level": level,
+                "level_candle_index": index - 1,
+                "confirm_candle_index": index,
+            }
+    return {"level": None, "level_candle_index": None, "confirm_candle_index": None}
+
+
+def latest_swing_level(candles, before_index, side):
+    """Backward-compatible pair (level, confirming index); see latest_swing_reference."""
+
+    reference = latest_swing_reference(candles, before_index, side)
+    return reference["level"], reference["confirm_candle_index"]
 
 
 def _record(**kwargs):
@@ -115,16 +145,22 @@ def _record(**kwargs):
         "level": None,
         "level_basis": LEVEL_BASIS_CALLER,
         "swing_index": None,
+        "level_candle_index": None,
+        "confirm_candle_index": None,
         "candle_indices": {"sweep": None, "confirm": None, "last_read": None},
         "claim_ids": [],
         "numbers": None,
+        "dimension_gaps": dimension_gaps(CONCEPT),
         "gaps": [],
     }
     base.update(kwargs)
     return base
 
 
-def _evaluate(rows, t, side, level, variant, level_basis, swing_index):
+def _evaluate(rows, t, side, level, variant, level_basis, reference):
+    swing_index = None if reference is None else reference["confirm_candle_index"]
+    level_candle_index = None if reference is None else reference["level_candle_index"]
+    confirm_candle_index = None if reference is None else reference["confirm_candle_index"]
     claim_ids = sorted(CLAIM_IDS[variant] + ((OWNER_CLAIM,) if level_basis == LEVEL_BASIS_OWNER_SWING else ()))
 
     if variant == VERSION_EQH:
@@ -136,6 +172,8 @@ def _evaluate(rows, t, side, level, variant, level_basis, swing_index):
             level=level,
             level_basis=level_basis,
             swing_index=swing_index,
+            level_candle_index=level_candle_index,
+            confirm_candle_index=confirm_candle_index,
             candle_indices={"sweep": t, "confirm": None, "last_read": t},
             claim_ids=claim_ids,
             gaps=[gap("GAP_SWEEP_EQH_BASIS")],
@@ -154,6 +192,8 @@ def _evaluate(rows, t, side, level, variant, level_basis, swing_index):
             level=level,
             level_basis=level_basis,
             swing_index=swing_index,
+            level_candle_index=level_candle_index,
+            confirm_candle_index=confirm_candle_index,
             candle_indices={
                 "sweep": t if variant == VERSION_REFERENCE else t - 1,
                 "confirm": None if variant == VERSION_REFERENCE else t,
@@ -211,6 +251,8 @@ def _evaluate(rows, t, side, level, variant, level_basis, swing_index):
         level=level,
         level_basis=level_basis,
         swing_index=swing_index,
+        level_candle_index=level_candle_index,
+        confirm_candle_index=confirm_candle_index,
         candle_indices={
             "sweep": sweep_index,
             "confirm": None if variant == VERSION_REFERENCE else t,
@@ -248,7 +290,7 @@ def sweep_at_swing_level(candles, t, side, variant):
 
     rows = as_candles(candles)
     _validate(rows, t, side, variant)
-    level, swing_index = latest_swing_level(rows, t, side)
-    if level is None:
+    reference = latest_swing_reference(rows, t, side)
+    if reference["level"] is None:
         raise ValueError("no closed swing level is available before index t")
-    return _evaluate(rows, t, side, level, variant, LEVEL_BASIS_OWNER_SWING, swing_index)
+    return _evaluate(rows, t, side, reference["level"], variant, LEVEL_BASIS_OWNER_SWING, reference)
