@@ -1,3 +1,5 @@
+**UNREQUESTED COMPILATION, NOT A DECISION BASIS**
+
 # واو — مواصفة نموذج ICT كما وردت في المصادر، بندًا بندًا
 
 **الملف:** `engine_v1/external_sources/s_ict_spec_sources_only.md`
@@ -28,7 +30,7 @@
 
 ---
 
-## 1. جدول المصادر (رموز هذا الملف)
+## 1. جدول المصادر (رموز هذا الملف) — 60 صفًا / 60 رمزًا فريدًا
 
 | الرمز | الرابط | الناشر | المؤلف الظاهر | تاريخ الصفحة | ملاحظة |
 |---|---|---|---|---|---|
@@ -92,7 +94,6 @@
 | S-QUANT-GLOSS | https://www.quantum-algo.com/glossary/displacement/ | quantum-algo.com | ILY · Reviewed by Quant | 2026-04-30 | 1.5×ATR(14) |
 | S-QUANT-SWP | https://www.quantum-algo.com/blog/guides/liquidity-sweep-trading-complete-guide/ | quantum-algo.com | ILY | 2026-06-05 | «within a few candles»؛ 1–3 في المقتطف |
 | S-LUX-EQH-IND | https://www.luxalgo.com/library/indicator/eqh-eql-fvg-breakouts/ | luxalgo.com | غير ظاهر | غير ظاهر | إعدادات بلا قيم |
-| S-ICN-SB (وسيط) | https://innercircletrader.net/tutorials/ict-silver-bullet-strategy/ | innercircletrader.net | Ayub Rana | غير ظاهر | 1:3 · 20–30 نقطة |
 
 ---
 
@@ -111,7 +112,7 @@
 
 **نتيجة عددية 1:** لا يوجد في أي مصدر مفحوص عنصر خامس (لا حجم تداول، لا زمن شمعة، لا عدد صفقات) يدخل في تعريف «قوة» الشمعة. المصادر تستعمل **ثلاثة** فقط: الجسم، المدى، الفتيل.
 
-### 2.2 «شمعة قوية» = أربع نسخ رقمية مختلفة، كل واحدة بمقامها
+### 2.2 «شمعة قوية» = عشر نسخ رقمية مختلفة، كل واحدة بمقامها
 
 | # | النص الحرفي | الرقم | المقام (من ماذا) | المقارَن به | عدد الشموع | المصدر | الحالة |
 |---|---|---|---|---|---|---|---|
@@ -120,13 +121,13 @@
 | ق-3 | «the candle's range should be at minimum 2x the average recent candle» | ≥2× | المدى | متوسط الشموع **3–5** السابقة | 3–5 | S-KZ-DISP | `Q-NOW` |
 | ق-4 | «The candle bodies should be at least two to three times the average body of the previous ten candles» | 2–3× | الجسم (حجم مطلق) | متوسط جسم **10** شموع سابقة | 10 | S-FXMT4 (F5) | `Q-PRIOR` |
 | ق-5 | «A large candle body, representing 60 to 80 percent or more of the total candle range» | 60–80% | الجسم ÷ المدى | لا شيء | 1 | S-BTX-DISP | `Q-PRIOR` |
-| ق-6 | «body covering at least 70% of the candle range» | 70% | الجسم ÷ المدى | لا شيء | 1 | S-BTX-SWP | `Q-PRIOR` |
+| ق-6 | «body covering at least 70% of the candle range» | 70% | الجسم ÷ المدى | لا شيء | 1 | S-BTX-SWP — **NOT displacement definition** (صفحة نتائج backtest) | `Q-PRIOR` |
 | ق-7 | «Look for candles where the body makes up at least 80% of the total candle range» | 80% | الجسم ÷ المدى | لا شيء | 1 | S-FXNX | `Q-PRIOR` |
-| ق-8 | «at least 1.5x the average size of the candles in the preceding consolidation» + فتيل <25% | 1.5× | الحجم (المصدر لا يحدّد جسمًا أم مدى) | متوسط شموع **تجميع سابق بطول غير مذكور** | UNSTATED | S-KZ-OB | `Q-PRIOR` |
+| ق-8 | «at least 1.5x the average size of the candles in the preceding consolidation» + فتيل <25% | 1.5× | الحجم (المصدر لا يحدّد جسمًا أم مدى) | متوسط شموع **تجميع سابق بطول غير مذكور** | UNSTATED | S-KZ-OB — **NOT displacement definition** (معيار كتلة أوامر) | `Q-PRIOR` |
 | ق-9 | «at least 1.5 times the average true range (ATR) of the prior 14 candles» | 1.5× | الجسم | ATR(14) | 14 | S-QUANT-GLOSS | `Q-NOW` |
 | ق-10 | «at least 1.5 times the 14-period Average True Range» | 1.5× | جسم شمعة الإزاحة | ATR(14) | 14 | S-FUND22 | `Q-NOW` |
 
-**الخلاصة العددية:** عشرة أرقام عند ثمانية ناشرين، على **ثلاثة مقامات مختلفة** (المدى الكامل، متوسط أجسام 10، ATR(14)) — ولا رقم واحد منها ينسبه صاحبه إلى مايكل. كل واحد منها مسجّل `SOURCE_NUMBER`.
+**الخلاصة العددية:** عشرة أرقام عند ستة ناشرين، على **ثلاثة مقامات مختلفة** (المدى الكامل، متوسط أجسام 10، ATR(14)) — ولا رقم واحد منها ينسبه صاحبه إلى مايكل. كل واحد منها مسجّل `SOURCE_NUMBER`. ومن العشرة، اثنان موسومان في الجدول بأنهما **ليسا تعريفَي إزاحة**: ق-6 (S-BTX-SWP: صفحة نتائج backtest، لا تعريفًا للإزاحة) وق-8 (S-KZ-OB: معيار داخل صفحة كتلة الأوامر، لا تعريفًا للإزاحة).
 
 ### 2.3 «قوية» كعدد شموع — كم شمعة تُعدّ إزاحة واحدة؟
 

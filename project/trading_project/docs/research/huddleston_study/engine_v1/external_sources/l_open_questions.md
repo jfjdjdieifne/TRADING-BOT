@@ -223,7 +223,7 @@ only in the new material recorded below.
 - type: NO_NUMBER (numbers present only inside declared constructed examples)
 - quote (<=25 words, English, verbatim): "They are not a rule that 80% qualifies while 79% fails." — QUOTE_VERIFIED
 - number and unit: NONE as a rule (5% and 81.8% are labelled constructed examples)
-- OF_WHAT: (of the examples) body ÷ high-to-low range
+- OF_WHAT: UNSTATED
 - COMPARED_TO_WHAT: (of the examples) "the median body of your chosen preceding sample"
 - HOW_MANY_CANDLES: UNSTATED — the page tells the reader to choose and record it
 - TIMEFRAME: "The comparison belongs to the same instrument and timeframe" (QUOTE_VERIFIED) — no value given
@@ -258,7 +258,7 @@ only in the new material recorded below.
 - publisher: ictkillzone.com
 - author if shown: "Michael Phillips"
 - page date if shown: UNSTATED in the fetched text (prior file records 2026-05-05)
-- type: TEACHING
+- type: TEACHING — **NOT a displacement definition** (the 1.5×-consolidation figure is an order-block entry criterion, not a definition of displacement)
 - quote (<=25 words, English, verbatim): "the displacement candle should be at least 1.5x the average size of the candles in the preceding consolidation" — QUOTE_VERIFIED
 - number and unit: 1.5 (multiple); plus "the wick should be less than 25% of the total candle range" (QUOTE_VERIFIED)
 - OF_WHAT: candle **size** (the page does not say body or range for the 1.5×) and wick ÷ total range for the 25%
@@ -277,7 +277,7 @@ only in the new material recorded below.
 - publisher: backtrex.com
 - author if shown: UNSTATED
 - page date if shown: UNSTATED (search metadata 2026-10-03)
-- type: TEACHING
+- type: TEACHING — **NOT a displacement definition** (the 70% rule is a mechanical entry filter from a backtest-results page, not a definition of displacement)
 - quote (<=25 words, English, verbatim): "a decisive closing candle (body covering at least 70% of the candle range) pushes in the opposite direction within 2 candles" — QUOTE_VERIFIED
 - number and unit: 70 (percent); 2 (candles)
 - OF_WHAT: body ÷ candle range
@@ -350,16 +350,17 @@ only in the new material recorded below.
 | candle range >= 2× average recent candle | candle range | average of the 3–5 preceding candles | 1 (Q1-03 ictkillzone) | 0 |
 | bodies 2–3× average body of previous 10 | candle body | average body, 10 candles | 1 (Q1-05 forexmt4systems) | 0 |
 | body-to-range >= 80% | body ÷ full range | none | 1 (Q1-06 fxnx) | 0 |
-| body >= 70%, within 2 candles of a sweep | body ÷ range | none | 1 (Q1-12 backtrex) | 0 |
-| size >= 1.5× preceding consolidation average, wick < 25% of range | candle size / wick ÷ range | average size of preceding consolidation (length UNSTATED) | 1 (Q1-11 ictkillzone) | 0 |
+| body >= 70%, within 2 candles of a sweep — **NOT displacement definition** (S-BTX-SWP / Q1-12: backtest-results page) | body ÷ range | none | 1 (Q1-12 backtrex) | 0 |
+| size >= 1.5× preceding consolidation average, wick < 25% of range — **NOT displacement definition** (S-KZ-OB / Q1-11: order-block criterion) | candle size / wick ÷ range | average size of preceding consolidation (length UNSTATED) | 1 (Q1-11 ictkillzone) | 0 |
 | candle count >= 3 consecutive same-direction | candle count | none | 1 (Q1-07 innercircletrader) | 0 |
 
 **Q1 totals (counts only):** 9 distinct numeric exact versions among 8 publishers; 4 publishers state no number
 at all for displacement (F3/Q1-08, F4/Q1-09, F6/Q1-10, Q1-13). No two publishers share an identical
 (number, OF_WHAT, COMPARED_TO_WHAT) triple except the 60–80% body-to-range pair (backtrex and ictflow), which is
-2 publishers and 1 new.
+2 publishers and 1 new. Two of the nine versions are marked **NOT displacement definitions** above: Q1-12 (backtest-results page)
+and Q1-11 (order-block criterion); excluding those two rows leaves 7 versions.
 
-### Q1 — pages checked (13)
+### Q1 — pages checked (16)
 
 | page | outcome |
 |---|---|
@@ -375,8 +376,8 @@ at all for displacement (F3/Q1-08, F4/Q1-09, F6/Q1-10, Q1-13). No two publishers
 | https://bullynx.com/blog/displacement-in-trading | Q1-08 — NO_NUMBER |
 | https://quartersequence.com/the-study/ict-market-structure/ | Q1-10 — NO_NUMBER |
 | https://www.ictkillzone.com/ict-2022-model | Q1-13 — NO_NUMBER ("judged by eye") |
-| https://www.ictkillzone.com/ict-order-block | Q1-11 — number found |
-| https://backtrex.com/en/blog/liquidity-sweep-strategy-backtest-results | Q1-12 — number found |
+| https://www.ictkillzone.com/ict-order-block | Q1-11 — number found (NOT displacement definition: order-block criterion) |
+| https://backtrex.com/en/blog/liquidity-sweep-strategy-backtest-results | Q1-12 — number found (NOT displacement definition: backtest-results page) |
 | https://fibalgo.com/library/ict-displacement (and TradingView port) | SNIPPET_ONLY — ATR(14)×1.5 default and body/range 65% default seen only in a search snippet; **not fetched**, not counted |
 | https://www.tradingview.com/script/9OYOAKNU-FibAlgo-ICT-Displacement/ | NOT_FETCHED (search snippet only) |
 
@@ -440,7 +441,7 @@ at all for displacement (F3/Q1-08, F4/Q1-09, F6/Q1-10, Q1-13). No two publishers
 - quote (<=25 words, English, verbatim): "Criterion 3: Price must reclaim within 1-3 candles." — QUOTE_VERIFIED (this line appears in the search snippet; the fetched page states the same rule as "then snaps back below the broken level within a few candles" and, per the snippet, criterion 3. Only the fetched wording is counted.)
 - Re-checked wording actually read on the page: "price wicks beyond an obvious support or resistance level, triggers the stops sitting just above that level, then snaps back below the broken level within a few candles" — QUOTE_VERIFIED
 - number and unit: "1-3" per the page's criterion list (snippet); "a few" in the fetched body text
-- OF_WHAT: candle position/close back beyond the broken level
+- OF_WHAT: UNSTATED (the recorded words — "Criterion 3: Price must reclaim within 1-3 candles." and, elsewhere on the page, "then snaps back below the broken level within a few candles" — name neither close nor wick nor position)
 - COMPARED_TO_WHAT: the broken level
 - HOW_MANY_CANDLES: 1–3 (criterion list) / UNSTATED ("a few") in the prose
 - TIMEFRAME: UNSTATED
@@ -480,7 +481,7 @@ at all for displacement (F3/Q1-08, F4/Q1-09, F6/Q1-10, Q1-13). No two publishers
 - type: TEACHING
 - quote (<=25 words, English, verbatim): "A sweep wicks beyond the level and closes back inside the prior range" — QUOTE_VERIFIED
 - number and unit: 1–3 (candles) — "reverses inside 1–3 candles" (QUOTE_VERIFIED)
-- OF_WHAT: candle **body close** position
+- OF_WHAT: candle **close** position ("closes back inside the prior range" — QUOTE_VERIFIED); the recorded words do not say "body"
 - COMPARED_TO_WHAT: the prior range / the level
 - HOW_MANY_CANDLES: 1–3
 - TIMEFRAME: UNSTATED (says the sweep is judged on 1–3 candles and the CHoCH on the "entry timeframe")
@@ -658,7 +659,7 @@ close back inside, and one source (Q2-06) explicitly carves out a type-2 excepti
 - type: TEACHING
 - quote (<=25 words, English, verbatim): "In the ICT framework, "approximately the same" means within 5–10 pips on major forex pairs" — QUOTE_VERIFIED
 - number and unit: 5–10 pips; also "10–20 points" for NQ/ES; "1.50–3.00 per ounce" for gold
-- OF_WHAT: absolute price difference between the two highs (resp. lows)
+- OF_WHAT: absolute price difference between the two highs (resp. lows) (elsewhere on the page: "Two consecutive candles at the same high is not a meaningful EQH" — QUOTE_VERIFIED)
 - COMPARED_TO_WHAT: nothing — a fixed distance in pips/points, not scaled
 - HOW_MANY_CANDLES: **UNSTATED** for a maximum distance; instead "the touches need time between them" and "Two consecutive candles at the same high is not a meaningful EQH" (QUOTE_VERIFIED) — a minimum, with no number ("a reasonable window of days to weeks" — QUOTE_VERIFIED)
 - TIMEFRAME: UNSTATED
@@ -679,7 +680,7 @@ close back inside, and one source (Q2-06) explicitly carves out a type-2 excepti
 - type: TEACHING
 - quote (<=25 words, English, verbatim): "within 5–10 pips on Forex, or within a few ticks on futures" — QUOTE_VERIFIED
 - number and unit: 5–10 pips (forex); "a few ticks" (futures — not a number)
-- OF_WHAT: absolute difference between the two wick highs
+- OF_WHAT: absolute difference between the two swing highs ("two or more consecutive swing highs print at approximately the same price" — QUOTE_VERIFIED, same page); the recorded words do not say "wick"
 - COMPARED_TO_WHAT: nothing (fixed distance)
 - HOW_MANY_CANDLES: UNSTATED
 - TIMEFRAME: "On the relevant timeframe" — UNSTATED
@@ -759,7 +760,7 @@ close back inside, and one source (Q2-06) explicitly carves out a type-2 excepti
 - type: NO_NUMBER (implementation description; source hidden, code NOT read)
 - quote (<=25 words, English, verbatim): "set as a multiple of the 14-period ATR rather than a fixed price distance" — QUOTE_VERIFIED
 - number and unit: NONE for the multiple (the multiplier value is not printed)
-- OF_WHAT: absolute price difference between two swing points
+- OF_WHAT: absolute price difference between two swing points ("compared against the immediately preceding swing point of the same type" — QUOTE_VERIFIED)
 - COMPARED_TO_WHAT: ATR, period 14
 - HOW_MANY_CANDLES: the pair is "compared against the immediately preceding swing point of the same type" (QUOTE_VERIFIED) — no maximum distance in bars is given
 - TIMEFRAME: UNSTATED (described as scaling across timeframes)
@@ -779,7 +780,7 @@ close back inside, and one source (Q2-06) explicitly carves out a type-2 excepti
 - type: NO_NUMBER (description only; code NOT read)
 - quote (<=25 words, English, verbatim): "a waiting level is dropped the moment price trades through it" — QUOTE_VERIFIED
 - number and unit: NONE printed (settings exist: "Equality tolerance … measured as a percentage of ATR"; "Minimum bars apart"; "Waiting levels expire after a set number of bars" — QUOTE_VERIFIED)
-- OF_WHAT: difference between two confirmed pivots
+- OF_WHAT: UNSTATED
 - COMPARED_TO_WHAT: ATR (percentage of it) — multiplier value UNSTATED
 - HOW_MANY_CANDLES: a "Minimum bars apart" setting exists; value UNSTATED
 - TIMEFRAME: UNSTATED
@@ -861,7 +862,7 @@ Q3-08); no teaching page gives a number of candles. Tolerances cluster at 5–10
 same type". (c) only two implementation descriptions answer it (Q3-07 drops the level on any trade-through;
 Q3-C1 does not test it). **No teaching source states a no-higher-high-between rule.**
 
-### Q3 — pages checked (14)
+### Q3 — pages checked (15)
 
 | page | outcome |
 |---|---|
@@ -895,7 +896,7 @@ Q3-C1 does not test it). **No teaching source states a no-higher-high-between ru
 - type: TEACHING
 - quote (<=25 words, English, verbatim): "The order block zone is marked using the candle body — not the full candle range including wicks" — QUOTE_VERIFIED
 - number and unit: 50 (percent) for the entry level
-- OF_WHAT: the zone = **body** (open→close); the entry level = 50% of that **body**
+- OF_WHAT: the zone = **body** (open→close); the entry level = 50% of that **body** ("The mean threshold is the 50% level of the order block candle body — not the full candle range" — QUOTE_VERIFIED, same page)
 - COMPARED_TO_WHAT: none (an absolute fraction of the candle's own body)
 - HOW_MANY_CANDLES: 1 (the last opposing candle); "or small cluster of candles" when several oppose, then "extend the zone to encompass the highest high to the lowest low of the entire cluster" (QUOTE_VERIFIED)
 - TIMEFRAME: UNSTATED; example 5-minute NQ
@@ -937,7 +938,7 @@ Q3-C1 does not test it). **No teaching source states a no-higher-high-between ru
 - type: TEACHING
 - quote (<=25 words, English, verbatim): "wick-to-wick is the widest honest zone; bodies-only is tighter but misses more touches" — QUOTE_VERIFIED
 - number and unit: NONE fixed; 50 (percent) is named as the mean-threshold line
-- OF_WHAT: two competing conventions — full wick-to-wick range, or bodies only; entry line = 50% line
+- OF_WHAT: two competing conventions — full wick-to-wick range, or bodies only (named in the quoted words); the 50% entry line: UNSTATED (no verbatim quote recorded in this record)
 - COMPARED_TO_WHAT: none
 - HOW_MANY_CANDLES: 1; "merge stacked opposing candles into one zone" as an alternative (QUOTE_VERIFIED)
 - TIMEFRAME: UNSTATED
@@ -1052,7 +1053,7 @@ wick-to-wick (1 teaching + 1 implementation). The entry level is either the **op
 **50% line** (4 publishers), and the 50% is placed on the **body** by two publishers and on the **full range** by
 one. No source gives a number of candles for the "cluster" case.
 
-### Q4 — pages checked (11)
+### Q4 — pages checked (12)
 
 | page | outcome |
 |---|---|
@@ -1104,7 +1105,7 @@ one. No source gives a number of candles for the "cluster" case.
 - type: TEACHING
 - quote (<=25 words, English, verbatim): "a gap worth at least half an ATR reflects genuine displacement" — QUOTE_VERIFIED
 - number and unit: 0.5 (ATR multiple)
-- OF_WHAT: the **gap height** (distance from candle 1's high to candle 3's low, bullish)
+- OF_WHAT: a gap ("a gap worth at least half an ATR" — QUOTE_VERIFIED); the boundary definition (candle 1 high → candle 3 low) is UNSTATED on the recorded words
 - COMPARED_TO_WHAT: ATR (period not stated on the page)
 - HOW_MANY_CANDLES: 3
 - TIMEFRAME: UNSTATED
@@ -1124,7 +1125,7 @@ one. No source gives a number of candles for the "cluster" case.
 - type: TEACHING
 - quote (<=25 words, English, verbatim): "Filter by size. A minimum size by ATR or by percentage removes the one- or two-tick gaps" — QUOTE_VERIFIED
 - number and unit: NONE (unit named: ATR or percentage)
-- OF_WHAT: gap height
+- OF_WHAT: the gap's size ("A minimum size by ATR or by percentage" — QUOTE_VERIFIED)
 - COMPARED_TO_WHAT: ATR **or** a percentage of price — the reader chooses
 - HOW_MANY_CANDLES: 3
 - TIMEFRAME: UNSTATED
@@ -1144,7 +1145,7 @@ one. No source gives a number of candles for the "cluster" case.
 - type: NO_NUMBER (for size) / TEACHING (for the fill taxonomy)
 - quote (<=25 words, English, verbatim): "There is no common standard here either, so choose one and keep it" — QUOTE_VERIFIED
 - number and unit: NONE — it lists three fill conventions: "Touched", "Half filled", "Fully filled" (QUOTE_VERIFIED)
-- OF_WHAT: gap height for the size filter; price depth inside the zone for the fill
+- OF_WHAT: UNSTATED (no recorded quote names the size filter's object; the fill side appears only as the conventions "Touched", "Half filled", "Fully filled" — QUOTE_VERIFIED)
 - COMPARED_TO_WHAT: "a fraction of the average true range" — fraction UNSTATED
 - HOW_MANY_CANDLES: 3
 - TIMEFRAME: UNSTATED
@@ -1260,7 +1261,7 @@ unit without a value; two state none. (b) the majority version among fetched tea
 through the far boundary**; one publisher (snippet only) puts it at the 50%; two treat a full fill as the failure.
 No fetched source treats a wick touch as invalidation of a fresh gap.
 
-### Q5 — pages checked (12)
+### Q5 — pages checked (13)
 
 | page | outcome |
 |---|---|
@@ -1292,7 +1293,7 @@ No fetched source treats a wick touch as invalidation of a fresh gap.
 - type: TEACHING
 - quote (<=25 words, English, verbatim): "Every ICT stop includes a 2–3 pip buffer beyond the structural reference" — QUOTE_VERIFIED
 - number and unit: **2–3 pips** buffer; and four type distances: **3–10, 5–18, 10–30, 20–50+ pips**
-- OF_WHAT: distance beyond a named price: FVG far boundary (C1 high), OB boundary (OB low), Judas extreme, prior swing low
+- OF_WHAT: distance beyond the structural reference ("beyond the structural reference" — QUOTE_VERIFIED); the four specific references (FVG far boundary C1 high, OB low, Judas extreme, prior swing low) are UNSTATED in the recorded quotes
 - COMPARED_TO_WHAT: the structural reference price, measured in pips
 - HOW_MANY_CANDLES: UNSTATED
 - TIMEFRAME: 5-minute throughout the worked lifecycle
@@ -1371,7 +1372,7 @@ No fetched source treats a wick touch as invalidation of a fresh gap.
 - type: TEACHING
 - quote (<=25 words, English, verbatim): "Add a small buffer for spread, especially on cross pairs" — QUOTE_VERIFIED
 - number and unit: NONE — "small buffer"; the worked example uses **5 pips** below a sweep low ("5 pips below the sweep low of 1.0851" — QUOTE_VERIFIED, hypothetical)
-- OF_WHAT: beyond the **extreme of the liquidity sweep**
+- OF_WHAT: beyond the **extreme of the liquidity sweep** ("a stop placed exactly at the sweep's extreme can be clipped by spread alone" — QUOTE_VERIFIED, same page)
 - COMPARED_TO_WHAT: the sweep's high/low
 - HOW_MANY_CANDLES: UNSTATED
 - TIMEFRAME: execution 1–15 minute; bias 1H/4H
@@ -1494,7 +1495,7 @@ No fetched source treats a wick touch as invalidation of a fresh gap.
 swept level — each from a single publisher. Every other fetched source states the *price* the stop goes beyond and
 declines to give a number. Futures points are recorded separately above and **not converted**.
 
-### Q6 — pages checked (11)
+### Q6 — pages checked (13)
 
 | page | outcome |
 |---|---|
@@ -1586,7 +1587,7 @@ declines to give a number. Futures points are recorded separately above and **no
 - type: TEACHING
 - quote (<=25 words, English, verbatim): "Target 1 (50% position) | Nearest short-term high" — QUOTE_VERIFIED (table row)
 - number and unit: **1:2** minimum ("Minimum R:R | 1:2 to first target before entry" — QUOTE_VERIFIED)
-- OF_WHAT: nearest short-term high/low (T1); HTF draw on liquidity (T2)
+- OF_WHAT: nearest short-term high/low (T1) ("Target 1 (50% position) | Nearest short-term high" — QUOTE_VERIFIED (table row)); T2: UNSTATED (no T2 quote recorded in this record)
 - COMPARED_TO_WHAT: the entry-to-stop distance for the R:R gate
 - HOW_MANY_CANDLES: UNSTATED
 - TIMEFRAME: UNSTATED
@@ -1706,7 +1707,7 @@ liquidity pool, named on the chart, with a partial at the first internal pool. T
 a risk multiple, and four different minimums are found (1.5:1, 1:2, 1:3, 3:1). No fetched source states a fixed pip
 target as a rule; the one absolute figure (20–30 pips) belongs to a time-boxed scalping model.
 
-### Q7 — pages checked (11)
+### Q7 — pages checked (12)
 
 | page | outcome |
 |---|---|
@@ -1765,13 +1766,13 @@ cited for any question. Recording it here so this dead end is not retried.
 
 | question | numeric exact versions found | publishers with no number | independent publishers contributing | pages fetched |
 |---|---|---|---|---|
-| Q1 displacement | 9 | 4 | 6 | 14 (2 snippet-only) |
-| Q2 sweep timing | 5 candle-window versions + 1 penetration-depth version | 4 (no limit stated) | 8 | 15 (1 unreachable, 3 snippet-only) |
-| Q3 equal highs | 5 tolerance bands + 1 percentage band | 3 | 8 | 14 (2 snippet-only) |
-| Q4 order block | 2 zone conventions, 2 entry conventions | 2 ("neither official") | 6 | 11 |
-| Q5 fair value gap | 1 numeric minimum size | 3 (unit only) + 2 (none) | 6 | 12 (2 snippet-only) |
-| Q6 stop | 4 forex pip versions + 2 futures-point versions | 5 | 6 | 11 |
-| Q7 target | 4 risk-multiple versions | 5 (no multiple) | 7 | 11 |
+| Q1 displacement | 9 | 4 | 6 | 16 (2 snippet-only) |
+| Q2 sweep timing | 5 candle-window versions + 1 penetration-depth version | 4 (no limit stated) | 8 | 15 (1 unreachable, 4 snippet-only) |
+| Q3 equal highs | 4 tolerance bands + 1 percentage band | 3 | 8 | 15 (2 snippet-only) |
+| Q4 order block | 2 zone conventions, 2 entry conventions | 2 ("neither official") | 6 | 12 |
+| Q5 fair value gap | 1 numeric minimum size | 3 (unit only) + 2 (none) | 6 | 13 (2 snippet-only) |
+| Q6 stop | 4 forex pip versions + 2 futures-point versions | 5 | 6 | 13 |
+| Q7 target | 4 risk-multiple versions | 5 (no multiple) | 7 | 12 (2 snippet-only) |
 
 **NO_SOURCE_FOUND** does not apply to any question: at least one page per question yielded a number with its
 object of measurement. It does apply to single sub-questions, recorded inline above as `UNSTATED`:
