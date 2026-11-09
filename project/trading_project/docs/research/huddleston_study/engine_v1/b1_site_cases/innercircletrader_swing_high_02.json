@@ -1,0 +1,120 @@
+{
+  "tier": "TIER2",
+  "viewed_status": "VIEWED",
+  "viewing_method": "SEARCH_INTERMEDIARY",
+  "viewing_limit": "The search intermediary is not the owner’s browser; the displayed result was matched to the page image URL.",
+  "OWNER_CHECK": "",
+  "OWNER_CHECK_choices": [
+    "YES",
+    "NO",
+    "CANNOT_SEE"
+  ],
+  "id": "innercircletrader_swing_high_02",
+  "source_url": "https://innercircletrader.net/tutorials/ict-swing-high-explained/",
+  "publisher": "Inner Circle Trader (innercircletrader.net; no s)",
+  "image_url": "https://innercircletrader.net/wp-content/uploads/2024/04/Swing-High.png",
+  "image_location": "How to Use Swing Highs in Trading, image after the entry-level setup paragraph",
+  "caption_kind": "page image alternative text; no separate visible caption found",
+  "caption_quote": "ICT Swing High used in trading: marking a recent swing high as resistance after a bearish shift in momentum",
+  "market_or_illustration": "UNSTATED",
+  "classification_limit": "The page does not specify whether this particular image uses real market data or is an illustration.",
+  "search_query": "\"ICT Swing High used in trading\" marking a recent",
+  "candle_groups": [
+    {
+      "source_position": "left",
+      "candles": [
+        {
+          "number": 1,
+          "open": null,
+          "high": null,
+          "low": null,
+          "close": null
+        },
+        {
+          "number": 2,
+          "open": null,
+          "high": null,
+          "low": null,
+          "close": null
+        },
+        {
+          "number": 3,
+          "open": null,
+          "high": null,
+          "low": null,
+          "close": null
+        }
+      ]
+    },
+    {
+      "source_position": "middle",
+      "candles": [
+        {
+          "number": 1,
+          "open": null,
+          "high": null,
+          "low": null,
+          "close": null
+        },
+        {
+          "number": 2,
+          "open": null,
+          "high": null,
+          "low": null,
+          "close": null
+        },
+        {
+          "number": 3,
+          "open": null,
+          "high": null,
+          "low": null,
+          "close": null
+        }
+      ]
+    },
+    {
+      "source_position": "right",
+      "candles": [
+        {
+          "number": 1,
+          "open": null,
+          "high": null,
+          "low": null,
+          "close": null
+        },
+        {
+          "number": 2,
+          "open": null,
+          "high": null,
+          "low": null,
+          "close": null
+        },
+        {
+          "number": 3,
+          "open": null,
+          "high": null,
+          "low": null,
+          "close": null
+        }
+      ]
+    }
+  ],
+  "expected_by_source": {
+    "numbered_groups": "The image repeats labels 1, 2, 3 at three marked positions.",
+    "marked_candle_in_each_group": 2,
+    "relationship_from_page": "candle 2 high is higher than candle 1 and candle 3 highs",
+    "source_text_caveat": "The caption describes the marked swing as a trading level; the neighbor relation is the article’s general formation rule. The visual grouping is subject to owner review."
+  },
+  "AXIS_READ_ESTIMATE": [],
+  "not_printed": "No numerical open, high, low or close prices are printed.",
+  "testability": "SOURCE_LABELS_ONLY; no numeric OHLC fixture can be reconstructed",
+  "number_provenance": [
+    {
+      "number": "1, 2, 3",
+      "location": "TEXT_AND_IMAGE_LABEL",
+      "meaning": "Printed candle identifiers in three sets; the source describes a three-candle formation, with no numerical prices.",
+      "tag": "SOURCE_NUMBER",
+      "source_quote": "An ICT swing high is basically a three-candle formation."
+    }
+  ]
+}
