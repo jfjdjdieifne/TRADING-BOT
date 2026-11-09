@@ -319,11 +319,29 @@ Unchanged: causal reads only, pre-registration before results, no editing expect
 failures, SAME_BAR_ORDER_UNKNOWN, censored is not failure or zero, protected file hash.
 ```
 
+> **NOTE on clause (d)** — added 2026-11-09. This note does **not** change the clause text
+> above; it records a consequence the owner must weigh before signing.
+>
+> As written, clause (d) forbids *any* edit to an existing file inside `HOLDOUT_V1`, including a
+> `PATCH ONLY` repair. The first dev attempt was killed by the operating system with resident
+> memory at `3.87 GB` of a `3.94 GB` machine, before it reached a single decision
+> (`dev_month_v0/SUMMARY_V0.md`). Bounding that memory without touching any existing file has
+> **not** been shown to be possible; if it turns out to require an edit to a closed module,
+> clause (d) as written makes the fix impossible inside the phase.
+>
+> The owner must therefore decide, **before signing**, one of two things:
+> **(i)** such fixes are done **before** the phase opens — i.e. now, in the design phase, which
+> is what `ict_recipe_v1/` sets out; or **(ii)** clause (d) is relaxed to permit `PATCH ONLY`
+> inside the phase under a declared, logged procedure. Until one of the two is recorded,
+> clause (d) is read literally and nothing is patched.
+
 The owner is asked to decide, in this order:
 
 1. accept / reject `D3`;
-2. if accepted, the **BTCUSDT month list** for the second window (currently a placeholder in
-   `PREREGISTRATION_V1.md` §2 — no month is invented there);
+2. if accepted, to **confirm the BTCUSDT month list** already drawn in
+   `PREREGISTRATION_V1.md` §2.3 (`2022-11`, `2022-02`, `2023-11`, `2022-09`, `2024-07`,
+   `2023-09`). This item is no longer a choice of months: the draw is recorded, and
+   re-drawing after the fact is the failure mode pre-registration exists to prevent;
 3. whether `HOLDOUT_V1` may read the EURUSD 2024 window before or after the BTC window.
 
 ---

@@ -84,9 +84,9 @@ Rules attached to the windows:
   are excluded from the draw range by construction (the range ends `2024-12`).
 - **`2026-05`** is outside the draw range and therefore cannot be drawn. Separately, an
   earlier read-only audit of this repository recorded `2026-05` as already used in an
-  evaluation context, while the owner states he has not viewed that data in this repository's
-  evaluation context. **Both records are kept and neither is resolved here**; the item is
-  excluded by range, not by this note.
+  evaluation context. The owner's viewing state for that data is **UNKNOWN (not answered)**:
+  no statement exists in which the owner says whether he viewed it, so this file does not and
+  may not claim that he did not. The item is excluded by range, not by this note.
 - W1 and W3 exist so that definitions can be broken without burning W2. They are never
   pooled with W2 in any aggregate; each window is reported alone, and no "combined" figure
   is produced.
@@ -121,7 +121,7 @@ project can have of the pre-existing state of the owner's eyes:
 
 - EURUSD 2024 — not viewed. (This is what makes W2 blind; the attestation above preserves it.)
 - BTCUSDT — no month viewed except `2025-08` / `2025-09`.
-- BTCUSDT `2026-05` — not viewed in this repository's evaluation context.
+- BTCUSDT `2026-05` — owner's viewing state: UNKNOWN (not answered).
 
 An `OWNER_STATEMENT_IN_CHAT` is **not verifiable by the project** and is recorded as a
 statement, never as a measurement.
@@ -641,6 +641,30 @@ value in this file at all** — not even a placeholder — because a placeholder
 the first time someone is in a hurry.
 
 ---
+
+### 9A. Dev-run record — first attempt aborted, next dev month declared
+
+Recorded on 2026-11-09, **before any bar of the next attempt is loaded**, so that the choice
+below cannot be adjusted after the fact.
+
+- **First dev attempt** — `EURUSD 5m`, decision month `2021-03`, history from `2021-01-01`,
+  default configuration, one run. It was aborted by the operating system (out-of-memory kill of
+  the Python process) after `12 min 59 s`, with resident memory at `3,870,276 kB` on a
+  `3,939 MB` machine. The kill happened **during the warm-up, before the first decision
+  instant**: `decisions = 0`, `plans = 0`, `cases = 0`, and the raw output directory holds a
+  `264`-byte log with no result file. **No result was seen.** Record:
+  `dev_month_v0/SUMMARY_V0.md`.
+- **Consequence for `2021-03`.** Because nothing was observed, `2021-03` is **not burned** as an
+  evaluation window in the sense of §8 — but it is also **not eligible as a blind window**,
+  since its bars were read into a decision process. It is treated as `LOADED_NO_RESULT` and is
+  never used as an out-of-sample window.
+- **Next dev month: `2021-06`** — tag `ENGINEERING_CHOICE`, declared here before any load.
+  Reason for a *new* month rather than repeating `2021-03`: a window is read once (§2.1), and
+  re-reading `2021-03` under a new wrapper is a second look at the same bars even when the
+  first look produced no decision.
+- The next attempt is **not authorised by this record**. It requires
+  `ict_recipe_v1/MEMORY_ANALYSIS_V0.md` and `ict_recipe_v1/DEV_RUN_PLAN_V1.md`, both of which
+  are design only.
 
 ## 10. What this does NOT establish
 
