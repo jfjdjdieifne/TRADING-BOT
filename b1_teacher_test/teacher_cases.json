@@ -1,0 +1,116 @@
+{
+  "schema": "teacher_cases_v1",
+  "freeze_basis": "Published teaching examples and B1 DESIGN V2; no engine implementation inspected for this comparison before this fixture commit.",
+  "policies": {
+    "prices": "Only explicitly hypothetical/constructed/made-up published examples are eligible. Missing OHLC components are omitted, not estimated or filled.",
+    "closures": "A closed flag may be supplied only when the article expressly describes a completed-bar observation; unspecified closure remains absent.",
+    "scope": "Published teacher judgments, V2 predictions, actual B1 output, and descriptive displacement measurements are separate; no source is attributed to a person other than its own publisher/author.",
+    "independence": "Mirrored cases, counterfactuals, boundary variants, and windows from the same sequence are related observations, not independent evidence.",
+    "sources_unverified": "An authorship byline is not proof of human-only composition. No article selected here declares chatbot generation; Swoopr, which declares AI assistance, is excluded conservatively.",
+    "unsupported_interface": "If a detector cannot consume the fields actually printed by the source, record NOT_RUN_MISSING_FIELDS; never repair the example by inventing values."
+  },
+  "sources": {
+    "HDP_DISP": {"publisher": "HomeDadPro", "author": "Yang", "url": "https://homedadpro.com/en/displacement-trading/", "provenance": "explicitly constructed teaching examples, not reported trades or backtest results; abstract units"},
+    "HDP_FVG": {"publisher": "HomeDadPro", "author": "Yang", "url": "https://homedadpro.com/en/fair-value-gap/", "provenance": "explicitly hypothetical boundary checks; same publisher as HDP_DISP"},
+    "TZ": {"publisher": "TradeZoro", "author": "not stated", "url": "https://tradezoro.com/learn-fair-value-gap", "provenance": "explicitly hypothetical example with made-up prices and an author's counterfactual"},
+    "SF": {"publisher": "SwingFolio", "author": "SwingFolio Team", "url": "https://swingfolio.com/blog/swing-highs-and-swing-lows", "provenance": "explicitly hypothetical 13-bar series; high and low only"},
+    "LA": {"publisher": "LuxAlgo", "author": "not stated in fetched article", "url": "https://www.luxalgo.com/blog/swing-highs-and-lows-basics-for-traders/", "provenance": "two separate explicitly hypothetical sequences, one prints only highs and the other only lows"}
+  },
+  "fvg_cases": [
+    {
+      "id": "HDP-DISP-BULL", "source": "HDP_DISP", "relation_group": "HDP-DISP-MIRROR", "direction": "bullish", "closure": "C3 completed as stated by source",
+      "bars": [{"open":"100","high":"102","low":"99","close":"101"},{"open":"101","high":"110","low":"100","close":"109"},{"open":"109","high":"113","low":"108","close":"112"}],
+      "teacher": {"verdict":"YES","lower":"102","upper":"108","midpoint":"105","confirmation_bar":3},
+      "v2_prediction": {"status":"YES","lower":"102","upper":"108"}
+    },
+    {
+      "id": "HDP-DISP-BEAR", "source": "HDP_DISP", "relation_group": "HDP-DISP-MIRROR", "direction": "bearish", "closure": "C3 completed as stated by source",
+      "bars": [{"open":"112","high":"113","low":"110","close":"111"},{"open":"111","high":"112","low":"102","close":"103"},{"open":"103","high":"104","low":"99","close":"100"}],
+      "teacher": {"verdict":"YES","lower":"104","upper":"110","midpoint":"107","confirmation_bar":3},
+      "v2_prediction": {"status":"YES","lower":"104","upper":"110"}
+    },
+    {
+      "id": "HDP-EDGE-BULL", "source": "HDP_FVG", "relation_group": "HDP-BOUNDARIES", "direction": "bullish", "closure": "source specifies three completed candles",
+      "bars": [{"high":"20000"},{},{"low":"20004"}],
+      "teacher": {"verdict":"YES","lower":"20000","upper":"20004","midpoint":"20002"},
+      "v2_prediction": {"status":"YES","lower":"20000","upper":"20004"}
+    },
+    {
+      "id": "HDP-EDGE-BEAR", "source": "HDP_FVG", "relation_group": "HDP-BOUNDARIES", "direction": "bearish", "closure": "source specifies three completed candles",
+      "bars": [{"low":"20010"},{},{"high":"20006"}],
+      "teacher": {"verdict":"YES","lower":"20006","upper":"20010","midpoint":"20008"},
+      "v2_prediction": {"status":"YES","lower":"20006","upper":"20010"}
+    },
+    {
+      "id": "HDP-EDGE-OVERLAP", "source": "HDP_FVG", "relation_group": "HDP-BOUNDARIES", "direction": "bullish", "closure": "source specifies three completed candles",
+      "bars": [{"high":"20000"},{},{"low":"19999"}],
+      "teacher": {"verdict":"NO","note":"No bullish FVG under the source's definition."},
+      "v2_prediction": {"status":"NO"}
+    },
+    {
+      "id": "HDP-EDGE-TOUCH", "source": "HDP_FVG", "relation_group": "HDP-BOUNDARIES", "direction": "bullish", "closure": "source specifies three completed candles",
+      "bars": [{"high":"20000"},{},{"low":"20000"}],
+      "teacher": {"verdict":"NO_POSITIVE_WIDTH_GAP","note":"The source decides equality is not a positive-width gap."},
+      "v2_prediction": {"status":"UNDECIDED","note":"V2 leaves touching edges as a knowledge gap; a difference in rule, not automatically a defect."}
+    },
+    {
+      "id": "TZ-BULL", "source": "TZ", "relation_group": "TZ-COUNTERFACTUAL", "direction": "bullish", "closure": "UNSTATED",
+      "bars": [{"high":"5010.00","low":"5004.50"},{"open":"5008.00","close":"5024.00"},{"high":"5029.00","low":"5015.25"}],
+      "teacher": {"verdict":"YES","lower":"5010.00","upper":"5015.25","midpoint":"5012.625"},
+      "v2_prediction": {"status":"YES","lower":"5010.00","upper":"5015.25"}
+    },
+    {
+      "id": "TZ-COUNTERFACTUAL", "source": "TZ", "relation_group": "TZ-COUNTERFACTUAL", "direction": "bullish", "closure": "UNSTATED",
+      "bars": [{"high":"5010.00","low":"5004.50"},{"open":"5008.00","close":"5024.00"},{"high":"5029.00","low":"5009.75"}],
+      "teacher": {"verdict":"NO","note":"Author's counterfactual: change C3 low to 5009.75; it overlaps the first high by 0.25."},
+      "v2_prediction": {"status":"NO"}
+    }
+  ],
+  "swing_cases": [
+    {
+      "id": "SF-SERIES", "source": "SF", "relation_group": "SF-ONE-SERIES", "closure": "observations are at the closes of the successive hypothetical daily bars",
+      "bars": [{"high":"20.40","low":"19.80"},{"high":"20.90","low":"20.10"},{"high":"21.60","low":"20.70"},{"high":"21.30","low":"20.60"},{"high":"20.80","low":"20.05"},{"high":"20.50","low":"19.95"},{"high":"20.95","low":"20.30"},{"high":"21.70","low":"20.85"},{"high":"22.40","low":"21.50"},{"high":"22.10","low":"21.20"},{"high":"21.80","low":"20.90"},{"high":"22.60","low":"21.40"},{"high":"23.00","low":"21.60"}],
+      "teacher": {
+        "left_bars":2,"right_bars":2,"strict":true,"testable_candidate_bars":[3,4,5,6,7,8,9,10,11],
+        "highs":[{"candidate":3,"confirmed_at":5,"price":"21.60"},{"candidate":9,"confirmed_at":11,"price":"22.40"}],
+        "lows":[{"candidate":6,"confirmed_at":8,"price":"19.95"},{"candidate":11,"confirmed_at":13,"price":"20.90"}],
+        "other_testable_candidates": "The article states that all other testable bars fail; this applies to each side not listed as a pivot.",
+        "unconfirmed_example": {"side":"low","candidate":11,"as_of":12,"verdict":"NOT_YET_CONFIRMED"},
+        "not_fully_testable_candidates":[1,2,12,13]
+      },
+      "v2_prediction": {
+        "left_bars":1,"right_bars":1,"candidate_range":[2,12],
+        "high_yes_candidates":[3,9],"low_yes_candidates":[6,11],
+        "all_other_candidates":"NO for the corresponding side; no equality occurs in these comparisons",
+        "confirmation":"candidate plus one bar, as opposed to source candidate plus two bars"
+      }
+    },
+    {
+      "id": "LA-HIGHS", "source": "LA", "relation_group": "LA-TWO-SEPARATE-SERIES", "direction":"high", "closure":"the first right bar and then the second right bar have closed as stated",
+      "bars": [{"high":"100"},{"high":"103"},{"high":"107"},{"high":"105"},{"high":"106"}],
+      "teacher": {"left_bars":2,"right_bars":2,"candidate":3,"verdict":"YES","confirmed_at":5,"price":"107"},
+      "v2_prediction": {"status":"YES","candidate":3,"confirmed_at":4}
+    },
+    {
+      "id": "LA-LOWS", "source": "LA", "relation_group": "LA-TWO-SEPARATE-SERIES", "direction":"low", "closure":"the first right bar and then the second right bar have closed as stated",
+      "bars": [{"low":"97"},{"low":"95"},{"low":"90"},{"low":"94"},{"low":"92"}],
+      "teacher": {"left_bars":2,"right_bars":2,"candidate":3,"verdict":"YES","confirmed_at":5,"price":"90"},
+      "v2_prediction": {"status":"YES","candidate":3,"confirmed_at":4}
+    }
+  ],
+  "displacement": {
+    "engine_implementation": "not implemented; describe measurements only, not an engine or teacher classification",
+    "target": "C2 in the two full HDP_DISP three-candle examples",
+    "expected_body": "8", "expected_range": "10", "expected_body_divided_by_range": "0.8",
+    "variants_kept_separate": [
+      {"id":"V-D-A-1","source_wording":"60–80 percent","expectation":"80% is at the upper printed boundary; do not choose a single cutoff from the band."},
+      {"id":"V-D-A-2","source_wording":"about 75 percent","expectation":"80% is above 75%; approximation does not supply an exact tolerance."},
+      {"id":"V-D-A-3","source_wording":"70 percent","expectation":"80% is above 70%."},
+      {"id":"V-D-A-4","source_wording":"80 percent","expectation":"80% equals 80%."},
+      {"id":"V-D-B-1","expectation":"NOT_MEASURABLE: only one earlier candle is supplied, not 3–5."},
+      {"id":"V-D-B-2","expectation":"NOT_MEASURABLE: only one earlier candle is supplied, not 10."},
+      {"id":"V-D-C-1","expectation":"NOT_MEASURABLE: no ATR(14) or sufficient history is supplied."}
+    ],
+    "limitations": "No threshold or winner is selected. The publisher describes the movement but does not adjudicate these named owner-recorded alternatives. The other examples omit prices needed for body/range or history."
+  }
+}
