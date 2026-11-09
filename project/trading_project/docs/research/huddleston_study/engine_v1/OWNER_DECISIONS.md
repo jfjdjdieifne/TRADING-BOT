@@ -37,3 +37,29 @@ An unverified pasted text claims that a source says equal highs are judged visua
 
 - **Records, counts and pages checked for Q1–Q7:** [external_sources/l_open_questions.md](external_sources/l_open_questions.md) — one section per open question, with TEACHING and IMPLEMENTATION_CODE kept separate.
 - **Full step-by-step ICT specification, every line carrying a source symbol:** [external_sources/s_ict_spec_sources_only.md](external_sources/s_ict_spec_sources_only.md) — candle elements, strength numbers with their denominators, swing, liquidity, sweep, MSS, FVG, order block, breaker, entry, stop, target, invalids, and a closed list of the points where the sources give nothing.
+
+## D2 — Displacement variants
+
+**Status: OWNER_APPROVED**
+
+There is **no reference definition of displacement**. Record the following three families as separate named variants. Measure every sub-version separately; never select one because of its results and never attribute any variant to a person. These are recorded alternatives, not a default or an endorsement of a winning threshold.
+
+- **V-D-A — body divided by candle range:**
+  - **V-D-A-1:** 60–80 percent, as printed by the source.
+  - **V-D-A-2:** about 75 percent, as printed by the source.
+  - **V-D-A-3:** 70 percent, as printed by the source.
+  - **V-D-A-4:** 80 percent, as printed by the source.
+- **V-D-B — candle compared with previous candles:**
+  - **V-D-B-1:** candle range at least 2× the average range of 3–5 previous candles.
+  - **V-D-B-2:** candle body 2–3× the average body of the previous 10 candles.
+- **V-D-C — body compared with ATR:**
+  - **V-D-C-1:** candle body at least 1.5 × ATR(14). The source itself says the multiple is a choice to test.
+
+A number supplied by the owner later would be an **additional named variant**, not a replacement chosen by results. **Displacement is not coded yet.**
+
+## OPEN_FROM_HARD_TESTS — undecided, not owner decisions
+
+- **Precedence:** `NO > UNDECIDED > PENDING` is an undeclared `ENGINEERING_CHOICE` of the builder, not a priority stated in V2. About 36 thousand observations depend on that choice; the hard-test report records 36,562. Which priority, if any, should be approved remains open.
+- **Missing closure flag:** The candle record defaults `closed=True` when that field is missing. Whether this default is acceptable remains open.
+- **Malformed candles:** Direct detector functions silently accept some malformed duck-typed candles, including examples with `high < low`, although the candle constructor rejects them. Whether direct calls must validate remains open.
+- **FVG closure:** The FVG detector does not require C3 to be closed. Whether a closure requirement should be introduced remains open.
