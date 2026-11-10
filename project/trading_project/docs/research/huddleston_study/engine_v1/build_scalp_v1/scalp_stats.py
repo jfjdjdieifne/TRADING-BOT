@@ -182,7 +182,7 @@ def main() -> None:
     # descriptive: alternative variants and shorts, plain hit next to event-specific break-even.
     descriptive, excluded, days_sensitivity = {}, {}, {}
     for month, (plans, controls, summary) in by_month.items():
-        for config in ("PRIMARY", "variant_1B", "window_2", "large_body", "large_loose", "shorts"):
+        for config in ("PRIMARY", "window_2", "large_body", "large_loose", "shorts"):
             ev = [p for p in plans if p.get("config") == config and p.get("state") == "settled"]
             if not ev:
                 continue
@@ -258,7 +258,7 @@ def main() -> None:
         lines.append(f"- {key}: n={d['first_event_per_day_n']}, paired difference={d['paired_delta']}.")
     lines += ["", "## Measurement availability and fault locator", "",
               "The five frozen exploratory run bundles predate added MAE / half-target fields, next-bar-open reruns, and the half-body H-level sensitivity. Do not rerun these already-seen months: those measures are unavailable here (bars-to-target is recoverable as bars_held for target hits); they are not silently imputed. The half-body H-level owner sensitivity was omitted from the initial pre-run declarations and is recorded now as not analyzed, not as a valid preregistered result.",
-              "The shorts calculation was corrected after its first exploratory execution; its old descriptive outcomes are invalidated and are not interpreted. Primary long results are unchanged by that short-only correction. The 1B diagnostic implementation also now enforces the intervening bullish candle; do not treat its earlier counts as validated.",
+              "The shorts calculation was corrected before the five run bundles were made; its secondary outcomes are included separately, not pooled. The 1B diagnostic implementation now enforces the intervening bullish candle; the earlier 1B records do not reliably establish that condition and are omitted from outcome tables.",
               "The primary family is sparse (many month/form cells have few events or days); MDE intervals are wide and generally do not exclude zero. This is NO_SIGNAL or UNDERPOWERED, not evidence of equivalence.",
               "The detector should be checked against the owner case cards. Any suspected detector issue must be entered in VARIANT_LOG_SCALP.md; no changes or reruns on these seen months are permitted.", "",
               "## What this does NOT establish", "",
@@ -266,7 +266,7 @@ def main() -> None:
               "- The exploratory months are seen; one currency pair and one year are represented.",
               "- CANDIDATE_FOR_CONFIRMATION, if ever assigned, would not mean a working strategy.",
               "- The target buffer is an engineering choice and its intent is a knowledge gap.",
-              "- MAE, the half-target-before-stop measure, next-bar-open sensitivity, and half-body H-level sensitivity were not generated in the frozen runs; no rerun was made on seen months.",
+              "- MAE, the half-target-before-stop measure, next-bar-open sensitivity, corrected 1B outcomes, and half-body H-level sensitivity were not generated in the frozen runs; no rerun was made on seen months.",
               "- Cards check whether the owner pattern was read correctly, not profitability.",
               "- 2021-10 is IN_SAMPLE; the v3 round on 2021-12 was waived by owner decision.", ""]
     (OUT / "TABLES_SCALP.md").write_text("\n".join(lines), encoding="utf-8")

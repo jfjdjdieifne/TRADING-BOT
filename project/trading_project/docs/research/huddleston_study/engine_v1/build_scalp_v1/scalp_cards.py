@@ -92,7 +92,9 @@ def cards() -> None:
                      if e["s_index"] == plan["s_index"] and e["r_index"] == plan["r_index"]
                      and e["h_index"] == plan["h_index"])
         swept_low, r_half = event["swept_low"], event["r_half"]
-        first = max(0, s_index - 3)
+        swept_index = event["swing_candle_index"]
+        target_source_index = plan["target_source"]["candle_index"]
+        first = min(target_source_index, swept_index, s_index)
         last = plan["h_index"]          # nothing after the entry candle is shown
         lines = [f"# CARD_{i:02d} — {month} — 15m", "",
                  "Candles up to and including the entry candle only. No outcome on this card.", "",
@@ -101,6 +103,10 @@ def cards() -> None:
         for idx in range(first, last + 1):
             candle = candles[idx]
             marks = []
+            if idx == target_source_index:
+                marks.append("target-source swing high")
+            if idx == swept_index:
+                marks.append("swept-low swing")
             if idx == plan["s_index"]:
                 marks.append("S (sweep)")
             if idx == plan["r_index"]:
