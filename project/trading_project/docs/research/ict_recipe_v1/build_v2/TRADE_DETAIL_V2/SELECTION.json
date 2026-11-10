@@ -1,0 +1,449 @@
+{
+ "hash_check": "sha256 verified: 75 files match, 0 do not",
+ "selected": [
+  {
+   "run": "2021-09_v1",
+   "why": "seeded random",
+   "plan_id": "plan:2021-09-28T06:00:00+00:00:sweep:high:None",
+   "r": -2.6666666666641996,
+   "meta": {
+    "seed": 3705771346333436008,
+    "index": 80,
+    "n": 103
+   },
+   "state": "settled_stop",
+   "file": "CARDS/2021-09_v1__seeded__plan_2021-09-28T06_00_00p00_00_sweep_high_None.md"
+  },
+  {
+   "run": "2021-09_v1",
+   "why": "highest R",
+   "plan_id": "plan:2021-09-07T07:55:00+00:00:fvg:bearish:50804",
+   "r": 46.99999999967804,
+   "meta": {
+    "r": 46.99999999967804
+   },
+   "state": "settled_target",
+   "file": "CARDS/2021-09_v1__highest__plan_2021-09-07T07_55_00p00_00_fvg_bearish_50804.md"
+  },
+  {
+   "run": "2021-09_v1",
+   "why": "same-bar (seeded)",
+   "plan_id": "plan:2021-09-03T06:10:00+00:00:sweep:low:None",
+   "r": -3.9999999999777955,
+   "meta": {
+    "seed": 10301509402179783077,
+    "index": 8,
+    "n": 66
+   },
+   "state": "settled_stop",
+   "file": "CARDS/2021-09_v1__same-bar__plan_2021-09-03T06_10_00p00_00_sweep_low_None.md"
+  },
+  {
+   "run": "2021-09_V2-0",
+   "why": "seeded random",
+   "plan_id": "plan:2021-09-29T08:00:00+00:00:5m:fvg:bearish:55411",
+   "r": -1.109375000000065,
+   "meta": {
+    "seed": 16970631434650186051,
+    "index": 27,
+    "n": 30
+   },
+   "state": "settled_stop",
+   "file": "CARDS/2021-09_V2-0__seeded__plan_2021-09-29T08_00_00p00_00_5m_fvg_bearish_55411.md"
+  },
+  {
+   "run": "2021-09_V2-0",
+   "why": "highest R",
+   "plan_id": "plan:2021-09-07T07:55:00+00:00:5m:fvg:bearish:50804",
+   "r": 46.99999999967804,
+   "meta": {
+    "r": 46.99999999967804
+   },
+   "state": "settled_target",
+   "file": "CARDS/2021-09_V2-0__highest__plan_2021-09-07T07_55_00p00_00_5m_fvg_bearish_50804.md"
+  },
+  {
+   "run": "2021-09_V2-0",
+   "why": "same-bar (seeded)",
+   "plan_id": "plan:2021-09-07T06:50:00+00:00:5m:fvg:bearish:50787",
+   "r": -1.0999999999998225,
+   "meta": {
+    "seed": 15959173880036208738,
+    "index": 7,
+    "n": 18
+   },
+   "state": "settled_stop",
+   "file": "CARDS/2021-09_V2-0__same-bar__plan_2021-09-07T06_50_00p00_00_5m_fvg_bearish_50787.md"
+  },
+  {
+   "run": "2021-09_V2-A",
+   "why": "seeded random",
+   "plan_id": "plan:2021-09-21T06:10:00+00:00:15m:fvg:bearish:17877",
+   "r": 1.4666666666668147,
+   "meta": {
+    "seed": 8195888506664408296,
+    "index": 12,
+    "n": 17
+   },
+   "state": "settled_target",
+   "file": "CARDS/2021-09_V2-A__seeded__plan_2021-09-21T06_10_00p00_00_15m_fvg_bearish_17877.md"
+  },
+  {
+   "run": "2021-09_V2-A",
+   "why": "highest R",
+   "plan_id": "plan:2021-09-07T07:40:00+00:00:15m:fvg:bearish:16922",
+   "r": 31.39999999993294,
+   "meta": {
+    "r": 31.39999999993294
+   },
+   "state": "settled_target",
+   "file": "CARDS/2021-09_V2-A__highest__plan_2021-09-07T07_40_00p00_00_15m_fvg_bearish_16922.md"
+  },
+  {
+   "run": "2021-09_V2-A",
+   "why": "same-bar (seeded)",
+   "plan_id": "plan:2021-09-08T07:15:00+00:00:15m:sweep:high:None",
+   "r": -1.147058823529719,
+   "meta": {
+    "seed": 8953928917605276702,
+    "index": 4,
+    "n": 7
+   },
+   "state": "settled_stop",
+   "file": "CARDS/2021-09_V2-A__same-bar__plan_2021-09-08T07_15_00p00_00_15m_sweep_high_None.md"
+  },
+  {
+   "run": "2021-09_V2-B",
+   "why": "seeded random",
+   "plan_id": "plan:2021-09-16T07:50:00+00:00:1h:fvg:bullish:4336",
+   "r": -1.050000000000111,
+   "meta": {
+    "seed": 6278280326450679685,
+    "index": 9,
+    "n": 16
+   },
+   "state": "settled_stop",
+   "file": "CARDS/2021-09_V2-B__seeded__plan_2021-09-16T07_50_00p00_00_1h_fvg_bullish_4336.md"
+  },
+  {
+   "run": "2021-09_V2-B",
+   "why": "highest R",
+   "plan_id": "plan:2021-09-14T08:00:00+00:00:1h:fvg:bearish:4315",
+   "r": 2.570312499999943,
+   "meta": {
+    "r": 2.570312499999943
+   },
+   "state": "settled_target",
+   "file": "CARDS/2021-09_V2-B__highest__plan_2021-09-14T08_00_00p00_00_1h_fvg_bearish_4315.md"
+  },
+  {
+   "run": "2021-09_V2-B",
+   "why": "same-bar (seeded)",
+   "plan_id": "plan:2021-09-07T08:55:00+00:00:1h:fvg:bearish:4232",
+   "r": -1.157894736842628,
+   "meta": {
+    "seed": 2757792367465335145,
+    "index": 0,
+    "n": 3
+   },
+   "state": "settled_stop",
+   "file": "CARDS/2021-09_V2-B__same-bar__plan_2021-09-07T08_55_00p00_00_1h_fvg_bearish_4232.md"
+  },
+  {
+   "run": "2021-09_V2-A-OFF",
+   "why": "seeded random",
+   "plan_id": "plan:2021-09-16T15:35:00+00:00:15m:fvg:bullish:17638",
+   "r": -1.099999999999852,
+   "meta": {
+    "seed": 823488160558538963,
+    "index": 54,
+    "n": 98
+   },
+   "state": "settled_stop",
+   "file": "CARDS/2021-09_V2-A-OFF__seeded__plan_2021-09-16T15_35_00p00_00_15m_fvg_bullish_17638.md"
+  },
+  {
+   "run": "2021-09_V2-A-OFF",
+   "why": "highest R",
+   "plan_id": "plan:2021-09-07T07:40:00+00:00:15m:fvg:bearish:16922",
+   "r": 31.39999999993294,
+   "meta": {
+    "r": 31.39999999993294
+   },
+   "state": "settled_target",
+   "file": "CARDS/2021-09_V2-A-OFF__highest__plan_2021-09-07T07_40_00p00_00_15m_fvg_bearish_16922.md"
+  },
+  {
+   "run": "2021-09_V2-A-OFF",
+   "why": "same-bar (seeded)",
+   "plan_id": "plan:2021-09-02T11:20:00+00:00:15m:fvg:bullish:16658",
+   "r": -1.1666666666671601,
+   "meta": {
+    "seed": 8180184358152833904,
+    "index": 3,
+    "n": 32
+   },
+   "state": "settled_stop",
+   "file": "CARDS/2021-09_V2-A-OFF__same-bar__plan_2021-09-02T11_20_00p00_00_15m_fvg_bullish_16658.md"
+  },
+  {
+   "run": "2021-09_V2-B-OFF",
+   "why": "seeded random",
+   "plan_id": "plan:2021-09-16T06:55:00+00:00:1h:fvg:bullish:4337",
+   "r": -1.0526315789473275,
+   "meta": {
+    "seed": 7559133325675539597,
+    "index": 22,
+    "n": 39
+   },
+   "state": "settled_stop",
+   "file": "CARDS/2021-09_V2-B-OFF__seeded__plan_2021-09-16T06_55_00p00_00_1h_fvg_bullish_4337.md"
+  },
+  {
+   "run": "2021-09_V2-B-OFF",
+   "why": "highest R",
+   "plan_id": "plan:2021-09-13T19:00:00+00:00:1h:fvg:bullish:4338",
+   "r": 6.022727272722869,
+   "meta": {
+    "r": 6.022727272722869
+   },
+   "state": "settled_target",
+   "file": "CARDS/2021-09_V2-B-OFF__highest__plan_2021-09-13T19_00_00p00_00_1h_fvg_bullish_4338.md"
+  },
+  {
+   "run": "2021-09_V2-B-OFF",
+   "why": "same-bar (seeded)",
+   "plan_id": "plan:2021-09-03T09:00:00+00:00:1h:fvg:bullish:4174",
+   "r": -1.1052631578950136,
+   "meta": {
+    "seed": 5279163097935296127,
+    "index": 0,
+    "n": 7
+   },
+   "state": "settled_stop",
+   "file": "CARDS/2021-09_V2-B-OFF__same-bar__plan_2021-09-03T09_00_00p00_00_1h_fvg_bullish_4174.md"
+  },
+  {
+   "run": "2021-07_v1",
+   "why": "seeded random",
+   "plan_id": "plan:2021-07-08T06:55:00+00:00:fvg:bearish:38405",
+   "r": -1.058139534883823,
+   "meta": {
+    "seed": 9172509303102896102,
+    "index": 24,
+    "n": 104
+   },
+   "state": "settled_stop",
+   "file": "CARDS/2021-07_v1__seeded__plan_2021-07-08T06_55_00p00_00_fvg_bearish_38405.md"
+  },
+  {
+   "run": "2021-07_v1",
+   "why": "highest R",
+   "plan_id": "plan:2021-07-16T07:05:00+00:00:fvg:bearish:40058",
+   "r": 5.0937499999928875,
+   "meta": {
+    "r": 5.0937499999928875
+   },
+   "state": "settled_target",
+   "file": "CARDS/2021-07_v1__highest__plan_2021-07-16T07_05_00p00_00_fvg_bearish_40058.md"
+  },
+  {
+   "run": "2021-07_v1",
+   "why": "same-bar (seeded)",
+   "plan_id": "plan:2021-07-16T08:40:00+00:00:fvg:bearish:40058",
+   "r": -1.25,
+   "meta": {
+    "seed": 14044755630888387150,
+    "index": 37,
+    "n": 74
+   },
+   "state": "settled_stop",
+   "file": "CARDS/2021-07_v1__same-bar__plan_2021-07-16T08_40_00p00_00_fvg_bearish_40058.md"
+  },
+  {
+   "run": "2021-07_V2-0",
+   "why": "seeded random",
+   "plan_id": "plan:2021-07-23T07:50:00+00:00:5m:fvg:bearish:41517",
+   "r": -1.2777777777786001,
+   "meta": {
+    "seed": 17997812289604226534,
+    "index": 33,
+    "n": 43
+   },
+   "state": "settled_stop",
+   "file": "CARDS/2021-07_V2-0__seeded__plan_2021-07-23T07_50_00p00_00_5m_fvg_bearish_41517.md"
+  },
+  {
+   "run": "2021-07_V2-0",
+   "why": "highest R",
+   "plan_id": "plan:2021-07-16T07:05:00+00:00:5m:fvg:bearish:40058",
+   "r": 5.0937499999928875,
+   "meta": {
+    "r": 5.0937499999928875
+   },
+   "state": "settled_target",
+   "file": "CARDS/2021-07_V2-0__highest__plan_2021-07-16T07_05_00p00_00_5m_fvg_bearish_40058.md"
+  },
+  {
+   "run": "2021-07_V2-0",
+   "why": "same-bar (seeded)",
+   "plan_id": "plan:2021-07-15T06:20:00+00:00:5m:fvg:bullish:39836",
+   "r": -1.2333333333339749,
+   "meta": {
+    "seed": 14560770889425750977,
+    "index": 9,
+    "n": 27
+   },
+   "state": "settled_stop",
+   "file": "CARDS/2021-07_V2-0__same-bar__plan_2021-07-15T06_20_00p00_00_5m_fvg_bullish_39836.md"
+  },
+  {
+   "run": "2021-07_V2-A",
+   "why": "seeded random",
+   "plan_id": "plan:2021-07-23T07:50:00+00:00:15m:fvg:bearish:13843",
+   "r": -1.2499999999996034,
+   "meta": {
+    "seed": 13751166741018251497,
+    "index": 17,
+    "n": 26
+   },
+   "state": "settled_stop",
+   "file": "CARDS/2021-07_V2-A__seeded__plan_2021-07-23T07_50_00p00_00_15m_fvg_bearish_13843.md"
+  },
+  {
+   "run": "2021-07_V2-A",
+   "why": "highest R",
+   "plan_id": "plan:2021-07-26T08:00:00+00:00:15m:fvg:bullish:13960",
+   "r": 3.05357142857179,
+   "meta": {
+    "r": 3.05357142857179
+   },
+   "state": "settled_target",
+   "file": "CARDS/2021-07_V2-A__highest__plan_2021-07-26T08_00_00p00_00_15m_fvg_bullish_13960.md"
+  },
+  {
+   "run": "2021-07_V2-A",
+   "why": "same-bar (seeded)",
+   "plan_id": "plan:2021-07-15T07:25:00+00:00:15m:fvg:bullish:13274",
+   "r": -1.138888888888512,
+   "meta": {
+    "seed": 5234212950843734012,
+    "index": 6,
+    "n": 13
+   },
+   "state": "settled_stop",
+   "file": "CARDS/2021-07_V2-A__same-bar__plan_2021-07-15T07_25_00p00_00_15m_fvg_bullish_13274.md"
+  },
+  {
+   "run": "2021-07_V2-B",
+   "why": "seeded random",
+   "plan_id": "plan:2021-07-12T06:00:00+00:00:1h:fvg:bullish:3236",
+   "r": -1.3076923076927018,
+   "meta": {
+    "seed": 16317560175287867036,
+    "index": 3,
+    "n": 10
+   },
+   "state": "settled_stop",
+   "file": "CARDS/2021-07_V2-B__seeded__plan_2021-07-12T06_00_00p00_00_1h_fvg_bullish_3236.md"
+  },
+  {
+   "run": "2021-07_V2-B",
+   "why": "highest R",
+   "plan_id": "plan:2021-07-19T07:00:00+00:00:1h:fvg:bullish:3302",
+   "r": 3.25,
+   "meta": {
+    "r": 3.25
+   },
+   "state": "settled_target",
+   "file": "CARDS/2021-07_V2-B__highest__plan_2021-07-19T07_00_00p00_00_1h_fvg_bullish_3302.md"
+  },
+  {
+   "run": "2021-07_V2-B",
+   "why": "same-bar (seeded)",
+   "plan_id": "plan:2021-07-14T08:00:00+00:00:1h:sweep:high:None",
+   "r": -1.2500000000013878,
+   "meta": {
+    "seed": 8484678017001336735,
+    "index": 1,
+    "n": 2
+   },
+   "state": "settled_stop",
+   "file": "CARDS/2021-07_V2-B__same-bar__plan_2021-07-14T08_00_00p00_00_1h_sweep_high_None.md"
+  },
+  {
+   "run": "2021-07_V2-A-OFF",
+   "why": "seeded random",
+   "plan_id": "plan:2021-07-13T22:20:00+00:00:15m:fvg:bearish:13147",
+   "r": 3.7916666666627346,
+   "meta": {
+    "seed": 11518404365041569225,
+    "index": 40,
+    "n": 109
+   },
+   "state": "settled_target",
+   "file": "CARDS/2021-07_V2-A-OFF__seeded__plan_2021-07-13T22_20_00p00_00_15m_fvg_bearish_13147.md"
+  },
+  {
+   "run": "2021-07_V2-A-OFF",
+   "why": "highest R",
+   "plan_id": "plan:2021-07-08T01:40:00+00:00:15m:fvg:bearish:12779",
+   "r": 5.833333333339501,
+   "meta": {
+    "r": 5.833333333339501
+   },
+   "state": "settled_target",
+   "file": "CARDS/2021-07_V2-A-OFF__highest__plan_2021-07-08T01_40_00p00_00_15m_fvg_bearish_12779.md"
+  },
+  {
+   "run": "2021-07_V2-A-OFF",
+   "why": "same-bar (seeded)",
+   "plan_id": "plan:2021-07-05T07:45:00+00:00:15m:fvg:bearish:12471",
+   "r": -1.2272727272725437,
+   "meta": {
+    "seed": 4859605289262792558,
+    "index": 3,
+    "n": 48
+   },
+   "state": "settled_stop",
+   "file": "CARDS/2021-07_V2-A-OFF__same-bar__plan_2021-07-05T07_45_00p00_00_15m_fvg_bearish_12471.md"
+  },
+  {
+   "run": "2021-07_V2-B-OFF",
+   "why": "seeded random",
+   "plan_id": "plan:2021-07-05T23:15:00+00:00:1h:fvg:bearish:3143",
+   "r": -1.33333333333395,
+   "meta": {
+    "seed": 7167434660136919431,
+    "index": 5,
+    "n": 39
+   },
+   "state": "settled_stop",
+   "file": "CARDS/2021-07_V2-B-OFF__seeded__plan_2021-07-05T23_15_00p00_00_1h_fvg_bearish_3143.md"
+  },
+  {
+   "run": "2021-07_V2-B-OFF",
+   "why": "highest R",
+   "plan_id": "plan:2021-07-02T05:35:00+00:00:1h:fvg:bearish:3098",
+   "r": 4.321428571426646,
+   "meta": {
+    "r": 4.321428571426646
+   },
+   "state": "settled_target",
+   "file": "CARDS/2021-07_V2-B-OFF__highest__plan_2021-07-02T05_35_00p00_00_1h_fvg_bearish_3098.md"
+  },
+  {
+   "run": "2021-07_V2-B-OFF",
+   "why": "same-bar (seeded)",
+   "plan_id": "plan:2021-07-06T08:00:00+00:00:1h:fvg:bullish:3150",
+   "r": -1.0909090909089685,
+   "meta": {
+    "seed": 7740075725050076119,
+    "index": 0,
+    "n": 6
+   },
+   "state": "settled_stop",
+   "file": "CARDS/2021-07_V2-B-OFF__same-bar__plan_2021-07-06T08_00_00p00_00_1h_fvg_bullish_3150.md"
+  }
+ ]
+}
