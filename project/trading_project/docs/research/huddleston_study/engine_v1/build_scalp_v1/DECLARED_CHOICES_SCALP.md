@@ -43,6 +43,7 @@ Reason: relative to the candles actually present, which is what "large" can mean
 Sensitivity only, reported, never chosen after seeing a result:
 - **L-BODY**: `R body ≥ P80 of the bodies of the 20 candles before R`.
 - **L-LOOSE**: `R.true_range ≥ P50 of the true ranges of the 20 candles before R`.
+- **H-level sensitivity**: separate `half_body` configuration uses `H.low > min(R.open,R.close) + 0.5 × abs(R.close−R.open)`; the primary remains 50% of R's full range.
 
 **KNOWLEDGE_GAP: LARGE_CANDLE_DEFINITION** — the owner gave no number and no comparison set.
 
@@ -95,8 +96,8 @@ order (months ascending, events in time order, five draws each).
   **mean R**.
 - **Declared test family: 20 tests = 5 months × 2 forms × 2 metrics**, all against the hour-matched
   control, all on LONG / variant 1A / window 3 / L-RANGE / primary entry. Holm over these 20.
-- Everything else (1B, window 2, Form×Form splits, L-BODY, L-LOOSE, next-bar entry, sub-pip excluded,
-  shorts, bias split) is **descriptive** and outside the Holm family; it is labelled as such in the
+- Everything else (1B, window 2, Form×Form splits, L-BODY, L-LOOSE, half-body H-level, next-bar entry,
+  sub-pip excluded, shorts, bias split) is **descriptive** and outside the Holm family; it is labelled as such in the
   report and can never promote a strategy.
 - Cluster-by-day bootstrap B = 10,000 (seed 20261109); permutation 10,000 (seed 20261109).
 - Per month: n events, n days, the CI half-width as the **minimum detectable effect**, sign consistency,
