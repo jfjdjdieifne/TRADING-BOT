@@ -100,4 +100,4 @@ def aggregate_15m(bars: list) -> list[dict]:
         candles.append(cur)
     return candles
 
-# What this does NOT establish: it does not establish strategy validity or profitability.
+# What this does NOT establish: it does not establish strategy validity or HYPOTHETICAL_ profitability.

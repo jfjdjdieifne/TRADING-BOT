@@ -262,12 +262,12 @@ def main() -> None:
               "The primary family is sparse (many month/form cells have few events or days); MDE intervals are wide and generally do not exclude zero. This is NO_SIGNAL or UNDERPOWERED, not evidence of equivalence.",
               "The detector should be checked against the owner case cards. Any suspected detector issue must be entered in VARIANT_LOG_SCALP.md; no changes or reruns on these seen months are permitted.", "",
               "## What this does NOT establish", "",
-              "- It does not establish a working strategy, profitability, or performance outside these exploratory samples.",
+              "- It does not establish a working strategy, HYPOTHETICAL_ profitability, or performance outside these exploratory samples.",
               "- The exploratory months are seen; one currency pair and one year are represented.",
               "- CANDIDATE_FOR_CONFIRMATION, if ever assigned, would not mean a working strategy.",
               "- The target buffer is an engineering choice and its intent is a knowledge gap.",
               "- MAE, the half-target-before-stop measure, next-bar-open sensitivity, corrected 1B outcomes, and half-body H-level sensitivity were not generated in the frozen runs; no rerun was made on seen months.",
-              "- Cards check whether the owner pattern was read correctly, not profitability.",
+              "- Cards check whether the owner pattern was read correctly, not HYPOTHETICAL_ profitability.",
               "- 2021-10 is IN_SAMPLE; the v3 round on 2021-12 was waived by owner decision.", ""]
     (OUT / "TABLES_SCALP.md").write_text("\n".join(lines), encoding="utf-8")
     print(json.dumps({"declared": DECLARED, "rows": len(rows), "decisions": decisions}, indent=2))
@@ -275,4 +275,4 @@ def main() -> None:
 if __name__ == "__main__":
     main()
 
-# What this does NOT establish: it does not establish strategy validity or profitability.
+# What this does NOT establish: it does not establish strategy validity or HYPOTHETICAL_ profitability.

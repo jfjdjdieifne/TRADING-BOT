@@ -132,7 +132,7 @@ def cards() -> None:
                   "## What this does NOT establish", "",
                   "- It does not establish that the pattern works; the card checks the reading only.",
                   "- It does not show the outcome; that is in ANSWER_KEY.json, hashed before this card.",
-                  "- It does not establish a working strategy or profitability.",
+                  "- It does not establish a working strategy or HYPOTHETICAL_ profitability.",
                   ""]
         (card_dir / f"CARD_{i:02d}_{month}.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(json.dumps({"cards_written": len(chosen), "dir": str(card_dir.name)}, indent=1))
@@ -152,4 +152,4 @@ def main() -> None:
 if __name__ == "__main__":
     main()
 
-# What this does NOT establish: it does not establish strategy validity or profitability.
+# What this does NOT establish: it does not establish strategy validity or HYPOTHETICAL_ profitability.

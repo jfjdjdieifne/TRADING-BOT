@@ -260,4 +260,4 @@ def excess_hit(plan: dict, outcome: dict) -> float | None:
 def ny_hour(moment: datetime) -> int:
     return moment.astimezone(NY).hour
 
-# What this does NOT establish: it does not establish strategy validity or profitability.
+# What this does NOT establish: it does not establish strategy validity or HYPOTHETICAL_ profitability.

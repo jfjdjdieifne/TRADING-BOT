@@ -181,4 +181,4 @@ def main():
 if __name__ == "__main__":
     main()
 
-# What this does NOT establish: it does not establish strategy validity or profitability.
+# What this does NOT establish: it does not establish strategy validity or HYPOTHETICAL_ profitability.
