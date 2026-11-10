@@ -1,0 +1,5 @@
+{
+ "active_after": 0,
+ "invalidation_rule": "KNOWLEDGE_GAP: FVG_INVALIDATION",
+ "state_after_close_through": "closed_through"
+}
