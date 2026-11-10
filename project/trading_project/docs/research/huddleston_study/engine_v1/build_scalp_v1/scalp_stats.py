@@ -240,9 +240,10 @@ def main() -> None:
         fmt = lambda x: "—" if x is None else f"{x:.4f}"
         lines.append(f"| {r['month']} | {r['form']} | {r['metric']} | {r['n_events']} | {r['n_days']} | {fmt(r['event_mean'])} | {fmt(r['matched_control_mean'])} | {fmt(r['paired_delta'])} | "
                      f"{('—' if lo is None else f'[{lo:.4f}, {hi:.4f}]')} | {fmt(r['mde_ci_halfwidth'])} | {r['p_cluster_permutation']:.4f} | {r['p_holm']:.4f} | {r.get('lodo_signs', [])} |")
-    lines += ["", "## Decision labels", "", "| Form | Metric | Label | sign consistency | qualifying months after Holm + CI + LODO |", "|---:|---|---|---|"]
+    lines += ["", "## Decision labels", "", "| Form | Metric | Label | sign consistency | qualifying months after Holm + CI + LODO |", "|---:|---|---|---:|---|"]
     for d in decisions:
-        lines.append(f"| {d['form']} | {d['metric']} | **{d['label']}** | {d['holm_ci_lodo_months']} |")
+        consistency = "—" if d["sign_consistency_fraction"] is None else f"{d['sign_consistency_fraction']:.2f}"
+        lines.append(f"| {d['form']} | {d['metric']} | **{d['label']}** | {consistency} | {d['holm_ci_lodo_months']} |")
     lines += ["", "## Descriptive runs (outside the declared family)", "",
               "Plain hit rate is shown next to event-level break-even `1/(1+RR)`. These rows do not enter the declared family.", "",
               "| Month/config | n | hit rate | break-even | mean R net of spread | excess-hit | ambiguous | sub-pip | expired | mean MAE (R) | median bars to T | share reaching half T before stop |",
