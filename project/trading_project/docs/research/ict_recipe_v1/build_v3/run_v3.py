@@ -4,7 +4,7 @@
     python run_v3.py --month 2021-10 --variant V3-0 --frame 15m --out /tmp/build_v3/2021-10_V3-0_15m
 
 The loader is called with an explicit [history_start, month_end) window, so a month that is not part
-of the run is never turned into a Bar (see RESERVED_MONTHS in v3_draw.py).
+of the run is never turned into a Bar (see RESERVED_MONTHS in this file).
 """
 
 from __future__ import annotations
