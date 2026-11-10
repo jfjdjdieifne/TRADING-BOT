@@ -1,0 +1,10 @@
+{
+ "_fixture": "fx_stop_far_edge_vs_sweep",
+ "_tag": "FIXTURE",
+ "value": {
+  "fvg_rule": "far side of fvg",
+  "fvg_stop": 1.099,
+  "sweep_rule": "sweep wick",
+  "sweep_stop": 1.098
+ }
+}

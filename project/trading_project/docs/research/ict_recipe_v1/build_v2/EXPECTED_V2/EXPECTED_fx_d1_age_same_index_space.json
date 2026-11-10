@@ -1,0 +1,16 @@
+{
+ "_fixture": "fx_d1_age_same_index_space",
+ "_tag": "FIXTURE",
+ "value": {
+  "ages": [
+   1
+  ],
+  "ages_equal_index_minus_formed": true,
+  "all_ages_plausible": true,
+  "formed_indices": [
+   6
+  ],
+  "frame_index": 7,
+  "n_pools": 1
+ }
+}

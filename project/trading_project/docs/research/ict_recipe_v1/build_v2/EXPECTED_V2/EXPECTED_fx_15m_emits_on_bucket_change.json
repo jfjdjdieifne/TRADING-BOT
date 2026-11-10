@@ -1,0 +1,11 @@
+{
+ "_fixture": "fx_15m_emits_on_bucket_change",
+ "_tag": "FIXTURE",
+ "value": {
+  "candle_close": 1.1007,
+  "candle_high": 1.1012,
+  "candle_low": 1.099,
+  "candle_open": 1.1,
+  "first_emitted_at_push": 3
+ }
+}
