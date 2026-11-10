@@ -115,9 +115,10 @@ def cards() -> None:
                 marks.append("FVG confirmed at this close")
             if idx == plan["h_index"]:
                 marks.append("H (entry candle)")
-            lines.append(f"{idx:>4d} {candle['start'].strftime('%Y-%m-%dT%H:%M'):22s} "
-                         f"{candle['open']:.5f} {candle['high']:.5f} {candle['low']:.5f} "
-                         f"{candle['close']:.5f}  {' '.join(marks)}")
+            row = (f"{idx:>4d} {candle['start'].strftime('%Y-%m-%dT%H:%M'):22s} "
+                   f"{candle['open']:.5f} {candle['high']:.5f} {candle['low']:.5f} "
+                   f"{candle['close']:.5f}  {' '.join(marks)}")
+            lines.append(row.rstrip())
         lines += ["```", "",
                   f"- swept low (previous confirmed swing low): {swept_low:.5f}",
                   f"- R range: {candles[plan['r_index']]['low']:.5f} .. {candles[plan['r_index']]['high']:.5f}"
@@ -134,7 +135,7 @@ def cards() -> None:
                   "- It does not show the outcome; that is in ANSWER_KEY.json, hashed before this card.",
                   "- It does not establish a working strategy or HYPOTHETICAL_ profitability.",
                   ""]
-        (card_dir / f"CARD_{i:02d}_{month}.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+        (card_dir / f"CARD_{i:02d}_{month}.md").write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
     print(json.dumps({"cards_written": len(chosen), "dir": str(card_dir.name)}, indent=1))
 
 
