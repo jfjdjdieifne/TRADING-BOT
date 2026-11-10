@@ -7,6 +7,9 @@
 | D7 | `2021-07_V2-A` and `2021-07_V2-A-OFF` | two plans carry a T1 that lies **behind** the entry price (`plan:2021-07-27T06:15…`, T1 1.18023; `plan:2021-07-13T00:15…`, T1 1.18585) | a target on the wrong side; the plan can only lose | no |
 | D8 | `report_v1.py` (v1 report) | max drawdown computed on raw R instead of the cumulative series | reported −8.05 instead of −87.63 | already recorded in `build_v2/DIAGNOSIS_V1.md`; not patched |
 
+| D9 | cards for `v1` runs and for `sweep` zones | the card's Section 2 prints setup-frame candles around `zone.formed_index`; v1 plans have no setup frame (`5m`) and sweep zones carry `formed_index = None`, so the table falls back to **setup candle 0** and the "zone candle" row is meaningless | the context table of those cards is uninformative; the numbers in Sections 4-8 are unaffected | no |
+| D10 | cards, Section 8 | a NOT_EVALUABLE check is rendered as `PASS` with the word NOT_EVALUABLE in the number column | the verdict column reads PASS for a check that was never evaluated | no |
+
 ## What this does NOT establish
 
 - The list is what the checks could see. A record field that is absent (D5) hides its own defect.
