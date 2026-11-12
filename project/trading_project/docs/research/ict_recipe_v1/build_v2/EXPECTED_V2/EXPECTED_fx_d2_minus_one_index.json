@@ -1,0 +1,15 @@
+{
+ "_fixture": "fx_d2_minus_one_index",
+ "_tag": "FIXTURE",
+ "value": {
+  "ages": [
+   null,
+   null
+  ],
+  "n": 2,
+  "states": [
+   "NO_FORMATION_BAR",
+   "NO_FORMATION_BAR"
+  ]
+ }
+}

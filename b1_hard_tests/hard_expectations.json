@@ -1,0 +1,4864 @@
+{
+  "title": "B1 hard test expectations — frozen before implementation inspection",
+  "source_basis": "BUILD_STEP_B1_DESIGN_V2.md sections 4 and 5 and CORRECTIONS_R3 only",
+  "fixture_label": "FIXTURE",
+  "price_unit": "integer ticks except deliberately invalid non-numeric / None probes",
+  "index_convention": "C2=i, C1=i-1, C3=i+1; event-time t=i+1",
+  "status_legend": {
+    "YES": "strict criterion and required confirmation met",
+    "NO": "closed C3 with a strictly failed swing comparison, or strict FVG overlap",
+    "UNDECIDED": "V2 leaves tie or FVG boundary touch undecided",
+    "PENDING": "both strict swing comparisons met and C3 not closed",
+    "TEXT_SILENT": "V2 does not decide this exact question"
+  },
+  "questions": {
+    "Q_EDGE_LEFT": "What status, or what error, should each concept return at C2 when C1 is missing?",
+    "Q_EDGE_RIGHT": "What status, or what error, should each concept return at C2 when C3 is missing?",
+    "Q_MIXED": "When one swing comparison is equal and the other strictly fails, and C3 is closed, is the status NO or UNDECIDED?",
+    "Q_OPEN_FAIL": "When at least one swing comparison strictly fails and C3 is open, is the status NO or PENDING?",
+    "Q_OPEN_EQUAL": "When at least one swing comparison is equal, neither fails, and C3 is open, is the status UNDECIDED or PENDING?",
+    "Q_OPEN_MIXED": "When a swing comparison is equal, the other strictly fails, and C3 is open, is the status NO, UNDECIDED, or PENDING?"
+  },
+  "A_series": [
+    {
+      "id": "A1",
+      "fixture_label": "FIXTURE",
+      "rows": [
+        {
+          "index": 0,
+          "candle": {
+            "open": 4,
+            "high": 16,
+            "low": 4,
+            "close": 16,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_EDGE_LEFT",
+              "exact_question": "What status, or what error, should each concept return at C2 when C1 is missing?"
+            },
+            "swing_low": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_EDGE_LEFT",
+              "exact_question": "What status, or what error, should each concept return at C2 when C1 is missing?"
+            },
+            "bullish_fvg": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_EDGE_LEFT",
+              "exact_question": "What status, or what error, should each concept return at C2 when C1 is missing?"
+            },
+            "bearish_fvg": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_EDGE_LEFT",
+              "exact_question": "What status, or what error, should each concept return at C2 when C1 is missing?"
+            }
+          },
+          "reason": "Q_EDGE_LEFT: C1 is absent."
+        },
+        {
+          "index": 1,
+          "candle": {
+            "open": 7,
+            "high": 13,
+            "low": 7,
+            "close": 13,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Inside both neighbours; endpoint ranges overlap."
+        },
+        {
+          "index": 2,
+          "candle": {
+            "open": 4,
+            "high": 16,
+            "low": 4,
+            "close": 16,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "YES"
+            },
+            "swing_low": {
+              "status": "YES"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Outside both neighbours; endpoint ranges overlap."
+        },
+        {
+          "index": 3,
+          "candle": {
+            "open": 7,
+            "high": 13,
+            "low": 7,
+            "close": 13,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Inside both neighbours; endpoint ranges overlap."
+        },
+        {
+          "index": 4,
+          "candle": {
+            "open": 4,
+            "high": 16,
+            "low": 4,
+            "close": 16,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "YES"
+            },
+            "swing_low": {
+              "status": "YES"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Outside both neighbours; endpoint ranges overlap."
+        },
+        {
+          "index": 5,
+          "candle": {
+            "open": 7,
+            "high": 13,
+            "low": 7,
+            "close": 13,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Inside both neighbours; endpoint ranges overlap."
+        },
+        {
+          "index": 6,
+          "candle": {
+            "open": 4,
+            "high": 16,
+            "low": 4,
+            "close": 16,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "YES"
+            },
+            "swing_low": {
+              "status": "YES"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Outside both neighbours; endpoint ranges overlap."
+        },
+        {
+          "index": 7,
+          "candle": {
+            "open": 7,
+            "high": 13,
+            "low": 7,
+            "close": 13,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Inside both neighbours; endpoint ranges overlap."
+        },
+        {
+          "index": 8,
+          "candle": {
+            "open": 4,
+            "high": 16,
+            "low": 4,
+            "close": 16,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "YES"
+            },
+            "swing_low": {
+              "status": "YES"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Outside both neighbours; endpoint ranges overlap."
+        },
+        {
+          "index": 9,
+          "candle": {
+            "open": 7,
+            "high": 13,
+            "low": 7,
+            "close": 13,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Inside both neighbours; endpoint ranges overlap."
+        },
+        {
+          "index": 10,
+          "candle": {
+            "open": 4,
+            "high": 16,
+            "low": 4,
+            "close": 16,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "YES"
+            },
+            "swing_low": {
+              "status": "YES"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Outside both neighbours; endpoint ranges overlap."
+        },
+        {
+          "index": 11,
+          "candle": {
+            "open": 7,
+            "high": 13,
+            "low": 7,
+            "close": 13,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Inside both neighbours; endpoint ranges overlap."
+        },
+        {
+          "index": 12,
+          "candle": {
+            "open": 4,
+            "high": 16,
+            "low": 4,
+            "close": 16,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "YES"
+            },
+            "swing_low": {
+              "status": "YES"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Outside both neighbours; endpoint ranges overlap."
+        },
+        {
+          "index": 13,
+          "candle": {
+            "open": 7,
+            "high": 13,
+            "low": 7,
+            "close": 13,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Inside ordinary and spiked neighbours; endpoints overlap."
+        },
+        {
+          "index": 14,
+          "candle": {
+            "open": 1,
+            "high": 20,
+            "low": 1,
+            "close": 20,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "YES"
+            },
+            "swing_low": {
+              "status": "YES"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Single extreme wick spike outside both neighbours; endpoints overlap."
+        },
+        {
+          "index": 15,
+          "candle": {
+            "open": 7,
+            "high": 13,
+            "low": 7,
+            "close": 13,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Inside spiked and ordinary neighbours; endpoints overlap."
+        },
+        {
+          "index": 16,
+          "candle": {
+            "open": 4,
+            "high": 16,
+            "low": 4,
+            "close": 16,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "YES"
+            },
+            "swing_low": {
+              "status": "YES"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Outside both neighbours; endpoint ranges overlap."
+        },
+        {
+          "index": 17,
+          "candle": {
+            "open": 7,
+            "high": 13,
+            "low": 7,
+            "close": 13,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Inside both neighbours; endpoint ranges overlap."
+        },
+        {
+          "index": 18,
+          "candle": {
+            "open": 4,
+            "high": 16,
+            "low": 4,
+            "close": 16,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "YES"
+            },
+            "swing_low": {
+              "status": "YES"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Outside both neighbours; endpoint ranges overlap."
+        },
+        {
+          "index": 19,
+          "candle": {
+            "open": 7,
+            "high": 13,
+            "low": 7,
+            "close": 13,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Inside both neighbours; endpoint ranges overlap."
+        },
+        {
+          "index": 20,
+          "candle": {
+            "open": 4,
+            "high": 16,
+            "low": 4,
+            "close": 16,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "YES"
+            },
+            "swing_low": {
+              "status": "YES"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Outside both neighbours; endpoint ranges overlap."
+        },
+        {
+          "index": 21,
+          "candle": {
+            "open": 7,
+            "high": 13,
+            "low": 7,
+            "close": 13,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Inside both neighbours; endpoint ranges overlap."
+        },
+        {
+          "index": 22,
+          "candle": {
+            "open": 4,
+            "high": 16,
+            "low": 4,
+            "close": 16,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "YES"
+            },
+            "swing_low": {
+              "status": "YES"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Outside both neighbours; endpoint ranges overlap."
+        },
+        {
+          "index": 23,
+          "candle": {
+            "open": 7,
+            "high": 13,
+            "low": 7,
+            "close": 13,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Inside both neighbours; endpoint ranges overlap."
+        },
+        {
+          "index": 24,
+          "candle": {
+            "open": 4,
+            "high": 16,
+            "low": 4,
+            "close": 16,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "YES"
+            },
+            "swing_low": {
+              "status": "YES"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Outside both neighbours; endpoint ranges overlap."
+        },
+        {
+          "index": 25,
+          "candle": {
+            "open": 7,
+            "high": 13,
+            "low": 7,
+            "close": 13,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Inside both neighbours; endpoint ranges overlap."
+        },
+        {
+          "index": 26,
+          "candle": {
+            "open": 4,
+            "high": 16,
+            "low": 4,
+            "close": 16,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "YES"
+            },
+            "swing_low": {
+              "status": "YES"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Outside both neighbours; endpoint ranges overlap."
+        },
+        {
+          "index": 27,
+          "candle": {
+            "open": 7,
+            "high": 13,
+            "low": 7,
+            "close": 13,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Inside both neighbours; endpoint ranges overlap."
+        },
+        {
+          "index": 28,
+          "candle": {
+            "open": 4,
+            "high": 16,
+            "low": 4,
+            "close": 16,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "YES"
+            },
+            "swing_low": {
+              "status": "YES"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Outside both neighbours; endpoint ranges overlap."
+        },
+        {
+          "index": 29,
+          "candle": {
+            "open": 7,
+            "high": 13,
+            "low": 7,
+            "close": 13,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_EDGE_RIGHT",
+              "exact_question": "What status, or what error, should each concept return at C2 when C3 is missing?"
+            },
+            "swing_low": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_EDGE_RIGHT",
+              "exact_question": "What status, or what error, should each concept return at C2 when C3 is missing?"
+            },
+            "bullish_fvg": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_EDGE_RIGHT",
+              "exact_question": "What status, or what error, should each concept return at C2 when C3 is missing?"
+            },
+            "bearish_fvg": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_EDGE_RIGHT",
+              "exact_question": "What status, or what error, should each concept return at C2 when C3 is missing?"
+            }
+          },
+          "reason": "Q_EDGE_RIGHT: C3 is absent."
+        }
+      ]
+    },
+    {
+      "id": "A2",
+      "fixture_label": "FIXTURE",
+      "rows": [
+        {
+          "index": 0,
+          "candle": {
+            "open": 0,
+            "high": 1,
+            "low": 0,
+            "close": 1,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_EDGE_LEFT",
+              "exact_question": "What status, or what error, should each concept return at C2 when C1 is missing?"
+            },
+            "swing_low": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_EDGE_LEFT",
+              "exact_question": "What status, or what error, should each concept return at C2 when C1 is missing?"
+            },
+            "bullish_fvg": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_EDGE_LEFT",
+              "exact_question": "What status, or what error, should each concept return at C2 when C1 is missing?"
+            },
+            "bearish_fvg": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_EDGE_LEFT",
+              "exact_question": "What status, or what error, should each concept return at C2 when C1 is missing?"
+            }
+          },
+          "reason": "Q_EDGE_LEFT: C1 is absent."
+        },
+        {
+          "index": 1,
+          "candle": {
+            "open": 3,
+            "high": 4,
+            "low": 3,
+            "close": 4,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "YES"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Strict rise; C3.low 6 > C1.high 1."
+        },
+        {
+          "index": 2,
+          "candle": {
+            "open": 6,
+            "high": 7,
+            "low": 6,
+            "close": 7,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "YES"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Strict rise; C3.low 9 > C1.high 4."
+        },
+        {
+          "index": 3,
+          "candle": {
+            "open": 9,
+            "high": 10,
+            "low": 9,
+            "close": 10,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "YES"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Strict rise; C3.low 12 > C1.high 7."
+        },
+        {
+          "index": 4,
+          "candle": {
+            "open": 12,
+            "high": 13,
+            "low": 12,
+            "close": 13,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "YES"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Strict rise; C3.low 15 > C1.high 10."
+        },
+        {
+          "index": 5,
+          "candle": {
+            "open": 15,
+            "high": 16,
+            "low": 15,
+            "close": 16,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "YES"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Strict rise; C3.low 18 > C1.high 13."
+        },
+        {
+          "index": 6,
+          "candle": {
+            "open": 18,
+            "high": 19,
+            "low": 18,
+            "close": 19,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "YES"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Strict rise; C3.low 21 > C1.high 16."
+        },
+        {
+          "index": 7,
+          "candle": {
+            "open": 21,
+            "high": 22,
+            "low": 21,
+            "close": 22,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "YES"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Strict rise; C3.low 24 > C1.high 19."
+        },
+        {
+          "index": 8,
+          "candle": {
+            "open": 24,
+            "high": 25,
+            "low": 24,
+            "close": 25,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "YES"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Strict rise; C3.low 27 > C1.high 22."
+        },
+        {
+          "index": 9,
+          "candle": {
+            "open": 27,
+            "high": 28,
+            "low": 27,
+            "close": 28,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "YES"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Strict rise; C3.low 30 > C1.high 25."
+        },
+        {
+          "index": 10,
+          "candle": {
+            "open": 30,
+            "high": 31,
+            "low": 30,
+            "close": 31,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "YES"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Strict rise; C3.low 33 > C1.high 28."
+        },
+        {
+          "index": 11,
+          "candle": {
+            "open": 33,
+            "high": 34,
+            "low": 33,
+            "close": 34,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "YES"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Strict rise; C3.low 36 > C1.high 31."
+        },
+        {
+          "index": 12,
+          "candle": {
+            "open": 36,
+            "high": 37,
+            "low": 36,
+            "close": 37,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "YES"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Strict rise; C3.low 39 > C1.high 34."
+        },
+        {
+          "index": 13,
+          "candle": {
+            "open": 39,
+            "high": 40,
+            "low": 39,
+            "close": 40,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "YES"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Strict rise; C3.low 42 > C1.high 37."
+        },
+        {
+          "index": 14,
+          "candle": {
+            "open": 42,
+            "high": 43,
+            "low": 42,
+            "close": 43,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "YES"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Strict rise; C3.low 45 > C1.high 40."
+        },
+        {
+          "index": 15,
+          "candle": {
+            "open": 45,
+            "high": 46,
+            "low": 45,
+            "close": 46,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "YES"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Peak high exceeds both; low is not a trough; endpoint ranges coincide."
+        },
+        {
+          "index": 16,
+          "candle": {
+            "open": 42,
+            "high": 43,
+            "low": 42,
+            "close": 43,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "YES"
+            }
+          },
+          "reason": "Strict fall; C3.high 40 < C1.low 45."
+        },
+        {
+          "index": 17,
+          "candle": {
+            "open": 39,
+            "high": 40,
+            "low": 39,
+            "close": 40,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "YES"
+            }
+          },
+          "reason": "Strict fall; C3.high 37 < C1.low 42."
+        },
+        {
+          "index": 18,
+          "candle": {
+            "open": 36,
+            "high": 37,
+            "low": 36,
+            "close": 37,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "YES"
+            }
+          },
+          "reason": "Strict fall; C3.high 34 < C1.low 39."
+        },
+        {
+          "index": 19,
+          "candle": {
+            "open": 33,
+            "high": 34,
+            "low": 33,
+            "close": 34,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "YES"
+            }
+          },
+          "reason": "Strict fall; C3.high 31 < C1.low 36."
+        },
+        {
+          "index": 20,
+          "candle": {
+            "open": 30,
+            "high": 31,
+            "low": 30,
+            "close": 31,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "YES"
+            }
+          },
+          "reason": "Strict fall; C3.high 28 < C1.low 33."
+        },
+        {
+          "index": 21,
+          "candle": {
+            "open": 27,
+            "high": 28,
+            "low": 27,
+            "close": 28,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "YES"
+            }
+          },
+          "reason": "Strict fall; C3.high 25 < C1.low 30."
+        },
+        {
+          "index": 22,
+          "candle": {
+            "open": 24,
+            "high": 25,
+            "low": 24,
+            "close": 25,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "YES"
+            }
+          },
+          "reason": "Strict fall; C3.high 22 < C1.low 27."
+        },
+        {
+          "index": 23,
+          "candle": {
+            "open": 21,
+            "high": 22,
+            "low": 21,
+            "close": 22,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "YES"
+            }
+          },
+          "reason": "Strict fall; C3.high 19 < C1.low 24."
+        },
+        {
+          "index": 24,
+          "candle": {
+            "open": 18,
+            "high": 19,
+            "low": 18,
+            "close": 19,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "YES"
+            }
+          },
+          "reason": "Strict fall; C3.high 16 < C1.low 21."
+        },
+        {
+          "index": 25,
+          "candle": {
+            "open": 15,
+            "high": 16,
+            "low": 15,
+            "close": 16,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "YES"
+            }
+          },
+          "reason": "Strict fall; C3.high 13 < C1.low 18."
+        },
+        {
+          "index": 26,
+          "candle": {
+            "open": 12,
+            "high": 13,
+            "low": 12,
+            "close": 13,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "YES"
+            }
+          },
+          "reason": "Strict fall; C3.high 10 < C1.low 15."
+        },
+        {
+          "index": 27,
+          "candle": {
+            "open": 9,
+            "high": 10,
+            "low": 9,
+            "close": 10,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "YES"
+            }
+          },
+          "reason": "Strict fall; C3.high 7 < C1.low 12."
+        },
+        {
+          "index": 28,
+          "candle": {
+            "open": 6,
+            "high": 7,
+            "low": 6,
+            "close": 7,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "YES"
+            }
+          },
+          "reason": "Strict fall; C3.high 4 < C1.low 9."
+        },
+        {
+          "index": 29,
+          "candle": {
+            "open": 3,
+            "high": 4,
+            "low": 3,
+            "close": 4,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_EDGE_RIGHT",
+              "exact_question": "What status, or what error, should each concept return at C2 when C3 is missing?"
+            },
+            "swing_low": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_EDGE_RIGHT",
+              "exact_question": "What status, or what error, should each concept return at C2 when C3 is missing?"
+            },
+            "bullish_fvg": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_EDGE_RIGHT",
+              "exact_question": "What status, or what error, should each concept return at C2 when C3 is missing?"
+            },
+            "bearish_fvg": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_EDGE_RIGHT",
+              "exact_question": "What status, or what error, should each concept return at C2 when C3 is missing?"
+            }
+          },
+          "reason": "Q_EDGE_RIGHT: C3 is absent."
+        }
+      ]
+    },
+    {
+      "id": "A3",
+      "fixture_label": "FIXTURE",
+      "rows": [
+        {
+          "index": 0,
+          "candle": {
+            "open": 8,
+            "high": 12,
+            "low": 8,
+            "close": 12,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_EDGE_LEFT",
+              "exact_question": "What status, or what error, should each concept return at C2 when C1 is missing?"
+            },
+            "swing_low": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_EDGE_LEFT",
+              "exact_question": "What status, or what error, should each concept return at C2 when C1 is missing?"
+            },
+            "bullish_fvg": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_EDGE_LEFT",
+              "exact_question": "What status, or what error, should each concept return at C2 when C1 is missing?"
+            },
+            "bearish_fvg": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_EDGE_LEFT",
+              "exact_question": "What status, or what error, should each concept return at C2 when C1 is missing?"
+            }
+          },
+          "reason": "Q_EDGE_LEFT: C1 is absent."
+        },
+        {
+          "index": 1,
+          "candle": {
+            "open": 7,
+            "high": 14,
+            "low": 7,
+            "close": 14,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "UNDECIDED"
+            },
+            "swing_low": {
+              "status": "UNDECIDED"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Both extremes improve on C1 and tie C3; endpoints overlap."
+        },
+        {
+          "index": 2,
+          "candle": {
+            "open": 7,
+            "high": 14,
+            "low": 7,
+            "close": 14,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "UNDECIDED"
+            },
+            "swing_low": {
+              "status": "UNDECIDED"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Both extremes tie both neighbours; endpoints overlap."
+        },
+        {
+          "index": 3,
+          "candle": {
+            "open": 7,
+            "high": 14,
+            "low": 7,
+            "close": 14,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "UNDECIDED"
+            },
+            "swing_low": {
+              "status": "UNDECIDED"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Both extremes tie C1 and improve on C3; endpoints overlap."
+        },
+        {
+          "index": 4,
+          "candle": {
+            "open": 8,
+            "high": 13,
+            "low": 8,
+            "close": 13,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Both extremes lie strictly between neighbours; endpoints overlap."
+        },
+        {
+          "index": 5,
+          "candle": {
+            "open": 9,
+            "high": 12,
+            "low": 9,
+            "close": 12,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Both extremes lie strictly between neighbours; endpoints overlap."
+        },
+        {
+          "index": 6,
+          "candle": {
+            "open": 10,
+            "high": 11,
+            "low": 10,
+            "close": 11,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Inside both neighbours; endpoints overlap."
+        },
+        {
+          "index": 7,
+          "candle": {
+            "open": 9,
+            "high": 12,
+            "low": 9,
+            "close": 12,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Both extremes lie strictly between neighbours; endpoints overlap."
+        },
+        {
+          "index": 8,
+          "candle": {
+            "open": 8,
+            "high": 13,
+            "low": 8,
+            "close": 13,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "YES"
+            },
+            "swing_low": {
+              "status": "UNDECIDED"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "High exceeds both; low improves on C1 and ties C3; endpoints overlap."
+        },
+        {
+          "index": 9,
+          "candle": {
+            "open": 8,
+            "high": 12,
+            "low": 8,
+            "close": 12,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_MIXED",
+              "exact_question": "When one swing comparison is equal and the other strictly fails, and C3 is closed, is the status NO or UNDECIDED?"
+            },
+            "swing_low": {
+              "status": "UNDECIDED"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Q_MIXED: high fails C1 and ties C3; low ties both; endpoints overlap."
+        },
+        {
+          "index": 10,
+          "candle": {
+            "open": 8,
+            "high": 12,
+            "low": 8,
+            "close": 12,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_MIXED",
+              "exact_question": "When one swing comparison is equal and the other strictly fails, and C3 is closed, is the status NO or UNDECIDED?"
+            },
+            "swing_low": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_MIXED",
+              "exact_question": "When one swing comparison is equal and the other strictly fails, and C3 is closed, is the status NO or UNDECIDED?"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Q_MIXED: both extremes tie C1 and fail against C3; endpoints overlap."
+        },
+        {
+          "index": 11,
+          "candle": {
+            "open": 7,
+            "high": 14,
+            "low": 7,
+            "close": 14,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "UNDECIDED"
+            },
+            "swing_low": {
+              "status": "UNDECIDED"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Both extremes improve on C1 and tie C3; endpoints overlap."
+        },
+        {
+          "index": 12,
+          "candle": {
+            "open": 7,
+            "high": 14,
+            "low": 7,
+            "close": 14,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "UNDECIDED"
+            },
+            "swing_low": {
+              "status": "UNDECIDED"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Both extremes tie both neighbours; endpoints overlap."
+        },
+        {
+          "index": 13,
+          "candle": {
+            "open": 7,
+            "high": 14,
+            "low": 7,
+            "close": 14,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "UNDECIDED"
+            },
+            "swing_low": {
+              "status": "UNDECIDED"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Both extremes tie C1 and improve on C3; endpoints overlap."
+        },
+        {
+          "index": 14,
+          "candle": {
+            "open": 8,
+            "high": 13,
+            "low": 8,
+            "close": 13,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Both extremes lie strictly between neighbours; endpoints overlap."
+        },
+        {
+          "index": 15,
+          "candle": {
+            "open": 9,
+            "high": 12,
+            "low": 9,
+            "close": 12,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Both extremes lie strictly between neighbours; endpoints overlap."
+        },
+        {
+          "index": 16,
+          "candle": {
+            "open": 10,
+            "high": 11,
+            "low": 10,
+            "close": 11,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Inside both neighbours; endpoints overlap."
+        },
+        {
+          "index": 17,
+          "candle": {
+            "open": 9,
+            "high": 12,
+            "low": 9,
+            "close": 12,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Both extremes lie strictly between neighbours; endpoints overlap."
+        },
+        {
+          "index": 18,
+          "candle": {
+            "open": 8,
+            "high": 13,
+            "low": 8,
+            "close": 13,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "YES"
+            },
+            "swing_low": {
+              "status": "UNDECIDED"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "High exceeds both; low improves on C1 and ties C3; endpoints overlap."
+        },
+        {
+          "index": 19,
+          "candle": {
+            "open": 8,
+            "high": 12,
+            "low": 8,
+            "close": 12,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_MIXED",
+              "exact_question": "When one swing comparison is equal and the other strictly fails, and C3 is closed, is the status NO or UNDECIDED?"
+            },
+            "swing_low": {
+              "status": "UNDECIDED"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Q_MIXED: high fails C1 and ties C3; low ties both; endpoints overlap."
+        },
+        {
+          "index": 20,
+          "candle": {
+            "open": 8,
+            "high": 12,
+            "low": 8,
+            "close": 12,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_MIXED",
+              "exact_question": "When one swing comparison is equal and the other strictly fails, and C3 is closed, is the status NO or UNDECIDED?"
+            },
+            "swing_low": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_MIXED",
+              "exact_question": "When one swing comparison is equal and the other strictly fails, and C3 is closed, is the status NO or UNDECIDED?"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Q_MIXED: both extremes tie C1 and fail against C3; endpoints overlap."
+        },
+        {
+          "index": 21,
+          "candle": {
+            "open": 7,
+            "high": 14,
+            "low": 7,
+            "close": 14,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "UNDECIDED"
+            },
+            "swing_low": {
+              "status": "UNDECIDED"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Both extremes improve on C1 and tie C3; endpoints overlap."
+        },
+        {
+          "index": 22,
+          "candle": {
+            "open": 7,
+            "high": 14,
+            "low": 7,
+            "close": 14,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "UNDECIDED"
+            },
+            "swing_low": {
+              "status": "UNDECIDED"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Both extremes tie both neighbours; endpoints overlap."
+        },
+        {
+          "index": 23,
+          "candle": {
+            "open": 7,
+            "high": 14,
+            "low": 7,
+            "close": 14,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "UNDECIDED"
+            },
+            "swing_low": {
+              "status": "UNDECIDED"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Both extremes tie C1 and improve on C3; endpoints overlap."
+        },
+        {
+          "index": 24,
+          "candle": {
+            "open": 8,
+            "high": 13,
+            "low": 8,
+            "close": 13,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Both extremes lie strictly between neighbours; endpoints overlap."
+        },
+        {
+          "index": 25,
+          "candle": {
+            "open": 9,
+            "high": 12,
+            "low": 9,
+            "close": 12,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Both extremes lie strictly between neighbours; endpoints overlap."
+        },
+        {
+          "index": 26,
+          "candle": {
+            "open": 10,
+            "high": 11,
+            "low": 10,
+            "close": 11,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Inside both neighbours; endpoints overlap."
+        },
+        {
+          "index": 27,
+          "candle": {
+            "open": 9,
+            "high": 12,
+            "low": 9,
+            "close": 12,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Both extremes lie strictly between neighbours; endpoints overlap."
+        },
+        {
+          "index": 28,
+          "candle": {
+            "open": 8,
+            "high": 13,
+            "low": 8,
+            "close": 13,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "YES"
+            },
+            "swing_low": {
+              "status": "UNDECIDED"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "High exceeds both; low improves on C1 and ties C3; endpoints overlap."
+        },
+        {
+          "index": 29,
+          "candle": {
+            "open": 8,
+            "high": 12,
+            "low": 8,
+            "close": 12,
+            "closed": true
+          },
+          "expected": {
+            "swing_high": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_EDGE_RIGHT",
+              "exact_question": "What status, or what error, should each concept return at C2 when C3 is missing?"
+            },
+            "swing_low": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_EDGE_RIGHT",
+              "exact_question": "What status, or what error, should each concept return at C2 when C3 is missing?"
+            },
+            "bullish_fvg": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_EDGE_RIGHT",
+              "exact_question": "What status, or what error, should each concept return at C2 when C3 is missing?"
+            },
+            "bearish_fvg": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_EDGE_RIGHT",
+              "exact_question": "What status, or what error, should each concept return at C2 when C3 is missing?"
+            }
+          },
+          "reason": "Q_EDGE_RIGHT: C3 is absent."
+        }
+      ]
+    }
+  ],
+  "B_shape_fixtures": [
+    {
+      "id": "B-PLATEAU-HIGH",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 0,
+          "high": 8,
+          "low": 0,
+          "close": 8,
+          "closed": true
+        },
+        {
+          "open": 0,
+          "high": 10,
+          "low": 0,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 0,
+          "high": 10,
+          "low": 0,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 0,
+          "high": 10,
+          "low": 0,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 0,
+          "high": 8,
+          "low": 0,
+          "close": 8,
+          "closed": true
+        }
+      ],
+      "targets": [
+        {
+          "index": 1,
+          "expected": {
+            "swing_high": {
+              "status": "UNDECIDED"
+            },
+            "swing_low": {
+              "status": "UNDECIDED"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Three equal highs; equal lows; endpoints overlap."
+        },
+        {
+          "index": 2,
+          "expected": {
+            "swing_high": {
+              "status": "UNDECIDED"
+            },
+            "swing_low": {
+              "status": "UNDECIDED"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Three equal highs; equal lows; endpoints overlap."
+        },
+        {
+          "index": 3,
+          "expected": {
+            "swing_high": {
+              "status": "UNDECIDED"
+            },
+            "swing_low": {
+              "status": "UNDECIDED"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Three equal highs; equal lows; endpoints overlap."
+        }
+      ]
+    },
+    {
+      "id": "B-PLATEAU-LOW",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 3,
+          "high": 10,
+          "low": 3,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 1,
+          "high": 10,
+          "low": 1,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 1,
+          "high": 10,
+          "low": 1,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 1,
+          "high": 10,
+          "low": 1,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 3,
+          "high": 10,
+          "low": 3,
+          "close": 10,
+          "closed": true
+        }
+      ],
+      "targets": [
+        {
+          "index": 1,
+          "expected": {
+            "swing_high": {
+              "status": "UNDECIDED"
+            },
+            "swing_low": {
+              "status": "UNDECIDED"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Three equal lows; equal highs; endpoints overlap."
+        },
+        {
+          "index": 2,
+          "expected": {
+            "swing_high": {
+              "status": "UNDECIDED"
+            },
+            "swing_low": {
+              "status": "UNDECIDED"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Three equal lows; equal highs; endpoints overlap."
+        },
+        {
+          "index": 3,
+          "expected": {
+            "swing_high": {
+              "status": "UNDECIDED"
+            },
+            "swing_low": {
+              "status": "UNDECIDED"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Three equal lows; equal highs; endpoints overlap."
+        }
+      ]
+    },
+    {
+      "id": "B-STAIR-UP",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 2,
+          "high": 4,
+          "low": 2,
+          "close": 4,
+          "closed": true
+        },
+        {
+          "open": 3,
+          "high": 5,
+          "low": 3,
+          "close": 5,
+          "closed": true
+        },
+        {
+          "open": 4,
+          "high": 6,
+          "low": 4,
+          "close": 6,
+          "closed": true
+        }
+      ],
+      "targets": [
+        {
+          "index": 1,
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "UNDECIDED"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Strict rise; bullish endpoint equality."
+        }
+      ]
+    },
+    {
+      "id": "B-STAIR-DOWN",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 4,
+          "high": 6,
+          "low": 4,
+          "close": 6,
+          "closed": true
+        },
+        {
+          "open": 3,
+          "high": 5,
+          "low": 3,
+          "close": 5,
+          "closed": true
+        },
+        {
+          "open": 2,
+          "high": 4,
+          "low": 2,
+          "close": 4,
+          "closed": true
+        }
+      ],
+      "targets": [
+        {
+          "index": 1,
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "UNDECIDED"
+            }
+          },
+          "reason": "Strict fall; bearish endpoint equality."
+        }
+      ]
+    },
+    {
+      "id": "B-ZIGZAG",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        },
+        {
+          "open": 2,
+          "high": 11,
+          "low": 2,
+          "close": 11,
+          "closed": true
+        },
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        }
+      ],
+      "targets": [
+        {
+          "index": 1,
+          "expected": {
+            "swing_high": {
+              "status": "YES"
+            },
+            "swing_low": {
+              "status": "YES"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Middle is outside both neighbours."
+        }
+      ]
+    },
+    {
+      "id": "B-INSIDE",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 2,
+          "high": 10,
+          "low": 2,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        },
+        {
+          "open": 2,
+          "high": 10,
+          "low": 2,
+          "close": 10,
+          "closed": true
+        }
+      ],
+      "targets": [
+        {
+          "index": 1,
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Middle is inside both neighbours."
+        }
+      ]
+    },
+    {
+      "id": "B-OUTSIDE",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        },
+        {
+          "open": 2,
+          "high": 10,
+          "low": 2,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        }
+      ],
+      "targets": [
+        {
+          "index": 1,
+          "expected": {
+            "swing_high": {
+              "status": "YES"
+            },
+            "swing_low": {
+              "status": "YES"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Middle encloses both neighbours."
+        }
+      ]
+    },
+    {
+      "id": "B-DOJI",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 3,
+          "high": 7,
+          "low": 3,
+          "close": 7,
+          "closed": true
+        },
+        {
+          "open": 5,
+          "high": 8,
+          "low": 2,
+          "close": 5,
+          "closed": true
+        },
+        {
+          "open": 3,
+          "high": 7,
+          "low": 3,
+          "close": 7,
+          "closed": true
+        }
+      ],
+      "targets": [
+        {
+          "index": 1,
+          "expected": {
+            "swing_high": {
+              "status": "YES"
+            },
+            "swing_low": {
+              "status": "YES"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Middle open equals close; wicks decide."
+        }
+      ]
+    },
+    {
+      "id": "B-PRICE-JUMP",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 1,
+          "high": 3,
+          "low": 1,
+          "close": 3,
+          "closed": true
+        },
+        {
+          "open": 7,
+          "high": 9,
+          "low": 7,
+          "close": 9,
+          "closed": true
+        },
+        {
+          "open": 11,
+          "high": 13,
+          "low": 11,
+          "close": 13,
+          "closed": true
+        }
+      ],
+      "targets": [
+        {
+          "index": 1,
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "YES"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Bullish zone [3,11]."
+        }
+      ],
+      "yes_bounds": {
+        "1": {
+          "bullish_fvg": [
+            3,
+            11
+          ]
+        }
+      }
+    },
+    {
+      "id": "B-LAST-OPEN",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        },
+        {
+          "open": 2,
+          "high": 10,
+          "low": 2,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": false
+        }
+      ],
+      "targets": [
+        {
+          "index": 1,
+          "expected": {
+            "swing_high": {
+              "status": "PENDING"
+            },
+            "swing_low": {
+              "status": "PENDING"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Strict swings await C3 close; no extra FVG close rule."
+        }
+      ]
+    },
+    {
+      "id": "B-FIRST-LAST",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        },
+        {
+          "open": 2,
+          "high": 10,
+          "low": 2,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        }
+      ],
+      "targets": [
+        {
+          "index": 0,
+          "expected": {
+            "swing_high": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_EDGE_LEFT",
+              "exact_question": "What status, or what error, should each concept return at C2 when C1 is missing?"
+            },
+            "swing_low": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_EDGE_LEFT",
+              "exact_question": "What status, or what error, should each concept return at C2 when C1 is missing?"
+            },
+            "bullish_fvg": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_EDGE_LEFT",
+              "exact_question": "What status, or what error, should each concept return at C2 when C1 is missing?"
+            },
+            "bearish_fvg": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_EDGE_LEFT",
+              "exact_question": "What status, or what error, should each concept return at C2 when C1 is missing?"
+            }
+          },
+          "reason": "C1 is missing."
+        },
+        {
+          "index": 2,
+          "expected": {
+            "swing_high": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_EDGE_RIGHT",
+              "exact_question": "What status, or what error, should each concept return at C2 when C3 is missing?"
+            },
+            "swing_low": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_EDGE_RIGHT",
+              "exact_question": "What status, or what error, should each concept return at C2 when C3 is missing?"
+            },
+            "bullish_fvg": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_EDGE_RIGHT",
+              "exact_question": "What status, or what error, should each concept return at C2 when C3 is missing?"
+            },
+            "bearish_fvg": {
+              "status": "TEXT_SILENT",
+              "question_id": "Q_EDGE_RIGHT",
+              "exact_question": "What status, or what error, should each concept return at C2 when C3 is missing?"
+            }
+          },
+          "reason": "C3 is missing."
+        }
+      ]
+    },
+    {
+      "id": "B-WICK-SPIKE",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 5,
+          "high": 10,
+          "low": 5,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 7,
+          "high": 20,
+          "low": 5,
+          "close": 7,
+          "closed": true
+        },
+        {
+          "open": 5,
+          "high": 11,
+          "low": 5,
+          "close": 11,
+          "closed": true
+        }
+      ],
+      "targets": [
+        {
+          "index": 1,
+          "expected": {
+            "swing_high": {
+              "status": "YES"
+            },
+            "swing_low": {
+              "status": "UNDECIDED"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Upper spike; equal lows."
+        }
+      ]
+    },
+    {
+      "id": "B-ADJACENT",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 4,
+          "high": 10,
+          "low": 4,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 5,
+          "high": 12,
+          "low": 5,
+          "close": 12,
+          "closed": true
+        },
+        {
+          "open": 2,
+          "high": 10,
+          "low": 2,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 4,
+          "high": 11,
+          "low": 4,
+          "close": 11,
+          "closed": true
+        }
+      ],
+      "targets": [
+        {
+          "index": 1,
+          "expected": {
+            "swing_high": {
+              "status": "YES"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "First adjacent candidate is a high."
+        },
+        {
+          "index": 2,
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "YES"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Second adjacent candidate is a low."
+        }
+      ]
+    },
+    {
+      "id": "B-OVERLAPPING-FVG",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 0,
+          "high": 2,
+          "low": 0,
+          "close": 2,
+          "closed": true
+        },
+        {
+          "open": 3,
+          "high": 5,
+          "low": 3,
+          "close": 5,
+          "closed": true
+        },
+        {
+          "open": 6,
+          "high": 8,
+          "low": 6,
+          "close": 8,
+          "closed": true
+        },
+        {
+          "open": 9,
+          "high": 11,
+          "low": 9,
+          "close": 11,
+          "closed": true
+        },
+        {
+          "open": 12,
+          "high": 14,
+          "low": 12,
+          "close": 14,
+          "closed": true
+        },
+        {
+          "open": 15,
+          "high": 17,
+          "low": 15,
+          "close": 17,
+          "closed": true
+        }
+      ],
+      "targets": [
+        {
+          "index": 1,
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "YES"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Consecutive overlapping bullish gap."
+        },
+        {
+          "index": 2,
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "YES"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Consecutive overlapping bullish gap."
+        },
+        {
+          "index": 3,
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "YES"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Consecutive overlapping bullish gap."
+        },
+        {
+          "index": 4,
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "YES"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Consecutive overlapping bullish gap."
+        }
+      ],
+      "yes_bounds": {
+        "1": {
+          "bullish_fvg": [
+            2,
+            6
+          ]
+        },
+        "2": {
+          "bullish_fvg": [
+            5,
+            9
+          ]
+        },
+        "3": {
+          "bullish_fvg": [
+            8,
+            12
+          ]
+        },
+        "4": {
+          "bullish_fvg": [
+            11,
+            15
+          ]
+        }
+      },
+      "overlapping_pairs": [
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          3,
+          4
+        ]
+      ]
+    },
+    {
+      "id": "B-BULL-TOUCH-FILL",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 1,
+          "high": 3,
+          "low": 1,
+          "close": 3,
+          "closed": true
+        },
+        {
+          "open": 4,
+          "high": 6,
+          "low": 4,
+          "close": 6,
+          "closed": true
+        },
+        {
+          "open": 7,
+          "high": 9,
+          "low": 7,
+          "close": 9,
+          "closed": true
+        },
+        {
+          "open": 6,
+          "high": 10,
+          "low": 6,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 1,
+          "high": 8,
+          "low": 1,
+          "close": 8,
+          "closed": true
+        },
+        {
+          "open": 0,
+          "high": 2,
+          "low": 0,
+          "close": 2,
+          "closed": true
+        }
+      ],
+      "targets": [
+        {
+          "index": 1,
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "YES"
+            },
+            "bearish_fvg": {
+              "status": "NO"
+            }
+          },
+          "reason": "Bull gap [3,7] later touched, filled, and closed through."
+        }
+      ],
+      "yes_bounds": {
+        "1": {
+          "bullish_fvg": [
+            3,
+            7
+          ]
+        }
+      },
+      "later_prefix_lengths": [
+        3,
+        4,
+        5,
+        6
+      ]
+    },
+    {
+      "id": "B-BEAR-TOUCH-FILL",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 17,
+          "high": 19,
+          "low": 17,
+          "close": 19,
+          "closed": true
+        },
+        {
+          "open": 14,
+          "high": 16,
+          "low": 14,
+          "close": 16,
+          "closed": true
+        },
+        {
+          "open": 11,
+          "high": 13,
+          "low": 11,
+          "close": 13,
+          "closed": true
+        },
+        {
+          "open": 10,
+          "high": 14,
+          "low": 10,
+          "close": 14,
+          "closed": true
+        },
+        {
+          "open": 12,
+          "high": 19,
+          "low": 12,
+          "close": 19,
+          "closed": true
+        },
+        {
+          "open": 18,
+          "high": 20,
+          "low": 18,
+          "close": 20,
+          "closed": true
+        }
+      ],
+      "targets": [
+        {
+          "index": 1,
+          "expected": {
+            "swing_high": {
+              "status": "NO"
+            },
+            "swing_low": {
+              "status": "NO"
+            },
+            "bullish_fvg": {
+              "status": "NO"
+            },
+            "bearish_fvg": {
+              "status": "YES"
+            }
+          },
+          "reason": "Bear gap [13,17] later touched, filled, and closed through."
+        }
+      ],
+      "yes_bounds": {
+        "1": {
+          "bearish_fvg": [
+            13,
+            17
+          ]
+        }
+      },
+      "later_prefix_lengths": [
+        3,
+        4,
+        5,
+        6
+      ]
+    }
+  ],
+  "C_metamorphic": {
+    "fixture_label": "FIXTURE",
+    "translate": 137,
+    "positive_multiplier": 7,
+    "mirror_K": 200,
+    "prepend": [
+      {
+        "open": -9,
+        "high": -7,
+        "low": -9,
+        "close": -7,
+        "closed": true
+      },
+      {
+        "open": -6,
+        "high": -4,
+        "low": -6,
+        "close": -4,
+        "closed": true
+      },
+      {
+        "open": -3,
+        "high": -1,
+        "low": -3,
+        "close": -1,
+        "closed": true
+      }
+    ],
+    "append": [
+      {
+        "open": 60,
+        "high": 62,
+        "low": 60,
+        "close": 62,
+        "closed": true
+      },
+      {
+        "open": 63,
+        "high": 65,
+        "low": 63,
+        "close": 65,
+        "closed": true
+      },
+      {
+        "open": 66,
+        "high": 68,
+        "low": 66,
+        "close": 68,
+        "closed": true
+      }
+    ],
+    "lookahead_seed": 56789,
+    "lookahead_trials_per_series": 50,
+    "lookahead_generator": "t=randint(1,n-3); for each position after t+1: low=randint(-30,60), high=randint(low,low+12), open=randint(low,high), close=randint(low,high), closed=choice([True,False])",
+    "pending_resolution_fixture": {
+      "candles": [
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        },
+        {
+          "open": 2,
+          "high": 10,
+          "low": 2,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": false
+        }
+      ],
+      "index": 1,
+      "append": {
+        "open": 5,
+        "high": 7,
+        "low": 5,
+        "close": 7,
+        "closed": true
+      },
+      "before": "PENDING",
+      "append_only": "PENDING",
+      "after_explicit_C3_close_and_append": "YES"
+    }
+  },
+  "D_brute_force": {
+    "fixture_label": "FIXTURE",
+    "low_high_min": 1,
+    "low_high_max": 4,
+    "closure_states": [
+      false,
+      true
+    ],
+    "closure_independent_for_each_candle": true,
+    "exhaustive_windows": 8000,
+    "random_seed": 12345,
+    "random_series": 2000,
+    "random_generator": "length=randint(5,40); each candle low=randint(1,40), high=randint(low,low+12), open=randint(low,high), close=randint(low,high), closed=choice([True,False])",
+    "random_index_selection": "all complete C2 indices, 1 through length-2 inclusive"
+  },
+  "E_invalid_probes": [
+    {
+      "id": "E-HIGH-BELOW-LOW",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        },
+        {
+          "open": 6,
+          "high": 5,
+          "low": 7,
+          "close": 6,
+          "closed": true
+        },
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        }
+      ],
+      "index": 1,
+      "expected_status": "TEXT_SILENT",
+      "exact_question": "For a candle with high 5 below low 7, should each interface raise a clear error, return a status, or silently accept the input?"
+    },
+    {
+      "id": "E-MISSING-OPEN",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        },
+        {
+          "high": 10,
+          "low": 2,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        }
+      ],
+      "index": 1,
+      "expected_status": "TEXT_SILENT",
+      "exact_question": "For a candle missing open, should each interface raise a clear error, return a status, or silently accept the input?"
+    },
+    {
+      "id": "E-MISSING-HIGH",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        },
+        {
+          "open": 2,
+          "low": 2,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        }
+      ],
+      "index": 1,
+      "expected_status": "TEXT_SILENT",
+      "exact_question": "For a candle missing high, should each interface raise a clear error, return a status, or silently accept the input?"
+    },
+    {
+      "id": "E-MISSING-LOW",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        },
+        {
+          "open": 2,
+          "high": 10,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        }
+      ],
+      "index": 1,
+      "expected_status": "TEXT_SILENT",
+      "exact_question": "For a candle missing low, should each interface raise a clear error, return a status, or silently accept the input?"
+    },
+    {
+      "id": "E-MISSING-CLOSE",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        },
+        {
+          "open": 2,
+          "high": 10,
+          "low": 2,
+          "closed": true
+        },
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        }
+      ],
+      "index": 1,
+      "expected_status": "TEXT_SILENT",
+      "exact_question": "For a candle missing close, should each interface raise a clear error, return a status, or silently accept the input?"
+    },
+    {
+      "id": "E-MISSING-CLOSED",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        },
+        {
+          "open": 2,
+          "high": 10,
+          "low": 2,
+          "close": 10
+        },
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        }
+      ],
+      "index": 1,
+      "expected_status": "TEXT_SILENT",
+      "exact_question": "For a candle missing closed, should each interface raise a clear error, return a status, or silently accept the input?"
+    },
+    {
+      "id": "E-NONNUMERIC-OPEN",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        },
+        {
+          "open": "not-a-number",
+          "high": 10,
+          "low": 2,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        }
+      ],
+      "index": 1,
+      "expected_status": "TEXT_SILENT",
+      "exact_question": "For a candle with non-numeric open, should each interface raise a clear error, return a status, or silently accept the input?"
+    },
+    {
+      "id": "E-NONNUMERIC-HIGH",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        },
+        {
+          "open": 2,
+          "high": "not-a-number",
+          "low": 2,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        }
+      ],
+      "index": 1,
+      "expected_status": "TEXT_SILENT",
+      "exact_question": "For a candle with non-numeric high, should each interface raise a clear error, return a status, or silently accept the input?"
+    },
+    {
+      "id": "E-NONNUMERIC-LOW",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        },
+        {
+          "open": 2,
+          "high": 10,
+          "low": "not-a-number",
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        }
+      ],
+      "index": 1,
+      "expected_status": "TEXT_SILENT",
+      "exact_question": "For a candle with non-numeric low, should each interface raise a clear error, return a status, or silently accept the input?"
+    },
+    {
+      "id": "E-NONNUMERIC-CLOSE",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        },
+        {
+          "open": 2,
+          "high": 10,
+          "low": 2,
+          "close": "not-a-number",
+          "closed": true
+        },
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        }
+      ],
+      "index": 1,
+      "expected_status": "TEXT_SILENT",
+      "exact_question": "For a candle with non-numeric close, should each interface raise a clear error, return a status, or silently accept the input?"
+    },
+    {
+      "id": "E-NONE-LIST",
+      "fixture_label": "FIXTURE",
+      "candles": null,
+      "index": 1,
+      "expected_status": "TEXT_SILENT",
+      "exact_question": "For a None candle sequence, should each interface raise a clear error, return a status, or silently accept the input?"
+    },
+    {
+      "id": "E-NONE-CANDLE",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        },
+        null,
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        }
+      ],
+      "index": 1,
+      "expected_status": "TEXT_SILENT",
+      "exact_question": "For a None candle in the window, should each interface raise a clear error, return a status, or silently accept the input?"
+    },
+    {
+      "id": "E-NONE-HIGH",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        },
+        {
+          "open": 2,
+          "high": null,
+          "low": 2,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        }
+      ],
+      "index": 1,
+      "expected_status": "TEXT_SILENT",
+      "exact_question": "For a candle with None high, should each interface raise a clear error, return a status, or silently accept the input?"
+    },
+    {
+      "id": "E-NONE-LOW",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        },
+        {
+          "open": 2,
+          "high": 10,
+          "low": null,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        }
+      ],
+      "index": 1,
+      "expected_status": "TEXT_SILENT",
+      "exact_question": "For a candle with None low, should each interface raise a clear error, return a status, or silently accept the input?"
+    },
+    {
+      "id": "E-EMPTY",
+      "fixture_label": "FIXTURE",
+      "candles": [],
+      "index": 0,
+      "expected_status": "TEXT_SILENT",
+      "exact_question": "For an empty candle sequence, should each interface raise a clear error, return a status, or silently accept the input?"
+    },
+    {
+      "id": "E-ONE-CANDLE",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        }
+      ],
+      "index": 0,
+      "expected_status": "TEXT_SILENT",
+      "exact_question": "For a one-candle sequence, should each interface raise a clear error, return a status, or silently accept the input?"
+    },
+    {
+      "id": "E-TWO-CANDLES",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        },
+        {
+          "open": 2,
+          "high": 10,
+          "low": 2,
+          "close": 10,
+          "closed": true
+        }
+      ],
+      "index": 1,
+      "expected_status": "TEXT_SILENT",
+      "exact_question": "For a two-candle sequence, should each interface raise a clear error, return a status, or silently accept the input?"
+    },
+    {
+      "id": "E-INDEX-NEGATIVE",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        },
+        {
+          "open": 2,
+          "high": 10,
+          "low": 2,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        }
+      ],
+      "index": -1,
+      "expected_status": "TEXT_SILENT",
+      "exact_question": "For out-of-range C2 index -1 for three candles, should each interface raise a clear error, return a status, or silently accept the input?"
+    },
+    {
+      "id": "E-INDEX-AT-LENGTH",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        },
+        {
+          "open": 2,
+          "high": 10,
+          "low": 2,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        }
+      ],
+      "index": 3,
+      "expected_status": "TEXT_SILENT",
+      "exact_question": "For out-of-range C2 index 3 for three candles, should each interface raise a clear error, return a status, or silently accept the input?"
+    },
+    {
+      "id": "E-INDEX-FAR",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        },
+        {
+          "open": 2,
+          "high": 10,
+          "low": 2,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 4,
+          "high": 8,
+          "low": 4,
+          "close": 8,
+          "closed": true
+        }
+      ],
+      "index": 99,
+      "expected_status": "TEXT_SILENT",
+      "exact_question": "For out-of-range C2 index 99 for three candles, should each interface raise a clear error, return a status, or silently accept the input?"
+    }
+  ],
+  "PRECEDENCE_CHOICE": [
+    {
+      "id": "SH-E-X-C",
+      "direction": "swing_high",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 0,
+          "high": 10,
+          "low": 0,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 0,
+          "high": 10,
+          "low": 0,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 0,
+          "high": 11,
+          "low": 0,
+          "close": 11,
+          "closed": true
+        }
+      ],
+      "index": 1,
+      "relations": {
+        "C2_vs_C1": "E",
+        "C2_vs_C3": "X",
+        "C3_closed": true
+      },
+      "expected_status": "TEXT_SILENT",
+      "question_id": "Q_MIXED",
+      "exact_question": "When one swing comparison is equal and the other strictly fails, and C3 is closed, is the status NO or UNDECIDED?"
+    },
+    {
+      "id": "SH-X-E-C",
+      "direction": "swing_high",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 0,
+          "high": 11,
+          "low": 0,
+          "close": 11,
+          "closed": true
+        },
+        {
+          "open": 0,
+          "high": 10,
+          "low": 0,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 0,
+          "high": 10,
+          "low": 0,
+          "close": 10,
+          "closed": true
+        }
+      ],
+      "index": 1,
+      "relations": {
+        "C2_vs_C1": "X",
+        "C2_vs_C3": "E",
+        "C3_closed": true
+      },
+      "expected_status": "TEXT_SILENT",
+      "question_id": "Q_MIXED",
+      "exact_question": "When one swing comparison is equal and the other strictly fails, and C3 is closed, is the status NO or UNDECIDED?"
+    },
+    {
+      "id": "SH-F-E-O",
+      "direction": "swing_high",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 0,
+          "high": 9,
+          "low": 0,
+          "close": 9,
+          "closed": true
+        },
+        {
+          "open": 0,
+          "high": 10,
+          "low": 0,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 0,
+          "high": 10,
+          "low": 0,
+          "close": 10,
+          "closed": false
+        }
+      ],
+      "index": 1,
+      "relations": {
+        "C2_vs_C1": "F",
+        "C2_vs_C3": "E",
+        "C3_closed": false
+      },
+      "expected_status": "TEXT_SILENT",
+      "question_id": "Q_OPEN_EQUAL",
+      "exact_question": "When at least one swing comparison is equal, neither fails, and C3 is open, is the status UNDECIDED or PENDING?"
+    },
+    {
+      "id": "SH-F-X-O",
+      "direction": "swing_high",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 0,
+          "high": 9,
+          "low": 0,
+          "close": 9,
+          "closed": true
+        },
+        {
+          "open": 0,
+          "high": 10,
+          "low": 0,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 0,
+          "high": 11,
+          "low": 0,
+          "close": 11,
+          "closed": false
+        }
+      ],
+      "index": 1,
+      "relations": {
+        "C2_vs_C1": "F",
+        "C2_vs_C3": "X",
+        "C3_closed": false
+      },
+      "expected_status": "TEXT_SILENT",
+      "question_id": "Q_OPEN_FAIL",
+      "exact_question": "When at least one swing comparison strictly fails and C3 is open, is the status NO or PENDING?"
+    },
+    {
+      "id": "SH-E-F-O",
+      "direction": "swing_high",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 0,
+          "high": 10,
+          "low": 0,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 0,
+          "high": 10,
+          "low": 0,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 0,
+          "high": 9,
+          "low": 0,
+          "close": 9,
+          "closed": false
+        }
+      ],
+      "index": 1,
+      "relations": {
+        "C2_vs_C1": "E",
+        "C2_vs_C3": "F",
+        "C3_closed": false
+      },
+      "expected_status": "TEXT_SILENT",
+      "question_id": "Q_OPEN_EQUAL",
+      "exact_question": "When at least one swing comparison is equal, neither fails, and C3 is open, is the status UNDECIDED or PENDING?"
+    },
+    {
+      "id": "SH-E-E-O",
+      "direction": "swing_high",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 0,
+          "high": 10,
+          "low": 0,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 0,
+          "high": 10,
+          "low": 0,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 0,
+          "high": 10,
+          "low": 0,
+          "close": 10,
+          "closed": false
+        }
+      ],
+      "index": 1,
+      "relations": {
+        "C2_vs_C1": "E",
+        "C2_vs_C3": "E",
+        "C3_closed": false
+      },
+      "expected_status": "TEXT_SILENT",
+      "question_id": "Q_OPEN_EQUAL",
+      "exact_question": "When at least one swing comparison is equal, neither fails, and C3 is open, is the status UNDECIDED or PENDING?"
+    },
+    {
+      "id": "SH-E-X-O",
+      "direction": "swing_high",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 0,
+          "high": 10,
+          "low": 0,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 0,
+          "high": 10,
+          "low": 0,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 0,
+          "high": 11,
+          "low": 0,
+          "close": 11,
+          "closed": false
+        }
+      ],
+      "index": 1,
+      "relations": {
+        "C2_vs_C1": "E",
+        "C2_vs_C3": "X",
+        "C3_closed": false
+      },
+      "expected_status": "TEXT_SILENT",
+      "question_id": "Q_OPEN_MIXED",
+      "exact_question": "When a swing comparison is equal, the other strictly fails, and C3 is open, is the status NO, UNDECIDED, or PENDING?"
+    },
+    {
+      "id": "SH-X-F-O",
+      "direction": "swing_high",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 0,
+          "high": 11,
+          "low": 0,
+          "close": 11,
+          "closed": true
+        },
+        {
+          "open": 0,
+          "high": 10,
+          "low": 0,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 0,
+          "high": 9,
+          "low": 0,
+          "close": 9,
+          "closed": false
+        }
+      ],
+      "index": 1,
+      "relations": {
+        "C2_vs_C1": "X",
+        "C2_vs_C3": "F",
+        "C3_closed": false
+      },
+      "expected_status": "TEXT_SILENT",
+      "question_id": "Q_OPEN_FAIL",
+      "exact_question": "When at least one swing comparison strictly fails and C3 is open, is the status NO or PENDING?"
+    },
+    {
+      "id": "SH-X-E-O",
+      "direction": "swing_high",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 0,
+          "high": 11,
+          "low": 0,
+          "close": 11,
+          "closed": true
+        },
+        {
+          "open": 0,
+          "high": 10,
+          "low": 0,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 0,
+          "high": 10,
+          "low": 0,
+          "close": 10,
+          "closed": false
+        }
+      ],
+      "index": 1,
+      "relations": {
+        "C2_vs_C1": "X",
+        "C2_vs_C3": "E",
+        "C3_closed": false
+      },
+      "expected_status": "TEXT_SILENT",
+      "question_id": "Q_OPEN_MIXED",
+      "exact_question": "When a swing comparison is equal, the other strictly fails, and C3 is open, is the status NO, UNDECIDED, or PENDING?"
+    },
+    {
+      "id": "SH-X-X-O",
+      "direction": "swing_high",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 0,
+          "high": 11,
+          "low": 0,
+          "close": 11,
+          "closed": true
+        },
+        {
+          "open": 0,
+          "high": 10,
+          "low": 0,
+          "close": 10,
+          "closed": true
+        },
+        {
+          "open": 0,
+          "high": 11,
+          "low": 0,
+          "close": 11,
+          "closed": false
+        }
+      ],
+      "index": 1,
+      "relations": {
+        "C2_vs_C1": "X",
+        "C2_vs_C3": "X",
+        "C3_closed": false
+      },
+      "expected_status": "TEXT_SILENT",
+      "question_id": "Q_OPEN_FAIL",
+      "exact_question": "When at least one swing comparison strictly fails and C3 is open, is the status NO or PENDING?"
+    },
+    {
+      "id": "SL-E-X-C",
+      "direction": "swing_low",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 10,
+          "high": 20,
+          "low": 10,
+          "close": 20,
+          "closed": true
+        },
+        {
+          "open": 10,
+          "high": 20,
+          "low": 10,
+          "close": 20,
+          "closed": true
+        },
+        {
+          "open": 9,
+          "high": 20,
+          "low": 9,
+          "close": 20,
+          "closed": true
+        }
+      ],
+      "index": 1,
+      "relations": {
+        "C2_vs_C1": "E",
+        "C2_vs_C3": "X",
+        "C3_closed": true
+      },
+      "expected_status": "TEXT_SILENT",
+      "question_id": "Q_MIXED",
+      "exact_question": "When one swing comparison is equal and the other strictly fails, and C3 is closed, is the status NO or UNDECIDED?"
+    },
+    {
+      "id": "SL-X-E-C",
+      "direction": "swing_low",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 9,
+          "high": 20,
+          "low": 9,
+          "close": 20,
+          "closed": true
+        },
+        {
+          "open": 10,
+          "high": 20,
+          "low": 10,
+          "close": 20,
+          "closed": true
+        },
+        {
+          "open": 10,
+          "high": 20,
+          "low": 10,
+          "close": 20,
+          "closed": true
+        }
+      ],
+      "index": 1,
+      "relations": {
+        "C2_vs_C1": "X",
+        "C2_vs_C3": "E",
+        "C3_closed": true
+      },
+      "expected_status": "TEXT_SILENT",
+      "question_id": "Q_MIXED",
+      "exact_question": "When one swing comparison is equal and the other strictly fails, and C3 is closed, is the status NO or UNDECIDED?"
+    },
+    {
+      "id": "SL-F-E-O",
+      "direction": "swing_low",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 11,
+          "high": 20,
+          "low": 11,
+          "close": 20,
+          "closed": true
+        },
+        {
+          "open": 10,
+          "high": 20,
+          "low": 10,
+          "close": 20,
+          "closed": true
+        },
+        {
+          "open": 10,
+          "high": 20,
+          "low": 10,
+          "close": 20,
+          "closed": false
+        }
+      ],
+      "index": 1,
+      "relations": {
+        "C2_vs_C1": "F",
+        "C2_vs_C3": "E",
+        "C3_closed": false
+      },
+      "expected_status": "TEXT_SILENT",
+      "question_id": "Q_OPEN_EQUAL",
+      "exact_question": "When at least one swing comparison is equal, neither fails, and C3 is open, is the status UNDECIDED or PENDING?"
+    },
+    {
+      "id": "SL-F-X-O",
+      "direction": "swing_low",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 11,
+          "high": 20,
+          "low": 11,
+          "close": 20,
+          "closed": true
+        },
+        {
+          "open": 10,
+          "high": 20,
+          "low": 10,
+          "close": 20,
+          "closed": true
+        },
+        {
+          "open": 9,
+          "high": 20,
+          "low": 9,
+          "close": 20,
+          "closed": false
+        }
+      ],
+      "index": 1,
+      "relations": {
+        "C2_vs_C1": "F",
+        "C2_vs_C3": "X",
+        "C3_closed": false
+      },
+      "expected_status": "TEXT_SILENT",
+      "question_id": "Q_OPEN_FAIL",
+      "exact_question": "When at least one swing comparison strictly fails and C3 is open, is the status NO or PENDING?"
+    },
+    {
+      "id": "SL-E-F-O",
+      "direction": "swing_low",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 10,
+          "high": 20,
+          "low": 10,
+          "close": 20,
+          "closed": true
+        },
+        {
+          "open": 10,
+          "high": 20,
+          "low": 10,
+          "close": 20,
+          "closed": true
+        },
+        {
+          "open": 11,
+          "high": 20,
+          "low": 11,
+          "close": 20,
+          "closed": false
+        }
+      ],
+      "index": 1,
+      "relations": {
+        "C2_vs_C1": "E",
+        "C2_vs_C3": "F",
+        "C3_closed": false
+      },
+      "expected_status": "TEXT_SILENT",
+      "question_id": "Q_OPEN_EQUAL",
+      "exact_question": "When at least one swing comparison is equal, neither fails, and C3 is open, is the status UNDECIDED or PENDING?"
+    },
+    {
+      "id": "SL-E-E-O",
+      "direction": "swing_low",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 10,
+          "high": 20,
+          "low": 10,
+          "close": 20,
+          "closed": true
+        },
+        {
+          "open": 10,
+          "high": 20,
+          "low": 10,
+          "close": 20,
+          "closed": true
+        },
+        {
+          "open": 10,
+          "high": 20,
+          "low": 10,
+          "close": 20,
+          "closed": false
+        }
+      ],
+      "index": 1,
+      "relations": {
+        "C2_vs_C1": "E",
+        "C2_vs_C3": "E",
+        "C3_closed": false
+      },
+      "expected_status": "TEXT_SILENT",
+      "question_id": "Q_OPEN_EQUAL",
+      "exact_question": "When at least one swing comparison is equal, neither fails, and C3 is open, is the status UNDECIDED or PENDING?"
+    },
+    {
+      "id": "SL-E-X-O",
+      "direction": "swing_low",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 10,
+          "high": 20,
+          "low": 10,
+          "close": 20,
+          "closed": true
+        },
+        {
+          "open": 10,
+          "high": 20,
+          "low": 10,
+          "close": 20,
+          "closed": true
+        },
+        {
+          "open": 9,
+          "high": 20,
+          "low": 9,
+          "close": 20,
+          "closed": false
+        }
+      ],
+      "index": 1,
+      "relations": {
+        "C2_vs_C1": "E",
+        "C2_vs_C3": "X",
+        "C3_closed": false
+      },
+      "expected_status": "TEXT_SILENT",
+      "question_id": "Q_OPEN_MIXED",
+      "exact_question": "When a swing comparison is equal, the other strictly fails, and C3 is open, is the status NO, UNDECIDED, or PENDING?"
+    },
+    {
+      "id": "SL-X-F-O",
+      "direction": "swing_low",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 9,
+          "high": 20,
+          "low": 9,
+          "close": 20,
+          "closed": true
+        },
+        {
+          "open": 10,
+          "high": 20,
+          "low": 10,
+          "close": 20,
+          "closed": true
+        },
+        {
+          "open": 11,
+          "high": 20,
+          "low": 11,
+          "close": 20,
+          "closed": false
+        }
+      ],
+      "index": 1,
+      "relations": {
+        "C2_vs_C1": "X",
+        "C2_vs_C3": "F",
+        "C3_closed": false
+      },
+      "expected_status": "TEXT_SILENT",
+      "question_id": "Q_OPEN_FAIL",
+      "exact_question": "When at least one swing comparison strictly fails and C3 is open, is the status NO or PENDING?"
+    },
+    {
+      "id": "SL-X-E-O",
+      "direction": "swing_low",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 9,
+          "high": 20,
+          "low": 9,
+          "close": 20,
+          "closed": true
+        },
+        {
+          "open": 10,
+          "high": 20,
+          "low": 10,
+          "close": 20,
+          "closed": true
+        },
+        {
+          "open": 10,
+          "high": 20,
+          "low": 10,
+          "close": 20,
+          "closed": false
+        }
+      ],
+      "index": 1,
+      "relations": {
+        "C2_vs_C1": "X",
+        "C2_vs_C3": "E",
+        "C3_closed": false
+      },
+      "expected_status": "TEXT_SILENT",
+      "question_id": "Q_OPEN_MIXED",
+      "exact_question": "When a swing comparison is equal, the other strictly fails, and C3 is open, is the status NO, UNDECIDED, or PENDING?"
+    },
+    {
+      "id": "SL-X-X-O",
+      "direction": "swing_low",
+      "fixture_label": "FIXTURE",
+      "candles": [
+        {
+          "open": 9,
+          "high": 20,
+          "low": 9,
+          "close": 20,
+          "closed": true
+        },
+        {
+          "open": 10,
+          "high": 20,
+          "low": 10,
+          "close": 20,
+          "closed": true
+        },
+        {
+          "open": 9,
+          "high": 20,
+          "low": 9,
+          "close": 20,
+          "closed": false
+        }
+      ],
+      "index": 1,
+      "relations": {
+        "C2_vs_C1": "X",
+        "C2_vs_C3": "X",
+        "C3_closed": false
+      },
+      "expected_status": "TEXT_SILENT",
+      "question_id": "Q_OPEN_FAIL",
+      "exact_question": "When at least one swing comparison strictly fails and C3 is open, is the status NO or PENDING?"
+    }
+  ],
+  "F_output_rules": {
+    "tier": "TIER2",
+    "swing_low_support": "WEAK_SUPPORT",
+    "fvg_invalidation": "INVALIDATION_UNDECIDED",
+    "source_ids": {
+      "swing_high": [
+        "A1",
+        "A4",
+        "A5"
+      ],
+      "swing_low": [
+        "A1",
+        "A5"
+      ],
+      "bullish_fvg": [
+        "B1",
+        "B2",
+        "B3",
+        "B4"
+      ],
+      "bearish_fvg": [
+        "B1",
+        "B2",
+        "B3",
+        "B4"
+      ]
+    },
+    "forbidden_name": "Michael",
+    "input_not_mutated": true,
+    "identical_two_runs": true
+  },
+  "counting": "A/B/D status observations exclude priority-dependent observations, which are grouped and counted in PRECEDENCE_CHOICE; E counts malformed fixtures with four outcomes; F counts each returned record."
+}

@@ -1,0 +1,13 @@
+{
+ "down": {
+  "direction": "DOWN",
+  "level": 1.098,
+  "with_displacement": false
+ },
+ "up": {
+  "direction": "UP",
+  "level": 1.105,
+  "qualification": "KNOWLEDGE_GAP: STRUCTURE_SHIFT_QUALIFICATION",
+  "with_displacement": true
+ }
+}

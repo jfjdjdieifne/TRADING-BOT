@@ -1,0 +1,11 @@
+{
+ "contract_status": "HYPOTHETICAL_NO_EXECUTION_CONTRACT",
+ "entry": 1.102,
+ "rr_t1": 3.0,
+ "rr_t2": 8.0,
+ "stop": 1.101,
+ "stop_rule": "far side of fvg",
+ "t1": 1.105,
+ "t2": 1.11,
+ "t2_note": null
+}

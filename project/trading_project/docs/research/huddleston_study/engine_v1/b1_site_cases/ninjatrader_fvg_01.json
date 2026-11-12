@@ -1,0 +1,148 @@
+{
+  "tier": "TIER2",
+  "viewed_status": "VIEWED",
+  "viewing_method": "SEARCH_INTERMEDIARY",
+  "viewing_limit": "The search intermediary is not the owner’s browser; the displayed result was matched to the page image URL.",
+  "OWNER_CHECK": "",
+  "OWNER_CHECK_choices": [
+    "YES",
+    "NO",
+    "CANNOT_SEE"
+  ],
+  "id": "ninjatrader_fvg_01",
+  "source_url": "https://ninjatrader.com/futures/blogs/fair-value-gaps/",
+  "publisher": "NinjaTrader",
+  "image_url": "https://ninjatrader.com/media/NT/media/images/Blog/Specific-Blog-Post-Thumbnails/The-Ultimate-Guide-to-Trading-Fair-Value-Gaps_Pattern_MES_5min.png",
+  "image_location": "The 3-bar definition, Figure 1",
+  "caption_kind": "visible page caption, first sentence",
+  "caption_quote": "Figure 1: This is a bullish fair value gap on a hypothetical MES 5-minute chart, built to show the pattern from setup to trade.",
+  "market_or_illustration": "ILLUSTRATION",
+  "classification_quote": "Prices and times are illustrative, not live market data.",
+  "instrument": "MES",
+  "timeframe": "5-minute",
+  "search_query": "NinjaTrader fair value gaps hypothetical MES 5 minute Figure 1 6053",
+  "candles": [
+    {
+      "number": 1,
+      "open": null,
+      "high": 6053,
+      "low": null,
+      "close": null,
+      "exact_value_provenance": {
+        "high": "6053 is a printed lower-zone label; the page defines that boundary as the high of candle 1. The mapping is from the source description, not an axis interpolation."
+      }
+    },
+    {
+      "number": 2,
+      "open": null,
+      "high": null,
+      "low": null,
+      "close": null
+    },
+    {
+      "number": 3,
+      "open": null,
+      "high": null,
+      "low": 6065,
+      "close": null,
+      "exact_value_provenance": {
+        "low": "6065 is a printed upper-zone label; the page defines that boundary as the low of candle 3. The mapping is from the source description, not an axis interpolation."
+      }
+    }
+  ],
+  "expected_by_source": {
+    "pattern": "bullish fair value gap",
+    "numbered_candles": [
+      1,
+      2,
+      3
+    ],
+    "candle_1_role": "reference high and lower gap boundary",
+    "candle_2_role": "displacement candle",
+    "candle_3_role": "low and upper gap boundary",
+    "lower_bound": 6053,
+    "upper_bound": 6065,
+    "illustrative_stop": 6048,
+    "zone_label": "FVG zone still open",
+    "illustrative_trigger": {
+      "printed_label": "Buy trigger 6067 close",
+      "caption_quote": "A few bars later, price dips back into that zone and gets rejected, closing at 6067 to trigger the entry.",
+      "limit": "This is the publisher’s hypothetical illustration, not a real-market observation or a printed OHLC value for a numbered candle."
+    }
+  },
+  "printed_axis_labels_not_OHLC": [
+    6040,
+    6045,
+    6050,
+    6055,
+    6060,
+    6070,
+    6075,
+    6080
+  ],
+  "printed_time_labels": [
+    "09:30",
+    "09:35",
+    "09:40",
+    "09:45",
+    "09:50",
+    "09:55",
+    "10:00",
+    "10:05"
+  ],
+  "AXIS_READ_ESTIMATE": [],
+  "not_printed": "No other numerical OHLC values are explicitly attributable to numbered candles 1, 2 or 3; no axis-read values were added. The 6067 trigger stays outside the candle list.",
+  "source_discrepancy": "Image alt text calls the upper boundary the displacement candle’s low; the caption and article identify the third candle’s low. The case records the caption and article, without resolving the discrepancy.",
+  "testability": "SOURCE_LABELS_ONLY; missing OHLC values prevent a complete numeric candle fixture",
+  "number_provenance": [
+    {
+      "number": "1",
+      "location": "TEXT_AND_IMAGE_LABEL",
+      "meaning": "First numbered candle, reference high.",
+      "tag": "SOURCE_NUMBER",
+      "source_quote": "Candle 1 sets the reference high"
+    },
+    {
+      "number": "2",
+      "location": "IMAGE_LABEL",
+      "meaning": "Second numbered candle, displacement.",
+      "tag": "SOURCE_NUMBER",
+      "source_quote": "2"
+    },
+    {
+      "number": "3",
+      "location": "TEXT_AND_IMAGE_LABEL",
+      "meaning": "Third numbered candle, low above the reference high.",
+      "tag": "SOURCE_NUMBER",
+      "source_quote": "candle 3 closes with a low still above that high"
+    },
+    {
+      "number": "6053 and 6065",
+      "location": "TEXT_AND_IMAGE_LABEL",
+      "meaning": "Hypothetical gap boundaries; the complete caption sentence exceeds 25 words.",
+      "tag": "SOURCE_NUMBER",
+      "source_quote": "the shaded zone between 6053 and 6065 untouched."
+    },
+    {
+      "number": "6067",
+      "location": "TEXT_AND_IMAGE_LABEL",
+      "meaning": "Hypothetical buy-trigger close, not a real-market observation.",
+      "tag": "SOURCE_NUMBER",
+      "source_quote": "A few bars later, price dips back into that zone and gets rejected, closing at 6067 to trigger the entry."
+    },
+    {
+      "number": "6048",
+      "location": "TEXT_AND_IMAGE_LABEL",
+      "meaning": "Illustrative stop.",
+      "tag": "SOURCE_NUMBER",
+      "source_quote": "The stop sits at 6048, just beyond the displacement candle's low, the point where the setup fails."
+    },
+    {
+      "number": "5-minute",
+      "location": "TEXT_AND_IMAGE_LABEL",
+      "meaning": "Chart timeframe, not candle OHLC.",
+      "tag": "SOURCE_NUMBER",
+      "source_quote": "Figure 1: This is a bullish fair value gap on a hypothetical MES 5-minute chart, built to show the pattern from setup to trade."
+    }
+  ]
+}

@@ -1,0 +1,306 @@
+{
+  "_file": "EXPECTED_FIXTURES.json",
+  "_path": "project/trading_project/docs/research/huddleston_study/engine_v1/b1_candles/EXPECTED_FIXTURES.json",
+  "_status": "tests-first: this file is committed before any code of this step",
+  "_source": "BUILD_STEP_B1_DESIGN_V2.md + CORRECTIONS_R3 only",
+  "_numbers_label": "FIXTURE",
+  "_numbers_note": "Every number in this file is a FIXTURE value: hand-made candle prices and indices for tests only. The only non-fixture constant of the step is one candle on each side (swing) and three candles (FVG); both are SOURCE_NUMBER of the design text and live in the code, not here.",
+  "_tier": "TIER2",
+  "_concepts": "swing high, swing low, bullish FVG, bearish FVG only",
+  "_excluded": "T-A-4 and T-B-4 are excluded by instruction: they need variants, which this step does not code",
+  "_swing_rule": "at index t (third candle): if any neighbour is strictly beyond c2 on the relevant side -> NO; else if any neighbour equals c2 -> UNDECIDED (tie gap); else if c3 not closed -> PENDING; else YES",
+  "_fvg_rule": "bullish: low(c3) > high(c1); bearish: high(c3) < low(c1); equality -> UNDECIDED (touch gap); otherwise NO; invalidation is never computed and always printed as INVALIDATION_UNDECIDED",
+  "_candle_format": "o, h, l, c are FIXTURE prices; closed is the candle state",
+  "cases": [
+    {
+      "id": "T-A-1",
+      "concept": "swing_high",
+      "evaluate_at": 2,
+      "candles": [
+        {"o": 10.0, "h": 11.0, "l": 9.0, "c": 10.0, "closed": true},
+        {"o": 10.0, "h": 13.0, "l": 10.0, "c": 12.0, "closed": true},
+        {"o": 12.0, "h": 12.0, "l": 10.0, "c": 11.0, "closed": true}
+      ],
+      "expected": {
+        "status": "YES",
+        "candle_indices": {"c1": 0, "c2": 1, "c3": 2},
+        "version": "V-A-00",
+        "tier": "TIER2",
+        "source_ids": ["A1", "A4", "A5"],
+        "labels": [],
+        "gap_ids": []
+      }
+    },
+    {
+      "id": "T-A-2",
+      "concept": "swing_high",
+      "evaluate_at": 2,
+      "candles": [
+        {"o": 10.0, "h": 11.0, "l": 9.0, "c": 10.0, "closed": true},
+        {"o": 10.0, "h": 13.0, "l": 10.0, "c": 12.0, "closed": true},
+        {"o": 12.0, "h": 14.0, "l": 12.0, "c": 13.0, "closed": true}
+      ],
+      "expected": {
+        "status": "NO",
+        "candle_indices": {"c1": 0, "c2": 1, "c3": 2},
+        "version": "V-A-00",
+        "tier": "TIER2",
+        "source_ids": ["A1", "A4", "A5"],
+        "labels": [],
+        "gap_ids": []
+      }
+    },
+    {
+      "id": "T-A-3",
+      "concept": "swing_high",
+      "evaluate_at": 2,
+      "candles": [
+        {"o": 10.0, "h": 11.0, "l": 9.0, "c": 10.0, "closed": true},
+        {"o": 10.0, "h": 13.0, "l": 10.0, "c": 12.0, "closed": true},
+        {"o": 12.0, "h": 13.0, "l": 10.0, "c": 11.0, "closed": true}
+      ],
+      "expected": {
+        "status": "UNDECIDED",
+        "candle_indices": {"c1": 0, "c2": 1, "c3": 2},
+        "version": "V-A-00",
+        "tier": "TIER2",
+        "source_ids": ["A1", "A4", "A5"],
+        "labels": [],
+        "gap_ids": ["GAP_TIE_SWING"]
+      }
+    },
+    {
+      "id": "T-A-1L",
+      "concept": "swing_low",
+      "evaluate_at": 2,
+      "candles": [
+        {"o": 10.0, "h": 11.0, "l": 9.0, "c": 10.0, "closed": true},
+        {"o": 9.0, "h": 10.0, "l": 7.0, "c": 8.0, "closed": true},
+        {"o": 8.0, "h": 9.0, "l": 8.0, "c": 9.0, "closed": true}
+      ],
+      "expected": {
+        "status": "YES",
+        "candle_indices": {"c1": 0, "c2": 1, "c3": 2},
+        "version": "V-A-00",
+        "tier": "TIER2",
+        "source_ids": ["A1", "A5"],
+        "labels": ["WEAK_SUPPORT"],
+        "gap_ids": []
+      }
+    },
+    {
+      "id": "T-A-2L",
+      "concept": "swing_low",
+      "evaluate_at": 2,
+      "candles": [
+        {"o": 10.0, "h": 11.0, "l": 9.0, "c": 10.0, "closed": true},
+        {"o": 9.0, "h": 10.0, "l": 7.0, "c": 8.0, "closed": true},
+        {"o": 8.0, "h": 9.0, "l": 6.0, "c": 7.0, "closed": true}
+      ],
+      "expected": {
+        "status": "NO",
+        "candle_indices": {"c1": 0, "c2": 1, "c3": 2},
+        "version": "V-A-00",
+        "tier": "TIER2",
+        "source_ids": ["A1", "A5"],
+        "labels": ["WEAK_SUPPORT"],
+        "gap_ids": []
+      }
+    },
+    {
+      "id": "T-A-3L",
+      "concept": "swing_low",
+      "evaluate_at": 2,
+      "candles": [
+        {"o": 10.0, "h": 11.0, "l": 9.0, "c": 10.0, "closed": true},
+        {"o": 9.0, "h": 10.0, "l": 7.0, "c": 8.0, "closed": true},
+        {"o": 8.0, "h": 9.0, "l": 7.0, "c": 8.0, "closed": true}
+      ],
+      "expected": {
+        "status": "UNDECIDED",
+        "candle_indices": {"c1": 0, "c2": 1, "c3": 2},
+        "version": "V-A-00",
+        "tier": "TIER2",
+        "source_ids": ["A1", "A5"],
+        "labels": ["WEAK_SUPPORT"],
+        "gap_ids": ["GAP_TIE_SWING"]
+      }
+    },
+    {
+      "id": "T-B-1",
+      "concept": "fvg_bullish",
+      "evaluate_at": 2,
+      "candles": [
+        {"o": 10.0, "h": 11.0, "l": 9.0, "c": 10.0, "closed": true},
+        {"o": 10.0, "h": 14.0, "l": 10.0, "c": 13.0, "closed": true},
+        {"o": 13.0, "h": 15.0, "l": 12.5, "c": 14.0, "closed": true}
+      ],
+      "expected": {
+        "status": "YES",
+        "candle_indices": {"c1": 0, "c2": 1, "c3": 2},
+        "version": "V-B-00",
+        "tier": "TIER2",
+        "source_ids": ["B1", "B2", "B3", "B4"],
+        "labels": [],
+        "gap_ids": [],
+        "gates": ["INVALIDATION_UNDECIDED"],
+        "bounds": {
+          "lower_bound": {"relation": "high(c1)", "value": 11.0},
+          "upper_bound": {"relation": "low(c3)", "value": 12.5}
+        }
+      }
+    },
+    {
+      "id": "T-B-2",
+      "concept": "fvg_bullish",
+      "evaluate_at": 2,
+      "candles": [
+        {"o": 10.0, "h": 11.0, "l": 9.0, "c": 10.0, "closed": true},
+        {"o": 10.0, "h": 14.0, "l": 10.0, "c": 13.0, "closed": true},
+        {"o": 11.0, "h": 13.0, "l": 10.0, "c": 12.0, "closed": true}
+      ],
+      "expected": {
+        "status": "NO",
+        "candle_indices": {"c1": 0, "c2": 1, "c3": 2},
+        "version": "V-B-00",
+        "tier": "TIER2",
+        "source_ids": ["B1", "B2", "B3", "B4"],
+        "labels": [],
+        "gap_ids": [],
+        "gates": ["INVALIDATION_UNDECIDED"],
+        "bounds": null
+      }
+    },
+    {
+      "id": "T-B-3",
+      "concept": "fvg_bullish",
+      "evaluate_at": 2,
+      "candles": [
+        {"o": 10.0, "h": 11.0, "l": 9.0, "c": 10.0, "closed": true},
+        {"o": 10.0, "h": 14.0, "l": 10.0, "c": 13.0, "closed": true},
+        {"o": 11.0, "h": 13.0, "l": 11.0, "c": 12.0, "closed": true}
+      ],
+      "expected": {
+        "status": "UNDECIDED",
+        "candle_indices": {"c1": 0, "c2": 1, "c3": 2},
+        "version": "V-B-00",
+        "tier": "TIER2",
+        "source_ids": ["B1", "B2", "B3", "B4"],
+        "labels": [],
+        "gap_ids": ["GAP_TOUCH_FVG"],
+        "gates": ["INVALIDATION_UNDECIDED"],
+        "bounds": null
+      }
+    },
+    {
+      "id": "T-B-1S",
+      "concept": "fvg_bearish",
+      "evaluate_at": 2,
+      "candles": [
+        {"o": 12.0, "h": 13.0, "l": 11.0, "c": 12.0, "closed": true},
+        {"o": 12.0, "h": 12.0, "l": 8.0, "c": 9.0, "closed": true},
+        {"o": 8.0, "h": 8.0, "l": 6.0, "c": 7.0, "closed": true}
+      ],
+      "expected": {
+        "status": "YES",
+        "candle_indices": {"c1": 0, "c2": 1, "c3": 2},
+        "version": "V-B-00",
+        "tier": "TIER2",
+        "source_ids": ["B1", "B2", "B3", "B4"],
+        "labels": [],
+        "gap_ids": [],
+        "gates": ["INVALIDATION_UNDECIDED"],
+        "bounds": {
+          "upper_bound": {"relation": "low(c1)", "value": 11.0},
+          "lower_bound": {"relation": "high(c3)", "value": 8.0}
+        }
+      }
+    },
+    {
+      "id": "T-B-2S",
+      "concept": "fvg_bearish",
+      "evaluate_at": 2,
+      "candles": [
+        {"o": 12.0, "h": 13.0, "l": 11.0, "c": 12.0, "closed": true},
+        {"o": 12.0, "h": 12.0, "l": 8.0, "c": 9.0, "closed": true},
+        {"o": 11.0, "h": 12.0, "l": 9.0, "c": 10.0, "closed": true}
+      ],
+      "expected": {
+        "status": "NO",
+        "candle_indices": {"c1": 0, "c2": 1, "c3": 2},
+        "version": "V-B-00",
+        "tier": "TIER2",
+        "source_ids": ["B1", "B2", "B3", "B4"],
+        "labels": [],
+        "gap_ids": [],
+        "gates": ["INVALIDATION_UNDECIDED"],
+        "bounds": null
+      }
+    },
+    {
+      "id": "T-B-3S",
+      "concept": "fvg_bearish",
+      "evaluate_at": 2,
+      "candles": [
+        {"o": 12.0, "h": 13.0, "l": 11.0, "c": 12.0, "closed": true},
+        {"o": 12.0, "h": 12.0, "l": 8.0, "c": 9.0, "closed": true},
+        {"o": 10.0, "h": 11.0, "l": 8.0, "c": 9.0, "closed": true}
+      ],
+      "expected": {
+        "status": "UNDECIDED",
+        "candle_indices": {"c1": 0, "c2": 1, "c3": 2},
+        "version": "V-B-00",
+        "tier": "TIER2",
+        "source_ids": ["B1", "B2", "B3", "B4"],
+        "labels": [],
+        "gap_ids": ["GAP_TOUCH_FVG"],
+        "gates": ["INVALIDATION_UNDECIDED"],
+        "bounds": null
+      }
+    },
+    {
+      "id": "T-A-1P",
+      "concept": "swing_high",
+      "evaluate_at": 2,
+      "candles": [
+        {"o": 10.0, "h": 11.0, "l": 9.0, "c": 10.0, "closed": true},
+        {"o": 10.0, "h": 13.0, "l": 10.0, "c": 12.0, "closed": true},
+        {"o": 12.0, "h": 12.0, "l": 10.0, "c": 11.0, "closed": false}
+      ],
+      "expected": {
+        "status": "PENDING",
+        "candle_indices": {"c1": 0, "c2": 1, "c3": 2},
+        "version": "V-A-00",
+        "tier": "TIER2",
+        "source_ids": ["A1", "A4", "A5"],
+        "labels": [],
+        "gap_ids": []
+      }
+    },
+    {
+      "id": "T-NL-1",
+      "concept": "swing_high",
+      "evaluate_at": 2,
+      "note": "no-lookahead fixture: the same first three candles, evaluated at index 2, must give the same record before and after appending future candles",
+      "candles": [
+        {"o": 10.0, "h": 11.0, "l": 9.0, "c": 10.0, "closed": true},
+        {"o": 10.0, "h": 13.0, "l": 10.0, "c": 12.0, "closed": true},
+        {"o": 12.0, "h": 12.0, "l": 10.0, "c": 11.0, "closed": true}
+      ],
+      "appended_candles": [
+        {"o": 11.0, "h": 20.0, "l": 11.0, "c": 19.0, "closed": true},
+        {"o": 19.0, "h": 21.0, "l": 18.0, "c": 20.0, "closed": true},
+        {"o": 20.0, "h": 20.0, "l": 5.0, "c": 6.0, "closed": true}
+      ],
+      "expected": {
+        "status": "YES",
+        "candle_indices": {"c1": 0, "c2": 1, "c3": 2},
+        "version": "V-A-00",
+        "tier": "TIER2",
+        "source_ids": ["A1", "A4", "A5"],
+        "labels": [],
+        "gap_ids": []
+      }
+    }
+  ]
+}

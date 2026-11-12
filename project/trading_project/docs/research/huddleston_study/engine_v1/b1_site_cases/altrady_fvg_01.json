@@ -1,0 +1,94 @@
+{
+  "tier": "TIER2",
+  "viewed_status": "VIEWED",
+  "viewing_method": "SEARCH_INTERMEDIARY",
+  "viewing_limit": "The search intermediary is not the owner’s browser; the displayed result was matched to the page image URL.",
+  "OWNER_CHECK": "",
+  "OWNER_CHECK_choices": [
+    "YES",
+    "NO",
+    "CANNOT_SEE"
+  ],
+  "id": "altrady_fvg_01",
+  "source_url": "https://www.altrady.com/blog/crypto-trading-strategies/ict-trading-strategy",
+  "publisher": "Altrady",
+  "image_url": "https://cdn-web.altrady.com/ict_fvg_ote_diagram_bae3b076b0.webp",
+  "image_location": "Core ICT Concepts, after Optimal trade entry (OTE)",
+  "caption_kind": "visible page caption",
+  "caption_quote": "A fair value gap and the OTE zone, the two entry tools ICT models use most.",
+  "market_or_illustration": "ILLUSTRATION (the page image alt calls it a diagram)",
+  "classification_quote": "Diagram of a bullish fair value gap",
+  "search_query": "site:altrady.com \"fair value gap\" \"optimal trade entry\" diagram",
+  "candles": [
+    {
+      "number": 1,
+      "open": null,
+      "high": null,
+      "low": null,
+      "close": null
+    },
+    {
+      "number": 2,
+      "open": null,
+      "high": null,
+      "low": null,
+      "close": null
+    },
+    {
+      "number": 3,
+      "open": null,
+      "high": null,
+      "low": null,
+      "close": null
+    }
+  ],
+  "expected_by_source": {
+    "pattern": "bullish fair value gap",
+    "numbered_candles": [
+      1,
+      2,
+      3
+    ],
+    "lower_bound": "high of candle 1; price NOT_STATED",
+    "upper_bound": "low of candle 3; price NOT_STATED",
+    "other_panel_labels_not_prices": [
+      "0%",
+      "62%",
+      "70.5%",
+      "79%",
+      "100%"
+    ]
+  },
+  "AXIS_READ_ESTIMATE": [],
+  "not_printed": "No numerical OHLC prices or price axis are printed for these candles. Percentages belong to the separate OTE panel, not candle prices.",
+  "testability": "SOURCE_LABELS_ONLY; no numeric OHLC fixture can be reconstructed",
+  "number_provenance": [
+    {
+      "number": "1 and 3",
+      "location": "TEXT_AND_IMAGE_LABEL",
+      "meaning": "Printed candle identifiers and gap boundaries, not prices.",
+      "tag": "SOURCE_NUMBER",
+      "source_quote": "the gap between candle 1's high and candle 3's low"
+    },
+    {
+      "number": "2",
+      "location": "IMAGE_LABEL",
+      "meaning": "Printed identifier of middle candle.",
+      "tag": "SOURCE_NUMBER",
+      "source_quote": "2"
+    },
+    {
+      "number": "62%, 70.5%, 79%",
+      "location": "TEXT_AND_IMAGE_LABEL",
+      "meaning": "OTE percentages on the other panel, not candle prices.",
+      "tag": "SOURCE_NUMBER",
+      "source_quote": "OTE is the zone between the 62% and 79% Fibonacci retracement of a swing, with 70.5% as the level many ICT traders watch."
+    },
+    {
+      "number": "0%, 100%",
+      "location": "IMAGE_LABEL",
+      "meaning": "Extremes of the separate OTE diagram, not candle prices.",
+      "tag": "SOURCE_NUMBER"
+    }
+  ]
+}

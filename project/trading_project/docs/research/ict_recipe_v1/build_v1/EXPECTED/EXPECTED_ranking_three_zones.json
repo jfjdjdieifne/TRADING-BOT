@@ -1,0 +1,25 @@
+{
+ "conflict_case": {
+  "by_bias_first": "ob:bearish:22",
+  "by_distance_first": "fvg:bullish:10",
+  "criteria_conflict": true,
+  "priority": "criteria_conflict"
+ },
+ "with_bias_down": {
+  "criteria_conflict": false,
+  "first": "fvg:bullish:10",
+  "priority": "KNOWLEDGE_GAP: ZONE_RANKING_PRIORITY"
+ },
+ "with_bias_up": {
+  "criteria_conflict": false,
+  "criteria_i_value": true,
+  "criteria_iii_value": 0.0,
+  "first": "fvg:bullish:10",
+  "order": [
+   "fvg:bullish:10",
+   "ob:bullish:14",
+   "sweep:low:18"
+  ],
+  "priority": "KNOWLEDGE_GAP: ZONE_RANKING_PRIORITY"
+ }
+}

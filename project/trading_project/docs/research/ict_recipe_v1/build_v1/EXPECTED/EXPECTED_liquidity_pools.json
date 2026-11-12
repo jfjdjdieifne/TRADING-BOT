@@ -1,0 +1,17 @@
+{
+ "equal_highs_ratio": "KNOWLEDGE_GAP: EQUAL_HIGHS_RATIO",
+ "kinds": [
+  "old_extreme",
+  "relative_equal_pair"
+ ],
+ "states": [
+  "formed",
+  "taken"
+ ],
+ "taken_levels": [
+  1.105
+ ],
+ "untaken_high_levels": [
+  1.106
+ ]
+}

@@ -1,0 +1,7 @@
+{
+ "_fixture": "fx_no_plan_when_stop_equals_entry",
+ "_tag": "FIXTURE",
+ "value": {
+  "error": "stop equals entry; no plan"
+ }
+}

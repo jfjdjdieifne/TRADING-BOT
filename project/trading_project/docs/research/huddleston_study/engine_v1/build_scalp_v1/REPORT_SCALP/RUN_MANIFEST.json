@@ -1,0 +1,112 @@
+{
+  "note": "Run outputs remain external under /tmp/build_scalp/<month>/; these hashes identify the frozen bundles.",
+  "data_file": "/tmp/hud_data/2021.csv.gz",
+  "data_sha256": "38be0503fd56269686a6f3d25f5e537e2ac5682ea9a5d79af1765acd224a6ab4",
+  "runs": [
+    {
+      "month": "2021-06",
+      "loaded_from": "2021-06-01T00:00:00+00:00",
+      "loaded_until_exclusive": "2021-07-01T00:00:00+00:00",
+      "last_month_seen": "2021-06",
+      "reserved_months_loaded": [],
+      "data_sha256": "38be0503fd56269686a6f3d25f5e537e2ac5682ea9a5d79af1765acd224a6ab4",
+      "primary_settled": 4,
+      "primary_hits": 1,
+      "controls": 20,
+      "sha256": {
+        "plans.jsonl": "ba1ead0e785ac683629030d42dbf03c00f30490b0841d9a1b7575f32b8342842",
+        "controls.jsonl": "133f460aaae32d9a197a812810f1664773a04756cd3b84eba3dd22543a7d2b67",
+        "run_summary.json": "07e052d0882d4646dc9a039755d0ad282acb67905c34ac9428e392b121622fa9"
+      },
+      "bytes": {
+        "plans.jsonl": 37995,
+        "controls.jsonl": 9935,
+        "run_summary.json": 971
+      }
+    },
+    {
+      "month": "2021-07",
+      "loaded_from": "2021-07-01T00:00:00+00:00",
+      "loaded_until_exclusive": "2021-08-01T00:00:00+00:00",
+      "last_month_seen": "2021-07",
+      "reserved_months_loaded": [],
+      "data_sha256": "38be0503fd56269686a6f3d25f5e537e2ac5682ea9a5d79af1765acd224a6ab4",
+      "primary_settled": 3,
+      "primary_hits": 1,
+      "controls": 15,
+      "sha256": {
+        "plans.jsonl": "827e6297c272bfe78d9872aa7cd30ababfad13526518553120e3b45eb8586e2f",
+        "controls.jsonl": "45c53ef09a4f7de20e06a2ef6f80c1881bd26d3ce490f1e7756b7d0ad93288cb",
+        "run_summary.json": "e8e004270cfe8ed45cd5be31fe32cd05d2cb88ddc556a69e91c58a3029d339c2"
+      },
+      "bytes": {
+        "plans.jsonl": 36490,
+        "controls.jsonl": 7369,
+        "run_summary.json": 972
+      }
+    },
+    {
+      "month": "2021-09",
+      "loaded_from": "2021-09-01T00:00:00+00:00",
+      "loaded_until_exclusive": "2021-10-01T00:00:00+00:00",
+      "last_month_seen": "2021-09",
+      "reserved_months_loaded": [],
+      "data_sha256": "38be0503fd56269686a6f3d25f5e537e2ac5682ea9a5d79af1765acd224a6ab4",
+      "primary_settled": 9,
+      "primary_hits": 4,
+      "controls": 45,
+      "sha256": {
+        "plans.jsonl": "ac8895030e3ce523f8de6364e6ab6086cf79e852de6f42011c3b171cda844f12",
+        "controls.jsonl": "340a5898084445f4a4c3b613f0c3af56293d6da4a8836ce0407debf1d84a4e85",
+        "run_summary.json": "c78ae9298e00f25148dd356190ae24ccbc3a39fe35fd224c2d76d7614470dbd8"
+      },
+      "bytes": {
+        "plans.jsonl": 75213,
+        "controls.jsonl": 22106,
+        "run_summary.json": 978
+      }
+    },
+    {
+      "month": "2021-10",
+      "loaded_from": "2021-10-01T00:00:00+00:00",
+      "loaded_until_exclusive": "2021-11-01T00:00:00+00:00",
+      "last_month_seen": "2021-10",
+      "reserved_months_loaded": [],
+      "data_sha256": "38be0503fd56269686a6f3d25f5e537e2ac5682ea9a5d79af1765acd224a6ab4",
+      "primary_settled": 1,
+      "primary_hits": 0,
+      "controls": 5,
+      "sha256": {
+        "plans.jsonl": "babd940dd1e3ed9d79248fa5de05c03cc4df9036167eb28621079564df25390f",
+        "controls.jsonl": "07471981ed50a29a0e7ae45afc640b4e94e3876e90256011aace8a2f07d7dacc",
+        "run_summary.json": "724190b6408fc8d3bd299d88a9ba680c420419d2140d7cb076d45a217411f24a"
+      },
+      "bytes": {
+        "plans.jsonl": 35348,
+        "controls.jsonl": 2455,
+        "run_summary.json": 954
+      }
+    },
+    {
+      "month": "2021-11",
+      "loaded_from": "2021-11-01T00:00:00+00:00",
+      "loaded_until_exclusive": "2021-12-01T00:00:00+00:00",
+      "last_month_seen": "2021-11",
+      "reserved_months_loaded": [],
+      "data_sha256": "38be0503fd56269686a6f3d25f5e537e2ac5682ea9a5d79af1765acd224a6ab4",
+      "primary_settled": 10,
+      "primary_hits": 5,
+      "controls": 50,
+      "sha256": {
+        "plans.jsonl": "77d2f0b9ad79d7183b1b049e6c742cb54c3b111f0a139f40cd04ec9b46473cd7",
+        "controls.jsonl": "531d68d8398492838b14c7bef44c76cd5154e98e7367a77145b3fe3decc12119",
+        "run_summary.json": "a8331fe31cca59fb0a95ecb5a617b7f820fb78de1f17e6c9d0055032b6dc01e7"
+      },
+      "bytes": {
+        "plans.jsonl": 44350,
+        "controls.jsonl": 24719,
+        "run_summary.json": 975
+      }
+    }
+  ]
+}

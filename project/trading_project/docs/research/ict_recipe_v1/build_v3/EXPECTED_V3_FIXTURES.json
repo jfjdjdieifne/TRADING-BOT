@@ -1,0 +1,115 @@
+{
+  "fixture_version": "V3-FIXTURES-1",
+  "declared_before_code": true,
+  "tag": "FIXTURE",
+  "note": "Hand-declared expectations, written before build_v3 code was committed. FIXTURE values are the fixture's own numbers; they are never evidence about the market.",
+  "hygiene": {
+    "H1_side_correct": {
+      "plan": {"direction": "bearish", "entry": 1.1, "stop": 1.105, "t1": 1.09, "decision_index": 0},
+      "bars": [
+        {"bid": [1.099, 1.1005, 1.098, 1.0995], "ask": [1.0994, 1.1009, 1.0984, 1.0999], "spread_open": 0.0004},
+        {"bid": [1.0998, 1.104, 1.0995, 1.1038], "ask": [1.1002, 1.106, 1.0999, 1.1042], "spread_open": 0.0004}
+      ],
+      "expected": {"state": "settled", "exit_reason": "stop", "exit_price": 1.105, "r_measured": -1.04,
+                   "bid_only_would_stop": false, "note": "bid high never reached the stop; the ask did"}
+    },
+    "H2_stale_cancel": {
+      "plan": {"direction": "bearish", "entry": 1.1, "stop": 1.105, "t1": 1.09, "decision_index": 0},
+      "bars": [
+        {"bid": [1.1008, 1.104, 1.1005, 1.1038], "ask": [1.1012, 1.1055, 1.1009, 1.1042], "spread_open": 0.0004}
+      ],
+      "expected": {"state": "cancelled", "exit_reason": "cancelled_invalidated_before_fill",
+                   "note": "the stop side traded while the entry level never traded"}
+    },
+    "H7_first_bar_after_arming": {
+      "plan": {"direction": "bearish", "entry": 1.1, "stop": 1.105, "t1": 1.09, "decision_index": 0},
+      "bars": [
+        {"bid": [1.0999, 1.1001, 1.0998, 1.1], "ask": [1.1003, 1.1005, 1.1002, 1.1004], "spread_open": 0.0004}
+      ],
+      "expected": {"state_after_arming_bar": "armed", "note": "the arming bar itself is never an execution bar"}
+    },
+    "H4_geometry_reject": {
+      "cases": [
+        {"direction": "bullish", "entry": 1.1, "t1": 1.09, "expected": true},
+        {"direction": "bearish", "entry": 1.1, "t1": 1.11, "expected": true},
+        {"direction": "bullish", "entry": 1.1, "t1": 1.11, "expected": false}
+      ],
+      "expected_reason": "TARGET_BEHIND_ENTRY"
+    },
+    "H3_pool_identity": {
+      "pools": [
+        {"side": "high", "level": 1.1, "frame": "15m"},
+        {"side": "high", "level": 1.1, "frame": "1h"},
+        {"side": "high", "level": 1.12, "frame": "15m"}
+      ],
+      "entry": 1.09,
+      "expected_merged": 2,
+      "expected_t1": 1.1,
+      "expected_t2": 1.12,
+      "expected_t2_not_equal_t1": true
+    }
+  },
+  "switches": {
+    "S1_no_origin": {"expected": {"stop": null, "reason": "S1_NO_CONFIRMED_ORIGIN"}},
+    "D_concept": {
+      "cases": [
+        {"break": true, "gap": true, "expected": "YES"},
+        {"break": false, "gap": true, "expected": "NO"},
+        {"break": true, "gap": false, "expected": "NO"},
+        {"break": false, "gap": false, "expected": "NO"}
+      ]
+    },
+    "L_class": {
+      "range": {"low": 1.1, "high": 1.12, "equilibrium": 1.11},
+      "cases": [
+        {"side": "high", "level": 1.13, "expected": "EXTERNAL"},
+        {"side": "high", "level": 1.11, "expected": "INTERNAL"},
+        {"side": "low", "level": 1.09, "expected": "EXTERNAL"},
+        {"side": "low", "level": 1.105, "expected": "INTERNAL"}
+      ]
+    },
+    "R_leg_state": {
+      "range": {"low": 1.1, "high": 1.12, "equilibrium": 1.11},
+      "cases": [
+        {"price": 1.13, "expected_label": "ABOVE_RANGE", "expected_ratio": 1.5},
+        {"price": 1.09, "expected_label": "BELOW_RANGE", "expected_ratio": -0.5},
+        {"price": 1.115, "expected_label": "premium"},
+        {"price": 1.105, "expected_label": "discount"}
+      ]
+    }
+  },
+  "sweep_pack": {
+    "declared_before_code": true,
+    "concept_map": {"SWEEP": "YES", "BREAK": "NO", "NOTHING": "NO"},
+    "cases": [
+      {"id": "sw01", "label": "wick beyond level, close back inside", "expected": "SWEEP"},
+      {"id": "sw02", "label": "close beyond the level", "expected": "BREAK"},
+      {"id": "sw03", "label": "no excursion beyond the level", "expected": "NOTHING"},
+      {"id": "sw04", "label": "wick beyond by one tenth of a pip, close back inside", "expected": "SWEEP"},
+      {"id": "sw05", "label": "two-candle sweep, second candle closes back inside", "expected": "SWEEP"},
+      {"id": "sw06", "label": "equal-highs pair, wick above the second high, close back inside", "expected": "SWEEP"}
+    ]
+  },
+  "time": {
+    "cases": [
+      {"utc": "2021-03-12T07:00:00+00:00", "expected_ny": "02:00", "expected_day_key": [2021, 3, 11]},
+      {"utc": "2021-03-15T06:00:00+00:00", "expected_ny": "02:00", "expected_day_key": [2021, 3, 14]},
+      {"utc": "2021-11-05T06:00:00+00:00", "expected_ny": "02:00"},
+      {"utc": "2021-11-08T07:00:00+00:00", "expected_ny": "02:00"}
+    ],
+    "session_window_in_utc": [
+      {"utc_start": "2021-03-12T07:00:00+00:00", "expected_in_window": true},
+      {"utc_start": "2021-03-12T06:55:00+00:00", "expected_in_window": false},
+      {"utc_start": "2021-03-15T06:00:00+00:00", "expected_in_window": true},
+      {"utc_start": "2021-03-15T05:55:00+00:00", "expected_in_window": false}
+    ]
+  },
+  "entry_market": {
+    "plan": {"direction": "bullish", "entry": 1.102, "stop": 1.1, "t1": 1.106, "decision_index": 0},
+    "bars": [
+      {"bid": [1.103, 1.1035, 1.1015, 1.1018], "ask": [1.1034, 1.1039, 1.1019, 1.1022], "spread_open": 0.0004},
+      {"bid": [1.1017, 1.1025, 1.1016, 1.1024], "ask": [1.1021, 1.1029, 1.102, 1.1028], "spread_open": 0.0004}
+    ],
+    "expected": {"fill_index_bar": 2, "fill_price": 1.1021, "note": "market fill at the ASK open of the bar after the touch-and-close-inside bar"}
+  }
+}

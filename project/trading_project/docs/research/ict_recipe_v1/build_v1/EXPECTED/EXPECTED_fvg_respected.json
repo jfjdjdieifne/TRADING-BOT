@@ -1,0 +1,11 @@
+{
+ "created": [
+  {
+   "direction": "bullish",
+   "lower": 1.1015,
+   "upper": 1.103
+  }
+ ],
+ "invalidation": "KNOWLEDGE_GAP: FVG_INVALIDATION",
+ "state_after_touch": "touched"
+}

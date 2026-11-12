@@ -1,0 +1,350 @@
+{
+ "data_sha256": "38be0503fd56269686a6f3d25f5e537e2ac5682ea9a5d79af1765acd224a6ab4",
+ "runs": {
+  "2021-06_V2-0": {
+   "plans": 43,
+   "side_changed": 3,
+   "stale": 10,
+   "armed_inside": 40,
+   "t2_same": 0,
+   "t2_present": 27,
+   "geom_behind": 0,
+   "zone_outside_range": 0,
+   "validation_match": 11,
+   "validation_mismatch": 22,
+   "sub_pip_risk": 15,
+   "delta_r_mean": {
+    "bullish": 0.0,
+    "bearish": -2.645833333335801
+   },
+   "delta_r_mean_clean": {
+    "bullish": 0.0,
+    "bearish": 0.0
+   }
+  },
+  "2021-06_V2-A": {
+   "plans": 14,
+   "side_changed": 1,
+   "stale": 2,
+   "armed_inside": 11,
+   "t2_same": 0,
+   "t2_present": 12,
+   "geom_behind": 0,
+   "zone_outside_range": 0,
+   "validation_match": 3,
+   "validation_mismatch": 8,
+   "sub_pip_risk": 6,
+   "delta_r_mean": {
+    "bullish": 0.0,
+    "bearish": 0.0
+   },
+   "delta_r_mean_clean": {
+    "bullish": 0.0,
+    "bearish": 0.0
+   }
+  },
+  "2021-06_V2-B": {
+   "plans": 8,
+   "side_changed": 0,
+   "stale": 1,
+   "armed_inside": 6,
+   "t2_same": 0,
+   "t2_present": 6,
+   "geom_behind": 0,
+   "zone_outside_range": 0,
+   "validation_match": 4,
+   "validation_mismatch": 3,
+   "sub_pip_risk": 1,
+   "delta_r_mean": {
+    "bullish": 0.0,
+    "bearish": 0.0
+   },
+   "delta_r_mean_clean": {
+    "bullish": 0.0,
+    "bearish": 0.0
+   }
+  },
+  "2021-07_v1": {
+   "plans": 104,
+   "side_changed": 4,
+   "stale": 15,
+   "armed_inside": 61,
+   "t2_same": 0,
+   "t2_present": 92,
+   "geom_behind": 0,
+   "zone_outside_range": 0,
+   "validation_match": 15,
+   "validation_mismatch": 76,
+   "sub_pip_risk": 39,
+   "delta_r_mean": {
+    "bullish": 0.0,
+    "bearish": 0.0
+   },
+   "delta_r_mean_clean": {
+    "bullish": 0.0,
+    "bearish": 0.0
+   }
+  },
+  "2021-07_V2-0": {
+   "plans": 43,
+   "side_changed": 1,
+   "stale": 8,
+   "armed_inside": 37,
+   "t2_same": 0,
+   "t2_present": 26,
+   "geom_behind": 0,
+   "zone_outside_range": 0,
+   "validation_match": 8,
+   "validation_mismatch": 28,
+   "sub_pip_risk": 15,
+   "delta_r_mean": {
+    "bullish": 0.0,
+    "bearish": 0.0
+   },
+   "delta_r_mean_clean": {
+    "bullish": 0.0,
+    "bearish": 0.0
+   }
+  },
+  "2021-07_V2-A": {
+   "plans": 26,
+   "side_changed": 0,
+   "stale": 5,
+   "armed_inside": 24,
+   "t2_same": 2,
+   "t2_present": 23,
+   "geom_behind": 1,
+   "zone_outside_range": 0,
+   "validation_match": 8,
+   "validation_mismatch": 13,
+   "sub_pip_risk": 3,
+   "delta_r_mean": {
+    "bullish": 0.0,
+    "bearish": 0.0
+   },
+   "delta_r_mean_clean": {
+    "bullish": 0.0,
+    "bearish": 0.0
+   }
+  },
+  "2021-07_V2-B": {
+   "plans": 10,
+   "side_changed": 0,
+   "stale": 3,
+   "armed_inside": 8,
+   "t2_same": 0,
+   "t2_present": 8,
+   "geom_behind": 0,
+   "zone_outside_range": 0,
+   "validation_match": 4,
+   "validation_mismatch": 3,
+   "sub_pip_risk": 1,
+   "delta_r_mean": {
+    "bullish": 0.0,
+    "bearish": 0.0
+   },
+   "delta_r_mean_clean": {
+    "bullish": 0.0,
+    "bearish": 0.0
+   }
+  },
+  "2021-07_V2-A-OFF": {
+   "plans": 109,
+   "side_changed": 8,
+   "stale": 19,
+   "armed_inside": 98,
+   "t2_same": 8,
+   "t2_present": 95,
+   "geom_behind": 1,
+   "zone_outside_range": 0,
+   "validation_match": 23,
+   "validation_mismatch": 65,
+   "sub_pip_risk": 28,
+   "delta_r_mean": {
+    "bullish": 0.0,
+    "bearish": -0.2421652421654214
+   },
+   "delta_r_mean_clean": {
+    "bullish": 0.0,
+    "bearish": -0.07777777777781889
+   }
+  },
+  "2021-07_V2-B-OFF": {
+   "plans": 39,
+   "side_changed": 2,
+   "stale": 8,
+   "armed_inside": 33,
+   "t2_same": 0,
+   "t2_present": 30,
+   "geom_behind": 0,
+   "zone_outside_range": 0,
+   "validation_match": 16,
+   "validation_mismatch": 12,
+   "sub_pip_risk": 1,
+   "delta_r_mean": {
+    "bullish": 0.0,
+    "bearish": 0.0
+   },
+   "delta_r_mean_clean": {
+    "bullish": 0.0,
+    "bearish": 0.0
+   }
+  },
+  "2021-09_v1": {
+   "plans": 103,
+   "side_changed": 11,
+   "stale": 15,
+   "armed_inside": 55,
+   "t2_same": 0,
+   "t2_present": 98,
+   "geom_behind": 0,
+   "zone_outside_range": 0,
+   "validation_match": 14,
+   "validation_mismatch": 73,
+   "sub_pip_risk": 40,
+   "delta_r_mean": {
+    "bullish": 0.0,
+    "bearish": -1.8137973137911134
+   },
+   "delta_r_mean_clean": {
+    "bullish": 0.0,
+    "bearish": -0.48455598455569454
+   }
+  },
+  "2021-09_V2-0": {
+   "plans": 30,
+   "side_changed": 3,
+   "stale": 7,
+   "armed_inside": 27,
+   "t2_same": 0,
+   "t2_present": 20,
+   "geom_behind": 0,
+   "zone_outside_range": 0,
+   "validation_match": 5,
+   "validation_mismatch": 18,
+   "sub_pip_risk": 9,
+   "delta_r_mean": {
+    "bullish": 0.0,
+    "bearish": -3.699206349184166
+   },
+   "delta_r_mean_clean": {
+    "bullish": 0.0,
+    "bearish": -0.46062271062273524
+   }
+  },
+  "2021-09_V2-A": {
+   "plans": 17,
+   "side_changed": 1,
+   "stale": 4,
+   "armed_inside": 16,
+   "t2_same": 0,
+   "t2_present": 16,
+   "geom_behind": 0,
+   "zone_outside_range": 0,
+   "validation_match": 4,
+   "validation_mismatch": 9,
+   "sub_pip_risk": 1,
+   "delta_r_mean": {
+    "bullish": 0.0,
+    "bearish": -4.124999999991673
+   },
+   "delta_r_mean_clean": {
+    "bullish": 0.0,
+    "bearish": 0.0
+   }
+  },
+  "2021-09_V2-B": {
+   "plans": 16,
+   "side_changed": 2,
+   "stale": 3,
+   "armed_inside": 12,
+   "t2_same": 0,
+   "t2_present": 14,
+   "geom_behind": 0,
+   "zone_outside_range": 0,
+   "validation_match": 8,
+   "validation_mismatch": 6,
+   "sub_pip_risk": 2,
+   "delta_r_mean": {
+    "bullish": 0.0,
+    "bearish": -0.5138888888889017
+   },
+   "delta_r_mean_clean": {
+    "bullish": 0.0,
+    "bearish": -0.616666666666682
+   }
+  },
+  "2021-09_V2-A-OFF": {
+   "plans": 98,
+   "side_changed": 9,
+   "stale": 20,
+   "armed_inside": 84,
+   "t2_same": 11,
+   "t2_present": 91,
+   "geom_behind": 0,
+   "zone_outside_range": 0,
+   "validation_match": 22,
+   "validation_mismatch": 51,
+   "sub_pip_risk": 19,
+   "delta_r_mean": {
+    "bullish": -0.1986666666666874,
+    "bearish": -0.7977120535701028
+   },
+   "delta_r_mean_clean": {
+    "bullish": -0.24833333333335922,
+    "bearish": -0.1392152255639881
+   }
+  },
+  "2021-09_V2-B-OFF": {
+   "plans": 39,
+   "side_changed": 3,
+   "stale": 6,
+   "armed_inside": 32,
+   "t2_same": 0,
+   "t2_present": 29,
+   "geom_behind": 0,
+   "zone_outside_range": 0,
+   "validation_match": 20,
+   "validation_mismatch": 15,
+   "sub_pip_risk": 3,
+   "delta_r_mean": {
+    "bullish": 0.0,
+    "bearish": -0.211458333333315
+   },
+   "delta_r_mean_clean": {
+    "bullish": 0.0,
+    "bearish": -0.22258771929822632
+   }
+  }
+ },
+ "totals": {
+  "delta_r_mean": {
+   "bullish": -0.01986666666666874,
+   "bearish": -0.9096948438442293
+  },
+  "delta_r_n": {
+   "bullish": 250,
+   "bearish": 308
+  },
+  "plans": 699,
+  "side_changed": 48,
+  "stale": 126,
+  "armed_inside": 544,
+  "t2_same": 21,
+  "t2_present": 587,
+  "geom_behind": 2,
+  "zone_outside_range": 0,
+  "side_changed_dir": {
+   "bullish": 18,
+   "bearish": 30
+  },
+  "delta_r_mean_clean": {
+   "bullish": -0.029044834307995232,
+   "bearish": -0.17501206563703642
+  },
+  "delta_r_n_clean": {
+   "bullish": 171,
+   "bearish": 222
+  }
+ }
+}

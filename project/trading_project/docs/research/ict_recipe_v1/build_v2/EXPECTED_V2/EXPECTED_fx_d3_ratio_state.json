@@ -1,0 +1,18 @@
+{
+ "_fixture": "fx_d3_ratio_state",
+ "_tag": "FIXTURE",
+ "value": {
+  "above": [
+   1.0,
+   "ABOVE_RANGE"
+  ],
+  "below": [
+   0.0,
+   "BELOW_RANGE"
+  ],
+  "inside": [
+   0.3,
+   "INSIDE_RANGE"
+  ]
+ }
+}

@@ -1,0 +1,12 @@
+{
+ "_fixture": "fx_two_targets_and_one_target",
+ "_tag": "FIXTURE",
+ "value": {
+  "one_note": "only one untaken opposing pool existed; T2 = None",
+  "one_t2": null,
+  "rr_t1": 4.0,
+  "rr_t2": 8.0,
+  "t1": 1.104,
+  "t2": 1.108
+ }
+}

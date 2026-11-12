@@ -1,0 +1,24 @@
+{
+ "definition_id": "ENGINEERING_HYPOTHESIS_LATEST_ALTERNATING_CONFIRMED_SWINGS",
+ "discount": {
+  "equilibrium": 1.105,
+  "high": 1.11,
+  "low": 1.1,
+  "position": "discount",
+  "position_ratio": 0.3
+ },
+ "equilibrium": {
+  "equilibrium": 1.105,
+  "high": 1.11,
+  "low": 1.1,
+  "position": "equilibrium",
+  "position_ratio": 0.5
+ },
+ "premium": {
+  "equilibrium": 1.105,
+  "high": 1.11,
+  "low": 1.1,
+  "position": "premium",
+  "position_ratio": 0.7
+ }
+}

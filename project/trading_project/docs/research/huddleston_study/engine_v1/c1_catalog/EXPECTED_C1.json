@@ -1,0 +1,1799 @@
+{
+  "_file": "EXPECTED_C1.json",
+  "_path": "project/trading_project/docs/research/huddleston_study/engine_v1/c1_catalog/EXPECTED_C1.json",
+  "_status": "tests-first: this file is committed before any code of step C1 exists",
+  "_source": "BUILD_STEP_C1_SPEC.md only; the spec quotes q_stage2_batch2_entry_zones.md, r_stage2_batch2b_corrections.md, BUILD_STEP_B1_DESIGN_V2.md (§7, §8), OWNER_DECISIONS.md §D1",
+  "_tier": "TIER2",
+  "_numbers_label": "FIXTURE",
+  "_numbers_note": "Every price, index and window in this file is a hand-made FIXTURE value for tests only. The only non-fixture numbers of the step are declared in the spec §9 (SOURCE_NUMBER) and live in the code, not here. The one exception is case T-OB-14, whose prices are the SOURCE_EXAMPLE printed by claim C-OB-21 (a block from 99.40 to 100.50 with a mean threshold of 99.95).",
+  "_comparison_note": "Price values are compared with an absolute tolerance of 1e-9; status, verdict, answer, variant ids, gap ids, filter results and claim ids are compared exactly.",
+  "_concepts": "order block, liquidity sweep, displacement only",
+  "_cases": [],
+  "cases": [
+    {
+      "id": "T-OB-01",
+      "fixture_tag": "FIXTURE",
+      "concept": "order_block",
+      "note": "إيجابية: آخر شمعة هابطة الإغلاق قبل الحركة الصاعدة؛ الحدود مدى كامل، والعتبة على الجسم، والدخول عند العتبة.",
+      "candles": [
+        {"o": 101.00, "h": 101.50, "l": 100.50, "c": 101.20, "closed": true},
+        {"o": 100.60, "h": 100.90, "l": 100.10, "c": 100.20, "closed": true},
+        {"o": 100.20, "h": 101.00, "l": 100.15, "c": 100.95, "closed": true},
+        {"o": 100.95, "h": 101.60, "l": 100.90, "c": 101.55, "closed": true}
+      ],
+      "call": {
+        "displacement_start_index": 2,
+        "direction": "bullish",
+        "boundaries": "V-OB-4",
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {"on": false, "evidence": null},
+          "V-OB-14": {"on": false, "evidence": null},
+          "V-OB-15": {"on": false, "evidence": null},
+          "V-OB-16": {"on": false}
+        }
+      },
+      "expect": {
+        "status": "BUILT",
+        "verdict": "VALID",
+        "block_index": 1,
+        "variant_ids": {
+          "boundaries": "V-OB-4",
+          "mean_threshold_basis": "V-OB-6",
+          "entry_level": "V-OB-8",
+          "invalidation": "V-OB-10",
+          "prerequisites": ["V-OB-13", "V-OB-14", "V-OB-15", "V-OB-16"]
+        },
+        "numbers": {"zone_low": 100.10, "zone_high": 100.90, "mean_threshold": 100.40, "entry": 100.40},
+        "filters": [["V-OB-13", "OFF"], ["V-OB-14", "OFF"], ["V-OB-15", "OFF"], ["V-OB-16", "OFF"]],
+        "invalidation_label": "NOT_INVALIDATED",
+        "invalidation_index": null,
+        "gap_ids": ["GAP_OB_MOVE_BOUNDS"],
+        "claim_ids_include": ["C-OB-13", "C-OB-19"]
+      }
+    },
+    {
+      "id": "T-OB-02",
+      "fixture_tag": "FIXTURE",
+      "concept": "order_block",
+      "note": "إيجابية مرآة: كتلة هابطة = آخر شمعة صاعدة الإغلاق قبل الحركة الهابطة.",
+      "candles": [
+        {"o": 100.00, "h": 100.40, "l": 99.70, "c": 99.80, "closed": true},
+        {"o": 99.80, "h": 100.35, "l": 99.75, "c": 100.25, "closed": true},
+        {"o": 100.25, "h": 100.30, "l": 99.20, "c": 99.30, "closed": true},
+        {"o": 99.30, "h": 99.40, "l": 98.60, "c": 98.70, "closed": true}
+      ],
+      "call": {
+        "displacement_start_index": 2,
+        "direction": "bearish",
+        "boundaries": "V-OB-4",
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {"on": false, "evidence": null},
+          "V-OB-14": {"on": false, "evidence": null},
+          "V-OB-15": {"on": false, "evidence": null},
+          "V-OB-16": {"on": false}
+        }
+      },
+      "expect": {
+        "status": "BUILT",
+        "verdict": "VALID",
+        "block_index": 1,
+        "numbers": {"zone_low": 99.75, "zone_high": 100.35, "mean_threshold": 100.025, "entry": 100.025},
+        "invalidation_label": "NOT_INVALIDATED",
+        "gap_ids": ["GAP_OB_MOVE_BOUNDS"],
+        "claim_ids_include": ["C-OB-13", "C-OB-19", "C-OB-06"]
+      }
+    },
+    {
+      "id": "T-OB-03a",
+      "fixture_tag": "FIXTURE",
+      "concept": "order_block",
+      "note": "CONFLICT-OB-C، الطرف الأول: الحدود = المدى الكامل بالفتائل (V-OB-4).",
+      "candles": [
+        {"o": 101.00, "h": 101.50, "l": 100.50, "c": 101.20, "closed": true},
+        {"o": 100.60, "h": 100.90, "l": 100.10, "c": 100.20, "closed": true},
+        {"o": 100.20, "h": 101.00, "l": 100.15, "c": 100.95, "closed": true},
+        {"o": 100.95, "h": 101.60, "l": 100.90, "c": 101.55, "closed": true}
+      ],
+      "call": {
+        "displacement_start_index": 2,
+        "direction": "bullish",
+        "boundaries": "V-OB-4",
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {"on": false, "evidence": null},
+          "V-OB-14": {"on": false, "evidence": null},
+          "V-OB-15": {"on": false, "evidence": null},
+          "V-OB-16": {"on": false}
+        }
+      },
+      "expect": {
+        "status": "BUILT",
+        "numbers": {"zone_low": 100.10, "zone_high": 100.90},
+        "claim_ids_include": ["C-OB-13"]
+      }
+    },
+    {
+      "id": "T-OB-03b",
+      "fixture_tag": "FIXTURE",
+      "concept": "order_block",
+      "note": "CONFLICT-OB-C، الطرف الثاني: الحدود = الجسم فقط (V-OB-5)، والمتوقع نطاق مختلف عن T-OB-03a على الشموع نفسها.",
+      "candles": [
+        {"o": 101.00, "h": 101.50, "l": 100.50, "c": 101.20, "closed": true},
+        {"o": 100.60, "h": 100.90, "l": 100.10, "c": 100.20, "closed": true},
+        {"o": 100.20, "h": 101.00, "l": 100.15, "c": 100.95, "closed": true},
+        {"o": 100.95, "h": 101.60, "l": 100.90, "c": 101.55, "closed": true}
+      ],
+      "call": {
+        "displacement_start_index": 2,
+        "direction": "bullish",
+        "boundaries": "V-OB-5",
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {"on": false, "evidence": null},
+          "V-OB-14": {"on": false, "evidence": null},
+          "V-OB-15": {"on": false, "evidence": null},
+          "V-OB-16": {"on": false}
+        }
+      },
+      "expect": {
+        "status": "BUILT",
+        "numbers": {"zone_low": 100.20, "zone_high": 100.60},
+        "claim_ids_include": ["C-OB-53"]
+      }
+    },
+    {
+      "id": "T-OB-04a",
+      "fixture_tag": "FIXTURE",
+      "concept": "order_block",
+      "note": "CONFLICT-OB-A، الطرف الأول: العتبة الوسطى = 50% من الجسم (V-OB-6).",
+      "candles": [
+        {"o": 101.00, "h": 101.50, "l": 100.50, "c": 101.20, "closed": true},
+        {"o": 100.60, "h": 100.90, "l": 100.10, "c": 100.20, "closed": true},
+        {"o": 100.20, "h": 101.00, "l": 100.15, "c": 100.95, "closed": true},
+        {"o": 100.95, "h": 101.60, "l": 100.90, "c": 101.55, "closed": true}
+      ],
+      "call": {
+        "displacement_start_index": 2,
+        "direction": "bullish",
+        "boundaries": "V-OB-4",
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {"on": false, "evidence": null},
+          "V-OB-14": {"on": false, "evidence": null},
+          "V-OB-15": {"on": false, "evidence": null},
+          "V-OB-16": {"on": false}
+        }
+      },
+      "expect": {
+        "status": "BUILT",
+        "numbers": {"mean_threshold": 100.40, "entry": 100.40},
+        "claim_ids_include": ["C-OB-19"]
+      }
+    },
+    {
+      "id": "T-OB-04b",
+      "fixture_tag": "FIXTURE",
+      "concept": "order_block",
+      "note": "CONFLICT-OB-A، الطرف الثاني: العتبة الوسطى = 50% من المدى الكامل (V-OB-7)، وقيمة مختلفة عن T-OB-04a.",
+      "candles": [
+        {"o": 101.00, "h": 101.50, "l": 100.50, "c": 101.20, "closed": true},
+        {"o": 100.60, "h": 100.90, "l": 100.10, "c": 100.20, "closed": true},
+        {"o": 100.20, "h": 101.00, "l": 100.15, "c": 100.95, "closed": true},
+        {"o": 100.95, "h": 101.60, "l": 100.90, "c": 101.55, "closed": true}
+      ],
+      "call": {
+        "displacement_start_index": 2,
+        "direction": "bullish",
+        "boundaries": "V-OB-4",
+        "mean_threshold_basis": "V-OB-7",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {"on": false, "evidence": null},
+          "V-OB-14": {"on": false, "evidence": null},
+          "V-OB-15": {"on": false, "evidence": null},
+          "V-OB-16": {"on": false}
+        }
+      },
+      "expect": {
+        "status": "BUILT",
+        "numbers": {"mean_threshold": 100.50, "entry": 100.50},
+        "claim_ids_include": ["C-OB-21"]
+      }
+    },
+    {
+      "id": "T-OB-05a",
+      "fixture_tag": "FIXTURE",
+      "concept": "order_block",
+      "note": "CONFLICT-OB-D، الطرف الأول: إغلاق 100.30 عبر العتبة الوسطى 100.40 لكنه داخل المنطقة، فـ V-OB-10 يقول غير مُبطل.",
+      "candles": [
+        {"o": 101.00, "h": 101.50, "l": 100.50, "c": 101.20, "closed": true},
+        {"o": 100.60, "h": 100.90, "l": 100.10, "c": 100.20, "closed": true},
+        {"o": 100.20, "h": 100.95, "l": 100.15, "c": 100.90, "closed": true},
+        {"o": 100.90, "h": 100.95, "l": 100.25, "c": 100.30, "closed": true}
+      ],
+      "call": {
+        "displacement_start_index": 2,
+        "direction": "bullish",
+        "boundaries": "V-OB-4",
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {"on": false, "evidence": null},
+          "V-OB-14": {"on": false, "evidence": null},
+          "V-OB-15": {"on": false, "evidence": null},
+          "V-OB-16": {"on": false}
+        }
+      },
+      "expect": {
+        "status": "BUILT",
+        "verdict": "VALID",
+        "invalidation_label": "NOT_INVALIDATED",
+        "invalidation_index": null,
+        "claim_ids_include": ["C-OB-48"]
+      }
+    },
+    {
+      "id": "T-OB-05b",
+      "fixture_tag": "FIXTURE",
+      "concept": "order_block",
+      "note": "CONFLICT-OB-D، الطرف الثاني: الشموع نفسها، فـ V-OB-11 يقول مُبطل عند الفهرس 3 — حكمان مختلفان على بيانات واحدة.",
+      "candles": [
+        {"o": 101.00, "h": 101.50, "l": 100.50, "c": 101.20, "closed": true},
+        {"o": 100.60, "h": 100.90, "l": 100.10, "c": 100.20, "closed": true},
+        {"o": 100.20, "h": 100.95, "l": 100.15, "c": 100.90, "closed": true},
+        {"o": 100.90, "h": 100.95, "l": 100.25, "c": 100.30, "closed": true}
+      ],
+      "call": {
+        "displacement_start_index": 2,
+        "direction": "bullish",
+        "boundaries": "V-OB-4",
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-11",
+        "prerequisites": {
+          "V-OB-13": {"on": false, "evidence": null},
+          "V-OB-14": {"on": false, "evidence": null},
+          "V-OB-15": {"on": false, "evidence": null},
+          "V-OB-16": {"on": false}
+        }
+      },
+      "expect": {
+        "status": "BUILT",
+        "verdict": "INVALIDATED",
+        "invalidation_label": "INVALIDATED",
+        "invalidation_index": 3,
+        "claim_ids_include": ["C-OB-39"]
+      }
+    },
+    {
+      "id": "T-OB-06",
+      "fixture_tag": "FIXTURE",
+      "concept": "order_block",
+      "note": "سلبية V-OB-10: إغلاق 100.00 أدنى من الحافة البعيدة 100.10 عند الفهرس 4.",
+      "candles": [
+        {"o": 101.00, "h": 101.50, "l": 100.50, "c": 101.20, "closed": true},
+        {"o": 100.60, "h": 100.90, "l": 100.10, "c": 100.20, "closed": true},
+        {"o": 100.20, "h": 100.95, "l": 100.15, "c": 100.90, "closed": true},
+        {"o": 100.90, "h": 100.95, "l": 100.25, "c": 100.30, "closed": true},
+        {"o": 100.30, "h": 100.35, "l": 99.90, "c": 100.00, "closed": true}
+      ],
+      "call": {
+        "displacement_start_index": 2,
+        "direction": "bullish",
+        "boundaries": "V-OB-4",
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {"on": false, "evidence": null},
+          "V-OB-14": {"on": false, "evidence": null},
+          "V-OB-15": {"on": false, "evidence": null},
+          "V-OB-16": {"on": false}
+        }
+      },
+      "expect": {
+        "status": "BUILT",
+        "verdict": "INVALIDATED",
+        "invalidation_label": "INVALIDATED",
+        "invalidation_index": 4,
+        "claim_ids_include": ["C-OB-48"]
+      }
+    },
+    {
+      "id": "T-OB-07",
+      "fixture_tag": "FIXTURE",
+      "concept": "order_block",
+      "note": "V-OB-12: الإغلاق عبر العتبة الوسطى تحذير لا إبطال، فالكتلة تبقى صالحة مع وسم WARNING.",
+      "candles": [
+        {"o": 101.00, "h": 101.50, "l": 100.50, "c": 101.20, "closed": true},
+        {"o": 100.60, "h": 100.90, "l": 100.10, "c": 100.20, "closed": true},
+        {"o": 100.20, "h": 100.95, "l": 100.15, "c": 100.90, "closed": true},
+        {"o": 100.90, "h": 100.95, "l": 100.25, "c": 100.30, "closed": true}
+      ],
+      "call": {
+        "displacement_start_index": 2,
+        "direction": "bullish",
+        "boundaries": "V-OB-4",
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-12",
+        "prerequisites": {
+          "V-OB-13": {"on": false, "evidence": null},
+          "V-OB-14": {"on": false, "evidence": null},
+          "V-OB-15": {"on": false, "evidence": null},
+          "V-OB-16": {"on": false}
+        }
+      },
+      "expect": {
+        "status": "BUILT",
+        "verdict": "VALID",
+        "invalidation_label": "WARNING",
+        "invalidation_index": 3,
+        "claim_ids_include": ["C-OB-40"]
+      }
+    },
+    {
+      "id": "T-OB-08",
+      "fixture_tag": "FIXTURE",
+      "concept": "order_block",
+      "note": "V-OB-9: الدخول عند افتتاح شمعة الكتلة 100.60 لا عند العتبة الوسطى 100.40.",
+      "candles": [
+        {"o": 101.00, "h": 101.50, "l": 100.50, "c": 101.20, "closed": true},
+        {"o": 100.60, "h": 100.90, "l": 100.10, "c": 100.20, "closed": true},
+        {"o": 100.20, "h": 101.00, "l": 100.15, "c": 100.95, "closed": true},
+        {"o": 100.95, "h": 101.60, "l": 100.90, "c": 101.55, "closed": true}
+      ],
+      "call": {
+        "displacement_start_index": 2,
+        "direction": "bullish",
+        "boundaries": "V-OB-4",
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-9",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {"on": false, "evidence": null},
+          "V-OB-14": {"on": false, "evidence": null},
+          "V-OB-15": {"on": false, "evidence": null},
+          "V-OB-16": {"on": false}
+        }
+      },
+      "expect": {
+        "status": "BUILT",
+        "verdict": "VALID",
+        "numbers": {"entry": 100.60, "mean_threshold": 100.40},
+        "claim_ids_include": ["C-OB-22"]
+      }
+    },
+    {
+      "id": "T-OB-09",
+      "fixture_tag": "FIXTURE",
+      "concept": "order_block",
+      "note": "سلبية الفلتر V-OB-13: المفتاح مشتعل والدليل غير متحقق، فالنتيجة FILTER_FAILED.",
+      "candles": [
+        {"o": 101.00, "h": 101.50, "l": 100.50, "c": 101.20, "closed": true},
+        {"o": 100.60, "h": 100.90, "l": 100.10, "c": 100.20, "closed": true},
+        {"o": 100.20, "h": 101.00, "l": 100.15, "c": 100.95, "closed": true},
+        {"o": 100.95, "h": 101.60, "l": 100.90, "c": 101.55, "closed": true}
+      ],
+      "call": {
+        "displacement_start_index": 2,
+        "direction": "bullish",
+        "boundaries": "V-OB-4",
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {"on": true, "evidence": false},
+          "V-OB-14": {"on": false, "evidence": null},
+          "V-OB-15": {"on": false, "evidence": null},
+          "V-OB-16": {"on": false}
+        }
+      },
+      "expect": {
+        "status": "BUILT",
+        "verdict": "FILTER_FAILED",
+        "filters": [["V-OB-13", "FAIL"], ["V-OB-14", "OFF"], ["V-OB-15", "OFF"], ["V-OB-16", "OFF"]],
+        "claim_ids_include": ["C-OB-56"]
+      }
+    },
+    {
+      "id": "T-OB-10",
+      "fixture_tag": "FIXTURE",
+      "concept": "order_block",
+      "note": "إيجابية الفلتر V-OB-15: المفتاح مشتعل والدليل متحقق، فالكتلة تبقى صالحة.",
+      "candles": [
+        {"o": 101.00, "h": 101.50, "l": 100.50, "c": 101.20, "closed": true},
+        {"o": 100.60, "h": 100.90, "l": 100.10, "c": 100.20, "closed": true},
+        {"o": 100.20, "h": 101.00, "l": 100.15, "c": 100.95, "closed": true},
+        {"o": 100.95, "h": 101.60, "l": 100.90, "c": 101.55, "closed": true}
+      ],
+      "call": {
+        "displacement_start_index": 2,
+        "direction": "bullish",
+        "boundaries": "V-OB-4",
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {"on": false, "evidence": null},
+          "V-OB-14": {"on": false, "evidence": null},
+          "V-OB-15": {"on": true, "evidence": true},
+          "V-OB-16": {"on": false}
+        }
+      },
+      "expect": {
+        "status": "BUILT",
+        "verdict": "VALID",
+        "filters": [["V-OB-13", "OFF"], ["V-OB-14", "OFF"], ["V-OB-15", "PASS"], ["V-OB-16", "OFF"]],
+        "claim_ids_include": ["C-OB-46"]
+      }
+    },
+    {
+      "id": "T-OB-11",
+      "fixture_tag": "FIXTURE",
+      "concept": "order_block",
+      "note": "سلبية V-OB-16 المحسوبة: الشمعة 2 لمست المنطقة قبل الشمعة الأخيرة، فالكتلة مستهلكة.",
+      "candles": [
+        {"o": 101.00, "h": 101.50, "l": 100.50, "c": 101.20, "closed": true},
+        {"o": 100.60, "h": 100.90, "l": 100.10, "c": 100.20, "closed": true},
+        {"o": 100.35, "h": 100.80, "l": 100.30, "c": 100.70, "closed": true},
+        {"o": 100.70, "h": 101.40, "l": 100.65, "c": 101.30, "closed": true}
+      ],
+      "call": {
+        "displacement_start_index": 2,
+        "direction": "bullish",
+        "boundaries": "V-OB-4",
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {"on": false, "evidence": null},
+          "V-OB-14": {"on": false, "evidence": null},
+          "V-OB-15": {"on": false, "evidence": null},
+          "V-OB-16": {"on": true}
+        }
+      },
+      "expect": {
+        "status": "BUILT",
+        "verdict": "FILTER_FAILED",
+        "filters": [["V-OB-13", "OFF"], ["V-OB-14", "OFF"], ["V-OB-15", "OFF"], ["V-OB-16", "FAIL"]],
+        "claim_ids_include": ["C-OB-36"]
+      }
+    },
+    {
+      "id": "T-OB-12",
+      "fixture_tag": "FIXTURE",
+      "concept": "order_block",
+      "note": "إيجابية V-OB-16 المحسوبة: اللمسة الأولى تقع على الشمعة الأخيرة نفسها، فلا لمسة سابقة.",
+      "candles": [
+        {"o": 100.50, "h": 100.60, "l": 100.00, "c": 100.10, "closed": true},
+        {"o": 100.60, "h": 100.90, "l": 100.10, "c": 100.20, "closed": true},
+        {"o": 101.00, "h": 101.60, "l": 101.00, "c": 101.50, "closed": true},
+        {"o": 101.50, "h": 101.55, "l": 100.50, "c": 100.95, "closed": true}
+      ],
+      "call": {
+        "displacement_start_index": 2,
+        "direction": "bullish",
+        "boundaries": "V-OB-4",
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {"on": false, "evidence": null},
+          "V-OB-14": {"on": false, "evidence": null},
+          "V-OB-15": {"on": false, "evidence": null},
+          "V-OB-16": {"on": true}
+        }
+      },
+      "expect": {
+        "status": "BUILT",
+        "verdict": "VALID",
+        "block_index": 1,
+        "filters": [["V-OB-13", "OFF"], ["V-OB-14", "OFF"], ["V-OB-15", "OFF"], ["V-OB-16", "PASS"]]
+      }
+    },
+    {
+      "id": "T-OB-13",
+      "fixture_tag": "FIXTURE",
+      "concept": "order_block",
+      "note": "شمعة أخيرة غير مغلقة: الحالة PENDING ولا يُعلن حكم.",
+      "candles": [
+        {"o": 101.00, "h": 101.50, "l": 100.50, "c": 101.20, "closed": true},
+        {"o": 100.60, "h": 100.90, "l": 100.10, "c": 100.20, "closed": true},
+        {"o": 100.20, "h": 101.00, "l": 100.15, "c": 100.95, "closed": true},
+        {"o": 100.95, "h": 101.60, "l": 100.90, "c": 101.55, "closed": false}
+      ],
+      "call": {
+        "displacement_start_index": 2,
+        "direction": "bullish",
+        "boundaries": "V-OB-4",
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {"on": false, "evidence": null},
+          "V-OB-14": {"on": false, "evidence": null},
+          "V-OB-15": {"on": false, "evidence": null},
+          "V-OB-16": {"on": false}
+        }
+      },
+      "expect": {
+        "status": "PENDING",
+        "verdict": "NONE",
+        "block_index": null,
+        "gap_ids": []
+      }
+    },
+    {
+      "id": "T-OB-14a",
+      "fixture_tag": "SOURCE_EXAMPLE",
+      "source_example_claim": "C-OB-21",
+      "concept": "order_block",
+      "note": "المثال الحرفي للمصدر: كتلة من 99.40 إلى 100.50، والعتبة الوسطى 99.95. متحقق بحدود المدى الكامل وعتبة المدى الكامل (V-OB-4 + V-OB-7).",
+      "candles": [
+        {"o": 100.60, "h": 100.80, "l": 100.30, "c": 100.50, "closed": true},
+        {"o": 100.40, "h": 100.50, "l": 99.40, "c": 99.60, "closed": true},
+        {"o": 99.60, "h": 100.70, "l": 99.55, "c": 100.60, "closed": true},
+        {"o": 100.60, "h": 101.00, "l": 100.55, "c": 100.95, "closed": true}
+      ],
+      "call": {
+        "displacement_start_index": 2,
+        "direction": "bullish",
+        "boundaries": "V-OB-4",
+        "mean_threshold_basis": "V-OB-7",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {"on": false, "evidence": null},
+          "V-OB-14": {"on": false, "evidence": null},
+          "V-OB-15": {"on": false, "evidence": null},
+          "V-OB-16": {"on": false}
+        }
+      },
+      "expect": {
+        "status": "BUILT",
+        "verdict": "VALID",
+        "block_index": 1,
+        "numbers": {"zone_low": 99.40, "zone_high": 100.50, "mean_threshold": 99.95, "entry": 99.95},
+        "claim_ids_include": ["C-OB-21"]
+      }
+    },
+    {
+      "id": "T-OB-14b",
+      "fixture_tag": "SOURCE_EXAMPLE",
+      "source_example_claim": "C-OB-21",
+      "concept": "order_block",
+      "note": "الشموع نفسها بحدود الجسم وعتبة الجسم: الناتج 100.00 لا 99.95، فيُطبع الحكمان جنبًا إلى جنب ولا فائز.",
+      "candles": [
+        {"o": 100.60, "h": 100.80, "l": 100.30, "c": 100.50, "closed": true},
+        {"o": 100.40, "h": 100.50, "l": 99.40, "c": 99.60, "closed": true},
+        {"o": 99.60, "h": 100.70, "l": 99.55, "c": 100.60, "closed": true},
+        {"o": 100.60, "h": 101.00, "l": 100.55, "c": 100.95, "closed": true}
+      ],
+      "call": {
+        "displacement_start_index": 2,
+        "direction": "bullish",
+        "boundaries": "V-OB-5",
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {"on": false, "evidence": null},
+          "V-OB-14": {"on": false, "evidence": null},
+          "V-OB-15": {"on": false, "evidence": null},
+          "V-OB-16": {"on": false}
+        }
+      },
+      "expect": {
+        "status": "BUILT",
+        "numbers": {"zone_low": 99.60, "zone_high": 100.40, "mean_threshold": 100.00, "entry": 100.00},
+        "claim_ids_include": ["C-OB-19"]
+      }
+    },
+    {
+      "id": "T-OB-15",
+      "fixture_tag": "FIXTURE",
+      "concept": "order_block",
+      "note": "سلبية: لا شمعة معارضة قبل الحركة، فالحساب تمّ والجواب نفي (NO_BLOCK).",
+      "candles": [
+        {"o": 100.00, "h": 100.50, "l": 99.90, "c": 100.40, "closed": true},
+        {"o": 100.40, "h": 101.00, "l": 100.30, "c": 100.90, "closed": true},
+        {"o": 100.90, "h": 101.50, "l": 100.80, "c": 101.40, "closed": true}
+      ],
+      "call": {
+        "displacement_start_index": 2,
+        "direction": "bullish",
+        "boundaries": "V-OB-4",
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {"on": false, "evidence": null},
+          "V-OB-14": {"on": false, "evidence": null},
+          "V-OB-15": {"on": false, "evidence": null},
+          "V-OB-16": {"on": false}
+        }
+      },
+      "expect": {
+        "status": "BUILT",
+        "verdict": "NO_BLOCK",
+        "block_index": null,
+        "gap_ids": ["GAP_OB_MOVE_BOUNDS"]
+      }
+    },
+    {
+      "id": "T-OB-16",
+      "fixture_tag": "FIXTURE",
+      "concept": "order_block",
+      "note": "حدّية: الشمعة السابقة للحركة دوجي (إغلاق = افتتاح)، والنص يشترط شمعة معارضة، فالحالة UNDEFINED مع فجوة.",
+      "candles": [
+        {"o": 100.00, "h": 100.50, "l": 99.50, "c": 100.20, "closed": true},
+        {"o": 100.20, "h": 100.60, "l": 99.80, "c": 100.20, "closed": true},
+        {"o": 100.20, "h": 101.00, "l": 100.10, "c": 100.90, "closed": true}
+      ],
+      "call": {
+        "displacement_start_index": 2,
+        "direction": "bullish",
+        "boundaries": "V-OB-4",
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {"on": false, "evidence": null},
+          "V-OB-14": {"on": false, "evidence": null},
+          "V-OB-15": {"on": false, "evidence": null},
+          "V-OB-16": {"on": false}
+        }
+      },
+      "expect": {
+        "status": "UNDEFINED",
+        "verdict": "NONE",
+        "block_index": null,
+        "gap_ids": ["GAP_OB_MOVE_BOUNDS", "GAP_DOJI_BLOCK"]
+      }
+    },
+    {
+      "id": "T-OB-17",
+      "fixture_tag": "FIXTURE",
+      "concept": "order_block",
+      "note": "V-OB-3: شمعتان هابطتا الإغلاق متجاورتان، والمحرك يأخذ الأخيرة ويطبع فجوة حدود التجمع.",
+      "candles": [
+        {"o": 101.00, "h": 101.20, "l": 100.40, "c": 100.50, "closed": true},
+        {"o": 100.50, "h": 100.70, "l": 99.90, "c": 100.00, "closed": true},
+        {"o": 100.00, "h": 100.30, "l": 99.40, "c": 99.60, "closed": true},
+        {"o": 99.60, "h": 100.80, "l": 99.55, "c": 100.70, "closed": true}
+      ],
+      "call": {
+        "displacement_start_index": 3,
+        "direction": "bullish",
+        "boundaries": "V-OB-4",
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {"on": false, "evidence": null},
+          "V-OB-14": {"on": false, "evidence": null},
+          "V-OB-15": {"on": false, "evidence": null},
+          "V-OB-16": {"on": false}
+        }
+      },
+      "expect": {
+        "status": "BUILT",
+        "verdict": "VALID",
+        "block_index": 2,
+        "numbers": {"zone_low": 99.40, "zone_high": 100.30, "mean_threshold": 99.80},
+        "gap_ids": ["GAP_OB_MOVE_BOUNDS", "GAP_CLUSTER_BOUND"]
+      }
+    },
+    {
+      "id": "R-OB-01",
+      "fixture_tag": "FIXTURE",
+      "concept": "order_block",
+      "note": "شمعة مشوَّهة: القمة أدنى من القاع يجب أن ترفع استثناءً لا أن تُقبل.",
+      "candles": [
+        {"o": 100.00, "h": 100.50, "l": 99.90, "c": 100.20, "closed": true},
+        {"o": 100.20, "h": 99.80, "l": 100.10, "c": 100.00, "closed": true},
+        {"o": 100.00, "h": 101.00, "l": 99.95, "c": 100.90, "closed": true}
+      ],
+      "call": {
+        "displacement_start_index": 2,
+        "direction": "bullish",
+        "boundaries": "V-OB-4",
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {"on": false, "evidence": null},
+          "V-OB-14": {"on": false, "evidence": null},
+          "V-OB-15": {"on": false, "evidence": null},
+          "V-OB-16": {"on": false}
+        }
+      },
+      "raises": "high is below its low"
+    },
+    {
+      "id": "R-OB-02",
+      "fixture_tag": "FIXTURE",
+      "concept": "order_block",
+      "note": "علم الإغلاق ناقص في الشمعة يجب أن يرفع استثناءً، ولا يُفترض True.",
+      "candles": [
+        {"o": 100.00, "h": 100.50, "l": 99.90, "c": 100.20},
+        {"o": 100.50, "h": 100.60, "l": 100.10, "c": 100.20, "closed": true},
+        {"o": 100.00, "h": 101.00, "l": 99.95, "c": 100.90, "closed": true}
+      ],
+      "call": {
+        "displacement_start_index": 2,
+        "direction": "bullish",
+        "boundaries": "V-OB-4",
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {"on": false, "evidence": null},
+          "V-OB-14": {"on": false, "evidence": null},
+          "V-OB-15": {"on": false, "evidence": null},
+          "V-OB-16": {"on": false}
+        }
+      },
+      "raises": "explicit 'closed' flag"
+    },
+    {
+      "id": "R-OB-03",
+      "fixture_tag": "FIXTURE",
+      "concept": "order_block",
+      "note": "الافتتاح خارج نطاق القمة/القاع.",
+      "candles": [
+        {"o": 100.00, "h": 100.50, "l": 99.90, "c": 100.20, "closed": true},
+        {"o": 101.20, "h": 100.60, "l": 100.10, "c": 100.30, "closed": true},
+        {"o": 100.00, "h": 101.00, "l": 99.95, "c": 100.90, "closed": true}
+      ],
+      "call": {
+        "displacement_start_index": 2,
+        "direction": "bullish",
+        "boundaries": "V-OB-4",
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {"on": false, "evidence": null},
+          "V-OB-14": {"on": false, "evidence": null},
+          "V-OB-15": {"on": false, "evidence": null},
+          "V-OB-16": {"on": false}
+        }
+      },
+      "raises": "open is outside its high/low range"
+    },
+    {
+      "id": "R-OB-04",
+      "fixture_tag": "FIXTURE",
+      "concept": "order_block",
+      "note": "الإغلاق خارج نطاق القمة/القاع.",
+      "candles": [
+        {"o": 100.00, "h": 100.50, "l": 99.90, "c": 100.20, "closed": true},
+        {"o": 100.20, "h": 100.60, "l": 100.10, "c": 101.00, "closed": true},
+        {"o": 100.00, "h": 101.00, "l": 99.95, "c": 100.90, "closed": true}
+      ],
+      "call": {
+        "displacement_start_index": 2,
+        "direction": "bullish",
+        "boundaries": "V-OB-4",
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {"on": false, "evidence": null},
+          "V-OB-14": {"on": false, "evidence": null},
+          "V-OB-15": {"on": false, "evidence": null},
+          "V-OB-16": {"on": false}
+        }
+      },
+      "raises": "close is outside its high/low range"
+    },
+    {
+      "id": "R-OB-05",
+      "fixture_tag": "FIXTURE",
+      "concept": "order_block",
+      "note": "فهرس بداية الحركة صفر: لا شمعة قبلها.",
+      "candles": [
+        {"o": 100.00, "h": 100.50, "l": 99.90, "c": 100.20, "closed": true},
+        {"o": 100.50, "h": 100.60, "l": 100.10, "c": 100.20, "closed": true},
+        {"o": 100.00, "h": 101.00, "l": 99.95, "c": 100.90, "closed": true}
+      ],
+      "call": {
+        "displacement_start_index": 0,
+        "direction": "bullish",
+        "boundaries": "V-OB-4",
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {"on": false, "evidence": null},
+          "V-OB-14": {"on": false, "evidence": null},
+          "V-OB-15": {"on": false, "evidence": null},
+          "V-OB-16": {"on": false}
+        }
+      },
+      "raises": "displacement_start_index must be at least 1"
+    },
+    {
+      "id": "R-OB-06",
+      "fixture_tag": "FIXTURE",
+      "concept": "order_block",
+      "note": "اتجاه غير معروف.",
+      "candles": [
+        {"o": 100.00, "h": 100.50, "l": 99.90, "c": 100.20, "closed": true},
+        {"o": 100.50, "h": 100.60, "l": 100.10, "c": 100.20, "closed": true},
+        {"o": 100.00, "h": 101.00, "l": 99.95, "c": 100.90, "closed": true}
+      ],
+      "call": {
+        "displacement_start_index": 2,
+        "direction": "sideways",
+        "boundaries": "V-OB-4",
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {"on": false, "evidence": null},
+          "V-OB-14": {"on": false, "evidence": null},
+          "V-OB-15": {"on": false, "evidence": null},
+          "V-OB-16": {"on": false}
+        }
+      },
+      "raises": "direction must be 'bullish' or 'bearish'"
+    },
+    {
+      "id": "R-OB-07",
+      "fixture_tag": "FIXTURE",
+      "concept": "order_block",
+      "note": "معرّف نسخة حدود غير موجود في الكتالوج.",
+      "candles": [
+        {"o": 100.00, "h": 100.50, "l": 99.90, "c": 100.20, "closed": true},
+        {"o": 100.50, "h": 100.60, "l": 100.10, "c": 100.20, "closed": true},
+        {"o": 100.00, "h": 101.00, "l": 99.95, "c": 100.90, "closed": true}
+      ],
+      "call": {
+        "displacement_start_index": 2,
+        "direction": "bullish",
+        "boundaries": "V-OB-99",
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {"on": false, "evidence": null},
+          "V-OB-14": {"on": false, "evidence": null},
+          "V-OB-15": {"on": false, "evidence": null},
+          "V-OB-16": {"on": false}
+        }
+      },
+      "raises": "unknown boundaries variant"
+    },
+    {
+      "id": "R-OB-08",
+      "fixture_tag": "FIXTURE",
+      "concept": "order_block",
+      "note": "مفتاح شرط سابق ناقص: يجب أن يرفع استثناءً لا أن يُفترض مطفأً.",
+      "candles": [
+        {"o": 100.00, "h": 100.50, "l": 99.90, "c": 100.20, "closed": true},
+        {"o": 100.50, "h": 100.60, "l": 100.10, "c": 100.20, "closed": true},
+        {"o": 100.00, "h": 101.00, "l": 99.95, "c": 100.90, "closed": true}
+      ],
+      "call": {
+        "displacement_start_index": 2,
+        "direction": "bullish",
+        "boundaries": "V-OB-4",
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {"on": false, "evidence": null},
+          "V-OB-15": {"on": false, "evidence": null},
+          "V-OB-16": {"on": false}
+        }
+      },
+      "raises": "prerequisites must provide an entry for V-OB-14"
+    },
+    {
+      "id": "R-OB-09",
+      "fixture_tag": "FIXTURE",
+      "concept": "order_block",
+      "note": "علم الإغلاق ليس بوليانيًا.",
+      "candles": [
+        {"o": 100.00, "h": 100.50, "l": 99.90, "c": 100.20, "closed": true},
+        {"o": 100.50, "h": 100.60, "l": 100.10, "c": 100.20, "closed": true},
+        {"o": 100.00, "h": 101.00, "l": 99.95, "c": 100.90, "closed": 1}
+      ],
+      "call": {
+        "displacement_start_index": 2,
+        "direction": "bullish",
+        "boundaries": "V-OB-4",
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {"on": false, "evidence": null},
+          "V-OB-14": {"on": false, "evidence": null},
+          "V-OB-15": {"on": false, "evidence": null},
+          "V-OB-16": {"on": false}
+        }
+      },
+      "raises": "closed' flag must be a bool"
+    },
+    {
+      "id": "R-OB-10",
+      "fixture_tag": "FIXTURE",
+      "concept": "order_block",
+      "note": "قائمة شموع فارغة.",
+      "candles": [],
+      "call": {
+        "displacement_start_index": 2,
+        "direction": "bullish",
+        "boundaries": "V-OB-4",
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {"on": false, "evidence": null},
+          "V-OB-14": {"on": false, "evidence": null},
+          "V-OB-15": {"on": false, "evidence": null},
+          "V-OB-16": {"on": false}
+        }
+      },
+      "raises": "at least one candle is required"
+    },
+    {
+      "id": "R-OB-11",
+      "fixture_tag": "FIXTURE",
+      "concept": "order_block",
+      "note": "قيمة سعرية غير رقمية.",
+      "candles": [
+        {"o": 100.00, "h": 100.50, "l": 99.90, "c": 100.20, "closed": true},
+        {"o": "abc", "h": 100.60, "l": 100.10, "c": 100.00, "closed": true},
+        {"o": 100.00, "h": 101.00, "l": 99.95, "c": 100.90, "closed": true}
+      ],
+      "call": {
+        "displacement_start_index": 2,
+        "direction": "bullish",
+        "boundaries": "V-OB-4",
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {"on": false, "evidence": null},
+          "V-OB-14": {"on": false, "evidence": null},
+          "V-OB-15": {"on": false, "evidence": null},
+          "V-OB-16": {"on": false}
+        }
+      },
+      "raises": "is not numeric"
+    },
+    {
+      "id": "R-OB-12",
+      "fixture_tag": "FIXTURE",
+      "concept": "order_block",
+      "note": "مفتاح شرط سابق مشتعل بلا دليل: يجب أن يرفع استثناءً لا أن يُفترض الدليل.",
+      "candles": [
+        {"o": 100.00, "h": 100.50, "l": 99.90, "c": 100.20, "closed": true},
+        {"o": 100.50, "h": 100.60, "l": 100.10, "c": 100.20, "closed": true},
+        {"o": 100.00, "h": 101.00, "l": 99.95, "c": 100.90, "closed": true}
+      ],
+      "call": {
+        "displacement_start_index": 2,
+        "direction": "bullish",
+        "boundaries": "V-OB-4",
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {"on": true, "evidence": null},
+          "V-OB-14": {"on": false, "evidence": null},
+          "V-OB-15": {"on": false, "evidence": null},
+          "V-OB-16": {"on": false}
+        }
+      },
+      "raises": "evidence is required when the filter is on"
+    },
+
+    {
+      "id": "R-OB-13",
+      "fixture_tag": "FIXTURE",
+      "concept": "order_block",
+      "note": "لا قيمة افتراضية لأي نسخة: حذف معرّف الحدود يجب أن يرفع استثناءً لا أن يُفترض.",
+      "candles": [
+        {"o": 100.00, "h": 100.50, "l": 99.90, "c": 100.20, "closed": true},
+        {"o": 100.50, "h": 100.60, "l": 100.10, "c": 100.20, "closed": true},
+        {"o": 100.00, "h": 101.00, "l": 99.95, "c": 100.90, "closed": true}
+      ],
+      "call": {
+        "displacement_start_index": 2,
+        "direction": "bullish",
+        "boundaries": null,
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {"on": false, "evidence": null},
+          "V-OB-14": {"on": false, "evidence": null},
+          "V-OB-15": {"on": false, "evidence": null},
+          "V-OB-16": {"on": false}
+        }
+      },
+      "raises": "boundaries must be provided explicitly"
+    },
+    {
+      "id": "T-E-1",
+      "fixture_tag": "FIXTURE",
+      "concept": "liquidity_sweep",
+      "note": "إيجابية V-E-00 على مستوى سفلي: فتيل 99.80 أدنى من 100.00، والإغلاق 100.20 أعلاه.",
+      "candles": [
+        {"o": 100.30, "h": 100.40, "l": 99.80, "c": 100.20, "closed": true}
+      ],
+      "call": {"t": 0, "side": "low", "level": 100.00, "variant": "V-E-00"},
+      "expect": {
+        "status": "BUILT",
+        "answer": "YES",
+        "variant_id": "V-E-00",
+        "numbers": {"wick": 99.80, "close": 100.20, "level": 100.00},
+        "gap_ids": ["GAP_SWEEP_DISTANCE"],
+        "claim_ids_include": ["E1", "E3", "E4", "E5"]
+      }
+    },
+    {
+      "id": "T-E-2",
+      "fixture_tag": "FIXTURE",
+      "concept": "liquidity_sweep",
+      "note": "سلبية: الفتيل تجاوز المستوى لكن الجسم أغلق أدناه، فهذا سلوك كسر لا جرف.",
+      "candles": [
+        {"o": 100.30, "h": 100.40, "l": 99.80, "c": 99.90, "closed": true}
+      ],
+      "call": {"t": 0, "side": "low", "level": 100.00, "variant": "V-E-00"},
+      "expect": {
+        "status": "BUILT",
+        "answer": "NO",
+        "variant_id": "V-E-00",
+        "gap_ids": ["GAP_SWEEP_DISTANCE"],
+        "claim_ids_include": ["E1", "E4"]
+      }
+    },
+    {
+      "id": "T-E-3",
+      "fixture_tag": "FIXTURE",
+      "concept": "liquidity_sweep",
+      "note": "حدّية: الإغلاق يساوي المستوى بالضبط، ولا نص يحسم فوقه أو داخله.",
+      "candles": [
+        {"o": 100.30, "h": 100.40, "l": 99.80, "c": 100.00, "closed": true}
+      ],
+      "call": {"t": 0, "side": "low", "level": 100.00, "variant": "V-E-00"},
+      "expect": {
+        "status": "UNDEFINED",
+        "answer": "UNDECIDED",
+        "gap_ids": ["GAP_SWEEP_DISTANCE", "GAP_SWEEP_EQUAL_CLOSE"]
+      }
+    },
+    {
+      "id": "T-E-4a",
+      "fixture_tag": "FIXTURE",
+      "concept": "liquidity_sweep",
+      "note": "V-E-00 على مستوى علوي: الجسم أغلق فوق المستوى، فلا عودة داخل المدى ← لا جرف.",
+      "candles": [
+        {"o": 99.60, "h": 100.40, "l": 99.50, "c": 100.30, "closed": true},
+        {"o": 100.30, "h": 100.35, "l": 99.70, "c": 99.80, "closed": true}
+      ],
+      "call": {"t": 0, "side": "high", "level": 100.00, "variant": "V-E-00"},
+      "expect": {
+        "status": "BUILT",
+        "answer": "NO",
+        "gap_ids": ["GAP_SWEEP_DISTANCE"]
+      }
+    },
+    {
+      "id": "T-E-4b",
+      "fixture_tag": "FIXTURE",
+      "concept": "liquidity_sweep",
+      "note": "V-E-01 على الشموع نفسها: إغلاق جسمي هامشي فوق المستوى ثم انعكاس الشمعة التالية ← جرف.",
+      "candles": [
+        {"o": 99.60, "h": 100.40, "l": 99.50, "c": 100.30, "closed": true},
+        {"o": 100.30, "h": 100.35, "l": 99.70, "c": 99.80, "closed": true}
+      ],
+      "call": {"t": 1, "side": "high", "level": 100.00, "variant": "V-E-01"},
+      "expect": {
+        "status": "BUILT",
+        "answer": "YES",
+        "variant_id": "V-E-01",
+        "numbers": {"wick": 100.40, "close": 100.30, "level": 100.00},
+        "gap_ids": ["GAP_SWEEP_DISTANCE"],
+        "claim_ids_include": ["E1"]
+      }
+    },
+    {
+      "id": "T-E-5",
+      "fixture_tag": "FIXTURE",
+      "concept": "liquidity_sweep",
+      "note": "سلبية V-E-01: الشمعة التالية لم تنعكس إلى الجهة الأخرى، فلا جرف بالنسخة الثانية.",
+      "candles": [
+        {"o": 99.60, "h": 100.40, "l": 99.50, "c": 100.30, "closed": true},
+        {"o": 100.30, "h": 100.35, "l": 100.10, "c": 100.20, "closed": true}
+      ],
+      "call": {"t": 1, "side": "high", "level": 100.00, "variant": "V-E-01"},
+      "expect": {
+        "status": "BUILT",
+        "answer": "NO",
+        "gap_ids": ["GAP_SWEEP_DISTANCE"]
+      }
+    },
+    {
+      "id": "T-E-6",
+      "fixture_tag": "FIXTURE",
+      "concept": "liquidity_sweep",
+      "note": "شمعة غير مغلقة: الحكم بعد الإغلاق فقط، فالحالة PENDING.",
+      "candles": [
+        {"o": 100.30, "h": 100.40, "l": 99.80, "c": 100.20, "closed": true},
+        {"o": 100.20, "h": 100.30, "l": 99.70, "c": 100.10, "closed": false}
+      ],
+      "call": {"t": 1, "side": "low", "level": 100.00, "variant": "V-E-00"},
+      "expect": {
+        "status": "PENDING",
+        "answer": null,
+        "gap_ids": []
+      }
+    },
+    {
+      "id": "T-E-7",
+      "fixture_tag": "FIXTURE",
+      "concept": "liquidity_sweep",
+      "note": "قرار المالك D1: المستوى = قاع تأرجح بتعريف V-A-00 (ثلاث شموع)، والمستوى المطبوع 100.10 من الفهرس 2.",
+      "candles": [
+        {"o": 101.00, "h": 101.20, "l": 100.60, "c": 100.80, "closed": true},
+        {"o": 100.80, "h": 101.00, "l": 100.10, "c": 100.90, "closed": true},
+        {"o": 100.90, "h": 101.10, "l": 100.20, "c": 101.00, "closed": true},
+        {"o": 101.00, "h": 101.05, "l": 99.90, "c": 100.60, "closed": true}
+      ],
+      "call": {"mode": "swing_level", "t": 3, "side": "low", "variant": "V-E-00"},
+      "expect": {
+        "status": "BUILT",
+        "answer": "YES",
+        "level_basis": "OWNER_DECISION_D1_SWING_V-A-00",
+        "swing_index": 2,
+        "numbers": {"level": 100.10, "wick": 99.90, "close": 100.60},
+        "gap_ids": ["GAP_SWEEP_DISTANCE"],
+        "claim_ids_include": ["OWNER-D1"]
+      }
+    },
+    {
+      "id": "T-E-8",
+      "fixture_tag": "FIXTURE",
+      "concept": "liquidity_sweep",
+      "note": "المتغير الموقوف V-E-EQH: لا يُحسب، ويُطبع UNDEFINED مع فجوة أساس المساواة.",
+      "candles": [
+        {"o": 100.30, "h": 100.40, "l": 99.80, "c": 100.20, "closed": true}
+      ],
+      "call": {"t": 0, "side": "low", "level": 100.00, "variant": "V-E-EQH"},
+      "expect": {
+        "status": "UNDEFINED",
+        "answer": null,
+        "variant_id": "V-E-EQH",
+        "gap_ids": ["GAP_SWEEP_EQH_BASIS"],
+        "claim_ids_include": ["OWNER-D1"]
+      }
+    },
+    {
+      "id": "R-E-01",
+      "fixture_tag": "FIXTURE",
+      "concept": "liquidity_sweep",
+      "note": "المستوى نص لا رقم.",
+      "candles": [{"o": 100.30, "h": 100.40, "l": 99.80, "c": 100.20, "closed": true}],
+      "call": {"t": 0, "side": "low", "level": "100.00", "variant": "V-E-00"},
+      "raises": "level must be a number"
+    },
+    {
+      "id": "R-E-02",
+      "fixture_tag": "FIXTURE",
+      "concept": "liquidity_sweep",
+      "note": "جهة غير معروفة.",
+      "candles": [{"o": 100.30, "h": 100.40, "l": 99.80, "c": 100.20, "closed": true}],
+      "call": {"t": 0, "side": "mid", "level": 100.00, "variant": "V-E-00"},
+      "raises": "side must be 'high' or 'low'"
+    },
+    {
+      "id": "R-E-03",
+      "fixture_tag": "FIXTURE",
+      "concept": "liquidity_sweep",
+      "note": "فهرس خارج القائمة.",
+      "candles": [{"o": 100.30, "h": 100.40, "l": 99.80, "c": 100.20, "closed": true}],
+      "call": {"t": 5, "side": "low", "level": 100.00, "variant": "V-E-00"},
+      "raises": "index t is outside the candle list"
+    },
+    {
+      "id": "R-E-04",
+      "fixture_tag": "FIXTURE",
+      "concept": "liquidity_sweep",
+      "note": "V-E-01 يحتاج شمعة سابقة للجرف.",
+      "candles": [{"o": 99.60, "h": 100.40, "l": 99.50, "c": 100.30, "closed": true}],
+      "call": {"t": 0, "side": "high", "level": 100.00, "variant": "V-E-01"},
+      "raises": "V-E-01 needs one earlier candle"
+    },
+    {
+      "id": "R-E-05",
+      "fixture_tag": "FIXTURE",
+      "concept": "liquidity_sweep",
+      "note": "معرّف نسخة غير موجود.",
+      "candles": [{"o": 100.30, "h": 100.40, "l": 99.80, "c": 100.20, "closed": true}],
+      "call": {"t": 0, "side": "low", "level": 100.00, "variant": "V-E-99"},
+      "raises": "unknown sweep variant"
+    },
+    {
+      "id": "R-E-06",
+      "fixture_tag": "FIXTURE",
+      "concept": "liquidity_sweep",
+      "note": "لا تأرجح مكتمل قبل الفهرس المطلوب، فلا مستوى محسوبًا.",
+      "candles": [
+        {"o": 101.00, "h": 101.20, "l": 100.00, "c": 100.80, "closed": true},
+        {"o": 100.80, "h": 101.30, "l": 100.20, "c": 101.10, "closed": true},
+        {"o": 101.10, "h": 101.40, "l": 100.40, "c": 101.20, "closed": true},
+        {"o": 101.20, "h": 101.50, "l": 100.60, "c": 101.30, "closed": true}
+      ],
+      "call": {"mode": "swing_level", "t": 3, "side": "low", "variant": "V-E-00"},
+      "raises": "no closed swing"
+    },
+
+    {
+      "id": "T-D-1a",
+      "fixture_tag": "FIXTURE",
+      "concept": "displacement",
+      "note": "إيجابية V-D-01: نسبة الجسم إلى المدى 0.875 أعلى من الحد المطبوع 0.60.",
+      "candles": [
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 100.00, "h": 103.75, "l": 99.75, "c": 103.50, "closed": true}
+      ],
+      "call": {"t": 10, "variant": "V-D-01", "previous_window": null},
+      "expect": {
+        "status": "BUILT",
+        "answer": "YES",
+        "variant_id": "V-D-01",
+        "numbers": {"body": 3.5, "range": 4.0, "body_range_ratio": 0.875},
+        "gap_ids": ["GAP_D_CLUSTER", "GAP_D_PRIOR_SWEEP"],
+        "claim_ids_include": ["F1"]
+      }
+    },
+    {
+      "id": "T-D-1b",
+      "fixture_tag": "FIXTURE",
+      "concept": "displacement",
+      "note": "إيجابية V-D-02 بنافذة 10: النسبة 0.875 أعلى من 0.75، والمدى 4.0 يساوي 4 أضعاف متوسط 1.6.",
+      "candles": [
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.50, "h": 102.00, "l": 99.00, "c": 100.00, "closed": true},
+        {"o": 99.50, "h": 102.00, "l": 99.00, "c": 100.00, "closed": true},
+        {"o": 99.50, "h": 102.00, "l": 99.00, "c": 100.00, "closed": true},
+        {"o": 100.00, "h": 103.75, "l": 99.75, "c": 103.50, "closed": true}
+      ],
+      "call": {"t": 10, "variant": "V-D-02", "previous_window": 10},
+      "expect": {
+        "status": "BUILT",
+        "answer": "YES",
+        "variant_id": "V-D-02",
+        "numbers": {"body_range_ratio": 0.875, "average_range": 1.6, "ratio_to_average_range": 2.5},
+        "gap_ids": ["GAP_D_CLUSTER", "GAP_D_PRIOR_SWEEP"],
+        "claim_ids_include": ["F2"]
+      }
+    },
+    {
+      "id": "T-D-1c",
+      "fixture_tag": "FIXTURE",
+      "concept": "displacement",
+      "note": "إيجابية V-D-03: الجسم 3.5 يساوي 7 أضعاف متوسط أجسام العشر السابقة 0.5.",
+      "candles": [
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 100.00, "h": 103.75, "l": 99.75, "c": 103.50, "closed": true}
+      ],
+      "call": {"t": 10, "variant": "V-D-03", "previous_window": null},
+      "expect": {
+        "status": "BUILT",
+        "answer": "YES",
+        "variant_id": "V-D-03",
+        "numbers": {"body": 3.5, "average_body": 0.5, "ratio_to_average_body": 7.0},
+        "gap_ids": ["GAP_D_CLUSTER", "GAP_D_PRIOR_SWEEP"],
+        "claim_ids_include": ["F5"]
+      }
+    },
+    {
+      "id": "T-D-2a",
+      "fixture_tag": "FIXTURE",
+      "concept": "displacement",
+      "note": "سلبية V-D-01: نسبة الجسم 1/6 أدنى من 0.60.",
+      "candles": [
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 100.00, "h": 101.00, "l": 99.50, "c": 100.25, "closed": true}
+      ],
+      "call": {"t": 10, "variant": "V-D-01", "previous_window": null},
+      "expect": {
+        "status": "BUILT",
+        "answer": "NO",
+        "numbers": {"body": 0.25, "range": 1.5},
+        "gap_ids": ["GAP_D_CLUSTER", "GAP_D_PRIOR_SWEEP"],
+        "claim_ids_include": ["F1"]
+      }
+    },
+    {
+      "id": "T-D-2b",
+      "fixture_tag": "FIXTURE",
+      "concept": "displacement",
+      "note": "سلبية V-D-02: النسبة 1/6 أدنى من 0.75، والمدى 1.5 أدنى من ضعف المتوسط 1.0.",
+      "candles": [
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 100.00, "h": 101.00, "l": 99.50, "c": 100.25, "closed": true}
+      ],
+      "call": {"t": 10, "variant": "V-D-02", "previous_window": 10},
+      "expect": {
+        "status": "BUILT",
+        "answer": "NO",
+        "numbers": {"average_range": 1.0, "ratio_to_average_range": 1.5},
+        "gap_ids": ["GAP_D_CLUSTER", "GAP_D_PRIOR_SWEEP"]
+      }
+    },
+    {
+      "id": "T-D-2c",
+      "fixture_tag": "FIXTURE",
+      "concept": "displacement",
+      "note": "سلبية V-D-03: الجسم 0.25 أدنى من ضعف متوسط الأجسام 0.5.",
+      "candles": [
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 100.00, "h": 101.00, "l": 99.50, "c": 100.25, "closed": true}
+      ],
+      "call": {"t": 10, "variant": "V-D-03", "previous_window": null},
+      "expect": {
+        "status": "BUILT",
+        "answer": "NO",
+        "numbers": {"body": 0.25, "average_body": 0.5, "ratio_to_average_body": 0.5},
+        "gap_ids": ["GAP_D_CLUSTER", "GAP_D_PRIOR_SWEEP"]
+      }
+    },
+    {
+      "id": "T-D-3a",
+      "fixture_tag": "FIXTURE",
+      "concept": "displacement",
+      "note": "حدّية V-D-01: نسبة الجسم تساوي 0.60 بالضبط، والنص يقول «60 percent or more» ولا يحسم المساواة.",
+      "candles": [
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.00, "h": 101.25, "l": 98.75, "c": 100.50, "closed": true}
+      ],
+      "call": {"t": 10, "variant": "V-D-01", "previous_window": null},
+      "expect": {
+        "status": "UNDEFINED",
+        "answer": "UNDECIDED",
+        "numbers": {"body": 1.5, "range": 2.5, "body_range_ratio": 0.6},
+        "gap_ids": ["GAP_D_CLUSTER", "GAP_D_PRIOR_SWEEP", "GAP_EQUAL_THRESHOLD"]
+      }
+    },
+    {
+      "id": "T-D-3b",
+      "fixture_tag": "FIXTURE",
+      "concept": "displacement",
+      "note": "حدّية V-D-02: النسبة تساوي 0.75 بالضبط، والنص يقول «above ~75%» بلا حكم للمساواة.",
+      "candles": [
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.25, "h": 101.00, "l": 99.00, "c": 100.75, "closed": true}
+      ],
+      "call": {"t": 10, "variant": "V-D-02", "previous_window": 10},
+      "expect": {
+        "status": "UNDEFINED",
+        "answer": "UNDECIDED",
+        "gap_ids": ["GAP_D_CLUSTER", "GAP_D_PRIOR_SWEEP", "GAP_EQUAL_THRESHOLD"]
+      }
+    },
+    {
+      "id": "T-D-3c",
+      "fixture_tag": "FIXTURE",
+      "concept": "displacement",
+      "note": "حدّية V-D-02: النسبة 0.875 تحسم الجزء الأول، لكن المدى يساوي ضعف المتوسط بالضبط، فلا نص يحسم «at minimum 2x» عند المساواة.",
+      "candles": [
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.25, "h": 101.00, "l": 99.00, "c": 101.00, "closed": true}
+      ],
+      "call": {"t": 10, "variant": "V-D-02", "previous_window": 10},
+      "expect": {
+        "status": "UNDEFINED",
+        "answer": "UNDECIDED",
+        "numbers": {"body": 1.75, "range": 2.0, "body_range_ratio": 0.875, "ratio_to_average_range": 2.0},
+        "gap_ids": ["GAP_D_CLUSTER", "GAP_D_PRIOR_SWEEP", "GAP_EQUAL_THRESHOLD"]
+      }
+    },
+    {
+      "id": "T-D-4a",
+      "fixture_tag": "FIXTURE",
+      "concept": "displacement",
+      "note": "اختلاف النسخ: النسبة 0.70 داخل نطاق F1 وخارج عتبة F2 ← V-D-01 تقول نعم و V-D-02 تقول لا على الشموع نفسها.",
+      "candles": [
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.00, "h": 101.25, "l": 98.75, "c": 100.75, "closed": true}
+      ],
+      "call": {"t": 10, "variant": "V-D-01", "previous_window": null},
+      "expect": {
+        "status": "BUILT",
+        "answer": "YES",
+        "numbers": {"body_range_ratio": 0.7},
+        "gap_ids": ["GAP_D_CLUSTER", "GAP_D_PRIOR_SWEEP"]
+      }
+    },
+    {
+      "id": "T-D-4b",
+      "fixture_tag": "FIXTURE",
+      "concept": "displacement",
+      "note": "V-D-02 على الشموع نفسها: النسبة 0.70 ليست أعلى من 0.75 ← لا.",
+      "candles": [
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.00, "h": 101.25, "l": 98.75, "c": 100.75, "closed": true}
+      ],
+      "call": {"t": 10, "variant": "V-D-02", "previous_window": 10},
+      "expect": {
+        "status": "BUILT",
+        "answer": "NO",
+        "numbers": {"body_range_ratio": 0.7},
+        "gap_ids": ["GAP_D_CLUSTER", "GAP_D_PRIOR_SWEEP"]
+      }
+    },
+    {
+      "id": "T-D-4c",
+      "fixture_tag": "FIXTURE",
+      "concept": "displacement",
+      "note": "V-D-03 على الشموع نفسها: الجسم 1.75 يساوي 3.5 أضعاف متوسط 0.5 ← نعم. ثلاث إجابات مختلفة على بيانات واحدة.",
+      "candles": [
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.00, "h": 101.25, "l": 98.75, "c": 100.75, "closed": true}
+      ],
+      "call": {"t": 10, "variant": "V-D-03", "previous_window": null},
+      "expect": {
+        "status": "BUILT",
+        "answer": "YES",
+        "numbers": {"ratio_to_average_body": 3.5},
+        "gap_ids": ["GAP_D_CLUSTER", "GAP_D_PRIOR_SWEEP"]
+      }
+    },
+    {
+      "id": "T-D-5",
+      "fixture_tag": "FIXTURE",
+      "concept": "displacement",
+      "note": "V-D-02 بلا نافذة: المحرك لا يختار من «3–5»، فيرجع UNDEFINED مع فجوة النافذة.",
+      "candles": [
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 100.00, "h": 103.75, "l": 99.75, "c": 103.50, "closed": true}
+      ],
+      "call": {"t": 10, "variant": "V-D-02", "previous_window": null},
+      "expect": {
+        "status": "UNDEFINED",
+        "answer": null,
+        "gap_ids": ["GAP_D_CLUSTER", "GAP_D_PRIOR_SWEEP", "GAP_D_WINDOW"]
+      }
+    },
+    {
+      "id": "T-D-6a",
+      "fixture_tag": "FIXTURE",
+      "concept": "displacement",
+      "note": "نافذة المستدعي 3: متوسط المدى 3.0، والمدى 4.0 أدنى من ضعفه ← لا. النافذة نفسها ليست من اختيار المحرك.",
+      "candles": [
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.50, "h": 102.00, "l": 99.00, "c": 100.00, "closed": true},
+        {"o": 99.50, "h": 102.00, "l": 99.00, "c": 100.00, "closed": true},
+        {"o": 99.50, "h": 102.00, "l": 99.00, "c": 100.00, "closed": true},
+        {"o": 100.00, "h": 103.75, "l": 99.75, "c": 103.50, "closed": true}
+      ],
+      "call": {"t": 10, "variant": "V-D-02", "previous_window": 3},
+      "expect": {
+        "status": "BUILT",
+        "answer": "NO",
+        "numbers": {"average_range": 3.0, "ratio_to_average_range": 1.3333333333333333},
+        "gap_ids": ["GAP_D_CLUSTER", "GAP_D_PRIOR_SWEEP"]
+      }
+    },
+    {
+      "id": "T-D-6b",
+      "fixture_tag": "FIXTURE",
+      "concept": "displacement",
+      "note": "الشموع نفسها بنافذة 10: متوسط المدى 1.6، والمدى 4.0 يساوي 2.5 ضعفه ← نعم. تبديل النافذة يبدّل الجواب.",
+      "candles": [
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.50, "h": 102.00, "l": 99.00, "c": 100.00, "closed": true},
+        {"o": 99.50, "h": 102.00, "l": 99.00, "c": 100.00, "closed": true},
+        {"o": 99.50, "h": 102.00, "l": 99.00, "c": 100.00, "closed": true},
+        {"o": 100.00, "h": 103.75, "l": 99.75, "c": 103.50, "closed": true}
+      ],
+      "call": {"t": 10, "variant": "V-D-02", "previous_window": 10},
+      "expect": {
+        "status": "BUILT",
+        "answer": "YES",
+        "numbers": {"average_range": 1.6, "ratio_to_average_range": 2.5},
+        "gap_ids": ["GAP_D_CLUSTER", "GAP_D_PRIOR_SWEEP"]
+      }
+    },
+    {
+      "id": "T-D-7",
+      "fixture_tag": "FIXTURE",
+      "concept": "displacement",
+      "note": "V-D-04: شرط الفجوة منصوص لكن كلمة «الفجوة» بلا تعريف مكتوب في الكتالوج ← UNDEFINED مع فجوة التعريف.",
+      "candles": [
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 100.00, "h": 103.75, "l": 99.75, "c": 103.50, "closed": true}
+      ],
+      "call": {"t": 1, "variant": "V-D-04", "previous_window": null},
+      "expect": {
+        "status": "UNDEFINED",
+        "answer": null,
+        "variant_id": "V-D-04",
+        "gap_ids": ["GAP_D_CLUSTER", "GAP_D_PRIOR_SWEEP", "GAP_D_GAP_DEFINITION"],
+        "claim_ids_include": ["F1"]
+      }
+    },
+    {
+      "id": "T-D-8",
+      "fixture_tag": "FIXTURE",
+      "concept": "displacement",
+      "note": "العائلة النوعية V-D-Q: ألفاظ نسبية بلا رقم ← UNDEFINED مع فجوتها.",
+      "candles": [
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 100.00, "h": 103.75, "l": 99.75, "c": 103.50, "closed": true}
+      ],
+      "call": {"t": 1, "variant": "V-D-Q", "previous_window": null},
+      "expect": {
+        "status": "UNDEFINED",
+        "answer": null,
+        "variant_id": "V-D-Q",
+        "gap_ids": ["GAP_D_CLUSTER", "GAP_D_PRIOR_SWEEP", "GAP_D_QUALITATIVE"],
+        "claim_ids_include": ["F3", "F4", "F6"]
+      }
+    },
+    {
+      "id": "T-D-9",
+      "fixture_tag": "FIXTURE",
+      "concept": "displacement",
+      "note": "شمعة الهدف غير مغلقة ← PENDING.",
+      "candles": [
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 100.00, "h": 103.75, "l": 99.75, "c": 103.50, "closed": false}
+      ],
+      "call": {"t": 1, "variant": "V-D-01", "previous_window": null},
+      "expect": {
+        "status": "PENDING",
+        "answer": null,
+        "gap_ids": []
+      }
+    },
+    {
+      "id": "T-D-10",
+      "fixture_tag": "FIXTURE",
+      "concept": "displacement",
+      "note": "V-D-03 يحتاج عشر شموع سابقة ولم تتوفر ← PENDING بلا حكم.",
+      "candles": [
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 100.00, "h": 103.75, "l": 99.75, "c": 103.50, "closed": true}
+      ],
+      "call": {"t": 5, "variant": "V-D-03", "previous_window": null},
+      "expect": {
+        "status": "PENDING",
+        "answer": null,
+        "gap_ids": []
+      }
+    },
+    {
+      "id": "R-D-01",
+      "fixture_tag": "FIXTURE",
+      "concept": "displacement",
+      "note": "مدى صفري: القسمة على المدى غير ممكنة، فاستثناء لا قيمة.",
+      "candles": [
+        {"o": 100.00, "h": 100.00, "l": 100.00, "c": 100.00, "closed": true}
+      ],
+      "call": {"t": 0, "variant": "V-D-01", "previous_window": null},
+      "raises": "candle range is zero"
+    },
+    {
+      "id": "R-D-02",
+      "fixture_tag": "FIXTURE",
+      "concept": "displacement",
+      "note": "نافذة 7 غير مطبوعة في أي مصدر (المطبوع 3–5 و10) فيجب رفضها.",
+      "candles": [
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 100.00, "h": 103.75, "l": 99.75, "c": 103.50, "closed": true}
+      ],
+      "call": {"t": 1, "variant": "V-D-02", "previous_window": 7},
+      "raises": "previous_window must be one of the numbers a source prints"
+    },
+    {
+      "id": "R-D-03",
+      "fixture_tag": "FIXTURE",
+      "concept": "displacement",
+      "note": "معرّف نسخة غير موجود.",
+      "candles": [
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true},
+        {"o": 100.00, "h": 103.75, "l": 99.75, "c": 103.50, "closed": true}
+      ],
+      "call": {"t": 1, "variant": "V-D-99", "previous_window": null},
+      "raises": "unknown displacement variant"
+    },
+    {
+      "id": "R-D-04",
+      "fixture_tag": "FIXTURE",
+      "concept": "displacement",
+      "note": "فهرس خارج القائمة.",
+      "candles": [
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25, "closed": true}
+      ],
+      "call": {"t": 9, "variant": "V-D-01", "previous_window": null},
+      "raises": "index t is outside the candle list"
+    },
+    {
+      "id": "R-D-05",
+      "fixture_tag": "FIXTURE",
+      "concept": "displacement",
+      "note": "متوسط الأجسام صفر (عشر شموع دوجي)، فلا نسبة ممكنة.",
+      "candles": [
+        {"o": 100.00, "h": 100.50, "l": 99.50, "c": 100.00, "closed": true},
+        {"o": 100.00, "h": 100.50, "l": 99.50, "c": 100.00, "closed": true},
+        {"o": 100.00, "h": 100.50, "l": 99.50, "c": 100.00, "closed": true},
+        {"o": 100.00, "h": 100.50, "l": 99.50, "c": 100.00, "closed": true},
+        {"o": 100.00, "h": 100.50, "l": 99.50, "c": 100.00, "closed": true},
+        {"o": 100.00, "h": 100.50, "l": 99.50, "c": 100.00, "closed": true},
+        {"o": 100.00, "h": 100.50, "l": 99.50, "c": 100.00, "closed": true},
+        {"o": 100.00, "h": 100.50, "l": 99.50, "c": 100.00, "closed": true},
+        {"o": 100.00, "h": 100.50, "l": 99.50, "c": 100.00, "closed": true},
+        {"o": 100.00, "h": 100.50, "l": 99.50, "c": 100.00, "closed": true},
+        {"o": 100.00, "h": 103.75, "l": 99.75, "c": 103.50, "closed": true}
+      ],
+      "call": {"t": 10, "variant": "V-D-03", "previous_window": null},
+      "raises": "average body is zero"
+    },
+    {
+      "id": "R-D-06",
+      "fixture_tag": "FIXTURE",
+      "concept": "displacement",
+      "note": "علم الإغلاق ناقص يجب أن يرفع استثناءً.",
+      "candles": [
+        {"o": 99.75, "h": 100.50, "l": 99.50, "c": 100.25},
+        {"o": 100.00, "h": 103.75, "l": 99.75, "c": 103.50, "closed": true}
+      ],
+      "call": {"t": 1, "variant": "V-D-01", "previous_window": null},
+      "raises": "explicit 'closed' flag"
+    }
+  ]
+}

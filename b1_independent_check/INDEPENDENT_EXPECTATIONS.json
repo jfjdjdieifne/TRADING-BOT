@@ -1,0 +1,1778 @@
+{
+  "title": "Independent expectations for B1 candle code",
+  "source_basis": "Only BUILD_STEP_B1_DESIGN_V2.md sections 4, 5, and CORRECTIONS_R3; written before opening engine_v1/b1_candles.",
+  "status_legend": {
+    "YES": "criterion established by the V2 text",
+    "NO": "criterion fails by the V2 text",
+    "UNDECIDED": "V2 explicitly leaves equality/touch indeterminate",
+    "PENDING": "strict criterion is met but c3 has not closed",
+    "TEXT_SILENT": "V2 does not resolve the listed priority; exact_question records the unresolved question."
+  },
+  "relation_legend": {
+    "above": "first named value is strictly greater than second",
+    "equal": "values are equal",
+    "below": "first named value is strictly less than second"
+  },
+  "expectations": {
+    "swing_high_at_c2": {
+      "case_count": 18,
+      "cases": [
+        {
+          "id": "SH-ABOVE-ABOVE-C3_CLOSED",
+          "relations": {
+            "c2_high_vs_c1_high": "above",
+            "c2_high_vs_c3_high": "above",
+            "c3_closed": true
+          },
+          "expected_status": "YES",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 5.0,
+                "high": 10,
+                "low": 0,
+                "close": 5.0,
+                "closed": true
+              },
+              {
+                "open": 5.5,
+                "high": 11,
+                "low": 0,
+                "close": 5.5,
+                "closed": true
+              },
+              {
+                "open": 5.0,
+                "high": 10,
+                "low": 0,
+                "close": 5.0,
+                "closed": true
+              }
+            ],
+            "target_index": 1
+          }
+        },
+        {
+          "id": "SH-ABOVE-ABOVE-C3_OPEN",
+          "relations": {
+            "c2_high_vs_c1_high": "above",
+            "c2_high_vs_c3_high": "above",
+            "c3_closed": false
+          },
+          "expected_status": "PENDING",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 5.0,
+                "high": 10,
+                "low": 0,
+                "close": 5.0,
+                "closed": true
+              },
+              {
+                "open": 5.5,
+                "high": 11,
+                "low": 0,
+                "close": 5.5,
+                "closed": true
+              },
+              {
+                "open": 5.0,
+                "high": 10,
+                "low": 0,
+                "close": 5.0,
+                "closed": false
+              }
+            ],
+            "target_index": 1
+          }
+        },
+        {
+          "id": "SH-ABOVE-EQUAL-C3_CLOSED",
+          "relations": {
+            "c2_high_vs_c1_high": "above",
+            "c2_high_vs_c3_high": "equal",
+            "c3_closed": true
+          },
+          "expected_status": "UNDECIDED",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 5.0,
+                "high": 10,
+                "low": 0,
+                "close": 5.0,
+                "closed": true
+              },
+              {
+                "open": 5.5,
+                "high": 11,
+                "low": 0,
+                "close": 5.5,
+                "closed": true
+              },
+              {
+                "open": 5.5,
+                "high": 11,
+                "low": 0,
+                "close": 5.5,
+                "closed": true
+              }
+            ],
+            "target_index": 1
+          }
+        },
+        {
+          "id": "SH-ABOVE-EQUAL-C3_OPEN",
+          "relations": {
+            "c2_high_vs_c1_high": "above",
+            "c2_high_vs_c3_high": "equal",
+            "c3_closed": false
+          },
+          "expected_status": "TEXT_SILENT",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 5.0,
+                "high": 10,
+                "low": 0,
+                "close": 5.0,
+                "closed": true
+              },
+              {
+                "open": 5.5,
+                "high": 11,
+                "low": 0,
+                "close": 5.5,
+                "closed": true
+              },
+              {
+                "open": 5.5,
+                "high": 11,
+                "low": 0,
+                "close": 5.5,
+                "closed": false
+              }
+            ],
+            "target_index": 1
+          },
+          "exact_question": "هل تُقدَّم حالة NO أو UNDECIDED على PENDING عندما لا تكون الشمعة الثالثة مغلقة؟"
+        },
+        {
+          "id": "SH-ABOVE-BELOW-C3_CLOSED",
+          "relations": {
+            "c2_high_vs_c1_high": "above",
+            "c2_high_vs_c3_high": "below",
+            "c3_closed": true
+          },
+          "expected_status": "NO",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 5.0,
+                "high": 10,
+                "low": 0,
+                "close": 5.0,
+                "closed": true
+              },
+              {
+                "open": 5.5,
+                "high": 11,
+                "low": 0,
+                "close": 5.5,
+                "closed": true
+              },
+              {
+                "open": 6.0,
+                "high": 12,
+                "low": 0,
+                "close": 6.0,
+                "closed": true
+              }
+            ],
+            "target_index": 1
+          }
+        },
+        {
+          "id": "SH-ABOVE-BELOW-C3_OPEN",
+          "relations": {
+            "c2_high_vs_c1_high": "above",
+            "c2_high_vs_c3_high": "below",
+            "c3_closed": false
+          },
+          "expected_status": "TEXT_SILENT",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 5.0,
+                "high": 10,
+                "low": 0,
+                "close": 5.0,
+                "closed": true
+              },
+              {
+                "open": 5.5,
+                "high": 11,
+                "low": 0,
+                "close": 5.5,
+                "closed": true
+              },
+              {
+                "open": 6.0,
+                "high": 12,
+                "low": 0,
+                "close": 6.0,
+                "closed": false
+              }
+            ],
+            "target_index": 1
+          },
+          "exact_question": "هل تُقدَّم حالة NO أو UNDECIDED على PENDING عندما لا تكون الشمعة الثالثة مغلقة؟"
+        },
+        {
+          "id": "SH-EQUAL-ABOVE-C3_CLOSED",
+          "relations": {
+            "c2_high_vs_c1_high": "equal",
+            "c2_high_vs_c3_high": "above",
+            "c3_closed": true
+          },
+          "expected_status": "UNDECIDED",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 5.0,
+                "high": 10,
+                "low": 0,
+                "close": 5.0,
+                "closed": true
+              },
+              {
+                "open": 5.0,
+                "high": 10,
+                "low": 0,
+                "close": 5.0,
+                "closed": true
+              },
+              {
+                "open": 4.5,
+                "high": 9,
+                "low": 0,
+                "close": 4.5,
+                "closed": true
+              }
+            ],
+            "target_index": 1
+          }
+        },
+        {
+          "id": "SH-EQUAL-ABOVE-C3_OPEN",
+          "relations": {
+            "c2_high_vs_c1_high": "equal",
+            "c2_high_vs_c3_high": "above",
+            "c3_closed": false
+          },
+          "expected_status": "TEXT_SILENT",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 5.0,
+                "high": 10,
+                "low": 0,
+                "close": 5.0,
+                "closed": true
+              },
+              {
+                "open": 5.0,
+                "high": 10,
+                "low": 0,
+                "close": 5.0,
+                "closed": true
+              },
+              {
+                "open": 4.5,
+                "high": 9,
+                "low": 0,
+                "close": 4.5,
+                "closed": false
+              }
+            ],
+            "target_index": 1
+          },
+          "exact_question": "هل تُقدَّم حالة NO أو UNDECIDED على PENDING عندما لا تكون الشمعة الثالثة مغلقة؟"
+        },
+        {
+          "id": "SH-EQUAL-EQUAL-C3_CLOSED",
+          "relations": {
+            "c2_high_vs_c1_high": "equal",
+            "c2_high_vs_c3_high": "equal",
+            "c3_closed": true
+          },
+          "expected_status": "UNDECIDED",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 5.0,
+                "high": 10,
+                "low": 0,
+                "close": 5.0,
+                "closed": true
+              },
+              {
+                "open": 5.0,
+                "high": 10,
+                "low": 0,
+                "close": 5.0,
+                "closed": true
+              },
+              {
+                "open": 5.0,
+                "high": 10,
+                "low": 0,
+                "close": 5.0,
+                "closed": true
+              }
+            ],
+            "target_index": 1
+          }
+        },
+        {
+          "id": "SH-EQUAL-EQUAL-C3_OPEN",
+          "relations": {
+            "c2_high_vs_c1_high": "equal",
+            "c2_high_vs_c3_high": "equal",
+            "c3_closed": false
+          },
+          "expected_status": "TEXT_SILENT",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 5.0,
+                "high": 10,
+                "low": 0,
+                "close": 5.0,
+                "closed": true
+              },
+              {
+                "open": 5.0,
+                "high": 10,
+                "low": 0,
+                "close": 5.0,
+                "closed": true
+              },
+              {
+                "open": 5.0,
+                "high": 10,
+                "low": 0,
+                "close": 5.0,
+                "closed": false
+              }
+            ],
+            "target_index": 1
+          },
+          "exact_question": "هل تُقدَّم حالة NO أو UNDECIDED على PENDING عندما لا تكون الشمعة الثالثة مغلقة؟"
+        },
+        {
+          "id": "SH-EQUAL-BELOW-C3_CLOSED",
+          "relations": {
+            "c2_high_vs_c1_high": "equal",
+            "c2_high_vs_c3_high": "below",
+            "c3_closed": true
+          },
+          "expected_status": "TEXT_SILENT",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 5.0,
+                "high": 10,
+                "low": 0,
+                "close": 5.0,
+                "closed": true
+              },
+              {
+                "open": 5.0,
+                "high": 10,
+                "low": 0,
+                "close": 5.0,
+                "closed": true
+              },
+              {
+                "open": 5.5,
+                "high": 11,
+                "low": 0,
+                "close": 5.5,
+                "closed": true
+              }
+            ],
+            "target_index": 1
+          },
+          "exact_question": "عند اجتماع علاقة مساواة غير محسومة مع إخفاق صارم، هل تكون النتيجة NO أم UNDECIDED؟"
+        },
+        {
+          "id": "SH-EQUAL-BELOW-C3_OPEN",
+          "relations": {
+            "c2_high_vs_c1_high": "equal",
+            "c2_high_vs_c3_high": "below",
+            "c3_closed": false
+          },
+          "expected_status": "TEXT_SILENT",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 5.0,
+                "high": 10,
+                "low": 0,
+                "close": 5.0,
+                "closed": true
+              },
+              {
+                "open": 5.0,
+                "high": 10,
+                "low": 0,
+                "close": 5.0,
+                "closed": true
+              },
+              {
+                "open": 5.5,
+                "high": 11,
+                "low": 0,
+                "close": 5.5,
+                "closed": false
+              }
+            ],
+            "target_index": 1
+          },
+          "exact_question": "هل تُقدَّم حالة NO أو UNDECIDED على PENDING عندما لا تكون الشمعة الثالثة مغلقة؟"
+        },
+        {
+          "id": "SH-BELOW-ABOVE-C3_CLOSED",
+          "relations": {
+            "c2_high_vs_c1_high": "below",
+            "c2_high_vs_c3_high": "above",
+            "c3_closed": true
+          },
+          "expected_status": "NO",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 5.0,
+                "high": 10,
+                "low": 0,
+                "close": 5.0,
+                "closed": true
+              },
+              {
+                "open": 4.5,
+                "high": 9,
+                "low": 0,
+                "close": 4.5,
+                "closed": true
+              },
+              {
+                "open": 4.0,
+                "high": 8,
+                "low": 0,
+                "close": 4.0,
+                "closed": true
+              }
+            ],
+            "target_index": 1
+          }
+        },
+        {
+          "id": "SH-BELOW-ABOVE-C3_OPEN",
+          "relations": {
+            "c2_high_vs_c1_high": "below",
+            "c2_high_vs_c3_high": "above",
+            "c3_closed": false
+          },
+          "expected_status": "TEXT_SILENT",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 5.0,
+                "high": 10,
+                "low": 0,
+                "close": 5.0,
+                "closed": true
+              },
+              {
+                "open": 4.5,
+                "high": 9,
+                "low": 0,
+                "close": 4.5,
+                "closed": true
+              },
+              {
+                "open": 4.0,
+                "high": 8,
+                "low": 0,
+                "close": 4.0,
+                "closed": false
+              }
+            ],
+            "target_index": 1
+          },
+          "exact_question": "هل تُقدَّم حالة NO أو UNDECIDED على PENDING عندما لا تكون الشمعة الثالثة مغلقة؟"
+        },
+        {
+          "id": "SH-BELOW-EQUAL-C3_CLOSED",
+          "relations": {
+            "c2_high_vs_c1_high": "below",
+            "c2_high_vs_c3_high": "equal",
+            "c3_closed": true
+          },
+          "expected_status": "TEXT_SILENT",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 5.0,
+                "high": 10,
+                "low": 0,
+                "close": 5.0,
+                "closed": true
+              },
+              {
+                "open": 4.5,
+                "high": 9,
+                "low": 0,
+                "close": 4.5,
+                "closed": true
+              },
+              {
+                "open": 4.5,
+                "high": 9,
+                "low": 0,
+                "close": 4.5,
+                "closed": true
+              }
+            ],
+            "target_index": 1
+          },
+          "exact_question": "عند اجتماع علاقة مساواة غير محسومة مع إخفاق صارم، هل تكون النتيجة NO أم UNDECIDED؟"
+        },
+        {
+          "id": "SH-BELOW-EQUAL-C3_OPEN",
+          "relations": {
+            "c2_high_vs_c1_high": "below",
+            "c2_high_vs_c3_high": "equal",
+            "c3_closed": false
+          },
+          "expected_status": "TEXT_SILENT",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 5.0,
+                "high": 10,
+                "low": 0,
+                "close": 5.0,
+                "closed": true
+              },
+              {
+                "open": 4.5,
+                "high": 9,
+                "low": 0,
+                "close": 4.5,
+                "closed": true
+              },
+              {
+                "open": 4.5,
+                "high": 9,
+                "low": 0,
+                "close": 4.5,
+                "closed": false
+              }
+            ],
+            "target_index": 1
+          },
+          "exact_question": "هل تُقدَّم حالة NO أو UNDECIDED على PENDING عندما لا تكون الشمعة الثالثة مغلقة؟"
+        },
+        {
+          "id": "SH-BELOW-BELOW-C3_CLOSED",
+          "relations": {
+            "c2_high_vs_c1_high": "below",
+            "c2_high_vs_c3_high": "below",
+            "c3_closed": true
+          },
+          "expected_status": "NO",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 5.0,
+                "high": 10,
+                "low": 0,
+                "close": 5.0,
+                "closed": true
+              },
+              {
+                "open": 4.5,
+                "high": 9,
+                "low": 0,
+                "close": 4.5,
+                "closed": true
+              },
+              {
+                "open": 5.0,
+                "high": 10,
+                "low": 0,
+                "close": 5.0,
+                "closed": true
+              }
+            ],
+            "target_index": 1
+          }
+        },
+        {
+          "id": "SH-BELOW-BELOW-C3_OPEN",
+          "relations": {
+            "c2_high_vs_c1_high": "below",
+            "c2_high_vs_c3_high": "below",
+            "c3_closed": false
+          },
+          "expected_status": "TEXT_SILENT",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 5.0,
+                "high": 10,
+                "low": 0,
+                "close": 5.0,
+                "closed": true
+              },
+              {
+                "open": 4.5,
+                "high": 9,
+                "low": 0,
+                "close": 4.5,
+                "closed": true
+              },
+              {
+                "open": 5.0,
+                "high": 10,
+                "low": 0,
+                "close": 5.0,
+                "closed": false
+              }
+            ],
+            "target_index": 1
+          },
+          "exact_question": "هل تُقدَّم حالة NO أو UNDECIDED على PENDING عندما لا تكون الشمعة الثالثة مغلقة؟"
+        }
+      ]
+    },
+    "swing_low_at_c2": {
+      "case_count": 18,
+      "cases": [
+        {
+          "id": "SL-ABOVE-ABOVE-C3_CLOSED",
+          "relations": {
+            "c2_low_vs_c1_low": "above",
+            "c2_low_vs_c3_low": "above",
+            "c3_closed": true
+          },
+          "expected_status": "NO",
+          "expected_label": "WEAK_SUPPORT",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 15.0,
+                "high": 20,
+                "low": 10,
+                "close": 15.0,
+                "closed": true
+              },
+              {
+                "open": 15.5,
+                "high": 20,
+                "low": 11,
+                "close": 15.5,
+                "closed": true
+              },
+              {
+                "open": 15.0,
+                "high": 20,
+                "low": 10,
+                "close": 15.0,
+                "closed": true
+              }
+            ],
+            "target_index": 1
+          }
+        },
+        {
+          "id": "SL-ABOVE-ABOVE-C3_OPEN",
+          "relations": {
+            "c2_low_vs_c1_low": "above",
+            "c2_low_vs_c3_low": "above",
+            "c3_closed": false
+          },
+          "expected_status": "TEXT_SILENT",
+          "expected_label": "WEAK_SUPPORT",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 15.0,
+                "high": 20,
+                "low": 10,
+                "close": 15.0,
+                "closed": true
+              },
+              {
+                "open": 15.5,
+                "high": 20,
+                "low": 11,
+                "close": 15.5,
+                "closed": true
+              },
+              {
+                "open": 15.0,
+                "high": 20,
+                "low": 10,
+                "close": 15.0,
+                "closed": false
+              }
+            ],
+            "target_index": 1
+          },
+          "exact_question": "هل تُقدَّم حالة NO أو UNDECIDED على PENDING عندما لا تكون الشمعة الثالثة مغلقة؟"
+        },
+        {
+          "id": "SL-ABOVE-EQUAL-C3_CLOSED",
+          "relations": {
+            "c2_low_vs_c1_low": "above",
+            "c2_low_vs_c3_low": "equal",
+            "c3_closed": true
+          },
+          "expected_status": "TEXT_SILENT",
+          "expected_label": "WEAK_SUPPORT",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 15.0,
+                "high": 20,
+                "low": 10,
+                "close": 15.0,
+                "closed": true
+              },
+              {
+                "open": 15.5,
+                "high": 20,
+                "low": 11,
+                "close": 15.5,
+                "closed": true
+              },
+              {
+                "open": 15.5,
+                "high": 20,
+                "low": 11,
+                "close": 15.5,
+                "closed": true
+              }
+            ],
+            "target_index": 1
+          },
+          "exact_question": "عند اجتماع علاقة مساواة غير محسومة مع إخفاق صارم، هل تكون النتيجة NO أم UNDECIDED؟"
+        },
+        {
+          "id": "SL-ABOVE-EQUAL-C3_OPEN",
+          "relations": {
+            "c2_low_vs_c1_low": "above",
+            "c2_low_vs_c3_low": "equal",
+            "c3_closed": false
+          },
+          "expected_status": "TEXT_SILENT",
+          "expected_label": "WEAK_SUPPORT",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 15.0,
+                "high": 20,
+                "low": 10,
+                "close": 15.0,
+                "closed": true
+              },
+              {
+                "open": 15.5,
+                "high": 20,
+                "low": 11,
+                "close": 15.5,
+                "closed": true
+              },
+              {
+                "open": 15.5,
+                "high": 20,
+                "low": 11,
+                "close": 15.5,
+                "closed": false
+              }
+            ],
+            "target_index": 1
+          },
+          "exact_question": "هل تُقدَّم حالة NO أو UNDECIDED على PENDING عندما لا تكون الشمعة الثالثة مغلقة؟"
+        },
+        {
+          "id": "SL-ABOVE-BELOW-C3_CLOSED",
+          "relations": {
+            "c2_low_vs_c1_low": "above",
+            "c2_low_vs_c3_low": "below",
+            "c3_closed": true
+          },
+          "expected_status": "NO",
+          "expected_label": "WEAK_SUPPORT",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 15.0,
+                "high": 20,
+                "low": 10,
+                "close": 15.0,
+                "closed": true
+              },
+              {
+                "open": 15.5,
+                "high": 20,
+                "low": 11,
+                "close": 15.5,
+                "closed": true
+              },
+              {
+                "open": 16.0,
+                "high": 20,
+                "low": 12,
+                "close": 16.0,
+                "closed": true
+              }
+            ],
+            "target_index": 1
+          }
+        },
+        {
+          "id": "SL-ABOVE-BELOW-C3_OPEN",
+          "relations": {
+            "c2_low_vs_c1_low": "above",
+            "c2_low_vs_c3_low": "below",
+            "c3_closed": false
+          },
+          "expected_status": "TEXT_SILENT",
+          "expected_label": "WEAK_SUPPORT",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 15.0,
+                "high": 20,
+                "low": 10,
+                "close": 15.0,
+                "closed": true
+              },
+              {
+                "open": 15.5,
+                "high": 20,
+                "low": 11,
+                "close": 15.5,
+                "closed": true
+              },
+              {
+                "open": 16.0,
+                "high": 20,
+                "low": 12,
+                "close": 16.0,
+                "closed": false
+              }
+            ],
+            "target_index": 1
+          },
+          "exact_question": "هل تُقدَّم حالة NO أو UNDECIDED على PENDING عندما لا تكون الشمعة الثالثة مغلقة؟"
+        },
+        {
+          "id": "SL-EQUAL-ABOVE-C3_CLOSED",
+          "relations": {
+            "c2_low_vs_c1_low": "equal",
+            "c2_low_vs_c3_low": "above",
+            "c3_closed": true
+          },
+          "expected_status": "TEXT_SILENT",
+          "expected_label": "WEAK_SUPPORT",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 15.0,
+                "high": 20,
+                "low": 10,
+                "close": 15.0,
+                "closed": true
+              },
+              {
+                "open": 15.0,
+                "high": 20,
+                "low": 10,
+                "close": 15.0,
+                "closed": true
+              },
+              {
+                "open": 14.5,
+                "high": 20,
+                "low": 9,
+                "close": 14.5,
+                "closed": true
+              }
+            ],
+            "target_index": 1
+          },
+          "exact_question": "عند اجتماع علاقة مساواة غير محسومة مع إخفاق صارم، هل تكون النتيجة NO أم UNDECIDED؟"
+        },
+        {
+          "id": "SL-EQUAL-ABOVE-C3_OPEN",
+          "relations": {
+            "c2_low_vs_c1_low": "equal",
+            "c2_low_vs_c3_low": "above",
+            "c3_closed": false
+          },
+          "expected_status": "TEXT_SILENT",
+          "expected_label": "WEAK_SUPPORT",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 15.0,
+                "high": 20,
+                "low": 10,
+                "close": 15.0,
+                "closed": true
+              },
+              {
+                "open": 15.0,
+                "high": 20,
+                "low": 10,
+                "close": 15.0,
+                "closed": true
+              },
+              {
+                "open": 14.5,
+                "high": 20,
+                "low": 9,
+                "close": 14.5,
+                "closed": false
+              }
+            ],
+            "target_index": 1
+          },
+          "exact_question": "هل تُقدَّم حالة NO أو UNDECIDED على PENDING عندما لا تكون الشمعة الثالثة مغلقة؟"
+        },
+        {
+          "id": "SL-EQUAL-EQUAL-C3_CLOSED",
+          "relations": {
+            "c2_low_vs_c1_low": "equal",
+            "c2_low_vs_c3_low": "equal",
+            "c3_closed": true
+          },
+          "expected_status": "UNDECIDED",
+          "expected_label": "WEAK_SUPPORT",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 15.0,
+                "high": 20,
+                "low": 10,
+                "close": 15.0,
+                "closed": true
+              },
+              {
+                "open": 15.0,
+                "high": 20,
+                "low": 10,
+                "close": 15.0,
+                "closed": true
+              },
+              {
+                "open": 15.0,
+                "high": 20,
+                "low": 10,
+                "close": 15.0,
+                "closed": true
+              }
+            ],
+            "target_index": 1
+          }
+        },
+        {
+          "id": "SL-EQUAL-EQUAL-C3_OPEN",
+          "relations": {
+            "c2_low_vs_c1_low": "equal",
+            "c2_low_vs_c3_low": "equal",
+            "c3_closed": false
+          },
+          "expected_status": "TEXT_SILENT",
+          "expected_label": "WEAK_SUPPORT",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 15.0,
+                "high": 20,
+                "low": 10,
+                "close": 15.0,
+                "closed": true
+              },
+              {
+                "open": 15.0,
+                "high": 20,
+                "low": 10,
+                "close": 15.0,
+                "closed": true
+              },
+              {
+                "open": 15.0,
+                "high": 20,
+                "low": 10,
+                "close": 15.0,
+                "closed": false
+              }
+            ],
+            "target_index": 1
+          },
+          "exact_question": "هل تُقدَّم حالة NO أو UNDECIDED على PENDING عندما لا تكون الشمعة الثالثة مغلقة؟"
+        },
+        {
+          "id": "SL-EQUAL-BELOW-C3_CLOSED",
+          "relations": {
+            "c2_low_vs_c1_low": "equal",
+            "c2_low_vs_c3_low": "below",
+            "c3_closed": true
+          },
+          "expected_status": "UNDECIDED",
+          "expected_label": "WEAK_SUPPORT",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 15.0,
+                "high": 20,
+                "low": 10,
+                "close": 15.0,
+                "closed": true
+              },
+              {
+                "open": 15.0,
+                "high": 20,
+                "low": 10,
+                "close": 15.0,
+                "closed": true
+              },
+              {
+                "open": 15.5,
+                "high": 20,
+                "low": 11,
+                "close": 15.5,
+                "closed": true
+              }
+            ],
+            "target_index": 1
+          }
+        },
+        {
+          "id": "SL-EQUAL-BELOW-C3_OPEN",
+          "relations": {
+            "c2_low_vs_c1_low": "equal",
+            "c2_low_vs_c3_low": "below",
+            "c3_closed": false
+          },
+          "expected_status": "TEXT_SILENT",
+          "expected_label": "WEAK_SUPPORT",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 15.0,
+                "high": 20,
+                "low": 10,
+                "close": 15.0,
+                "closed": true
+              },
+              {
+                "open": 15.0,
+                "high": 20,
+                "low": 10,
+                "close": 15.0,
+                "closed": true
+              },
+              {
+                "open": 15.5,
+                "high": 20,
+                "low": 11,
+                "close": 15.5,
+                "closed": false
+              }
+            ],
+            "target_index": 1
+          },
+          "exact_question": "هل تُقدَّم حالة NO أو UNDECIDED على PENDING عندما لا تكون الشمعة الثالثة مغلقة؟"
+        },
+        {
+          "id": "SL-BELOW-ABOVE-C3_CLOSED",
+          "relations": {
+            "c2_low_vs_c1_low": "below",
+            "c2_low_vs_c3_low": "above",
+            "c3_closed": true
+          },
+          "expected_status": "NO",
+          "expected_label": "WEAK_SUPPORT",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 15.0,
+                "high": 20,
+                "low": 10,
+                "close": 15.0,
+                "closed": true
+              },
+              {
+                "open": 14.5,
+                "high": 20,
+                "low": 9,
+                "close": 14.5,
+                "closed": true
+              },
+              {
+                "open": 14.0,
+                "high": 20,
+                "low": 8,
+                "close": 14.0,
+                "closed": true
+              }
+            ],
+            "target_index": 1
+          }
+        },
+        {
+          "id": "SL-BELOW-ABOVE-C3_OPEN",
+          "relations": {
+            "c2_low_vs_c1_low": "below",
+            "c2_low_vs_c3_low": "above",
+            "c3_closed": false
+          },
+          "expected_status": "TEXT_SILENT",
+          "expected_label": "WEAK_SUPPORT",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 15.0,
+                "high": 20,
+                "low": 10,
+                "close": 15.0,
+                "closed": true
+              },
+              {
+                "open": 14.5,
+                "high": 20,
+                "low": 9,
+                "close": 14.5,
+                "closed": true
+              },
+              {
+                "open": 14.0,
+                "high": 20,
+                "low": 8,
+                "close": 14.0,
+                "closed": false
+              }
+            ],
+            "target_index": 1
+          },
+          "exact_question": "هل تُقدَّم حالة NO أو UNDECIDED على PENDING عندما لا تكون الشمعة الثالثة مغلقة؟"
+        },
+        {
+          "id": "SL-BELOW-EQUAL-C3_CLOSED",
+          "relations": {
+            "c2_low_vs_c1_low": "below",
+            "c2_low_vs_c3_low": "equal",
+            "c3_closed": true
+          },
+          "expected_status": "UNDECIDED",
+          "expected_label": "WEAK_SUPPORT",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 15.0,
+                "high": 20,
+                "low": 10,
+                "close": 15.0,
+                "closed": true
+              },
+              {
+                "open": 14.5,
+                "high": 20,
+                "low": 9,
+                "close": 14.5,
+                "closed": true
+              },
+              {
+                "open": 14.5,
+                "high": 20,
+                "low": 9,
+                "close": 14.5,
+                "closed": true
+              }
+            ],
+            "target_index": 1
+          }
+        },
+        {
+          "id": "SL-BELOW-EQUAL-C3_OPEN",
+          "relations": {
+            "c2_low_vs_c1_low": "below",
+            "c2_low_vs_c3_low": "equal",
+            "c3_closed": false
+          },
+          "expected_status": "TEXT_SILENT",
+          "expected_label": "WEAK_SUPPORT",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 15.0,
+                "high": 20,
+                "low": 10,
+                "close": 15.0,
+                "closed": true
+              },
+              {
+                "open": 14.5,
+                "high": 20,
+                "low": 9,
+                "close": 14.5,
+                "closed": true
+              },
+              {
+                "open": 14.5,
+                "high": 20,
+                "low": 9,
+                "close": 14.5,
+                "closed": false
+              }
+            ],
+            "target_index": 1
+          },
+          "exact_question": "هل تُقدَّم حالة NO أو UNDECIDED على PENDING عندما لا تكون الشمعة الثالثة مغلقة؟"
+        },
+        {
+          "id": "SL-BELOW-BELOW-C3_CLOSED",
+          "relations": {
+            "c2_low_vs_c1_low": "below",
+            "c2_low_vs_c3_low": "below",
+            "c3_closed": true
+          },
+          "expected_status": "YES",
+          "expected_label": "WEAK_SUPPORT",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 15.0,
+                "high": 20,
+                "low": 10,
+                "close": 15.0,
+                "closed": true
+              },
+              {
+                "open": 14.5,
+                "high": 20,
+                "low": 9,
+                "close": 14.5,
+                "closed": true
+              },
+              {
+                "open": 15.0,
+                "high": 20,
+                "low": 10,
+                "close": 15.0,
+                "closed": true
+              }
+            ],
+            "target_index": 1
+          }
+        },
+        {
+          "id": "SL-BELOW-BELOW-C3_OPEN",
+          "relations": {
+            "c2_low_vs_c1_low": "below",
+            "c2_low_vs_c3_low": "below",
+            "c3_closed": false
+          },
+          "expected_status": "PENDING",
+          "expected_label": "WEAK_SUPPORT",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 15.0,
+                "high": 20,
+                "low": 10,
+                "close": 15.0,
+                "closed": true
+              },
+              {
+                "open": 14.5,
+                "high": 20,
+                "low": 9,
+                "close": 14.5,
+                "closed": true
+              },
+              {
+                "open": 15.0,
+                "high": 20,
+                "low": 10,
+                "close": 15.0,
+                "closed": false
+              }
+            ],
+            "target_index": 1
+          }
+        }
+      ]
+    },
+    "fvg_bullish": {
+      "case_count": 3,
+      "cases": [
+        {
+          "id": "FVG-BULL-LOW_C3_VS_HIGH_C1-ABOVE",
+          "relations": {
+            "low_c3_vs_high_c1": "above"
+          },
+          "expected_status": "YES",
+          "expected_label": "INVALIDATION_UNDECIDED",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 7.5,
+                "high": 10,
+                "low": 5,
+                "close": 7.5,
+                "closed": true
+              },
+              {
+                "open": 8.5,
+                "high": 11,
+                "low": 6,
+                "close": 8.5,
+                "closed": true
+              },
+              {
+                "open": 12.5,
+                "high": 13,
+                "low": 12,
+                "close": 12.5,
+                "closed": true
+              }
+            ],
+            "target_index": 1
+          }
+        },
+        {
+          "id": "FVG-BULL-LOW_C3_VS_HIGH_C1-EQUAL",
+          "relations": {
+            "low_c3_vs_high_c1": "equal"
+          },
+          "expected_status": "UNDECIDED",
+          "expected_label": "INVALIDATION_UNDECIDED",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 7.5,
+                "high": 10,
+                "low": 5,
+                "close": 7.5,
+                "closed": true
+              },
+              {
+                "open": 8.5,
+                "high": 11,
+                "low": 6,
+                "close": 8.5,
+                "closed": true
+              },
+              {
+                "open": 11.5,
+                "high": 13,
+                "low": 10,
+                "close": 11.5,
+                "closed": true
+              }
+            ],
+            "target_index": 1
+          }
+        },
+        {
+          "id": "FVG-BULL-LOW_C3_VS_HIGH_C1-BELOW",
+          "relations": {
+            "low_c3_vs_high_c1": "below"
+          },
+          "expected_status": "NO",
+          "expected_label": "INVALIDATION_UNDECIDED",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 7.5,
+                "high": 10,
+                "low": 5,
+                "close": 7.5,
+                "closed": true
+              },
+              {
+                "open": 8.5,
+                "high": 11,
+                "low": 6,
+                "close": 8.5,
+                "closed": true
+              },
+              {
+                "open": 10.5,
+                "high": 13,
+                "low": 8,
+                "close": 10.5,
+                "closed": true
+              }
+            ],
+            "target_index": 1
+          }
+        }
+      ]
+    },
+    "fvg_bearish": {
+      "case_count": 3,
+      "cases": [
+        {
+          "id": "FVG-BEAR-HIGH_C3_VS_LOW_C1-ABOVE",
+          "relations": {
+            "high_c3_vs_low_c1": "above"
+          },
+          "expected_status": "NO",
+          "expected_label": "INVALIDATION_UNDECIDED",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 12.5,
+                "high": 15,
+                "low": 10,
+                "close": 12.5,
+                "closed": true
+              },
+              {
+                "open": 11.5,
+                "high": 14,
+                "low": 9,
+                "close": 11.5,
+                "closed": true
+              },
+              {
+                "open": 8.5,
+                "high": 12,
+                "low": 5,
+                "close": 8.5,
+                "closed": true
+              }
+            ],
+            "target_index": 1
+          }
+        },
+        {
+          "id": "FVG-BEAR-HIGH_C3_VS_LOW_C1-EQUAL",
+          "relations": {
+            "high_c3_vs_low_c1": "equal"
+          },
+          "expected_status": "UNDECIDED",
+          "expected_label": "INVALIDATION_UNDECIDED",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 12.5,
+                "high": 15,
+                "low": 10,
+                "close": 12.5,
+                "closed": true
+              },
+              {
+                "open": 11.5,
+                "high": 14,
+                "low": 9,
+                "close": 11.5,
+                "closed": true
+              },
+              {
+                "open": 7.5,
+                "high": 10,
+                "low": 5,
+                "close": 7.5,
+                "closed": true
+              }
+            ],
+            "target_index": 1
+          }
+        },
+        {
+          "id": "FVG-BEAR-HIGH_C3_VS_LOW_C1-BELOW",
+          "relations": {
+            "high_c3_vs_low_c1": "below"
+          },
+          "expected_status": "YES",
+          "expected_label": "INVALIDATION_UNDECIDED",
+          "fixture_label": "FIXTURE",
+          "fixture": {
+            "candles": [
+              {
+                "open": 12.5,
+                "high": 15,
+                "low": 10,
+                "close": 12.5,
+                "closed": true
+              },
+              {
+                "open": 11.5,
+                "high": 14,
+                "low": 9,
+                "close": 11.5,
+                "closed": true
+              },
+              {
+                "open": 6.5,
+                "high": 8,
+                "low": 5,
+                "close": 6.5,
+                "closed": true
+              }
+            ],
+            "target_index": 1
+          }
+        }
+      ]
+    }
+  },
+  "cross_cutting_expectations": [
+    {
+      "id": "X-LOW-WEAK-SUPPORT",
+      "expectation": "Every swing-low result carries label WEAK_SUPPORT, as required by CORRECTIONS_R3 R3-b.",
+      "fixture_label": "FIXTURE",
+      "fixture": {
+        "candles": [
+          {
+            "open": 15.0,
+            "high": 20,
+            "low": 10,
+            "close": 15.0,
+            "closed": true
+          },
+          {
+            "open": 14.5,
+            "high": 20,
+            "low": 9,
+            "close": 14.5,
+            "closed": true
+          },
+          {
+            "open": 14.0,
+            "high": 20,
+            "low": 8,
+            "close": 14.0,
+            "closed": true
+          }
+        ],
+        "target_index": 1
+      }
+    },
+    {
+      "id": "X-FVG-INVALIDATION-UNDECIDED",
+      "expectation": "Every FVG result carries label INVALIDATION_UNDECIDED, since V2 §5.3 and §5.7 leave invalidation without a reference.",
+      "fixture_label": "FIXTURE",
+      "fixture": {
+        "candles": [
+          {
+            "open": 7.5,
+            "high": 10,
+            "low": 5,
+            "close": 7.5,
+            "closed": true
+          },
+          {
+            "open": 8.5,
+            "high": 11,
+            "low": 6,
+            "close": 8.5,
+            "closed": true
+          },
+          {
+            "open": 12.5,
+            "high": 13,
+            "low": 12,
+            "close": 12.5,
+            "closed": true
+          }
+        ],
+        "target_index": 1
+      }
+    },
+    {
+      "id": "X-NO-MICHAEL",
+      "expectation": "Output must never contain the word Michael.",
+      "fixture_label": "FIXTURE",
+      "fixture": {
+        "candles": [
+          {
+            "open": 7.5,
+            "high": 10,
+            "low": 5,
+            "close": 7.5,
+            "closed": true
+          },
+          {
+            "open": 8.5,
+            "high": 11,
+            "low": 6,
+            "close": 8.5,
+            "closed": true
+          },
+          {
+            "open": 9.5,
+            "high": 12,
+            "low": 7,
+            "close": 9.5,
+            "closed": true
+          }
+        ],
+        "target_index": 1
+      }
+    },
+    {
+      "id": "X-FUTURE-INVARIANCE",
+      "expectation": "The function result at index t is unchanged when any candles after t are appended.",
+      "fixture_label": "FIXTURE",
+      "fixture": {
+        "candles": [
+          {
+            "open": 7.5,
+            "high": 10,
+            "low": 5,
+            "close": 7.5,
+            "closed": true
+          },
+          {
+            "open": 9.0,
+            "high": 12,
+            "low": 6,
+            "close": 9.0,
+            "closed": true
+          },
+          {
+            "open": 9.0,
+            "high": 11,
+            "low": 7,
+            "close": 9.0,
+            "closed": true
+          },
+          {
+            "open": 8.5,
+            "high": 13,
+            "low": 4,
+            "close": 8.5,
+            "closed": true
+          }
+        ],
+        "target_index": 1,
+        "compare_to_prefix_length": 3
+      }
+    },
+    {
+      "id": "X-NO-INPUT-MUTATION",
+      "expectation": "The input candle list is not mutated.",
+      "fixture_label": "FIXTURE",
+      "fixture": {
+        "candles": [
+          {
+            "open": 7.5,
+            "high": 10,
+            "low": 5,
+            "close": 7.5,
+            "closed": true
+          },
+          {
+            "open": 9.0,
+            "high": 12,
+            "low": 6,
+            "close": 9.0,
+            "closed": true
+          },
+          {
+            "open": 9.0,
+            "high": 11,
+            "low": 7,
+            "close": 9.0,
+            "closed": true
+          }
+        ],
+        "target_index": 1
+      }
+    },
+    {
+      "id": "X-DETERMINISTIC",
+      "expectation": "Two runs with identical input give identical output.",
+      "fixture_label": "FIXTURE",
+      "fixture": {
+        "candles": [
+          {
+            "open": 7.5,
+            "high": 10,
+            "low": 5,
+            "close": 7.5,
+            "closed": true
+          },
+          {
+            "open": 9.0,
+            "high": 12,
+            "low": 6,
+            "close": 9.0,
+            "closed": true
+          },
+          {
+            "open": 9.0,
+            "high": 11,
+            "low": 7,
+            "close": 9.0,
+            "closed": true
+          }
+        ],
+        "target_index": 1
+      }
+    }
+  ]
+}
