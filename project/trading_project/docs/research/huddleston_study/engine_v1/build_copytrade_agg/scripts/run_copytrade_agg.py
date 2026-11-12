@@ -20,12 +20,17 @@ Run script for Copy-Trade Aggregator (build_copytrade_agg).
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path
 from datetime import datetime, timezone
 
-from trader_classifier import TraderProfile
-from confidence_scorer import ConfidenceScorer
-from recommendation_engine import RecommendationEngine
-from telegram_notifier import TelegramNotifier, TelegramConfig
+# إضافة مجلد src إلى مسار الاستيراد لتشغيل السكريبت مباشرة
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+
+from classifier import TraderProfile
+from scorer import ConfidenceScorer
+from engine import RecommendationEngine
+from telegram import TelegramNotifier, TelegramConfig
 
 
 def build_demo_signals(engine: RecommendationEngine) -> None:
@@ -212,7 +217,7 @@ def main() -> None:
         best.current_price = 65100.0
         best.current_price_source = "binance"
         # إعادة صياغة رسالة التيليجرام مع السعر الحالي
-        from confidence_scorer import ConfidenceScorer
+        from scorer import ConfidenceScorer
         scorer = ConfidenceScorer(entry_tolerance_pct=1.5)
         best.telegram_message = scorer.format_telegram_message(
             type('CR', (), {

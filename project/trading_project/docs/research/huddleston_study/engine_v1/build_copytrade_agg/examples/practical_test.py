@@ -15,11 +15,17 @@
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+
+# إضافة مجلد src إلى مسار الاستيراد لتشغيل الأمثلة مباشرة
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+
 from datetime import datetime, timezone, timedelta
-from trader_classifier import TraderProfile, TraderClassifier
-from confidence_scorer import ConfidenceScorer, TraderEntry
-from recommendation_engine import RecommendationEngine
-from telegram_notifier import TelegramNotifier, TelegramConfig
+from classifier import TraderProfile, TraderClassifier
+from scorer import ConfidenceScorer, TraderEntry
+from engine import RecommendationEngine
+from telegram import TelegramNotifier, TelegramConfig
 from connectors import (
     RawFill, normalize_fill_to_signal,
     HyperliquidConnector, DydxConnector, Collective2Connector,

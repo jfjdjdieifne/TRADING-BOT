@@ -328,8 +328,8 @@ class TelegramNotifier:
 
 def test_message_format() -> None:
     """اختبار تنسيق الرسائل بدون اتصال حقيقي."""
-    from recommendation_engine import Recommendation
-    from confidence_scorer import ConfidenceResult, TraderEntry
+    from engine import Recommendation
+    from scorer import ConfidenceResult, TraderEntry
 
     result = ConfidenceResult(
         total_score=85,

@@ -1,0 +1,12 @@
+# build_copytrade_agg — تبعيات المشروع
+# جميع النتائج افتراضية (HYPOTHETICAL_) ولا تشكل نصيحة استثمارية.
+
+# office dependencies (مطلوبة للتشغيل الفعلي ضد المنصات)
+aiohttp>=3.8.0
+
+# التطوير والاختبار (اختياري)
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+black>=23.0.0
+flake8>=6.0.0
+mypy>=1.0.0

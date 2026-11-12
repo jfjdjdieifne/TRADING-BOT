@@ -23,7 +23,7 @@ from dataclasses import dataclass, field
 from statistics import mean
 from typing import Optional
 
-from trader_classifier import TraderProfile, TraderClassifier
+from classifier import TraderProfile, TraderClassifier
 
 
 @dataclass
