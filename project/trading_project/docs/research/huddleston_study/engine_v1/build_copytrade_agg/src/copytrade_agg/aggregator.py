@@ -12,8 +12,8 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Optional
 
-from models import Signal, AggregatedSignal, CopyTradeAggregator
-from connectors import RawFill, normalize_fill_to_signal
+from .models import Signal, AggregatedSignal, CopyTradeAggregator
+from .connectors import RawFill, normalize_fill_to_signal
 
 UTC = timezone.utc
 

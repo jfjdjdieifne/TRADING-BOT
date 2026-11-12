@@ -21,9 +21,9 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Optional
 
-from classifier import TraderProfile, TraderClassifier
-from scorer import ConfidenceScorer, ConfidenceResult
-from connectors import RawFill, normalize_fill_to_signal
+from .classifier import TraderProfile, TraderClassifier
+from .scorer import ConfidenceScorer, ConfidenceResult
+from .connectors import RawFill, normalize_fill_to_signal
 
 UTC = timezone.utc
 

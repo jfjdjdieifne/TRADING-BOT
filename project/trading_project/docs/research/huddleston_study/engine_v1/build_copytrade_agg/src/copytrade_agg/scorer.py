@@ -23,7 +23,7 @@ from dataclasses import dataclass, field
 from statistics import mean
 from typing import Optional
 
-from classifier import TraderProfile, TraderClassifier
+from .classifier import TraderProfile, TraderClassifier
 
 
 @dataclass
@@ -464,7 +464,7 @@ def demo() -> None:
     print("Confidence Scorer — Demo (نظام الثقة من 100 نقطة)")
     print("=" * 70)
 
-    from trader_classifier import TraderProfile
+    from .classifier import TraderProfile
 
     scorer = ConfidenceScorer(entry_tolerance_pct=1.5)
 

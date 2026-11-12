@@ -1,6 +1,6 @@
 # DECLARED_CHOICES_COPYTRADE_AGG.md — نسخ الصفقات المجمّع (تصميم وقرارات)
 
-**المشروع:** build_copytrade_agg (جانبي، منفصل عن ZONES v1)
+**المشروع:** copytrade-aggregator (جانبي، منفصل عن ZONES v1)
 **التاريخ:** 2026-11-11
 **الفرع:** arena/f75dc3c4-trading-bot
 

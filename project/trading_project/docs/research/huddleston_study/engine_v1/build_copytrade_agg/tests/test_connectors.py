@@ -2,12 +2,7 @@
 اختبارات لوحدة وصلات المنصات (connectors.py).
 """
 
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
-
-from connectors import (
+from copytrade_agg.connectors import (
     RawFill, BaseConnector,
     HyperliquidConnector, DydxConnector,
     Collective2Connector, MyfxbookConnector,
@@ -18,7 +13,6 @@ from connectors import (
 )
 from datetime import datetime, timezone
 
-
 def test_list_platforms():
     """اختبار أن جميع المنصات الـ 8 مسجلة."""
     platforms = list_platforms()
@@ -28,13 +22,11 @@ def test_list_platforms():
     for p in expected:
         assert p in platforms
 
-
 def test_get_connector():
     """اختبار إنشاء موصل لكل منصة."""
     for platform in list_platforms():
         connector = get_connector(platform)
         assert connector.platform == platform
-
 
 def test_get_connector_invalid():
     """اختبار أن منصة غير معروفة ترفع خطأ."""
@@ -43,7 +35,6 @@ def test_get_connector_invalid():
         assert False, "يجب أن يرفع خطأ لمنصة غير معروفة"
     except ValueError:
         pass
-
 
 def test_normalize_fill_to_signal():
     """اختبار تحويل RawFill إلى Signal."""
@@ -64,7 +55,6 @@ def test_normalize_fill_to_signal():
     assert signal["trader_id"] == "0xabc123"
     assert signal["source"] == "hyperliquid"
 
-
 def test_all_connectors_have_required_methods():
     """اختبار أن جميع الموصلات تطبق واجهة BaseConnector."""
     for platform, connector_class in ALL_CONNECTORS.items():
@@ -73,7 +63,6 @@ def test_all_connectors_have_required_methods():
         assert hasattr(connector, "stream_fills")
         assert hasattr(connector, "health_check")
         assert hasattr(connector, "platform")
-
 
 def test_public_connectors_no_api_key():
     """اختبار أن المنصات العامة لا تحتاج API Key (لا تحتوي على خاصية api_key)."""
@@ -84,7 +73,6 @@ def test_public_connectors_no_api_key():
     assert not hasattr(hl, "api_key")
     assert not hasattr(dx, "api_key")
 
-
 def test_api_key_connectors_require_key():
     """اختبار أن المنصات التي تحتاج API Key تُظهر أنها غير فعالة بدون مفتاح."""
     c2 = Collective2Connector(api_key=None)
@@ -94,7 +82,6 @@ def test_api_key_connectors_require_key():
     assert c2.api_key is None
     assert dw.api_key is None
     assert bd.api_key is None
-
 
 if __name__ == "__main__":
     test_list_platforms()

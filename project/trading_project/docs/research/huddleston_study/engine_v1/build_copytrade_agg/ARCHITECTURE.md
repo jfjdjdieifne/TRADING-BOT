@@ -1,6 +1,6 @@
 # ARCHITECTURE.md — نسخ الصفقات المجمّع (بنية المشروع)
 
-**المشروع:** build_copytrade_agg (جانبي، منفصل تماماً عن ZONES v1 المجمد)
+**المشروع:** copytrade-aggregator (جانبي، منفصل تماماً عن ZONES v1 المجمد)
 **التاريخ:** 2026-11-12
 **الفرع:** arena/f75dc3c4-trading-bot
 **الإصدار:** 1.0.0
@@ -14,25 +14,28 @@
 ## هيكل الملفات (النهائي)
 
 ```
-build_copytrade_agg/
+copytrade-aggregator/
 ├── README.md                 # توثيق المشروع الرئيسي
-├── requirements.txt          # تبعيات المشروع
+├── LICENSE                   # ترخيص MIT
+├── requirements.txt          # تبعيات التشغيل
+├── requirements-dev.txt      # تبعيات التطوير
 ├── setup.py                  # إعدادات التثبيت
+├── pyproject.toml            # إعدادات نظام البناء
 ├── .gitignore                # ملفات تُتجاهل في Git
 ├── DECLARED_CHOICES_COPYTRADE_AGG.md   # قرارات التصميم والمواصفات
 ├── ARCHITECTURE.md           # هذا الملف (هندسة المشروع)
 ├── docs/PLATFORM_SETUP.md    # دليل إعداد المنصات
-├── src/                      # الكود المصدري (مستقل عن ZONES v1)
-│   ├── __init__.py
-│   ├── models.py             # Signal, AggregatedSignal, CopyTradeAggregator
-│   ├── classifier.py         # TraderClassifier (تصنيف 4-way)
-│   ├── scorer.py             # ConfidenceScorer (الثقة من 100 نقطة)
-│   ├── engine.py             # RecommendationEngine (محرك التوصيات)
-│   ├── aggregator.py         # CopyTradeEngine (محرك التجميع البسيط)
-│   ├── connectors.py         # وصلات 8 منصات + normalizer
-│   ├── telegram.py           # TelegramNotifier (إشعارات تليجرام + /details)
-│   ├── backtest.py           # اختبار التاريخي للإشارات
-│   └── utils.py              # دوال مساعدة
+├── src/
+│   └── copytrade_agg/        # الحزمة الرئيسية (مستقلة عن ZONES v1)
+│       ├── __init__.py
+│       ├── models.py         # Signal, AggregatedSignal, CopyTradeAggregator
+│       ├── classifier.py     # TraderClassifier (تصنيف 4-way)
+│       ├── scorer.py         # ConfidenceScorer (الثقة من 100 نقطة)
+│       ├── engine.py         # RecommendationEngine (محرك التوصيات)
+│       ├── aggregator.py     # CopyTradeEngine (محرك التجميع البسيط)
+│       ├── connectors.py     # وصلات 8 منصات + normalizer
+│       ├── telegram.py       # TelegramNotifier (إشعارات تليجرام + /details)
+│       └── backtest.py       # اختبار التاريخي للإشارات
 ├── tests/                    # اختبارات الوحدة (مُقترَح)
 │   ├── test_classifier.py
 │   ├── test_scorer.py
@@ -185,7 +188,7 @@ pip install -e .
 أو للتطوير:
 
 ```bash
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 ```
 
 ---

@@ -1,5 +1,5 @@
 """
-build_copytrade_agg — نسخ الصفقات المجمّع (مستقل تماماً عن ZONES v1)
+copytrade-aggregator — نسخ الصفقات المجمّع (مستقل تماماً عن ZONES v1)
 
 إطار عمل لجمع إشارات نسخ التداول من متداولين محترفين عبر منصات متعددة،
 وتجميع الإشارات المتفقة على نفس الزوج والاتجاه مع مستويات دخول متقاربة،
@@ -18,12 +18,12 @@ build_copytrade_agg — نسخ الصفقات المجمّع (مستقل تما�
 جميع النتائج افتراضية (HYPOTHETICAL_) ولا تشكل نصيحة استثمارية.
 """
 
-from models import Signal, AggregatedSignal, CopyTradeAggregator
-from classifier import TraderClassifier, TraderProfile
-from scorer import ConfidenceScorer, ConfidenceResult
-from engine import RecommendationEngine, Recommendation
-from aggregator import CopyTradeEngine, EngineConfig, AggregationResult
-from connectors import (
+from .models import Signal, AggregatedSignal, CopyTradeAggregator
+from .classifier import TraderClassifier, TraderProfile
+from .scorer import ConfidenceScorer, ConfidenceResult
+from .engine import RecommendationEngine, Recommendation
+from .aggregator import CopyTradeEngine, EngineConfig, AggregationResult
+from .connectors import (
     RawFill,
     BaseConnector,
     HyperliquidConnector,
@@ -39,8 +39,8 @@ from connectors import (
     list_platforms,
     normalize_fill_to_signal,
 )
-from telegram import TelegramNotifier, TelegramConfig
-from backtest import BacktestResult, backtest_signal, summarize_backtest
+from .telegram import TelegramNotifier, TelegramConfig
+from .backtest import BacktestResult, backtest_signal, summarize_backtest
 
 __version__ = "1.0.0"
 __all__ = [

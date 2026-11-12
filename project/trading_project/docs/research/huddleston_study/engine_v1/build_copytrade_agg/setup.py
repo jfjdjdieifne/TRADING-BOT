@@ -1,5 +1,5 @@
 """
-إعدادات تثبيت مشروع build_copytrade_agg — نسخ الصفقات المجمّع.
+إعدادات تثبيت مشروع copytrade-aggregator — نسخ الصفقات المجمّع.
 
 للتثبيت في وضع التطوير:
     pip install -e .
@@ -17,13 +17,14 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
     requirements = [line.strip() for line in fh if line.strip() and not line.startswith("#")]
 
 setup(
-    name="build_copytrade_agg",
+    name="copytrade-aggregator",
     version="1.0.0",
     author="Trading Bot Team",
     description="نظام تجميع إشارات نسخ التداول من متداولين محترفين عبر منصات متعددة",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/your-org/build_copytrade_agg",
+    url="https://github.com/jfjdjdieifne/copytrade-aggregator",
+    license="MIT",
     package_dir={"": "src"},
     packages=find_packages(where="src"),
     classifiers=[
@@ -48,13 +49,9 @@ setup(
             "mypy>=1.0.0",
         ],
     },
-    entry_points={
-        "console_scripts": [
-            "copytrade-agg=scripts.run_copytrade_agg:main",
-        ],
-    },
     project_urls={
-        "Bug Reports": "https://github.com/your-org/build_copytrade_agg/issues",
-        "Documentation": "https://github.com/your-org/build_copytrade_agg#readme",
+        "Bug Reports": "https://github.com/jfjdjdieifne/copytrade-aggregator/issues",
+        "Source": "https://github.com/jfjdjdieifne/copytrade-aggregator",
+        "Documentation": "https://github.com/jfjdjdieifne/copytrade-aggregator#readme",
     },
 )

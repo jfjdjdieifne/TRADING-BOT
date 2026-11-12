@@ -1,4 +1,4 @@
-# دليل إعداد المنصات — build_copytrade_agg
+# دليل إعداد المنصات — copytrade-aggregator
 
 يشرح هذا الملف كيفية إعداد كل منصة للاتصال الفعلي بالنظام.
 
@@ -12,7 +12,7 @@
 **مفتاح API:** غير مطلوب للبيانات العامة
 
 ```python
-from build_copytrade_agg.connectors import HyperliquidConnector
+from copytrade_agg.connectors import HyperliquidConnector
 
 connector = HyperliquidConnector()
 await connector.health_check()  # يتحقق من توفر المنصة
@@ -29,7 +29,7 @@ await connector.health_check()  # يتحقق من توفر المنصة
 **مفتاح API:** غير مطلوب للقراءة العامة
 
 ```python
-from build_copytrade_agg.connectors import DydxConnector
+from copytrade_agg.connectors import DydxConnector
 
 connector = DydxConnector()
 await connector.health_check()
@@ -43,7 +43,7 @@ fills = await connector.fetch_recent_fills(limit=200)
 **مفتاح API:** غير مطلوب للوصول العام الأساسي
 
 ```python
-from build_copytrade_agg.connectors import DeBankConnector
+from copytrade_agg.connectors import DeBankConnector
 
 connector = DeBankConnector()
 await connector.health_check()
@@ -60,7 +60,7 @@ await connector.health_check()
 **نقاط النهاية:** `listAllSystems`, `GetLeaderBoard`, `GetStrategyDetails`
 
 ```python
-from build_copytrade_agg.connectors import Collective2Connector
+from copytrade_agg.connectors import Collective2Connector
 
 connector = Collective2Connector(api_key="YOUR_API_KEY_HERE")
 await connector.health_check()
@@ -75,7 +75,7 @@ await connector.health_check()
 **نقاط النهاية:** `GetAccount`, `GetGain`, `GetTrades`
 
 ```python
-from build_copytrade_agg.connectors import MyfxbookConnector
+from copytrade_agg.connectors import MyfxbookConnector
 
 connector = MyfxbookConnector(email="YOUR_EMAIL", password="YOUR_PASSWORD")
 await connector.health_check()
@@ -90,7 +90,7 @@ await connector.health_check()
 **نقاط النهاية:** زلورانك (ZuluRank)، لائحة المتصدرين
 
 ```python
-from build_copytrade_agg.connectors import ZuluTradeConnector
+from copytrade_agg.connectors import ZuluTradeConnector
 
 connector = ZuluTradeConnector(api_key="YOUR_API_KEY_HERE")
 await connector.health_check()
@@ -103,7 +103,7 @@ await connector.health_check()
 **نقاط النهاية:** DARWINs، السمات الاستثمارية (0–10)
 
 ```python
-from build_copytrade_agg.connectors import DarwinexConnector
+from copytrade_agg.connectors import DarwinexConnector
 
 connector = DarwinexConnector(api_key="YOUR_API_KEY_HERE")
 await connector.health_check()
@@ -116,7 +116,7 @@ await connector.health_check()
 **نقاط النهاية:** wallet PnL، smart money، trader leaderboards
 
 ```python
-from build_copytrade_agg.connectors import BirdeyeConnector
+from copytrade_agg.connectors import BirdeyeConnector
 
 connector = BirdeyeConnector(api_key="YOUR_API_KEY_HERE")
 await connector.health_check()
@@ -161,7 +161,7 @@ BIRDEYE_API_KEY=your_key_here
 
 ```python
 import os
-from build_copytrade_agg.connectors import Collective2Connector
+from copytrade_agg.connectors import Collective2Connector
 
 connector = Collective2Connector(api_key=os.getenv("COLLECTIVE2_API_KEY"))
 ```

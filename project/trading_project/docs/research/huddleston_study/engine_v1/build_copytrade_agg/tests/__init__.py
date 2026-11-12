@@ -1,1 +1,1 @@
-"""اختبارات وحدة لنظام build_copytrade_agg."""
+"""اختبارات وحدة لنظام copytrade-aggregator."""

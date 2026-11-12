@@ -15,18 +15,14 @@
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
 # إضافة مجلد src إلى مسار الاستيراد لتشغيل الأمثلة مباشرة
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from datetime import datetime, timezone, timedelta
-from classifier import TraderProfile, TraderClassifier
-from scorer import ConfidenceScorer, TraderEntry
-from engine import RecommendationEngine
-from telegram import TelegramNotifier, TelegramConfig
-from connectors import (
+from copytrade_agg.classifier import TraderProfile, TraderClassifier
+from copytrade_agg.scorer import ConfidenceScorer, TraderEntry
+from copytrade_agg.engine import RecommendationEngine
+from copytrade_agg.telegram import TelegramNotifier, TelegramConfig
+from copytrade_agg.connectors import (
     RawFill, normalize_fill_to_signal,
     HyperliquidConnector, DydxConnector, Collective2Connector,
     MyfxbookConnector, ZuluTradeConnector, DarwinexConnector,
@@ -35,12 +31,10 @@ from connectors import (
 
 utc = timezone.utc
 
-
 def print_header(text: str) -> None:
     print("\n" + "=" * 70)
     print(text)
     print("=" * 70)
-
 
 def show_platform_status() -> None:
     """إظهار حالة كل منصة: عامة أم تحتاج API Key."""
@@ -62,7 +56,6 @@ def show_platform_status() -> None:
         print(f"\n  {name}: {status}")
         print(f"    ملاحظة: {note}")
         print(f"    منصّة في النظام: {conn.platform}")
-
 
 def build_realistic_profiles() -> list[TraderProfile]:
     """بناء ملفات متداولين واقعية تمر عبر النظام كاملاً."""
@@ -215,7 +208,6 @@ def build_realistic_profiles() -> list[TraderProfile]:
     ]
     return profiles
 
-
 def main() -> None:
     print_header("🚀 اختبار عملي كامل لنظام Copy-Trade Aggregator")
     print("البيانات تمر عبر كامل خط الأنابيب الفعلي (لا éxécution تلقائية — توصية فقط)")
@@ -305,7 +297,6 @@ def main() -> None:
         best.current_price = 65100.0
         best.current_price_source = "binance"
 
-        from confidence_scorer import ConfidenceScorer
         scorer = ConfidenceScorer(entry_tolerance_pct=1.5)
         best.telegram_message = scorer.format_telegram_message(
             type('CR', (), {
@@ -360,7 +351,6 @@ def main() -> None:
     print("  7. ✅ رسالة تليجرام مع أمر /details للتفاصيل الكاملة")
     print("  8. ✅ لا تنفيذ تلقائي — توصية فقط، والقرار للمستخدم")
     print("\n📋 للمنصات التي تحتاج API Key: أضف المفتاح في إنشاء الموصل (مثلاً Collective2Connector(api_key='YOUR_KEY'))")
-
 
 if __name__ == "__main__":
     main()

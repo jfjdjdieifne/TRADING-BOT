@@ -2,13 +2,7 @@
 اختبارات لوحدة تصنيف المتداولين (classifier.py).
 """
 
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
-
-from classifier import TraderProfile, TraderClassifier
-
+from copytrade_agg.classifier import TraderProfile, TraderClassifier
 
 def test_professional_active_classification():
     """اختبار تصنيف متداول محترف نشط."""
@@ -38,7 +32,6 @@ def test_professional_active_classification():
     assert result.classification == "PROFESSIONAL_ACTIVE"
     assert result.classification_score >= 70
 
-
 def test_suspicious_classification():
     """اختبار تصنيف متداول مشبوه (نسبة ربح غير واقعية مع 20+ صفقة)."""
     classifier = TraderClassifier()
@@ -65,7 +58,6 @@ def test_suspicious_classification():
     result = classifier.classify(profile)
     assert result.classification == "SUSPICIOUS"
 
-
 def test_regular_classification():
     """اختبار تصنيف متداول عادي."""
     classifier = TraderClassifier()
@@ -91,7 +83,6 @@ def test_regular_classification():
     )
     result = classifier.classify(profile)
     assert result.classification in ("REGULAR", "PROFESSIONAL_INACTIVE")
-
 
 def test_deduplicate_by_trader_id():
     """اختبار إزالة التكرار للشخص نفسه عبر منصات متعددة."""
@@ -134,7 +125,6 @@ def test_deduplicate_by_trader_id():
     deduped = classifier.deduplicate_by_trader_id(classified)
     assert len(deduped) == 1  # يجب أن يُحتسب مرة واحدة
 
-
 def test_get_professional_active():
     """اختبار جلب المتداولين المحترفين النشطين فقط."""
     classifier = TraderClassifier()
@@ -157,7 +147,6 @@ def test_get_professional_active():
     classified = classifier.classify_batch(profiles)
     active = classifier.get_professional_active(classified)
     assert len(active) == 1
-
 
 if __name__ == "__main__":
     test_professional_active_classification()

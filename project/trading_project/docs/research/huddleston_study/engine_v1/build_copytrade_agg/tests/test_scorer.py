@@ -2,14 +2,8 @@
 اختبارات لوحدة نظام الثقة (scorer.py).
 """
 
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
-
-from classifier import TraderProfile
-from scorer import ConfidenceScorer, ConfidenceResult
-
+from copytrade_agg.classifier import TraderProfile
+from copytrade_agg.scorer import ConfidenceScorer, ConfidenceResult
 
 def test_confidence_score_range():
     """اختبار أن درجة الثقة ضمن المدى 0-100."""
@@ -29,7 +23,6 @@ def test_confidence_score_range():
     assert 0 <= result.total_score <= 100
     assert result.confidence_level in ("VERY_HIGH", "HIGH", "MEDIUM", "LOW", "INSUFFICIENT")
 
-
 def test_min_professionals_required():
     """اختبار أن الإشارة لا تُطلق مع أقل من 2 محترفين نشطين."""
     scorer = ConfidenceScorer(entry_tolerance_pct=1.5)
@@ -45,7 +38,6 @@ def test_min_professionals_required():
     ]
     result = scorer.score(profiles, "BTC-USD", "BUY", "spot")
     assert result.signal_emitted is False  #need min 2
-
 
 def test_two_professionals_emit_signal():
     """اختبار أن الإشارة تُطلق مع 2 محترفين نشطين."""
@@ -65,7 +57,6 @@ def test_two_professionals_emit_signal():
     assert result.signal_emitted is True
     assert result.n_professional_active == 2
 
-
 def test_entry_spread_within_tolerance():
     """اختبار أن انتشار الدخول ضمن 1.5% لا يؤثر سلباً على الثقة."""
     scorer = ConfidenceScorer(entry_tolerance_pct=1.5)
@@ -82,7 +73,6 @@ def test_entry_spread_within_tolerance():
     ]
     result = scorer.score(profiles, "BTC-USD", "BUY", "spot")
     assert result.entry_spread_pct < 1.5  # ضمن التolerance
-
 
 def test_market_type_separation():
     """اختبار أن Spot و Futures لا يُخلطان."""
@@ -111,7 +101,6 @@ def test_market_type_separation():
     result_futures = scorer.score(profiles_futures, "BTC-USD", "BUY", "futures")
     assert result_spot.market_types == ["spot"]
     assert result_futures.market_types == ["futures"]
-
 
 if __name__ == "__main__":
     test_confidence_score_range()

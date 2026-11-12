@@ -1,4 +1,4 @@
-# build_copytrade_agg — نسخ الصفقات المجمّع
+# copytrade-aggregator — نسخ الصفقات المجمّع
 
 نظام تجميع إشارات نسخ التداول من متداولين محترفين عبر منصات متعددة، مع نظام تصنيف وتصنيف ثقة من 100 نقطة، وإشعارات تليجرام مع أمر `/details` لعرض تفاصيل كل متداول على حدة.
 
@@ -22,24 +22,28 @@
 ## هيكل الملفات
 
 ```
-build_copytrade_agg/
+copytrade-aggregator/
 ├── README.md                 # هذا الملف
-├── requirements.txt          # تبعيات المشروع
+├── LICENSE                   # ترخيص MIT
+├── requirements.txt          # تبعيات التشغيل
+├── requirements-dev.txt      # تبعيات التطوير والاختبار
 ├── setup.py                  # إعدادات التثبيت
+├── pyproject.toml            # إعدادات نظام البناء
+├── conftest.py               # تشغيل pytest بدون تثبيت الحزمة
 ├── .gitignore                # ملفات تُتجاهل في Git
 ├── DECLARED_CHOICES_COPYTRADE_AGG.md   # قرارات التصميم
 ├── ARCHITECTURE.md           # هندسة المشروع
-├── src/                      # الكود المصدري
-│   ├── __init__.py
-│   ├── models.py             # Signal, AggregatedSignal, CopyTradeAggregator
-│   ├── classifier.py         # TraderClassifier (تصنيف 4-way)
-│   ├── scorer.py             # ConfidenceScorer (الثقة من 100 نقطة)
-│   ├── engine.py             # RecommendationEngine (محرك التوصيات)
-│   ├── aggregator.py         # CopyTradeEngine (محرك التجميع البسيط)
-│   ├── connectors.py         # وصلات 8 منصات
-│   ├── telegram.py           # TelegramNotifier (إشعارات تليجرام)
-│   ├── backtest.py           # اختبار التاريخي للإشارات
-│   └── utils.py              # دوال مساعدة
+├── src/
+│   └── copytrade_agg/        # الحزمة الرئيسية
+│       ├── __init__.py
+│       ├── models.py         # Signal, AggregatedSignal, CopyTradeAggregator
+│       ├── classifier.py     # TraderClassifier (تصنيف 4-way)
+│       ├── scorer.py         # ConfidenceScorer (الثقة من 100 نقطة)
+│       ├── engine.py         # RecommendationEngine (محرك التوصيات)
+│       ├── aggregator.py     # CopyTradeEngine (محرك التجميع البسيط)
+│       ├── connectors.py     # وصلات 8 منصات
+│       ├── telegram.py       # TelegramNotifier (إشعارات تليجرام)
+│       └── backtest.py       # اختبار التاريخي للإشارات
 ├── tests/                    # اختبارات الوحدة
 │   ├── test_classifier.py
 │   ├── test_scorer.py
@@ -57,8 +61,8 @@ build_copytrade_agg/
 
 ```bash
 # نسخ المستودع
-git clone https://github.com/your-org/build_copytrade_agg.git
-cd build_copytrade_agg
+git clone https://github.com/jfjdjdieifne/copytrade-aggregator.git
+cd copytrade-aggregator
 
 # التثبيت في وضع التطوير
 pip install -e .
@@ -77,7 +81,7 @@ python scripts/run_copytrade_agg.py
 python examples/practical_test.py
 
 # استيراد كمكتبة في كودك الخاص
-from build_copytrade_agg import RecommendationEngine, TraderClassifier, ConfidenceScorer
+from copytrade_agg import RecommendationEngine, TraderClassifier, ConfidenceScorer
 ```
 
 ## المنصات المدعومة
@@ -150,6 +154,9 @@ from build_copytrade_agg import RecommendationEngine, TraderClassifier, Confiden
 ## التطوير
 
 ```bash
+# تثبيت تبعيات التطوير
+pip install -r requirements-dev.txt
+
 # تشغيل الاختبارات
 pytest tests/
 
@@ -161,7 +168,7 @@ mypy src/
 
 ## الترخيص
 
-MIT License — راجع ملف LICENSE (لم يُنشأ بعد).
+MIT License — راجع ملف LICENSE.
 
 ---
 

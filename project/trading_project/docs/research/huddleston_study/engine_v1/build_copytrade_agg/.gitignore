@@ -1,4 +1,4 @@
-# build_copytrade_agg — ملفات تُتجاهل في Git
+# copytrade-aggregator — ملفات تُتجاهل في Git
 
 # Python
 __pycache__/

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Run script for Copy-Trade Aggregator (build_copytrade_agg).
+Run script for Copy-Trade Aggregator (copytrade-aggregator).
 
 هذا السكربت يشغل خط الأنابيب الكامل للمجمع وفق المواصفات الجديدة:
 1. يبدأ بالكريبتو، ويفصل Spot عن Futures
@@ -20,18 +20,14 @@ Run script for Copy-Trade Aggregator (build_copytrade_agg).
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
 from datetime import datetime, timezone
 
-# إضافة مجلد src إلى مسار الاستيراد لتشغيل السكريبت مباشرة
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+# يتطلب تثبيت الحزمة أولاً: pip install -e .
 
-from classifier import TraderProfile
-from scorer import ConfidenceScorer
-from engine import RecommendationEngine
-from telegram import TelegramNotifier, TelegramConfig
-
+from copytrade_agg.classifier import TraderProfile
+from copytrade_agg.scorer import ConfidenceScorer
+from copytrade_agg.engine import RecommendationEngine
+from copytrade_agg.telegram import TelegramNotifier, TelegramConfig
 
 def build_demo_signals(engine: RecommendationEngine) -> None:
     """بناء إشارات توضيحية من منصات متعددة (كريبتو، Spot/Futures)."""
@@ -165,7 +161,6 @@ def build_demo_signals(engine: RecommendationEngine) -> None:
         signal_timestamp=datetime(2026, 11, 12, 10, 5, 0, tzinfo=utc),
     )
 
-
 def main() -> None:
     print("=" * 70)
     print("Copy-Trade Aggregator — Run Script (مجمع نسخ الصفقات)")
@@ -217,7 +212,7 @@ def main() -> None:
         best.current_price = 65100.0
         best.current_price_source = "binance"
         # إعادة صياغة رسالة التيليجرام مع السعر الحالي
-        from scorer import ConfidenceScorer
+        from copytrade_agg.scorer import ConfidenceScorer
         scorer = ConfidenceScorer(entry_tolerance_pct=1.5)
         best.telegram_message = scorer.format_telegram_message(
             type('CR', (), {
@@ -270,7 +265,6 @@ def main() -> None:
     print("\n" + "=" * 70)
     print("اكتمل التشغيل (لا مكالمات API حقيقية تمت، لا تنفيذ تلقائي).")
     print("=" * 70)
-
 
 if __name__ == "__main__":
     main()

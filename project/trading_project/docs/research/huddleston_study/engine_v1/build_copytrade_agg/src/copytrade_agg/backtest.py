@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone, timedelta
 from typing import Optional
 
-from models import AggregatedSignal
+from .models import AggregatedSignal
 
 UTC = timezone.utc
 
@@ -144,8 +144,8 @@ def _make_candle(start: datetime, open_p: float, high: float, low: float, close:
 
 
 def run_backtest_demo() -> None:
-    from models import Signal, CopyTradeAggregator
-    from connectors import normalize_fill_to_signal, RawFill
+    from .models import Signal, CopyTradeAggregator
+    from .connectors import normalize_fill_to_signal, RawFill
 
     print("=" * 70)
     print("Copy Trade Backtest — Demo (بيانات اصطناعية)")

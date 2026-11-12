@@ -2,14 +2,8 @@
 اختبارات لوحدة محرك التوصيات (engine.py).
 """
 
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
-
-from classifier import TraderProfile
-from engine import RecommendationEngine
-
+from copytrade_agg.classifier import TraderProfile
+from copytrade_agg.engine import RecommendationEngine
 
 def test_engine_generates_recommendation():
     """اختبار أن المحرك يولد توصية عند توفر 2 محترفين نشطين."""
@@ -45,7 +39,6 @@ def test_engine_generates_recommendation():
     assert rec.signal_emitted is True
     assert rec.confidence_score >= 45
 
-
 def test_engine_no_recommendation_below_min_confidence():
     """اختبار أن المحرك لا يولد توصية أقل من الحد الأدنى للثقة."""
     engine = RecommendationEngine(entry_tolerance_pct=1.5, min_confidence=90)
@@ -72,7 +65,6 @@ def test_engine_no_recommendation_below_min_confidence():
     # قد لا تُطلق الإشارة إذا كانت الثقة أقل من 90
     for rec in recommendations:
         assert rec.confidence_score >= 90
-
 
 def test_engine_market_type_filter():
     """اختبار تصفية التوصيات حسب نوع السوق."""
@@ -104,7 +96,6 @@ def test_engine_market_type_filter():
     for rec in recs_futures:
         assert rec.market_type == "futures"
 
-
 def test_statistics():
     """اختبار إحصائيات المحرك."""
     engine = RecommendationEngine(entry_tolerance_pct=1.5, min_confidence=45)
@@ -122,7 +113,6 @@ def test_statistics():
     assert stats["unique_traders"] == 1
     assert "BTC-USD" in stats["pairs"]
     assert "spot" in stats["market_types"]
-
 
 if __name__ == "__main__":
     test_engine_generates_recommendation()
