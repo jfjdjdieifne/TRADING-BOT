@@ -1,0 +1,30 @@
+{
+  "fixture_version": "SCALP-FIXTURES-3",
+  "declared_after_fixtures_2": true,
+  "tag": "FIXTURE",
+  "reason": "Two cases in EXPECTED_SCALP_FIXTURES_2.json are defective and are NOT edited (the rule forbids editing an expectation after a failure). They are superseded here, numbered.",
+  "defects": [
+    {"id": "FIX-D1", "case": "variant_1B", "defect": "the declared H candle [1.10500, 1.10520, 1.10470, 1.10500] is a doji (open == close), so it is not a bearish candle and no valid H exists"},
+    {"id": "FIX-D2", "case": "fvg_in_1B", "defect": "the declared candle 5 [1.10300, 1.10520, 1.10500, 1.10510] has its open below its own low (malformed OHLC)"}
+  ],
+  "cases": [
+    {
+      "id": "variant_1B_fixed",
+      "supersedes": "variant_1B",
+      "label": "R at S, one more bullish candle, then a bearish H -> variant 1B, no FVG",
+      "candles_extra": {"5": [1.10300, 1.10500, 1.10280, 1.10450],
+                        "6": [1.10520, 1.10530, 1.10480, 1.10500]},
+      "expected": {"valid": true, "variant": "1B", "h_index": 6, "r_index": 4, "fvg": false,
+                   "note": "candle after R is index 5 with low 1.10280, below candle 3 high 1.10450 -> no gap; H is bearish and its low 1.10480 is above the 50 percent level 1.1014"}
+    },
+    {
+      "id": "fvg_in_1B_fixed",
+      "supersedes": "fvg_in_1B",
+      "label": "1B where the extra bullish candle itself leaves the gap",
+      "candles_extra": {"5": [1.10505, 1.10530, 1.10500, 1.10520],
+                        "6": [1.10540, 1.10550, 1.10500, 1.10520]},
+      "expected": {"valid": true, "variant": "1B", "h_index": 6, "fvg": true,
+                   "note": "candle 5 low 1.10500 > candle 3 high 1.10450, and H low 1.10500 stays above the 50 percent level"}
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+ "identical": true,
+ "window_only": {
+  "dealing_range": "undefined",
+  "gap_count": 0,
+  "last_close": 1.108,
+  "pool_count": 0,
+  "swing_count": 0,
+  "window_len": 60
+ },
+ "with_40_older_bars": {
+  "dealing_range": "undefined",
+  "gap_count": 0,
+  "last_close": 1.108,
+  "pool_count": 0,
+  "swing_count": 0,
+  "window_len": 60
+ }
+}

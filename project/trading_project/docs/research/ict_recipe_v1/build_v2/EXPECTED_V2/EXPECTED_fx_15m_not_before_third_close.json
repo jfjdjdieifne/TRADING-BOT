@@ -1,0 +1,11 @@
+{
+ "_fixture": "fx_15m_not_before_third_close",
+ "_tag": "FIXTURE",
+ "value": {
+  "emitted": [
+   false,
+   false,
+   false
+  ]
+ }
+}

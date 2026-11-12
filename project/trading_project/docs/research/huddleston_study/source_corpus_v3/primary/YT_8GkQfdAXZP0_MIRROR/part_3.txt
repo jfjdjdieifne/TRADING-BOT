@@ -1,0 +1,179 @@
+ormation it
+
+won't be identical but it's closely related to the general
+
+idea if it trades back to this candle High don't worry I'll zoom in in a moment that's your entry right there
+
+that's aggressive and I don't have a problem being aggressive if I know what I'm looking for but there's also an
+
+imbalance in here and it rebalances that right there see that now once we
+
+establish the market structure on that hourly chart I'm not going down into the lower time frames below it and marking
+
+out all the swing highs and swing lows either that that's Overkill I just need to know what I'm looking for on the time
+
+frame I'm trading on the logic is based on that daily chart that it's going up into this imbalance to go
+
+lower the hourly chart frames my trade it gives me what I'm looking for to
+
+start hunting entry techniques now the 15-minute time frame that's the Bell weather this is where
+
+it's going to give me the actual get in get out but I might not like the risk
+
+parameters that's required on this time frame so I can go down into lower time
+
+frames should price go lower and break
+
+lower I'm looking at that short-term low here and that INR term low there if we
+
+have a short-term low taken out and an intermediate term low taken out or
+
+just an intermediate term low taken out then we can go back to the previous
+
+long-term High long-term low now a long-term High long-term low is
+
+generally going to be linked to a higher time frame daily chart that might be
+
+a price range it might be a high to a short-term low in this case I'm framing
+
+the idea and logic around that fair value Gap that I outlined in front of all of you saying it's likely go up
+
+there rebounce and then go lower and take out that old daily low there's lots of ways you can frame
+
+your trade but you have to have something directly linked to that daily
+
+chart because the daily chart that's exactly what institutions are working off of that's exactly what banks are
+
+working off of that's where the money is that's where your bias is going to be determined
+
+that's going to be what makes or breaks your Trend continuation that daily chart
+
+so the majority of your time in study should be on determining where that daily chart's going over the next day or
+
+two or a week but you try not to forecast longer than a
+
+week not that you can't I'm not suggesting that anyone can't do that I'm just saying if as a developing student
+
+you want to keep your perspective limited to a 5-day time Horizon and don't be upset if you don't have the
+
+entire weekly range forecasted correctly that's not important right now you're growing you're trying to learn how to do
+
+this and it's highly technical no one gets it overnight it took me six years
+
+so but it pays off if you stick with it so if we have a break below and any
+
+return low then we have what a significant break in Market structure this is
+
+something that's more significant just simply than going into a chart saying okay well it took out a short-term low
+
+there it is uh-uh see how much more detailed this is what this tells me is then I can
+
+start using this range high and low and start getting projections
+
+down I can get a measurement of measuring this High to this low and
+
+start replicating that going down and it'll give me price targets
+
+they're generic price targets if you don't want to use that targeting
+
+method this long-term low to interterm high if price breaks below here as it
+
+does here you can simply take your Fibonacci anchor it to the highest high down to the lowest low and this is what
+
+you would get here why am I using that why am I not using this here to here because this
+
+returned back up this is where all of this move starts right there this is
+
+just the beginning of the the framework this is where the swing begins on the
+
+decline follow what I'm saying I'll say it again this high and this low that's your
+
+framework the retracement that fails that starts the decline begins here at that intermate term high so if you
+
+anchor your FIB to the interm term High down to that low which is a long-term low the projection is -1 1/2 standard
+
+deviation and there's your low how much lower than this can it go that's one way
+
+of determining it now I know what you're asking what is your FIB settings ICT
+
+there's my FIB settings okay I don't toggle everything because I don't need all the lines but I'm looking at
+
+measurements like this with logic behind it it's not just me randomly going in there because I get a lot of qu when I
+
+was on baby Pips I got lots of emails all the time and people would post in the form why are you anchoring your FIB to That Swing high and not in that swing
+
+high and not this swing high this is what I never taught this is what I'm showing you today this is Advanced
+
+Market structure this is not something you're going to find in books Mr Williams I'm sure doesn't even know it like this he's rather simplistic in the
+
+way he does things that's the only thing I've really gleaned from him
+
+he's he's a legend don't get me wrong but he does things rather simplistic but
+
+but because of my background is computer programming and computer science and I have obsessive compulsive disorder I
+
+need to know why things do what they do and I need to know everything now I
+
+don't know everything but my pursuit of knowing everything led me to look at
+
+markets like this and internalize how what the algorithms are doing because there has to be a rhyme and reason right
+
+like to suggest the idea that these markets are operating under an algorithm
+
+and they're going up and down based on and AI artificial intelligence is controlling this it's not your buying
+
+and selling pressure I've said this many times before but if that is true and
+
+let's suspend your disbelief if you don't believe there's an algorithm just for the sake of this conversation let's just say for a moment that you do
+
+subscribe to the idea if there's an algorithm that means it must follow some form of
+
+logic and how does it reference how far to go up and how far
+
+to go down it cannot see your stop it doesn't see Michael stop it
+
+doesn't see Renee stop it doesn't see Juan stop it doesn't see
+
+Brian Larry that's outside of
+
+its capability but it knows where people will have their stops
+
+based on these ideas is short-term High short-term low interterm high interterm low long-term
+
+low long-term high and where the imbalances are now I
+
+already know right now at this moment right now your heads are spinning you're probably sitting here looking at man
+
+this is crazy how did he come up with this and how the hell am I going to use
+
+it exactly you're going to take time learning this line upon line precept
+
+upon precept here a little there a little it takes time to do this okay but I got requested to teach Market
+
+structure and this is my interpretation of Market structure because I'm leaning
+
+on algorithmic principles that are in the marketplace that can't be taught to
+
+you but I'm creating a language so that way you can see it visually in your chart and you can measure and reference
+
+certain things not exactly like the gthm does but very very close to what it's
+
+doing which in my mind doesn't really step on anybody's toes now does it so if
+
+we're looking at this little shaded area here I want to zoom in now and get down to the heart ofest teaching this is the same 15-minute time
+
+frame and just zoomed in a little bit more this is an aggressive entry for going short now that hourly chart was
+
+showing those two candles going up in the 15minute time frame it's obviously more cand
+
+so in this up close candle series of 1 2 3 4 five
+
+candles in that range if I get a fair value gy form with a
+
+breakdown like this notice I don't need a swing low broken notice
+
+that on the model I'm teaching you you have to look for what the short-term low being broken
+
+that's your Market structure shift then you see price go up into that imbalance and then you can go short or vice versa
+
+when you're going bullish if you understand Mar

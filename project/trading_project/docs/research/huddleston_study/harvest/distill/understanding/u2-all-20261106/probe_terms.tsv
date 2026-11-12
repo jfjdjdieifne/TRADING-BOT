@@ -1,0 +1,117 @@
+phrase	count	files	densest_or_first_file
+buy side	1104	234	transcriptions/2023-ICT-Mentorship/ICT-Mentorship-2023-Market-Maker-Models-001.json
+sell side	868	221	transcriptions/2023-ICT-Mentorship/ICT-Mentorship-2023-September-12-2023-NQ-Algorithmic-Price-Delivery-001.json
+buy side liquidity	219	112	transcriptions/2016-ICT-Private-Mentorship-Core-Content-Month-04/ICT-Mentorship-Core-Content-Month-04-ICT-Fair-Value-Gaps-FVG-001.json
+sell side liquidity	188	110	transcriptions/2022-ICT-Mentorship/2022-ICT-Mentorship-Episode-25-001.json
+equal highs	543	187	transcriptions/ICT-Charter-Content/ICT-Charter-Price-Action-Model-3-Amplified-Lecture-001.json
+equal lows	409	169	transcriptions/2023-ICT-Mentorship/ICT-Mentorship-2023-Immediate-Rebalance-&-Institutional-Order-Flow-001.json
+relative equal highs	300	125	transcriptions/2022-ICT-Mentorship/2022-ICT-Mentorship-Episode-24-001.json
+relative equal lows	243	109	transcriptions/2023-ICT-Mentorship/ICT-Mentorship-2023-Immediate-Rebalance-&-Institutional-Order-Flow-001.json
+old high	629	207	transcriptions/2016-ICT-Private-Mentorship-Core-Content-Month-03/ICT-Mentorship-Core-Content-Month-03-Institutional-Sponsorship-001.json
+old highs	180	97	transcriptions/2016-ICT-Private-Mentorship-Core-Content-Month-01/ICT-Mentorship-Core-Content-Month-1-Liquidity-Runs-001.json
+old low	457	168	transcriptions/2017-ICT-Private-Mentorship-Core-Content-Month-05/ICT-Mentorship-Core-Content-Month-05-Defining-HTF-PD-Arrays-001.json
+old lows	133	85	transcriptions/2016-ICT-Private-Mentorship-Core-Content-Month-01/ICT-Mentorship-Core-Content-Month-1-Liquidity-Runs-001.json
+run on stops	24	23	transcriptions/2016-ICT-Private-Mentorship-Core-Content-Month-04/ICT-Mentorship-Core-Content-Month-04-ICT-Breaker-Block-001.json
+stop run	87	54	transcriptions/2017-ICT-Private-Mentorship-Core-Content-Month-06/ICT-Mentorship-Core-Content-Month-06-The-Million-Dollar-Swing-Setup-001.json
+liquidity run	132	53	transcriptions/2016-ICT-Private-Mentorship-Core-Content-Month-01/ICT-Mentorship-Core-Content-Month-1-Liquidity-Runs-001.json
+draw on liquidity	210	108	transcriptions/ICT-Charter-Content/ICT-Charter-Price-Action-Model-3-Amplified-Lecture-001.json
+liquidity pool	232	100	transcriptions/ICT-Charter-Content/ICT-Charter-Price-Action-Model-3-Amplified-Lecture-001.json
+target	582	211	transcriptions/Live-Streams/Pattern-Recognition-Selecting-Precision-Price-Objectives-001.json
+swing high	423	130	transcriptions/ICT-Forex-Scout-Sniper-Basic-Field-Guide-Series/ICT-Forex-Scout-Sniper-Basic-Field-Guide-Vol-4-002.json
+swing highs	46	30	transcriptions/ICT-Mastering-High-Probability-Scalping-Volumes-1-3/ICT-Mastering-High-Probability-Scalping-Vol-1-of-3-001.json
+swing low	412	135	transcriptions/ICT-Forex-What-Every-New-&-Or-Aspiring-Forex-Traders-Wants-To-Know/ICT-W-E-N-T-Series-Part-1-of-5-001.json
+swing lows	68	39	transcriptions/ICT-Mastering-High-Probability-Scalping-Volumes-1-3/ICT-Mastering-High-Probability-Scalping-Vol-1-of-3-001.json
+swing point	34	11	transcriptions/2017-ICT-Private-Mentorship-Core-Content-Month-05/ICT-Mentorship-Core-Content-Month-05-Defining-Institutional-Swing-Points-001.json
+short term high	147	85	transcriptions/ICT-Forex-Market-Maker-Primer-Course/OTE-Primer-Intro-To-ICT-Optimal-Trade-Entry-001.json
+short term low	175	81	transcriptions/ICT-Market-Maker-Forex-Series/ICT-Forex-Market-Maker-Series-Vol-4-of-5-001.json
+intermediate term high	36	19	transcriptions/2022-ICT-Mentorship/2022-ICT-Mentorship-Episode-12-001.json
+intermediate term low	17	10	transcriptions/2022-ICT-Mentorship/2022-ICT-Mentorship-Episode-12-001.json
+long term high	10	8	transcriptions/2022-ICT-Mentorship/2022-ICT-Mentorship-Episode-22-001.json
+long term low	11	7	transcriptions/ICT-Forex-What-Every-New-&-Or-Aspiring-Forex-Traders-Wants-To-Know/ICT-W-E-N-T-Series-Part-3-of-5-002.json
+ipda	3	3	transcriptions/2017-ICT-Private-Mentorship-Core-Content-Month-05/ICT-Mentorship-Core-Content-Month-05-Using-IPDA-Data-Ranges-002.json
+interbank price delivery algorithm	17	12	transcriptions/2016-ICT-Private-Mentorship-Core-Content-Month-02/ICT-Mentorship-Core-Content-Month-02-The-Secrets-To-Selecting-High-Reward-Setups-001.json
+data range	103	26	transcriptions/ICT-Charter-Content/ICT-Charter-Price-Action-Model-3-Trade-Plan-&-Algorithmic-Theory-001.json
+data ranges	64	29	transcriptions/2017-ICT-Private-Mentorship-Core-Content-Month-09/ICT-Mentorship-Core-Content-Month-09-ICT-Day-Trade-Routine-001.json
+displacement	274	114	transcriptions/Ends-Series/2022-ICT-Mentorship-Ends-Series-Part-4-of-4-001.json
+shift in market structure	202	100	transcriptions/2023-ICT-Mentorship/Tuesday-May-23-2023-Forex-&-Spooz-Market-Review-001.json
+market structure shift	90	45	transcriptions/2022-ICT-Mentorship/2022-ICT-Mentorship-Episode-3-001.json
+market structure	948	232	transcriptions/ICT-Forex-What-Every-New-&-Or-Aspiring-Forex-Traders-Wants-To-Know/ICT-W-E-N-T-Series-Part-3-of-5-001.json
+fair value gap	2025	287	transcriptions/Ends-Series/2022-ICT-Mentorship-Ends-Series-Part-4-of-4-001.json
+order block	2012	310	transcriptions/ICT-Forex-Precision-Trading-Concepts-Series/ICT-Precision-Trading-Concepts-2-001.json
+breaker	755	143	transcriptions/2023-ICT-Mentorship/ICT-Mentorship-2023-Advanced-Theory-On-ICT-Breaker-001.json
+bullish breaker	126	54	transcriptions/2023-ICT-Mentorship/April-13-2023-Live-Tape-Reading-Emini-S&P-AM-Session-001.json
+bearish breaker	98	48	transcriptions/2017-ICT-Private-Mentorship-Core-Content-Month-05/ICT-Mentorship-Core-Content-Month-05-Defining-HTF-PD-Arrays-001.json
+mitigation block	105	42	transcriptions/2017-ICT-Private-Mentorship-Core-Content-Month-05/ICT-Mentorship-Core-Content-Month-05-Defining-HTF-PD-Arrays-001.json
+rejection block	179	60	transcriptions/ICT-Charter-Content/ICT-Charter-Price-Action-Model-7-Universal-Trading-Model-002.json
+consequent encroachment	416	111	transcriptions/2023-ICT-Mentorship/February-14-2023-ES-Live-Commentary-CPI-Release-001.json
+inefficiency	785	123	transcriptions/2023-ICT-Mentorship/Tuesday-May-23-2023-Forex-&-Spooz-Market-Review-001.json
+imbalance	724	177	transcriptions/2022-ICT-Mentorship/2022-ICT-Mentorship-Episode-12-001.json
+rebalance	138	57	transcriptions/2022-ICT-Mentorship/2022-ICT-Mentorship-Episode-12-001.json
+volume imbalance	101	49	transcriptions/2023-ICT-Mentorship/Price-Action-Chronicles-February-07-2023-002.json
+liquidity void	202	73	transcriptions/2016-ICT-Private-Mentorship-Core-Content-Month-04/ICT-Mentorship-Core-Content-Month-04-Liquidity-Voids-001.json
+inversion fair value gap	97	34	transcriptions/2023-ICT-Mentorship/ICT-Mentorship-2023-September-08-2023-Review-&-ICT-Ma-Deuce-Model-001.json
+optimal trade entry	600	158	transcriptions/ICT-OTE-Pattern-Recognition-Series/OTE-Pattern-Recognition-Series-Vol-01-001.json
+2022 model	57	29	transcriptions/Ends-Series/2022-ICT-Mentorship-Ends-Series-Part-4-of-4-001.json
+price action model	129	34	transcriptions/ICT-Charter-Content/ICT-Charter-Price-Action-Model-1-Trade-Plan-&-Algorithmic-Theory-001.json
+entry model	7	6	transcriptions/2023-ICT-Mentorship/ICT-Mentorship-2023-T-G-I-F-Setup-001.json
+dealing range	164	56	transcriptions/Live-Streams/The-Inner-Circle-Trader-Live-Test-Stream-001.json
+equilibrium	540	123	transcriptions/2016-ICT-Private-Mentorship-Core-Content-Month-01/ICT-Mentorship-Core-Content-Month-1-Equilibrium-Vs-Discount-001.json
+premium	1409	222	transcriptions/2017-ICT-Private-Mentorship-Core-Content-Month-07/ICT-Mentorship-Core-Content-Month-07-Short-Term-Trading-Using-Monthly-&-Weekly-Ranges-001.json
+discount	1379	226	transcriptions/2017-ICT-Private-Mentorship-Core-Content-Month-07/ICT-Mentorship-Core-Content-Month-07-Short-Term-Trading-Using-Monthly-&-Weekly-Ranges-001.json
+premium array	262	75	transcriptions/2017-ICT-Private-Mentorship-Core-Content-Month-07/ICT-Mentorship-Core-Content-Month-07-Short-Term-Trading-Using-Monthly-&-Weekly-Ranges-001.json
+discount array	237	74	transcriptions/2017-ICT-Private-Mentorship-Core-Content-Month-12/ICT-Mentorship-Core-Content-Month-12-Intraday-Top-Down-Analysis-001.json
+pd array	489	112	transcriptions/2017-ICT-Private-Mentorship-Core-Content-Month-07/ICT-Mentorship-Core-Content-Month-07-Short-Term-Trading-Market-Maker-Manipulation-Templates-001.json
+time distortion	34	12	transcriptions/2023-ICT-Mentorship/ICT-Mentorship-2023-Deep-Dive-Into-Institutional-Order-Flow-002.json
+news	422	134	transcriptions/2022-ICT-Mentorship/2022-ICT-Mentorship-Episode-40-001.json
+high impact news	78	36	transcriptions/2022-ICT-Mentorship/2022-ICT-Mentorship-Episode-40-001.json
+non farm payroll	1	1	transcriptions/ICT-Charter-Content/ICT-Charter-Price-Action-Model-#4-Supplementary-Lesson-001.json
+day of week	23	21	transcriptions/ICT-Charter-Content/ICT-Charter-Price-Action-Model-10-Swing-Trading-001.json
+days of the week	27	23	transcriptions/ICT-Forex-Scout-Sniper-Basic-Field-Guide-Series/ICT-Forex-Scout-Sniper-Basic-Field-Guide-Vol-8-001.json
+kill zone	195	66	transcriptions/ICT-Charter-Content/ICT-Charter-Price-Action-Model-5-Day-Trading-Intraday-Volatility-Expansions-001.json
+kill zones	93	55	transcriptions/ICT-Forex-Scout-Sniper-Basic-Field-Guide-Series/ICT-Forex-Scout-Sniper-Basic-Field-Guide-Vol-4-001.json
+asian range	368	48	transcriptions/ICT-Forex-Market-Maker-Primer-Course/ICT-Forex-Implementing-The-Asian-Range-001.json
+asian session	93	41	transcriptions/ICT-Forex-Market-Maker-Primer-Course/ICT-Forex-The-ICT-Asian-Killzone-001.json
+london session	233	90	transcriptions/2017-ICT-Private-Mentorship-Core-Content-Month-08/ICT-Mentorship-Core-Content-Month-08-When-To-Avoid-The-London-Session-001.json
+london open	265	90	transcriptions/ICT-Forex-Trading-Plan-Development-Series/ICT-Trading-Plan-Development-7-001.json
+new york session	403	146	transcriptions/2017-ICT-Private-Mentorship-Core-Content-Month-09/ICT-Mentorship-Core-Content-Month-09-Trading-Market-Reversals-001.json
+new york open	271	76	transcriptions/ICT-Forex-Market-Maker-Primer-Course/ICT-Forex-The-ICT-New-York-Killzone-001.json
+time of day	333	149	transcriptions/ICT-Forex-Market-Maker-Primer-Course/ICT-Forex-The-ICT-Asian-Killzone-001.json
+midnight	398	89	transcriptions/ICT-Forex-Market-Maker-Primer-Course/ICT-Forex-Implementing-The-Asian-Range-001.json
+opening price	1012	156	transcriptions/ICT-Forex-Market-Maker-Primer-Course/ICT-Forex-The-Weekly-Bias-Excellence-In-Short-Term-Trading-001.json
+bias	911	250	transcriptions/ICT-Forex-What-Every-New-&-Or-Aspiring-Forex-Traders-Wants-To-Know/ICT-W-E-N-T-Series-Part-3-of-5-001.json
+directional bias	205	105	transcriptions/ICT-Forex-What-Every-New-&-Or-Aspiring-Forex-Traders-Wants-To-Know/ICT-W-E-N-T-Series-Part-3-of-5-001.json
+daily bias	104	49	transcriptions/ICT-Forex-Market-Maker-Primer-Course/ICT-Forex-Essentials-To-Trading-The-Daily-Bias-001.json
+weekly bias	19	16	transcriptions/ICT-Forex-Market-Maker-Primer-Course/ICT-Forex-The-Weekly-Bias-Excellence-In-Short-Term-Trading-001.json
+higher time frame	1058	243	transcriptions/ICT-Forex-What-Every-New-&-Or-Aspiring-Forex-Traders-Wants-To-Know/ICT-W-E-N-T-Series-Part-3-of-5-002.json
+lower time frame	299	151	transcriptions/ICT-Charter-Content/ICT-Charter-Price-Action-Model-9-One-Shot-One-Kill-001.json
+weekly template	4	3	transcriptions/2017-ICT-Private-Mentorship-Core-Content-Month-09/ICT-Mentorship-Core-Content-Month-09-ICT-Day-Trade-Routine-001.json
+daily template	2	1	transcriptions/If-I-Could-Go-Back-&-Tell-Myself-What-I-Know-Now/If-I-Could-Go-Back-&-Tell-Myself-What-I-Know-Now-Part-4-of-4-001.json
+seasonal tendency	353	53	transcriptions/2017-ICT-Private-Mentorship-Core-Content-Month-10/ICT-Mentorship-Core-Content-Month-10-Commodity-Seasonals-Tendencies-My-Personal-Favorites-001.json
+mean threshold	305	99	transcriptions/2023-ICT-Mentorship/Thursday-June-15-2023-ICT-Price-Action-Workshop-003.json
+risk	1752	280	transcriptions/ICT-Forex-Market-Maker-Primer-Course/ICT-Forex-Considerations-In-Risk-Management-001.json
+stop loss	746	207	transcriptions/2023-ICT-Mentorship/ICT-Mentorship-2023-August-18-2023-Live-trade-Walkthrough-001.json
+break even	83	58	transcriptions/ICT-Trade-Executions/December-2023-Non-Farm-Payroll-Live-Execution-&-Explanations-001.json
+partial	313	110	transcriptions/ICT-Charter-Content/ICT-Charter-Price-Action-Model-10-Swing-Trading-001.json
+partials	199	73	transcriptions/2023-ICT-Mentorship/April-11-2023-Live-Tape-Reading-Emini-S&P-AM-Session-002.json
+no trade	24	18	transcriptions/ICT-Charter-Content/ICT-Charter-Price-Action-Model-1-Trade-Plan-&-Algorithmic-Theory-001.json
+being wrong	38	29	transcriptions/If-I-Could-Go-Back-&-Tell-Myself-What-I-Know-Now/If-I-Could-Go-Back-&-Tell-Myself-What-I-Know-Now-Part-4-of-4-001.json
+wrong	984	282	transcriptions/If-I-Could-Go-Back-&-Tell-Myself-What-I-Know-Now/If-I-Could-Go-Back-&-Tell-Myself-What-I-Know-Now-Part-4-of-4-001.json
+position	1202	289	transcriptions/ICT-Forex-What-Every-New-&-Or-Aspiring-Forex-Traders-Wants-To-Know/ICT-W-E-N-T-Series-4-of-5-002.json
+money management	111	60	transcriptions/ICT-Forex-Market-Maker-Primer-Course/ICT-Forex-Money-Management-That-Works-001.json
+risk management	42	22	transcriptions/2022-ICT-Mentorship/2022-ICT-Mentorship-Episode-41-&-Final-001.json
+one shot one kill	154	58	transcriptions/ICT-Charter-Content/ICT-Charter-Price-Action-Model-9-One-Shot-One-Kill-001.json
+turtle soup	134	70	transcriptions/2017-ICT-Private-Mentorship-Core-Content-Month-12/ICT-Mentorship-Core-Content-Month-12-Intraday-Top-Down-Analysis-001.json
+silver bullet	182	56	transcriptions/2023-ICT-Mentorship/ICT-Mentorship-2023-Immediate-Rebalance-&-Institutional-Order-Flow-002.json
+judas swing	109	60	transcriptions/ICT-Forex-Market-Maker-Primer-Course/ICT-Forex-Understanding-The-ICT-Judas-Swing-001.json
+smt divergence	101	45	transcriptions/ICT-Forex-Trading-Plan-Development-Series/ICT-Trading-Plan-Development-5-001.json
+market maker	351	84	transcriptions/2023-ICT-Mentorship/ICT-Mentorship-2023-Market-Maker-Models-001.json
+power of three	6	6	transcriptions/Real-Money-Real-People-Series/Real-Money-Real-People-ICT-Student-Paladin-001.json
+cell side	236	121	transcriptions/2023-ICT-Mentorship/ICT-Mentorship-2023-Market-Maker-Models-001.json
+cell stops	256	116	transcriptions/2017-ICT-Private-Mentorship-Core-Content-Month-05/ICT-Mentorship-Core-Content-Month-05-Open-Float-001.json
+south side	123	71	transcriptions/2023-ICT-Mentorship/ICT-2023-Mentorship-Analysis-January-25-2023-001.json
+fairway gap	129	72	transcriptions/2023-ICT-Mentorship/Price-Action-Chronicles-February-07-2023-003.json
+volume and balance	189	66	transcriptions/2023-ICT-Mentorship/ICT-Mentorship-2023-September-27-2023-Market-Review-Commentary-002.json
+consequent encouragement	241	95	transcriptions/2023-ICT-Mentorship/February-14-2023-ES-Live-Commentary-CPI-Release-001.json
+dealers range	173	22	transcriptions/2017-ICT-Private-Mentorship-Core-Content-Month-08/ICT-Mentorship-Core-Content-Month-08-Projecting-Daily-Highs-&-Lows-001.json
+central bank dealers range	162	20	transcriptions/2017-ICT-Private-Mentorship-Core-Content-Month-09/ICT-Mentorship-Core-Content-Month-09-Filling-The-Numbers-001.json
+shot one kill	162	59	transcriptions/ICT-Charter-Content/ICT-Charter-Price-Action-Model-9-One-Shot-One-Kill-001.json

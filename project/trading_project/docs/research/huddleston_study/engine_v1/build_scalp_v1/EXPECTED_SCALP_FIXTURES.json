@@ -1,0 +1,242 @@
+{
+  "fixture_version": "SCALP-FIXTURES-1",
+  "declared_before_code": true,
+  "tag": "FIXTURE",
+  "scope": "Only the part of the owner strategy that is fully specified: the S candle (sweep candle) and the entry windows. Everything downstream of the S candle is NOT fixtures-covered because its rules were not part of the received text.",
+  "S_candle_definition": {
+    "tag": "SOURCE_NUMBER: OWNER_SPEC",
+    "text": "its low is below a previous swing low (reuse the existing swing detector) and its CLOSE is back above that swing low",
+    "side": "long (the short mirror uses the swing high, the high above it and the close back below it)"
+  },
+  "windows": {
+    "tag": "SOURCE_NUMBER: OWNER_SPEC",
+    "primary": [
+      "S+1",
+      "S+2",
+      "S+3"
+    ],
+    "secondary_reported_separately": [
+      "S+1",
+      "S+2"
+    ]
+  },
+  "cases": [
+    {
+      "id": "s01",
+      "label": "low below the previous swing low, close back above it",
+      "expected": "S",
+      "candles": [
+        [
+          1.102,
+          1.103,
+          1.101,
+          1.1025
+        ],
+        [
+          1.1025,
+          1.1028,
+          1.1,
+          1.1005
+        ],
+        [
+          1.1005,
+          1.1035,
+          1.1002,
+          1.103
+        ],
+        [
+          1.103,
+          1.1032,
+          1.101,
+          1.1015
+        ],
+        [
+          1.1015,
+          1.1018,
+          1.1004,
+          1.1008
+        ],
+        [
+          1.1008,
+          1.1012,
+          1.0985,
+          1.101
+        ]
+      ],
+      "s_index": 5,
+      "swing_low": 1.1
+    },
+    {
+      "id": "s02",
+      "label": "low below the previous swing low but the close stays below it",
+      "expected": "NOT_S",
+      "candles": [
+        [
+          1.102,
+          1.103,
+          1.101,
+          1.1025
+        ],
+        [
+          1.1025,
+          1.1028,
+          1.1,
+          1.1005
+        ],
+        [
+          1.1005,
+          1.1035,
+          1.1002,
+          1.103
+        ],
+        [
+          1.103,
+          1.1032,
+          1.101,
+          1.1015
+        ],
+        [
+          1.1015,
+          1.1018,
+          1.1004,
+          1.1008
+        ],
+        [
+          1.1008,
+          1.101,
+          1.0985,
+          1.0995
+        ]
+      ],
+      "s_index": null
+    },
+    {
+      "id": "s03",
+      "label": "no excursion below the previous swing low",
+      "expected": "NOT_S",
+      "candles": [
+        [
+          1.102,
+          1.103,
+          1.101,
+          1.1025
+        ],
+        [
+          1.1025,
+          1.1028,
+          1.1,
+          1.1005
+        ],
+        [
+          1.1005,
+          1.1035,
+          1.1002,
+          1.103
+        ],
+        [
+          1.103,
+          1.1032,
+          1.101,
+          1.1015
+        ],
+        [
+          1.1015,
+          1.1018,
+          1.1004,
+          1.1008
+        ],
+        [
+          1.1008,
+          1.1012,
+          1.10005,
+          1.101
+        ]
+      ],
+      "s_index": null
+    },
+    {
+      "id": "s04",
+      "label": "low exactly equal to the previous swing low (strictly below is required)",
+      "expected": "NOT_S",
+      "candles": [
+        [
+          1.102,
+          1.103,
+          1.101,
+          1.1025
+        ],
+        [
+          1.1025,
+          1.1028,
+          1.1,
+          1.1005
+        ],
+        [
+          1.1005,
+          1.1035,
+          1.1002,
+          1.103
+        ],
+        [
+          1.103,
+          1.1032,
+          1.101,
+          1.1015
+        ],
+        [
+          1.1015,
+          1.1018,
+          1.1004,
+          1.1008
+        ],
+        [
+          1.1008,
+          1.1012,
+          1.1,
+          1.101
+        ]
+      ],
+      "s_index": null
+    },
+    {
+      "id": "s05",
+      "label": "sweep of the swing low that was confirmed only two candles earlier",
+      "expected": "S",
+      "candles": [
+        [
+          1.105,
+          1.106,
+          1.104,
+          1.1045
+        ],
+        [
+          1.1045,
+          1.1055,
+          1.101,
+          1.105
+        ],
+        [
+          1.105,
+          1.1062,
+          1.1048,
+          1.1055
+        ],
+        [
+          1.1055,
+          1.1058,
+          1.102,
+          1.1025
+        ],
+        [
+          1.1025,
+          1.103,
+          1.1005,
+          1.1015
+        ]
+      ],
+      "s_index": 4,
+      "swing_low": 1.101,
+      "note": "candidate swing low is candle 1 (confirming candle 2), so it is confirmed before candle 4"
+    }
+  ]
+}

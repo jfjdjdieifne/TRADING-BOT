@@ -1,0 +1,1839 @@
+{
+  "_file": "EXPECTED_C1b.json",
+  "_path": "project/trading_project/docs/research/huddleston_study/engine_v1/c1_catalog/EXPECTED_C1b.json",
+  "_status": "tests-first: this file is committed before any C1b code change exists",
+  "_source": "BUILD_STEP_C1b_SPEC.md §2, §4, §5, §6 and OWNER_DECISIONS_D2.md only",
+  "_tier": "TIER2",
+  "_numbers_label": "FIXTURE",
+  "_numbers_note": "Every price and index here is a hand-made FIXTURE value. The only non-fixture numbers are the SOURCE_NUMBER values already in the code (0.60, 0.75, 0.80, 2.0, 3.0, 10, and 1.5 / 14 for V-D-C), which are not repeated as prices here.",
+  "_comparison_note": "Status, answers, verdicts, variant ids, gap ids, gap print status, flags, indices and reference_variant are compared exactly; numbers are compared with an absolute tolerance of 1e-9. This file is never edited after a failure: a mismatch is reported instead.",
+  "catalog": {
+    "gap_count": 19,
+    "gap_ids": [
+      "GAP_CLUSTER_BOUND",
+      "GAP_DOJI_BLOCK",
+      "GAP_STOP_AND_SIZE",
+      "GAP_WICK_INVALIDATION",
+      "GAP_LOCATION",
+      "GAP_OB_DISPLACEMENT_FILTER",
+      "GAP_OB_MOVE_BOUNDS",
+      "GAP_SWEEP_DISTANCE",
+      "GAP_SWEEP_EQUAL_CLOSE",
+      "GAP_SWEEP_EQH_BASIS",
+      "GAP_SWEEP_QUALITATIVE",
+      "GAP_D_QUALITATIVE",
+      "GAP_D_GAP_DEFINITION",
+      "GAP_D_WINDOW",
+      "GAP_D_CLUSTER",
+      "GAP_D_PRIOR_SWEEP",
+      "GAP_D_SWEEP_LEVEL",
+      "GAP_EQUAL_THRESHOLD",
+      "GAP_D_ATR_FORMULA"
+    ],
+    "text_prefix": "KNOWLEDGE_GAP: ",
+    "print_status": {
+      "GAP_CLUSTER_BOUND": "PRINTED_PER_RESULT",
+      "GAP_DOJI_BLOCK": "PRINTED_PER_RESULT",
+      "GAP_STOP_AND_SIZE": "NOT_PRINTABLE",
+      "GAP_WICK_INVALIDATION": "NOT_PRINTABLE",
+      "GAP_LOCATION": "NOT_PRINTABLE",
+      "GAP_OB_DISPLACEMENT_FILTER": "NOT_PRINTABLE",
+      "GAP_OB_MOVE_BOUNDS": "PRINTED_PER_RESULT",
+      "GAP_SWEEP_DISTANCE": "PRINTED_PER_RESULT",
+      "GAP_SWEEP_EQUAL_CLOSE": "PRINTED_PER_RESULT",
+      "GAP_SWEEP_EQH_BASIS": "PRINTED_PER_RESULT",
+      "GAP_SWEEP_QUALITATIVE": "NOT_PRINTABLE",
+      "GAP_D_QUALITATIVE": "PRINTED_PER_RESULT",
+      "GAP_D_GAP_DEFINITION": "PRINTED_PER_RESULT",
+      "GAP_D_WINDOW": "PRINTED_PER_RESULT",
+      "GAP_D_CLUSTER": "PRINTED_PER_RESULT",
+      "GAP_D_PRIOR_SWEEP": "PRINTED_PER_RESULT",
+      "GAP_D_SWEEP_LEVEL": "PRINTED_IN_DIMENSION_GAPS",
+      "GAP_EQUAL_THRESHOLD": "PRINTED_PER_RESULT",
+      "GAP_D_ATR_FORMULA": "PRINTED_PER_RESULT"
+    },
+    "print_status_counts": {
+      "PRINTED_PER_RESULT": 13,
+      "PRINTED_IN_DIMENSION_GAPS": 1,
+      "NOT_PRINTABLE": 5
+    }
+  },
+  "module_checks": [
+    {
+      "id": "M-D-01",
+      "module": "displacement",
+      "absent": [
+        "REFERENCE_VARIANT"
+      ],
+      "present": [
+        "REFERENCE_VARIANT_NONE",
+        "V_D_C",
+        "GAP_D_ATR_FORMULA"
+      ],
+      "equals": {
+        "REFERENCE_VARIANT_NONE": "NONE_PER_OWNER_D2"
+      }
+    },
+    {
+      "id": "M-D-02",
+      "module": "displacement",
+      "equals": {
+        "VARIANT_STATUS_LABEL": {
+          "V-D-01": "COMPUTED",
+          "V-D-02": "COMPUTED",
+          "V-D-03": "COMPUTED",
+          "V-D-04": "UNDEFINED_ALWAYS",
+          "V-D-C": "UNDEFINED_ATR_FORMULA",
+          "V-D-Q": "UNDEFINED_ALWAYS"
+        }
+      }
+    },
+    {
+      "id": "M-D-03",
+      "module": "displacement",
+      "source_absent": [
+        "REFERENCE_VARIANT =",
+        "REFERENCE_VARIANT=",
+        "FLAGGED_FOR_OWNER_OVERRIDE"
+      ]
+    },
+    {
+      "id": "M-OB-01",
+      "module": "order_block",
+      "equals": {
+        "VARIANT_STATUS_LABEL": {
+          "V-OB-3": "PARTIAL_LAST_CANDLE_ONLY",
+          "V-OB-13": "CALLER_INPUT_NOT_COMPUTED",
+          "V-OB-14": "CALLER_INPUT_NOT_COMPUTED",
+          "V-OB-15": "CALLER_INPUT_NOT_COMPUTED"
+        }
+      }
+    },
+    {
+      "id": "M-E-01",
+      "module": "liquidity_sweep",
+      "equals": {
+        "VARIANT_STATUS_LABEL": {
+          "V-E-EQH": "ACCEPTED_RETURNS_UNDEFINED"
+        }
+      }
+    },
+    {
+      "id": "M-C-01",
+      "module": "common",
+      "present": [
+        "GAP_PROMISE",
+        "DIMENSION_GAPS",
+        "dimension_gaps",
+        "gap_ids_of",
+        "PRINTED_PER_RESULT",
+        "PRINTED_IN_DIMENSION_GAPS",
+        "NOT_PRINTABLE"
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "id": "X-D-C-ABOVE",
+      "fixture_tag": "FIXTURE",
+      "correction": "C1b-1",
+      "concept": "displacement",
+      "note": "V-D-C إيجابية بحسب نيّة العائلة: الجسم 2.5 أعلى من 1.5 × متوسط مدى بسيط = 1.5 (FIXTURE). الحكم الملزم: UNDEFINED لأن صيغة ATR غير معرّفة.",
+      "candles": [
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 103.0,
+          "l": 99.9,
+          "c": 102.5,
+          "closed": true
+        }
+      ],
+      "call": {
+        "t": 14,
+        "variant": "V-D-C",
+        "previous_window": null
+      },
+      "expect": {
+        "status": "UNDEFINED",
+        "answer": null,
+        "variant_id": "V-D-C",
+        "numbers_is_null": true,
+        "gap_ids": [
+          "GAP_D_CLUSTER",
+          "GAP_D_PRIOR_SWEEP",
+          "GAP_D_ATR_FORMULA"
+        ],
+        "source_number_names": [
+          "body_to_atr_multiple",
+          "atr_period"
+        ],
+        "dimension_gap_ids": [
+          "GAP_D_SWEEP_LEVEL"
+        ],
+        "dimension_gap_status": {
+          "GAP_D_SWEEP_LEVEL": "PRINTED_IN_DIMENSION_GAPS"
+        },
+        "reference_variant": "NONE_PER_OWNER_D2",
+        "flags": [
+          "OWNER_DECISION_D2_NO_REFERENCE_VARIANT"
+        ],
+        "claim_ids_include": [
+          "Q1-01",
+          "Q1-02"
+        ]
+      }
+    },
+    {
+      "id": "X-D-C-BELOW",
+      "fixture_tag": "FIXTURE",
+      "correction": "C1b-1",
+      "concept": "displacement",
+      "note": "V-D-C سلبية بحسب نيّة العائلة: الجسم 0.1 أدنى من 1.5 × 1.0 (FIXTURE). الحكم الملزم: UNDEFINED، ولا يُدَّعى NO.",
+      "candles": [
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.2,
+          "l": 99.8,
+          "c": 100.1,
+          "closed": true
+        }
+      ],
+      "call": {
+        "t": 14,
+        "variant": "V-D-C",
+        "previous_window": null
+      },
+      "expect": {
+        "status": "UNDEFINED",
+        "answer": null,
+        "variant_id": "V-D-C",
+        "numbers_is_null": true,
+        "gap_ids": [
+          "GAP_D_CLUSTER",
+          "GAP_D_PRIOR_SWEEP",
+          "GAP_D_ATR_FORMULA"
+        ],
+        "source_number_names": [
+          "body_to_atr_multiple",
+          "atr_period"
+        ],
+        "dimension_gap_ids": [
+          "GAP_D_SWEEP_LEVEL"
+        ],
+        "dimension_gap_status": {
+          "GAP_D_SWEEP_LEVEL": "PRINTED_IN_DIMENSION_GAPS"
+        },
+        "reference_variant": "NONE_PER_OWNER_D2",
+        "flags": [
+          "OWNER_DECISION_D2_NO_REFERENCE_VARIANT"
+        ]
+      }
+    },
+    {
+      "id": "X-D-C-EQUAL",
+      "fixture_tag": "FIXTURE",
+      "correction": "C1b-1",
+      "concept": "displacement",
+      "note": "V-D-C حدّية: الجسم 1.5 يساوي 1.5 × متوسط مدى بسيط = 1.5 بالضبط (FIXTURE). المساواة لا تُحسم: UNDEFINED، لا YES.",
+      "candles": [
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 101.6,
+          "l": 99.6,
+          "c": 101.5,
+          "closed": true
+        }
+      ],
+      "call": {
+        "t": 14,
+        "variant": "V-D-C",
+        "previous_window": null
+      },
+      "expect": {
+        "status": "UNDEFINED",
+        "answer": null,
+        "variant_id": "V-D-C",
+        "numbers_is_null": true,
+        "gap_ids": [
+          "GAP_D_CLUSTER",
+          "GAP_D_PRIOR_SWEEP",
+          "GAP_D_ATR_FORMULA"
+        ],
+        "dimension_gap_ids": [
+          "GAP_D_SWEEP_LEVEL"
+        ],
+        "dimension_gap_status": {
+          "GAP_D_SWEEP_LEVEL": "PRINTED_IN_DIMENSION_GAPS"
+        },
+        "reference_variant": "NONE_PER_OWNER_D2"
+      }
+    },
+    {
+      "id": "X-D-C-SHORT",
+      "fixture_tag": "FIXTURE",
+      "correction": "C1b-1",
+      "concept": "displacement",
+      "note": "V-D-C بأقل من 14 شمعة سابقة (4 سابقات): الحكم UNDEFINED نفسه، لأن المقام غير معرّف أصلًا (مواصفة C1b §2.1).",
+      "candles": [
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 103.0,
+          "l": 99.9,
+          "c": 102.5,
+          "closed": true
+        }
+      ],
+      "call": {
+        "t": 4,
+        "variant": "V-D-C",
+        "previous_window": null
+      },
+      "expect": {
+        "status": "UNDEFINED",
+        "answer": null,
+        "variant_id": "V-D-C",
+        "numbers_is_null": true,
+        "gap_ids": [
+          "GAP_D_CLUSTER",
+          "GAP_D_PRIOR_SWEEP",
+          "GAP_D_ATR_FORMULA"
+        ],
+        "source_number_names": [
+          "body_to_atr_multiple",
+          "atr_period"
+        ],
+        "dimension_gap_ids": [
+          "GAP_D_SWEEP_LEVEL"
+        ],
+        "dimension_gap_status": {
+          "GAP_D_SWEEP_LEVEL": "PRINTED_IN_DIMENSION_GAPS"
+        }
+      }
+    },
+    {
+      "id": "X-D-C-PENDING",
+      "fixture_tag": "FIXTURE",
+      "correction": "C1b-1",
+      "concept": "displacement",
+      "note": "V-D-C والشمعة المقيسة غير مغلقة: PENDING قبل فجوة الصيغة، وقائمة الفجوات فارغة كما في C1.",
+      "candles": [
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 103.0,
+          "l": 99.9,
+          "c": 102.5,
+          "closed": false
+        }
+      ],
+      "call": {
+        "t": 14,
+        "variant": "V-D-C",
+        "previous_window": null
+      },
+      "expect": {
+        "status": "PENDING",
+        "answer": null,
+        "variant_id": "V-D-C",
+        "numbers_is_null": true,
+        "gap_ids": [],
+        "dimension_gap_ids": [
+          "GAP_D_SWEEP_LEVEL"
+        ],
+        "dimension_gap_status": {
+          "GAP_D_SWEEP_LEVEL": "PRINTED_IN_DIMENSION_GAPS"
+        }
+      }
+    },
+    {
+      "id": "R-D-C-MALFORMED",
+      "fixture_tag": "FIXTURE",
+      "correction": "C1b-1",
+      "concept": "displacement",
+      "note": "رفض: الشمعة المقيسة high < low ← استثناء لا حكم.",
+      "candles": [
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 99.0,
+          "l": 100.5,
+          "c": 101.0,
+          "closed": true
+        }
+      ],
+      "call": {
+        "t": 14,
+        "variant": "V-D-C",
+        "previous_window": null
+      },
+      "raises": "candle high is below its low"
+    },
+    {
+      "id": "R-D-C-NOCLOSED",
+      "fixture_tag": "FIXTURE",
+      "correction": "C1b-1",
+      "concept": "displacement",
+      "note": "رفض: مفتاح closed غائب ← استثناء، لا افتراض True.",
+      "candles": [
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 103.0,
+          "l": 99.9,
+          "c": 102.5
+        }
+      ],
+      "call": {
+        "t": 14,
+        "variant": "V-D-C",
+        "previous_window": null
+      },
+      "raises": "missing the explicit 'closed' flag"
+    },
+    {
+      "id": "R-D-REF-FAMILY-ID",
+      "fixture_tag": "FIXTURE",
+      "correction": "C1b-1",
+      "concept": "displacement",
+      "note": "سلبي لحذف المرجع: معرّفات D2 (V-D-A-1) ليست معرّفات شيفرة؛ طلبها ← استثناء معرّف غير معروف.",
+      "candles": [
+        {
+          "o": 99.75,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.25,
+          "closed": true
+        },
+        {
+          "o": 99.75,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.25,
+          "closed": true
+        },
+        {
+          "o": 99.75,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.25,
+          "closed": true
+        },
+        {
+          "o": 99.75,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.25,
+          "closed": true
+        },
+        {
+          "o": 99.75,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.25,
+          "closed": true
+        },
+        {
+          "o": 99.75,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.25,
+          "closed": true
+        },
+        {
+          "o": 99.75,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.25,
+          "closed": true
+        },
+        {
+          "o": 99.75,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.25,
+          "closed": true
+        },
+        {
+          "o": 99.75,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.25,
+          "closed": true
+        },
+        {
+          "o": 99.75,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.25,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 103.75,
+          "l": 99.75,
+          "c": 103.5,
+          "closed": true
+        }
+      ],
+      "call": {
+        "t": 10,
+        "variant": "V-D-A-1",
+        "previous_window": null
+      },
+      "raises": "unknown displacement variant"
+    },
+    {
+      "id": "X-D-REF-01",
+      "fixture_tag": "FIXTURE",
+      "correction": "C1b-1",
+      "concept": "displacement",
+      "note": "إيجابي لحذف المرجع: V-D-01 تُطبع reference_variant = NONE_PER_OWNER_D2، والحساب لم يتغيّر (0.875).",
+      "candles": [
+        {
+          "o": 99.75,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.25,
+          "closed": true
+        },
+        {
+          "o": 99.75,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.25,
+          "closed": true
+        },
+        {
+          "o": 99.75,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.25,
+          "closed": true
+        },
+        {
+          "o": 99.75,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.25,
+          "closed": true
+        },
+        {
+          "o": 99.75,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.25,
+          "closed": true
+        },
+        {
+          "o": 99.75,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.25,
+          "closed": true
+        },
+        {
+          "o": 99.75,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.25,
+          "closed": true
+        },
+        {
+          "o": 99.75,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.25,
+          "closed": true
+        },
+        {
+          "o": 99.75,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.25,
+          "closed": true
+        },
+        {
+          "o": 99.75,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.25,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 103.75,
+          "l": 99.75,
+          "c": 103.5,
+          "closed": true
+        }
+      ],
+      "call": {
+        "t": 10,
+        "variant": "V-D-01",
+        "previous_window": null
+      },
+      "expect": {
+        "status": "BUILT",
+        "answer": "YES",
+        "variant_id": "V-D-01",
+        "numbers": {
+          "body": 3.5,
+          "range": 4.0,
+          "body_range_ratio": 0.875
+        },
+        "gap_ids": [
+          "GAP_D_CLUSTER",
+          "GAP_D_PRIOR_SWEEP"
+        ],
+        "dimension_gap_ids": [
+          "GAP_D_SWEEP_LEVEL"
+        ],
+        "dimension_gap_status": {
+          "GAP_D_SWEEP_LEVEL": "PRINTED_IN_DIMENSION_GAPS"
+        },
+        "reference_variant": "NONE_PER_OWNER_D2",
+        "flags": [
+          "OWNER_DECISION_D2_NO_REFERENCE_VARIANT"
+        ],
+        "claim_ids_include": [
+          "F1"
+        ]
+      }
+    },
+    {
+      "id": "X-D-REF-02",
+      "fixture_tag": "FIXTURE",
+      "correction": "C1b-1",
+      "concept": "displacement",
+      "note": "إيجابي مصاحب: V-D-04 (UNDEFINED_ALWAYS) تحمل reference_variant = NONE_PER_OWNER_D2 أيضًا.",
+      "candles": [
+        {
+          "o": 99.75,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.25,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 103.75,
+          "l": 99.75,
+          "c": 103.5,
+          "closed": true
+        }
+      ],
+      "call": {
+        "t": 1,
+        "variant": "V-D-04",
+        "previous_window": null
+      },
+      "expect": {
+        "status": "UNDEFINED",
+        "answer": null,
+        "variant_id": "V-D-04",
+        "gap_ids": [
+          "GAP_D_CLUSTER",
+          "GAP_D_PRIOR_SWEEP",
+          "GAP_D_GAP_DEFINITION"
+        ],
+        "dimension_gap_ids": [
+          "GAP_D_SWEEP_LEVEL"
+        ],
+        "dimension_gap_status": {
+          "GAP_D_SWEEP_LEVEL": "PRINTED_IN_DIMENSION_GAPS"
+        },
+        "reference_variant": "NONE_PER_OWNER_D2"
+      }
+    },
+    {
+      "id": "X-D-04-UNCLOSED",
+      "fixture_tag": "FIXTURE",
+      "correction": "C1b-3",
+      "concept": "displacement",
+      "note": "V-D-04 = UNDEFINED_ALWAYS: شمعة غير مغلقة لا تُحوّله إلى PENDING، بخلاف V-D-01/02/03/5.",
+      "candles": [
+        {
+          "o": 99.75,
+          "h": 100.5,
+          "l": 99.5,
+          "c": 100.25,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 103.75,
+          "l": 99.75,
+          "c": 103.5,
+          "closed": false
+        }
+      ],
+      "call": {
+        "t": 1,
+        "variant": "V-D-04",
+        "previous_window": null
+      },
+      "expect": {
+        "status": "UNDEFINED",
+        "answer": null,
+        "variant_id": "V-D-04",
+        "gap_ids": [
+          "GAP_D_CLUSTER",
+          "GAP_D_PRIOR_SWEEP",
+          "GAP_D_GAP_DEFINITION"
+        ]
+      }
+    },
+    {
+      "id": "X-OB-CLUSTER-2",
+      "fixture_tag": "FIXTURE",
+      "correction": "C1b-4",
+      "concept": "order_block",
+      "note": "تجمع من شمعتين معارضتين متجاورتين: V-OB-3 = PARTIAL (تُؤخذ الأخيرة) وcluster_notice.count = 2 والفجوة تُطبع.",
+      "candles": [
+        {
+          "o": 101.0,
+          "h": 101.2,
+          "l": 100.6,
+          "c": 100.7,
+          "closed": true
+        },
+        {
+          "o": 100.7,
+          "h": 100.9,
+          "l": 100.1,
+          "c": 100.2,
+          "closed": true
+        },
+        {
+          "o": 100.2,
+          "h": 101.5,
+          "l": 100.15,
+          "c": 101.4,
+          "closed": true
+        },
+        {
+          "o": 101.4,
+          "h": 102.0,
+          "l": 101.3,
+          "c": 101.9,
+          "closed": true
+        }
+      ],
+      "call": {
+        "displacement_start_index": 2,
+        "direction": "bullish",
+        "boundaries": "V-OB-4",
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {
+            "on": false,
+            "evidence": null
+          },
+          "V-OB-14": {
+            "on": false,
+            "evidence": null
+          },
+          "V-OB-15": {
+            "on": false,
+            "evidence": null
+          },
+          "V-OB-16": {
+            "on": false
+          }
+        }
+      },
+      "expect": {
+        "status": "BUILT",
+        "verdict": "VALID",
+        "block_index": 1,
+        "numbers": {
+          "zone_low": 100.1,
+          "zone_high": 100.9,
+          "mean_threshold": 100.45,
+          "entry": 100.45
+        },
+        "gap_ids": [
+          "GAP_OB_MOVE_BOUNDS",
+          "GAP_CLUSTER_BOUND"
+        ],
+        "cluster_notice": {
+          "count": 2,
+          "gap_printed": true
+        },
+        "dimension_gap_ids": [
+          "GAP_WICK_INVALIDATION",
+          "GAP_LOCATION",
+          "GAP_OB_DISPLACEMENT_FILTER",
+          "GAP_STOP_AND_SIZE"
+        ],
+        "dimension_gap_status": {
+          "GAP_WICK_INVALIDATION": "NOT_PRINTABLE",
+          "GAP_LOCATION": "NOT_PRINTABLE",
+          "GAP_OB_DISPLACEMENT_FILTER": "NOT_PRINTABLE",
+          "GAP_STOP_AND_SIZE": "NOT_PRINTABLE"
+        },
+        "invalidation_label": "NOT_INVALIDATED"
+      }
+    },
+    {
+      "id": "X-OB-CLUSTER-3",
+      "fixture_tag": "FIXTURE",
+      "correction": "C1b-4",
+      "concept": "order_block",
+      "note": "تجمع من ثلاث شمعات معارضة متجاورات: التنبيه يُطبع، والعدد المطبوع 3 لا 1 (E-10).",
+      "candles": [
+        {
+          "o": 101.0,
+          "h": 101.2,
+          "l": 100.6,
+          "c": 100.7,
+          "closed": true
+        },
+        {
+          "o": 100.7,
+          "h": 100.9,
+          "l": 100.2,
+          "c": 100.3,
+          "closed": true
+        },
+        {
+          "o": 100.3,
+          "h": 100.5,
+          "l": 99.9,
+          "c": 100.0,
+          "closed": true
+        },
+        {
+          "o": 100.0,
+          "h": 101.4,
+          "l": 99.95,
+          "c": 101.3,
+          "closed": true
+        },
+        {
+          "o": 101.3,
+          "h": 101.9,
+          "l": 101.2,
+          "c": 101.8,
+          "closed": true
+        }
+      ],
+      "call": {
+        "displacement_start_index": 3,
+        "direction": "bullish",
+        "boundaries": "V-OB-4",
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {
+            "on": false,
+            "evidence": null
+          },
+          "V-OB-14": {
+            "on": false,
+            "evidence": null
+          },
+          "V-OB-15": {
+            "on": false,
+            "evidence": null
+          },
+          "V-OB-16": {
+            "on": false
+          }
+        }
+      },
+      "expect": {
+        "status": "BUILT",
+        "verdict": "VALID",
+        "block_index": 2,
+        "numbers": {
+          "zone_low": 99.9,
+          "zone_high": 100.5,
+          "mean_threshold": 100.15,
+          "entry": 100.15
+        },
+        "gap_ids": [
+          "GAP_OB_MOVE_BOUNDS",
+          "GAP_CLUSTER_BOUND"
+        ],
+        "cluster_notice": {
+          "count": 3,
+          "gap_printed": true
+        }
+      }
+    },
+    {
+      "id": "X-OB-CLUSTER-1",
+      "fixture_tag": "FIXTURE",
+      "correction": "C1b-4",
+      "concept": "order_block",
+      "note": "سلبي: شمعة معارضة واحدة قبل الحركة ← لا تجمع، ولا تُطبع GAP_CLUSTER_BOUND (كما في C1).",
+      "candles": [
+        {
+          "o": 100.0,
+          "h": 101.0,
+          "l": 99.8,
+          "c": 100.9,
+          "closed": true
+        },
+        {
+          "o": 100.9,
+          "h": 101.0,
+          "l": 100.2,
+          "c": 100.3,
+          "closed": true
+        },
+        {
+          "o": 100.3,
+          "h": 101.6,
+          "l": 100.25,
+          "c": 101.5,
+          "closed": true
+        },
+        {
+          "o": 101.5,
+          "h": 102.0,
+          "l": 101.4,
+          "c": 101.9,
+          "closed": true
+        }
+      ],
+      "call": {
+        "displacement_start_index": 2,
+        "direction": "bullish",
+        "boundaries": "V-OB-4",
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {
+            "on": false,
+            "evidence": null
+          },
+          "V-OB-14": {
+            "on": false,
+            "evidence": null
+          },
+          "V-OB-15": {
+            "on": false,
+            "evidence": null
+          },
+          "V-OB-16": {
+            "on": false
+          }
+        }
+      },
+      "expect": {
+        "status": "BUILT",
+        "verdict": "VALID",
+        "block_index": 1,
+        "numbers": {
+          "zone_low": 100.2,
+          "zone_high": 101.0,
+          "mean_threshold": 100.6,
+          "entry": 100.6
+        },
+        "gap_ids": [
+          "GAP_OB_MOVE_BOUNDS"
+        ],
+        "cluster_notice": {
+          "count": 1,
+          "gap_printed": false
+        }
+      }
+    },
+    {
+      "id": "X-OB-CALLER",
+      "fixture_tag": "FIXTURE",
+      "correction": "C1b-2",
+      "concept": "order_block",
+      "note": "V-OB-13/14/15 = CALLER_INPUT لا محسوبة؛ وكل فجوات هذا البُعد NOT_PRINTABLE ولا تظهر في gaps.",
+      "candles": [
+        {
+          "o": 100.9,
+          "h": 101.0,
+          "l": 100.2,
+          "c": 100.3,
+          "closed": true
+        },
+        {
+          "o": 100.3,
+          "h": 101.6,
+          "l": 100.25,
+          "c": 101.5,
+          "closed": true
+        },
+        {
+          "o": 101.5,
+          "h": 102.0,
+          "l": 101.4,
+          "c": 101.9,
+          "closed": true
+        }
+      ],
+      "call": {
+        "displacement_start_index": 1,
+        "direction": "bullish",
+        "boundaries": "V-OB-4",
+        "mean_threshold_basis": "V-OB-6",
+        "entry_level": "V-OB-8",
+        "invalidation": "V-OB-10",
+        "prerequisites": {
+          "V-OB-13": {
+            "on": true,
+            "evidence": true
+          },
+          "V-OB-14": {
+            "on": true,
+            "evidence": false
+          },
+          "V-OB-15": {
+            "on": false,
+            "evidence": null
+          },
+          "V-OB-16": {
+            "on": false
+          }
+        }
+      },
+      "expect": {
+        "status": "BUILT",
+        "verdict": "FILTER_FAILED",
+        "block_index": 0,
+        "filters": [
+          [
+            "V-OB-13",
+            "PASS"
+          ],
+          [
+            "V-OB-14",
+            "FAIL"
+          ],
+          [
+            "V-OB-15",
+            "OFF"
+          ],
+          [
+            "V-OB-16",
+            "OFF"
+          ]
+        ],
+        "filter_bases": {
+          "V-OB-13": "CALLER_INPUT",
+          "V-OB-14": "CALLER_INPUT",
+          "V-OB-15": "CALLER_INPUT",
+          "V-OB-16": "COMPUTED_FROM_CANDLES"
+        },
+        "numbers": {
+          "zone_low": 100.2,
+          "zone_high": 101.0,
+          "mean_threshold": 100.6,
+          "entry": 100.6
+        },
+        "gap_ids": [
+          "GAP_OB_MOVE_BOUNDS"
+        ],
+        "dimension_gap_ids": [
+          "GAP_WICK_INVALIDATION",
+          "GAP_LOCATION",
+          "GAP_OB_DISPLACEMENT_FILTER",
+          "GAP_STOP_AND_SIZE"
+        ],
+        "dimension_gap_status": {
+          "GAP_WICK_INVALIDATION": "NOT_PRINTABLE",
+          "GAP_LOCATION": "NOT_PRINTABLE",
+          "GAP_OB_DISPLACEMENT_FILTER": "NOT_PRINTABLE",
+          "GAP_STOP_AND_SIZE": "NOT_PRINTABLE"
+        }
+      }
+    },
+    {
+      "id": "X-E-IDX-01",
+      "fixture_tag": "FIXTURE",
+      "correction": "C1b-4",
+      "concept": "liquidity_sweep",
+      "note": "E-9: المستوى 100.10 من فتيل الشمعة 1، والتأكيد الشمعة 2. swing_index يبقى 2، ويُضاف level_candle_index = 1.",
+      "candles": [
+        {
+          "o": 101.0,
+          "h": 101.2,
+          "l": 100.6,
+          "c": 100.8,
+          "closed": true
+        },
+        {
+          "o": 100.8,
+          "h": 101.0,
+          "l": 100.1,
+          "c": 100.9,
+          "closed": true
+        },
+        {
+          "o": 100.9,
+          "h": 101.1,
+          "l": 100.2,
+          "c": 101.0,
+          "closed": true
+        },
+        {
+          "o": 101.0,
+          "h": 101.05,
+          "l": 99.9,
+          "c": 100.6,
+          "closed": true
+        }
+      ],
+      "call": {
+        "mode": "swing_level",
+        "t": 3,
+        "side": "low",
+        "variant": "V-E-00"
+      },
+      "expect": {
+        "status": "BUILT",
+        "answer": "YES",
+        "level_basis": "OWNER_DECISION_D1_SWING_V-A-00",
+        "swing_index": 2,
+        "level_candle_index": 1,
+        "confirm_candle_index": 2,
+        "numbers": {
+          "level": 100.1,
+          "wick": 99.9,
+          "close": 100.6
+        },
+        "gap_ids": [
+          "GAP_SWEEP_DISTANCE"
+        ],
+        "dimension_gap_ids": [
+          "GAP_SWEEP_QUALITATIVE"
+        ],
+        "dimension_gap_status": {
+          "GAP_SWEEP_QUALITATIVE": "NOT_PRINTABLE"
+        },
+        "claim_ids_include": [
+          "OWNER-D1"
+        ]
+      }
+    },
+    {
+      "id": "X-E-IDX-02",
+      "fixture_tag": "FIXTURE",
+      "correction": "C1b-4",
+      "concept": "liquidity_sweep",
+      "note": "مستوى من المستدعي: الحقول الثلاثة null، ولا يُستنتج تأرجح.",
+      "candles": [
+        {
+          "o": 100.5,
+          "h": 100.8,
+          "l": 99.9,
+          "c": 100.2,
+          "closed": true
+        }
+      ],
+      "call": {
+        "t": 0,
+        "side": "low",
+        "level": 100.0,
+        "variant": "V-E-00"
+      },
+      "expect": {
+        "status": "BUILT",
+        "answer": "YES",
+        "level_basis": "CALLER_INPUT",
+        "swing_index": null,
+        "level_candle_index": null,
+        "confirm_candle_index": null,
+        "numbers": {
+          "level": 100.0,
+          "wick": 99.9,
+          "close": 100.2
+        },
+        "gap_ids": [
+          "GAP_SWEEP_DISTANCE"
+        ]
+      }
+    },
+    {
+      "id": "X-E-IDX-03",
+      "fixture_tag": "FIXTURE",
+      "correction": "C1b-4",
+      "concept": "liquidity_sweep",
+      "note": "رفض: لا تأرجح مغلق قبل الفهرس t ← استثناء، لا مستوى مخترع.",
+      "candles": [
+        {
+          "o": 101.0,
+          "h": 101.2,
+          "l": 100.6,
+          "c": 100.8,
+          "closed": true
+        },
+        {
+          "o": 100.8,
+          "h": 101.0,
+          "l": 100.1,
+          "c": 100.9,
+          "closed": true
+        }
+      ],
+      "call": {
+        "mode": "swing_level",
+        "t": 1,
+        "side": "low",
+        "variant": "V-E-00"
+      },
+      "raises": "no closed swing level"
+    },
+    {
+      "id": "X-E-EQH",
+      "fixture_tag": "FIXTURE",
+      "correction": "C1b-3",
+      "concept": "liquidity_sweep",
+      "note": "E-7: V-E-EQH = ACCEPTED_RETURNS_UNDEFINED: المعرّف مقبول والنتيجة UNDEFINED مع فجوة D1، لا NOT_CODED صامتة.",
+      "candles": [
+        {
+          "o": 100.5,
+          "h": 100.8,
+          "l": 99.9,
+          "c": 100.2,
+          "closed": true
+        }
+      ],
+      "call": {
+        "t": 0,
+        "side": "low",
+        "level": 100.0,
+        "variant": "V-E-EQH"
+      },
+      "expect": {
+        "status": "UNDEFINED",
+        "answer": null,
+        "variant_id": "V-E-EQH",
+        "gap_ids": [
+          "GAP_SWEEP_EQH_BASIS"
+        ],
+        "dimension_gap_ids": [
+          "GAP_SWEEP_QUALITATIVE"
+        ],
+        "dimension_gap_status": {
+          "GAP_SWEEP_QUALITATIVE": "NOT_PRINTABLE"
+        }
+      }
+    }
+  ]
+}

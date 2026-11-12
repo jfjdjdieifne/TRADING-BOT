@@ -1,0 +1,114 @@
+{
+  "fixture_version": "SCALP-FIXTURES-2",
+  "declared_before_code": true,
+  "tag": "FIXTURE",
+  "note": "Hand-declared expectations for the scalp pattern, written before the code that implements them. EXPECTED_SCALP_FIXTURES.json (the S candle) is frozen and untouched.",
+  "base_structure": {
+    "comment": "S is candle 4: low 1.09900 breaks the confirmed swing low 1.10000 of candle 1 and closes back above it. R = S itself unless stated.",
+    "candles": [
+      [1.10400, 1.10500, 1.10300, 1.10400],
+      [1.10400, 1.10500, 1.10000, 1.10100],
+      [1.10100, 1.10450, 1.10050, 1.10400],
+      [1.10400, 1.10450, 1.10300, 1.10350],
+      [1.09950, 1.10380, 1.09900, 1.10300],
+      [1.10300, 1.10350, 1.10250, 1.10300],
+      [1.10300, 1.10340, 1.10260, 1.10300],
+      [1.10300, 1.10330, 1.10260, 1.10300]
+    ],
+    "s_index": 4,
+    "r_index": 4,
+    "r_range": 0.0048,
+    "r_half_level": 1.1014,
+    "candle_before_r_high": 1.1045
+  },
+  "cases": [
+    {
+      "id": "fvg_yes",
+      "label": "H low above the high of the candle before R -> R created an FVG",
+      "candle_5": [1.10600, 1.10620, 1.10500, 1.10550],
+      "expected": {"valid": true, "form": 1, "variant": "1A", "h_index": 5, "fvg": true,
+                   "h_low": 1.105, "h_low_above_half": true}
+    },
+    {
+      "id": "fvg_no",
+      "label": "H low between the 50 percent level and the candle before R -> no FVG",
+      "candle_5": [1.10450, 1.10480, 1.10300, 1.10350],
+      "expected": {"valid": true, "form": 2, "variant": "1A", "h_index": 5, "fvg": false,
+                   "h_low": 1.103, "h_low_above_half": true}
+    },
+    {
+      "id": "h_below_half",
+      "label": "H low below the 50 percent level of R -> invalid",
+      "candle_5": [1.10350, 1.10380, 1.10100, 1.10150],
+      "expected": {"valid": false, "reason": "H_LOW_NOT_ABOVE_HALF", "h_index": 5}
+    },
+    {
+      "id": "variant_1B",
+      "label": "R at S, one more bullish candle, then H -> variant 1B",
+      "candles_extra": {"5": [1.10300, 1.10500, 1.10280, 1.10450],
+                        "6": [1.10500, 1.10520, 1.10470, 1.10500]},
+      "expected": {"valid": true, "variant": "1B", "h_index": 6, "r_index": 4, "fvg": true,
+                   "note": "candle 5 is the candle after R, so the FVG test uses its low 1.10280 against 1.10450 -> no gap; see fvg_in_1B"}
+    },
+    {
+      "id": "fvg_in_1B",
+      "label": "1B where the extra bullish candle itself leaves the gap",
+      "candles_extra": {"5": [1.10300, 1.10520, 1.10500, 1.10510],
+                        "6": [1.10520, 1.10540, 1.10500, 1.10520]},
+      "expected": {"valid": true, "variant": "1B", "h_index": 6, "fvg": true,
+                   "note": "candle 5 low 1.10500 > candle 3 high 1.10450, and H low 1.10500 stays above the 50 percent level"}
+    },
+    {
+      "id": "window_2_vs_3",
+      "label": "H at S+1 is inside both windows; H at S+3 is inside window 3 only",
+      "cases": {"h_at_5": {"window_3": true, "window_2": true},
+                "h_at_7": {"window_3": true, "window_2": false}}
+    },
+    {
+      "id": "R_equals_S",
+      "label": "R may be S itself",
+      "expected": {"r_index": 4, "s_index": 4, "valid_if_other_conditions_hold": true}
+    },
+    {
+      "id": "target_behind",
+      "label": "a target at or below the entry is rejected and counted",
+      "cases": [{"entry": 1.1, "target": 1.0999, "expected": "TARGET_BEHIND_ENTRY"},
+                {"entry": 1.1, "target": 1.1, "expected": "TARGET_BEHIND_ENTRY"},
+                {"entry": 1.1, "target": 1.1001, "expected": "OK"}]
+    },
+    {
+      "id": "side_correct",
+      "label": "entry on the ask, exits on the bid, spread counted once",
+      "entry_bar": {"bid_close": 1.09996, "ask_close": 1.1},
+      "h_low": 1.099,
+      "target_before_buffer": 1.102,
+      "expected": {"entry": 1.1, "buffer": 0.00021999999999999998, "stop": 1.09878,
+                   "target": 1.10178, "risk": 0.0012199999999999999, "rr": 1.459016393442623,
+                   "exit_at_target_r": 1.459016393442623, "exit_at_stop_r": -1.0}
+    },
+    {
+      "id": "path_ordering",
+      "label": "one 5m bar touching both levels -> stop first, counted ambiguous",
+      "bars": [
+        {"bid": [1.1000, 1.1005, 1.0998, 1.1002]},
+        {"bid": [1.1002, 1.1020, 1.0980, 1.1000]}
+      ],
+      "stop": 1.09878,
+      "target": 1.10178,
+      "entry": 1.1,
+      "expected": {"exit_reason": "stop", "ambiguous_bars": 1, "r": -1.0}
+    },
+    {
+      "id": "truncation",
+      "label": "the plan at the H close is identical when every later candle is removed",
+      "expected": {"identical": true}
+    },
+    {
+      "id": "hour_control",
+      "label": "control draws stay in the same NY hour and outside the two-hour exclusion zone",
+      "event_ny_hour": 9,
+      "exclusion_hours": 2,
+      "expected": {"same_hour": true, "outside_zone": true, "m_per_event": 5, "seed": 20261109}
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+ "_fixture": "fx_thesis_identity",
+ "_tag": "FIXTURE",
+ "value": {
+  "a_blocked": true,
+  "b_allowed": true,
+  "identity_includes_frame": true
+ }
+}

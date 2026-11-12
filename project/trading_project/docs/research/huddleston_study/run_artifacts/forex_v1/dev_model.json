@@ -1,0 +1,63 @@
+{
+ "kind": "context-event-model-v1",
+ "counts": [
+  [
+   [
+    "down",
+    "selected",
+    "contained",
+    "pending"
+   ],
+   {
+    "E-CONTINUATION": 53,
+    "E-VIOLATION": 60,
+    "E-NONE-IN-HORIZON": 47,
+    "E-AMBIGUOUS-SAME-BAR": 0
+   }
+  ],
+  [
+   [
+    "down",
+    "selected",
+    "contained",
+    "observed"
+   ],
+   {
+    "E-CONTINUATION": 36,
+    "E-VIOLATION": 19,
+    "E-NONE-IN-HORIZON": 16,
+    "E-AMBIGUOUS-SAME-BAR": 0
+   }
+  ],
+  [
+   [
+    "up",
+    "selected",
+    "contained",
+    "pending"
+   ],
+   {
+    "E-CONTINUATION": 49,
+    "E-VIOLATION": 41,
+    "E-NONE-IN-HORIZON": 50,
+    "E-AMBIGUOUS-SAME-BAR": 0
+   }
+  ],
+  [
+   [
+    "up",
+    "selected",
+    "contained",
+    "observed"
+   ],
+   {
+    "E-CONTINUATION": 33,
+    "E-VIOLATION": 47,
+    "E-NONE-IN-HORIZON": 17,
+    "E-AMBIGUOUS-SAME-BAR": 0
+   }
+  ]
+ ],
+ "n_episodes": 468,
+ "trained_through": "2025-01-31 10:00:00+00:00"
+}

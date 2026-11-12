@@ -1,0 +1,1100 @@
+{
+  "axis_1_reproducibility_causal_integrity": {
+    "append_after_t_test": "tests/test_contextual_trade_plan.py::test_append_after_t_invariance (pass)",
+    "immutable_revisions": "tests/test_contextual_trade_plan.py revision/ledger tests (pass)",
+    "separation": "train as_of <= 2025-09-06 00:00:00+00:00 < eval as_of >= 2025-09-11 00:00:00+00:00; purged overlapping train episodes: 4"
+  },
+  "axis_2_source_agreement": {
+    "rows": [
+      {
+        "component": "entry",
+        "plan_position": "the first completed task-scale bar whose CLOSE is strictly beyond the last confirmed leg's END extreme in the leg's direction (SP-03 close binding of the leg-end reference)",
+        "source_position": "SRC-EX-01: ICT entry technique = trade away from the OB then return to its high (directly-stated)",
+        "verdict": "differs (engine uses the scenario's discriminating binding; the OB-return technique is NOT implemented \u2014 G-OB-P not runnable: P-N/P-W unset in the foundation and no owner policy exists)"
+      },
+      {
+        "component": "invalidation",
+        "plan_position": "the first completed task-scale bar whose CLOSE is strictly beyond the falsifier reference level on its falsifying side (SP-03 close violation)",
+        "source_position": "SRC-EX-01 stop at the OB low (directly-stated); SRC-EX-02: ICT-primary invalidation-by-close NOT in primary text (P-K)",
+        "verdict": "partially aligned (stop-at-structural-extreme concept present in source; the close-based falsifier operationalization is engineering/community-influenced, not ICT-primary)"
+      },
+      {
+        "component": "objective",
+        "plan_position": "one completed, causally confirmed task-scale F-K leg in the scenario direction whose knowable time is after the entry bar",
+        "source_position": "SRC-EX-03: no target definition in verified primary text; liquidity target explicitly not selectable",
+        "verdict": "not stated in verified material (declared research configuration used; identified as such)"
+      }
+    ],
+    "scope": "definition-level agreement only; NOT a performance or accuracy claim"
+  },
+  "axis_3_event_forecasts_later_data": {
+    "ex_ante_baseline": {
+      "derivation": "computed only from the training-period labels; the evaluation outcomes are unknown at derivation time",
+      "hit_rate": 0.3529,
+      "hits": 6,
+      "method": "train-majority-class (ex-ante)",
+      "misses": 11,
+      "n_eval_episodes": 17,
+      "no_calls": 0,
+      "predicted_class": "E-CONTINUATION",
+      "predictions": [
+        {
+          "as_of": "2025-09-11 00:00:00+00:00",
+          "episode_id": "EP-plan-v1-0041",
+          "hit": false,
+          "predicted": "E-CONTINUATION",
+          "realized": "E-VIOLATION"
+        },
+        {
+          "as_of": "2025-09-12 00:00:00+00:00",
+          "episode_id": "EP-plan-v1-0042",
+          "hit": false,
+          "predicted": "E-CONTINUATION",
+          "realized": "E-VIOLATION"
+        },
+        {
+          "as_of": "2025-09-13 00:00:00+00:00",
+          "episode_id": "EP-plan-v1-0043",
+          "hit": false,
+          "predicted": "E-CONTINUATION",
+          "realized": "E-VIOLATION"
+        },
+        {
+          "as_of": "2025-09-14 00:00:00+00:00",
+          "episode_id": "EP-plan-v1-0044",
+          "hit": true,
+          "predicted": "E-CONTINUATION",
+          "realized": "E-CONTINUATION"
+        },
+        {
+          "as_of": "2025-09-15 00:00:00+00:00",
+          "episode_id": "EP-plan-v1-0045",
+          "hit": true,
+          "predicted": "E-CONTINUATION",
+          "realized": "E-CONTINUATION"
+        },
+        {
+          "as_of": "2025-09-16 00:00:00+00:00",
+          "episode_id": "EP-plan-v1-0046",
+          "hit": false,
+          "predicted": "E-CONTINUATION",
+          "realized": "E-VIOLATION"
+        },
+        {
+          "as_of": "2025-09-17 00:00:00+00:00",
+          "episode_id": "EP-plan-v1-0047",
+          "hit": false,
+          "predicted": "E-CONTINUATION",
+          "realized": "E-VIOLATION"
+        },
+        {
+          "as_of": "2025-09-18 00:00:00+00:00",
+          "episode_id": "EP-plan-v1-0048",
+          "hit": false,
+          "predicted": "E-CONTINUATION",
+          "realized": "E-VIOLATION"
+        },
+        {
+          "as_of": "2025-09-19 00:00:00+00:00",
+          "episode_id": "EP-plan-v1-0049",
+          "hit": false,
+          "predicted": "E-CONTINUATION",
+          "realized": "E-VIOLATION"
+        },
+        {
+          "as_of": "2025-09-20 00:00:00+00:00",
+          "episode_id": "EP-plan-v1-0050",
+          "hit": false,
+          "predicted": "E-CONTINUATION",
+          "realized": "E-VIOLATION"
+        },
+        {
+          "as_of": "2025-09-21 00:00:00+00:00",
+          "episode_id": "EP-plan-v1-0051",
+          "hit": true,
+          "predicted": "E-CONTINUATION",
+          "realized": "E-CONTINUATION"
+        },
+        {
+          "as_of": "2025-09-22 00:00:00+00:00",
+          "episode_id": "EP-plan-v1-0052",
+          "hit": true,
+          "predicted": "E-CONTINUATION",
+          "realized": "E-CONTINUATION"
+        },
+        {
+          "as_of": "2025-09-23 00:00:00+00:00",
+          "episode_id": "EP-plan-v1-0053",
+          "hit": true,
+          "predicted": "E-CONTINUATION",
+          "realized": "E-CONTINUATION"
+        },
+        {
+          "as_of": "2025-09-24 00:00:00+00:00",
+          "episode_id": "EP-plan-v1-0054",
+          "hit": true,
+          "predicted": "E-CONTINUATION",
+          "realized": "E-CONTINUATION"
+        },
+        {
+          "as_of": "2025-09-25 00:00:00+00:00",
+          "episode_id": "EP-plan-v1-0055",
+          "hit": false,
+          "predicted": "E-CONTINUATION",
+          "realized": "E-AMBIGUOUS-SAME-BAR"
+        },
+        {
+          "as_of": "2025-09-26 00:00:00+00:00",
+          "episode_id": "EP-plan-v1-0056",
+          "hit": false,
+          "predicted": "E-CONTINUATION",
+          "realized": "E-VIOLATION"
+        },
+        {
+          "as_of": "2025-09-27 00:00:00+00:00",
+          "episode_id": "EP-plan-v1-0057",
+          "hit": false,
+          "predicted": "E-CONTINUATION",
+          "realized": "E-VIOLATION"
+        }
+      ],
+      "train_label_counts": {
+        "E-CONTINUATION": 14,
+        "E-NONE-IN-HORIZON": 1,
+        "E-VIOLATION": 13
+      }
+    },
+    "model": {
+      "confusion_predicted_rows_realized_cols": {
+        "E-CONTINUATION": {
+          "E-CONTINUATION": 1,
+          "E-VIOLATION": 1
+        },
+        "E-VIOLATION": {
+          "E-AMBIGUOUS-SAME-BAR": 1,
+          "E-CONTINUATION": 5,
+          "E-VIOLATION": 9
+        }
+      },
+      "coverage": 1.0,
+      "hit": 10,
+      "hit_rate_on_covered": 0.5882,
+      "hit_rate_overall": 0.5882,
+      "label_distribution": {
+        "E-AMBIGUOUS-SAME-BAR": 1,
+        "E-CONTINUATION": 6,
+        "E-VIOLATION": 10
+      },
+      "labels_note": "structural event identities only; win/loss here means scenario continuation/violation \u2014 NEVER trade profit/loss",
+      "miss": 7,
+      "n_eval_episodes": 17,
+      "no_call": 0
+    },
+    "note": "small, correlated sample (17 episodes); the decision ranking stays PROVISIONAL and UNVALIDATED; 10/17 vs 6/17 establishes nothing about market understanding or trading readiness"
+  },
+  "axis_4_hypothetical_plan_outcomes": {
+    "final_states": {
+      "CONDITION_OBSERVED": 6,
+      "HYPOTHETICAL_ENTRY_MET": 6,
+      "INVALIDATED": 20
+    },
+    "hypothetical_outcomes": {
+      "invalidated_after_entry": 1,
+      "invalidated_before_entry": 19,
+      "missed": 0,
+      "objective_before_invalidation": 5,
+      "open_at_run_end": 7
+    },
+    "n_plans": 32,
+    "note": "hypothetical plan MECHANICS only: 'objective' means one completed confirmed structural leg \u2014 NOT a profit, NOT a return; losses, misses, invalidations and open cases are all reported; nothing here is trained on wins"
+  },
+  "horizon_disclosure": "EPISODE_HORIZON_BARS = 24 is NOT source-grounded, NOT owner-approved, and NOT a market rule: it is a declared engineering parameter for bounded episode labeling.  It determines each label as the FIRST predefined observable event whose binding occurs on a completed task-scale bar inside the half-open window (as_of_bar, as_of_bar + 24]; episodes whose window extends past the available data are CENSORED, excluded, and reported \u2014 their labels are never guessed.  Sensitivity across alternative horizon values remains UNTESTED: no other defensible, explicitly declared configuration exists in this project, and no alternative values were invented or searched to improve the result.",
+  "required_examples": {
+    "invalidated_or_missed_scenario": {
+      "events_seen": {
+        "entry_bars": [
+          76,
+          78
+        ],
+        "invalidation_bars": [
+          82
+        ],
+        "objective_seen": true
+      },
+      "plan_id": "PLAN-plan-v1-0002",
+      "versions": [
+        {
+          "analysis_id": "AN-9f5d9cfb4329",
+          "analysis_version": 12,
+          "as_of_bar": 71,
+          "as_of_time": "2025-08-13 00:00:00+00:00",
+          "components": {
+            "entry": {
+              "basis": "SRS-SP03 + SRS-FK",
+              "claim_class": "engineering-interpretation",
+              "definition": "the first completed task-scale bar whose CLOSE is strictly beyond the falsifier reference level on its falsifying side (SP-03 close violation \u2014 the event that supports the reversal scenario)",
+              "definition_origin": "declared-research-configuration",
+              "detector": "sp03-close-binding",
+              "kind": "entry",
+              "source_reference": "ICT entry technique exists (SRC-EX-01) but is NOT implemented: G-OB-P not runnable (P-N/P-W unset; owner policy required; none invented)"
+            },
+            "invalidation": {
+              "basis": "SRS-SP03 + SRS-SP04 + SRS-TS5 (falsifier semantics)",
+              "claim_class": "engineering-interpretation",
+              "definition": "the first completed task-scale bar whose CLOSE is strictly beyond the last confirmed leg's END extreme in the leg's direction (SP-03 close binding \u2014 the event that supports the continuation scenario and voids the reversal plan)",
+              "definition_origin": "declared-research-configuration",
+              "detector": "sp03-close-violation",
+              "kind": "invalidation",
+              "source_reference": "SRC-EX-01 stop concept (directly-stated) + SRC-EX-02: ICT-primary invalidation-by-close NOT in primary text (P-K)"
+            },
+            "objective": {
+              "basis": "SRS-FK",
+              "claim_class": "engineering-interpretation",
+              "definition": "one completed, causally confirmed task-scale F-K leg in the scenario direction whose knowable time is after the entry bar",
+              "definition_origin": "declared-research-configuration",
+              "detector": "fk-leg-completion",
+              "kind": "objective",
+              "source_reference": "SRC-EX-03: no target definition in the verified primary text read"
+            }
+          },
+          "decision_id": "DEC-plan-v1-0012",
+          "direction": "up",
+          "events_observed": {
+            "entry_bars": [],
+            "invalidation_bars": []
+          },
+          "ledger_uid": "T-PLAN-V1#26",
+          "levels": {
+            "leg_direction": "down",
+            "leg_end": {
+              "bar": 65,
+              "continuation_side": "down",
+              "id": "PTC:F-K(k=5)|low@2025-08-12T00:00:00+00:00",
+              "level": 118050.11,
+              "side": "low"
+            },
+            "plan_direction": "up",
+            "reference": {
+              "bar": 61,
+              "falsifying_side": "up",
+              "id": "PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00",
+              "level": 122335.16,
+              "side": "high"
+            }
+          },
+          "limitations": [
+            "selection_quality = NOT_ESTABLISHED",
+            "hypothetical analytical record \u2014 NOT an order; no execution connectivity exists",
+            "no position is inferred from chart data; position_status is always 'absent'",
+            "the decision layer's ranking is PROVISIONAL and UNVALIDATED (10/17 vs 6/17 on 17 correlated episodes is a small sample and establishes nothing about market understanding or readiness)",
+            "run context: historical-replay (a historical replay is never an actual live market observation)",
+            "no probabilities, no candle counts, no percentages, no ATR multiples and no confidence values are used or implied",
+            "not Michael Huddleston; no exact-replication, accuracy or profitability claim"
+          ],
+          "missing_evidence": [],
+          "observed_before_record": false,
+          "position_status": "absent",
+          "revises": null,
+          "revision_reason": null,
+          "run_context": "historical-replay",
+          "scenario": "reversal",
+          "selection_quality": "NOT_ESTABLISHED",
+          "state": "MONITORING",
+          "state_detail": "awaiting the entry condition: the first completed task-scale bar whose CLOSE is strictly beyond the falsifier reference level on its falsifying side (SP-03 close violation \u2014 the event that supports the reversal scenario)",
+          "version": 1
+        },
+        {
+          "analysis_id": "AN-9f5d9cfb4329",
+          "analysis_version": 13,
+          "as_of_bar": 77,
+          "as_of_time": "2025-08-14 00:00:00+00:00",
+          "components": {
+            "entry": {
+              "basis": "SRS-SP03 + SRS-FK",
+              "claim_class": "engineering-interpretation",
+              "definition": "the first completed task-scale bar whose CLOSE is strictly beyond the falsifier reference level on its falsifying side (SP-03 close violation \u2014 the event that supports the reversal scenario)",
+              "definition_origin": "declared-research-configuration",
+              "detector": "sp03-close-binding",
+              "kind": "entry",
+              "source_reference": "ICT entry technique exists (SRC-EX-01) but is NOT implemented: G-OB-P not runnable (P-N/P-W unset; owner policy required; none invented)"
+            },
+            "invalidation": {
+              "basis": "SRS-SP03 + SRS-SP04 + SRS-TS5 (falsifier semantics)",
+              "claim_class": "engineering-interpretation",
+              "definition": "the first completed task-scale bar whose CLOSE is strictly beyond the last confirmed leg's END extreme in the leg's direction (SP-03 close binding \u2014 the event that supports the continuation scenario and voids the reversal plan)",
+              "definition_origin": "declared-research-configuration",
+              "detector": "sp03-close-violation",
+              "kind": "invalidation",
+              "source_reference": "SRC-EX-01 stop concept (directly-stated) + SRC-EX-02: ICT-primary invalidation-by-close NOT in primary text (P-K)"
+            },
+            "objective": {
+              "basis": "SRS-FK",
+              "claim_class": "engineering-interpretation",
+              "definition": "one completed, causally confirmed task-scale F-K leg in the scenario direction whose knowable time is after the entry bar",
+              "definition_origin": "declared-research-configuration",
+              "detector": "fk-leg-completion",
+              "kind": "objective",
+              "source_reference": "SRC-EX-03: no target definition in the verified primary text read"
+            }
+          },
+          "decision_id": "DEC-plan-v1-0013",
+          "direction": "up",
+          "events_observed": {
+            "entry_bars": [
+              76
+            ],
+            "invalidation_bars": [],
+            "new_entry_bars": [
+              76
+            ],
+            "new_invalidation_bars": [],
+            "objective_seen": false
+          },
+          "ledger_uid": null,
+          "levels": {
+            "leg_direction": "down",
+            "leg_end": {
+              "bar": 65,
+              "continuation_side": "down",
+              "id": "PTC:F-K(k=5)|low@2025-08-12T00:00:00+00:00",
+              "level": 118050.11,
+              "side": "low"
+            },
+            "plan_direction": "up",
+            "reference": {
+              "bar": 61,
+              "falsifying_side": "up",
+              "id": "PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00",
+              "level": 122335.16,
+              "side": "high"
+            }
+          },
+          "limitations": [
+            "selection_quality = NOT_ESTABLISHED",
+            "hypothetical analytical record \u2014 NOT an order; no execution connectivity exists",
+            "no position is inferred from chart data; position_status is always 'absent'",
+            "the decision layer's ranking is PROVISIONAL and UNVALIDATED (10/17 vs 6/17 on 17 correlated episodes is a small sample and establishes nothing about market understanding or readiness)",
+            "run context: historical-replay (a historical replay is never an actual live market observation)",
+            "no probabilities, no candle counts, no percentages, no ATR multiples and no confidence values are used or implied",
+            "not Michael Huddleston; no exact-replication, accuracy or profitability claim"
+          ],
+          "missing_evidence": [],
+          "observed_before_record": false,
+          "position_status": "absent",
+          "revises": "PLAN-plan-v1-0002@v1",
+          "revision_reason": "plan PLAN-plan-v1-0002 revised to HYPOTHETICAL_ENTRY_MET by post-record evidence (PLAN-plan-v1-0002@v1 preserved)",
+          "run_context": "historical-replay",
+          "scenario": "reversal",
+          "selection_quality": "NOT_ESTABLISHED",
+          "state": "HYPOTHETICAL_ENTRY_MET",
+          "state_detail": "the entry condition was observed at bar 76 after the plan record (observed_before_record=False) \u2014 a HYPOTHETICAL entry, not an order",
+          "version": 2
+        },
+        {
+          "analysis_id": "AN-9f5d9cfb4329",
+          "analysis_version": 14,
+          "as_of_bar": 83,
+          "as_of_time": "2025-08-15 00:00:00+00:00",
+          "components": {
+            "entry": {
+              "basis": "SRS-SP03 + SRS-FK",
+              "claim_class": "engineering-interpretation",
+              "definition": "the first completed task-scale bar whose CLOSE is strictly beyond the falsifier reference level on its falsifying side (SP-03 close violation \u2014 the event that supports the reversal scenario)",
+              "definition_origin": "declared-research-configuration",
+              "detector": "sp03-close-binding",
+              "kind": "entry",
+              "source_reference": "ICT entry technique exists (SRC-EX-01) but is NOT implemented: G-OB-P not runnable (P-N/P-W unset; owner policy required; none invented)"
+            },
+            "invalidation": {
+              "basis": "SRS-SP03 + SRS-SP04 + SRS-TS5 (falsifier semantics)",
+              "claim_class": "engineering-interpretation",
+              "definition": "the first completed task-scale bar whose CLOSE is strictly beyond the last confirmed leg's END extreme in the leg's direction (SP-03 close binding \u2014 the event that supports the continuation scenario and voids the reversal plan)",
+              "definition_origin": "declared-research-configuration",
+              "detector": "sp03-close-violation",
+              "kind": "invalidation",
+              "source_reference": "SRC-EX-01 stop concept (directly-stated) + SRC-EX-02: ICT-primary invalidation-by-close NOT in primary text (P-K)"
+            },
+            "objective": {
+              "basis": "SRS-FK",
+              "claim_class": "engineering-interpretation",
+              "definition": "one completed, causally confirmed task-scale F-K leg in the scenario direction whose knowable time is after the entry bar",
+              "definition_origin": "declared-research-configuration",
+              "detector": "fk-leg-completion",
+              "kind": "objective",
+              "source_reference": "SRC-EX-03: no target definition in the verified primary text read"
+            }
+          },
+          "decision_id": "DEC-plan-v1-0014",
+          "direction": "up",
+          "events_observed": {
+            "entry_bars": [
+              76,
+              78
+            ],
+            "invalidation_bars": [
+              82
+            ],
+            "new_entry_bars": [
+              78
+            ],
+            "new_invalidation_bars": [
+              82
+            ],
+            "objective_seen": true
+          },
+          "ledger_uid": null,
+          "levels": {
+            "leg_direction": "down",
+            "leg_end": {
+              "bar": 65,
+              "continuation_side": "down",
+              "id": "PTC:F-K(k=5)|low@2025-08-12T00:00:00+00:00",
+              "level": 118050.11,
+              "side": "low"
+            },
+            "plan_direction": "up",
+            "reference": {
+              "bar": 61,
+              "falsifying_side": "up",
+              "id": "PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00",
+              "level": 122335.16,
+              "side": "high"
+            }
+          },
+          "limitations": [
+            "selection_quality = NOT_ESTABLISHED",
+            "hypothetical analytical record \u2014 NOT an order; no execution connectivity exists",
+            "no position is inferred from chart data; position_status is always 'absent'",
+            "the decision layer's ranking is PROVISIONAL and UNVALIDATED (10/17 vs 6/17 on 17 correlated episodes is a small sample and establishes nothing about market understanding or readiness)",
+            "run context: historical-replay (a historical replay is never an actual live market observation)",
+            "no probabilities, no candle counts, no percentages, no ATR multiples and no confidence values are used or implied",
+            "not Michael Huddleston; no exact-replication, accuracy or profitability claim"
+          ],
+          "missing_evidence": [],
+          "observed_before_record": false,
+          "position_status": "absent",
+          "revises": "PLAN-plan-v1-0002@v2",
+          "revision_reason": "plan PLAN-plan-v1-0002 revised to INVALIDATED by post-record evidence (PLAN-plan-v1-0002@v2 preserved)",
+          "run_context": "historical-replay",
+          "scenario": "reversal",
+          "selection_quality": "NOT_ESTABLISHED",
+          "state": "INVALIDATED",
+          "state_detail": "the invalidation condition was observed at bar 82 after the hypothetical entry (bar 76) and before the objective",
+          "version": 3
+        }
+      ]
+    },
+    "no_plan_with_specific_missing_evidence": {
+      "as_of": "2025-08-02 00:00:00+00:00",
+      "decision_id": "DEC-plan-v1-0001",
+      "missing_evidence": [
+        "evidence-supported directional preference (the decision is UNRESOLVED: model does not strictly distinguish the scenarios / input insufficient)",
+        "precise falsifier reference (reference_status=unresolved",
+        "completed task-scale leg with a resolved end extreme"
+      ],
+      "next_discriminating_observation": "the first completed task-scale leg's existence and direction",
+      "state": "NO_JUSTIFIED_PLAN"
+    },
+    "plan_entry_condition_becomes_met": {
+      "events_seen": {
+        "entry_bars": [
+          76,
+          78
+        ],
+        "invalidation_bars": [
+          82
+        ],
+        "objective_seen": true
+      },
+      "plan_id": "PLAN-plan-v1-0002",
+      "versions": [
+        {
+          "analysis_id": "AN-9f5d9cfb4329",
+          "analysis_version": 12,
+          "as_of_bar": 71,
+          "as_of_time": "2025-08-13 00:00:00+00:00",
+          "components": {
+            "entry": {
+              "basis": "SRS-SP03 + SRS-FK",
+              "claim_class": "engineering-interpretation",
+              "definition": "the first completed task-scale bar whose CLOSE is strictly beyond the falsifier reference level on its falsifying side (SP-03 close violation \u2014 the event that supports the reversal scenario)",
+              "definition_origin": "declared-research-configuration",
+              "detector": "sp03-close-binding",
+              "kind": "entry",
+              "source_reference": "ICT entry technique exists (SRC-EX-01) but is NOT implemented: G-OB-P not runnable (P-N/P-W unset; owner policy required; none invented)"
+            },
+            "invalidation": {
+              "basis": "SRS-SP03 + SRS-SP04 + SRS-TS5 (falsifier semantics)",
+              "claim_class": "engineering-interpretation",
+              "definition": "the first completed task-scale bar whose CLOSE is strictly beyond the last confirmed leg's END extreme in the leg's direction (SP-03 close binding \u2014 the event that supports the continuation scenario and voids the reversal plan)",
+              "definition_origin": "declared-research-configuration",
+              "detector": "sp03-close-violation",
+              "kind": "invalidation",
+              "source_reference": "SRC-EX-01 stop concept (directly-stated) + SRC-EX-02: ICT-primary invalidation-by-close NOT in primary text (P-K)"
+            },
+            "objective": {
+              "basis": "SRS-FK",
+              "claim_class": "engineering-interpretation",
+              "definition": "one completed, causally confirmed task-scale F-K leg in the scenario direction whose knowable time is after the entry bar",
+              "definition_origin": "declared-research-configuration",
+              "detector": "fk-leg-completion",
+              "kind": "objective",
+              "source_reference": "SRC-EX-03: no target definition in the verified primary text read"
+            }
+          },
+          "decision_id": "DEC-plan-v1-0012",
+          "direction": "up",
+          "events_observed": {
+            "entry_bars": [],
+            "invalidation_bars": []
+          },
+          "ledger_uid": "T-PLAN-V1#26",
+          "levels": {
+            "leg_direction": "down",
+            "leg_end": {
+              "bar": 65,
+              "continuation_side": "down",
+              "id": "PTC:F-K(k=5)|low@2025-08-12T00:00:00+00:00",
+              "level": 118050.11,
+              "side": "low"
+            },
+            "plan_direction": "up",
+            "reference": {
+              "bar": 61,
+              "falsifying_side": "up",
+              "id": "PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00",
+              "level": 122335.16,
+              "side": "high"
+            }
+          },
+          "limitations": [
+            "selection_quality = NOT_ESTABLISHED",
+            "hypothetical analytical record \u2014 NOT an order; no execution connectivity exists",
+            "no position is inferred from chart data; position_status is always 'absent'",
+            "the decision layer's ranking is PROVISIONAL and UNVALIDATED (10/17 vs 6/17 on 17 correlated episodes is a small sample and establishes nothing about market understanding or readiness)",
+            "run context: historical-replay (a historical replay is never an actual live market observation)",
+            "no probabilities, no candle counts, no percentages, no ATR multiples and no confidence values are used or implied",
+            "not Michael Huddleston; no exact-replication, accuracy or profitability claim"
+          ],
+          "missing_evidence": [],
+          "observed_before_record": false,
+          "position_status": "absent",
+          "revises": null,
+          "revision_reason": null,
+          "run_context": "historical-replay",
+          "scenario": "reversal",
+          "selection_quality": "NOT_ESTABLISHED",
+          "state": "MONITORING",
+          "state_detail": "awaiting the entry condition: the first completed task-scale bar whose CLOSE is strictly beyond the falsifier reference level on its falsifying side (SP-03 close violation \u2014 the event that supports the reversal scenario)",
+          "version": 1
+        },
+        {
+          "analysis_id": "AN-9f5d9cfb4329",
+          "analysis_version": 13,
+          "as_of_bar": 77,
+          "as_of_time": "2025-08-14 00:00:00+00:00",
+          "components": {
+            "entry": {
+              "basis": "SRS-SP03 + SRS-FK",
+              "claim_class": "engineering-interpretation",
+              "definition": "the first completed task-scale bar whose CLOSE is strictly beyond the falsifier reference level on its falsifying side (SP-03 close violation \u2014 the event that supports the reversal scenario)",
+              "definition_origin": "declared-research-configuration",
+              "detector": "sp03-close-binding",
+              "kind": "entry",
+              "source_reference": "ICT entry technique exists (SRC-EX-01) but is NOT implemented: G-OB-P not runnable (P-N/P-W unset; owner policy required; none invented)"
+            },
+            "invalidation": {
+              "basis": "SRS-SP03 + SRS-SP04 + SRS-TS5 (falsifier semantics)",
+              "claim_class": "engineering-interpretation",
+              "definition": "the first completed task-scale bar whose CLOSE is strictly beyond the last confirmed leg's END extreme in the leg's direction (SP-03 close binding \u2014 the event that supports the continuation scenario and voids the reversal plan)",
+              "definition_origin": "declared-research-configuration",
+              "detector": "sp03-close-violation",
+              "kind": "invalidation",
+              "source_reference": "SRC-EX-01 stop concept (directly-stated) + SRC-EX-02: ICT-primary invalidation-by-close NOT in primary text (P-K)"
+            },
+            "objective": {
+              "basis": "SRS-FK",
+              "claim_class": "engineering-interpretation",
+              "definition": "one completed, causally confirmed task-scale F-K leg in the scenario direction whose knowable time is after the entry bar",
+              "definition_origin": "declared-research-configuration",
+              "detector": "fk-leg-completion",
+              "kind": "objective",
+              "source_reference": "SRC-EX-03: no target definition in the verified primary text read"
+            }
+          },
+          "decision_id": "DEC-plan-v1-0013",
+          "direction": "up",
+          "events_observed": {
+            "entry_bars": [
+              76
+            ],
+            "invalidation_bars": [],
+            "new_entry_bars": [
+              76
+            ],
+            "new_invalidation_bars": [],
+            "objective_seen": false
+          },
+          "ledger_uid": null,
+          "levels": {
+            "leg_direction": "down",
+            "leg_end": {
+              "bar": 65,
+              "continuation_side": "down",
+              "id": "PTC:F-K(k=5)|low@2025-08-12T00:00:00+00:00",
+              "level": 118050.11,
+              "side": "low"
+            },
+            "plan_direction": "up",
+            "reference": {
+              "bar": 61,
+              "falsifying_side": "up",
+              "id": "PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00",
+              "level": 122335.16,
+              "side": "high"
+            }
+          },
+          "limitations": [
+            "selection_quality = NOT_ESTABLISHED",
+            "hypothetical analytical record \u2014 NOT an order; no execution connectivity exists",
+            "no position is inferred from chart data; position_status is always 'absent'",
+            "the decision layer's ranking is PROVISIONAL and UNVALIDATED (10/17 vs 6/17 on 17 correlated episodes is a small sample and establishes nothing about market understanding or readiness)",
+            "run context: historical-replay (a historical replay is never an actual live market observation)",
+            "no probabilities, no candle counts, no percentages, no ATR multiples and no confidence values are used or implied",
+            "not Michael Huddleston; no exact-replication, accuracy or profitability claim"
+          ],
+          "missing_evidence": [],
+          "observed_before_record": false,
+          "position_status": "absent",
+          "revises": "PLAN-plan-v1-0002@v1",
+          "revision_reason": "plan PLAN-plan-v1-0002 revised to HYPOTHETICAL_ENTRY_MET by post-record evidence (PLAN-plan-v1-0002@v1 preserved)",
+          "run_context": "historical-replay",
+          "scenario": "reversal",
+          "selection_quality": "NOT_ESTABLISHED",
+          "state": "HYPOTHETICAL_ENTRY_MET",
+          "state_detail": "the entry condition was observed at bar 76 after the plan record (observed_before_record=False) \u2014 a HYPOTHETICAL entry, not an order",
+          "version": 2
+        },
+        {
+          "analysis_id": "AN-9f5d9cfb4329",
+          "analysis_version": 14,
+          "as_of_bar": 83,
+          "as_of_time": "2025-08-15 00:00:00+00:00",
+          "components": {
+            "entry": {
+              "basis": "SRS-SP03 + SRS-FK",
+              "claim_class": "engineering-interpretation",
+              "definition": "the first completed task-scale bar whose CLOSE is strictly beyond the falsifier reference level on its falsifying side (SP-03 close violation \u2014 the event that supports the reversal scenario)",
+              "definition_origin": "declared-research-configuration",
+              "detector": "sp03-close-binding",
+              "kind": "entry",
+              "source_reference": "ICT entry technique exists (SRC-EX-01) but is NOT implemented: G-OB-P not runnable (P-N/P-W unset; owner policy required; none invented)"
+            },
+            "invalidation": {
+              "basis": "SRS-SP03 + SRS-SP04 + SRS-TS5 (falsifier semantics)",
+              "claim_class": "engineering-interpretation",
+              "definition": "the first completed task-scale bar whose CLOSE is strictly beyond the last confirmed leg's END extreme in the leg's direction (SP-03 close binding \u2014 the event that supports the continuation scenario and voids the reversal plan)",
+              "definition_origin": "declared-research-configuration",
+              "detector": "sp03-close-violation",
+              "kind": "invalidation",
+              "source_reference": "SRC-EX-01 stop concept (directly-stated) + SRC-EX-02: ICT-primary invalidation-by-close NOT in primary text (P-K)"
+            },
+            "objective": {
+              "basis": "SRS-FK",
+              "claim_class": "engineering-interpretation",
+              "definition": "one completed, causally confirmed task-scale F-K leg in the scenario direction whose knowable time is after the entry bar",
+              "definition_origin": "declared-research-configuration",
+              "detector": "fk-leg-completion",
+              "kind": "objective",
+              "source_reference": "SRC-EX-03: no target definition in the verified primary text read"
+            }
+          },
+          "decision_id": "DEC-plan-v1-0014",
+          "direction": "up",
+          "events_observed": {
+            "entry_bars": [
+              76,
+              78
+            ],
+            "invalidation_bars": [
+              82
+            ],
+            "new_entry_bars": [
+              78
+            ],
+            "new_invalidation_bars": [
+              82
+            ],
+            "objective_seen": true
+          },
+          "ledger_uid": null,
+          "levels": {
+            "leg_direction": "down",
+            "leg_end": {
+              "bar": 65,
+              "continuation_side": "down",
+              "id": "PTC:F-K(k=5)|low@2025-08-12T00:00:00+00:00",
+              "level": 118050.11,
+              "side": "low"
+            },
+            "plan_direction": "up",
+            "reference": {
+              "bar": 61,
+              "falsifying_side": "up",
+              "id": "PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00",
+              "level": 122335.16,
+              "side": "high"
+            }
+          },
+          "limitations": [
+            "selection_quality = NOT_ESTABLISHED",
+            "hypothetical analytical record \u2014 NOT an order; no execution connectivity exists",
+            "no position is inferred from chart data; position_status is always 'absent'",
+            "the decision layer's ranking is PROVISIONAL and UNVALIDATED (10/17 vs 6/17 on 17 correlated episodes is a small sample and establishes nothing about market understanding or readiness)",
+            "run context: historical-replay (a historical replay is never an actual live market observation)",
+            "no probabilities, no candle counts, no percentages, no ATR multiples and no confidence values are used or implied",
+            "not Michael Huddleston; no exact-replication, accuracy or profitability claim"
+          ],
+          "missing_evidence": [],
+          "observed_before_record": false,
+          "position_status": "absent",
+          "revises": "PLAN-plan-v1-0002@v2",
+          "revision_reason": "plan PLAN-plan-v1-0002 revised to INVALIDATED by post-record evidence (PLAN-plan-v1-0002@v2 preserved)",
+          "run_context": "historical-replay",
+          "scenario": "reversal",
+          "selection_quality": "NOT_ESTABLISHED",
+          "state": "INVALIDATED",
+          "state_detail": "the invalidation condition was observed at bar 82 after the hypothetical entry (bar 76) and before the objective",
+          "version": 3
+        }
+      ]
+    },
+    "scenario_monitored_before_its_condition": {
+      "events_seen": {
+        "entry_bars": [
+          76,
+          78
+        ],
+        "invalidation_bars": [
+          82
+        ],
+        "objective_seen": true
+      },
+      "plan_id": "PLAN-plan-v1-0002",
+      "versions": [
+        {
+          "analysis_id": "AN-9f5d9cfb4329",
+          "analysis_version": 12,
+          "as_of_bar": 71,
+          "as_of_time": "2025-08-13 00:00:00+00:00",
+          "components": {
+            "entry": {
+              "basis": "SRS-SP03 + SRS-FK",
+              "claim_class": "engineering-interpretation",
+              "definition": "the first completed task-scale bar whose CLOSE is strictly beyond the falsifier reference level on its falsifying side (SP-03 close violation \u2014 the event that supports the reversal scenario)",
+              "definition_origin": "declared-research-configuration",
+              "detector": "sp03-close-binding",
+              "kind": "entry",
+              "source_reference": "ICT entry technique exists (SRC-EX-01) but is NOT implemented: G-OB-P not runnable (P-N/P-W unset; owner policy required; none invented)"
+            },
+            "invalidation": {
+              "basis": "SRS-SP03 + SRS-SP04 + SRS-TS5 (falsifier semantics)",
+              "claim_class": "engineering-interpretation",
+              "definition": "the first completed task-scale bar whose CLOSE is strictly beyond the last confirmed leg's END extreme in the leg's direction (SP-03 close binding \u2014 the event that supports the continuation scenario and voids the reversal plan)",
+              "definition_origin": "declared-research-configuration",
+              "detector": "sp03-close-violation",
+              "kind": "invalidation",
+              "source_reference": "SRC-EX-01 stop concept (directly-stated) + SRC-EX-02: ICT-primary invalidation-by-close NOT in primary text (P-K)"
+            },
+            "objective": {
+              "basis": "SRS-FK",
+              "claim_class": "engineering-interpretation",
+              "definition": "one completed, causally confirmed task-scale F-K leg in the scenario direction whose knowable time is after the entry bar",
+              "definition_origin": "declared-research-configuration",
+              "detector": "fk-leg-completion",
+              "kind": "objective",
+              "source_reference": "SRC-EX-03: no target definition in the verified primary text read"
+            }
+          },
+          "decision_id": "DEC-plan-v1-0012",
+          "direction": "up",
+          "events_observed": {
+            "entry_bars": [],
+            "invalidation_bars": []
+          },
+          "ledger_uid": "T-PLAN-V1#26",
+          "levels": {
+            "leg_direction": "down",
+            "leg_end": {
+              "bar": 65,
+              "continuation_side": "down",
+              "id": "PTC:F-K(k=5)|low@2025-08-12T00:00:00+00:00",
+              "level": 118050.11,
+              "side": "low"
+            },
+            "plan_direction": "up",
+            "reference": {
+              "bar": 61,
+              "falsifying_side": "up",
+              "id": "PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00",
+              "level": 122335.16,
+              "side": "high"
+            }
+          },
+          "limitations": [
+            "selection_quality = NOT_ESTABLISHED",
+            "hypothetical analytical record \u2014 NOT an order; no execution connectivity exists",
+            "no position is inferred from chart data; position_status is always 'absent'",
+            "the decision layer's ranking is PROVISIONAL and UNVALIDATED (10/17 vs 6/17 on 17 correlated episodes is a small sample and establishes nothing about market understanding or readiness)",
+            "run context: historical-replay (a historical replay is never an actual live market observation)",
+            "no probabilities, no candle counts, no percentages, no ATR multiples and no confidence values are used or implied",
+            "not Michael Huddleston; no exact-replication, accuracy or profitability claim"
+          ],
+          "missing_evidence": [],
+          "observed_before_record": false,
+          "position_status": "absent",
+          "revises": null,
+          "revision_reason": null,
+          "run_context": "historical-replay",
+          "scenario": "reversal",
+          "selection_quality": "NOT_ESTABLISHED",
+          "state": "MONITORING",
+          "state_detail": "awaiting the entry condition: the first completed task-scale bar whose CLOSE is strictly beyond the falsifier reference level on its falsifying side (SP-03 close violation \u2014 the event that supports the reversal scenario)",
+          "version": 1
+        },
+        {
+          "analysis_id": "AN-9f5d9cfb4329",
+          "analysis_version": 13,
+          "as_of_bar": 77,
+          "as_of_time": "2025-08-14 00:00:00+00:00",
+          "components": {
+            "entry": {
+              "basis": "SRS-SP03 + SRS-FK",
+              "claim_class": "engineering-interpretation",
+              "definition": "the first completed task-scale bar whose CLOSE is strictly beyond the falsifier reference level on its falsifying side (SP-03 close violation \u2014 the event that supports the reversal scenario)",
+              "definition_origin": "declared-research-configuration",
+              "detector": "sp03-close-binding",
+              "kind": "entry",
+              "source_reference": "ICT entry technique exists (SRC-EX-01) but is NOT implemented: G-OB-P not runnable (P-N/P-W unset; owner policy required; none invented)"
+            },
+            "invalidation": {
+              "basis": "SRS-SP03 + SRS-SP04 + SRS-TS5 (falsifier semantics)",
+              "claim_class": "engineering-interpretation",
+              "definition": "the first completed task-scale bar whose CLOSE is strictly beyond the last confirmed leg's END extreme in the leg's direction (SP-03 close binding \u2014 the event that supports the continuation scenario and voids the reversal plan)",
+              "definition_origin": "declared-research-configuration",
+              "detector": "sp03-close-violation",
+              "kind": "invalidation",
+              "source_reference": "SRC-EX-01 stop concept (directly-stated) + SRC-EX-02: ICT-primary invalidation-by-close NOT in primary text (P-K)"
+            },
+            "objective": {
+              "basis": "SRS-FK",
+              "claim_class": "engineering-interpretation",
+              "definition": "one completed, causally confirmed task-scale F-K leg in the scenario direction whose knowable time is after the entry bar",
+              "definition_origin": "declared-research-configuration",
+              "detector": "fk-leg-completion",
+              "kind": "objective",
+              "source_reference": "SRC-EX-03: no target definition in the verified primary text read"
+            }
+          },
+          "decision_id": "DEC-plan-v1-0013",
+          "direction": "up",
+          "events_observed": {
+            "entry_bars": [
+              76
+            ],
+            "invalidation_bars": [],
+            "new_entry_bars": [
+              76
+            ],
+            "new_invalidation_bars": [],
+            "objective_seen": false
+          },
+          "ledger_uid": null,
+          "levels": {
+            "leg_direction": "down",
+            "leg_end": {
+              "bar": 65,
+              "continuation_side": "down",
+              "id": "PTC:F-K(k=5)|low@2025-08-12T00:00:00+00:00",
+              "level": 118050.11,
+              "side": "low"
+            },
+            "plan_direction": "up",
+            "reference": {
+              "bar": 61,
+              "falsifying_side": "up",
+              "id": "PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00",
+              "level": 122335.16,
+              "side": "high"
+            }
+          },
+          "limitations": [
+            "selection_quality = NOT_ESTABLISHED",
+            "hypothetical analytical record \u2014 NOT an order; no execution connectivity exists",
+            "no position is inferred from chart data; position_status is always 'absent'",
+            "the decision layer's ranking is PROVISIONAL and UNVALIDATED (10/17 vs 6/17 on 17 correlated episodes is a small sample and establishes nothing about market understanding or readiness)",
+            "run context: historical-replay (a historical replay is never an actual live market observation)",
+            "no probabilities, no candle counts, no percentages, no ATR multiples and no confidence values are used or implied",
+            "not Michael Huddleston; no exact-replication, accuracy or profitability claim"
+          ],
+          "missing_evidence": [],
+          "observed_before_record": false,
+          "position_status": "absent",
+          "revises": "PLAN-plan-v1-0002@v1",
+          "revision_reason": "plan PLAN-plan-v1-0002 revised to HYPOTHETICAL_ENTRY_MET by post-record evidence (PLAN-plan-v1-0002@v1 preserved)",
+          "run_context": "historical-replay",
+          "scenario": "reversal",
+          "selection_quality": "NOT_ESTABLISHED",
+          "state": "HYPOTHETICAL_ENTRY_MET",
+          "state_detail": "the entry condition was observed at bar 76 after the plan record (observed_before_record=False) \u2014 a HYPOTHETICAL entry, not an order",
+          "version": 2
+        },
+        {
+          "analysis_id": "AN-9f5d9cfb4329",
+          "analysis_version": 14,
+          "as_of_bar": 83,
+          "as_of_time": "2025-08-15 00:00:00+00:00",
+          "components": {
+            "entry": {
+              "basis": "SRS-SP03 + SRS-FK",
+              "claim_class": "engineering-interpretation",
+              "definition": "the first completed task-scale bar whose CLOSE is strictly beyond the falsifier reference level on its falsifying side (SP-03 close violation \u2014 the event that supports the reversal scenario)",
+              "definition_origin": "declared-research-configuration",
+              "detector": "sp03-close-binding",
+              "kind": "entry",
+              "source_reference": "ICT entry technique exists (SRC-EX-01) but is NOT implemented: G-OB-P not runnable (P-N/P-W unset; owner policy required; none invented)"
+            },
+            "invalidation": {
+              "basis": "SRS-SP03 + SRS-SP04 + SRS-TS5 (falsifier semantics)",
+              "claim_class": "engineering-interpretation",
+              "definition": "the first completed task-scale bar whose CLOSE is strictly beyond the last confirmed leg's END extreme in the leg's direction (SP-03 close binding \u2014 the event that supports the continuation scenario and voids the reversal plan)",
+              "definition_origin": "declared-research-configuration",
+              "detector": "sp03-close-violation",
+              "kind": "invalidation",
+              "source_reference": "SRC-EX-01 stop concept (directly-stated) + SRC-EX-02: ICT-primary invalidation-by-close NOT in primary text (P-K)"
+            },
+            "objective": {
+              "basis": "SRS-FK",
+              "claim_class": "engineering-interpretation",
+              "definition": "one completed, causally confirmed task-scale F-K leg in the scenario direction whose knowable time is after the entry bar",
+              "definition_origin": "declared-research-configuration",
+              "detector": "fk-leg-completion",
+              "kind": "objective",
+              "source_reference": "SRC-EX-03: no target definition in the verified primary text read"
+            }
+          },
+          "decision_id": "DEC-plan-v1-0014",
+          "direction": "up",
+          "events_observed": {
+            "entry_bars": [
+              76,
+              78
+            ],
+            "invalidation_bars": [
+              82
+            ],
+            "new_entry_bars": [
+              78
+            ],
+            "new_invalidation_bars": [
+              82
+            ],
+            "objective_seen": true
+          },
+          "ledger_uid": null,
+          "levels": {
+            "leg_direction": "down",
+            "leg_end": {
+              "bar": 65,
+              "continuation_side": "down",
+              "id": "PTC:F-K(k=5)|low@2025-08-12T00:00:00+00:00",
+              "level": 118050.11,
+              "side": "low"
+            },
+            "plan_direction": "up",
+            "reference": {
+              "bar": 61,
+              "falsifying_side": "up",
+              "id": "PTC:F-K(k=5)|high@2025-08-11T08:00:00+00:00",
+              "level": 122335.16,
+              "side": "high"
+            }
+          },
+          "limitations": [
+            "selection_quality = NOT_ESTABLISHED",
+            "hypothetical analytical record \u2014 NOT an order; no execution connectivity exists",
+            "no position is inferred from chart data; position_status is always 'absent'",
+            "the decision layer's ranking is PROVISIONAL and UNVALIDATED (10/17 vs 6/17 on 17 correlated episodes is a small sample and establishes nothing about market understanding or readiness)",
+            "run context: historical-replay (a historical replay is never an actual live market observation)",
+            "no probabilities, no candle counts, no percentages, no ATR multiples and no confidence values are used or implied",
+            "not Michael Huddleston; no exact-replication, accuracy or profitability claim"
+          ],
+          "missing_evidence": [],
+          "observed_before_record": false,
+          "position_status": "absent",
+          "revises": "PLAN-plan-v1-0002@v2",
+          "revision_reason": "plan PLAN-plan-v1-0002 revised to INVALIDATED by post-record evidence (PLAN-plan-v1-0002@v2 preserved)",
+          "run_context": "historical-replay",
+          "scenario": "reversal",
+          "selection_quality": "NOT_ESTABLISHED",
+          "state": "INVALIDATED",
+          "state_detail": "the invalidation condition was observed at bar 82 after the hypothetical entry (bar 76) and before the objective",
+          "version": 3
+        }
+      ]
+    }
+  },
+  "source_examples": [
+    {
+      "awaited_or_present_event": "validation: \"the high of the lowest down candle or price bar is traded through by a later formed candle or price bar\"",
+      "claim_classes": {
+        "definition": "directly-stated",
+        "entry": "directly-stated",
+        "operationalization": "unsupported-or-unavailable",
+        "stop": "directly-stated",
+        "stop_management": "paraphrase",
+        "validation": "directly-stated"
+      },
+      "context_at_decision_time": [
+        "\"the lowest candle or price bar with a down close that has the most range between open to close and is near a support level\" \u2014 'near support' is UNDEFINED (P-N) and 'the move' window is UNDEFINED (P-W)"
+      ],
+      "entry_and_invalidation_as_described": "entry: \"when price trades higher away from the bullish order block and then returns to the bullish order block candle or price bar high\";  stop: \"the low of the bullish order block is the location of a relatively safe stop loss placement\";  stop management: \"just below the 50 percent of the order block total range\" (AMBIGUOUS UN-11)",
+      "example_id": "SRC-EX-01-OB-ENTRY-STOP",
+      "explained_only_after_outcome": "not applicable: the lesson is procedural (\"candles, validation, entries, stops\"), not a statistical result (05 \u00a75.7); no outcome-based case is used as evidence (08 \u00a78.3)",
+      "grade": "P1 partial transcript (opening section; no timestamps; auto-caption artifacts; provenance caveats recorded)",
+      "location": "knowledge_foundation/05_FVG_ORDER_BLOCKS_ZONES.md \u00a75.4 and \u00a75.4a (P1 quotes) + 08_APPLIED_CHART_CASES.md CASE-02",
+      "reference_selected": "the order-block candle itself: its HIGH is the validation/entry level, its LOW is the stop level",
+      "source": "ICT Mentorship Core Content \u2013 Month 04 \u2013 Orderblocks (YouTube PIYh0CxoY9c; Dec-2016 content; uploader The Inner Circle Trader)"
+    },
+    {
+      "awaited_or_present_event": "trade-through validation of the block's high (P1 wording)",
+      "claim_classes": {
+        "community_close_through": "paraphrase",
+        "primary_invalidation": "unsupported-or-unavailable"
+      },
+      "context_at_decision_time": "zone status transitions each require a bar and a knowability time (\u00a75.8)",
+      "entry_and_invalidation_as_described": "entry described (SRC-EX-01); INVALIDATION: 'Not in primary text read' (P-K) \u2014 the community close-through mitigation/invalidation concept is a separate S1 rule and is NOT merged with the primary definition",
+      "example_id": "SRC-EX-02-INVALIDATION-GAP",
+      "explained_only_after_outcome": "n/a",
+      "grade": "P1 for the primary-text gap; S1 snippets for the community rule",
+      "location": "knowledge_foundation/05_FVG_ORDER_BLOCKS_ZONES.md \u00a75.4a parameter P-K and \u00a75.8",
+      "reference_selected": "zone boundaries of the candidate",
+      "source": "same lesson set + community pages (S1)"
+    },
+    {
+      "awaited_or_present_event": "n/a",
+      "claim_classes": {
+        "mechanism": "unsupported-or-unavailable",
+        "target_refusal": "directly-stated"
+      },
+      "context_at_decision_time": "liquidity candidates exist (untaken old highs/lows)",
+      "entry_and_invalidation_as_described": "no target/objective definition in the verified primary text read; the stop-cluster mechanism is asserted in community sources with NO verified empirical confirmation (CF-05)",
+      "example_id": "SRC-EX-03-NO-TARGET-IN-VERIFIED-TEXT",
+      "explained_only_after_outcome": "n/a",
+      "grade": "foundation synthesis with explicit gap markers",
+      "location": "knowledge_foundation/04_LIQUIDITY.md (lines 21, 73, 77, 87-88, 100) + 02_SWINGS_AND_WAVES.md line 57",
+      "reference_selected": "NOT selectable: \"The available information does not select one as 'the' liquidity target without a task and a stated objective\"",
+      "source": "pinned liquidity/method material"
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+/home/user/work/venv/lib/python3.11/site-packages/numpy/lib/nanfunctions.py:1215: RuntimeWarning: Mean of empty slice
+  return np.nanmean(a, axis, out=out, keepdims=keepdims)
+/home/user/work/venv/lib/python3.11/site-packages/numpy/lib/nanfunctions.py:1215: RuntimeWarning: Mean of empty slice
+  return np.nanmean(a, axis, out=out, keepdims=keepdims)
+/home/user/work/venv/lib/python3.11/site-packages/numpy/lib/nanfunctions.py:1215: RuntimeWarning: Mean of empty slice
+  return np.nanmean(a, axis, out=out, keepdims=keepdims)
+/home/user/work/venv/lib/python3.11/site-packages/numpy/lib/nanfunctions.py:1215: RuntimeWarning: Mean of empty slice
+  return np.nanmean(a, axis, out=out, keepdims=keepdims)
+== stopped at 2025-08-07 00:00:00+00:00 (8639 observations; 8640 steps, 36 material) in 14.0s ==
+
+== PAUSED VIEW (at 2025-08-07 00:00:00+00:00) ==
+[context] higher-frame trend=down established_at=2025-08-06 12:00:00+00:00
+[context] evidence=['SF-DIR-connected-read-v1-32']
+[references] structural refs on task frame: 0 candidate(s) (see study candidates below)
+[FVG regions] 185 observable region(s):
+  FVG-connected-read-v1-cr-15m-102 downward [113637.27, 113670.82] @15m observable_at=2025-08-02 01:45:00+00:00 ce_midpoint=113654.05 interactions=66
+  FVG-connected-read-v1-cr-15m-109 upward [113720.01, 113765.41] @15m observable_at=2025-08-02 03:30:00+00:00 ce_midpoint=113742.71 interactions=61
+  FVG-connected-read-v1-cr-15m-11 upward [115810.71, 115843.42] @15m observable_at=2025-08-01 03:00:00+00:00 ce_midpoint=115827.07 interactions=13
+  FVG-connected-read-v1-cr-15m-114 upward [113936.09, 113993.56] @15m observable_at=2025-08-02 04:45:00+00:00 ce_midpoint=113964.82 interactions=83
+  FVG-connected-read-v1-cr-15m-115 upward [113993.57, 114005.34] @15m observable_at=2025-08-02 05:00:00+00:00 ce_midpoint=113999.46 interactions=54
+  FL-connected-read-v1-cr-0499: FVG-connected-read-v1-cr-15m-61 (15m) --intervals_overlap-- FVG-connected-read-v1-cr-1h-140 (1h)
+  FL-connected-read-v1-cr-0500: FVG-connected-read-v1-cr-15m-64 (15m) --intervals_overlap-- FVG-connected-read-v1-cr-1h-140 (1h)
+[shift watches] 0:
+[reading tasks] 1:
+  RT-REF-REVIEW: UNRESOLVED_NO_EDGE preferred=None
+    reason: no interaction observed yet at any reference; nothing justifies a preference
+[working interpretations] 1:
+  INT-HF-CONTEXT [REVISED] v2 (1 revision(s))
+    statement: higher-frame context: down (derived from completed structure; available at 2025-08-06 12:00:00+00:00)
+    alternative: the context may revise when completed structure changes — ENGINEERING_INTERPRETATION
+    alternative: no context is source-established beyond the engine's derivation — UNKNOWN_UNSUPPORTED
+    watch next: a completed structural change on the higher frame (the engine's I-primary direction revision)
+      would change: the context statement is revised to a new linked version
+      cannot establish: that the context predicts future prices
+[unknowns] what the data cannot establish:
+  - the intrabar path inside any bar (not established by completed OHLC)
+  - order flow, resting orders, participant positions or intent
+  - that a gap will be filled ('rebalanced') — a revisit is an observed relation, not a guarantee
+  - that a region has the same origin, significance, or geometry on another timeframe (FVG16-A: a finer frame may show a multi-candle liquidity void rather than identical three-candle geometry)
+  - any entry, target, stop, reversal or continuation signal from the geometry alone
+== state saved to /home/user/work/cr_state.json ==
+
+[step 2025-08-07 04:00:00+00:00] NEW OBSERVED/RECORDED:
+  facts: 224 -> 233
+  links: 500 -> 537
+  regions: 185 -> 192
+
+[step 2025-08-07 08:00:00+00:00] NEW OBSERVED/RECORDED:
+  facts: 233 -> 240
+  links: 537 -> 588
+  regions: 192 -> 199
+
+[step 2025-08-07 12:00:00+00:00] NEW OBSERVED/RECORDED:
+  facts: 240 -> 259
+  interp_versions: 2 -> 3
+  links: 588 -> 648
+  regions: 199 -> 208
+  task_versions: 1 -> 3
+  task RT-REF-REVIEW conclusion v2: EVIDENCE_PREFERRED
+  task RT-WATCH-SW-connected-read-v1-0001 conclusion v1: UNRESOLVED_NO_EDGE
+
+== PAUSED VIEW (after 3 step(s)) ==
+[context] higher-frame trend=down established_at=2025-08-06 12:00:00+00:00
+[context] evidence=['SF-DIR-connected-read-v1-32']
+[references] structural refs on task frame: 1 candidate(s) (see study candidates below)
+  ref OBC-connected-read-v1-0001: AWAITING_CONFIRMATION role=UNDETERMINED bar=2025-08-07 12:00:00+00:00 level_relation=None
+[shift watches] 1:
+  SW-connected-read-v1-0001 [WATCHING] crossing={'ref_id': 'PSC:F-K(k=5)|high@2025-08-04T20:00:00+00:00', 'ref_side': 'high', 'ref_level': 115720.0, 'bar': 38, 'bar_time': '2025-08-07 12:00:00+00:00', 'previous_close': 114787.99, 'close': 116519.53, 'direction': 'upward', 'transition': 'close-to-close transition across the level between two completed bars (intrabar path NOT established)'}
+[reading tasks] 2:
+  RT-REF-REVIEW: EVIDENCE_PREFERRED preferred=PSC:F-K(k=5)|high@2025-08-04T20:00:00+00:00
+    reason: an interaction is actually observed at this reference and at no other (for the declared review task)
+    alternative: PSC:F-K(k=5)|low@2025-08-03T04:00:00+00:00 — no interaction observed yet (still monitored)
+    alternative: PSC:F-K(k=5)|low@2025-08-05T16:00:00+00:00 — no interaction observed yet (still monitored)
+  RT-WATCH-SW-connected-read-v1-0001: UNRESOLVED_NO_EDGE preferred=None
+    reason: no candidate meets the declared discriminating criteria; no preference is forced
+    alternative: FVG-connected-read-v1-cr-15m-102 — declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level
+    alternative: FVG-connected-read-v1-cr-15m-109 — declared criteria not all met: observable_after_crossing, interval_contains_crossed_level
+    alternative: FVG-connected-read-v1-cr-15m-11 — declared criteria not all met: observable_after_crossing, interval_contains_crossed_level
+  INT-HF-CONTEXT [REVISED] v2 (1 revision(s))
+    statement: higher-frame context: down (derived from completed structure; available at 2025-08-06 12:00:00+00:00)
+    alternative: the context may revise when completed structure changes — ENGINEERING_INTERPRETATION
+    alternative: no context is source-established beyond the engine's derivation — UNKNOWN_UNSUPPORTED
+    watch next: a completed structural change on the higher frame (the engine's I-primary direction revision)
+      would change: the context statement is revised to a new linked version
+      cannot establish: that the context predicts future prices
+  INT-WATCH-SW-connected-read-v1-0001 [UNRESOLVED] v1 (0 revision(s))
+    statement: a possible shift is being WATCHED after the recorded reference interaction — no shift is established
+    alternative: a shift occurred — UNSUPPORTED_OR_UNAVAILABLE
+    alternative: no shift is developing — UNSUPPORTED_OR_UNAVAILABLE
+    watch next: the declared watch questions' observables (displacement/non-overlap bars; local-swing crossing; a completed FVG meeting the task criteria)
+      would change: evidence items are appended; a declared task may reach an evidence-preferred conclusion
+      cannot establish: institutional intent, resting orders, or a tradeable edge
+[unknowns] what the data cannot establish:
+  - the intrabar path inside any bar (not established by completed OHLC)
+  - order flow, resting orders, participant positions or intent
+  - that a gap will be filled ('rebalanced') — a revisit is an observed relation, not a guarantee
+  - that a region has the same origin, significance, or geometry on another timeframe (FVG16-A: a finer frame may show a multi-candle liquidity void rather than identical three-candle geometry)
+  - any entry, target, stop, reversal or continuation signal from the geometry alone
+== final state saved (cursor 9359) ==
+== resuming this state in a NEW process reproduces the continuous run (see --verify-resume) ==
+/home/user/work/venv/lib/python3.11/site-packages/numpy/lib/nanfunctions.py:1215: RuntimeWarning: Mean of empty slice
+  return np.nanmean(a, axis, out=out, keepdims=keepdims)
+/home/user/work/venv/lib/python3.11/site-packages/numpy/lib/nanfunctions.py:1215: RuntimeWarning: Mean of empty slice

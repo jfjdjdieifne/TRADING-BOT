@@ -1,0 +1,17 @@
+{
+ "displacement_same_bar": {
+  "answer": "YES",
+  "ratio": 0.83333333,
+  "variant": "V-D-01"
+ },
+ "sweep_with_narrow_body": {
+  "displacement": "NO",
+  "ratio": 0.01785714,
+  "sweep": "YES"
+ },
+ "sweep_with_wide_body": {
+  "answer": "YES",
+  "level": 1.105,
+  "variant": "V-E-00"
+ }
+}

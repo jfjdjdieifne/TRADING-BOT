@@ -1,0 +1,8 @@
+{
+ "criteria_conflict": "criteria_conflict",
+ "no_target": "no_target_ahead",
+ "no_zone": "no_zone_in_direction",
+ "outside_window": "outside_session_window",
+ "premium_for_a_long": "range_position_premium",
+ "zone_not_touched": "zone_not_touched"
+}

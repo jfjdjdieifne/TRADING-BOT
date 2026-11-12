@@ -1,0 +1,314 @@
+{
+ "dataset_and_build": {
+  "target_commit": "3a33ab48c42ac8c224a693d4b5c656b0f3601ff4",
+  "input_1m_sha256": "1e6f48197eaf13da6a263b025f4dc45fbdc33bf127aef5ef4dd4962792e1556a",
+  "input_4h_sha256": "37bd2ae5c63c87e2e0773adb06c3194460a6ddb9b9441c491a2d91649f59a4ef",
+  "adapter_1m_fingerprint": "38d51936271baef90a4e996fda163be43ed83b59a0b40884662707ddc974b326",
+  "adapter_4h_fingerprint": "32281bf65e6dc40473fcde0127e61be087714ff30e568ab2af988c398bde4ba8",
+  "chart": {
+   "path": "/home/user/work/muf_v1/integration/movement_understanding_chart_v1.png",
+   "sha256": "37a2e9e9ad10a54225c92b256fd0f92cb35d3e10f1ea472998dae14cfceb73b3"
+  },
+   "full_record": {
+    "path": "/home/user/work/muf_v1/integration/integration_record_v1.json",
+    "sha256_as_reported": "b8914fec96f58d5bdc6bfd36cb5992628db873f6f84bc02d2f0e4ed1776053d4",
+    "sha256_current_file": "3034e8b4266ff22e6b5d2b31afc60608c0110c5158290c14a4b89a900237a344",
+    "byte_difference": "ONLY field timing_seconds_total (46.59 as reported -> 44.92 on the 2026-10-12 verification re-run). Proof: json.dumps(record with timing_seconds_total=46.59, indent=1) hashes exactly to sha256_as_reported, so every other byte is identical to the reported run.",
+    "note": "timing_seconds_total is wall-clock and is the record's only non-deterministic field. The chart is byte-stable across runs (sha256 37a2e9e9... before and after re-run). test_log_v1.json current sha256 b451a10f1de2422089aa3c96814d4e777135833e3ebafd32fafdfdff5d9c998b (no as-reported hash was recorded here); its T1-T9 semantic equality is established via the record byte-identity (the record embeds the same tests map) and the fresh full re-run."
+   }
+ },
+ "boundaries": {
+  "B0_midnight_open_bar": {
+   "key": "2025-09-25T00:01:00Z",
+   "price": 113293.8,
+   "candidates_1m": 654,
+   "candidates_4h": 73,
+   "placement": {
+    "candidates": 654,
+    "placed": 654,
+    "insufficient_evidence": 0,
+    "coverage_ratio": 1.0
+   },
+   "s1": {
+    "running_high_so_far": 113940.0,
+    "running_low_so_far": 111042.66,
+    "observed_close_path_length": 39199.60000000028,
+    "sum_close_displacement": 1340.4000000000087
+   }
+  },
+  "B1_post5_06_49": {
+   "key": "2025-09-25T06:49:00Z",
+   "price": 111656.61,
+   "candidates_1m": 813,
+   "candidates_4h": 73,
+   "placement": {
+    "candidates": 813,
+    "placed": 813,
+    "insufficient_evidence": 0,
+    "coverage_ratio": 1.0
+   },
+   "s1": {
+    "running_high_so_far": 113940.0,
+    "running_low_so_far": 111042.66,
+    "observed_close_path_length": 54861.19000000025,
+    "sum_close_displacement": -296.7899999999936
+   }
+  },
+  "B2_post6_19_34": {
+   "key": "2025-09-25T19:34:00Z",
+   "price": 109648.46,
+   "candidates_1m": 1112,
+   "candidates_4h": 74,
+   "placement": {
+    "candidates": 1112,
+    "placed": 1112,
+    "insufficient_evidence": 0,
+    "coverage_ratio": 1.0
+   },
+   "s1": {
+    "running_high_so_far": 113940.0,
+    "running_low_so_far": 108631.51,
+    "observed_close_path_length": 89001.22000000045,
+    "sum_close_displacement": -2304.939999999988
+   }
+  }
+ },
+ "ab_comparison": {
+  "B0_midnight_open_bar": {
+   "Q1a_counts_A": 654,
+   "Q1a_counts_B": 654,
+   "Q1a_H1_equal": true,
+   "Q1b_placement_coverage": {
+    "candidates": 654,
+    "placed": 654,
+    "insufficient_evidence": 0,
+    "coverage_ratio": 1.0
+   },
+   "Q2_identifiability": {
+    "4hr_fvg_reference": {
+     "A": "AMBIGUOUS_MATCH: 73 eligible 4h candidates; no source-stated binding rule",
+     "B": "AMBIGUOUS_MATCH (movement context labels attached; no source-stated rule binds one candidate)",
+     "class_changed": false,
+     "improvement_claimed": false
+    },
+    "midnight_open_reference": {
+     "A": "UNIQUE: 00:00 bar open is a single published OHLC fact",
+     "B": "UNIQUE (unchanged); movement context adds position facts only",
+     "class_changed": false,
+     "improvement_claimed": false
+    }
+   },
+   "Q3_selection_quality": {
+    "state": "NOT_ESTABLISHED_BLOCKED",
+    "missing_prerequisites": [
+     "identifiable ground-truth human selections at frozen boundaries (current: 1 unique level, 1 ambiguous family)",
+     "owner swing policy (swing_quantile etc.) to unblock structure/liquidity/OB/dealing-range candidate families",
+     "task-and-outcome authority (repo evaluation_boundary state: NOT_ESTABLISHED_MISSING_TASK_AUTHORITY)"
+    ]
+   }
+  },
+  "B1_post5_06_49": {
+   "Q1a_counts_A": 813,
+   "Q1a_counts_B": 813,
+   "Q1a_H1_equal": true,
+   "Q1b_placement_coverage": {
+    "candidates": 813,
+    "placed": 813,
+    "insufficient_evidence": 0,
+    "coverage_ratio": 1.0
+   },
+   "Q2_identifiability": {
+    "4hr_fvg_reference": {
+     "A": "AMBIGUOUS_MATCH: 73 eligible 4h candidates; no source-stated binding rule",
+     "B": "AMBIGUOUS_MATCH (movement context labels attached; no source-stated rule binds one candidate)",
+     "class_changed": false,
+     "improvement_claimed": false
+    },
+    "midnight_open_reference": {
+     "A": "UNIQUE: 00:00 bar open is a single published OHLC fact",
+     "B": "UNIQUE (unchanged); movement context adds position facts only",
+     "class_changed": false,
+     "improvement_claimed": false
+    }
+   },
+   "Q3_selection_quality": {
+    "state": "NOT_ESTABLISHED_BLOCKED",
+    "missing_prerequisites": [
+     "identifiable ground-truth human selections at frozen boundaries (current: 1 unique level, 1 ambiguous family)",
+     "owner swing policy (swing_quantile etc.) to unblock structure/liquidity/OB/dealing-range candidate families",
+     "task-and-outcome authority (repo evaluation_boundary state: NOT_ESTABLISHED_MISSING_TASK_AUTHORITY)"
+    ]
+   }
+  },
+  "B2_post6_19_34": {
+   "Q1a_counts_A": 1112,
+   "Q1a_counts_B": 1112,
+   "Q1a_H1_equal": true,
+   "Q1b_placement_coverage": {
+    "candidates": 1112,
+    "placed": 1112,
+    "insufficient_evidence": 0,
+    "coverage_ratio": 1.0
+   },
+   "Q2_identifiability": {
+    "4hr_fvg_reference": {
+     "A": "AMBIGUOUS_MATCH: 74 eligible 4h candidates; no source-stated binding rule",
+     "B": "AMBIGUOUS_MATCH (movement context labels attached; no source-stated rule binds one candidate)",
+     "class_changed": false,
+     "improvement_claimed": false
+    },
+    "midnight_open_reference": {
+     "A": "UNIQUE: 00:00 bar open is a single published OHLC fact",
+     "B": "UNIQUE (unchanged); movement context adds position facts only",
+     "class_changed": false,
+     "improvement_claimed": false
+    }
+   },
+   "Q3_selection_quality": {
+    "state": "NOT_ESTABLISHED_BLOCKED",
+    "missing_prerequisites": [
+     "identifiable ground-truth human selections at frozen boundaries (current: 1 unique level, 1 ambiguous family)",
+     "owner swing policy (swing_quantile etc.) to unblock structure/liquidity/OB/dealing-range candidate families",
+     "task-and-outcome authority (repo evaluation_boundary state: NOT_ESTABLISHED_MISSING_TASK_AUTHORITY)"
+    ]
+   }
+  }
+ },
+ "tests": {
+  "T1_NO_FUTURE_LEAKAGE": "PASS",
+  "T2_PREFIX_ASOF_STABILITY": "PASS",
+  "T3_CANDIDATE_COMPLETENESS": "PASS",
+  "T4_CROSS_SCALE_VALIDITY": "PASS",
+  "T5_MISSING_POLICY_BEHAVIOR": "PASS",
+  "T6_NO_FABRICATED_MOVEMENT_LABELS": "PASS",
+  "T7_NO_SILENT_CANDIDATE_FILTERING": "PASS",
+  "T8_REPRODUCIBLE_OUTPUTS": "PASS",
+  "T9_EXPLICIT_INCOMPLETE_COVERAGE": "PASS"
+ },
+ "test_details": {
+  "T1_NO_FUTURE_LEAKAGE": {
+   "method": "replay truncated at B1 vs full-run prefix rows; compare OHLC, S1 descriptors, domain states, entity sets",
+   "entity_sets_equal": true,
+   "rows_equal": true,
+   "result": "PASS",
+   "mismatch_sample": []
+  },
+  "T2_PREFIX_ASOF_STABILITY": {
+   "method": "boundary rows at all positions <= B1 identical between truncated and full runs (semantic fields)",
+   "positions_checked": 1849,
+   "result": "PASS"
+  },
+  "T3_CANDIDATE_COMPLETENESS": {
+   "method": "independent 4.2A recount on identical frames vs registered entities",
+   "1m": {
+    "engine": 1786,
+    "registered": 1786,
+    "summary": 1786,
+    "equal": true
+   },
+   "4h": {
+    "engine": 75,
+    "registered": 75,
+    "summary": 75,
+    "equal": true
+   },
+   "result": "PASS"
+  },
+  "T4_CROSS_SCALE_VALIDITY": {
+   "method": "completed H1/4h bucket OHLC == aggregation of member 1m bars",
+   "h1_buckets_checked": 4261,
+   "h1_mismatches": 0,
+   "h4_buckets_checked": 342,
+   "h4_mismatches": 0,
+   "result": "PASS"
+  },
+  "T5_MISSING_POLICY_BEHAVIOR": {
+   "method": "swing-dependent domains must carry explicit UNAVAILABLE_NO_EXPLICIT_SWING_POLICY at every analysis boundary",
+   "result": "PASS"
+  },
+  "T6_NO_FABRICATED_MOVEMENT_LABELS": {
+   "method": "scan producer records for impulse/correction/reversal/trend labels",
+   "hits": [],
+   "result": "PASS"
+  },
+  "T7_NO_SILENT_CANDIDATE_FILTERING": {
+   "method": "candidate_universe_pruned==False on all boundaries; A vs B candidate counts equal",
+   "pruned_flags_clean": true,
+   "ab_counts_equal": true,
+   "result": "PASS"
+  },
+  "T8_REPRODUCIBLE_OUTPUTS": {
+   "method": "re-run 4h pipeline in-process; deterministic fingerprint + prefix chain equality",
+   "fingerprint_first": "32281bf65e6dc40473fcde0127e61be087714ff30e568ab2af988c398bde4ba8",
+   "fingerprint_rerun": "32281bf65e6dc40473fcde0127e61be087714ff30e568ab2af988c398bde4ba8",
+   "fingerprint_equal": true,
+   "prefix_chain_equal": true,
+   "result": "PASS"
+  },
+  "T9_EXPLICIT_INCOMPLETE_COVERAGE": {
+   "method": "coverage states surfaced (PARTIAL_QUERY_OR_BOUNDARY_LIMIT acknowledged; unexamined counts reported)",
+   "relationship_search_states": [
+    "COMPLETE",
+    "PARTIAL_QUERY_OR_BOUNDARY_LIMIT"
+   ],
+   "report_relationship_coverage_state": "PARTIAL_QUERY_OR_BOUNDARY_LIMIT",
+   "boundaries_with_unexamined_pairs_or_queries": 26,
+   "result": "PASS"
+  }
+ },
+ "timing_seconds_total": 46.59,
+ "remaining_unanswered_selection_questions": [
+  "which specific 4h FVG the trader meant (73/74 eligible; no source-stated binding rule)",
+  "which liquidity band/cluster the DOL denotes at candidate level (swing policy missing)",
+  "whether movement context improves selection accuracy on identifiable ground truth (blocked: no such ground-truth set yet)",
+  "swing/structural-break/OB/dealing-range candidate relations (domains policy-blocked)",
+  "S5 wave nesting relations (S5 plan requires owner swing policy authorization)"
+ ],
+ "preservation_verification": {
+  "verified_at_date": "2026-10-12",
+  "remote_head_recheck": "3a33ab48c42ac8c224a693d4b5c656b0f3601ff4 (git ls-remote + gh api; unchanged vs built commit)",
+  "verification_method": "full harness re-run of movement_understanding_integration_v1.py (T1-T9 reproduced) + targeted inspection of raw adapter outputs + byte-identity proof of integration_record_v1.json + fresh scan for fabricated improvement claims",
+  "checks": {
+   "C1_INFORMATION_TIME_BOUNDARIES": {
+    "result": "PASS",
+    "evidence": "B0 pos1440 2025-09-25T00:01:00Z (midnight-open reference bar), B1 pos1848 2025-09-25T06:49:00Z (last completed bar <= post5 created 2025-09-25T06:49:22.428Z, v1), B2 pos2613 2025-09-25T19:34:00Z (<= post6 created 2025-09-25T19:34:06.983Z, v3); all three keys COMPLETED_ROW_AVAILABLE; Discourse post metadata carried in source_case"
+   },
+   "C2_NO_FUTURE_LEAKAGE": {
+    "result": "PASS",
+    "evidence": "T1 truncated-at-B1 replay equals full-run prefix (OHLC, S1 descriptors, domain states, entity sets) + T2 1,849 prefix rows semantically identical, both reproduced on re-run; boundary rows carry coverage_locked_source_bar_count equal to boundary position and closed_global_anchor_asof_boundary = null"
+   },
+   "C3_CANDIDATE_COMPLETENESS": {
+    "result": "PASS",
+    "evidence": "T3 independent 4.2A recount: 1,786=1,786=1,786 (1m), 75=75=75 (4h); T7 candidate_universe_pruned==False on all 4,662 boundaries; A/B counts equal (654/813/1,112)"
+   },
+   "C4_CROSS_SCALE_IDENTITY": {
+    "result": "PASS_WITH_DOCUMENTED_LIMITATION",
+    "evidence": "T4: 4,261 completed H1 buckets + 342 4h buckets equal exact 1m aggregations, 0 mismatches. Limitation: 4h-run published_bar_record.source_identity.interval reads '1m' over 4h-barred OHLCV (the adapter source contract is 1m-only) — see identity_label_adjudication"
+   },
+   "C5_DETERMINISTIC_REPRODUCTION": {
+    "result": "PASS",
+    "evidence": "full harness re-run reproduces T1-T9 all PASS with identical boundary/A-B numbers; T8 fingerprints equal (4h 32281bf65e6dc40473fcde0127e61be087714ff30e568ab2af988c398bde4ba8; 1m 38d51936271baef90a4e996fda163be43ed83b59a0b40884662707ddc974b326 unchanged); chart byte-stable (37a2e9e9...); integration_record byte-identical modulo timing_seconds_total (proof in dataset_and_build.full_record)"
+   },
+   "C6_EXPLICIT_INCOMPLETE_COVERAGE": {
+    "result": "PASS",
+    "evidence": "raw relationship_coverage.jsonl states {COMPLETE: 4238, PARTIAL_QUERY_OR_BOUNDARY_LIMIT: 82}; summary relationship_coverage_state = PARTIAL_QUERY_OR_BOUNDARY_LIMIT; 26 boundaries carry unexamined same-batch pairs/queries (128-per-boundary cap) and are reported explicitly (T9)"
+   },
+   "C7_NO_FABRICATED_SELECTION_IMPROVEMENT": {
+    "result": "PASS",
+    "evidence": "improvement_claimed == false in every A/B block of the record and of this manifest; Q2 classes unchanged (AMBIGUOUS_MATCH stays AMBIGUOUS_MATCH; midnight-open UNIQUE stays UNIQUE); Q3 remains NOT_ESTABLISHED_BLOCKED; report section J states 'Not improved'; the only 'superiority' wording anywhere is the negated warning 'geometric agreement != empirical superiority'"
+   }
+  },
+  "identity_label_adjudication": {
+   "question": "is the 1m source-identity label on 4h-barred runs a merely documented adapter limitation, or a semantic misrepresentation downstream?",
+   "finding_values_safe": "all published OHLCV values are exact 240x1m aggregates (T4) and no reported conclusion keys on the interval label",
+   "finding_metadata_defect": "the identity field is semantically wrong about cadence in isolation (source_identity.interval='1m' over 4h bars), and Stage4C H1 grid fields on the 4h run consequently read expected_grid_bar_count=60 / missing_grid_observation_count=59 per hour (implying expected-but-absent 1m data) instead of 'the 1m grid was never expected to be filled in 3 of every 4 hours' — a genuine misrepresentation for any future consumer that keys on these fields",
+   "finding_self_disclosing": "the same records disclose the actual cadence (H1__observed_source_bar_count=1 per bucket, H1__coverage_status=GRID_OBSERVATIONS_MISSING) and the contract state (source_semantics=CALLER_SUPPLIED_OHLC; SOURCE_ORIGIN_UNVERIFIED; tie_order_contract=NOT_PROVEN)",
+   "verdict": "DOCUMENTED_LIMITATION_WITH_BOUNDED_METADATA_DEFECT — NOT BLOCKED. Correctness of every reported conclusion (boundaries, completeness, placement, A/B, tests) is independently established and none consumes the defective fields. Hazard note: future consumers must NOT treat source_identity.interval as content cadence, and must NOT read missing_grid_observation_count as expected-but-absent data for non-1m feeds. Future runs should record a supplied_bar_cadence attribute alongside the contract label (documentation-level fix only; CLOSED contracts left unchanged)."
+  },
+  "file_status": {
+   "movement_understanding_integration_v1.py": "unmodified since build; re-executed 2026-10-12: T1-T9 PASS",
+   "run_manifest_v1.json": "updated 2026-10-12 with this preservation_verification block and the full_record hash reconciliation",
+   "MOVEMENT_UNDERSTANDING_V1.md": "append-only section N (Preservation & Verification) added 2026-10-12"
+  }
+ }
+}

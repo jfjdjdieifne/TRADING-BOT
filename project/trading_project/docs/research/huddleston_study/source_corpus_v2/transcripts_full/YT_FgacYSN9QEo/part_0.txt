@@ -1,0 +1,147 @@
+![Thumbnail (1920x1080)](https://i.ytimg.com/vi/FgacYSN9QEo/maxresdefault.jpg)
+# [ICT Mentorship Core Content - Month 04 - ICT Fair Value Gaps FVG](https://www.youtube.com/watch?v=FgacYSN9QEo)
+
+**Visibility**: Public
+**Uploaded by**: [The Inner Circle Trader](https://www.youtube.com/@InnerCircleTrader)
+**Uploaded at**: 2022-09-10
+**Published at**: 
+**Length**: 17:57
+**Views**: 559602
+**Likes**: 12954
+**Category**: Education
+
+## Description
+
+```
+2016 Premium ICT Mentorship Core Content Video Lectures
+Audio and visuals are exactly as they were distributed in December 2016. 
+
+CFTC RULE 4.41 – HYPOTHETICAL OR SIMULATED PERFORMANCE RESULTS HAVE CERTAIN LIMITATIONS. UNLIKE AN ACTUAL PERFORMANCE RECORD, SIMULATED RESULTS DO NOT REPRESENT ACTUAL TRADING. ALSO, SINCE THE TRADES HAVE NOT BEEN EXECUTED, THE RESULTS MAY HAVE UNDER-OR-OVER COMPENSATED FOR THE IMPACT, IF ANY, OF CERTAIN MARKET FACTORS, SUCH AS LACK OF LIQUIDITY. SIMULATED TRADING PROGRAMS IN GENERAL ARE ALSO SUBJECT TO THE FACT THAT THEY ARE DESIGNED WITH THE BENEFIT OF HINDSIGHT. NO REPRESENTATION IS BEING MADE THAT ANY ACCOUNT WILL OR IS LIKELY TO ACHIEVE PROFIT OR LOSSES SIMILAR TO THOSE SHOWN
+
+Trading performance displayed herein is hypothetical. Hypothetical performance results have many inherent limitations, some of which are described below. No representation is being made that any account will or is likely to achieve profits or losses similar to those shown. In fact, there are frequently sharp differences between hypothetical performance results and the actual results subsequently achieved by any particular trading program. One of the limitations of hypothetical performance trading results is that they are generally prepared with the benefit of hindsight. In addition, hypothetical trading does not involve financial risk, and no hypothetical trading record can completely account for the impact of financial risk in actual trading. For example, the ability to withstand losses or to adhere to a particular trading program in spite of trading losses are material points which can also adversely affect actual trading results. There are numerous other factors related to the markets in general or to the implementation of any specific trading program which cannot be fully accounted for in the preparation of hypothetical performance results and all of which can adversely affect actual trading results.
+
+U.S. Government Required Disclaimer – Commodity Futures Trading Commission Futures and Options trading has large potential rewards, but also large potential risk. You must be aware of the risks and be willing to accept them in order to invest in the futures and options markets. Don’t trade with money you can’t afford to lose. This is neither a solicitation nor an offer to Buy/Sell futures or options. No representation is being made that any account will or is likely to achieve profits or losses similar to those discussed on this web site. The past performance of any trading system or methodology is not necessarily indicative of future results.
+
+Trade at your own risk. The information provided here is of the nature of a general comment only and neither purports nor intends to be, specific trading advice. It has been prepared without regard to any particular person’s investment objectives, financial situation and particular needs. Information should not be considered as an offer or enticement to buy, sell or trade.
+
+You should seek appropriate advice from your broker, or licensed investment advisor, before taking any action. Past performance does not guarantee future results. Simulated performance results contain inherent limitations. Unlike actual performance records the results may under or over compensate for such factors such as lack of liquidity. No representation is being made that any account will or is likely to achieve profits or losses to those shown.
+
+The risk of loss in trading can be substantial. You should therefore carefully consider whether such trading is suitable for you in light of your financial condition.
+
+If you purchase or sell Equities, Futures, Currencies or Options you may sustain a total loss of the initial margin funds and any additional funds that you deposit with your broker to establish or maintain your position. If the market moves against your position, you may be called upon by your broker to deposit a substantial amount of additional margin funds, on short notice in order to maintain your position. If you do not provide the required funds within the prescribed time, your position may be liquidated at a loss, and you may be liable for any resulting deficit in your account.
+
+Under certain market conditions, you may find it difficult or impossible to liquidate a position. This can occur, for example, when the market makes a “limit move.” The placement of contingent orders by you, such as a “stop-loss” or “stop-limit” order, will not necessarily limit your losses to the intended amounts, since market conditions may make it impossible to execute such orders.
+```
+
+## Transcript
+
+we'll be dealing specifically with the
+reinforcing of fair value gaps
+and it's a concept of trading inside the
+range
+okay what is a fair value gap
+it is a range in price delivery where
+one side of the market liquidity is
+offered and typically confirmed with a
+liquidity void on the lower time frame
+charts in the same range of price
+price can actually gap to create a
+literal vacuum of trading thus posting
+an actual price gap
+okay let's take a look at a
+euro dollar daily chart
+okay and i'm going to ask you where do
+you see an example of the fair value gap
+okay i'm going to draw your attention to
+it here
+it's a blue shaded area here
+on the daily chart let me explain to you
+why i'm shading in that specific area of
+price
+it's about a 20 pip range
+on the daily
+but inside of that
+blue shaded area
+that is what is common referred to in my
+work as a fair value gap
+so take a look at what makes
+that gap so significant
+as you can see here the candle
+to the
+left
+of the down candle we're looking at that
+comprises the fair value gap
+that's this candle here
+okay and to the left of that we have the
+higher
+bearish candle
+and i'm drawing attention to the fact
+that it has a
+down close but it's come off the low
+okay so we're looking at the low up to
+the close that little wick in there
+if you take that same range okay and you
+look at our
+down candle that created that fair value
+gap on the daily chart
+that range between
+105 15
+to approximately 105 big figure
+inside our down candle and in this
+candle here that's highlighted from the
+low
+to the
+close
+that price range has been traded
+up into
+once already delivering the buy side
+liquidity in other words on this
+candle's low up to the close price
+had come off that low
+so if it came off that low to have a
+higher close on that candle that means
+the buy side liquidity had been offered
+on that range between 105 15
+to 105 big figure
+so that means when we look at the down
+candle
+that makes the fair value gap we're not
+concerned with the 105 15 to 105
+big figure price range so we're going to
+be drawing our attention to that low
+here
+and we'll draw that
+out in time but let's now look at the
+other candle
+that frames our fair value gap
+the next area
+at which we see buy side liquidity
+offered
+is from this green candle or up close
+candle to the right
+of our down candle that makes the fair
+value gap
+the open to the high on this candle has
+offered by side liquidity as well so we
+have
+seen price offered on the up
+movement
+or buy side liquidity
+on two candles one to the left of our
+fair value gap creating down candle on
+the daily chart and one candle to the
+right of it where we saw price move
+higher
+in portion of that down candle
+so we have a range left that's open
+and it specifically is this area right
+in here
+so we're delineating
+the low of the previous candle and the
+high of the count to the right of the
+down camera that creates that little
+pocket of space
+so between
+105 big figure
+down to
+10

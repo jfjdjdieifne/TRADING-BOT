@@ -1,0 +1,1502 @@
+{
+ "pause_at": "2025-08-07 16:00:00+00:00",
+ "task": "RT-WATCH-SW-connected-read-v1-0001",
+ "conclusion": {
+  "status": "EVIDENCE_PREFERRED",
+  "preferred": "FVG-connected-read-v1-cr-4h-39",
+  "reasons": [
+   "the declared discriminating criteria are all met by this candidate and by no other (evidence distinguishes it for THIS task); the sequence crossing_before_fvg_observable is recorded as established; the region is relevant evidence only \u2014 NOT proof of a shift (E03-A/B) and never a trade signal"
+  ],
+  "discriminating_evidence": [
+   "observable_after_crossing",
+   "direction_consistent",
+   "interval_contains_crossed_level"
+  ],
+  "alternatives": [
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-102",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-109",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-11",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-114",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-115",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-121",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-122",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-126",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-130",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-131",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-135",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-142",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-144",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-147",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-149",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-154",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-157",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-159",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-16",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-164",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-165",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-167",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-168",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-17",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-174",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-176",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-180",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-183",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-185",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-189",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-196",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-20",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-201",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-204",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-207",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-209",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-213",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-214",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-221",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-226",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-233",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-235",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-236",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-237",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-240",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-241",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-243",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-255",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-257",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-259",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-26",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-260",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-266",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-27",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-272",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-273",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-275",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-281",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-284",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-287",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-291",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-292",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-302",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-303",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-307",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-309",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-317",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-319",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-328",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-335",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-336",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-343",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-344",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-345",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-347",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-353",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-356",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-357",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-359",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-367",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-37",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-38",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-380",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-383",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-384",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-385",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-397",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-398",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-404",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-411",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-415",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-418",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-421",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-422",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-423",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-426",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-428",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-434",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-435",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-439",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-441",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-442",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-443",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-449",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-453",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-454",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-46",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-460",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-465",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-467",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-47",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-473",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-474",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-475",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-477",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-48",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-481",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-497",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-501",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-505",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-51",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-513",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-515",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-517",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-525",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-526",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-532",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-536",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-54",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-540",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-543",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-55",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-550",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-551",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-552",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-559",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-560",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-563",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-565",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-567",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-577",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-58",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-582",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-584",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-587",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-588",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-591",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-595",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-596",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-598",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-600",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-601",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-604",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-609",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-61",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-610",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-616",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-617",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-618",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing",
+    "supporting": 2,
+    "counterevidence": 1,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-619",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-622",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-625",
+    "why_not_preferred": "declared criteria not all met: direction_consistent, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-638",
+    "why_not_preferred": "declared criteria not all met: interval_contains_crossed_level",
+    "supporting": 2,
+    "counterevidence": 1,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-64",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-69",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-76",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-77",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-84",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-89",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-9",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-90",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-98",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-15m-99",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-1D-3",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-1h-100",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-1h-106",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-1h-109",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-1h-111",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-1h-119",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-1h-126",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-1h-135",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-1h-140",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-1h-144",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-1h-151",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-1h-152",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-1h-155",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing",
+    "supporting": 2,
+    "counterevidence": 1,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-1h-18",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-1h-19",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-1h-23",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-1h-28",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-1h-3",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-1h-38",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-1h-50",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-1h-51",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-1h-59",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-1h-66",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-1h-67",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-1h-7",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-1h-73",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-1h-77",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-1h-86",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-1h-89",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-1h-91",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-1h-94",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-1h-98",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-4h-10",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-4h-13",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-4h-25",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-4h-28",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, direction_consistent, interval_contains_crossed_level",
+    "supporting": 0,
+    "counterevidence": 3,
+    "conflict": false
+   },
+   {
+    "candidate_id": "FVG-connected-read-v1-cr-4h-34",
+    "why_not_preferred": "declared criteria not all met: observable_after_crossing, interval_contains_crossed_level",
+    "supporting": 1,
+    "counterevidence": 2,
+    "conflict": true
+   }
+  ]
+ },
+ "comparison": {
+  "rule": "candidates are COMPARED by the declared criteria and the recorded evidence breakdown above",
+  "candidates_before_filtering": 211,
+  "by_support_count": {
+   "0": 90,
+   "1": 117,
+   "2": 3,
+   "3": 1
+  },
+  "materially_relevant_rule": "at least one declared criterion met OR conflicting evidence recorded (categorical \u2014 no numerical threshold)",
+  "candidates_after_filtering": 121,
+  "removed_from_record": 0,
+  "resource_limit": "none enforced; every observable region is evaluated (counts reported above)"
+ }
+}

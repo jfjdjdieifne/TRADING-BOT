@@ -1,0 +1,14 @@
+{
+ "_fixture": "fx_no_partial_high_low_leak",
+ "_tag": "FIXTURE",
+ "value": {
+  "grew_by_exactly_one": true,
+  "last_is_none_while_forming": true,
+  "window_after_close": 1,
+  "window_lengths_during": [
+   0,
+   0,
+   0
+  ]
+ }
+}

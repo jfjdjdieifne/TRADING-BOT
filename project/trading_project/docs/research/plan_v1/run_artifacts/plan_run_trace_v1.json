@@ -1,0 +1,470 @@
+[
+ {
+  "as_of": "2025-08-02 00:00:00+00:00",
+  "plan_id": null,
+  "state": "NO_JUSTIFIED_PLAN",
+  "changed": false,
+  "missing": [
+   "evidence-supported directional preference (the decision is UNRESOLVED: model does not strictly distinguish the scenarios / input insufficient)",
+   "precise falsifier reference (reference_status=unresolved",
+   "completed task-scale leg with a resolved end extreme"
+  ]
+ },
+ {
+  "as_of": "2025-08-03 00:00:00+00:00",
+  "plan_id": null,
+  "state": "NO_JUSTIFIED_PLAN",
+  "changed": false,
+  "missing": [
+   "evidence-supported directional preference (the decision is UNRESOLVED: model does not strictly distinguish the scenarios / input insufficient)",
+   "precise falsifier reference (reference_status=unresolved",
+   "completed task-scale leg with a resolved end extreme"
+  ]
+ },
+ {
+  "as_of": "2025-08-04 00:00:00+00:00",
+  "plan_id": null,
+  "state": "NO_JUSTIFIED_PLAN",
+  "changed": false,
+  "missing": [
+   "evidence-supported directional preference (the decision is UNRESOLVED: model does not strictly distinguish the scenarios / input insufficient)",
+   "precise falsifier reference (reference_status=unresolved",
+   "completed task-scale leg with a resolved end extreme"
+  ]
+ },
+ {
+  "as_of": "2025-08-05 00:00:00+00:00",
+  "plan_id": null,
+  "state": "NO_JUSTIFIED_PLAN",
+  "changed": false,
+  "missing": [
+   "evidence-supported directional preference (the decision is UNRESOLVED: model does not strictly distinguish the scenarios / input insufficient)",
+   "precise falsifier reference (reference_status=unresolved",
+   "completed task-scale leg with a resolved end extreme"
+  ]
+ },
+ {
+  "as_of": "2025-08-06 00:00:00+00:00",
+  "plan_id": null,
+  "state": "NO_JUSTIFIED_PLAN",
+  "changed": false,
+  "missing": [
+   "evidence-supported directional preference (the decision is NO_EDGE: model does not strictly distinguish the scenarios / input insufficient)"
+  ]
+ },
+ {
+  "as_of": "2025-08-07 00:00:00+00:00",
+  "plan_id": null,
+  "state": "NO_JUSTIFIED_PLAN",
+  "changed": false,
+  "missing": [
+   "evidence-supported directional preference (the decision is NO_EDGE: model does not strictly distinguish the scenarios / input insufficient)"
+  ]
+ },
+ {
+  "as_of": "2025-08-08 00:00:00+00:00",
+  "plan_id": null,
+  "state": "NO_JUSTIFIED_PLAN",
+  "changed": false,
+  "missing": [
+   "evidence-supported directional preference (the decision is EVENT_OCCURRED: model does not strictly distinguish the scenarios / input insufficient)"
+  ]
+ },
+ {
+  "as_of": "2025-08-09 00:00:00+00:00",
+  "plan_id": null,
+  "state": "NO_JUSTIFIED_PLAN",
+  "changed": false,
+  "missing": [
+   "evidence-supported directional preference (the decision is NO_EDGE: model does not strictly distinguish the scenarios / input insufficient)"
+  ]
+ },
+ {
+  "as_of": "2025-08-10 00:00:00+00:00",
+  "plan_id": null,
+  "state": "NO_JUSTIFIED_PLAN",
+  "changed": false,
+  "missing": [
+   "evidence-supported directional preference (the decision is NO_EDGE: model does not strictly distinguish the scenarios / input insufficient)"
+  ]
+ },
+ {
+  "as_of": "2025-08-11 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0001",
+  "state": "CONDITION_OBSERVED",
+  "changed": true,
+  "missing": null
+ },
+ {
+  "as_of": "2025-08-12 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0001",
+  "state": "CONDITION_OBSERVED",
+  "changed": false,
+  "missing": null
+ },
+ {
+  "as_of": "2025-08-13 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0002",
+  "state": "MONITORING",
+  "changed": true,
+  "missing": null
+ },
+ {
+  "as_of": "2025-08-14 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0002",
+  "state": "HYPOTHETICAL_ENTRY_MET",
+  "changed": true,
+  "missing": null
+ },
+ {
+  "as_of": "2025-08-15 00:00:00+00:00",
+  "plan_id": null,
+  "state": "NO_JUSTIFIED_PLAN",
+  "changed": true,
+  "missing": [
+   "evidence-supported directional preference (the decision is EVENT_OCCURRED: model does not strictly distinguish the scenarios / input insufficient)"
+  ]
+ },
+ {
+  "as_of": "2025-08-16 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0003",
+  "state": "INVALIDATED",
+  "changed": true,
+  "missing": null
+ },
+ {
+  "as_of": "2025-08-17 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0004",
+  "state": "MONITORING",
+  "changed": true,
+  "missing": null
+ },
+ {
+  "as_of": "2025-08-18 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0004",
+  "state": "MONITORING",
+  "changed": false,
+  "missing": null
+ },
+ {
+  "as_of": "2025-08-19 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0005",
+  "state": "INVALIDATED",
+  "changed": true,
+  "missing": null
+ },
+ {
+  "as_of": "2025-08-20 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0006",
+  "state": "INVALIDATED",
+  "changed": true,
+  "missing": null
+ },
+ {
+  "as_of": "2025-08-21 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0007",
+  "state": "INVALIDATED",
+  "changed": true,
+  "missing": null
+ },
+ {
+  "as_of": "2025-08-22 00:00:00+00:00",
+  "plan_id": null,
+  "state": "NO_JUSTIFIED_PLAN",
+  "changed": false,
+  "missing": [
+   "evidence-supported directional preference (the decision is EVENT_OCCURRED: model does not strictly distinguish the scenarios / input insufficient)",
+   "precise falsifier reference (reference_status=unresolved"
+  ]
+ },
+ {
+  "as_of": "2025-08-23 00:00:00+00:00",
+  "plan_id": null,
+  "state": "NO_JUSTIFIED_PLAN",
+  "changed": false,
+  "missing": [
+   "evidence-supported directional preference (the decision is EVENT_OCCURRED: model does not strictly distinguish the scenarios / input insufficient)",
+   "precise falsifier reference (reference_status=unresolved"
+  ]
+ },
+ {
+  "as_of": "2025-08-24 00:00:00+00:00",
+  "plan_id": null,
+  "state": "NO_JUSTIFIED_PLAN",
+  "changed": false,
+  "missing": [
+   "evidence-supported directional preference (the decision is EVENT_OCCURRED: model does not strictly distinguish the scenarios / input insufficient)",
+   "precise falsifier reference (reference_status=unresolved"
+  ]
+ },
+ {
+  "as_of": "2025-08-25 00:00:00+00:00",
+  "plan_id": null,
+  "state": "NO_JUSTIFIED_PLAN",
+  "changed": false,
+  "missing": [
+   "evidence-supported directional preference (the decision is NO_EDGE: model does not strictly distinguish the scenarios / input insufficient)"
+  ]
+ },
+ {
+  "as_of": "2025-08-26 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0008",
+  "state": "INVALIDATED",
+  "changed": true,
+  "missing": null
+ },
+ {
+  "as_of": "2025-08-27 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0009",
+  "state": "INVALIDATED",
+  "changed": true,
+  "missing": null
+ },
+ {
+  "as_of": "2025-08-28 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0010",
+  "state": "INVALIDATED",
+  "changed": true,
+  "missing": null
+ },
+ {
+  "as_of": "2025-08-29 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0011",
+  "state": "INVALIDATED",
+  "changed": true,
+  "missing": null
+ },
+ {
+  "as_of": "2025-08-30 00:00:00+00:00",
+  "plan_id": null,
+  "state": "NO_JUSTIFIED_PLAN",
+  "changed": false,
+  "missing": [
+   "evidence-supported directional preference (the decision is PRIOR_VIEW_WEAKENED_OR_INVALIDATED: model does not strictly distinguish the scenarios / input insufficient)"
+  ]
+ },
+ {
+  "as_of": "2025-08-31 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0012",
+  "state": "MONITORING",
+  "changed": true,
+  "missing": null
+ },
+ {
+  "as_of": "2025-09-01 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0013",
+  "state": "MONITORING",
+  "changed": true,
+  "missing": null
+ },
+ {
+  "as_of": "2025-09-02 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0013",
+  "state": "MONITORING",
+  "changed": false,
+  "missing": null
+ },
+ {
+  "as_of": "2025-09-03 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0014",
+  "state": "INVALIDATED",
+  "changed": true,
+  "missing": null
+ },
+ {
+  "as_of": "2025-09-04 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0015",
+  "state": "INVALIDATED",
+  "changed": true,
+  "missing": null
+ },
+ {
+  "as_of": "2025-09-05 00:00:00+00:00",
+  "plan_id": null,
+  "state": "NO_JUSTIFIED_PLAN",
+  "changed": true,
+  "missing": [
+   "evidence-supported directional preference (the decision is EVENT_OCCURRED: model does not strictly distinguish the scenarios / input insufficient)",
+   "precise falsifier reference (reference_status=unresolved"
+  ]
+ },
+ {
+  "as_of": "2025-09-06 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0016",
+  "state": "INVALIDATED",
+  "changed": true,
+  "missing": null
+ },
+ {
+  "as_of": "2025-09-07 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0017",
+  "state": "MONITORING",
+  "changed": true,
+  "missing": null
+ },
+ {
+  "as_of": "2025-09-08 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0018",
+  "state": "MONITORING",
+  "changed": true,
+  "missing": null
+ },
+ {
+  "as_of": "2025-09-09 00:00:00+00:00",
+  "plan_id": null,
+  "state": "NO_JUSTIFIED_PLAN",
+  "changed": false,
+  "missing": [
+   "evidence-supported directional preference (the decision is NO_EDGE: model does not strictly distinguish the scenarios / input insufficient)"
+  ]
+ },
+ {
+  "as_of": "2025-09-10 00:00:00+00:00",
+  "plan_id": null,
+  "state": "NO_JUSTIFIED_PLAN",
+  "changed": false,
+  "missing": [
+   "evidence-supported directional preference (the decision is NO_EDGE: model does not strictly distinguish the scenarios / input insufficient)"
+  ]
+ },
+ {
+  "as_of": "2025-09-11 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0019",
+  "state": "CONDITION_OBSERVED",
+  "changed": true,
+  "missing": null
+ },
+ {
+  "as_of": "2025-09-12 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0019",
+  "state": "CONDITION_OBSERVED",
+  "changed": false,
+  "missing": null
+ },
+ {
+  "as_of": "2025-09-13 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0019",
+  "state": "CONDITION_OBSERVED",
+  "changed": false,
+  "missing": null
+ },
+ {
+  "as_of": "2025-09-14 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0020",
+  "state": "MONITORING",
+  "changed": true,
+  "missing": null
+ },
+ {
+  "as_of": "2025-09-15 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0021",
+  "state": "MONITORING",
+  "changed": true,
+  "missing": null
+ },
+ {
+  "as_of": "2025-09-16 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0022",
+  "state": "INVALIDATED",
+  "changed": true,
+  "missing": null
+ },
+ {
+  "as_of": "2025-09-17 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0023",
+  "state": "CONDITION_OBSERVED",
+  "changed": true,
+  "missing": null
+ },
+ {
+  "as_of": "2025-09-18 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0023",
+  "state": "CONDITION_OBSERVED",
+  "changed": false,
+  "missing": null
+ },
+ {
+  "as_of": "2025-09-19 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0023",
+  "state": "CONDITION_OBSERVED",
+  "changed": false,
+  "missing": null
+ },
+ {
+  "as_of": "2025-09-20 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0024",
+  "state": "MONITORING",
+  "changed": true,
+  "missing": null
+ },
+ {
+  "as_of": "2025-09-21 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0025",
+  "state": "MONITORING",
+  "changed": true,
+  "missing": null
+ },
+ {
+  "as_of": "2025-09-22 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0025",
+  "state": "MONITORING",
+  "changed": false,
+  "missing": null
+ },
+ {
+  "as_of": "2025-09-23 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0026",
+  "state": "INVALIDATED",
+  "changed": true,
+  "missing": null
+ },
+ {
+  "as_of": "2025-09-24 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0027",
+  "state": "INVALIDATED",
+  "changed": true,
+  "missing": null
+ },
+ {
+  "as_of": "2025-09-25 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0028",
+  "state": "CONDITION_OBSERVED",
+  "changed": true,
+  "missing": null
+ },
+ {
+  "as_of": "2025-09-26 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0029",
+  "state": "CONDITION_OBSERVED",
+  "changed": true,
+  "missing": null
+ },
+ {
+  "as_of": "2025-09-27 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0030",
+  "state": "INVALIDATED",
+  "changed": true,
+  "missing": null
+ },
+ {
+  "as_of": "2025-09-28 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0031",
+  "state": "MONITORING",
+  "changed": true,
+  "missing": null
+ },
+ {
+  "as_of": "2025-09-29 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0031",
+  "state": "HYPOTHETICAL_ENTRY_MET",
+  "changed": true,
+  "missing": null
+ },
+ {
+  "as_of": "2025-09-30 00:00:00+00:00",
+  "plan_id": "PLAN-plan-v1-0032",
+  "state": "CONDITION_OBSERVED",
+  "changed": true,
+  "missing": null
+ }
+]

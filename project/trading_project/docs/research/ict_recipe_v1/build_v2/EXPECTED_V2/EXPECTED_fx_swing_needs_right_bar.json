@@ -1,0 +1,12 @@
+{
+ "_fixture": "fx_swing_needs_right_bar",
+ "_tag": "FIXTURE",
+ "value": {
+  "per_candle_swing_count": [
+   0,
+   0,
+   0,
+   1
+  ]
+ }
+}

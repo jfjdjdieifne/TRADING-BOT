@@ -1,0 +1,535 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "real_chart_element_annotation_v1",
+  "title": "Real-Chart Market Element Application Annotation V1",
+  "description": "Structured annotation of ONE analytical selection act performed by a named human source on a real chart. Purpose: teach and evaluate contextual application of ICT market elements (swings, waves, BOS references, liquidity candidates, FVGs, order blocks). This schema records what the source selected, what alternatives were visible, under which operational definition, with what evidence available at the claimed decision time. It does NOT define market truth. Labels such as BEST_FVG or TRUE_SWING are FORBIDDEN unless a record carries an explicit task_contract interpretation clause naming the source, era, and rule under which the selection is 'correct for the task'. Selections are never labeled from future price outcomes.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "record_id",
+    "source",
+    "decision_context",
+    "market",
+    "chart_region",
+    "element",
+    "explanation",
+    "matching",
+    "evaluation_limits"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "const": "REAL_CHART_ELEMENT_ANNOTATION_V1" },
+    "record_id": { "type": "string", "minLength": 1 },
+    "created_utc": {
+      "type": "string",
+      "description": "Annotation-record creation date (YYYY-MM-DD), i.e. when this record was authored in the study, NOT when the source was published."
+    },
+    "annotator": {
+      "type": "object",
+      "description": "Who produced this record and under what protocol.",
+      "required": ["annotator_id", "protocol"],
+      "properties": {
+        "annotator_id": { "type": "string" },
+        "protocol": {
+          "type": "string",
+          "description": "e.g. TRANSCRIPT_EXTRACTION, CHART_INSPECTION, BLINDED_STUDY_JOURNAL, SECOND_PASS_REVIEW"
+        },
+        "independence_note": {
+          "type": "string",
+          "description": "Whether the annotator had seen later price action / the source's resolution before annotating."
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "description": "Source identity. Publication timestamps must carry provenance; unknown values must be null with a note. Never fabricate a timestamp.",
+      "required": [
+        "source_id",
+        "source_kind",
+        "url",
+        "title",
+        "publication_timestamp",
+        "retrieved_utc",
+        "access_status",
+        "rights_note"
+      ],
+      "properties": {
+        "source_id": { "type": "string" },
+        "source_kind": {
+          "type": "string",
+          "enum": [
+            "ICT_OFFICIAL_VIDEO",
+            "ICT_OFFICIAL_VIDEO_TRANSCRIPT",
+            "ICT_OFFICIAL_COMMUNITY_POST",
+            "THIRD_PARTY_NOTES",
+            "FORUM_CHART_POST",
+            "TRADINGVIEW_IDEA",
+            "TRADINGVIEW_INDICATOR_DOC",
+            "ACADEMIC_PAPER",
+            "BOOK_OR_PDF",
+            "REPO_DOC",
+            "OTHER"
+          ]
+        },
+        "url": { "type": "string" },
+        "title": { "type": "string" },
+        "author_or_channel": { "type": ["string", "null"] },
+        "platform": { "type": ["string", "null"] },
+        "publication_timestamp": {
+          "type": "object",
+          "required": ["value", "provenance"],
+          "properties": {
+            "value": { "type": ["string", "null"] },
+            "provenance": {
+              "type": "string",
+              "enum": [
+                "PLATFORM_METADATA",
+                "VIDEO_STATEMENT",
+                "FORUM_METADATA",
+                "PAGE_METADATA",
+                "SEARCH_INDEX",
+                "SELF_STATED_IN_TEXT",
+                "UNKNOWN"
+              ]
+            },
+            "note": { "type": "string" }
+          }
+        },
+        "decision_timestamp": {
+          "type": "object",
+          "description": "When the analytical act happened, if distinct from publication (e.g. live lecture vs upload).",
+          "properties": {
+            "value": { "type": ["string", "null"] },
+            "provenance": { "type": "string" },
+            "note": { "type": "string" }
+          }
+        },
+        "retrieved_utc": { "type": "string" },
+        "access_status": {
+          "type": "string",
+          "enum": ["FULL_TEXT", "PARTIAL_TEXT", "METADATA_ONLY", "PAYWALLED", "REMOVED"]
+        },
+        "rights_note": {
+          "type": "string",
+          "description": "Licensing/copyright constraints on chart media and text. Chart images are referenced by URL; they are NOT copied into the dataset unless an explicit license permits it."
+        },
+        "is_primary_source": {
+          "type": "boolean",
+          "description": "True only for original material by the acting trader/teacher. Notes, summaries, and re-uploads are secondary even when accurate."
+        }
+      }
+    },
+    "decision_context": {
+      "type": "object",
+      "required": [
+        "task_description",
+        "hindsight_class",
+        "evidence_available_at_decision"
+      ],
+      "properties": {
+        "task_description": {
+          "type": "string",
+          "description": "What the analytical task actually was, in the source's own framing (e.g. 'find reasons that provided the market structure shift and buy/sell side liquidity')."
+        },
+        "claimed_decision_time_utc": {
+          "type": "object",
+          "properties": {
+            "value": { "type": ["string", "null"] },
+            "provenance": { "type": "string" },
+            "note": { "type": "string" }
+          }
+        },
+        "evidence_available_at_decision": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Factual information that was visible/available at the claimed decision time (price bars up to t, session times, prior levels). Statements about intent or hidden orders are NOT evidence; put them in interpretation."
+        },
+        "hindsight_class": {
+          "type": "string",
+          "enum": [
+            "PRE_EVENT",
+            "LIVE_ANNOTATION",
+            "PRE_EVENT_ASSIGNMENT_REVIEWED_LATER",
+            "TEACHING_RECAP_WITH_TIME_REFERENCES",
+            "RETROSPECTIVE_UNCLEAR",
+            "CONTESTED_PROVENANCE"
+          ]
+        },
+        "hindsight_notes": {
+          "type": "string",
+          "description": "Explicit record of hindsight contamination risk and transcript uncertainty."
+        }
+      }
+    },
+    "market": {
+      "type": "object",
+      "required": ["instrument", "timeframes"],
+      "properties": {
+        "instrument": {
+          "type": "object",
+          "required": ["value", "confidence", "evidence"],
+          "properties": {
+            "value": { "type": ["string", "null"] },
+            "confidence": { "type": "string", "enum": ["HIGH", "MEDIUM", "LOW", "UNKNOWN"] },
+            "evidence": { "type": "string" }
+          }
+        },
+        "venue": { "type": ["string", "null"] },
+        "contract_period": { "type": ["string", "null"] },
+        "session_context": { "type": ["string", "null"] },
+        "timeframes": {
+          "type": "object",
+          "required": ["primary", "stack"],
+          "properties": {
+            "primary": { "type": ["string", "null"] },
+            "stack": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "source_data_resolution": {
+          "type": ["string", "null"],
+          "description": "Resolution of the data behind the source chart if known (e.g. '1-min bars aggregated by platform')."
+        },
+        "chart_date": {
+          "type": "object",
+          "properties": {
+            "value": { "type": ["string", "null"] },
+            "confidence": { "type": "string", "enum": ["HIGH", "MEDIUM", "LOW", "UNKNOWN"] },
+            "evidence": { "type": "string" }
+          }
+        }
+      }
+    },
+    "chart_region": {
+      "type": "object",
+      "description": "Coordinates/regions exactly as stated by the source. Absent coordinates stay null. Never reconstruct coordinates the source did not state.",
+      "required": ["coordinate_space", "anchors"],
+      "properties": {
+        "coordinate_space": {
+          "type": "string",
+          "enum": [
+            "CHART_TIME_LABEL",
+            "PRICE_LEVEL",
+            "BAR_RELATIVE",
+            "VIDEO_TIMESTAMP",
+            "PAGE_IMAGE_REGION",
+            "TEXT_ONLY",
+            "UNKNOWN"
+          ]
+        },
+        "anchors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["anchor_id", "kind", "source_quote_or_paraphrase"],
+            "properties": {
+              "anchor_id": { "type": "string" },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "SWING_HIGH",
+                  "SWING_LOW",
+                  "RANGE_HIGH",
+                  "RANGE_LOW",
+                  "LEVEL",
+                  "ZONE_LOW",
+                  "ZONE_HIGH",
+                  "ZONE_MID",
+                  "TIME_LABEL",
+                  "BAR",
+                  "OTHER"
+                ]
+              },
+              "label": { "type": ["string", "null"] },
+              "value": { "type": ["number", "null"] },
+              "unit": { "type": ["string", "null"] },
+              "source_quote_or_paraphrase": { "type": "string" },
+              "is_quote": { "type": "boolean" }
+            }
+          }
+        },
+        "chart_image_ref": {
+          "type": "object",
+          "properties": {
+            "url": { "type": ["string", "null"] },
+            "retrieval_status": {
+              "type": "string",
+              "enum": ["NOT_RETRIEVED", "REFERENCED_ONLY", "RETRIEVED_LOCAL", "UNAVAILABLE"]
+            },
+            "note": { "type": "string" }
+          }
+        }
+      }
+    },
+    "element": {
+      "type": "object",
+      "required": ["element_type", "selection_claim", "operational_definition", "observable_vs_interpretive"],
+      "properties": {
+        "element_type": {
+          "type": "string",
+          "enum": [
+            "SWING",
+            "SWING_SEQUENCE",
+            "STRUCTURAL_BREAK_REFERENCE",
+            "LIQUIDITY_LEVEL",
+            "LIQUIDITY_PAIR_OR_CLUSTER",
+            "FVG",
+            "ORDER_BLOCK",
+            "DEALING_RANGE",
+            "SESSION_LEVEL",
+            "WAVE",
+            "DISPLACEMENT_LEG",
+            "INVALIDATION_REFERENCE",
+            "TARGET_REFERENCE",
+            "OTHER"
+          ]
+        },
+        "direction": { "type": ["string", "null"], "enum": ["BULLISH", "BEARISH", "NEUTRAL", null] },
+        "selection_claim": {
+          "type": "string",
+          "description": "What the source selected, in plain language, e.g. 'the relative-equal-highs pair instead of the single 5:00 high'."
+        },
+        "operational_definition": {
+          "type": "object",
+          "required": ["definition_text", "provenance", "confidence"],
+          "properties": {
+            "definition_text": {
+              "type": "string",
+              "description": "The rule the source applied to this element type in this teaching era. May be a faithful paraphrase of a quote."
+            },
+            "provenance": {
+              "type": "string",
+              "description": "Exact source location of the definition (URL + timestamp/chapter), or 'NOT_VERIFIED_PRIMARY'."
+            },
+            "era": { "type": ["string", "null"] },
+            "confidence": { "type": "string", "enum": ["HIGH", "MEDIUM", "LOW", "UNKNOWN"] },
+            "conflicts_with": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Named alternative definitions visible in other sources or in the repository (kept as conflicts, not resolved)."
+            }
+          }
+        },
+        "observable_vs_interpretive": {
+          "type": "object",
+          "required": ["observable", "interpretive"],
+          "properties": {
+            "observable": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Statements verifiable from OHLC/time (levels, breaks, gaps)."
+            },
+            "interpretive": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Statements about intent, orders, institutional causation, significance."
+            }
+          }
+        }
+      }
+    },
+    "alternatives": {
+      "type": "array",
+      "description": "Competing candidates that were visible at the decision time. Use status EXPLICIT_IN_SOURCE when the source itself discusses them. Use VISIBLE_ON_CHART only when the annotator inspected the chart image directly. Do not invent alternatives.",
+      "items": {
+        "type": "object",
+        "required": ["alternative_id", "description", "status"],
+        "properties": {
+          "alternative_id": { "type": "string" },
+          "element_type": { "type": "string" },
+          "description": { "type": "string" },
+          "status": {
+            "type": "string",
+            "enum": ["EXPLICIT_IN_SOURCE", "VISIBLE_ON_CHART", "IMPLIED_BY_DEFINITION", "NOT_ASSESSED"]
+          },
+          "source_quote_or_paraphrase": { "type": ["string", "null"] },
+          "why_not_selected": {
+            "type": ["string", "null"],
+            "description": "The source's stated preference rationale, or null when the source does not explain."
+          }
+        }
+      }
+    },
+    "explanation": {
+      "type": "object",
+      "required": ["trader_explanation", "supporting_evidence"],
+      "properties": {
+        "trader_explanation": { "type": "string" },
+        "supporting_evidence": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["evidence_id", "kind", "text"],
+            "properties": {
+              "evidence_id": { "type": "string" },
+              "kind": {
+                "type": "string",
+                "enum": ["QUOTE", "PARAPHRASE", "CHART_FEATURE", "TIMESTAMP", "EXTERNAL_DOCUMENT"]
+              },
+              "text": { "type": "string" },
+              "location": { "type": ["string", "null"] },
+              "is_quote": { "type": "boolean" }
+            }
+          }
+        },
+        "explanation_class": {
+          "type": "string",
+          "enum": ["RULE_BASED", "CONTEXT_DEPENDENT", "PREFERENCE_WITHOUT_RULE", "NONE_GIVEN", "MIXED"]
+        }
+      }
+    },
+    "task_contract": {
+      "type": "object",
+      "description": "MANDATORY if any label in this record is interpreted as 'the correct selection'. Defines, task-specifically, what correctness means. Without it, the record supports extraction/coverage analysis only.",
+      "properties": {
+        "contract_id": { "type": "string" },
+        "correctness_clause": {
+          "type": "string",
+          "description": "e.g. 'correct = the liquidity reference the source preferred under its stated 2022-era preference rule; NOT the objectively best reference'."
+        },
+        "forbidden_interpretations": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "e.g. ['market-correct reference', 'profitable reference', 'unique true swing']"
+        }
+      }
+    },
+    "matching": {
+      "type": "object",
+      "description": "Mapping to the repository candidate universe. Statuses are exhaustive and mutually exclusive at record level; sub-elements may carry their own status rows in match_rows.",
+      "required": ["repo_producer_targets", "match_status", "tolerance"],
+      "properties": {
+        "repo_producer_targets": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "1.2_SESSION_CONTEXT",
+              "2.1A_SWING_DETECTOR",
+              "2.1B_SWING_SEQUENCE",
+              "2.1C_STRUCTURAL_BREAKS",
+              "2.2_LIQUIDITY_MAP",
+              "4.1_ORDER_BLOCKS",
+              "4.2A_FVG",
+              "4.2B_DEALING_RANGE",
+              "5.1_HTF",
+              "5.2_MTF_CONFLUENCE",
+              "MUF_S5_WAVE_REPRESENTATION",
+              "NONE"
+            ]
+          }
+        },
+        "match_status": {
+          "type": "string",
+          "enum": [
+            "PENDING",
+            "CANDIDATE_PRESENT",
+            "CANDIDATE_ABSENT",
+            "CANDIDATE_NOT_YET_AVAILABLE_AT_DECISION_TIME",
+            "CANDIDATE_PRESENT_BUT_SELECTION_UNAVAILABLE",
+            "REPRESENTATION_MISMATCH",
+            "INTERPRETATION_DISAGREEMENT",
+            "INSUFFICIENT_SOURCE_EVIDENCE",
+            "AMBIGUOUS_MATCH",
+            "PRODUCER_BLOCKED_NO_AUTHORIZED_POLICY",
+            "OUT_OF_DATA_SLICE_COVERAGE"
+          ]
+        },
+        "match_rows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["row_id", "match_status"],
+            "properties": {
+              "row_id": { "type": "string" },
+              "match_status": { "type": "string" },
+              "candidate_ids": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Repository candidate IDs when the producers were actually run. Empty (not fabricated) otherwise."
+              },
+              "evidence": { "type": "string" },
+              "representation_gap": { "type": ["string", "null"] }
+            }
+          }
+        },
+        "tolerance": {
+          "type": "object",
+          "description": "Declared matching tolerances. Fuzzy matching that silently declares a candidate correct is forbidden; tolerances only convert a stated coordinate into an equality test and any within-tolerance ambiguity is reported as AMBIGUOUS_MATCH.",
+          "properties": {
+            "time_bars": { "type": ["integer", "null"] },
+            "price_abs": { "type": ["number", "null"] },
+            "price_frac": { "type": ["number", "null"] },
+            "declared_by": { "type": "string" }
+          }
+        },
+        "notes": { "type": "string" }
+      }
+    },
+    "dataset": {
+      "type": "object",
+      "description": "Dataset-assembly metadata (added in v1.1). Partition/executability facts about THIS record inside a named dataset release.",
+      "required": ["dataset_id", "partition", "executability"],
+      "properties": {
+        "dataset_id": { "type": "string" },
+        "partition": {
+          "type": "string",
+          "enum": ["DEV", "EVAL", "UNPARTITIONED"]
+        },
+        "partition_basis": {
+          "type": "string",
+          "description": "Why this record sits in this partition (source family + chronological period)."
+        },
+        "executability": {
+          "type": "string",
+          "enum": [
+            "EXECUTABLE",
+            "PARTIALLY_EXECUTABLE",
+            "NOT_EXECUTABLE",
+            "NOT_ASSESSED"
+          ]
+        },
+        "executability_note": { "type": "string" },
+        "data_slice_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["slice_id"],
+            "properties": {
+              "slice_id": { "type": "string" },
+              "role": { "type": "string" },
+              "venue_relation": {
+                "type": "string",
+                "enum": ["EXACT", "VENUE_PROXY", "INSTRUMENT_FAMILY_PROXY", "UNKNOWN"]
+              }
+            }
+          }
+        }
+      }
+    },
+    "evaluation_limits": {
+      "type": "object",
+      "required": ["annotation_uncertainty", "not_evaluable_from_ohlc", "data_availability_limitations"],
+      "properties": {
+        "evaluable_from_ohlc": { "type": "boolean" },
+        "not_evaluable_from_ohlc": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "e.g. 'existence of resting stop orders', 'institutional intent'"
+        },
+        "annotation_uncertainty": {
+          "type": "object",
+          "required": ["level", "reasons"],
+          "properties": {
+            "level": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "UNUSABLE"] },
+            "reasons": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "data_availability_limitations": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "e.g. 'chart date not identified', 'video frame not captured', 'tick data unavailable', 'third-party transcript may differ from audio'"
+        }
+      }
+    }
+  }
+}
