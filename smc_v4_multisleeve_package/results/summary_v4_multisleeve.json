@@ -1,0 +1,1775 @@
+{
+  "dataset": {
+    "symbol": "XAUUSD",
+    "bars_1m": 2360931,
+    "data_start_utc": "2020-01-01 23:00:00+00:00",
+    "data_end_utc": "2026-10-16 21:58:00+00:00",
+    "eval_start_utc": "2020-02-01 00:00:00+00:00",
+    "eval_split_h1_h2_utc": "2023-07-01 00:00:00+00:00",
+    "eval_end_utc": "2026-11-01 00:00:00+00:00"
+  },
+  "V4_MultiSleeve_cost_025": {
+    "overall": {
+      "n": 512,
+      "wins": 181,
+      "losses": 331,
+      "win_rate_pct": 35.35,
+      "total_r": 100.692,
+      "expectancy_r": 0.1967,
+      "total_usd": 958.05,
+      "profit_factor": 1.294,
+      "max_dd_r": 14.681,
+      "max_consec_losses": 14,
+      "avg_risk_usd": 10.81,
+      "t_stat": 2.662,
+      "ci95": [
+        0.052,
+        0.339
+      ],
+      "pos_years": "7/7",
+      "years": {
+        "2020": {
+          "n": 69,
+          "win_rate_pct": 34.8,
+          "net_r": 12.37
+        },
+        "2021": {
+          "n": 82,
+          "win_rate_pct": 36.6,
+          "net_r": 18.23
+        },
+        "2022": {
+          "n": 71,
+          "win_rate_pct": 36.6,
+          "net_r": 18.13
+        },
+        "2023": {
+          "n": 69,
+          "win_rate_pct": 42.0,
+          "net_r": 29.12
+        },
+        "2024": {
+          "n": 87,
+          "win_rate_pct": 32.2,
+          "net_r": 5.57
+        },
+        "2025": {
+          "n": 72,
+          "win_rate_pct": 34.7,
+          "net_r": 13.93
+        },
+        "2026": {
+          "n": 62,
+          "win_rate_pct": 30.6,
+          "net_r": 3.35
+        }
+      }
+    },
+    "h1_2020_2023": {
+      "n": 254,
+      "wins": 90,
+      "losses": 164,
+      "win_rate_pct": 35.43,
+      "total_r": 50.922,
+      "expectancy_r": 0.2005,
+      "total_usd": 274.3,
+      "profit_factor": 1.298,
+      "max_dd_r": 14.681,
+      "max_consec_losses": 14,
+      "avg_risk_usd": 7.94,
+      "t_stat": 1.896,
+      "ci95": [
+        -0.004,
+        0.416
+      ],
+      "pos_years": "4/4",
+      "years": {
+        "2020": {
+          "n": 69,
+          "win_rate_pct": 34.8,
+          "net_r": 12.37
+        },
+        "2021": {
+          "n": 82,
+          "win_rate_pct": 36.6,
+          "net_r": 18.23
+        },
+        "2022": {
+          "n": 71,
+          "win_rate_pct": 36.6,
+          "net_r": 18.13
+        },
+        "2023": {
+          "n": 32,
+          "win_rate_pct": 31.2,
+          "net_r": 2.19
+        }
+      }
+    },
+    "h2_2023_2026": {
+      "n": 258,
+      "wins": 91,
+      "losses": 167,
+      "win_rate_pct": 35.27,
+      "total_r": 49.77,
+      "expectancy_r": 0.1929,
+      "total_usd": 683.75,
+      "profit_factor": 1.29,
+      "max_dd_r": 14.361,
+      "max_consec_losses": 14,
+      "avg_risk_usd": 13.64,
+      "t_stat": 1.865,
+      "ci95": [
+        -0.003,
+        0.392
+      ],
+      "pos_years": "4/4",
+      "years": {
+        "2023": {
+          "n": 37,
+          "win_rate_pct": 51.4,
+          "net_r": 26.93
+        },
+        "2024": {
+          "n": 87,
+          "win_rate_pct": 32.2,
+          "net_r": 5.57
+        },
+        "2025": {
+          "n": 72,
+          "win_rate_pct": 34.7,
+          "net_r": 13.93
+        },
+        "2026": {
+          "n": 62,
+          "win_rate_pct": 30.6,
+          "net_r": 3.35
+        }
+      }
+    },
+    "long_only": {
+      "n": 257,
+      "wins": 91,
+      "losses": 166,
+      "win_rate_pct": 35.41,
+      "total_r": 53.245,
+      "expectancy_r": 0.2072,
+      "total_usd": 701.61,
+      "profit_factor": 1.31,
+      "max_dd_r": 14.185,
+      "max_consec_losses": 14,
+      "avg_risk_usd": 11.06,
+      "t_stat": 1.973,
+      "ci95": [
+        0.008,
+        0.412
+      ],
+      "pos_years": "6/7",
+      "years": {
+        "2020": {
+          "n": 37,
+          "win_rate_pct": 37.8,
+          "net_r": 10.75
+        },
+        "2021": {
+          "n": 42,
+          "win_rate_pct": 33.3,
+          "net_r": 5.39
+        },
+        "2022": {
+          "n": 32,
+          "win_rate_pct": 40.6,
+          "net_r": 13.88
+        },
+        "2023": {
+          "n": 33,
+          "win_rate_pct": 33.3,
+          "net_r": 3.78
+        },
+        "2024": {
+          "n": 47,
+          "win_rate_pct": 31.9,
+          "net_r": 2.92
+        },
+        "2025": {
+          "n": 35,
+          "win_rate_pct": 45.7,
+          "net_r": 20.25
+        },
+        "2026": {
+          "n": 31,
+          "win_rate_pct": 25.8,
+          "net_r": -3.73
+        }
+      }
+    },
+    "short_only": {
+      "n": 255,
+      "wins": 90,
+      "losses": 165,
+      "win_rate_pct": 35.29,
+      "total_r": 47.447,
+      "expectancy_r": 0.1861,
+      "total_usd": 256.44,
+      "profit_factor": 1.278,
+      "max_dd_r": 13.892,
+      "max_consec_losses": 11,
+      "avg_risk_usd": 10.56,
+      "t_stat": 1.787,
+      "ci95": [
+        -0.019,
+        0.386
+      ],
+      "pos_years": "6/7",
+      "years": {
+        "2020": {
+          "n": 32,
+          "win_rate_pct": 31.2,
+          "net_r": 1.62
+        },
+        "2021": {
+          "n": 40,
+          "win_rate_pct": 40.0,
+          "net_r": 12.85
+        },
+        "2022": {
+          "n": 39,
+          "win_rate_pct": 33.3,
+          "net_r": 4.24
+        },
+        "2023": {
+          "n": 36,
+          "win_rate_pct": 50.0,
+          "net_r": 25.34
+        },
+        "2024": {
+          "n": 40,
+          "win_rate_pct": 32.5,
+          "net_r": 2.65
+        },
+        "2025": {
+          "n": 37,
+          "win_rate_pct": 24.3,
+          "net_r": -6.33
+        },
+        "2026": {
+          "n": 31,
+          "win_rate_pct": 35.5,
+          "net_r": 7.07
+        }
+      }
+    }
+  },
+  "V4_MultiSleeve_cost_035": {
+    "overall": {
+      "n": 512,
+      "wins": 181,
+      "losses": 331,
+      "win_rate_pct": 35.35,
+      "total_r": 93.305,
+      "expectancy_r": 0.1822,
+      "total_usd": 906.85,
+      "profit_factor": 1.269,
+      "max_dd_r": 14.953,
+      "max_consec_losses": 14,
+      "avg_risk_usd": 10.81,
+      "t_stat": 2.467,
+      "ci95": [
+        0.036,
+        0.324
+      ],
+      "pos_years": "7/7",
+      "years": {
+        "2020": {
+          "n": 69,
+          "win_rate_pct": 34.8,
+          "net_r": 11.37
+        },
+        "2021": {
+          "n": 82,
+          "win_rate_pct": 36.6,
+          "net_r": 16.82
+        },
+        "2022": {
+          "n": 71,
+          "win_rate_pct": 36.6,
+          "net_r": 16.84
+        },
+        "2023": {
+          "n": 69,
+          "win_rate_pct": 42.0,
+          "net_r": 27.77
+        },
+        "2024": {
+          "n": 87,
+          "win_rate_pct": 32.2,
+          "net_r": 4.29
+        },
+        "2025": {
+          "n": 72,
+          "win_rate_pct": 34.7,
+          "net_r": 13.21
+        },
+        "2026": {
+          "n": 62,
+          "win_rate_pct": 30.6,
+          "net_r": 3.0
+        }
+      }
+    },
+    "h1_2020_2023": {
+      "n": 254,
+      "wins": 90,
+      "losses": 164,
+      "win_rate_pct": 35.43,
+      "total_r": 46.617,
+      "expectancy_r": 0.1835,
+      "total_usd": 248.9,
+      "profit_factor": 1.268,
+      "max_dd_r": 14.953,
+      "max_consec_losses": 14,
+      "avg_risk_usd": 7.94,
+      "t_stat": 1.735,
+      "ci95": [
+        -0.022,
+        0.385
+      ],
+      "pos_years": "4/4",
+      "years": {
+        "2020": {
+          "n": 69,
+          "win_rate_pct": 34.8,
+          "net_r": 11.37
+        },
+        "2021": {
+          "n": 82,
+          "win_rate_pct": 36.6,
+          "net_r": 16.82
+        },
+        "2022": {
+          "n": 71,
+          "win_rate_pct": 36.6,
+          "net_r": 16.84
+        },
+        "2023": {
+          "n": 32,
+          "win_rate_pct": 31.2,
+          "net_r": 1.58
+        }
+      }
+    },
+    "h2_2023_2026": {
+      "n": 258,
+      "wins": 91,
+      "losses": 167,
+      "win_rate_pct": 35.27,
+      "total_r": 46.688,
+      "expectancy_r": 0.181,
+      "total_usd": 657.95,
+      "profit_factor": 1.269,
+      "max_dd_r": 14.506,
+      "max_consec_losses": 14,
+      "avg_risk_usd": 13.64,
+      "t_stat": 1.75,
+      "ci95": [
+        -0.021,
+        0.381
+      ],
+      "pos_years": "4/4",
+      "years": {
+        "2023": {
+          "n": 37,
+          "win_rate_pct": 51.4,
+          "net_r": 26.19
+        },
+        "2024": {
+          "n": 87,
+          "win_rate_pct": 32.2,
+          "net_r": 4.29
+        },
+        "2025": {
+          "n": 72,
+          "win_rate_pct": 34.7,
+          "net_r": 13.21
+        },
+        "2026": {
+          "n": 62,
+          "win_rate_pct": 30.6,
+          "net_r": 3.0
+        }
+      }
+    },
+    "long_only": {
+      "n": 257,
+      "wins": 91,
+      "losses": 166,
+      "win_rate_pct": 35.41,
+      "total_r": 49.728,
+      "expectancy_r": 0.1935,
+      "total_usd": 675.91,
+      "profit_factor": 1.286,
+      "max_dd_r": 14.259,
+      "max_consec_losses": 14,
+      "avg_risk_usd": 11.06,
+      "t_stat": 1.842,
+      "ci95": [
+        -0.013,
+        0.399
+      ],
+      "pos_years": "6/7",
+      "years": {
+        "2020": {
+          "n": 37,
+          "win_rate_pct": 37.8,
+          "net_r": 10.24
+        },
+        "2021": {
+          "n": 42,
+          "win_rate_pct": 33.3,
+          "net_r": 4.7
+        },
+        "2022": {
+          "n": 32,
+          "win_rate_pct": 40.6,
+          "net_r": 13.31
+        },
+        "2023": {
+          "n": 33,
+          "win_rate_pct": 33.3,
+          "net_r": 3.19
+        },
+        "2024": {
+          "n": 47,
+          "win_rate_pct": 31.9,
+          "net_r": 2.24
+        },
+        "2025": {
+          "n": 35,
+          "win_rate_pct": 45.7,
+          "net_r": 19.93
+        },
+        "2026": {
+          "n": 31,
+          "win_rate_pct": 25.8,
+          "net_r": -3.89
+        }
+      }
+    },
+    "short_only": {
+      "n": 255,
+      "wins": 90,
+      "losses": 165,
+      "win_rate_pct": 35.29,
+      "total_r": 43.577,
+      "expectancy_r": 0.1709,
+      "total_usd": 230.94,
+      "profit_factor": 1.251,
+      "max_dd_r": 14.074,
+      "max_consec_losses": 11,
+      "avg_risk_usd": 10.56,
+      "t_stat": 1.642,
+      "ci95": [
+        -0.025,
+        0.381
+      ],
+      "pos_years": "6/7",
+      "years": {
+        "2020": {
+          "n": 32,
+          "win_rate_pct": 31.2,
+          "net_r": 1.13
+        },
+        "2021": {
+          "n": 40,
+          "win_rate_pct": 40.0,
+          "net_r": 12.12
+        },
+        "2022": {
+          "n": 39,
+          "win_rate_pct": 33.3,
+          "net_r": 3.53
+        },
+        "2023": {
+          "n": 36,
+          "win_rate_pct": 50.0,
+          "net_r": 24.58
+        },
+        "2024": {
+          "n": 40,
+          "win_rate_pct": 32.5,
+          "net_r": 2.05
+        },
+        "2025": {
+          "n": 37,
+          "win_rate_pct": 24.3,
+          "net_r": -6.72
+        },
+        "2026": {
+          "n": 31,
+          "win_rate_pct": 35.5,
+          "net_r": 6.89
+        }
+      }
+    }
+  },
+  "V4_MultiSleeve_cost_050": {
+    "overall": {
+      "n": 512,
+      "wins": 181,
+      "losses": 331,
+      "win_rate_pct": 35.35,
+      "total_r": 82.225,
+      "expectancy_r": 0.1606,
+      "total_usd": 830.05,
+      "profit_factor": 1.232,
+      "max_dd_r": 16.348,
+      "max_consec_losses": 14,
+      "avg_risk_usd": 10.81,
+      "t_stat": 2.174,
+      "ci95": [
+        0.017,
+        0.311
+      ],
+      "pos_years": "7/7",
+      "years": {
+        "2020": {
+          "n": 69,
+          "win_rate_pct": 34.8,
+          "net_r": 9.88
+        },
+        "2021": {
+          "n": 82,
+          "win_rate_pct": 36.6,
+          "net_r": 14.7
+        },
+        "2022": {
+          "n": 71,
+          "win_rate_pct": 36.6,
+          "net_r": 14.91
+        },
+        "2023": {
+          "n": 69,
+          "win_rate_pct": 42.0,
+          "net_r": 25.75
+        },
+        "2024": {
+          "n": 87,
+          "win_rate_pct": 32.2,
+          "net_r": 2.37
+        },
+        "2025": {
+          "n": 72,
+          "win_rate_pct": 34.7,
+          "net_r": 12.13
+        },
+        "2026": {
+          "n": 62,
+          "win_rate_pct": 30.6,
+          "net_r": 2.49
+        }
+      }
+    },
+    "h1_2020_2023": {
+      "n": 254,
+      "wins": 90,
+      "losses": 164,
+      "win_rate_pct": 35.43,
+      "total_r": 40.159,
+      "expectancy_r": 0.1581,
+      "total_usd": 210.8,
+      "profit_factor": 1.226,
+      "max_dd_r": 16.348,
+      "max_consec_losses": 14,
+      "avg_risk_usd": 7.94,
+      "t_stat": 1.495,
+      "ci95": [
+        -0.045,
+        0.37
+      ],
+      "pos_years": "4/4",
+      "years": {
+        "2020": {
+          "n": 69,
+          "win_rate_pct": 34.8,
+          "net_r": 9.88
+        },
+        "2021": {
+          "n": 82,
+          "win_rate_pct": 36.6,
+          "net_r": 14.7
+        },
+        "2022": {
+          "n": 71,
+          "win_rate_pct": 36.6,
+          "net_r": 14.91
+        },
+        "2023": {
+          "n": 32,
+          "win_rate_pct": 31.2,
+          "net_r": 0.67
+        }
+      }
+    },
+    "h2_2023_2026": {
+      "n": 258,
+      "wins": 91,
+      "losses": 167,
+      "win_rate_pct": 35.27,
+      "total_r": 42.066,
+      "expectancy_r": 0.163,
+      "total_usd": 619.25,
+      "profit_factor": 1.238,
+      "max_dd_r": 14.723,
+      "max_consec_losses": 14,
+      "avg_risk_usd": 13.64,
+      "t_stat": 1.577,
+      "ci95": [
+        -0.035,
+        0.367
+      ],
+      "pos_years": "4/4",
+      "years": {
+        "2023": {
+          "n": 37,
+          "win_rate_pct": 51.4,
+          "net_r": 25.08
+        },
+        "2024": {
+          "n": 87,
+          "win_rate_pct": 32.2,
+          "net_r": 2.37
+        },
+        "2025": {
+          "n": 72,
+          "win_rate_pct": 34.7,
+          "net_r": 12.13
+        },
+        "2026": {
+          "n": 62,
+          "win_rate_pct": 30.6,
+          "net_r": 2.49
+        }
+      }
+    },
+    "long_only": {
+      "n": 257,
+      "wins": 91,
+      "losses": 166,
+      "win_rate_pct": 35.41,
+      "total_r": 44.453,
+      "expectancy_r": 0.173,
+      "total_usd": 637.36,
+      "profit_factor": 1.25,
+      "max_dd_r": 14.37,
+      "max_consec_losses": 14,
+      "avg_risk_usd": 11.06,
+      "t_stat": 1.646,
+      "ci95": [
+        -0.026,
+        0.377
+      ],
+      "pos_years": "6/7",
+      "years": {
+        "2020": {
+          "n": 37,
+          "win_rate_pct": 37.8,
+          "net_r": 9.49
+        },
+        "2021": {
+          "n": 42,
+          "win_rate_pct": 33.3,
+          "net_r": 3.68
+        },
+        "2022": {
+          "n": 32,
+          "win_rate_pct": 40.6,
+          "net_r": 12.44
+        },
+        "2023": {
+          "n": 33,
+          "win_rate_pct": 33.3,
+          "net_r": 2.32
+        },
+        "2024": {
+          "n": 47,
+          "win_rate_pct": 31.9,
+          "net_r": 1.21
+        },
+        "2025": {
+          "n": 35,
+          "win_rate_pct": 45.7,
+          "net_r": 19.45
+        },
+        "2026": {
+          "n": 31,
+          "win_rate_pct": 25.8,
+          "net_r": -4.13
+        }
+      }
+    },
+    "short_only": {
+      "n": 255,
+      "wins": 90,
+      "losses": 165,
+      "win_rate_pct": 35.29,
+      "total_r": 37.772,
+      "expectancy_r": 0.1481,
+      "total_usd": 192.69,
+      "profit_factor": 1.214,
+      "max_dd_r": 15.041,
+      "max_consec_losses": 11,
+      "avg_risk_usd": 10.56,
+      "t_stat": 1.424,
+      "ci95": [
+        -0.055,
+        0.353
+      ],
+      "pos_years": "6/7",
+      "years": {
+        "2020": {
+          "n": 32,
+          "win_rate_pct": 31.2,
+          "net_r": 0.39
+        },
+        "2021": {
+          "n": 40,
+          "win_rate_pct": 40.0,
+          "net_r": 11.02
+        },
+        "2022": {
+          "n": 39,
+          "win_rate_pct": 33.3,
+          "net_r": 2.47
+        },
+        "2023": {
+          "n": 36,
+          "win_rate_pct": 50.0,
+          "net_r": 23.44
+        },
+        "2024": {
+          "n": 40,
+          "win_rate_pct": 32.5,
+          "net_r": 1.15
+        },
+        "2025": {
+          "n": 37,
+          "win_rate_pct": 24.3,
+          "net_r": -7.31
+        },
+        "2026": {
+          "n": 31,
+          "win_rate_pct": 35.5,
+          "net_r": 6.62
+        }
+      }
+    }
+  },
+  "V4_1PosLock_cost_025": {
+    "overall": {
+      "n": 455,
+      "wins": 163,
+      "losses": 292,
+      "win_rate_pct": 35.82,
+      "total_r": 97.111,
+      "expectancy_r": 0.2134,
+      "total_usd": 843.97,
+      "profit_factor": 1.322,
+      "max_dd_r": 13.347,
+      "max_consec_losses": 13,
+      "avg_risk_usd": 11.19,
+      "t_stat": 2.72,
+      "ci95": [
+        0.062,
+        0.362
+      ],
+      "pos_years": "7/7",
+      "years": {
+        "2020": {
+          "n": 60,
+          "win_rate_pct": 35.0,
+          "net_r": 10.99
+        },
+        "2021": {
+          "n": 72,
+          "win_rate_pct": 37.5,
+          "net_r": 18.13
+        },
+        "2022": {
+          "n": 58,
+          "win_rate_pct": 37.9,
+          "net_r": 16.48
+        },
+        "2023": {
+          "n": 55,
+          "win_rate_pct": 45.5,
+          "net_r": 30.05
+        },
+        "2024": {
+          "n": 80,
+          "win_rate_pct": 31.2,
+          "net_r": 3.16
+        },
+        "2025": {
+          "n": 70,
+          "win_rate_pct": 35.7,
+          "net_r": 15.99
+        },
+        "2026": {
+          "n": 60,
+          "win_rate_pct": 30.0,
+          "net_r": 2.31
+        }
+      }
+    },
+    "h1_2020_2023": {
+      "n": 214,
+      "wins": 78,
+      "losses": 136,
+      "win_rate_pct": 36.45,
+      "total_r": 49.131,
+      "expectancy_r": 0.2296,
+      "total_usd": 219.7,
+      "profit_factor": 1.347,
+      "max_dd_r": 12.541,
+      "max_consec_losses": 10,
+      "avg_risk_usd": 7.99,
+      "t_stat": 1.994,
+      "ci95": [
+        0.003,
+        0.456
+      ],
+      "pos_years": "4/4",
+      "years": {
+        "2020": {
+          "n": 60,
+          "win_rate_pct": 35.0,
+          "net_r": 10.99
+        },
+        "2021": {
+          "n": 72,
+          "win_rate_pct": 37.5,
+          "net_r": 18.13
+        },
+        "2022": {
+          "n": 58,
+          "win_rate_pct": 37.9,
+          "net_r": 16.48
+        },
+        "2023": {
+          "n": 24,
+          "win_rate_pct": 33.3,
+          "net_r": 3.53
+        }
+      }
+    },
+    "h2_2023_2026": {
+      "n": 241,
+      "wins": 85,
+      "losses": 156,
+      "win_rate_pct": 35.27,
+      "total_r": 47.981,
+      "expectancy_r": 0.1991,
+      "total_usd": 624.28,
+      "profit_factor": 1.299,
+      "max_dd_r": 13.347,
+      "max_consec_losses": 13,
+      "avg_risk_usd": 14.03,
+      "t_stat": 1.853,
+      "ci95": [
+        -0.016,
+        0.41
+      ],
+      "pos_years": "4/4",
+      "years": {
+        "2023": {
+          "n": 31,
+          "win_rate_pct": 54.8,
+          "net_r": 26.52
+        },
+        "2024": {
+          "n": 80,
+          "win_rate_pct": 31.2,
+          "net_r": 3.16
+        },
+        "2025": {
+          "n": 70,
+          "win_rate_pct": 35.7,
+          "net_r": 15.99
+        },
+        "2026": {
+          "n": 60,
+          "win_rate_pct": 30.0,
+          "net_r": 2.31
+        }
+      }
+    },
+    "long_only": {
+      "n": 228,
+      "wins": 83,
+      "losses": 145,
+      "win_rate_pct": 36.4,
+      "total_r": 54.725,
+      "expectancy_r": 0.24,
+      "total_usd": 632.77,
+      "profit_factor": 1.366,
+      "max_dd_r": 14.185,
+      "max_consec_losses": 14,
+      "avg_risk_usd": 11.44,
+      "t_stat": 2.149,
+      "ci95": [
+        0.025,
+        0.456
+      ],
+      "pos_years": "6/7",
+      "years": {
+        "2020": {
+          "n": 31,
+          "win_rate_pct": 38.7,
+          "net_r": 10.01
+        },
+        "2021": {
+          "n": 36,
+          "win_rate_pct": 33.3,
+          "net_r": 4.64
+        },
+        "2022": {
+          "n": 25,
+          "win_rate_pct": 44.0,
+          "net_r": 12.94
+        },
+        "2023": {
+          "n": 28,
+          "win_rate_pct": 39.3,
+          "net_r": 9.02
+        },
+        "2024": {
+          "n": 43,
+          "win_rate_pct": 30.2,
+          "net_r": 0.56
+        },
+        "2025": {
+          "n": 34,
+          "win_rate_pct": 47.1,
+          "net_r": 21.29
+        },
+        "2026": {
+          "n": 31,
+          "win_rate_pct": 25.8,
+          "net_r": -3.73
+        }
+      }
+    },
+    "short_only": {
+      "n": 227,
+      "wins": 80,
+      "losses": 147,
+      "win_rate_pct": 35.24,
+      "total_r": 42.387,
+      "expectancy_r": 0.1867,
+      "total_usd": 211.2,
+      "profit_factor": 1.279,
+      "max_dd_r": 14.363,
+      "max_consec_losses": 10,
+      "avg_risk_usd": 10.93,
+      "t_stat": 1.69,
+      "ci95": [
+        -0.032,
+        0.409
+      ],
+      "pos_years": "6/7",
+      "years": {
+        "2020": {
+          "n": 29,
+          "win_rate_pct": 31.0,
+          "net_r": 0.97
+        },
+        "2021": {
+          "n": 36,
+          "win_rate_pct": 41.7,
+          "net_r": 13.49
+        },
+        "2022": {
+          "n": 33,
+          "win_rate_pct": 33.3,
+          "net_r": 3.54
+        },
+        "2023": {
+          "n": 27,
+          "win_rate_pct": 51.9,
+          "net_r": 21.03
+        },
+        "2024": {
+          "n": 37,
+          "win_rate_pct": 32.4,
+          "net_r": 2.6
+        },
+        "2025": {
+          "n": 36,
+          "win_rate_pct": 25.0,
+          "net_r": -5.3
+        },
+        "2026": {
+          "n": 29,
+          "win_rate_pct": 34.5,
+          "net_r": 6.04
+        }
+      }
+    }
+  },
+  "Sleeve1_V3_NY_cost_025": {
+    "overall": {
+      "n": 278,
+      "wins": 99,
+      "losses": 179,
+      "win_rate_pct": 35.61,
+      "total_r": 59.992,
+      "expectancy_r": 0.2158,
+      "total_usd": 496.21,
+      "profit_factor": 1.325,
+      "max_dd_r": 11.936,
+      "max_consec_losses": 10,
+      "avg_risk_usd": 12.17,
+      "t_stat": 2.144,
+      "ci95": [
+        0.015,
+        0.418
+      ],
+      "pos_years": "7/7",
+      "years": {
+        "2020": {
+          "n": 37,
+          "win_rate_pct": 37.8,
+          "net_r": 10.81
+        },
+        "2021": {
+          "n": 49,
+          "win_rate_pct": 34.7,
+          "net_r": 8.65
+        },
+        "2022": {
+          "n": 35,
+          "win_rate_pct": 51.4,
+          "net_r": 26.76
+        },
+        "2023": {
+          "n": 34,
+          "win_rate_pct": 32.4,
+          "net_r": 2.92
+        },
+        "2024": {
+          "n": 44,
+          "win_rate_pct": 29.5,
+          "net_r": 0.16
+        },
+        "2025": {
+          "n": 44,
+          "win_rate_pct": 34.1,
+          "net_r": 7.58
+        },
+        "2026": {
+          "n": 35,
+          "win_rate_pct": 31.4,
+          "net_r": 3.12
+        }
+      }
+    },
+    "h1_2020_2023": {
+      "n": 136,
+      "wins": 51,
+      "losses": 85,
+      "win_rate_pct": 37.5,
+      "total_r": 37.536,
+      "expectancy_r": 0.276,
+      "total_usd": 192.4,
+      "profit_factor": 1.426,
+      "max_dd_r": 10.337,
+      "max_consec_losses": 10,
+      "avg_risk_usd": 8.57,
+      "t_stat": 1.893,
+      "ci95": [
+        -0.009,
+        0.559
+      ],
+      "pos_years": "3/4",
+      "years": {
+        "2020": {
+          "n": 37,
+          "win_rate_pct": 37.8,
+          "net_r": 10.81
+        },
+        "2021": {
+          "n": 49,
+          "win_rate_pct": 34.7,
+          "net_r": 8.65
+        },
+        "2022": {
+          "n": 35,
+          "win_rate_pct": 51.4,
+          "net_r": 26.76
+        },
+        "2023": {
+          "n": 15,
+          "win_rate_pct": 13.3,
+          "net_r": -8.68
+        }
+      }
+    },
+    "h2_2023_2026": {
+      "n": 142,
+      "wins": 48,
+      "losses": 94,
+      "win_rate_pct": 33.8,
+      "total_r": 22.456,
+      "expectancy_r": 0.1581,
+      "total_usd": 303.8,
+      "profit_factor": 1.233,
+      "max_dd_r": 11.936,
+      "max_consec_losses": 10,
+      "avg_risk_usd": 15.62,
+      "t_stat": 1.135,
+      "ci95": [
+        -0.112,
+        0.452
+      ],
+      "pos_years": "4/4",
+      "years": {
+        "2023": {
+          "n": 19,
+          "win_rate_pct": 47.4,
+          "net_r": 11.6
+        },
+        "2024": {
+          "n": 44,
+          "win_rate_pct": 29.5,
+          "net_r": 0.16
+        },
+        "2025": {
+          "n": 44,
+          "win_rate_pct": 34.1,
+          "net_r": 7.58
+        },
+        "2026": {
+          "n": 35,
+          "win_rate_pct": 31.4,
+          "net_r": 3.12
+        }
+      }
+    },
+    "long_only": {
+      "n": 159,
+      "wins": 59,
+      "losses": 100,
+      "win_rate_pct": 37.11,
+      "total_r": 42.555,
+      "expectancy_r": 0.2676,
+      "total_usd": 514.19,
+      "profit_factor": 1.413,
+      "max_dd_r": 8.243,
+      "max_consec_losses": 8,
+      "avg_risk_usd": 11.84,
+      "t_stat": 1.989,
+      "ci95": [
+        0.007,
+        0.536
+      ],
+      "pos_years": "6/7",
+      "years": {
+        "2020": {
+          "n": 22,
+          "win_rate_pct": 45.5,
+          "net_r": 12.26
+        },
+        "2021": {
+          "n": 28,
+          "win_rate_pct": 32.1,
+          "net_r": 2.41
+        },
+        "2022": {
+          "n": 16,
+          "win_rate_pct": 50.0,
+          "net_r": 11.39
+        },
+        "2023": {
+          "n": 18,
+          "win_rate_pct": 22.2,
+          "net_r": -4.78
+        },
+        "2024": {
+          "n": 27,
+          "win_rate_pct": 33.3,
+          "net_r": 3.62
+        },
+        "2025": {
+          "n": 28,
+          "win_rate_pct": 46.4,
+          "net_r": 16.88
+        },
+        "2026": {
+          "n": 20,
+          "win_rate_pct": 30.0,
+          "net_r": 0.78
+        }
+      }
+    },
+    "short_only": {
+      "n": 119,
+      "wins": 40,
+      "losses": 79,
+      "win_rate_pct": 33.61,
+      "total_r": 17.437,
+      "expectancy_r": 0.1465,
+      "total_usd": -17.98,
+      "profit_factor": 1.215,
+      "max_dd_r": 17.243,
+      "max_consec_losses": 9,
+      "avg_risk_usd": 12.62,
+      "t_stat": 0.964,
+      "ci95": [
+        -0.145,
+        0.441
+      ],
+      "pos_years": "4/7",
+      "years": {
+        "2020": {
+          "n": 15,
+          "win_rate_pct": 26.7,
+          "net_r": -1.45
+        },
+        "2021": {
+          "n": 21,
+          "win_rate_pct": 38.1,
+          "net_r": 6.23
+        },
+        "2022": {
+          "n": 19,
+          "win_rate_pct": 52.6,
+          "net_r": 15.37
+        },
+        "2023": {
+          "n": 16,
+          "win_rate_pct": 43.8,
+          "net_r": 7.7
+        },
+        "2024": {
+          "n": 17,
+          "win_rate_pct": 23.5,
+          "net_r": -3.46
+        },
+        "2025": {
+          "n": 16,
+          "win_rate_pct": 12.5,
+          "net_r": -9.3
+        },
+        "2026": {
+          "n": 15,
+          "win_rate_pct": 33.3,
+          "net_r": 2.34
+        }
+      }
+    }
+  },
+  "Sleeve2_VisB_cost_025": {
+    "overall": {
+      "n": 117,
+      "wins": 41,
+      "losses": 76,
+      "win_rate_pct": 35.04,
+      "total_r": 22.526,
+      "expectancy_r": 0.1925,
+      "total_usd": 415.18,
+      "profit_factor": 1.287,
+      "max_dd_r": 13.414,
+      "max_consec_losses": 7,
+      "avg_risk_usd": 11.66,
+      "t_stat": 1.242,
+      "ci95": [
+        -0.106,
+        0.492
+      ],
+      "pos_years": "5/7",
+      "years": {
+        "2020": {
+          "n": 23,
+          "win_rate_pct": 30.4,
+          "net_r": 0.85
+        },
+        "2021": {
+          "n": 22,
+          "win_rate_pct": 31.8,
+          "net_r": 1.51
+        },
+        "2022": {
+          "n": 17,
+          "win_rate_pct": 23.5,
+          "net_r": -3.66
+        },
+        "2023": {
+          "n": 20,
+          "win_rate_pct": 60.0,
+          "net_r": 21.12
+        },
+        "2024": {
+          "n": 16,
+          "win_rate_pct": 25.0,
+          "net_r": -2.49
+        },
+        "2025": {
+          "n": 10,
+          "win_rate_pct": 40.0,
+          "net_r": 3.8
+        },
+        "2026": {
+          "n": 9,
+          "win_rate_pct": 33.3,
+          "net_r": 1.39
+        }
+      }
+    },
+    "h1_2020_2023": {
+      "n": 72,
+      "wins": 24,
+      "losses": 48,
+      "win_rate_pct": 33.33,
+      "total_r": 9.292,
+      "expectancy_r": 0.1291,
+      "total_usd": 42.71,
+      "profit_factor": 1.187,
+      "max_dd_r": 13.414,
+      "max_consec_losses": 7,
+      "avg_risk_usd": 9.13,
+      "t_stat": 0.66,
+      "ci95": [
+        -0.215,
+        0.519
+      ],
+      "pos_years": "3/4",
+      "years": {
+        "2020": {
+          "n": 23,
+          "win_rate_pct": 30.4,
+          "net_r": 0.85
+        },
+        "2021": {
+          "n": 22,
+          "win_rate_pct": 31.8,
+          "net_r": 1.51
+        },
+        "2022": {
+          "n": 17,
+          "win_rate_pct": 23.5,
+          "net_r": -3.66
+        },
+        "2023": {
+          "n": 10,
+          "win_rate_pct": 60.0,
+          "net_r": 10.59
+        }
+      }
+    },
+    "h2_2023_2026": {
+      "n": 45,
+      "wins": 17,
+      "losses": 28,
+      "win_rate_pct": 37.78,
+      "total_r": 13.233,
+      "expectancy_r": 0.2941,
+      "total_usd": 372.46,
+      "profit_factor": 1.459,
+      "max_dd_r": 7.401,
+      "max_consec_losses": 5,
+      "avg_risk_usd": 15.71,
+      "t_stat": 1.149,
+      "ci95": [
+        -0.175,
+        0.769
+      ],
+      "pos_years": "3/4",
+      "years": {
+        "2023": {
+          "n": 10,
+          "win_rate_pct": 60.0,
+          "net_r": 10.52
+        },
+        "2024": {
+          "n": 16,
+          "win_rate_pct": 25.0,
+          "net_r": -2.49
+        },
+        "2025": {
+          "n": 10,
+          "win_rate_pct": 40.0,
+          "net_r": 3.8
+        },
+        "2026": {
+          "n": 9,
+          "win_rate_pct": 33.3,
+          "net_r": 1.39
+        }
+      }
+    },
+    "long_only": {
+      "n": 55,
+      "wins": 21,
+      "losses": 34,
+      "win_rate_pct": 38.18,
+      "total_r": 16.844,
+      "expectancy_r": 0.3063,
+      "total_usd": 296.22,
+      "profit_factor": 1.48,
+      "max_dd_r": 7.791,
+      "max_consec_losses": 7,
+      "avg_risk_usd": 12.09,
+      "t_stat": 1.322,
+      "ci95": [
+        -0.139,
+        0.752
+      ],
+      "pos_years": "4/7",
+      "years": {
+        "2020": {
+          "n": 14,
+          "win_rate_pct": 28.6,
+          "net_r": -0.38
+        },
+        "2021": {
+          "n": 10,
+          "win_rate_pct": 40.0,
+          "net_r": 3.59
+        },
+        "2022": {
+          "n": 9,
+          "win_rate_pct": 33.3,
+          "net_r": 1.19
+        },
+        "2023": {
+          "n": 8,
+          "win_rate_pct": 62.5,
+          "net_r": 9.22
+        },
+        "2024": {
+          "n": 7,
+          "win_rate_pct": 28.6,
+          "net_r": -0.17
+        },
+        "2025": {
+          "n": 3,
+          "win_rate_pct": 66.7,
+          "net_r": 3.95
+        },
+        "2026": {
+          "n": 4,
+          "win_rate_pct": 25.0,
+          "net_r": -0.54
+        }
+      }
+    },
+    "short_only": {
+      "n": 62,
+      "wins": 20,
+      "losses": 42,
+      "win_rate_pct": 32.26,
+      "total_r": 5.681,
+      "expectancy_r": 0.0916,
+      "total_usd": 118.96,
+      "profit_factor": 1.131,
+      "max_dd_r": 15.342,
+      "max_consec_losses": 14,
+      "avg_risk_usd": 11.28,
+      "t_stat": 0.438,
+      "ci95": [
+        -0.304,
+        0.492
+      ],
+      "pos_years": "3/7",
+      "years": {
+        "2020": {
+          "n": 9,
+          "win_rate_pct": 33.3,
+          "net_r": 1.23
+        },
+        "2021": {
+          "n": 12,
+          "win_rate_pct": 25.0,
+          "net_r": -2.07
+        },
+        "2022": {
+          "n": 8,
+          "win_rate_pct": 12.5,
+          "net_r": -4.85
+        },
+        "2023": {
+          "n": 12,
+          "win_rate_pct": 58.3,
+          "net_r": 11.9
+        },
+        "2024": {
+          "n": 9,
+          "win_rate_pct": 22.2,
+          "net_r": -2.32
+        },
+        "2025": {
+          "n": 7,
+          "win_rate_pct": 28.6,
+          "net_r": -0.14
+        },
+        "2026": {
+          "n": 5,
+          "win_rate_pct": 40.0,
+          "net_r": 1.94
+        }
+      }
+    }
+  },
+  "Sleeve3_VisA_cost_025": {
+    "overall": {
+      "n": 117,
+      "wins": 41,
+      "losses": 76,
+      "win_rate_pct": 35.04,
+      "total_r": 18.174,
+      "expectancy_r": 0.1553,
+      "total_usd": 46.67,
+      "profit_factor": 1.228,
+      "max_dd_r": 15.511,
+      "max_consec_losses": 9,
+      "avg_risk_usd": 6.73,
+      "t_stat": 1.009,
+      "ci95": [
+        -0.13,
+        0.473
+      ],
+      "pos_years": "5/7",
+      "years": {
+        "2020": {
+          "n": 9,
+          "win_rate_pct": 33.3,
+          "net_r": 0.71
+        },
+        "2021": {
+          "n": 11,
+          "win_rate_pct": 54.5,
+          "net_r": 8.08
+        },
+        "2022": {
+          "n": 19,
+          "win_rate_pct": 21.1,
+          "net_r": -4.97
+        },
+        "2023": {
+          "n": 15,
+          "win_rate_pct": 40.0,
+          "net_r": 5.08
+        },
+        "2024": {
+          "n": 27,
+          "win_rate_pct": 40.7,
+          "net_r": 7.9
+        },
+        "2025": {
+          "n": 18,
+          "win_rate_pct": 33.3,
+          "net_r": 2.55
+        },
+        "2026": {
+          "n": 18,
+          "win_rate_pct": 27.8,
+          "net_r": -1.17
+        }
+      }
+    },
+    "h1_2020_2023": {
+      "n": 46,
+      "wins": 15,
+      "losses": 31,
+      "win_rate_pct": 32.61,
+      "total_r": 4.094,
+      "expectancy_r": 0.089,
+      "total_usd": 39.18,
+      "profit_factor": 1.124,
+      "max_dd_r": 15.511,
+      "max_consec_losses": 9,
+      "avg_risk_usd": 4.2,
+      "t_stat": 0.354,
+      "ci95": [
+        -0.386,
+        0.591
+      ],
+      "pos_years": "3/4",
+      "years": {
+        "2020": {
+          "n": 9,
+          "win_rate_pct": 33.3,
+          "net_r": 0.71
+        },
+        "2021": {
+          "n": 11,
+          "win_rate_pct": 54.5,
+          "net_r": 8.08
+        },
+        "2022": {
+          "n": 19,
+          "win_rate_pct": 21.1,
+          "net_r": -4.97
+        },
+        "2023": {
+          "n": 7,
+          "win_rate_pct": 28.6,
+          "net_r": 0.28
+        }
+      }
+    },
+    "h2_2023_2026": {
+      "n": 71,
+      "wins": 26,
+      "losses": 45,
+      "win_rate_pct": 36.62,
+      "total_r": 14.08,
+      "expectancy_r": 0.1983,
+      "total_usd": 7.49,
+      "profit_factor": 1.302,
+      "max_dd_r": 13.257,
+      "max_consec_losses": 9,
+      "avg_risk_usd": 8.36,
+      "t_stat": 1.014,
+      "ci95": [
+        -0.172,
+        0.583
+      ],
+      "pos_years": "3/4",
+      "years": {
+        "2023": {
+          "n": 8,
+          "win_rate_pct": 50.0,
+          "net_r": 4.8
+        },
+        "2024": {
+          "n": 27,
+          "win_rate_pct": 40.7,
+          "net_r": 7.9
+        },
+        "2025": {
+          "n": 18,
+          "win_rate_pct": 33.3,
+          "net_r": 2.55
+        },
+        "2026": {
+          "n": 18,
+          "win_rate_pct": 27.8,
+          "net_r": -1.17
+        }
+      }
+    },
+    "long_only": {
+      "n": 43,
+      "wins": 11,
+      "losses": 32,
+      "win_rate_pct": 25.58,
+      "total_r": -6.155,
+      "expectancy_r": -0.1431,
+      "total_usd": -108.79,
+      "profit_factor": 0.817,
+      "max_dd_r": 9.318,
+      "max_consec_losses": 8,
+      "avg_risk_usd": 6.86,
+      "t_stat": -0.593,
+      "ci95": [
+        -0.578,
+        0.351
+      ],
+      "pos_years": "1/7",
+      "years": {
+        "2020": {
+          "n": 1,
+          "win_rate_pct": 0.0,
+          "net_r": -1.13
+        },
+        "2021": {
+          "n": 4,
+          "win_rate_pct": 25.0,
+          "net_r": -0.61
+        },
+        "2022": {
+          "n": 7,
+          "win_rate_pct": 28.6,
+          "net_r": 1.3
+        },
+        "2023": {
+          "n": 7,
+          "win_rate_pct": 28.6,
+          "net_r": -0.66
+        },
+        "2024": {
+          "n": 13,
+          "win_rate_pct": 30.8,
+          "net_r": -0.53
+        },
+        "2025": {
+          "n": 4,
+          "win_rate_pct": 25.0,
+          "net_r": -0.57
+        },
+        "2026": {
+          "n": 7,
+          "win_rate_pct": 14.3,
+          "net_r": -3.96
+        }
+      }
+    },
+    "short_only": {
+      "n": 74,
+      "wins": 30,
+      "losses": 44,
+      "win_rate_pct": 40.54,
+      "total_r": 24.329,
+      "expectancy_r": 0.3288,
+      "total_usd": 155.46,
+      "profit_factor": 1.526,
+      "max_dd_r": 11.768,
+      "max_consec_losses": 11,
+      "avg_risk_usd": 6.65,
+      "t_stat": 1.666,
+      "ci95": [
+        -0.05,
+        0.719
+      ],
+      "pos_years": "6/7",
+      "years": {
+        "2020": {
+          "n": 8,
+          "win_rate_pct": 37.5,
+          "net_r": 1.84
+        },
+        "2021": {
+          "n": 7,
+          "win_rate_pct": 71.4,
+          "net_r": 8.69
+        },
+        "2022": {
+          "n": 12,
+          "win_rate_pct": 16.7,
+          "net_r": -6.28
+        },
+        "2023": {
+          "n": 8,
+          "win_rate_pct": 50.0,
+          "net_r": 5.74
+        },
+        "2024": {
+          "n": 14,
+          "win_rate_pct": 50.0,
+          "net_r": 8.43
+        },
+        "2025": {
+          "n": 14,
+          "win_rate_pct": 35.7,
+          "net_r": 3.12
+        },
+        "2026": {
+          "n": 11,
+          "win_rate_pct": 36.4,
+          "net_r": 2.79
+        }
+      }
+    }
+  }
+}
