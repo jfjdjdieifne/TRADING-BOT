@@ -25,8 +25,10 @@ from engine.causal_primitives import (  # noqa: E402
 from engine.smc_v3_trend_engine import SMCV3Config, run_smc_v3_backtest  # noqa: E402
 from engine.smc_v4_portfolio import (  # noqa: E402
     apply_cost_reprice,
+    run_engine_ltf_1m,
     run_smc_v4_portfolio,
     run_smc_v5_portfolio,
+    run_smc_v6_xau_portfolio,
     simulate_compounded_account,
 )
 
@@ -132,6 +134,10 @@ def test_smc_v4_and_v5_all_sleeves_prefix_invariance():
     for sleeve in ("v3_pro", "vis_b_pro", "vis_a", "amd_pro", "v5_unlocked"):
         _assert_prefix_invariant(full_v5[sleeve], pref_v5[sleeve], cut)
 
+    full_ltf = run_engine_ltf_1m(df, ev0, ev1, cost=0.25)
+    pref_ltf = run_engine_ltf_1m(df.loc[:cut], ev0, ev1, cost=0.25)
+    _assert_prefix_invariant(full_ltf, pref_ltf, cut)
+
 
 def test_real_data_slice_v4_and_v5_prefix_invariance_and_cost_reprice():
     data_dir = PKG_ROOT / "data" / "XAUUSD_1m_histdata"
@@ -149,15 +155,16 @@ def test_real_data_slice_v4_and_v5_prefix_invariance_and_cost_reprice():
         _assert_prefix_invariant(full_v4[sleeve], pref_v4[sleeve], cut)
     assert len(pref_v4["combined"]) > 0
 
-    full_v5 = run_smc_v5_portfolio(df, ev0, ev1, cost=0.25, single_position_lock=False)
-    pref_v5 = run_smc_v5_portfolio(df.loc[:cut], ev0, ev1, cost=0.25, single_position_lock=False)
-    for sleeve in ("v3_pro", "vis_b_pro", "vis_a", "amd_pro", "v5_unlocked"):
-        _assert_prefix_invariant(full_v5[sleeve], pref_v5[sleeve], cut)
-    assert len(pref_v5["v5_unlocked"]) > 0
+    full_v6 = run_smc_v6_xau_portfolio(df, ev0, ev1, cost=0.25, single_position_lock=False)
+    pref_v6 = run_smc_v6_xau_portfolio(df.loc[:cut], ev0, ev1, cost=0.25, single_position_lock=False)
+    for sleeve in ("v3_pro", "vis_b_pro", "vis_a", "amd_pro", "ltf_1m", "v5_unlocked", "v6_unlocked"):
+        _assert_prefix_invariant(full_v6[sleeve], pref_v6[sleeve], cut)
+    assert len(pref_v6["ltf_1m"]) > 0
+    assert len(pref_v6["v6_unlocked"]) > 0
 
     # Verify cost reprice matches full re-run at $0.35 identically
     full_v5_035 = run_smc_v5_portfolio(df, ev0, ev1, cost=0.35, single_position_lock=False)["v5_unlocked"]
-    repriced_035 = apply_cost_reprice(full_v5["v5_unlocked"], 0.35)
+    repriced_035 = apply_cost_reprice(full_v6["v5_unlocked"], 0.35)
     assert len(full_v5_035) == len(repriced_035)
     for a, b in zip(full_v5_035, repriced_035):
         assert a["entry_time"] == b["entry_time"]

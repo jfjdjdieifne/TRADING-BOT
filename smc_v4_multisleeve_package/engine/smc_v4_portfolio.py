@@ -829,3 +829,225 @@ def run_smc_v5_portfolio(
         "vis_a": t_va,
         "amd_pro": t_amd,
     }
+
+
+def run_engine_ltf_1m(
+    df_1m: pd.DataFrame,
+    eval_start: pd.Timestamp,
+    eval_end: pd.Timestamp,
+    *,
+    min_risk_abs: float = 2.00,
+    min_risk_pct: float = 0.0010,
+    rr: float = 3.0,
+    cost: float = 0.25,
+    engine_label: str = "XAU_LTF1M",
+) -> list[dict[str, Any]]:
+    """Sleeve 5 (`XAU_LTF1M`): Dual 4H+1H BOS Bias -> 15m (k=2) Sweep -> 1m CHoCH + 1m FVG (3.0R TP)."""
+    tf15 = resample_causal_tf(df_1m, "15min")
+    h15, l15, c15 = tf15["High"].to_numpy(), tf15["Low"].to_numpy(), tf15["Close"].to_numpy()
+    end15 = tf15.index
+    sw15 = detect_swings_causal(h15, l15, end15, 2)
+
+    e4, t4 = build_causal_htf_structure(df_1m, "4h", 2)
+    e1, t1h = build_causal_htf_structure(df_1m, "1h", 2)
+
+    o1 = df_1m["Open"].to_numpy()
+    h1 = df_1m["High"].to_numpy()
+    l1 = df_1m["Low"].to_numpy()
+    c1 = df_1m["Close"].to_numpy()
+    t1_idx = df_1m.index
+    atr1 = causal_atr14(h1, l1, c1)
+    sw1 = detect_swings_causal(h1, l1, t1_idx, 2)
+
+    p15, p4, p1 = 0, 0, 0
+    cur_4h, cur_1h = 0, 0
+    act_h15: list[Any] = []
+    act_l15: list[Any] = []
+    last1_sh: float | None = None
+    last1_sl: float | None = None
+    cands: list[dict[str, Any]] = []
+    pending: list[dict[str, Any]] = []
+    trades: list[dict[str, Any]] = []
+    busy_until = -1
+    warmup = eval_start - pd.Timedelta(hours=12)
+
+    for m in range(len(t1_idx)):
+        tm = t1_idx[m]
+        while p4 < len(e4) and e4[p4] <= tm:
+            cur_4h = int(t4[p4])
+            p4 += 1
+        while p1 < len(e1) and e1[p1] <= tm:
+            cur_1h = int(t1h[p1])
+            p1 += 1
+        while p15 < len(end15) and end15[p15] <= tm:
+            for sp in act_l15:
+                if (p15 - sp.candle_idx) >= 2 and l15[p15] < sp.price and c15[p15] > sp.price:
+                    cands.append({"side": "LONG", "start_m": m, "sl_base": float(l15[p15]), "choch": last1_sh})
+            for sp in act_h15:
+                if (p15 - sp.candle_idx) >= 2 and h15[p15] > sp.price and c15[p15] < sp.price:
+                    cands.append({"side": "SHORT", "start_m": m, "sl_base": float(h15[p15]), "choch": last1_sl})
+            act_h15 = [sp for sp in act_h15 if h15[p15] <= sp.price and (p15 - sp.candle_idx) <= 48]
+            act_l15 = [sp for sp in act_l15 if l15[p15] >= sp.price and (p15 - sp.candle_idx) <= 48]
+            for sp in sw15.get(p15, []):
+                if sp.kind == "high" and h15[sp.candle_idx + 1 : p15 + 1].max() <= sp.price:
+                    act_h15.append(sp)
+                elif sp.kind == "low" and l15[sp.candle_idx + 1 : p15 + 1].min() >= sp.price:
+                    act_l15.append(sp)
+            p15 += 1
+
+        new_p = []
+        for st in pending:
+            if m > st["expire"]:
+                continue
+            if st["side"] == "LONG":
+                if o1[m] <= st["sl"] or o1[m] >= st["tp"]:
+                    continue
+                if l1[m] <= st["trig"]:
+                    if m <= busy_until or not in_killzone_utc(tm):
+                        if l1[m] <= st["sl"] or h1[m] >= st["tp"] or m <= busy_until:
+                            continue
+                        new_p.append(st)
+                        continue
+                    if not (eval_start <= tm < eval_end):
+                        continue
+                    fill = min(float(o1[m]), st["trig"])
+                    res = _sim_1m_path(
+                        engine=engine_label,
+                        side="LONG",
+                        entry_idx=m,
+                        fill=fill,
+                        sl=st["sl"],
+                        tp=st["tp"],
+                        h1=h1,
+                        l1=l1,
+                        t1=t1_idx,
+                        cost=cost,
+                        setup_time=st["setup_time"],
+                    )
+                    if res:
+                        busy_until = res["exit_idx"]
+                        trades.append(res)
+                    continue
+            else:
+                if o1[m] >= st["sl"] or o1[m] <= st["tp"]:
+                    continue
+                if h1[m] >= st["trig"]:
+                    if m <= busy_until or not in_killzone_utc(tm):
+                        if h1[m] >= st["sl"] or l1[m] <= st["tp"] or m <= busy_until:
+                            continue
+                        new_p.append(st)
+                        continue
+                    if not (eval_start <= tm < eval_end):
+                        continue
+                    fill = max(float(o1[m]), st["trig"])
+                    res = _sim_1m_path(
+                        engine=engine_label,
+                        side="SHORT",
+                        entry_idx=m,
+                        fill=fill,
+                        sl=st["sl"],
+                        tp=st["tp"],
+                        h1=h1,
+                        l1=l1,
+                        t1=t1_idx,
+                        cost=cost,
+                        setup_time=st["setup_time"],
+                    )
+                    if res:
+                        busy_until = res["exit_idx"]
+                        trades.append(res)
+                    continue
+            new_p.append(st)
+        pending = new_p
+
+        if m >= 2 and in_killzone_utc(tm) and warmup <= tm < eval_end:
+            a1 = float(atr1[m]) if np.isfinite(atr1[m]) else 0.5
+            buf = max(0.50, 1.0 * a1)
+            min_r = max(min_risk_abs, float(c1[m]) * min_risk_pct)
+            c1i, c2i, c3i = m - 2, m - 1, m
+            c2b = abs(float(c1[c2i] - o1[c2i]))
+            still = []
+            for sc in cands:
+                if m - sc["start_m"] > 20:
+                    continue
+                if sc["side"] == "LONG":
+                    if l1[m] < sc["sl_base"]:
+                        continue
+                    gap = float(l1[c3i] - h1[c1i])
+                    if (
+                        cur_1h == 1
+                        and cur_4h == 1
+                        and sc["choch"] is not None
+                        and c1[c3i] > sc["choch"]
+                        and gap >= max(0.15, 0.25 * a1)
+                        and c1[c2i] > o1[c2i]
+                        and c2b >= 1.0 * a1
+                    ):
+                        trig = float(l1[c3i])
+                        sl = sc["sl_base"] - buf
+                        risk = trig - sl
+                        if risk >= min_r:
+                            pending.append(
+                                {"side": "LONG", "trig": trig, "sl": sl, "tp": trig + rr * risk, "expire": m + 20, "setup_time": tm}
+                            )
+                            continue
+                else:
+                    if h1[m] > sc["sl_base"]:
+                        continue
+                    gap = float(l1[c1i] - h1[c3i])
+                    if (
+                        cur_1h == -1
+                        and cur_4h == -1
+                        and sc["choch"] is not None
+                        and c1[c3i] < sc["choch"]
+                        and gap >= max(0.15, 0.25 * a1)
+                        and c1[c2i] < o1[c2i]
+                        and c2b >= 1.0 * a1
+                    ):
+                        trig = float(h1[c3i])
+                        sl = sc["sl_base"] + buf
+                        risk = sl - trig
+                        if risk >= min_r:
+                            pending.append(
+                                {"side": "SHORT", "trig": trig, "sl": sl, "tp": trig - rr * risk, "expire": m + 20, "setup_time": tm}
+                            )
+                            continue
+                still.append(sc)
+            cands = still
+
+        for sp in sw1.get(m, []):
+            if sp.kind == "high":
+                last1_sh = sp.price
+            else:
+                last1_sl = sp.price
+
+    return trades
+
+
+def run_smc_v6_xau_portfolio(
+    df_1m: pd.DataFrame,
+    eval_start: pd.Timestamp,
+    eval_end: pd.Timestamp,
+    *,
+    cost: float = 0.25,
+    single_position_lock: bool = True,
+) -> dict[str, Any]:
+    """Run 5-sleeve causal XAUUSD V6 portfolio (V5 + fast XAU_LTF1M 15m-sweep->1m sleeve)."""
+    v5 = run_smc_v5_portfolio(df_1m, eval_start, eval_end, cost=cost, single_position_lock=False)
+    t_ltf = run_engine_ltf_1m(df_1m, eval_start, eval_end, cost=cost)
+
+    unlocked = sorted(v5["v5_unlocked"] + t_ltf, key=lambda x: pd.Timestamp(x["exit_time"]))
+    locked = lock_single_position(unlocked)
+
+    return {
+        "combined": locked if single_position_lock else unlocked,
+        "v6_1pos_lock": locked,
+        "v6_unlocked": unlocked,
+        "v5_1pos_lock": v5["v5_1pos_lock"],
+        "v5_unlocked": v5["v5_unlocked"],
+        "v3_pro": v5["v3_pro"],
+        "vis_b_pro": v5["vis_b_pro"],
+        "vis_a": v5["vis_a"],
+        "amd_pro": v5["amd_pro"],
+        "ltf_1m": t_ltf,
+    }

@@ -15,11 +15,13 @@ from .smc_v4_portfolio import (
     apply_cost_reprice,
     lock_single_position,
     run_engine_amd_pro,
+    run_engine_ltf_1m,
     run_engine_vis_a,
     run_engine_vis_b,
     run_engine_vis_b_pro,
     run_smc_v4_portfolio,
     run_smc_v5_portfolio,
+    run_smc_v6_xau_portfolio,
     simulate_compounded_account,
 )
 
@@ -36,11 +38,13 @@ __all__ = [
     "lock_single_position",
     "resample_causal_tf",
     "run_engine_amd_pro",
+    "run_engine_ltf_1m",
     "run_engine_vis_a",
     "run_engine_vis_b",
     "run_engine_vis_b_pro",
     "run_smc_v3_backtest",
     "run_smc_v4_portfolio",
     "run_smc_v5_portfolio",
+    "run_smc_v6_xau_portfolio",
     "simulate_compounded_account",
 ]
