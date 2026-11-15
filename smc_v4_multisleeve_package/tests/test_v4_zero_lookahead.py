@@ -19,6 +19,7 @@ from engine.causal_primitives import (  # noqa: E402
     causal_atr14,
     detect_swings_causal,
     in_killzone_utc,
+    load_asset_ohlcv,
     load_xauusd_1m,
     resample_causal_tf,
 )
@@ -26,9 +27,11 @@ from engine.smc_v3_trend_engine import SMCV3Config, run_smc_v3_backtest  # noqa:
 from engine.smc_v4_portfolio import (  # noqa: E402
     apply_cost_reprice,
     run_engine_ltf_1m,
+    run_engine_sniper_htf,
     run_smc_v4_portfolio,
     run_smc_v5_portfolio,
     run_smc_v6_xau_portfolio,
+    run_smc_v7_multiasset_portfolio,
     simulate_compounded_account,
 )
 
@@ -177,3 +180,49 @@ def test_compounding_simulation_math():
     # 100 -> +20% = 120 -> -10% of 120 = 108.0; peak=120, dd=12/120=10%
     assert res["final_equity"] == pytest.approx(108.0, abs=1e-6)
     assert res["max_dd_pct"] == pytest.approx(10.0, abs=1e-6)
+
+
+def test_v7_sniper_and_multiasset_zero_lookahead_prefix_invariance():
+    xau_dir = PKG_ROOT / "data" / "XAUUSD_1m_histdata"
+    nsx_dir = PKG_ROOT / "data" / "NSXUSD_1m_histdata"
+    btc_dir = PKG_ROOT / "data" / "BTCUSD_5m"
+    if not ((xau_dir / "2026-03.csv.gz").exists() and (nsx_dir / "2026-03.csv.gz").exists() and (btc_dir / "2026.csv.gz").exists()):
+        pytest.skip("Multi-asset archives not present")
+
+    df_xau = load_asset_ohlcv(xau_dir, ["2026-01", "2026-02", "2026-03", "2026-04"])
+    df_nsx = load_asset_ohlcv(nsx_dir, ["2026-01", "2026-02", "2026-03", "2026-04"])
+    df_btc = load_asset_ohlcv(btc_dir, ["2025", "2026"])
+    df_btc = df_btc.loc[df_btc.index <= pd.Timestamp("2026-05-01 00:00", tz="UTC")]
+
+    ev0 = pd.Timestamp("2026-02-01 00:00", tz="UTC")
+    ev1 = pd.Timestamp("2026-05-01 00:00", tz="UTC")
+    cut = pd.Timestamp("2026-03-31 14:30:00", tz="UTC")
+
+    full_x15 = run_engine_sniper_htf(
+        df_xau, ev0, ev1, asset="XAUUSD", sweep_tf="15min", sweep_k=2, min_age=2, htf_mode="dual",
+        min_risk_abs=2.0, min_risk_pct=0.0010, fixed_rr=None, trail_1h_after_r=4.0, be_lock_r=1.5,
+        use_killzone=True, cost=0.25, engine_label="XAU_15m1m_Tr1H",
+    )
+    pref_x15 = run_engine_sniper_htf(
+        df_xau.loc[:cut], ev0, ev1, asset="XAUUSD", sweep_tf="15min", sweep_k=2, min_age=2, htf_mode="dual",
+        min_risk_abs=2.0, min_risk_pct=0.0010, fixed_rr=None, trail_1h_after_r=4.0, be_lock_r=1.5,
+        use_killzone=True, cost=0.25, engine_label="XAU_15m1m_Tr1H",
+    )
+    _assert_prefix_invariant(full_x15, pref_x15, cut)
+
+    full_btc = run_engine_sniper_htf(
+        df_btc, ev0, ev1, asset="BTCUSD", sweep_tf="1h", sweep_k=3, min_age=4, htf_mode="dual",
+        min_risk_abs=0.0, min_risk_pct=0.0020, fixed_rr=15.0, trail_1h_after_r=None,
+        use_killzone=False, cost=0.0, pct_cost=0.0008, engine_label="BTC_1H5m_Dual15R",
+    )
+    pref_btc = run_engine_sniper_htf(
+        df_btc.loc[:cut], ev0, ev1, asset="BTCUSD", sweep_tf="1h", sweep_k=3, min_age=4, htf_mode="dual",
+        min_risk_abs=0.0, min_risk_pct=0.0020, fixed_rr=15.0, trail_1h_after_r=None,
+        use_killzone=False, cost=0.0, pct_cost=0.0008, engine_label="BTC_1H5m_Dual15R",
+    )
+    _assert_prefix_invariant(full_btc, pref_btc, cut)
+
+    full_v7 = run_smc_v7_multiasset_portfolio(df_xau, df_nsx, df_btc, ev0, ev1)
+    assert len(full_v7["v7_global_1pos"]) > 0
+    assert len(full_v7["v7_3asset_1pos_each"]) >= len(full_v7["v7_global_1pos"])
+    assert {t["asset"] for t in full_v7["v7_3asset_1pos_each"]}.issubset({"XAUUSD", "NSXUSD", "BTCUSD"})

@@ -7,6 +7,7 @@ from .causal_primitives import (
     causal_atr14,
     detect_swings_causal,
     in_killzone_utc,
+    load_asset_ohlcv,
     load_xauusd_1m,
     resample_causal_tf,
 )
@@ -16,12 +17,14 @@ from .smc_v4_portfolio import (
     lock_single_position,
     run_engine_amd_pro,
     run_engine_ltf_1m,
+    run_engine_sniper_htf,
     run_engine_vis_a,
     run_engine_vis_b,
     run_engine_vis_b_pro,
     run_smc_v4_portfolio,
     run_smc_v5_portfolio,
     run_smc_v6_xau_portfolio,
+    run_smc_v7_multiasset_portfolio,
     simulate_compounded_account,
 )
 
@@ -34,11 +37,13 @@ __all__ = [
     "causal_atr14",
     "detect_swings_causal",
     "in_killzone_utc",
+    "load_asset_ohlcv",
     "load_xauusd_1m",
     "lock_single_position",
     "resample_causal_tf",
     "run_engine_amd_pro",
     "run_engine_ltf_1m",
+    "run_engine_sniper_htf",
     "run_engine_vis_a",
     "run_engine_vis_b",
     "run_engine_vis_b_pro",
@@ -46,5 +51,6 @@ __all__ = [
     "run_smc_v4_portfolio",
     "run_smc_v5_portfolio",
     "run_smc_v6_xau_portfolio",
+    "run_smc_v7_multiasset_portfolio",
     "simulate_compounded_account",
 ]

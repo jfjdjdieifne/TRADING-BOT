@@ -29,9 +29,14 @@ class SwingPoint:
 
 def load_xauusd_1m(data_dir: Path, months: list[str] | None = None) -> pd.DataFrame:
     """Load sorted UTC 1m OHLC CSV.GZ archives with strict monotonicity & sanity checks."""
+    return load_asset_ohlcv(data_dir, include_stems=months)
+
+
+def load_asset_ohlcv(data_dir: Path, include_stems: list[str] | None = None) -> pd.DataFrame:
+    """Load sorted UTC OHLC CSV.GZ archives (1m or 5m, YYYY-MM or YYYY stems)."""
     files = sorted(data_dir.glob("*.csv.gz"))
-    if months is not None:
-        wanted = {f"{m}.csv.gz" for m in months}
+    if include_stems is not None:
+        wanted = {f"{s}.csv.gz" for s in include_stems}
         files = [f for f in files if f.name in wanted]
     if not files:
         raise FileNotFoundError(f"No .csv.gz files found in {data_dir}")
@@ -49,6 +54,8 @@ def load_xauusd_1m(data_dir: Path, months: list[str] | None = None) -> pd.DataFr
         out[col] = out[col].astype(np.float64)
     if "Volume" in out.columns:
         out["Volume"] = out["Volume"].astype(np.float64)
+    else:
+        out["Volume"] = 0.0
     return out
 
 
