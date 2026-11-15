@@ -1,8 +1,9 @@
-"""Standalone SMC V4 Multi-Sleeve Causal Engine Package."""
+"""Standalone Zero-Lookahead XAUUSD SMC Portfolio Engine (V4 & V5)."""
 
 from .causal_primitives import (
     SwingPoint,
     build_causal_htf_structure,
+    build_causal_swing_events,
     causal_atr14,
     detect_swings_causal,
     in_killzone_utc,
@@ -13,24 +14,33 @@ from .smc_v3_trend_engine import SMCV3Config, run_smc_v3_backtest
 from .smc_v4_portfolio import (
     apply_cost_reprice,
     lock_single_position,
+    run_engine_amd_pro,
     run_engine_vis_a,
     run_engine_vis_b,
+    run_engine_vis_b_pro,
     run_smc_v4_portfolio,
+    run_smc_v5_portfolio,
+    simulate_compounded_account,
 )
 
 __all__ = [
-    "SwingPoint",
     "SMCV3Config",
-    "load_xauusd_1m",
-    "resample_causal_tf",
+    "SwingPoint",
+    "apply_cost_reprice",
+    "build_causal_htf_structure",
+    "build_causal_swing_events",
+    "causal_atr14",
     "detect_swings_causal",
     "in_killzone_utc",
-    "causal_atr14",
-    "build_causal_htf_structure",
-    "run_smc_v3_backtest",
+    "load_xauusd_1m",
+    "lock_single_position",
+    "resample_causal_tf",
+    "run_engine_amd_pro",
     "run_engine_vis_a",
     "run_engine_vis_b",
+    "run_engine_vis_b_pro",
+    "run_smc_v3_backtest",
     "run_smc_v4_portfolio",
-    "apply_cost_reprice",
-    "lock_single_position",
+    "run_smc_v5_portfolio",
+    "simulate_compounded_account",
 ]

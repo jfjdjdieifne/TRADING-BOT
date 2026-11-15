@@ -1,9 +1,9 @@
-"""Standalone Reproducibility Runner for V4_MultiSleeve (-$0.25, -$0.35, -$0.50/oz).
+"""Standalone Reproducibility Runner for SMC V4 & V5 (-$0.25, -$0.35, -$0.50/oz).
 
 Reads all 82 monthly XAUUSD 1m archives from `./data/XAUUSD_1m_histdata/` (2020-01 .. 2026-10),
-runs all 3 causal SMC sleeves (`V3_NY`, `VisB`, `VisA`), verifies real-data prefix-invariance,
-computes full statistics across -$0.25, -$0.35, and -$0.50/oz round-trip costs, and writes
-all trade CSVs, JSON summary, and comparison PNG charts into `./results/`.
+runs BOTH legacy V4 (`V3_NY + VisB + VisA`) and upgraded V5 (`V3_Pro + VisB_Pro + VisA + AMD_Pro`),
+computes statistics across -$0.25, -$0.35, and -$0.50/oz round-trip costs, runs realistic $100
+compounding simulations for 1-Position Lock, and writes all CSVs, JSONs, and charts into `./results/`.
 """
 
 from __future__ import annotations
@@ -27,6 +27,8 @@ from engine.smc_v4_portfolio import (  # noqa: E402
     apply_cost_reprice,
     lock_single_position,
     run_smc_v4_portfolio,
+    run_smc_v5_portfolio,
+    simulate_compounded_account,
 )
 
 
@@ -108,11 +110,21 @@ def main() -> None:
     t_mid = pd.Timestamp("2023-07-01", tz="UTC")
     t1 = pd.Timestamp("2026-11-01", tz="UTC")
 
-    res_025 = run_smc_v4_portfolio(df, t0, t1, cost=0.25, single_position_lock=False)
-    comb_025 = res_025["combined"]
-    comb_035 = apply_cost_reprice(comb_025, 0.35)
-    comb_050 = apply_cost_reprice(comb_025, 0.50)
-    comb_1pos_025 = lock_single_position(comb_025)
+    # 1. Run V4 Legacy + V5 Upgraded
+    v4_025 = run_smc_v4_portfolio(df, t0, t1, cost=0.25, single_position_lock=False)
+    v4_comb_025 = v4_025["combined"]
+    v4_comb_035 = apply_cost_reprice(v4_comb_025, 0.35)
+    v4_comb_050 = apply_cost_reprice(v4_comb_025, 0.50)
+    v4_1pos_025 = lock_single_position(v4_comb_025)
+
+    v5_025 = run_smc_v5_portfolio(df, t0, t1, cost=0.25, single_position_lock=True)
+    v5_1pos_025 = v5_025["v5_1pos_lock"]
+    v5_1pos_035 = apply_cost_reprice(v5_1pos_025, 0.35)
+    v5_1pos_050 = apply_cost_reprice(v5_1pos_025, 0.50)
+
+    v5_unlk_025 = v5_025["v5_unlocked"]
+    v5_unlk_035 = apply_cost_reprice(v5_unlk_025, 0.35)
+    v5_unlk_050 = apply_cost_reprice(v5_unlk_025, 0.50)
 
     rng = np.random.default_rng(20261115)
 
@@ -127,8 +139,8 @@ def main() -> None:
         s_l = summarize_trades(tr_l, rng)
         s_s = summarize_trades(tr_s, rng)
         print(
-            f"{name:28s} | N={s['n']:3d} W%={s['win_rate_pct']:5.2f} "
-            f"Net={s['total_r']:+6.2f}R PF={s['profit_factor']} DD={s['max_dd_r']:5.2f}R "
+            f"{name:30s} | N={s['n']:3d} W%={s['win_rate_pct']:5.2f} "
+            f"Net={s['total_r']:+7.2f}R PF={s['profit_factor']} DD={s['max_dd_r']:5.2f}R "
             f"t={s['t_stat']:+.2f} CI={s['ci95']} +Y={s['pos_years']} | "
             f"H1={s_h1['total_r']:+5.1f}R H2={s_h2['total_r']:+5.1f}R"
         )
@@ -140,6 +152,14 @@ def main() -> None:
             "short_only": s_s,
         }
 
+    # $100 live-style compounding simulations for V5_1PosLock (-$0.25/oz)
+    sim_100 = {
+        "risk_1pct_compound": simulate_compounded_account(v5_1pos_025, start_capital=100.0, risk_pct=0.01, compound=True),
+        "risk_2pct_compound": simulate_compounded_account(v5_1pos_025, start_capital=100.0, risk_pct=0.02, compound=True),
+        "risk_3pct_compound": simulate_compounded_account(v5_1pos_025, start_capital=100.0, risk_pct=0.03, compound=True),
+        "risk_1pct_fixed": simulate_compounded_account(v5_1pos_025, start_capital=100.0, risk_pct=0.01, compound=False),
+    }
+
     summary = {
         "dataset": {
             "symbol": "XAUUSD",
@@ -150,48 +170,55 @@ def main() -> None:
             "eval_split_h1_h2_utc": str(t_mid),
             "eval_end_utc": str(t1),
         },
-        "V4_MultiSleeve_cost_025": full_block("V4_MultiSleeve (-$0.25)", comb_025),
-        "V4_MultiSleeve_cost_035": full_block("V4_MultiSleeve (-$0.35)", comb_035),
-        "V4_MultiSleeve_cost_050": full_block("V4_MultiSleeve (-$0.50)", comb_050),
-        "V4_1PosLock_cost_025": full_block("V4_1PosLock (-$0.25)", comb_1pos_025),
-        "Sleeve1_V3_NY_cost_025": full_block("  Sleeve 1: V3_NY", res_025["v3_ny"]),
-        "Sleeve2_VisB_cost_025": full_block("  Sleeve 2: VisB", res_025["vis_b"]),
-        "Sleeve3_VisA_cost_025": full_block("  Sleeve 3: VisA", res_025["vis_a"]),
+        "V5_1PosLock_cost_025": full_block("V5_1PosLock (-$0.25)", v5_1pos_025),
+        "V5_1PosLock_cost_035": full_block("V5_1PosLock (-$0.35)", v5_1pos_035),
+        "V5_1PosLock_cost_050": full_block("V5_1PosLock (-$0.50)", v5_1pos_050),
+        "V5_MultiSleeve_cost_025": full_block("V5_MultiSleeve (-$0.25)", v5_unlk_025),
+        "V5_MultiSleeve_cost_035": full_block("V5_MultiSleeve (-$0.35)", v5_unlk_035),
+        "V5_MultiSleeve_cost_050": full_block("V5_MultiSleeve (-$0.50)", v5_unlk_050),
+        "V5_Sleeve1_V3_Pro": full_block("  V5 Sleeve 1: V3_Pro", v5_025["v3_pro"]),
+        "V5_Sleeve2_VisB_Pro": full_block("  V5 Sleeve 2: VisB_Pro", v5_025["vis_b_pro"]),
+        "V5_Sleeve3_VisA": full_block("  V5 Sleeve 3: VisA", v5_025["vis_a"]),
+        "V5_Sleeve4_AMD_Pro": full_block("  V5 Sleeve 4: AMD_Pro", v5_025["amd_pro"]),
+        "V4_MultiSleeve_cost_025": full_block("V4_MultiSleeve (-$0.25)", v4_comb_025),
+        "V4_MultiSleeve_cost_035": full_block("V4_MultiSleeve (-$0.35)", v4_comb_035),
+        "V4_MultiSleeve_cost_050": full_block("V4_MultiSleeve (-$0.50)", v4_comb_050),
+        "V4_1PosLock_cost_025": full_block("V4_1PosLock (-$0.25)", v4_1pos_025),
+        "V5_1PosLock_USD100_Compounding": sim_100,
     }
 
     (results_dir / "summary_v4_multisleeve.json").write_text(json.dumps(summary, indent=2))
-    pd.DataFrame(comb_025).to_csv(results_dir / "trades_v4_multisleeve_cost025.csv", index=False)
-    pd.DataFrame(comb_035).to_csv(results_dir / "trades_v4_multisleeve_cost035.csv", index=False)
-    pd.DataFrame(comb_050).to_csv(results_dir / "trades_v4_multisleeve_cost050.csv", index=False)
+    pd.DataFrame(v4_comb_025).to_csv(results_dir / "trades_v4_multisleeve_cost025.csv", index=False)
+    pd.DataFrame(v4_comb_035).to_csv(results_dir / "trades_v4_multisleeve_cost035.csv", index=False)
+    pd.DataFrame(v4_comb_050).to_csv(results_dir / "trades_v4_multisleeve_cost050.csv", index=False)
+    pd.DataFrame(v5_1pos_025).to_csv(results_dir / "trades_v5_1pos_cost025.csv", index=False)
+    pd.DataFrame(v5_1pos_035).to_csv(results_dir / "trades_v5_1pos_cost035.csv", index=False)
+    pd.DataFrame(v5_1pos_050).to_csv(results_dir / "trades_v5_1pos_cost050.csv", index=False)
+    pd.DataFrame(v5_unlk_025).to_csv(results_dir / "trades_v5_unlocked_cost025.csv", index=False)
 
-    # Chart 1: V4_MultiSleeve across -$0.25, -$0.35, -$0.50 + 3 individual sleeves
-    fig, ax = plt.subplots(figsize=(13.5, 6.8), dpi=130)
+    # Chart 1: V5_1PosLock & V5_MultiSleeve vs V4_MultiSleeve across spread costs
+    fig, ax = plt.subplots(figsize=(13.5, 7.0), dpi=130)
     fig.patch.set_facecolor("#131722")
     ax.set_facecolor("#131722")
     ax.axhline(0.0, color="#6b7280", lw=0.9, ls=":")
-    for lbl, trs, col, lw in [
-        ("V4_MultiSleeve (-$0.25/oz)", comb_025, "#26a69a", 2.4),
-        ("V4_MultiSleeve (-$0.35/oz Stress)", comb_035, "#42a5f5", 2.0),
-        ("V4_MultiSleeve (-$0.50/oz 2x Spread)", comb_050, "#ff9800", 1.8),
-        ("Sleeve 1: V3_NY (-$0.25)", res_025["v3_ny"], "#80cbc4", 1.2),
-        ("Sleeve 2: VisB 1H Sweep (-$0.25)", res_025["vis_b"], "#ab47bc", 1.2),
-        ("Sleeve 3: VisA Trendline (-$0.25)", res_025["vis_a"], "#ffee58", 1.2),
+    for lbl, trs, col, lw, ls in [
+        ("V5_MultiSleeve 4-Sleeves (-$0.25)", v5_unlk_025, "#00e676", 2.2, "-"),
+        ("V5_1PosLock (-$0.25/oz)", v5_1pos_025, "#26a69a", 2.6, "-"),
+        ("V5_1PosLock (-$0.35/oz Stress)", v5_1pos_035, "#42a5f5", 2.0, "-"),
+        ("V5_1PosLock (-$0.50/oz 2x Spread)", v5_1pos_050, "#ff9800", 1.8, "-"),
+        ("V4_MultiSleeve Baseline (-$0.25)", v4_comb_025, "#9ca3af", 1.5, "--"),
     ]:
         s = summarize_trades(trs, rng)
         times = [pd.Timestamp(t["exit_time"]) for t in trs]
         cum = np.cumsum([t["net_r"] for t in trs])
         ax.plot(
-            times,
-            cum,
+            times, cum,
             label=f"{lbl}: N={s['n']}, {s['total_r']:+.1f}R, PF={s['profit_factor']}, DD={s['max_dd_r']:.1f}R, t={s['t_stat']:+.2f}",
-            color=col,
-            lw=lw,
+            color=col, lw=lw, ls=ls,
         )
     ax.set_title(
-        "V4_MultiSleeve XAUUSD Equity Curves Across Spread Costs (-$0.25 / -$0.35 / -$0.50 per oz, 2020-02 to 2026-10)",
-        color="#e5e7eb",
-        fontsize=11.5,
-        fontweight="bold",
+        "SMC V5 (V3_Pro + VisB_Pro + VisA + AMD_Pro) vs V4 Baseline Equity Curves (2020-02 to 2026-10)",
+        color="#e5e7eb", fontsize=11.5, fontweight="bold",
     )
     ax.set_ylabel("Cumulative Net R", color="#d1d5db")
     ax.set_xlabel("Date (UTC)", color="#d1d5db")
@@ -204,36 +231,31 @@ def main() -> None:
     fig.savefig(charts_dir / "v4_multisleeve_costs_comparison.png", facecolor="#131722")
     plt.close(fig)
 
-    # Chart 2: Year-by-year R breakdown across the 3 sleeves and 3 cost scenarios
+    # Chart 2: Year-by-year R breakdown for V5_1PosLock across -$0.25 / -$0.35 / -$0.50
     years = ["2020", "2021", "2022", "2023", "2024", "2025", "2026"]
     x = np.arange(len(years))
     w = 0.25
-    y025 = [summary["V4_MultiSleeve_cost_025"]["overall"]["years"][y]["net_r"] for y in years]
-    y035 = [summary["V4_MultiSleeve_cost_035"]["overall"]["years"][y]["net_r"] for y in years]
-    y050 = [summary["V4_MultiSleeve_cost_050"]["overall"]["years"][y]["net_r"] for y in years]
+    y025 = [summary["V5_1PosLock_cost_025"]["overall"]["years"][y]["net_r"] for y in years]
+    y035 = [summary["V5_1PosLock_cost_035"]["overall"]["years"][y]["net_r"] for y in years]
+    y050 = [summary["V5_1PosLock_cost_050"]["overall"]["years"][y]["net_r"] for y in years]
 
     fig, ax = plt.subplots(figsize=(12.5, 5.5), dpi=130)
     fig.patch.set_facecolor("#131722")
     ax.set_facecolor("#131722")
     ax.axhline(0.0, color="#6b7280", lw=0.9)
-    b1 = ax.bar(x - w, y025, width=w, color="#26a69a", label="-$0.25/oz (+100.7R)")
-    b2 = ax.bar(x, y035, width=w, color="#42a5f5", label="-$0.35/oz (+93.3R)")
-    b3 = ax.bar(x + w, y050, width=w, color="#ff9800", label="-$0.50/oz (+82.2R)")
+    b1 = ax.bar(x - w, y025, width=w, color="#26a69a", label=f"V5_1PosLock -$0.25/oz ({summary['V5_1PosLock_cost_025']['overall']['total_r']:+.1f}R)")
+    b2 = ax.bar(x, y035, width=w, color="#42a5f5", label=f"V5_1PosLock -$0.35/oz ({summary['V5_1PosLock_cost_035']['overall']['total_r']:+.1f}R)")
+    b3 = ax.bar(x + w, y050, width=w, color="#ff9800", label=f"V5_1PosLock -$0.50/oz ({summary['V5_1PosLock_cost_050']['overall']['total_r']:+.1f}R)")
     for bars in (b1, b2, b3):
         for bar in bars:
             val = bar.get_height()
             ax.text(
-                bar.get_x() + bar.get_width() / 2,
-                val + 0.5,
-                f"{val:+.1f}",
-                ha="center",
-                va="bottom",
-                color="#e5e7eb",
-                fontsize=7.5,
+                bar.get_x() + bar.get_width() / 2, val + 0.7,
+                f"{val:+.1f}", ha="center", va="bottom", color="#e5e7eb", fontsize=7.5,
             )
     ax.set_xticks(x)
     ax.set_xticklabels(years, color="#e5e7eb")
-    ax.set_title("V4_MultiSleeve Year-by-Year Net R (7/7 Positive Years Under All 3 Spread Regimes)", color="#e5e7eb", fontsize=11.5, fontweight="bold")
+    ax.set_title("V5_1PosLock Year-by-Year Net R (7/7 Positive Years Under All 3 Spread Regimes)", color="#e5e7eb", fontsize=11.5, fontweight="bold")
     ax.set_ylabel("Annual Net R", color="#d1d5db")
     ax.tick_params(colors="#9ca3af")
     ax.grid(axis="y", color="#2a2e39", alpha=0.45)
@@ -243,7 +265,7 @@ def main() -> None:
     plt.tight_layout()
     fig.savefig(charts_dir / "v4_multisleeve_yearly_bars.png", facecolor="#131722")
     plt.close(fig)
-    print("All V4_MultiSleeve outputs saved cleanly in", results_dir)
+    print("All V4 & V5 outputs saved cleanly in", results_dir)
 
 
 if __name__ == "__main__":

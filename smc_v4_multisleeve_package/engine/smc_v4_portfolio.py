@@ -1,10 +1,16 @@
-"""SMC V4 Multi-Sleeve Portfolio Engine (Zero-Lookahead).
+"""SMC V4 & V5 Multi-Sleeve Portfolio Engine (Zero-Lookahead).
 
-Combines 3 complementary institutional SMC/ICT engines:
-1. Sleeve 1 (`V3_NY`): Dual 4H+1H BOS Alignment -> 15m BOS Displacement FVG in NY Killzone (12-17 UTC).
-2. Sleeve 2 (`VisB`): 4H BOS Bias -> 1H Major Swing (k=3, >=4h age) Real Sweep -> 5m CHoCH + FVG.
-3. Sleeve 3 (`VisA`): 15m Major Swing (k=3) Zone + 5m Rising/Falling Trendline (>=3 pivots)
-                      -> Zone Tap/Sweep -> CHoCH Breakdown -> Target Trendline Origin.
+V4 Legacy Sleeves:
+1. `V3_NY`: Dual 4H+1H BOS Alignment -> 15m BOS Displacement FVG in NY Killzone (12-17 UTC), 2.5R TP.
+2. `VisB`: 4H BOS Bias -> 1H Major Swing (k=3, >=4h age) Real Sweep -> 5m CHoCH + FVG, 2.5R TP.
+3. `VisA`: 15m Major Swing (k=3) Zone + 5m Trendline (>=3 pivots) -> Tap -> CHoCH -> Target Origin.
+
+V5 Upgraded Sleeves (Causal 1H Trailing & AMD/PO3 Expansion):
+1. `V3_Pro`: `V3_NY` with `0.75 ATR` SL buffer + 1H (k=2) swing trail at +2.5R (+1.0R SL lock).
+2. `VisB_Pro`: `VisB` with 1H (k=2) swing trail at +1.5R (+1.0R SL lock).
+3. `VisA`: Kept at structural Origin TP (mean-reverting range exhaustion).
+4. `AMD_Pro`: 15m Accumulation Range (8 bars <= 2.5 ATR) -> Fake Sweep Manipulation ->
+   1H BOS Aligned Distribution (BOS + FVG) -> 1H (k=2) swing trail at +2.0R (+1.0R SL lock).
 """
 
 from __future__ import annotations
@@ -16,6 +22,7 @@ import pandas as pd
 
 from .causal_primitives import (
     build_causal_htf_structure,
+    build_causal_swing_events,
     causal_atr14,
     detect_swings_causal,
     in_killzone_utc,
@@ -81,6 +88,87 @@ def _sim_1m_path(
         "net_r": float(net_usd / risk),
         "risk_usd": float(risk),
         "planned_rr": float(abs(tp - fill) / risk),
+    }
+
+
+def _sim_1m_trail_1h(
+    *,
+    engine: str,
+    side: str,
+    entry_idx: int,
+    fill: float,
+    sl: float,
+    act_r: float,
+    be_lock_r: float,
+    h1: np.ndarray,
+    l1: np.ndarray,
+    t1: pd.DatetimeIndex,
+    s1h_t: pd.DatetimeIndex,
+    s1h_k: list[str],
+    s1h_p: np.ndarray,
+    cost: float,
+    setup_time: pd.Timestamp | None = None,
+) -> dict[str, Any] | None:
+    risk = (fill - sl) if side == "LONG" else (sl - fill)
+    if risk <= 0:
+        return None
+    act_px = fill + act_r * risk if side == "LONG" else fill - act_r * risk
+    cur_sl = float(sl)
+    trail_active = False
+    out_idx, out_px, out_lbl = entry_idx, fill, "EOD"
+    ptr = int(s1h_t.searchsorted(t1[entry_idx], side="right"))
+
+    if (side == "LONG" and l1[entry_idx] <= cur_sl) or (side == "SHORT" and h1[entry_idx] >= cur_sl):
+        out_idx, out_px, out_lbl = entry_idx, cur_sl, "SL"
+    else:
+        for j in range(entry_idx + 1, len(t1)):
+            tj = t1[j]
+            while ptr < len(s1h_t) and s1h_t[ptr] <= tj:
+                if trail_active:
+                    if side == "LONG" and s1h_k[ptr] == "low" and s1h_p[ptr] > cur_sl and s1h_p[ptr] < l1[j]:
+                        cur_sl = float(s1h_p[ptr])
+                    elif side == "SHORT" and s1h_k[ptr] == "high" and s1h_p[ptr] < cur_sl and s1h_p[ptr] > h1[j]:
+                        cur_sl = float(s1h_p[ptr])
+                ptr += 1
+
+            if side == "LONG":
+                if l1[j] <= cur_sl:
+                    out_idx, out_px = j, cur_sl
+                    out_lbl = "TRAIL" if trail_active else "SL"
+                    break
+                if not trail_active and h1[j] >= act_px:
+                    trail_active = True
+                    cur_sl = max(cur_sl, fill + be_lock_r * risk)
+            else:
+                if h1[j] >= cur_sl:
+                    out_idx, out_px = j, cur_sl
+                    out_lbl = "TRAIL" if trail_active else "SL"
+                    break
+                if not trail_active and l1[j] <= act_px:
+                    trail_active = True
+                    cur_sl = min(cur_sl, fill - be_lock_r * risk)
+
+    gross_usd = (out_px - fill) if side == "LONG" else (fill - out_px)
+    net_usd = gross_usd - cost
+    return {
+        "engine": engine,
+        "side": side,
+        "setup_time": str(setup_time) if setup_time is not None else str(t1[entry_idx]),
+        "entry_time": str(t1[entry_idx]),
+        "exit_time": str(t1[out_idx]),
+        "entry_idx": entry_idx,
+        "exit_idx": out_idx,
+        "entry_price": float(fill),
+        "sl_price": float(sl),
+        "tp_price": float(act_px),
+        "exit_price": float(out_px),
+        "outcome": out_lbl,
+        "gross_usd": float(gross_usd),
+        "net_usd": float(net_usd),
+        "gross_r": float(gross_usd / risk),
+        "net_r": float(net_usd / risk),
+        "risk_usd": float(risk),
+        "planned_rr": float(act_r),
     }
 
 
@@ -277,8 +365,11 @@ def run_engine_vis_b(
     rr: float = 2.5,
     htf_align: bool = True,
     cost: float = 0.25,
+    trail_1h_after_r: float | None = None,
+    be_lock_r: float = 1.0,
+    engine_label: str = "VisB",
 ) -> list[dict[str, Any]]:
-    """Sleeve 2 (VisB): 4H BOS Bias -> 1H Major Swing Sweep -> 5m CHoCH + FVG."""
+    """Sleeve 2 (VisB / VisB_Pro): 4H BOS Bias -> 1H Major Swing Sweep -> 5m CHoCH + FVG."""
     tf5 = resample_causal_tf(df_1m, "5min")
     tfh = resample_causal_tf(df_1m, htf_freq)
 
@@ -292,6 +383,12 @@ def run_engine_vis_b(
     endh = tfh.index
     swh = detect_swings_causal(hh, lh, endh, htf_k)
     e4, t4 = build_causal_htf_structure(df_1m, "4h", 2)
+
+    use_1h_trail = trail_1h_after_r is not None
+    if use_1h_trail:
+        s1h_t, s1h_k, s1h_p = build_causal_swing_events(df_1m, "1h", 2)
+    else:
+        s1h_t, s1h_k, s1h_p = pd.DatetimeIndex([]), [], np.array([], dtype=np.float64)
 
     o1, h1, l1, t1 = df_1m["Open"].to_numpy(), df_1m["High"].to_numpy(), df_1m["Low"].to_numpy(), df_1m.index
 
@@ -346,11 +443,19 @@ def run_engine_vis_b(
                         if not (eval_start <= tm < eval_end):
                             continue
                         fill = min(float(o1[m]), st["trig"])
-                        res = _sim_1m_path(
-                            engine="VisB", side="LONG", entry_idx=m, fill=fill,
-                            sl=st["sl"], tp=st["tp"], h1=h1, l1=l1, t1=t1, cost=cost,
-                            setup_time=st["setup_time"],
-                        )
+                        if use_1h_trail:
+                            res = _sim_1m_trail_1h(
+                                engine=engine_label, side="LONG", entry_idx=m, fill=fill,
+                                sl=st["sl"], act_r=float(trail_1h_after_r), be_lock_r=be_lock_r,
+                                h1=h1, l1=l1, t1=t1, s1h_t=s1h_t, s1h_k=s1h_k, s1h_p=s1h_p,
+                                cost=cost, setup_time=st["setup_time"],
+                            )
+                        else:
+                            res = _sim_1m_path(
+                                engine=engine_label, side="LONG", entry_idx=m, fill=fill,
+                                sl=st["sl"], tp=st["tp"], h1=h1, l1=l1, t1=t1, cost=cost,
+                                setup_time=st["setup_time"],
+                            )
                         if res:
                             busy_until = res["exit_idx"]
                             trades.append(res)
@@ -369,11 +474,19 @@ def run_engine_vis_b(
                         if not (eval_start <= tm < eval_end):
                             continue
                         fill = max(float(o1[m]), st["trig"])
-                        res = _sim_1m_path(
-                            engine="VisB", side="SHORT", entry_idx=m, fill=fill,
-                            sl=st["sl"], tp=st["tp"], h1=h1, l1=l1, t1=t1, cost=cost,
-                            setup_time=st["setup_time"],
-                        )
+                        if use_1h_trail:
+                            res = _sim_1m_trail_1h(
+                                engine=engine_label, side="SHORT", entry_idx=m, fill=fill,
+                                sl=st["sl"], act_r=float(trail_1h_after_r), be_lock_r=be_lock_r,
+                                h1=h1, l1=l1, t1=t1, s1h_t=s1h_t, s1h_k=s1h_k, s1h_p=s1h_p,
+                                cost=cost, setup_time=st["setup_time"],
+                            )
+                        else:
+                            res = _sim_1m_path(
+                                engine=engine_label, side="SHORT", entry_idx=m, fill=fill,
+                                sl=st["sl"], tp=st["tp"], h1=h1, l1=l1, t1=t1, cost=cost,
+                                setup_time=st["setup_time"],
+                            )
                         if res:
                             busy_until = res["exit_idx"]
                             trades.append(res)
@@ -430,6 +543,163 @@ def run_engine_vis_b(
     return trades
 
 
+def run_engine_vis_b_pro(
+    df_1m: pd.DataFrame,
+    eval_start: pd.Timestamp,
+    eval_end: pd.Timestamp,
+    *,
+    cost: float = 0.25,
+) -> list[dict[str, Any]]:
+    """Upgraded Sleeve 2 (`VisB_Pro`): 1H (k=2) swing trail at +1.5R with +1.0R SL lock."""
+    return run_engine_vis_b(
+        df_1m,
+        eval_start,
+        eval_end,
+        htf_freq="1h",
+        htf_k=3,
+        htf_align=True,
+        cost=cost,
+        trail_1h_after_r=1.5,
+        be_lock_r=1.0,
+        engine_label="VisB_Pro",
+    )
+
+
+def run_engine_amd_pro(
+    df_1m: pd.DataFrame,
+    eval_start: pd.Timestamp,
+    eval_end: pd.Timestamp,
+    *,
+    range_bars: int = 8,
+    max_box_atr: float = 2.5,
+    disp_atr: float = 0.8,
+    fvg_atr: float = 0.25,
+    trail_1h_after_r: float = 2.0,
+    be_lock_r: float = 1.0,
+    cost: float = 0.25,
+) -> list[dict[str, Any]]:
+    """Sleeve 4 (`AMD_Pro`): 15m Accumulation Range -> Manipulation Fake Sweep -> 1H-Aligned BOS + FVG -> 1H Trail."""
+    tf15 = resample_causal_tf(df_1m, "15min")
+    o15, h15, l15, c15 = tf15["Open"].to_numpy(), tf15["High"].to_numpy(), tf15["Low"].to_numpy(), tf15["Close"].to_numpy()
+    end15, st15 = tf15.index, tf15["start_time"]
+    f1m15, l1m15 = tf15["first_1m_pos"].to_numpy(), tf15["last_1m_pos"].to_numpy()
+    atr15 = causal_atr14(h15, l15, c15)
+
+    e1, t1h = build_causal_htf_structure(df_1m, "1h", 2)
+    s1h_t, s1h_k, s1h_p = build_causal_swing_events(df_1m, "1h", 2)
+    o1, h1, l1, t1 = df_1m["Open"].to_numpy(), df_1m["High"].to_numpy(), df_1m["Low"].to_numpy(), df_1m.index
+
+    p1, cur1 = 0, 0
+    manips: list[dict[str, Any]] = []
+    pending: list[dict[str, Any]] = []
+    trades: list[dict[str, Any]] = []
+    busy_until = -1
+    warmup_start = eval_start - pd.Timedelta(hours=12)
+
+    for i in range(max(12, range_bars + 2), len(tf15)):
+        te, ts = end15[i], st15.iloc[i]
+        while p1 < len(e1) and e1[p1] <= te:
+            cur1 = int(t1h[p1])
+            p1 += 1
+
+        npend = []
+        for st in pending:
+            if i > st["expire"]:
+                continue
+            ps, pe = int(f1m15[i]), int(l1m15[i])
+            dead = False
+            for m in range(ps, pe + 1):
+                tm = t1[m]
+                if st["side"] == "LONG":
+                    if o1[m] <= st["sl"]:
+                        dead = True
+                        break
+                    if l1[m] <= st["trig"]:
+                        if m <= busy_until or not in_killzone_utc(tm) or not (eval_start <= tm < eval_end):
+                            if m <= busy_until or l1[m] <= st["sl"]:
+                                dead = True
+                                break
+                            continue
+                        res = _sim_1m_trail_1h(
+                            engine="AMD_Pro", side="LONG", entry_idx=m,
+                            fill=min(float(o1[m]), st["trig"]), sl=st["sl"],
+                            act_r=trail_1h_after_r, be_lock_r=be_lock_r,
+                            h1=h1, l1=l1, t1=t1, s1h_t=s1h_t, s1h_k=s1h_k, s1h_p=s1h_p,
+                            cost=cost, setup_time=st["setup_time"],
+                        )
+                        if res:
+                            busy_until = res["exit_idx"]
+                            trades.append(res)
+                        dead = True
+                        break
+                else:
+                    if o1[m] >= st["sl"]:
+                        dead = True
+                        break
+                    if h1[m] >= st["trig"]:
+                        if m <= busy_until or not in_killzone_utc(tm) or not (eval_start <= tm < eval_end):
+                            if m <= busy_until or h1[m] >= st["sl"]:
+                                dead = True
+                                break
+                            continue
+                        res = _sim_1m_trail_1h(
+                            engine="AMD_Pro", side="SHORT", entry_idx=m,
+                            fill=max(float(o1[m]), st["trig"]), sl=st["sl"],
+                            act_r=trail_1h_after_r, be_lock_r=be_lock_r,
+                            h1=h1, l1=l1, t1=t1, s1h_t=s1h_t, s1h_k=s1h_k, s1h_p=s1h_p,
+                            cost=cost, setup_time=st["setup_time"],
+                        )
+                        if res:
+                            busy_until = res["exit_idx"]
+                            trades.append(res)
+                        dead = True
+                        break
+            if not dead:
+                npend.append(st)
+        pending = npend
+
+        a = float(atr15[i])
+        if not np.isfinite(a) or a <= 0 or te < warmup_start or te >= eval_end:
+            continue
+
+        box_hi = float(h15[i - range_bars : i].max())
+        box_lo = float(l15[i - range_bars : i].min())
+        if (box_hi - box_lo) <= max_box_atr * a:
+            if l15[i] < box_lo and c15[i] >= box_lo - 0.8 * a:
+                manips.append({"side": "LONG", "r_hi": box_hi, "r_lo": box_lo, "ext": float(l15[i]), "si": i})
+            if h15[i] > box_hi and c15[i] <= box_hi + 0.8 * a:
+                manips.append({"side": "SHORT", "r_hi": box_hi, "r_lo": box_lo, "ext": float(h15[i]), "si": i})
+
+        new_m = []
+        c1i, c2i, c3i = i - 2, i - 1, i
+        c2b = abs(float(c15[c2i] - o15[c2i]))
+        for mp in manips:
+            if i - mp["si"] > 8:
+                continue
+            if mp["side"] == "LONG":
+                mp["ext"] = min(mp["ext"], float(l15[i]))
+                gap = float(l15[c3i] - h15[c1i])
+                if c15[i] > mp["r_hi"] and gap >= fvg_atr * a and c15[c2i] > o15[c2i] and c2b >= disp_atr * a and cur1 == 1 and in_killzone_utc(ts):
+                    trig = float(l15[c3i])
+                    sl = mp["ext"] - 0.5 * a
+                    if trig - sl > 0:
+                        pending.append({"side": "LONG", "trig": trig, "sl": sl, "expire": i + 20, "setup_time": te})
+                        continue
+            else:
+                mp["ext"] = max(mp["ext"], float(h15[i]))
+                gap = float(l15[c1i] - h15[c3i])
+                if c15[i] < mp["r_lo"] and gap >= fvg_atr * a and c15[c2i] < o15[c2i] and c2b >= disp_atr * a and cur1 == -1 and in_killzone_utc(ts):
+                    trig = float(h15[c3i])
+                    sl = mp["ext"] + 0.5 * a
+                    if sl - trig > 0:
+                        pending.append({"side": "SHORT", "trig": trig, "sl": sl, "expire": i + 20, "setup_time": te})
+                        continue
+            new_m.append(mp)
+        manips = new_m
+
+    return trades
+
+
 def apply_cost_reprice(trades: list[dict[str, Any]], cost: float) -> list[dict[str, Any]]:
     """Recompute net USD & net R for an alternative round-trip cost without altering fills."""
     out = []
@@ -442,7 +712,7 @@ def apply_cost_reprice(trades: list[dict[str, Any]], cost: float) -> list[dict[s
 
 
 def lock_single_position(trades: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Optional chronological filter allowing at most 1 open position across all 3 sleeves."""
+    """Chronological filter allowing at most 1 open position across all sleeves."""
     ordered = sorted(trades, key=lambda x: (pd.Timestamp(x["entry_time"]), pd.Timestamp(x["exit_time"])))
     kept: list[dict[str, Any]] = []
     busy_until = pd.Timestamp.min.tz_localize("UTC")
@@ -455,6 +725,39 @@ def lock_single_position(trades: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return kept
 
 
+def simulate_compounded_account(
+    trades: list[dict[str, Any]],
+    *,
+    start_capital: float = 100.0,
+    risk_pct: float = 0.02,
+    compound: bool = True,
+) -> dict[str, Any]:
+    """Simulate real-world equity compounding sequentially by trade exit_time."""
+    ordered = sorted(trades, key=lambda x: pd.Timestamp(x["exit_time"]))
+    eq = float(start_capital)
+    peak = eq
+    max_dd_pct = 0.0
+    yearly_equity: dict[str, float] = {}
+    for tr in ordered:
+        risk_usd = (eq * risk_pct) if compound else (start_capital * risk_pct)
+        eq += risk_usd * float(tr["net_r"])
+        if eq <= 0:
+            eq = 0.0
+            break
+        peak = max(peak, eq)
+        max_dd_pct = max(max_dd_pct, 100.0 * (peak - eq) / peak)
+        yearly_equity[str(pd.Timestamp(tr["exit_time"]).year)] = round(eq, 2)
+    return {
+        "start_capital": round(start_capital, 2),
+        "risk_pct": round(100.0 * risk_pct, 2),
+        "compound": compound,
+        "final_equity": round(eq, 2),
+        "total_return_pct": round(100.0 * (eq / start_capital - 1.0), 1),
+        "max_dd_pct": round(max_dd_pct, 2),
+        "yearly_equity": yearly_equity,
+    }
+
+
 def run_smc_v4_portfolio(
     df_1m: pd.DataFrame,
     eval_start: pd.Timestamp,
@@ -463,7 +766,7 @@ def run_smc_v4_portfolio(
     cost: float = 0.25,
     single_position_lock: bool = False,
 ) -> dict[str, Any]:
-    """Run all 3 causal SMC sleeves and combine into V4_MultiSleeve."""
+    """Run all 3 causal V4 sleeves and combine into V4_MultiSleeve."""
     t_v3 = run_smc_v3_backtest(
         df_1m,
         SMCV3Config(killzone_mode="ny", rr_target=2.5, round_trip_cost_usd=cost),
@@ -484,4 +787,45 @@ def run_smc_v4_portfolio(
         "v3_ny": t_v3,
         "vis_b": t_vb,
         "vis_a": t_va,
+    }
+
+
+def run_smc_v5_portfolio(
+    df_1m: pd.DataFrame,
+    eval_start: pd.Timestamp,
+    eval_end: pd.Timestamp,
+    *,
+    cost: float = 0.25,
+    single_position_lock: bool = True,
+) -> dict[str, Any]:
+    """Run all 4 upgraded causal V5 sleeves (V3_Pro + VisB_Pro + VisA + AMD_Pro)."""
+    t_v3p = run_smc_v3_backtest(
+        df_1m,
+        SMCV3Config(
+            killzone_mode="ny",
+            sl_buffer_atr_mult=0.75,
+            rr_target=2.5,
+            round_trip_cost_usd=cost,
+            trail_1h_after_r=2.5,
+            be_lock_r=1.0,
+            engine_label="V3_Pro",
+        ),
+        eval_start,
+        eval_end,
+    )["trades"]
+    t_vbp = run_engine_vis_b_pro(df_1m, eval_start, eval_end, cost=cost)
+    t_va = run_engine_vis_a(df_1m, eval_start, eval_end, htf_freq="15min", htf_k=3, entry_mode="break_close", cost=cost)
+    t_amd = run_engine_amd_pro(df_1m, eval_start, eval_end, cost=cost)
+
+    unlocked = sorted(t_v3p + t_vbp + t_va + t_amd, key=lambda x: pd.Timestamp(x["exit_time"]))
+    locked = lock_single_position(unlocked)
+
+    return {
+        "combined": locked if single_position_lock else unlocked,
+        "v5_1pos_lock": locked,
+        "v5_unlocked": unlocked,
+        "v3_pro": t_v3p,
+        "vis_b_pro": t_vbp,
+        "vis_a": t_va,
+        "amd_pro": t_amd,
     }

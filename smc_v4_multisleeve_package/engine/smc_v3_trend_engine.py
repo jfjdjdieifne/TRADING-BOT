@@ -1,4 +1,10 @@
-"""Sleeve 1 (V3_NY): Dual 4H+1H BOS Structure + 15m BOS Displacement FVG (Zero-Lookahead)."""
+"""Sleeve 1 (V3_NY & V3_Pro): Dual 4H+1H BOS Structure + 15m BOS Displacement FVG (Zero-Lookahead).
+
+Supports both:
+- Legacy `V3_NY`: `sl_buffer_atr_mult=0.50`, fixed `rr_target=2.5` (`+59.99R`).
+- Upgraded `V3_Pro`: `sl_buffer_atr_mult=0.75`, causal `1H (k=2)` swing trailing activated at `+2.5R`
+  with `+1.0R` SL lock (`+96.04R`, `PF=1.560`, `t=+2.56`, `7/7` positive years).
+"""
 
 from __future__ import annotations
 
@@ -10,6 +16,7 @@ import pandas as pd
 
 from .causal_primitives import (
     build_causal_htf_structure,
+    build_causal_swing_events,
     causal_atr14,
     detect_swings_causal,
     in_killzone_utc,
@@ -34,6 +41,10 @@ class SMCV3Config:
     allow_long: bool = True
     allow_short: bool = True
     round_trip_cost_usd: float = 0.25
+    # Upgraded V3_Pro causal trailing options (None = legacy fixed rr_target)
+    trail_1h_after_r: float | None = None
+    be_lock_r: float | None = None
+    engine_label: str = "V3_NY"
 
 
 def _kz_allowed(ts: pd.Timestamp, mode: str) -> bool:
@@ -66,6 +77,12 @@ def run_smc_v3_backtest(
 
     e4, t4 = build_causal_htf_structure(df_1m, "4h", cfg.htf_swing_k)
     e1, t1h = build_causal_htf_structure(df_1m, "1h", cfg.htf_swing_k)
+
+    use_1h_trail = cfg.trail_1h_after_r is not None
+    if use_1h_trail:
+        s1h_t, s1h_k, s1h_p = build_causal_swing_events(df_1m, "1h", 2)
+    else:
+        s1h_t, s1h_k, s1h_p = pd.DatetimeIndex([]), [], np.array([], dtype=np.float64)
 
     o1 = df_1m["Open"].to_numpy()
     h1 = df_1m["High"].to_numpy()
@@ -120,22 +137,47 @@ def run_smc_v3_backtest(
                         if risk <= 0:
                             dead = True
                             break
+                        cur_sl = float(st["sl"])
                         out_idx, out_px, out_lbl = m, fill, "EOD"
-                        if l1[m] <= st["sl"]:
-                            out_idx, out_px, out_lbl = m, st["sl"], "SL"
+
+                        if use_1h_trail:
+                            act_px = fill + float(cfg.trail_1h_after_r) * risk
+                            trail_active = False
+                            ptr = int(s1h_t.searchsorted(tm, side="right"))
+                            if l1[m] <= cur_sl:
+                                out_idx, out_px, out_lbl = m, cur_sl, "SL"
+                            else:
+                                for j in range(m + 1, n1):
+                                    tj = t1[j]
+                                    while ptr < len(s1h_t) and s1h_t[ptr] <= tj:
+                                        if trail_active and s1h_k[ptr] == "low" and s1h_p[ptr] > cur_sl and s1h_p[ptr] < l1[j]:
+                                            cur_sl = float(s1h_p[ptr])
+                                        ptr += 1
+                                    if l1[j] <= cur_sl:
+                                        out_idx, out_px = j, cur_sl
+                                        out_lbl = "TRAIL" if trail_active else "SL"
+                                        break
+                                    if not trail_active and h1[j] >= act_px:
+                                        trail_active = True
+                                        if cfg.be_lock_r is not None:
+                                            cur_sl = max(cur_sl, fill + cfg.be_lock_r * risk)
                         else:
-                            for j in range(m + 1, n1):
-                                if l1[j] <= st["sl"]:
-                                    out_idx, out_px, out_lbl = j, st["sl"], "SL"
-                                    break
-                                if h1[j] >= st["tp"]:
-                                    out_idx, out_px, out_lbl = j, st["tp"], "TP"
-                                    break
+                            if l1[m] <= cur_sl:
+                                out_idx, out_px, out_lbl = m, cur_sl, "SL"
+                            else:
+                                for j in range(m + 1, n1):
+                                    if l1[j] <= cur_sl:
+                                        out_idx, out_px, out_lbl = j, cur_sl, "SL"
+                                        break
+                                    if h1[j] >= st["tp"]:
+                                        out_idx, out_px, out_lbl = j, st["tp"], "TP"
+                                        break
+
                         gross_usd = out_px - fill
                         net_usd = gross_usd - cfg.round_trip_cost_usd
                         busy_until_1m = out_idx
                         trades.append({
-                            "engine": "V3_NY",
+                            "engine": cfg.engine_label,
                             "side": "LONG",
                             "setup_time": str(st["setup_time"]),
                             "entry_time": str(tm),
@@ -176,22 +218,47 @@ def run_smc_v3_backtest(
                         if risk <= 0:
                             dead = True
                             break
+                        cur_sl = float(st["sl"])
                         out_idx, out_px, out_lbl = m, fill, "EOD"
-                        if h1[m] >= st["sl"]:
-                            out_idx, out_px, out_lbl = m, st["sl"], "SL"
+
+                        if use_1h_trail:
+                            act_px = fill - float(cfg.trail_1h_after_r) * risk
+                            trail_active = False
+                            ptr = int(s1h_t.searchsorted(tm, side="right"))
+                            if h1[m] >= cur_sl:
+                                out_idx, out_px, out_lbl = m, cur_sl, "SL"
+                            else:
+                                for j in range(m + 1, n1):
+                                    tj = t1[j]
+                                    while ptr < len(s1h_t) and s1h_t[ptr] <= tj:
+                                        if trail_active and s1h_k[ptr] == "high" and s1h_p[ptr] < cur_sl and s1h_p[ptr] > h1[j]:
+                                            cur_sl = float(s1h_p[ptr])
+                                        ptr += 1
+                                    if h1[j] >= cur_sl:
+                                        out_idx, out_px = j, cur_sl
+                                        out_lbl = "TRAIL" if trail_active else "SL"
+                                        break
+                                    if not trail_active and l1[j] <= act_px:
+                                        trail_active = True
+                                        if cfg.be_lock_r is not None:
+                                            cur_sl = min(cur_sl, fill - cfg.be_lock_r * risk)
                         else:
-                            for j in range(m + 1, n1):
-                                if h1[j] >= st["sl"]:
-                                    out_idx, out_px, out_lbl = j, st["sl"], "SL"
-                                    break
-                                if l1[j] <= st["tp"]:
-                                    out_idx, out_px, out_lbl = j, st["tp"], "TP"
-                                    break
+                            if h1[m] >= cur_sl:
+                                out_idx, out_px, out_lbl = m, cur_sl, "SL"
+                            else:
+                                for j in range(m + 1, n1):
+                                    if h1[j] >= cur_sl:
+                                        out_idx, out_px, out_lbl = j, cur_sl, "SL"
+                                        break
+                                    if l1[j] <= st["tp"]:
+                                        out_idx, out_px, out_lbl = j, st["tp"], "TP"
+                                        break
+
                         gross_usd = fill - out_px
                         net_usd = gross_usd - cfg.round_trip_cost_usd
                         busy_until_1m = out_idx
                         trades.append({
-                            "engine": "V3_NY",
+                            "engine": cfg.engine_label,
                             "side": "SHORT",
                             "setup_time": str(st["setup_time"]),
                             "entry_time": str(tm),

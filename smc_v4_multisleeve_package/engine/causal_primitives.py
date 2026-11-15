@@ -189,3 +189,27 @@ def build_causal_htf_structure(
             cur = -1
         trend[i] = cur
     return tf.index, trend
+
+
+def build_causal_swing_events(
+    df_1m: pd.DataFrame,
+    freq: str = "1h",
+    k: int = 2,
+) -> tuple[pd.DatetimeIndex, list[str], np.ndarray]:
+    """Return chronologically ordered confirmed swing events `(confirm_times, kinds, prices)`.
+
+    Every event at `confirm_times[idx]` is strictly confirmed after `k` completed `freq` bars
+    following the pivot bar, guaranteeing zero future leakage for live trailing stops.
+    """
+    tf = resample_causal_tf(df_1m, freq)
+    sw = detect_swings_causal(tf["High"].to_numpy(), tf["Low"].to_numpy(), tf.index, k)
+    ev_t: list[pd.Timestamp] = []
+    ev_k: list[str] = []
+    ev_p: list[float] = []
+    for i in range(len(tf)):
+        for sp in sw.get(i, []):
+            ev_t.append(tf.index[i])
+            ev_k.append(sp.kind)
+            ev_p.append(sp.price)
+    return pd.DatetimeIndex(ev_t), ev_k, np.array(ev_p, dtype=np.float64)
+
