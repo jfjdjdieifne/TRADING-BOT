@@ -5,23 +5,25 @@
 
 ---
 
-## 1) الحقيقة أولاً — قبل أي شي (مهم جداً)
+## 1) وين الاستراتيجية؟ → **`STRATEGY.md`** (امر واحد: `python3 run_strategy.py`)
 
-الطلب: سكالبينغ على افتتاح جلسات قوية، بشروط كثيرة ومفصلة، بحيث إذا تحققت
-تكون "صفقة ذهبية" بنسبة وصول للهدف عالية جداً، مع تقبّل أيام خسارة صغيرة
-(3–5$) وأيام ربح أكبر (15–20$)، والهدف النهائي: **ربح صافٍ أسبوعي/شهري**،
-وماسح يمسح كل عملات السوق. هاد طلب واقعي ومحترم. وبشتغل فيه بكل جدية، بس
-لازم أكون صريح بالأرقام:
+**الاستراتيجية اسمها `MOMENTUM-X`**: بوت زخم يمسح **كل عملات Binance**، يختار
+الأقوى زخماً بين العملات السائلة، ويدخل بس لما **12 شرط مفصّل** يتحققوا مع بعض
+في افتتاح لندن/نيويورك. الكل بـ `strategy.py` + `live/multi_bot.py` + `scanner.py`.
 
-| الادعاء | الحقيقة |
-|---|---|
-| نسبة فوز 90% على 1m/5m | **غير موجودة في الأسواق الحقيقية.** حتى أفضل أنظمة ICT الميكانيكية المستقلة: 29.6%، وبحكم بشري 40.4% ([مصدر](https://offbeatforex.com/is-ict-strategy-profitable/)). |
-| سكالبينغ بيربح بعد الرسوم | دراسة على **2,160** استراتيجية سكالبينغ بدقائق 1m: **ولا واحدة ربحت بعد الرسوم**. حتى بوت عنده "رؤية مثالية" للشمعة الجاية بيربح 0.066% للصفقة، بينما الكلفة 0.17–0.22% ([مصدر](https://dev.to/walid_koussa_0941941b1fdb/we-backtested-2160-crypto-scalping-strategies-on-1-minute-data-none-of-them-beat-the-fees-3mii)). |
-| 90% فوز يعني ربح | **لا.** 90% فوز بهدف قريب ووقف بعيد = expectancy سلبي. إثبات من بياناتنا بالجدول بالأسفل. |
+**نتائج مفصولة (لا تخلطها ببعضها):**
 
-**الخلاصة:** لا في بوت بيضمن ربح. اللي موجود فعلاً هو **حافة صغيرة + إدارة رأس
-مال + وقت طويل**. السكالبينغ اليومي على 1m/5m **ما فيه حافة بعد الرسوم** —
-لا ببياناتنا ولا بالأدبيات. التفاصيل بالأسفل.
+- **V8.3 (استراتيجية منفصلة):** تجميع تاريخي لـ net-R حسب يوم/أسبوع/شهر الخروج:
+  371/994 أيام، 179/348 أسابيع، 54/81 شهراً موجبة؛ المجموع +515.8R. هذا ليس
+  محاكاة محفظة ولا نتيجة MOMENTUM-X. الرسم: `outputs/horizons_positive.png`.
+- **مرجع زخم يومي منفصل (`run_momentum.py`):** Walk-Forward خارج العينة 2020→2026،
+  محفظة 3 أصول +223.5%، t=2.98؛ وعند مضاعفة التكلفة المفترضة +171.6%، t=2.55.
+- **MOMENTUM-X (قواعد 5m أعلاه):** مرشح/بوت تجريبي؛ لم يُثبت بعد على كامل
+  Binance USDT-M. التفاصيل: `STRATEGY.md` و `RESULTS.md`.
+
+**ببلاش؟** `run_demo.py` بلا حساب ولا إنترنت (مسارات رمزية)، و
+`--mode paper --market futures` بداتا Binance العامة وأوامر وهمية بلا مفاتيح/إيداع.
+(Testnet خيار منفصل لتجربة الأوامر — التفاصيل بـ `STRATEGY.md` §4).
 
 ---
 
@@ -42,7 +44,13 @@ scalping/
 │   ├── binance.py      # عميل Binance REST + WebSocket (سبوت + فيوتشر، بدون ccxt)
 │   ├── live_bot.py     # بوت رمز واحد: حي/ورقي/ريبي (tick-level sweep monitor)
 │   └── multi_bot.py    # بوت متعدد العملات: يمسح السوق ويصفق كل شمعة مغلقة
+├── strategy.py         # ★ الاستراتيجية: MOMENTUM-X، 12 شرط، قرار نقي سبقي
+├── STRATEGY.md         # ★ قواعد MOMENTUM-X + فصل النتائج + التشغيل المجاني
 ├── scanner.py          # ماسح كل أزواج USDT على Binance Futures (+ --offline)
+├── run_strategy.py     # ★ أمر واحد: القواعد + النتائج المفصولة + الإطلاق
+├── run_momentum.py     # مرجع زخم يومي منفصل (Walk-Forward 2020→2026)
+├── run_horizons.py     # تجميع تاريخي لدفتر V8.3 المنفصل حسب اليوم/الأسبوع/الشهر
+├── make_horizons_chart.py  # رسم تجميع net-R التاريخي لـ V8.3
 ├── run_backtest.py     # باك تست على بيانات حقيقية
 ├── run_research.py     # شبكة parameters + train/test (+ --orb لبحث الجلسات)
 ├── run_confluence.py   # اختبار: هل الشروط المدرجة ترفع نسبة الفوز/الربح؟
@@ -56,9 +64,8 @@ scalping/
 └── outputs/            # النتائج المولّدة
 ```
 
-**أنماط الدخول:** `sweep` (نصب سيولة)، `ob` (order block)، `vwap` (pullback للـVWAP)،
-`bos` (كسر structure مع displacement)، `reclaim` (نصب ثم استرجاع)، `mr` (mean-reversion)،
-`orb` (فتحة الجلسة)، `combo` (كلهم).
+**الاستراتيجية الأساسية:** `momentum` (MOMENTUM-X، 12 شرط، كل العملات).
+أنماط البحث الأخرى: `sweep`، `ob`، `vwap`، `bos`، `reclaim`، `mr`، `orb`، `combo`.
 
 ---
 
@@ -66,6 +73,16 @@ scalping/
 
 ```bash
 pip install -r requirements.txt
+
+# ★ امر واحد: يعرض الاستراتيجية + النتائج المفصولة + طريقة الإطلاق
+python3 run_strategy.py
+python3 run_strategy.py --test        # يعيد الاختبارين القويين
+python3 run_strategy.py --launch      # يطلق البوت الورقي ببلاش
+
+# ★ الاختباران المرجعيان مباشرة (ليسا باك تست لـ MOMENTUM-X 5m)
+python3 run_momentum.py               # مرجع زخم يومي Walk-Forward 2020→2026
+python3 run_momentum.py --stress      # ضغط الرسوم المفترضة ×2
+python3 run_horizons.py               # تجميع تاريخي لدفتر V8.3 المنفصل
 
 # باك تست سريع على BTC 5m
 python3 run_backtest.py --asset btc5m --years 2025 2026 --mode orb --rr 1.5 --max-bars 24
@@ -85,12 +102,12 @@ python3 run_confluence.py --asset btc5m --mode orb
 python3 scanner.py --top 10
 python3 scanner.py --offline
 
-# بوت ورقي برمز واحد
-python3 -m live.live_bot --mode paper --symbol BTCUSDT --interval 5m --testnet
+# بوت ورقي برمز واحد (داتا Binance العامة، بلا مفاتيح)
+python3 -m live.live_bot --mode paper --symbol BTCUSDT --interval 5m --market futures
 
-# بوت ورقي يمسح كل العملات ويتداول أفضل 8 (يعيد المسح كل 30 دقيقة)
-python3 -m live.live_bot --mode paper --scan --top 8 --entry-mode orb \
-    --min-confluence 0.5 --testnet
+# ★ البوت الأساسي: يمسح كل العملات ويتداول MOMENTUM-X (يعيد المسح كل 30 دقيقة)
+python3 -m live.live_bot --mode paper --scan --top 8 --entry-mode momentum \
+    --min-confluence 0.4 --market futures
 
 # إطلاق أوفلاين مستمر (نفس الحلقة، بلا مفاتيح ولا إنترنت — محاكاة واضحة)
 python3 run_demo.py --symbols 4 --cycle-sec 60
@@ -201,8 +218,7 @@ PF 0.65–0.80، سلبي بعد الرسوم).
 
 ## 7) وش تعمل الآن (خطة صادقة)
 
-1. **شغّل البوت الورقي** أسبوعين على testnet أو داتا حية بـ `--scan --top 8`
-   — بدون ما تخسر دولار، وشوف الـ paper PnL الحقيقي.
+1. **شغّل البوت الورقي** أسبوعين على داتا Binance العامة (`--mode paper --scan --top 8 --entry-mode momentum --market futures` بلا مفاتيح/إيداع، أو testnet لتجربة أوامر افتراضية) — بدون ما تخسر دولار، وشوف الـ paper PnL الحقيقي.
 2. **المسار الواقع للربح الأسبوعي/الشهري:** حافة صغيرة × انضباط × وقت. على
    فريم 5m فوق تكاليف الرسوم، هالحافة **غير موجودة بالأدلة**. على $100،
    أهدافك اليومية تحتاج +0.8R..+2.5R بالصفقة (انظر `RESULTS.md` §0)؛

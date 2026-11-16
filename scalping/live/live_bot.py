@@ -3,9 +3,10 @@
 Modes
 -----
   replay : read local closed bars and run the exact live loop offline (no net).
-  paper  : real Binance websocket market data, simulated orders (default).
+  paper  : real Binance public websocket market data, simulated orders; no API
+           key or deposit is needed (default).
   live   : real Binance websocket data + real signed orders (needs API keys and
-           an explicit --live flag; testnet recommended first).
+           --mode live; testnet recommended first).
 
 The bot is deliberately conservative: one position at a time, hard daily-loss
 and trades-per-day circuit breakers, and it never sends an order unless
@@ -426,8 +427,10 @@ def main():
         print("reasons:", m["reasons"], "exits:", m["exits"])
         return
 
-    if not a.testnet and not os.environ.get("BINANCE_API_KEY"):
-        print("Refusing to connect without BINANCE_API_KEY (use --testnet or set keys).")
+    if a.mode == "live" and (not os.environ.get("BINANCE_API_KEY")
+                             or not os.environ.get("BINANCE_API_SECRET")):
+        print("Refusing live orders without BINANCE_API_KEY and BINANCE_API_SECRET "
+              "(use --mode paper for free public-data simulation, or set testnet/live keys).")
         return
 
     if a.scan or a.symbols:

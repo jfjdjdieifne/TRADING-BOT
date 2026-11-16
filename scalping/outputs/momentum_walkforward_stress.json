@@ -1,0 +1,54 @@
+{
+  "BTCUSD 1D": {
+    "total_pct": 425.0,
+    "t_stat": 2.07,
+    "max_dd_pct": 69.7,
+    "pos_days_pct": 29.0,
+    "nonneg_days_pct": 68.6,
+    "pos_weeks_pct": 34.3,
+    "pos_months_pct": 38.6,
+    "best_week_pct": 26.9,
+    "best_month_pct": 46.9,
+    "avg_pos_month_pct": 15.8,
+    "final_100usd": 524.98
+  },
+  "XAUUSD 1D": {
+    "total_pct": 66.0,
+    "t_stat": 1.55,
+    "max_dd_pct": 24.3,
+    "pos_days_pct": 34.3,
+    "nonneg_days_pct": 67.6,
+    "pos_weeks_pct": 37.0,
+    "pos_months_pct": 50.0,
+    "best_week_pct": 7.9,
+    "best_month_pct": 13.3,
+    "avg_pos_month_pct": 4.0,
+    "final_100usd": 165.98
+  },
+  "NSXUSD 1D": {
+    "total_pct": 46.4,
+    "t_stat": 1.18,
+    "max_dd_pct": 29.7,
+    "pos_days_pct": 42.7,
+    "nonneg_days_pct": 64.1,
+    "pos_weeks_pct": 45.2,
+    "pos_months_pct": 50.0,
+    "best_week_pct": 6.6,
+    "best_month_pct": 10.7,
+    "avg_pos_month_pct": 4.2,
+    "final_100usd": 146.44
+  },
+  "PORTFOLIO": {
+    "total_pct": 171.6,
+    "t_stat": 2.55,
+    "max_dd_pct": 39.0,
+    "pos_days_pct": 45.2,
+    "nonneg_days_pct": 59.1,
+    "pos_weeks_pct": 49.3,
+    "pos_months_pct": 51.8,
+    "best_week_pct": 11.5,
+    "best_month_pct": 14.2,
+    "avg_pos_month_pct": 5.0,
+    "final_100usd": 271.56
+  }
+}

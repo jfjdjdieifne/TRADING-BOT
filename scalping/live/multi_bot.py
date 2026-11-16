@@ -14,8 +14,8 @@ Design
 * The symbol list is re-scanned every `--rescan-min` minutes by reconnecting.
 * `paper_only=True` (default) never sends an order.
 
-    python3 -m live.live_bot --mode paper --scan --top 8 --testnet
-    python3 -m live.live_bot --mode paper --symbols BTCUSDT,ETHUSDT,SOLUSDT --testnet
+    python3 -m live.live_bot --mode paper --scan --top 8 --entry-mode momentum --market futures
+    python3 -m live.live_bot --mode paper --symbols BTCUSDT,ETHUSDT,SOLUSDT --market futures
 """
 
 from __future__ import annotations
@@ -34,6 +34,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from scalping_engine.engine import (  # noqa: E402
     EngineConfig, ScalpingEngine, attach_indicators)
 from scalping_engine.sessions import session_name  # noqa: E402
+from strategy import (  # noqa: E402
+    decide as momentum_decide, momentum_score, rank_symbols)
 
 from .binance import BinanceClient  # noqa: E402
 
@@ -52,17 +54,20 @@ def synthetic_frames(df: pd.DataFrame, symbols: list[str],
     """
     base = df.tail(min(len(df), max_bars)).copy()
     close = base["Close"].to_numpy(float)
-    r = np.append(0.0, np.diff(close) / close[:-1])
+    lr = np.diff(np.log(close))
+    lr = np.r_[0.0, lr]
+    base_mean = float(lr.mean())            # preserve the source regime/drift
     rel_o = (base["Open"] / base["Close"]).to_numpy(float)
     rel_h = (base["High"] / base["Close"]).to_numpy(float)
     rel_l = (base["Low"] / base["Close"]).to_numpy(float)
     vol = base["Volume"].to_numpy(float)
     frames = {}
     for i, sym in enumerate(symbols):
-        rr = np.roll(r, 137 * i) * (0.85 + 0.12 * i)
-        path = np.cumprod(1.0 + np.clip(rr, -0.2, 0.2))
+        rr = np.roll(lr, 137 * i)
+        rr = (rr - float(rr.mean()) + base_mean) * (0.85 + 0.12 * i)
+        log_path = np.cumsum(np.clip(rr, -0.05, 0.05))
         level = 64000.0 / (1.0 + 3.0 * i)
-        c = level * path / path[0]
+        c = level * np.exp(log_path - log_path[0])
         frames[sym] = pd.DataFrame({
             "Open": c * rel_o, "High": c * rel_h, "Low": c * rel_l,
             "Close": c, "Volume": vol * (0.5 + 0.2 * i),
@@ -105,6 +110,8 @@ class SymbolState:
         self.tick_hi = np.nan
         self.tick_lo = np.nan
         self.last_quality = 0.0
+        self.daily_close: pd.Series | None = None   # 210 closed daily bars
+        self.daily_day = None
 
 
 class MultiSymbolBot:
@@ -136,25 +143,46 @@ class MultiSymbolBot:
         self._conf_last = 0.0
         self.symbols: list[str] = []
         self.quiet = False
+        self.offline = False
+        self.btc_daily: pd.Series | None = None
 
     # ------------------------------------------------------------------ #
+    def _daily_series(self, symbol: str) -> pd.Series | None:
+        """210 CLOSED daily bars — the trend/regime layer is a daily signal."""
+        kl = self.client.klines(symbol, "1d", limit=210)
+        if not kl:
+            return None
+        d = pd.DataFrame({
+            "Datetime": [pd.Timestamp(k[0], unit="ms", tz="UTC") for k in kl],
+            "Close": [float(k[4]) for k in kl],
+        }).set_index("Datetime")["Close"]
+        # last kline is still open -> drop it (no lookahead into today's close)
+        return d.iloc[:-1] if len(d) > 2 else d
+
     def seed_all(self, symbols: list[str]):
         keep = set(symbols)
         for sym in list(self.states):
             if sym not in keep:
                 del self.states[sym]
+        try:
+            self.btc_daily = self._daily_series("BTCUSDT")
+        except Exception as e:  # noqa: BLE001
+            print(f"[seed] BTC regime unavailable ({e}); gate defaults to risk-on")
         for sym in symbols:
             st = self.states.setdefault(sym, SymbolState(sym))
-            if len(st.hist) >= 60:
-                continue
-            kl = self.client.klines(sym, self.interval, limit=self.window)
-            rows = [{
-                "Datetime": pd.Timestamp(k[0], unit="ms", tz="UTC"),
-                "Open": float(k[1]), "High": float(k[2]), "Low": float(k[3]),
-                "Close": float(k[4]), "Volume": float(k[5]),
-            } for k in kl]
-            st.hist = pd.DataFrame(rows).set_index("Datetime")
-            print(f"[seed] {sym}: {len(st.hist)} {self.interval} bars")
+            if len(st.hist) < 60:
+                kl = self.client.klines(sym, self.interval, limit=self.window)
+                rows = [{
+                    "Datetime": pd.Timestamp(k[0], unit="ms", tz="UTC"),
+                    "Open": float(k[1]), "High": float(k[2]), "Low": float(k[3]),
+                    "Close": float(k[4]), "Volume": float(k[5]),
+                } for k in kl]
+                st.hist = pd.DataFrame(rows).set_index("Datetime")
+                print(f"[seed] {sym}: {len(st.hist)} {self.interval} bars")
+            try:
+                st.daily_close = self._daily_series(sym)
+            except Exception as e:  # noqa: BLE001
+                print(f"[seed] daily trend unavailable for {sym}: {e}")
         self.symbols = symbols
 
     # ------------------------------------------------------------------ #
@@ -184,7 +212,7 @@ class MultiSymbolBot:
             "_ob": ind["ob"], "_fvg": ind["fvg"],
             "_sweeps": ind["sweeps"], "_candles": ind["candles"],
             "_disp": ind["disp"], "_sessions": ind["sessions"],
-            "_confluence": ind["confluence"],
+            "_confluence": ind["confluence"], "_htf_trend": ind["htf_trend"],
             "_t": t, "_vwap": self._session_vwap(hist.iloc[-self.window:]),
         }
 
@@ -220,10 +248,38 @@ class MultiSymbolBot:
         if b is None:
             return
         self._conf_last = float(b["_confluence"][b["_t"]])
-        sig = self.engine.on_bar(b)
+        if self.cfg.entry_mode == "momentum":
+            sig = self._momentum_signal(symbol, st, b, ts)
+        else:
+            sig = self.engine.on_bar(b)
         if sig is not None:
             self.signals_seen += 1
             self._enter(sig, symbol, ts)
+
+    # ------------------------------------------------------------------ #
+    def _momentum_signal(self, symbol, st, b, ts):
+        """MOMENTUM-X: rank ALL scanned coins, enter only the golden setup."""
+        from types import SimpleNamespace
+        scores = {s: momentum_score(x.hist) for s, x in self.states.items()}
+        ranked = rank_symbols(scores)
+        rank = ranked.index(symbol) + 1 if symbol in ranked else 10 ** 6
+        ind = {"atr": b["_atr"], "htf_trend": b["_htf_trend"],
+               "confluence": b["_confluence"], "disp": b["_disp"],
+               "session_vwap": b["_vwap"]}
+        v = momentum_decide(
+            symbol=symbol, ts=ts, hist=st.hist, ind=ind, t=b["_t"],
+            daily_close=st.daily_close, btc_daily=self.btc_daily,
+            score_rank=rank, universe_size=len(self.states), cfg=self.cfg,
+            daily_ok=(self.day_trades < self.cfg.max_trades_per_day
+                      and self.day_pnl > -abs(self.engine.equity)
+                      * self.cfg.daily_loss_pct))
+        if not v.ok:
+            return None
+        if not self.quiet:
+            print(f"[MOMENTUM-X] {symbol} rank={rank}/{len(self.states)} "
+                  f"conf={self._conf_last:.2f} 12/12 conditions aligned")
+        return SimpleNamespace(side=v.side, trigger=v.trigger, sl=v.sl,
+                               reason=v.reason)
 
     # ------------------------------------------------------------------ #
     def _enter(self, sig, symbol: str, ts):
@@ -346,9 +402,12 @@ class MultiSymbolBot:
     def replay(self, frames: dict[str, pd.DataFrame], bars: int = 1500,
                verbose: bool = True):
         self.quiet = not verbose
+        self.offline = True
         for sym, df in frames.items():
             st = self.states.setdefault(sym, SymbolState(sym))
             st.hist = df.iloc[:-bars].copy()
+            st.daily_close = df.iloc[:-bars]["Close"].resample("1D").last().dropna()
+        self.btc_daily = self.states[next(iter(frames))].daily_close
         events = []
         for sym, df in frames.items():
             for ts, row in df.tail(bars).iterrows():
