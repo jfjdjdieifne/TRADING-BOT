@@ -44,29 +44,40 @@ def _sim_1m_path(
     t1: pd.DatetimeIndex,
     cost: float,
     setup_time: pd.Timestamp | None = None,
+    be_act_r: float | None = None,
+    be_lock_r: float = 1.0,
 ) -> dict[str, Any] | None:
     risk = (fill - sl) if side == "LONG" else (sl - fill)
     if risk <= 0:
         return None
+    cur_sl = float(sl)
+    be_px = (fill + float(be_act_r) * risk if side == "LONG" else fill - float(be_act_r) * risk) if be_act_r is not None else None
+    be_on = False
     out_idx, out_px, out_lbl = entry_idx, fill, "EOD"
-    if (side == "LONG" and l1[entry_idx] <= sl) or (side == "SHORT" and h1[entry_idx] >= sl):
-        out_idx, out_px, out_lbl = entry_idx, sl, "SL"
+    if (side == "LONG" and l1[entry_idx] <= cur_sl) or (side == "SHORT" and h1[entry_idx] >= cur_sl):
+        out_idx, out_px, out_lbl = entry_idx, cur_sl, "SL"
     else:
         for j in range(entry_idx + 1, len(t1)):
             if side == "LONG":
-                if l1[j] <= sl:
-                    out_idx, out_px, out_lbl = j, sl, "SL"
+                if l1[j] <= cur_sl:
+                    out_idx, out_px, out_lbl = j, cur_sl, ("BE" if be_on else "SL")
                     break
                 if h1[j] >= tp:
                     out_idx, out_px, out_lbl = j, tp, "TP"
                     break
+                if be_px is not None and not be_on and h1[j] >= be_px:
+                    be_on = True
+                    cur_sl = max(cur_sl, fill + float(be_lock_r) * risk)
             else:
-                if h1[j] >= sl:
-                    out_idx, out_px, out_lbl = j, sl, "SL"
+                if h1[j] >= cur_sl:
+                    out_idx, out_px, out_lbl = j, cur_sl, ("BE" if be_on else "SL")
                     break
                 if l1[j] <= tp:
                     out_idx, out_px, out_lbl = j, tp, "TP"
                     break
+                if be_px is not None and not be_on and l1[j] <= be_px:
+                    be_on = True
+                    cur_sl = min(cur_sl, fill - float(be_lock_r) * risk)
     gross_usd = (out_px - fill) if side == "LONG" else (fill - out_px)
     net_usd = gross_usd - cost
     return {
@@ -1067,13 +1078,17 @@ def run_engine_sniper_htf(
     min_risk_pct: float = 0.0010,
     fixed_rr: float | None = 15.0,
     trail_1h_after_r: float | None = None,
+    be_act_r: float | None = None,
     be_lock_r: float = 1.5,
+    entry_mode: str = "fvg_edge",
+    require_cisd: bool = False,
     use_killzone: bool = True,
+    min_hour_utc: int | None = None,
     cost: float = 0.25,
     pct_cost: float = 0.0,
     engine_label: str = "Sniper_HTF",
 ) -> list[dict[str, Any]]:
-    """Causal HTF-Sweep -> LTF (1m/5m) CHoCH+FVG Sniper Engine targeting 10R-20R+ HTF waves."""
+    """Causal HTF-Sweep -> LTF (1m/5m) CHoCH+FVG (or ICT OB/BISI+CISD) Sniper Engine."""
     tf_sw = resample_causal_tf(df_ltf, sweep_tf)
     hs, ls, cs = tf_sw["High"].to_numpy(), tf_sw["Low"].to_numpy(), tf_sw["Close"].to_numpy()
     ends = tf_sw.index
@@ -1130,7 +1145,7 @@ def run_engine_sniper_htf(
                     act_l.append(sp)
             ps += 1
 
-        kz_ok = (not use_killzone) or in_killzone_utc(tm)
+        kz_ok = ((not use_killzone) or in_killzone_utc(tm)) and (min_hour_utc is None or tm.hour >= min_hour_utc)
         new_p = []
         for st in pending:
             if m > st["expire"]:
@@ -1180,6 +1195,8 @@ def run_engine_sniper_htf(
                             t1=t1_idx,
                             cost=c_eff,
                             setup_time=st["setup_time"],
+                            be_act_r=be_act_r,
+                            be_lock_r=be_lock_r,
                         )
                     if res:
                         res["asset"] = asset
@@ -1232,6 +1249,8 @@ def run_engine_sniper_htf(
                             t1=t1_idx,
                             cost=c_eff,
                             setup_time=st["setup_time"],
+                            be_act_r=be_act_r,
+                            be_lock_r=be_lock_r,
                         )
                     if res:
                         res["asset"] = asset
@@ -1242,7 +1261,7 @@ def run_engine_sniper_htf(
             new_p.append(st)
         pending = new_p
 
-        if m >= 2 and kz_ok and warmup <= tm < eval_end:
+        if m >= 6 and kz_ok and warmup <= tm < eval_end:
             a1 = float(atr1[m]) if np.isfinite(atr1[m]) else float(c1[m]) * 0.0005
             buf = 1.0 * a1
             min_r = max(min_risk_abs, float(c1[m]) * min_risk_pct)
@@ -1270,7 +1289,23 @@ def run_engine_sniper_htf(
                         and c1[c2i] > o1[c2i]
                         and c2b >= 1.0 * a1
                     ):
-                        trig = float(l1[c3i])
+                        k_end = c1i
+                        while k_end >= 1 and c1[k_end] >= o1[k_end] and (c1i - k_end) <= 2:
+                            k_end -= 1
+                        k_start = k_end
+                        while k_start >= 1 and c1[k_start - 1] < o1[k_start - 1] and (k_end - k_start) < 4:
+                            k_start -= 1
+                        has_bear_ob = c1[k_end] < o1[k_end]
+                        if require_cisd and not (has_bear_ob and c1[c2i] > o1[k_start]):
+                            still.append(sc)
+                            continue
+                        fvg_hi, fvg_lo = float(l1[c3i]), float(h1[c1i])
+                        if entry_mode == "ob_overlap" and has_bear_ob:
+                            ob_wick, ob_body = float(h1[k_start]), float(o1[k_start])
+                            ob_top = ob_wick if (fvg_lo <= ob_wick <= fvg_hi) else ob_body
+                            trig = min(fvg_hi, max(fvg_lo, ob_top)) if ob_top >= fvg_lo else fvg_lo
+                        else:
+                            trig = fvg_hi
                         sl = sc["sl_base"] - buf
                         if trig - sl >= min_r:
                             pending.append({"side": "LONG", "trig": trig, "sl": sl, "expire": m + 20, "setup_time": tm})
@@ -1293,7 +1328,23 @@ def run_engine_sniper_htf(
                         and c1[c2i] < o1[c2i]
                         and c2b >= 1.0 * a1
                     ):
-                        trig = float(h1[c3i])
+                        k_end = c1i
+                        while k_end >= 1 and c1[k_end] <= o1[k_end] and (c1i - k_end) <= 2:
+                            k_end -= 1
+                        k_start = k_end
+                        while k_start >= 1 and c1[k_start - 1] > o1[k_start - 1] and (k_end - k_start) < 4:
+                            k_start -= 1
+                        has_bull_ob = c1[k_end] > o1[k_end]
+                        if require_cisd and not (has_bull_ob and c1[c2i] < o1[k_start]):
+                            still.append(sc)
+                            continue
+                        fvg_lo, fvg_hi = float(h1[c3i]), float(l1[c1i])
+                        if entry_mode == "ob_overlap" and has_bull_ob:
+                            ob_wick, ob_body = float(l1[k_start]), float(o1[k_start])
+                            ob_bot = ob_wick if (fvg_lo <= ob_wick <= fvg_hi) else ob_body
+                            trig = max(fvg_lo, min(fvg_hi, ob_bot)) if ob_bot <= fvg_hi else fvg_hi
+                        else:
+                            trig = fvg_lo
                         sl = sc["sl_base"] + buf
                         if sl - trig >= min_r:
                             pending.append({"side": "SHORT", "trig": trig, "sl": sl, "expire": m + 20, "setup_time": tm})
@@ -1386,4 +1437,85 @@ def run_smc_v7_multiasset_portfolio(
         "btc_dual_15r": btc_dual_15r,
         "xau_15m_tr1h": xau_15_tr,
         "xau_1h_15r": xau_1h_15r,
+    }
+
+
+def run_smc_v8_multiasset_portfolio(
+    df_xau: pd.DataFrame,
+    df_nsx: pd.DataFrame,
+    df_btc: pd.DataFrame,
+    eval_start: pd.Timestamp,
+    eval_end: pd.Timestamp,
+    *,
+    xau_cost: float = 0.25,
+    nsx_cost_pts: float = 2.0,
+    btc_pct_cost: float = 0.0008,
+) -> dict[str, Any]:
+    """Run V8 Microscopy-Upgraded Multi-Asset Portfolio across XAUUSD, NSXUSD, and BTCUSD.
+
+    Upgrades from V7 based on forensic winner/loser microscopy:
+    1. XAU `V3_Pro_Clean`: Removes 13:00-14:59 UTC NY cash-open chop (PF 1.56 -> 2.29, DD 13.7R -> 7.4R).
+    2. NSX `NSX_AMD_1D`: Adds causal 1D BOS alignment (PF 1.19 -> 1.51, DD 24.8R -> 13.1R).
+    3. NSX `NSX_1H1m_10R`: Drops dead 07:00-08:59 UTC London hours (`min_hour_utc=9`, PF 1.41 -> 1.57).
+    4. BTC `BTC_15R_BE`: Adds `BE@3.0R(+1.0R)` shield + `min_hour_utc=9` (PF 1.60 -> 2.33, DD 36.8R -> 11.9R).
+    """
+    v6 = run_smc_v6_xau_portfolio(df_xau, eval_start, eval_end, cost=xau_cost, single_position_lock=False)
+    xau_unlk = []
+    for t in v6["v6_unlocked"]:
+        if t["engine"] == "V3_Pro" and pd.Timestamp(t["entry_time"]).hour in (13, 14):
+            continue
+        nt = dict(t)
+        nt["asset"] = "XAUUSD"
+        nt["cost_usd"] = xau_cost
+        if nt["engine"] == "V3_Pro":
+            nt["engine"] = "V3_Pro_Clean"
+        xau_unlk.append(nt)
+    xau_v8_1pos = lock_single_position(xau_unlk)
+
+    df_nsx_scaled = df_nsx.copy()
+    for col in ("Open", "High", "Low", "Close"):
+        df_nsx_scaled[col] = df_nsx_scaled[col] / 10.0
+    nsx_amd_raw = run_engine_amd_pro(df_nsx_scaled, eval_start, eval_end, cost=nsx_cost_pts / 10.0)
+    ed_n, td_n = build_causal_htf_structure(df_nsx, "1D", 2)
+    nsx_amd_1d = []
+    for t in nsx_amd_raw:
+        p1d = int(ed_n.searchsorted(pd.Timestamp(t["setup_time"]), side="right")) - 1
+        d = 1 if t["side"] == "LONG" else -1
+        if p1d >= 0 and int(td_n[p1d]) == d:
+            nt = dict(t)
+            nt["engine"] = "NSX_AMD_1D"
+            nt["asset"] = "NSXUSD"
+            nt["cost_usd"] = nsx_cost_pts / 10.0
+            nsx_amd_1d.append(nt)
+
+    nsx_1h_10r = run_engine_sniper_htf(
+        df_nsx, eval_start, eval_end,
+        asset="NSXUSD", sweep_tf="1h", sweep_k=3, min_age=4, htf_mode="4h",
+        min_risk_abs=10.0, min_risk_pct=0.0010, fixed_rr=10.0, trail_1h_after_r=None,
+        use_killzone=True, min_hour_utc=9, cost=nsx_cost_pts, engine_label="NSX_1H1m_10R",
+    )
+    nsx_v8_1pos = lock_single_position(nsx_amd_1d + nsx_1h_10r)
+
+    btc_15r_be = run_engine_sniper_htf(
+        df_btc, eval_start, eval_end,
+        asset="BTCUSD", sweep_tf="1h", sweep_k=3, min_age=4, htf_mode="dual",
+        min_risk_abs=0.0, min_risk_pct=0.0020, fixed_rr=15.0, trail_1h_after_r=None,
+        be_act_r=3.0, be_lock_r=1.0,
+        use_killzone=False, min_hour_utc=9, cost=0.0, pct_cost=btc_pct_cost, engine_label="BTC_15R_BE",
+    )
+
+    v8_global_1pos = lock_single_position(xau_unlk + nsx_amd_1d + btc_15r_be)
+    v8_3asset_1pos_each = sorted(
+        xau_v8_1pos + nsx_v8_1pos + btc_15r_be,
+        key=lambda x: pd.Timestamp(x["exit_time"]),
+    )
+
+    return {
+        "v8_global_1pos": v8_global_1pos,
+        "v8_3asset_1pos_each": v8_3asset_1pos_each,
+        "xau_v8_1pos": xau_v8_1pos,
+        "nsx_amd_1d": nsx_amd_1d,
+        "nsx_1h_10r": nsx_1h_10r,
+        "nsx_v8_1pos": nsx_v8_1pos,
+        "btc_15r_be": btc_15r_be,
     }

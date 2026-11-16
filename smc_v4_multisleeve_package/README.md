@@ -1,11 +1,33 @@
-# `smc_v4_multisleeve_package` — Standalone Zero-Lookahead Multi-Asset SMC Portfolio (`V7`, `V6`, `V5`, `V4`, `2020–2026`)
+# `smc_v4_multisleeve_package` — Standalone Zero-Lookahead Multi-Asset SMC Portfolio (`V8`, `V7`, `V6`, `V5`, `V4`, `2020–2026`)
 
 Self-contained, reproducible package containing **ALL tested multi-asset datasets directly inside `data/`**:
 - **`XAUUSD_1m_histdata/`**: `82` monthly 1-minute archives (`2020-01` .. `2026-10`, `2,360,931` bars, SHA-256 verified)
 - **`NSXUSD_1m_histdata/`**: `82` monthly 1-minute archives (`2020-01` .. `2026-10`, `2,277,180` bars, SHA-256 verified)
 - **`BTCUSD_5m/`**: `8` annual 5-minute 24/7 archives (`2019` .. `2026`, `823,154` bars, SHA-256 verified)
 
-Includes the **V7 Multi-Asset Uncorrelated Sniper System (`XAUUSD` + `NSXUSD` + `BTCUSD`)** with `10R–17.4R` HTF targets from tight `1m`/`5m` entries, **`V6` (`5`-sleeve XAUUSD)**, **`V5` (`4`-sleeve XAUUSD)**, **`V4` (`3`-sleeve baseline)**, **`9/9` Zero-Lookahead unit & prefix-invariance tests**, `2×` cost-stress verification, `$100` compounding simulations, charts, and full Arabic engineering handoff (`HANDOFF_DETAILED_AR.md`).
+Includes the **V8 Microscopy-Upgraded Multi-Asset System (`XAUUSD` + `NSXUSD` + `BTCUSD`)**, **V7 Baseline (`10R–17.4R` HTF Sniper)**, **`V6` (`5`-sleeve XAUUSD)**, **`V5` (`4`-sleeve XAUUSD)**, **`V4` (`3`-sleeve baseline)**, **`10/10` Zero-Lookahead unit & prefix-invariance tests**, `2×` cost-stress verification, 81-month `$100` compounding ledgers, charts, and full Arabic engineering & microscopy handoff (`HANDOFF_DETAILED_AR.md`).
+
+## V8 Microscopy-Upgraded Multi-Asset Portfolio (`2020-02-01` → `2026-10-31`, `81` Months)
+
+### 4 Structural Market Microscopy Upgrades (Derived from `1,603`-Trade Forensic Autopsy)
+1. **`V3_Pro_Clean` (XAUUSD):** Drops `13:00–14:59 UTC` NY cash-open chop (`N=124` vs `261`, `+95.2R`, `PF 1.560 -> 2.288`, `DD 13.7R -> 7.4R`, `worst month -6.2R -> -3.1R`).
+2. **`NSX_AMD_1D` (NSXUSD):** Enforces causal `1D BOS` alignment (`N=256` vs `504`, `+79.1R` vs `+61.8R`, `PF 1.189 -> 1.506`, `DD 24.8R -> 13.1R`, `t +1.40 -> +2.28`).
+3. **`NSX_1H1m_10R >=09h` (NSXUSD):** Removes dead `07:00–08:59 UTC` London hours (`min_hour_utc=9`, `N=203`, `+97.8R` vs `+84.4R`, `PF 1.412 -> 1.540`, `DD 47.1R -> 41.6R`).
+4. **`BTC_15R_BE >=09h` (BTCUSD):** Drops Asian `00:00–08:59 UTC` (`min_hour_utc=9`) + activates causal `BE@3.0R(+1.0R)` shield (`N=134`, `WR 10.3% -> 29.9%`, `+90.6R`, `PF 1.596 -> 1.906`, `DD 36.8R -> 21.5R`, `6/7` +yrs vs `4/7`).
+
+### V8 vs V7 Portfolios (`1.0×` Realistic Cost & `2.0×` Double-Cost Stress)
+| Portfolio / Mode | `N` | WR% | Net R (`Avg/mo`) | PF | Max DD | `t-stat` | `+Yrs` | `-Mo / 81` | Worst Mo | `$100 @ 1%` | `$100 @ 1.5%` | `$100 @ 2%` |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| **`V7_Global_1Pos` (Baseline)** | `887` | `35.4%` | `+317.3R (+3.92R)` | `1.531` | `20.2R` | `+4.12` | `7/7` | `23` | `-10.1R` | `$1,794` | `$6,235` | `$19,229` |
+| **`V8_Global_1Pos` (Upgraded)** | `791` | `38.0%` | **`+325.4R (+4.02R)`** | **`1.637`** | `20.3R` | **`+4.68`** | **`7/7`** | `23` | **`-8.3R`** | **`$2,044`** | **`$7,839`** | **`$27,188`** |
+| **`V7_3Asset_1PosEach` (Baseline)** | `1,603` | `31.8%` | `+481.4R (+5.94R)` | `1.422` | `35.8R` | `+4.44` | `7/7` | `25` | `-17.4R` | `$7,026` | `$39,952` | `$179,790` |
+| **`V8_3Asset_1PosEach` (Upgraded)** | `1,321` | `34.2%` | **`+515.8R (+6.37R)`** | **`1.570`** | **`26.1R`** | **`+5.22`** | **`7/7`** | `27` | **`-11.3R`** | **`$10,852`** (`DD 23.0%`) | **`$81,566`** (`DD 32.6%`) | **`$503,286`** (`DD 41.3%`) |
+| `V8_Global_1Pos (2.0x Cost Stress)` | `791` | `38.0%` | `+291.4R (+3.60R)` | `1.548` | `23.5R` | `+4.19` | `7/7` | `27` | `-8.7R` | `$1,457` | `$4,721` | `$13,831` |
+| `V8_3Asset_1PosEach (2.0x Stress)` | `1,321` | `34.2%` | `+459.2R (+5.67R)` | `1.487` | `29.9R` | `+4.65` | `7/7` | `27` | `-12.0R` | `$6,171` | `$35,007` | `$163,034` |
+
+*(Also includes `entry_mode="ob_overlap"` & `require_cisd=True` inside `run_engine_sniper_htf` implementing ICT `OB+/BISI + CISD`; `XAU 15m->1m + CISD + OB/BISI` improves `PF 1.526 -> 1.654` on `240` trades.)*
+
+---
 
 ## V7 Multi-Asset Uncorrelated Sniper Results (`2020-02-01` → `2026-10-31`, `81` Months)
 
@@ -73,6 +95,7 @@ smc_v4_multisleeve_package/
 ├── requirements.txt                           # Python dependencies
 ├── run_v4_multisleeve_backtest.py             # Reproduces XAUUSD V6 + V5 + V4 backtests
 ├── run_v7_multiasset_backtest.py              # Reproduces Multi-Asset V7 (XAU + NSX + BTC) + 2x stress + charts
+├── run_v8_multiasset_backtest.py              # Reproduces Multi-Asset V8 Microscopy + monthly $100 ledger + 2x stress
 ├── data/
 │   ├── DATA_MANIFEST.sha256                   # SHA-256 checksums for 82 XAUUSD 1m files
 │   ├── NSXUSD_MANIFEST.sha256                 # SHA-256 checksums for 82 NSXUSD 1m files
@@ -84,10 +107,16 @@ smc_v4_multisleeve_package/
 │   ├── __init__.py
 │   ├── causal_primitives.py                   # Multi-asset loader, causal resampling, k-swings, ATR, HTF BOS
 │   ├── smc_v3_trend_engine.py                 # Sleeve 1: V3_NY & V3_Pro (0.75 ATR SL + 1H trail)
-│   └── smc_v4_portfolio.py                    # VisB_Pro, VisA, AMD_Pro, XAU_LTF1M, Sniper_HTF, V4..V7
+│   └── smc_v4_portfolio.py                    # VisB_Pro, VisA, AMD_Pro, XAU_LTF1M, Sniper_HTF (OB/CISD+BE), V4..V8
 ├── tests/
-│   └── test_v4_zero_lookahead.py              # 9 strict causal & prefix-invariance pytest checks (V4..V7)
+│   └── test_v4_zero_lookahead.py              # 10 strict causal & prefix-invariance pytest checks (V4..V8 + ICT OB)
 └── results/
+    ├── summary_v8_multiasset.json             # Complete V8 microscopy summary (1x & 2x stress)
+    ├── trades_v8_global_1pos.csv              # 791 trades (V8_Global_1Pos)
+    ├── trades_v8_3asset_1pos_each.csv         # 1,321 trades (V8_3Asset_1PosEach)
+    ├── monthly_breakdown_v8_from_100usd.csv   # Full 81-month $100 compounding ledger (1%, 1.5%, 2%)
+    ├── v8_vs_v7_equity_and_dd.png
+    ├── v8_monthly_r_and_yearly.png
     ├── summary_v7_multiasset.json             # Complete V7 multi-asset numerical summary (1x & 2x stress)
     ├── trades_v7_global_1pos.csv              # 887 trades (V7_Global_1Pos)
     ├── trades_v7_3asset_1pos_each.csv         # 1,603 trades (V7_3Asset_1PosEach)
@@ -101,7 +130,7 @@ smc_v4_multisleeve_package/
         └── v4_multisleeve_yearly_bars.png
 ```
 
-## Quickstart (Verify All 3 Datasets + Zero-Lookahead Tests + Reproduce V7 & V6)
+## Quickstart (Verify All 3 Datasets + Zero-Lookahead Tests + Reproduce V8 & V7)
 
 ```bash
 cd smc_v4_multisleeve_package
@@ -112,12 +141,13 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 (cd data/NSXUSD_1m_histdata && sha256sum -c ../NSXUSD_MANIFEST.sha256)
 (cd data/BTCUSD_5m && sha256sum -c ../BTCUSD_MANIFEST.sha256)
 
-# 2. Run Zero-Lookahead & Prefix-Invariance test suite (9/9 checks)
+# 2. Run Zero-Lookahead & Prefix-Invariance test suite (10/10 checks)
 .venv/bin/pytest -v tests/test_v4_zero_lookahead.py
 
-# 3. Reproduce V7 Multi-Asset (XAU + NSX + BTC), 2x cost stress, correlation & charts
-.venv/bin/python run_v7_multiasset_backtest.py
+# 3. Reproduce V8 Microscopy-Upgraded Multi-Asset (XAU + NSX + BTC), 2x stress, $100 ledger & charts
+.venv/bin/python run_v8_multiasset_backtest.py
 
-# 4. Reproduce XAUUSD V6 + V5 + V4 backtests & charts
+# 4. Reproduce V7 Multi-Asset & XAUUSD V6 + V5 + V4 backtests
+.venv/bin/python run_v7_multiasset_backtest.py
 .venv/bin/python run_v4_multisleeve_backtest.py
 ```

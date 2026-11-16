@@ -25,6 +25,7 @@ from .smc_v4_portfolio import (
     run_smc_v5_portfolio,
     run_smc_v6_xau_portfolio,
     run_smc_v7_multiasset_portfolio,
+    run_smc_v8_multiasset_portfolio,
     simulate_compounded_account,
 )
 
@@ -52,5 +53,6 @@ __all__ = [
     "run_smc_v5_portfolio",
     "run_smc_v6_xau_portfolio",
     "run_smc_v7_multiasset_portfolio",
+    "run_smc_v8_multiasset_portfolio",
     "simulate_compounded_account",
 ]
