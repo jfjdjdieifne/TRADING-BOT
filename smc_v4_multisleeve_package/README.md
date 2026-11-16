@@ -177,3 +177,20 @@ Run its focused tests from the package root:
 The Arabic design, source limits, and live-readiness checklist are in
 `V9_DYNAMIC_PROFILE_DESIGN_AR.md`. `V9_DYNAMIC_PROFILE_EXAMPLE.py` is a
 synthetic offline example only.
+
+## V9 QuantConnect export (testing draft)
+
+`exports/quantconnect/V9_3Asset_1PosEach_DynamicProfile_QC.py` is a
+self-contained QuantConnect-oriented export: it retains the V8 sleeves and
+adds the V9 profile, sweep/CHoCH, zone-target, risk, expiry, and telemetry
+layer. The V8 file remains unchanged.
+
+The export defaults to `v9_require_spot_cvd=1`. This is fail-closed because
+QuantConnect's XAU/NSX/BTC bars do not, by themselves, provide the declared
+external Spot executed-flow feed required by V9. `v9_use_ohlcv_proxy=1` is an
+explicit research-only close-location proxy and is not Spot CVD evidence.
+V9 pending orders expire on a 15-minute clock after
+`v9_pending_expiry_bars` bars (default 20). A local `py_compile` and stub/API
+smoke check do not replace QuantConnect cloud compilation, data-contract
+verification, backtesting, walk-forward testing, paper trading, or live
+simulation; no profitability result is claimed.
