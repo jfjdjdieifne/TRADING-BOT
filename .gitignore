@@ -28,3 +28,12 @@ smoke/
 .closure_*.sha
 .tools_gate_*.txt
 .build_mutations.json
+
+# --- never commit (repo rule: no caches / no uploads / no credentials)
+.venv/
+venv/
+__pycache__/
+*.pyc
+uploads/
+*.zip
+.env
