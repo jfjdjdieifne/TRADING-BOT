@@ -1,10 +1,10 @@
-# QUANTCONNECT.COM - SMC V8.1 Multi-Asset Sniper (OCO-Safe, ATR-Floored, Reclaim-Confirmed)
+# QUANTCONNECT.COM - SMC V8.2 Multi-Asset Sniper (Elite-4 High-PF, Step-Lock, UTC-Aligned)
 # Assets: XAUUSD (OANDA CFD), NAS100USD (OANDA CFD), BTCUSD (Coinbase Crypto)
-# 6 High-Edge Sleeves (XAU_LTF1M & VisA disabled for OANDA spread resilience):
-#   XAUUSD   : V3_Pro_Clean (15m), VisB_Pro (1H->5m), AMD_Pro (15m Reclaim)
-#   NAS100USD: NSX_AMD_1D (15m+1D), NSX_1H1m_10R (1H->1m >=09h UTC)
-#   BTCUSD   : BTC_15R_BE (1H->5m >=09h UTC, BE@+3R->+1R)
-# Protections: OCO portfolio-sync guard, ATR5m+% stop floor, PF-tiered sizing, realized-equity DD brake.
+# Default Elite-4 Sleeves (NSX_1H1m_10R, XAU_LTF1M, VisA disabled for OANDA spread resilience):
+#   XAUUSD   : V3_Pro_Clean (15m + BE@1.5R->+0.2R + 1H trail), VisB_Pro (1H->5m + 1H trail)
+#   NAS100USD: NSX_AMD_1D (15m+1D + 1H trail)
+#   BTCUSD   : BTC_15R_BE (1H->5m >=09h UTC, TP=12R + progressive step-locks)
+# Optional param: use_amd_pro=1 enables AMD_Pro (confirm reclaim), risk_scale=1.0 scales sizing.
 
 from AlgorithmImports import *
 from collections import defaultdict, deque
@@ -23,9 +23,8 @@ class CausalSwingTracker:
         self.act_hi = []
         self.act_lo = []
 
-    def update(self, bar):
+    def update_hlc(self, h: float, l: float, c: float):
         self.bar_idx += 1
-        h, l, c = float(bar.High), float(bar.Low), float(bar.Close)
         self.win.append((h, l))
         nh = nl = None
         if len(self.win) == 2 * self.k + 1:
@@ -55,6 +54,9 @@ class CausalSwingTracker:
             self.trend = -1
         return nh, nl
 
+    def update(self, bar):
+        return self.update_hlc(float(bar.High), float(bar.Low), float(bar.Close))
+
 
 class WilderATR14:
     def __init__(self) -> None:
@@ -78,33 +80,30 @@ class AssetState:
         self.name, self.symbol, self.leverage = name, symbol, leverage
         self.sw_1d, self.sw_4h = CausalSwingTracker(2), CausalSwingTracker(2)
         self.sw_1h, self.sw_1h_k3 = CausalSwingTracker(2), CausalSwingTracker(3)
-        self.sw_15m, self.sw_15m_k3 = CausalSwingTracker(2), CausalSwingTracker(3)
-        self.sw_5m, self.sw_ltf = CausalSwingTracker(2), CausalSwingTracker(2)
+        self.sw_15m, self.sw_5m, self.sw_ltf = CausalSwingTracker(2), CausalSwingTracker(2), CausalSwingTracker(2)
         self.atr_15m, self.atr_5m, self.atr_ltf = WilderATR14(), WilderATR14(), WilderATR14()
-        self.bars_1h, self.bars_15m = deque(maxlen=15), deque(maxlen=20)
-        self.bars_5m, self.bars_ltf = deque(maxlen=15), deque(maxlen=5)
-        self.cands_1h_k3_5m, self.cands_1h_k3_ltf = [], []
-        self.amd_manips, self.visa_5m_lo, self.visa_5m_hi = [], deque(maxlen=20), deque(maxlen=20)
-        self.visa_tap_s, self.visa_tap_l, self.visa_hi_px, self.visa_lo_px = -999, -999, 0.0, 1e18
+        self.bars_15m, self.bars_5m, self.bars_ltf = deque(maxlen=20), deque(maxlen=15), deque(maxlen=5)
+        self.cands_1h_k3_5m, self.cands_1h_k3_ltf, self.amd_manips = [], [], []
+        self.b4h_bucket, self.b4h_ohlc = None, None
+        self.b1d_date, self.b1d_ohlc = None, None
         self.pending_ticket = self.pending_meta = self.confirm_setup = None
         self.in_position, self.active_engine, self.active_side = False, None, 0
         self.entry_price = self.sl_price = self.risk_dist = self.qty = 0.0
-        self.tp_price = self.trail_after_r = self.be_act_r = self.trail_mode = None
-        self.be_lock_r, self.be_done, self.trailing_active = 1.0, False, False
+        self.tp_price = self.trail_after_r = self.trail_mode = None
+        self.step_locks, self.trailing_active = (), False
         self.sl_ticket = self.tp_ticket = None
         self.ltf_idx = self.idx_5m = self.idx_15m = self.bars_seen = self.orders_submitted = 0
 
 
 class V8MultiAssetSniperAlgorithm(QCAlgorithm):
-    # PF-tiered base risk weights (Tier 1 Elite 1.5%, Tier 2 Core 0.9%, Tier 3 Tail 0.7%)
     ENGINE_RISK = {
         "VisB_Pro": 0.015,
         "V3_Pro_Clean": 0.015,
         "BTC_15R_BE": 0.015,
-        "AMD_Pro": 0.009,
-        "NSX_AMD_1D": 0.009,
-        "NSX_1H1m_10R": 0.007,
+        "NSX_AMD_1D": 0.010,
+        "AMD_Pro": 0.008,
     }
+    BTC_STEPS = ((2.0, 0.2), (3.0, 1.0), (5.0, 2.5), (7.0, 4.5), (9.0, 6.5))
 
     def initialize(self) -> None:
         self.set_time_zone(TimeZones.UTC)
@@ -112,6 +111,7 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
         self.set_end_date(2026, 10, 31)
         self.set_cash(100000)
         self.risk_scale = float(self.get_parameter("risk_scale") or 1.0)
+        self.use_amd_pro = bool(int(self.get_parameter("use_amd_pro") or 0))
         self.hwm_equity = 100000.0
         self.set_warm_up(timedelta(days=30), Resolution.MINUTE)
         self.set_brokerage_model(DefaultBrokerageModel(AccountType.MARGIN))
@@ -130,8 +130,7 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
         self.trade_counts, self.invalid_counts = defaultdict(int), defaultdict(int)
         self.oco_cleanups = 0
         for sym, st in self.assets.items():
-            self.consolidate(sym, timedelta(days=1), lambda b, s=st: self.on_1d(s, b))
-            self.consolidate(sym, timedelta(hours=4), lambda b, s=st: self.on_4h(s, b))
+            # UTC-exact 4H and 1D bars are aggregated inside on_1h to avoid OANDA market-break drift
             self.consolidate(sym, timedelta(hours=1), lambda b, s=st: self.on_1h(s, b))
             self.consolidate(sym, timedelta(minutes=15), lambda b, s=st: self.on_15m(s, b))
             self.consolidate(sym, timedelta(minutes=5), lambda b, s=st: self.on_5m(s, b))
@@ -153,9 +152,8 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
     def _effective_risk_pct(self, engine: str) -> float:
         eq = float(self.portfolio.total_portfolio_value)
         dd = (self.hwm_equity - eq) / self.hwm_equity if self.hwm_equity > 0 else 0.0
-        brake = 0.35 if dd >= 0.12 else (0.50 if dd >= 0.08 else 1.0)
-        base = self.ENGINE_RISK.get(engine, 0.009)
-        return base * brake * self.risk_scale
+        brake = 0.30 if dd >= 0.09 else (0.50 if dd >= 0.06 else 1.0)
+        return self.ENGINE_RISK.get(engine, 0.010) * brake * self.risk_scale
 
     def _round_qty(self, sym: Symbol, raw_qty: float, is_long: bool) -> float:
         sp = self.securities[sym].symbol_properties
@@ -204,13 +202,14 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
         return sl
 
     def _submit_entry(self, st: AssetState, engine: str, side: int, trig: float, sl: float,
-                      tp: float = None, trail_after_r: float = None, be_act_r: float = None,
-                      be_lock_r: float = 1.0, expire_bars: int = 20, min_risk: float = 0.0,
-                      kz_mode: str = "both", skip_hours=None, is_market: bool = False,
-                      require_confirm: bool = False) -> None:
+                      tp: float = None, trail_after_r: float = None, step_locks=(),
+                      expire_bars: int = 20, min_risk: float = 0.0, skip_hours=None,
+                      is_market: bool = False, require_confirm: bool = False) -> None:
         if self.is_warming_up or st.in_position or st.pending_ticket is not None or st.confirm_setup is not None:
             return
         if not self.is_market_open(st.symbol):
+            return
+        if st.symbol != self.btc_sym and self.time.hour == 22:
             return
         if self.portfolio[st.symbol].invested:
             self.transactions.cancel_open_orders(st.symbol)
@@ -228,12 +227,11 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
             return
         if not is_market and ((side == 1 and trig_px > cur_px) or (side == -1 and trig_px < cur_px)):
             return
-
         if require_confirm and not is_market:
             st.confirm_setup = {
                 "engine": engine, "side": side, "trig": trig_px, "sl": sl_px,
                 "tp": self._round_px(st.symbol, tp) if tp is not None else None,
-                "trail_after_r": trail_after_r, "be_act_r": be_act_r, "be_lock_r": be_lock_r,
+                "trail_after_r": trail_after_r, "step_locks": step_locks,
                 "exp": st.ltf_idx + expire_bars, "skip_hours": skip_hours, "touched": False,
             }
             return
@@ -246,8 +244,7 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
             "engine": engine, "side": side, "trig": trig_px, "sl": sl_px,
             "tp": self._round_px(st.symbol, tp) if tp is not None else None,
             "risk": risk, "qty": qty, "trail_after_r": trail_after_r,
-            "be_act_r": be_act_r, "be_lock_r": be_lock_r,
-            "expire_idx": st.ltf_idx + expire_bars, "kz_mode": kz_mode, "skip_hours": skip_hours,
+            "step_locks": step_locks, "expire_idx": st.ltf_idx + expire_bars, "skip_hours": skip_hours,
         }
         st.orders_submitted += 1
         ticket = self.market_order(st.symbol, qty, tag=engine) if is_market else self.limit_order(st.symbol, qty, trig_px, tag=engine)
@@ -257,27 +254,50 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
         if st.pending_meta is not None:
             st.pending_ticket = ticket
 
-    def on_1d(self, st: AssetState, bar) -> None:
-        st.sw_1d.update(bar)
+    def _update_utc_htf(self, st: AssetState, dt, o: float, h: float, l: float, c: float) -> None:
+        # Flush UTC-aligned 4H and 1D bars immediately on boundary (or bucket change across breaks)
+        ref = dt - timedelta(minutes=1)
+        b4_key = (ref.date(), ref.hour // 4)
+        if st.b4h_bucket is not None and b4_key != st.b4h_bucket and st.b4h_ohlc is not None:
+            st.sw_4h.update_hlc(st.b4h_ohlc[1], st.b4h_ohlc[2], st.b4h_ohlc[3])
+            st.b4h_ohlc = None
+        if st.b4h_ohlc is None:
+            st.b4h_ohlc = (o, h, l, c)
+        else:
+            st.b4h_ohlc = (st.b4h_ohlc[0], max(st.b4h_ohlc[1], h), min(st.b4h_ohlc[2], l), c)
+        st.b4h_bucket = b4_key
+        if dt.hour % 4 == 0 and dt.minute == 0:
+            st.sw_4h.update_hlc(st.b4h_ohlc[1], st.b4h_ohlc[2], st.b4h_ohlc[3])
+            st.b4h_ohlc = None
 
-    def on_4h(self, st: AssetState, bar) -> None:
-        st.sw_4h.update(bar)
+        d_key = ref.date()
+        if st.b1d_date is not None and d_key != st.b1d_date and st.b1d_ohlc is not None:
+            st.sw_1d.update_hlc(st.b1d_ohlc[1], st.b1d_ohlc[2], st.b1d_ohlc[3])
+            st.b1d_ohlc = None
+        if st.b1d_ohlc is None:
+            st.b1d_ohlc = (o, h, l, c)
+        else:
+            st.b1d_ohlc = (st.b1d_ohlc[0], max(st.b1d_ohlc[1], h), min(st.b1d_ohlc[2], l), c)
+        st.b1d_date = d_key
+        if dt.hour == 0 and dt.minute == 0:
+            st.sw_1d.update_hlc(st.b1d_ohlc[1], st.b1d_ohlc[2], st.b1d_ohlc[3])
+            st.b1d_ohlc = None
 
     def on_1h(self, st: AssetState, bar) -> None:
         h, l, c, o = float(bar.High), float(bar.Low), float(bar.Close), float(bar.Open)
-        st.bars_1h.append((bar.EndTime, o, h, l, c))
+        self._update_utc_htf(st, bar.EndTime, o, h, l, c)
         k3 = st.sw_1h_k3
         for idx_s, p_lo in list(k3.act_lo):
             if (k3.bar_idx + 1 - idx_s) >= 4 and l < p_lo and c > p_lo:
                 if st.symbol == self.xau_sym:
                     st.cands_1h_k3_5m.append({"side": 1, "start_i": st.idx_5m, "sl_base": l, "choch": st.sw_5m.last_high})
-                else:
+                elif st.symbol == self.btc_sym:
                     st.cands_1h_k3_ltf.append({"side": 1, "start_i": st.ltf_idx, "sl_base": l, "choch": st.sw_ltf.last_high})
         for idx_s, p_hi in list(k3.act_hi):
             if (k3.bar_idx + 1 - idx_s) >= 4 and h > p_hi and c < p_hi:
                 if st.symbol == self.xau_sym:
                     st.cands_1h_k3_5m.append({"side": -1, "start_i": st.idx_5m, "sl_base": h, "choch": st.sw_5m.last_low})
-                else:
+                elif st.symbol == self.btc_sym:
                     st.cands_1h_k3_ltf.append({"side": -1, "start_i": st.ltf_idx, "sl_base": h, "choch": st.sw_ltf.last_low})
         nh, nl = st.sw_1h.update(bar)
         st.sw_1h_k3.update(bar)
@@ -302,14 +322,15 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
                 bos_up = (b2[4] <= st.sw_15m.last_high < b3[4]) or (b1[4] <= st.sw_15m.last_high < b2[4])
                 if bos_up and (b3[3] - b1[2]) >= max(0.20, 0.30 * a15) and b2[4] > b2[1] and c2b >= a15:
                     self._submit_entry(st, "V3_Pro_Clean", 1, b3[3], min(b1[3], b2[3]) - buf,
-                                       trail_after_r=2.5, expire_bars=300, min_risk=1.0, kz_mode="ny", skip_hours=(13, 14))
+                                       trail_after_r=2.5, step_locks=((1.5, 0.2),), expire_bars=300, min_risk=1.0, skip_hours=(13, 14))
             elif st.sw_4h.trend == -1 and st.sw_1h.trend == -1 and st.sw_15m.last_low is not None:
                 bos_dn = (b2[4] >= st.sw_15m.last_low > b3[4]) or (b1[4] >= st.sw_15m.last_low > b2[4])
                 if bos_dn and (b1[3] - b3[2]) >= max(0.20, 0.30 * a15) and b2[4] < b2[1] and c2b >= a15:
                     self._submit_entry(st, "V3_Pro_Clean", -1, b3[2], max(b1[2], b2[2]) + buf,
-                                       trail_after_r=2.5, expire_bars=300, min_risk=1.0, kz_mode="ny", skip_hours=(13, 14))
+                                       trail_after_r=2.5, step_locks=((1.5, 0.2),), expire_bars=300, min_risk=1.0, skip_hours=(13, 14))
 
-        if st.symbol in (self.xau_sym, self.nsx_sym) and len(st.bars_15m) >= 10 and a15 > 0:
+        run_amd = (st.symbol == self.nsx_sym) or (st.symbol == self.xau_sym and self.use_amd_pro)
+        if run_amd and len(st.bars_15m) >= 10 and a15 > 0:
             box = list(st.bars_15m)[-9:-1]
             box_hi, box_lo = max(b[2] for b in box), min(b[3] for b in box)
             if (box_hi - box_lo) <= 2.5 * a15:
@@ -342,10 +363,7 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
                         continue
                 still.append(mp)
             st.amd_manips = still
-
         st.sw_15m.update(bar)
-        if st.symbol == self.xau_sym:
-            st.sw_15m_k3.update(bar)
 
     def on_5m(self, st: AssetState, bar) -> None:
         st.idx_5m += 1
@@ -375,42 +393,10 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
                 still.append(sc)
             st.cands_1h_k3_5m = still
 
-        if st.symbol == self.xau_sym and a5 > 0 and "VisA" in self.ENGINE_RISK:
-            buf = max(1.0, 0.5 * a5)
-            for idx_s, sp_hi in st.sw_15m_k3.act_hi:
-                if (st.sw_15m_k3.bar_idx - idx_s) <= 120 and h >= sp_hi - 0.5 * a5:
-                    st.visa_hi_px = h if (st.idx_5m - st.visa_tap_s > 18) else max(st.visa_hi_px, h)
-                    st.visa_tap_s = st.idx_5m
-            for idx_s, sp_lo in st.sw_15m_k3.act_lo:
-                if (st.sw_15m_k3.bar_idx - idx_s) <= 120 and l <= sp_lo + 0.5 * a5:
-                    st.visa_lo_px = l if (st.idx_5m - st.visa_tap_l > 18) else min(st.visa_lo_px, l)
-                    st.visa_tap_l = st.idx_5m
-            if self._in_kz(bar.EndTime) and len(st.bars_5m) >= 2:
-                pc = st.bars_5m[-2][4]
-                if (st.idx_5m - st.visa_tap_s) <= 12 and len(st.visa_5m_lo) >= 3:
-                    la, lb, lc = st.visa_5m_lo[-3], st.visa_5m_lo[-2], st.visa_5m_lo[-1]
-                    if la[1] < lb[1] < lc[1] and (st.idx_5m - la[0]) <= 72 and lc[0] < st.idx_5m and pc >= lc[1] > c:
-                        sl = max(st.visa_hi_px, max(b[2] for b in list(st.bars_5m)[-7:])) + buf
-                        if sl > c and 2.0 <= (c - la[1]) / (sl - c) <= 6.0:
-                            self._submit_entry(st, "VisA", -1, c, sl, tp=la[1], expire_bars=5, min_risk=1.0, is_market=True)
-                        st.visa_tap_s = -999
-                if (st.idx_5m - st.visa_tap_l) <= 12 and len(st.visa_5m_hi) >= 3:
-                    ha, hb, hc = st.visa_5m_hi[-3], st.visa_5m_hi[-2], st.visa_5m_hi[-1]
-                    if ha[1] > hb[1] > hc[1] and (st.idx_5m - ha[0]) <= 72 and hc[0] < st.idx_5m and pc <= hc[1] < c:
-                        sl = min(st.visa_lo_px, min(b[3] for b in list(st.bars_5m)[-7:])) - buf
-                        if c > sl and 2.0 <= (ha[1] - c) / (c - sl) <= 6.0:
-                            self._submit_entry(st, "VisA", 1, c, sl, tp=ha[1], expire_bars=5, min_risk=1.0, is_market=True)
-                        st.visa_tap_l = -999
-
-        nh5, nl5 = st.sw_5m.update(bar)
-        if nl5 is not None:
-            st.visa_5m_lo.append((st.idx_5m - 2, nl5[1]))
-        if nh5 is not None:
-            st.visa_5m_hi.append((st.idx_5m - 2, nh5[1]))
-
+        st.sw_5m.update(bar)
         if st.symbol == self.btc_sym:
             st.atr_5m.val = a5
-            self._ltf_bar(st, bar, 9, False, 0.0, 0.0020, 15.0, 3.0, "dual", "BTC_15R_BE", True)
+            self._ltf_bar(st, bar, 9, 0.0, 0.0020, 12.0, self.BTC_STEPS, "BTC_15R_BE", True)
 
     def on_data(self, data: Slice) -> None:
         for sym, st in self.assets.items():
@@ -422,10 +408,8 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
                 self.transactions.cancel_open_orders(sym)
                 self.liquidate(sym, tag="ORPHAN_SYNC")
                 self.oco_cleanups += 1
-            if sym == self.xau_sym:
-                self._ltf_bar(st, bar, None, True, 2.0, 0.0010, 3.0, None, "dual", "XAU_LTF1M", False)
-            elif sym == self.nsx_sym:
-                self._ltf_bar(st, bar, 9, True, 10.0, 0.0010, 10.0, None, "4h", "NSX_1H1m_10R", True)
+            if sym != self.btc_sym:
+                self._ltf_bar(st, bar, None, 0.0, 0.0, 0.0, (), "", False)
 
     def _check_confirm_setup(self, st: AssetState, dt, o: float, h: float, l: float, c: float) -> None:
         cs = st.confirm_setup
@@ -434,21 +418,17 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
         if st.ltf_idx > cs["exp"] or (cs["skip_hours"] and dt.hour in cs["skip_hours"]) or ((l <= cs["sl"]) if cs["side"] == 1 else (h >= cs["sl"])):
             st.confirm_setup = None
             return
-        if not cs["touched"]:
-            if ((l <= cs["trig"]) if cs["side"] == 1 else (h >= cs["trig"])):
-                cs["touched"] = True
+        if not cs["touched"] and ((l <= cs["trig"]) if cs["side"] == 1 else (h >= cs["trig"])):
+            cs["touched"] = True
         if cs["touched"]:
             ok_c = (c > o and c > cs["trig"]) if cs["side"] == 1 else (c < o and c < cs["trig"])
             if ok_c:
                 st.confirm_setup = None
-                self._submit_entry(
-                    st, cs["engine"], cs["side"], c, cs["sl"], tp=cs["tp"],
-                    trail_after_r=cs["trail_after_r"], be_act_r=cs["be_act_r"],
-                    be_lock_r=cs["be_lock_r"], is_market=True,
-                )
+                self._submit_entry(st, cs["engine"], cs["side"], c, cs["sl"], tp=cs["tp"],
+                                   trail_after_r=cs["trail_after_r"], step_locks=cs["step_locks"], is_market=True)
 
-    def _ltf_bar(self, st: AssetState, bar, min_hr, use_kz: bool, min_abs: float, min_pct: float,
-                 fixed_rr: float, be_act_r, htf_mode: str, eng: str, allow_entries: bool) -> None:
+    def _ltf_bar(self, st: AssetState, bar, min_hr, min_abs: float, min_pct: float,
+                 fixed_rr: float, step_locks, eng: str, allow_entries: bool) -> None:
         st.ltf_idx += 1
         dt = bar.EndTime
         o, h, l, c = float(bar.Open), float(bar.High), float(bar.Low), float(bar.Close)
@@ -456,17 +436,16 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
         st.bars_ltf.append((dt, o, h, l, c))
 
         if st.in_position and st.risk_dist > 0 and st.sl_ticket is not None:
-            can_upd = st.sl_ticket.status not in (OrderStatus.FILLED, OrderStatus.CANCELED, OrderStatus.INVALID)
-            if can_upd and st.be_act_r is not None and not st.be_done:
-                hit_be = (h >= st.entry_price + st.be_act_r * st.risk_dist) if st.active_side == 1 else (l <= st.entry_price - st.be_act_r * st.risk_dist)
-                if hit_be:
-                    st.be_done = True
-                    self._try_lock_sl(st, st.entry_price + st.active_side * st.be_lock_r * st.risk_dist, c)
-            if can_upd and st.trail_after_r is not None and not st.trailing_active:
-                hit_tr = (h >= st.entry_price + st.trail_after_r * st.risk_dist) if st.active_side == 1 else (l <= st.entry_price - st.trail_after_r * st.risk_dist)
-                if hit_tr:
-                    st.trailing_active, st.trail_mode = True, "1h"
-                    self._try_lock_sl(st, st.entry_price + st.active_side * st.be_lock_r * st.risk_dist, c)
+            if st.sl_ticket.status not in (OrderStatus.FILLED, OrderStatus.CANCELED, OrderStatus.INVALID):
+                for act_r, lk_r in st.step_locks:
+                    hit = (h >= st.entry_price + act_r * st.risk_dist) if st.active_side == 1 else (l <= st.entry_price - act_r * st.risk_dist)
+                    if hit:
+                        self._try_lock_sl(st, st.entry_price + st.active_side * lk_r * st.risk_dist, c)
+                if st.trail_after_r is not None and not st.trailing_active:
+                    hit_tr = (h >= st.entry_price + st.trail_after_r * st.risk_dist) if st.active_side == 1 else (l <= st.entry_price - st.trail_after_r * st.risk_dist)
+                    if hit_tr:
+                        st.trailing_active, st.trail_mode = True, "1h"
+                        self._try_lock_sl(st, st.entry_price + st.active_side * st.risk_dist, c)
 
         if st.pending_ticket is not None and st.pending_meta is not None:
             pm = st.pending_meta
@@ -476,8 +455,7 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
         if not self.is_warming_up:
             self._check_confirm_setup(st, dt, o, h, l, c)
 
-        kz_ok = ((not use_kz) or self._in_kz(dt)) and (min_hr is None or dt.hour >= min_hr)
-        if allow_entries and len(st.bars_ltf) >= 3 and kz_ok and not self.is_warming_up:
+        if allow_entries and len(st.bars_ltf) >= 3 and (min_hr is None or dt.hour >= min_hr) and not self.is_warming_up:
             b1, b2, b3 = st.bars_ltf[-3], st.bars_ltf[-2], st.bars_ltf[-1]
             c2b, buf, min_r = abs(b2[4] - b2[1]), a1, max(min_abs, c * min_pct)
             still = []
@@ -487,20 +465,18 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
                 if sc["side"] == 1:
                     if l < sc["sl_base"]:
                         continue
-                    ok_htf = (st.sw_4h.trend == 1) and (htf_mode != "dual" or st.sw_1h.trend == 1)
-                    if ok_htf and sc["choch"] is not None and b3[4] > sc["choch"] and (b3[3] - b1[2]) >= 0.25 * a1 and b2[4] > b2[1] and c2b >= a1:
+                    if st.sw_4h.trend == 1 and st.sw_1h.trend == 1 and sc["choch"] is not None and b3[4] > sc["choch"] and (b3[3] - b1[2]) >= 0.25 * a1 and b2[4] > b2[1] and c2b >= a1:
                         trig, sl = b3[3], sc["sl_base"] - buf
                         sl = self._floor_sl(st, 1, trig, sl, min_r, c)
-                        self._submit_entry(st, eng, 1, trig, sl, tp=trig + fixed_rr * (trig - sl), be_act_r=be_act_r, expire_bars=20, min_risk=min_r, kz_mode="both" if use_kz else "none")
+                        self._submit_entry(st, eng, 1, trig, sl, tp=trig + fixed_rr * (trig - sl), step_locks=step_locks, expire_bars=20, min_risk=min_r)
                         continue
                 else:
                     if h > sc["sl_base"]:
                         continue
-                    ok_htf = (st.sw_4h.trend == -1) and (htf_mode != "dual" or st.sw_1h.trend == -1)
-                    if ok_htf and sc["choch"] is not None and b3[4] < sc["choch"] and (b1[3] - b3[2]) >= 0.25 * a1 and b2[4] < b2[1] and c2b >= a1:
+                    if st.sw_4h.trend == -1 and st.sw_1h.trend == -1 and sc["choch"] is not None and b3[4] < sc["choch"] and (b1[3] - b3[2]) >= 0.25 * a1 and b2[4] < b2[1] and c2b >= a1:
                         trig, sl = b3[2], sc["sl_base"] + buf
                         sl = self._floor_sl(st, -1, trig, sl, min_r, c)
-                        self._submit_entry(st, eng, -1, trig, sl, tp=trig - fixed_rr * (sl - trig), be_act_r=be_act_r, expire_bars=20, min_risk=min_r, kz_mode="both" if use_kz else "none")
+                        self._submit_entry(st, eng, -1, trig, sl, tp=trig - fixed_rr * (sl - trig), step_locks=step_locks, expire_bars=20, min_risk=min_r)
                         continue
                 still.append(sc)
             st.cands_1h_k3_ltf = still
@@ -535,9 +511,8 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
             fill_px = float(oe.fill_price)
             st.in_position, st.active_engine, st.active_side = True, pm["engine"], pm["side"]
             st.entry_price, st.sl_price, st.tp_price = fill_px, pm["sl"], pm["tp"]
-            st.risk_dist, st.trail_after_r, st.be_act_r, st.be_lock_r = abs(fill_px - pm["sl"]), pm["trail_after_r"], pm["be_act_r"], pm["be_lock_r"]
-            st.be_done = st.trailing_active = False
-            st.trail_mode, st.qty, st.sl_ticket, st.tp_ticket = None, pm["qty"], None, None
+            st.risk_dist, st.trail_after_r, st.step_locks = abs(fill_px - pm["sl"]), pm["trail_after_r"], pm["step_locks"]
+            st.trailing_active, st.trail_mode, st.qty, st.sl_ticket, st.tp_ticket = False, None, pm["qty"], None, None
             self.trade_counts[(st.name, pm["engine"])] += 1
             if st.risk_dist <= 0:
                 self.liquidate(st.symbol)
@@ -548,7 +523,6 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
                 st.tp_ticket = self.limit_order(st.symbol, -pm["qty"], pm["tp"], tag=f"{pm['engine']}_TP")
             return
 
-        # Exit fill or stray OCO second-leg fill: enforce OCO + portfolio flat sync
         self.transactions.cancel_open_orders(oe.symbol)
         st.in_position = False
         st.sl_ticket = st.tp_ticket = None
@@ -560,9 +534,9 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
             self.hwm_equity = eq_now
 
     def on_end_of_algorithm(self) -> None:
-        self.log(f"=== V8.1 Asset Telemetry (oco_cleanups={self.oco_cleanups}) ===")
+        self.log(f"=== V8.2 Asset Telemetry (oco_cleanups={self.oco_cleanups}) ===")
         for st in self.assets.values():
             self.log(f"  {st.name:10s} | bars={st.bars_seen} | submitted={st.orders_submitted} | invalid={self.invalid_counts[st.name]}")
-        self.log("=== V8.1 Trade Breakdown by (Asset, Engine) ===")
+        self.log("=== V8.2 Trade Breakdown by (Asset, Engine) ===")
         for (asset, eng), cnt in sorted(self.trade_counts.items()):
             self.log(f"  {asset:10s} | {eng:14s}: {cnt} trades")
