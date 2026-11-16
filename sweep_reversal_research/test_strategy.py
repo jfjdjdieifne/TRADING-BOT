@@ -10,6 +10,7 @@ from strategy import (
     Bar15,
     MinuteBar,
     StrategyConfig,
+    aggregate_15m,
     detect_signals,
     detect_swings,
     signal_core_signature,
@@ -65,6 +66,19 @@ def pattern_rows(side: str) -> list[tuple[float, float, float, float]]:
 
 
 class StrategyTests(unittest.TestCase):
+    def test_native_five_minute_observations_aggregate_to_complete_15m(self) -> None:
+        origin = datetime(2021, 1, 1, tzinfo=UTC)
+        source = [
+            MinuteBar(index, origin + timedelta(minutes=5 * index), 100.0 + index, 101.0 + index, 99.0 + index, 100.5 + index)
+            for index in range(6)
+        ]
+        bars = aggregate_15m(source, source_interval_minutes=5)
+        self.assertEqual(len(bars), 2)
+        self.assertEqual(bars[0].minute_count, 3)
+        self.assertEqual(bars[0].first_minute, 0)
+        self.assertEqual(bars[0].last_minute, 2)
+        self.assertTrue(all(bar.complete for bar in bars))
+
     def test_short_uses_upper_sweep_red_displacement_and_prior_low_target(self) -> None:
         rows = [(100.0, 100.2, 99.8, 100.0)] * 24
         rows += [

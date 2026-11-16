@@ -13,6 +13,10 @@ python test_strategy.py
 python run_2021.py
 python run_2021_account.py
 python run_2021_active.py
+python run_2021_session_profile.py
+python run_2021_pattern_discovery.py
+python run_session_oos.py
+python run_filter_scan.py
 ```
 
 `run_2021_account.py` هو replay الحساب الكامل من يناير إلى ديسمبر 2021، برصيد
@@ -24,6 +28,27 @@ python run_2021_active.py
 اتجاه displacement في `S+1`، target الأول، وعدم التداخل، لكنه يزيل FVG وP80
 حتى لا يخنق عدد الإشارات. حسابه الأساسي يستخدم 0.15% لكل صفقة وحد سحب تاريخي
 مراقب 5%. مخرجاته في `results_2021_active/`. هذه نسخة بحثية، وليست ضمان ربح.
+
+`run_2021_session_profile.py` يضيف طبقة pattern/session قابلة للتدقيق: XAUUSD
+SHORT في نافذة London UTC، وLONG في نافذة New York UTC. مخرجاته في
+`results_2021_session_profile/`، وتشمل نتائج شهرية وأسبوعية ويومية وسجل كل صفقة.
+
+`run_2021_pattern_discovery.py` يقارن XAUUSD وNSXUSD وBTCUSD حسب الأصل
+والاتجاه والجلسة ونصف السنة في `results_2021_pattern_discovery/`. يخرج
+`breakdown_summary.csv` جداول الشهر والأسبوع واليوم وweekday والجلسة والساعة
+والاتجاه، مع win rate وtotal/mean R وprofit factor وdrawdown.
+
+BTCUSD ليس 1m: المصدر native 5m، وتُبنى منه شمعة setup 15m من ثلاث شموع 5m
+مكتملة، بينما XAU/NSX يبنيان setup 15m من 1m. لذلك لا تُقرأ فروق الأصول كأنها
+مقارنة تنفيذ متساوية.
+
+`run_session_oos.py` يختبر فرضية الجلسة المجمدة على XAUUSD وNSXUSD وBTCUSD
+خلال 2022–2025 كـ holdout في `results_session_oos/`، ويخرج جداول شهرية وأسبوعية
+ويومية في `period_summary.csv` مع win rate وPF وDD، والمقارنة raw مقابل
+one-position. `run_filter_scan.py` يفصل development 2021
+عن holdout 2022–2025 لعشر قواعد signal-time معلنة مسبقاً؛ النتيجة السالبة أو
+المتذبذبة تُحفظ ولا تُخفى في `FILTER_SCAN_REPORT_AR.md`.
+
 
 النتائج التشخيصية السابقة في `results_2021_six_months/`:
 
@@ -47,8 +72,13 @@ python run_2021_active.py
 5. الـ small/hammer candle بعد displacement معلومة وصفية لاحقة وليست شرطاً
    يخفي look-ahead.
 6. القياس الأساسي يدخل عند إغلاق displacement ويقيس الشموع الثلاث التالية على
-   1m OHLC. المسار الوصفي `after_three` ينتظر D+3، يرفض أي setup لمس target/stop
-   قبله، ثم يقيس D+4..D+6. لا توجد bid/ask في المصدر، لذلك لا يتم اختراع spread أو fee.
+   source OHLC. في XAU/NSX هذا source هو 1m؛ في BTC هو 5m، والـ15m setup يتكون
+   من ثلاث شموع 5m متصلة. المسار الوصفي `after_three` ينتظر D+3، يرفض أي setup
+   لمس target/stop قبله، ثم يقيس D+4..D+6. لا توجد bid/ask في المصدر، لذلك لا يتم
+   اختراع spread أو fee.
+7. كل replay يحمل warm-up كافياً قبل فترة التقييم؛ هذا مهم لأن تعريف first
+   opposite swing يعتمد على التاريخ المتاح، ولا يجوز تغيير حد warm-up بين train
+   وholdout ثم خلط النتائج.
 
 الجولة تقيس XAUUSD 15m/1m على ستة أشهر متتالية من 2021-06 إلى 2021-11، مع
 2021-05 warm-up و2021-12 outcome-only لنهاية نوفمبر. ليست النتيجة وعداً بربح أو

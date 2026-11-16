@@ -24,6 +24,7 @@ from collections import defaultdict
 from dataclasses import asdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from typing import Callable
 
 from strategy import (
     Outcome,
@@ -53,6 +54,8 @@ RISK_PCTS = (0.005, 0.01, 0.02)
 BASE_RISK_PCT = 0.01
 PROFILE_NOTE = ""
 MAX_ACCEPTABLE_DD_PCT: float | None = None
+SIGNAL_FILTER: Callable[[Signal], bool] | None = None
+SIGNAL_FILTER_DESCRIPTION = "all eligible signals"
 
 
 def _risk_label(risk_pct: float) -> str:
@@ -115,6 +118,23 @@ def _round(value: float | None, digits: int = 6) -> float | None:
     return None if value is None else round(float(value), digits)
 
 
+def _trade_metrics(values: list[float]) -> dict:
+    gains = sum(value for value in values if value > 0)
+    losses = sum(-value for value in values if value < 0)
+    equity = 0.0
+    peak = 0.0
+    max_drawdown = 0.0
+    for value in values:
+        equity += value
+        peak = max(peak, equity)
+        max_drawdown = max(max_drawdown, peak - equity)
+    return {
+        "win_rate_pct": _round(100.0 * sum(value > 0 for value in values) / len(values), 4) if values else None,
+        "profit_factor": _round(gains / losses, 6) if losses else ("inf" if gains else None),
+        "max_drawdown_r": _round(max_drawdown, 6),
+    }
+
+
 def _outcome_row(outcome: Outcome) -> dict:
     return asdict(outcome)
 
@@ -171,6 +191,7 @@ def _risk_curve(taken: list[dict], risk_pct: float, start_equity: float = 100.0)
         "negative_trades": sum(value < 0 for value in rs),
         "total_r": _round(total_r, 6),
         "mean_r": _round(statistics.fmean(rs), 6) if rs else None,
+        **_trade_metrics(rs),
         "max_drawdown_dollars": _round(max_dd, 4),
         "max_drawdown_pct_of_peak": _round(max_dd_pct * 100.0, 4),
     }
@@ -210,6 +231,7 @@ def _summarise_period(
             "time_exits": sum(row["state"] == "TIME" for row in selected),
             "positive_trades": sum(value > 0 for value in rs),
             "negative_trades": sum(value < 0 for value in rs),
+            **_trade_metrics(rs),
             "sum_r": _round(sum(rs), 6),
             "profit_usd_at_base_risk": _round(sum(pnl), 6),
             "equity_before_period_at_base_risk": _round(equity_before, 6),
@@ -247,14 +269,20 @@ def _activity_metrics(taken: list[dict]) -> dict:
     }
 
 
-def _audit_prefixes(bars, full_signals: list[Signal]) -> dict:
-    """Compare every calendar-month prefix with the full signal replay."""
+def _audit_prefixes(
+    bars,
+    full_signals: list[Signal],
+    signal_filter: Callable[[Signal], bool] | None = None,
+) -> dict:
+    """Compare every calendar-month prefix with the filtered full replay."""
 
     checks = []
     for month in range(2, 13):
         cutoff = datetime(2021, month, 1, tzinfo=UTC)
         prefix_bars = [bar for bar in bars if bar.end <= cutoff]
         prefix = detect_signals(prefix_bars, CONFIG, EVAL_START, cutoff)
+        if signal_filter is not None:
+            prefix = [signal for signal in prefix if signal_filter(signal)]
         full_core = [
             (signal.sweep_time, signal_core_signature(signal))
             for signal in full_signals
@@ -283,6 +311,7 @@ def _make_report(summary: dict, path: Path) -> None:
     base_label = _risk_label(BASE_RISK_PCT)
     monthly = summary["monthly_entry_ledger"]
     weekly = summary["weekly_entry_ledger"]
+    daily = summary["daily_entry_ledger"]
     trade_rows = summary["taken_trades"]
     lines = [
         "# حساب 100$ — replay كامل لسنة 2021",
@@ -297,13 +326,14 @@ def _make_report(summary: dict, path: Path) -> None:
         "- الحد الأقصى: **صفقة واحدة عالمياً** بين LONG وSHORT. الإشارة التي تظهر أثناء صفقة مفتوحة تسجل `CONCURRENT_BLOCKED` ولا تدخل.",
         "- signal لا يظهر إلا بعد إغلاق displacement في `S+1`؛ لا يتم استعمال أي شمعة لاحقة لصناعة الإشارة.",
         "- target: أول swing معاكس مؤكد قبل الـ swept swing؛ HIGH سابق للـ swept LOW في LONG، وLOW سابق للـ swept HIGH في SHORT.",
+        f"- فلتر النمط/الجلسة: `{SIGNAL_FILTER_DESCRIPTION}`.",
         "- لا bid/ask/spread في ملفات XAU المعبأة؛ لذلك النتائج gross ولا توجد رسوم مختلقة.",
         "- صفقات إشارتها في ديسمبر 2021 قد تغلق في يناير 2022؛ يناير محمّل outcome-only ومذكور صراحة.",
         "",
         "## النتيجة النهائية",
         "",
-        "| curve | trades | positive | negative | total R | profit | final equity | return | max DD |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
+        "| curve | trades | win% | PF | positive | negative | total R | profit | final equity | return | max DD |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for name, curve in summary["account_curves"].items():
         dd = (
@@ -312,7 +342,7 @@ def _make_report(summary: dict, path: Path) -> None:
             else f"${curve['max_drawdown_dollars']:.4f} ({curve['max_drawdown_pct_of_peak']:.2f}%)"
         )
         lines.append(
-            f"| {name} | {curve['trades']} | {curve['positive_trades']} | {curve['negative_trades']} | "
+            f"| {name} | {curve['trades']} | {curve['win_rate_pct']} | {curve['profit_factor']} | {curve['positive_trades']} | {curve['negative_trades']} | "
             f"{curve['total_r']:.4f} | ${curve['profit_dollars']:.4f} | ${curve['final_equity_after_all_2021_entries_closed']:.4f} | "
             f"{curve['return_pct']:.2f}% | {dd} |"
         )
@@ -330,26 +360,43 @@ def _make_report(summary: dict, path: Path) -> None:
         "",
         f"`profit_usd_at_base_risk` هو الربح المنسوب لشهر دخول الإشارة عند مخاطرة {base_label}. صفقة يمكن أن تغلق في الشهر التالي، وتفصيلها الكامل موجود في جدول الصفقات.",
         "",
-        f"| الشهر | eligible | taken | blocked | targets | stops | time | + trades | - trades | sum R | profit $ at {base_label} | equity start | equity end |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+        f"| الشهر | eligible | taken | blocked | targets | stops | time | win% | PF | DD R | sum R | profit $ at {base_label} | equity start | equity end |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for row in monthly:
         lines.append(
             f"| {row['period']} | {row['eligible_signals']} | {row['taken_trades']} | {row['concurrent_blocked']} | "
-            f"{row['target_hits']} | {row['stop_hits']} | {row['time_exits']} | {row['positive_trades']} | {row['negative_trades']} | "
+            f"{row['target_hits']} | {row['stop_hits']} | {row['time_exits']} | {row['win_rate_pct']} | {row['profit_factor']} | {row['max_drawdown_r']:.4f} | "
             f"{row['sum_r']:.4f} | ${row['profit_usd_at_base_risk']:.4f} | ${row['equity_before_period_at_base_risk']:.6f} | ${row['equity_after_period_at_base_risk']:.6f} |"
         )
     lines += [
         "",
         "## كل أسبوع بالتفصيل",
         "",
-        f"| الأسبوع | eligible | taken | blocked | targets | stops | time | sum R | profit $ at {base_label} | equity start | equity end |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+        f"| الأسبوع | eligible | taken | blocked | targets | stops | time | win% | PF | DD R | sum R | profit $ at {base_label} | equity start | equity end |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for row in weekly:
         lines.append(
             f"| {row['period']} | {row['eligible_signals']} | {row['taken_trades']} | {row['concurrent_blocked']} | "
-            f"{row['target_hits']} | {row['stop_hits']} | {row['time_exits']} | {row['sum_r']:.4f} | "
+            f"{row['target_hits']} | {row['stop_hits']} | {row['time_exits']} | {row['win_rate_pct']} | {row['profit_factor']} | {row['max_drawdown_r']:.4f} | {row['sum_r']:.4f} | "
+            f"${row['profit_usd_at_base_risk']:.4f} | ${row['equity_before_period_at_base_risk']:.6f} | ${row['equity_after_period_at_base_risk']:.6f} |"
+        )
+    lines += [
+        "",
+        "## كل يوم فيه إشارة مأخوذة",
+        "",
+        f"`daily_summary.csv` يحتوي أيضاً الأيام الصفرية؛ الجدول التالي يعرض الأيام التي فيها صفقة واحدة على الأقل، عند مخاطرة {base_label}.",
+        "",
+        "| اليوم | eligible | taken | blocked | targets | stops | time | win% | PF | DD R | sum R | PnL $ | equity start | equity end |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+    ]
+    for row in daily:
+        if not row["taken_trades"]:
+            continue
+        lines.append(
+            f"| {row['period']} | {row['eligible_signals']} | {row['taken_trades']} | {row['concurrent_blocked']} | "
+            f"{row['target_hits']} | {row['stop_hits']} | {row['time_exits']} | {row['win_rate_pct']} | {row['profit_factor']} | {row['max_drawdown_r']:.4f} | {row['sum_r']:.4f} | "
             f"${row['profit_usd_at_base_risk']:.4f} | ${row['equity_before_period_at_base_risk']:.6f} | ${row['equity_after_period_at_base_risk']:.6f} |"
         )
     lines += [
@@ -387,7 +434,12 @@ def main() -> None:
     RESULTS.mkdir(parents=True, exist_ok=True)
     minutes, hashes = load_minutes(DATA_DIR, LOAD_MONTHS)
     bars = aggregate_15m(minutes)
-    full_signals = detect_signals(bars, CONFIG, EVAL_START, EVAL_END)
+    detected_signals = detect_signals(bars, CONFIG, EVAL_START, EVAL_END)
+    full_signals = [
+        signal
+        for signal in detected_signals
+        if SIGNAL_FILTER is None or SIGNAL_FILTER(signal)
+    ]
     eligible = [signal for signal in full_signals if signal.eligible]
     hypothetical: dict[tuple[str, str, int], Outcome] = {}
     for signal in eligible:
@@ -421,6 +473,7 @@ def main() -> None:
             "exit_time": outcome.exit_time,
             "period_label": period_label,
             "week_label": week_label,
+            "day_label": signal.displacement_time[:10],
             "hypothetical_state": outcome.state,
             "decision": None,
         }
@@ -458,6 +511,7 @@ def main() -> None:
             "mae_r": outcome.mae_r,
             "period_label": period_label,
             "week_label": week_label,
+            "day_label": signal.displacement_time[:10],
             "exit_month": _month(outcome.exit_time),
         })
         next_free = _parse(outcome.exit_time)
@@ -480,6 +534,7 @@ def main() -> None:
         "negative_trades": sum(float(row["r_multiple"]) < 0 for row in taken),
         "total_r": _round(fixed_profit, 6),
         "mean_r": _round(statistics.fmean([float(row["r_multiple"]) for row in taken]), 6) if taken else None,
+        **_trade_metrics([float(row["r_multiple"]) for row in taken]),
         "max_drawdown_dollars": None,
         "max_drawdown_pct_of_peak": None,
     }
@@ -491,6 +546,12 @@ def main() -> None:
         week_starts.append(cursor.strftime("%G-W%V"))
         cursor += timedelta(days=7)
     weekly = _summarise_period(week_starts, taken, decisions, label_key="week_label")
+    day_labels = []
+    cursor = EVAL_START
+    while cursor < EVAL_END:
+        day_labels.append(cursor.strftime("%Y-%m-%d"))
+        cursor += timedelta(days=1)
+    daily = _summarise_period(day_labels, taken, decisions, label_key="day_label")
 
     decisions_rows = []
     for row in decisions:
@@ -503,7 +564,7 @@ def main() -> None:
             outcome = hypothetical[(signal.side, signal.sweep_time, signal.sweep_index)]
             candidate_rows.append(_candidate_row(signal, outcome))
 
-    zero_lookahead = _audit_prefixes(bars, full_signals)
+    zero_lookahead = _audit_prefixes(bars, full_signals, SIGNAL_FILTER)
     taken_count = len(taken)
     account_summary = {
         "dataset": {
@@ -525,6 +586,7 @@ def main() -> None:
             "risk_curves": RISK_PCTS,
             "max_acceptable_drawdown_pct": MAX_ACCEPTABLE_DD_PCT,
             "profile_note": PROFILE_NOTE,
+            "signal_filter": SIGNAL_FILTER_DESCRIPTION,
             "max_concurrent_positions": 1,
             "same_timestamp_policy": "discard all candidates sharing an entry timestamp",
             "target_definition": "first prior confirmed opposite swing before the swept swing: HIGH before swept LOW for long, LOW before swept HIGH for short",
@@ -533,6 +595,7 @@ def main() -> None:
             "no_lookahead": True,
         },
         "candidate_counts": {
+            "all_signals_before_profile_filter": len(detected_signals),
             "all_signals": len(full_signals),
             "eligible_signals": len(eligible),
             "taken": taken_count,
@@ -544,6 +607,7 @@ def main() -> None:
         "activity_metrics": _activity_metrics(taken),
         "monthly_entry_ledger": monthly,
         "weekly_entry_ledger": weekly,
+        "daily_entry_ledger": daily,
         "taken_trades": taken,
         "zero_lookahead": zero_lookahead,
     }
@@ -553,6 +617,7 @@ def main() -> None:
     _write_csv(RESULTS / "taken_trades.csv", taken)
     _write_csv(RESULTS / "monthly_summary.csv", monthly)
     _write_csv(RESULTS / "weekly_summary.csv", weekly)
+    _write_csv(RESULTS / "daily_summary.csv", daily)
     (RESULTS / "data_hashes.txt").write_text(
         "\n".join(f"{digest}  {name}" for name, digest in sorted(hashes.items())) + "\n",
         encoding="utf-8",

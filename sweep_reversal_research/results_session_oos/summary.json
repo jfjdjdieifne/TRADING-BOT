@@ -1,0 +1,442 @@
+{
+  "assets": {
+    "ALL_ASSETS": {
+      "concurrent_blocked": 859,
+      "contract": "one global position across XAUUSD, NSXUSD, BTCUSD",
+      "one_position_portfolio": {
+        "max_drawdown_r": 125.022771,
+        "mean_r": -0.001364,
+        "negative": 1852,
+        "positive": 1363,
+        "profit_factor": 0.996767,
+        "risk_0_15_pct": {
+          "final_equity": 98.800266,
+          "max_drawdown_pct_of_peak": 17.331873,
+          "profit_dollars": -1.199734,
+          "risk_pct": 0.0015
+        },
+        "risk_0_30_pct": {
+          "final_equity": 96.557935,
+          "max_drawdown_pct_of_peak": 32.038428,
+          "profit_dollars": -3.442065,
+          "risk_pct": 0.003
+        },
+        "risk_0_50_pct": {
+          "final_equity": 92.096907,
+          "max_drawdown_pct_of_peak": 48.104588,
+          "profit_dollars": -7.903093,
+          "risk_pct": 0.005
+        },
+        "sum_r": -4.384839,
+        "trades": 3215,
+        "win_rate_pct": 42.395023,
+        "zero": 0
+      },
+      "raw": {
+        "max_drawdown_r": 125.870297,
+        "mean_r": 0.004666,
+        "negative": 2563,
+        "positive": 1907,
+        "profit_factor": 1.011201,
+        "risk_0_15_pct": {
+          "final_equity": 102.421841,
+          "max_drawdown_pct_of_peak": 17.439027,
+          "profit_dollars": 2.421841,
+          "risk_pct": 0.0015
+        },
+        "risk_0_30_pct": {
+          "final_equity": 103.382342,
+          "max_drawdown_pct_of_peak": 32.21969,
+          "profit_dollars": 3.382342,
+          "risk_pct": 0.003
+        },
+        "risk_0_50_pct": {
+          "final_equity": 102.357265,
+          "max_drawdown_pct_of_peak": 48.346987,
+          "profit_dollars": 2.357265,
+          "risk_pct": 0.005
+        },
+        "sum_r": 20.857736,
+        "trades": 4470,
+        "win_rate_pct": 42.662192,
+        "zero": 0
+      },
+      "raw_executable": 4470,
+      "same_time_conflicts": 396
+    },
+    "BTCUSD": {
+      "all_signals": 28370,
+      "complete_15m_bars": 240803,
+      "concurrent_blocked": 229,
+      "filtered_eligible": 1869,
+      "minutes_or_source_bars": 722418,
+      "one_position_portfolio": {
+        "max_drawdown_r": 79.791861,
+        "mean_r": -0.006738,
+        "negative": 938,
+        "positive": 702,
+        "profit_factor": 0.983646,
+        "risk_0_15_pct": {
+          "final_equity": 98.101364,
+          "max_drawdown_pct_of_peak": 11.359374,
+          "profit_dollars": -1.898636,
+          "risk_pct": 0.0015
+        },
+        "risk_0_30_pct": {
+          "final_equity": 95.744074,
+          "max_drawdown_pct_of_peak": 21.567783,
+          "profit_dollars": -4.255926,
+          "risk_pct": 0.003
+        },
+        "risk_0_50_pct": {
+          "final_equity": 91.956506,
+          "max_drawdown_pct_of_peak": 33.556377,
+          "profit_dollars": -8.043494,
+          "risk_pct": 0.005
+        },
+        "sum_r": -11.050342,
+        "trades": 1640,
+        "win_rate_pct": 42.804878,
+        "zero": 0
+      },
+      "raw": {
+        "max_drawdown_r": 83.42063,
+        "mean_r": -0.012749,
+        "negative": 1063,
+        "positive": 806,
+        "profit_factor": 0.968663,
+        "risk_0_15_pct": {
+          "final_equity": 96.219179,
+          "max_drawdown_pct_of_peak": 11.848782,
+          "profit_dollars": -3.780821,
+          "risk_pct": 0.0015
+        },
+        "risk_0_30_pct": {
+          "final_equity": 92.067298,
+          "max_drawdown_pct_of_peak": 22.445931,
+          "profit_dollars": -7.932702,
+          "risk_pct": 0.003
+        },
+        "risk_0_50_pct": {
+          "final_equity": 86.067665,
+          "max_drawdown_pct_of_peak": 34.818512,
+          "profit_dollars": -13.932335,
+          "risk_pct": 0.005
+        },
+        "sum_r": -23.827124,
+        "trades": 1869,
+        "win_rate_pct": 43.124666,
+        "zero": 0
+      },
+      "raw_executable": 1869,
+      "same_time_conflicts": 0,
+      "setup_timeframe": "15m",
+      "source_timeframe": "5m"
+    },
+    "NSXUSD": {
+      "all_signals": 17620,
+      "complete_15m_bars": 114562,
+      "concurrent_blocked": 149,
+      "filtered_eligible": 1273,
+      "minutes_or_source_bars": 1723327,
+      "one_position_portfolio": {
+        "max_drawdown_r": 69.143274,
+        "mean_r": 0.00614,
+        "negative": 657,
+        "positive": 446,
+        "profit_factor": 1.013708,
+        "risk_0_15_pct": {
+          "final_equity": 100.79725,
+          "max_drawdown_pct_of_peak": 9.877156,
+          "profit_dollars": 0.79725,
+          "risk_pct": 0.0015
+        },
+        "risk_0_30_pct": {
+          "final_equity": 101.156277,
+          "max_drawdown_pct_of_peak": 18.824405,
+          "profit_dollars": 1.156277,
+          "risk_pct": 0.003
+        },
+        "risk_0_50_pct": {
+          "final_equity": 100.958527,
+          "max_drawdown_pct_of_peak": 29.449458,
+          "profit_dollars": 0.958527,
+          "risk_pct": 0.005
+        },
+        "sum_r": 6.772487,
+        "trades": 1103,
+        "win_rate_pct": 40.435177,
+        "zero": 0
+      },
+      "raw": {
+        "max_drawdown_r": 70.514768,
+        "mean_r": 0.020148,
+        "negative": 730,
+        "positive": 522,
+        "profit_factor": 1.046123,
+        "risk_0_15_pct": {
+          "final_equity": 103.604764,
+          "max_drawdown_pct_of_peak": 10.066053,
+          "profit_dollars": 3.604764,
+          "risk_pct": 0.0015
+        },
+        "risk_0_30_pct": {
+          "final_equity": 106.825879,
+          "max_drawdown_pct_of_peak": 19.170941,
+          "profit_dollars": 6.825879,
+          "risk_pct": 0.003
+        },
+        "risk_0_50_pct": {
+          "final_equity": 110.464054,
+          "max_drawdown_pct_of_peak": 29.9634,
+          "profit_dollars": 10.464054,
+          "risk_pct": 0.005
+        },
+        "sum_r": 25.22484,
+        "trades": 1252,
+        "win_rate_pct": 41.693291,
+        "zero": 0
+      },
+      "raw_executable": 1252,
+      "same_time_conflicts": 0,
+      "setup_timeframe": "15m",
+      "source_timeframe": "1m"
+    },
+    "XAUUSD": {
+      "all_signals": 19069,
+      "complete_15m_bars": 118681,
+      "concurrent_blocked": 166,
+      "filtered_eligible": 1375,
+      "minutes_or_source_bars": 1785170,
+      "one_position_portfolio": {
+        "max_drawdown_r": 38.909362,
+        "mean_r": 0.015672,
+        "negative": 681,
+        "positive": 502,
+        "profit_factor": 1.037336,
+        "risk_0_15_pct": {
+          "final_equity": 102.617395,
+          "max_drawdown_pct_of_peak": 5.69507,
+          "profit_dollars": 2.617395,
+          "risk_pct": 0.0015
+        },
+        "risk_0_30_pct": {
+          "final_equity": 104.891783,
+          "max_drawdown_pct_of_peak": 11.11421,
+          "profit_dollars": 4.891783,
+          "risk_pct": 0.003
+        },
+        "risk_0_50_pct": {
+          "final_equity": 107.355362,
+          "max_drawdown_pct_of_peak": 17.927794,
+          "profit_dollars": 7.355362,
+          "risk_pct": 0.005
+        },
+        "sum_r": 18.540375,
+        "trades": 1183,
+        "win_rate_pct": 42.434489,
+        "zero": 0
+      },
+      "raw": {
+        "max_drawdown_r": 42.302456,
+        "mean_r": 0.014426,
+        "negative": 770,
+        "positive": 579,
+        "profit_factor": 1.035073,
+        "risk_0_15_pct": {
+          "final_equity": 102.742754,
+          "max_drawdown_pct_of_peak": 6.179077,
+          "profit_dollars": 2.742754,
+          "risk_pct": 0.0015
+        },
+        "risk_0_30_pct": {
+          "final_equity": 105.114952,
+          "max_drawdown_pct_of_peak": 12.034071,
+          "profit_dollars": 5.114952,
+          "risk_pct": 0.003
+        },
+        "risk_0_50_pct": {
+          "final_equity": 107.660818,
+          "max_drawdown_pct_of_peak": 19.359001,
+          "profit_dollars": 7.660818,
+          "risk_pct": 0.005
+        },
+        "sum_r": 19.46002,
+        "trades": 1349,
+        "win_rate_pct": 42.920682,
+        "zero": 0
+      },
+      "raw_executable": 1349,
+      "same_time_conflicts": 0,
+      "setup_timeframe": "15m",
+      "source_timeframe": "1m"
+    }
+  },
+  "cost_model": "gross; source has no bid/ask/commission fields",
+  "evaluation_end_utc_exclusive": "2026-01-01T00:00:00+00:00",
+  "evaluation_start_utc": "2022-01-01T00:00:00+00:00",
+  "fixed_hypothesis": "side/session rule frozen from 2021: SHORT London UTC 07-12 plus LONG New York UTC 13-19; applied unchanged to each asset",
+  "input_sha256": {
+    "BTCUSD/2020.csv.gz": "0bc2fc1077d9197f772b08574c78f2308533ff6ee96c5085b5e91e56d9b2ca63",
+    "BTCUSD/2021.csv.gz": "efa4ca3b404e98343239812b30ef9f083e578de043bc9cd174c8b3ee98d03ce0",
+    "BTCUSD/2022.csv.gz": "d6248b3c0cc03077a496e67e63beb3a705cc073ae9ed417833f1de38fd13271e",
+    "BTCUSD/2023.csv.gz": "07563539f53381f4c3c5f27f0588698c0f6a7727fe779701ec3839bdbc8b28ab",
+    "BTCUSD/2024.csv.gz": "5ce9b8ebe886c84edc1af86e30b866bb94135f97d7132fab0335560eb444d4b2",
+    "BTCUSD/2025.csv.gz": "b4576e0c48eede122cd4e862a86b1c44dafbfacdb60720e6ec9ddde89dc7af8b",
+    "BTCUSD/2026.csv.gz": "78f2e46a01e6edb43827639d7e2516bcff2329463015f4f1499e5f8f3aac87a1",
+    "NSXUSD/2020-12.csv.gz": "a77757b179e25dec7223c16eff8cb19839cd8a09f78be51a7c7953418caf024e",
+    "NSXUSD/2021-01.csv.gz": "9a95565870b3d1196f053bf2f3d1abfe49666d15698d50b6e4369e0cb4aec405",
+    "NSXUSD/2021-02.csv.gz": "825d51f69ac48c660f975d49d131a64bd2455f563cee64063f20ebb290b4756e",
+    "NSXUSD/2021-03.csv.gz": "23fd87aba6611249f0fba7907ae8b03bd3fe50f6bb3f5d0e4e05d682b18ce95b",
+    "NSXUSD/2021-04.csv.gz": "0bf749216e44f800b1910c236abb8204a1b7931ee7e4e0ef12a2e4b0e94ab0f8",
+    "NSXUSD/2021-05.csv.gz": "50400e44a9466c93838af4186d232b6564c7aeb5dc08033a6bdc04ca186f6490",
+    "NSXUSD/2021-06.csv.gz": "4958451b0fefab3029678d31a34df6370c4a3d3c29986951084b73d0982a5036",
+    "NSXUSD/2021-07.csv.gz": "796f225b5acbe60e1fb6bc82c82c778ab3f2204365577b5acc70d8065ecb1fd8",
+    "NSXUSD/2021-08.csv.gz": "8b3725871e0ecdef0ba50cea73bc90bac75fabe43fd0ccb04c6217a93c0b080e",
+    "NSXUSD/2021-09.csv.gz": "9e727a66e6b0daefaa45fffcfeabbba9830414434e5a52b17613ce5c131cbe79",
+    "NSXUSD/2021-10.csv.gz": "cb22924a7c084c230c38d710596368c004720a9f172d2f9bba0d35facaf2341b",
+    "NSXUSD/2021-11.csv.gz": "5a7d2a6b238db4a2582d32e017f5b7cfbe8f57d3dfe4d1aadb3ca35e5fb19d69",
+    "NSXUSD/2021-12.csv.gz": "f5d1120438aea6ee8a6853aa29bdb819a54abef2c8bad4c11513f949a7c73f7c",
+    "NSXUSD/2022-01.csv.gz": "3172564b73af02dcbf89b61a87112796a8669ac9ef39567a570cc77ce91d3b30",
+    "NSXUSD/2022-02.csv.gz": "41161baf44d58a6ddbe85975e7d8040e1e6bbc327bb8f3e024c1b38fb79b32b1",
+    "NSXUSD/2022-03.csv.gz": "ec18ab8af3b9703e831bd4756f4e4b467f5c1bc0e2b253cd5bf0260d8c762323",
+    "NSXUSD/2022-04.csv.gz": "154623431b38cc686ea5e34ed2cd2be74b8f9387d333741eb824a32eb06308ad",
+    "NSXUSD/2022-05.csv.gz": "7885e67f18804b9fa742a606add669ff07e2f18f92a1a266e4dc5caae5579792",
+    "NSXUSD/2022-06.csv.gz": "1b07404390940093c5cae022ff3da572c277ca07c571c44455eb9be5c4ec4d3b",
+    "NSXUSD/2022-07.csv.gz": "f5b29657702eaab967a89955ad233de96e8d345409a0a0e7a03f4dce07da089a",
+    "NSXUSD/2022-08.csv.gz": "e2d15ded573bd3eba14a635b8cf3c48b5201aad482a041170f352eebad5378f9",
+    "NSXUSD/2022-09.csv.gz": "eadb05616e7392c36118336ad681e17b9224b86e78bb0fe4bbc896d4b4d5b090",
+    "NSXUSD/2022-10.csv.gz": "a18eed36f4eea032bacc0544615e816d1167737b272d4a092f0dcb7ca2dd2618",
+    "NSXUSD/2022-11.csv.gz": "936ddbc7d1a24bfb858fe68b7c1cee39bd977e329451c2d0e6eaa215da4ff45a",
+    "NSXUSD/2022-12.csv.gz": "387333b2eec3fe887a23ca31edbd03c38efbed6e097c1c9fadb97a86ad592661",
+    "NSXUSD/2023-01.csv.gz": "a5dd4b2b335f639bb7197b183608c7af71b330722c91669cb2c9d30a8f2e7941",
+    "NSXUSD/2023-02.csv.gz": "ee9cd83ce43359c2a0748c3cc03e11add7a224976cabf11ce49e99d6ef4a2dff",
+    "NSXUSD/2023-03.csv.gz": "c5e54a06a0772ecbff4c3ea703e3deefa5ae875125f031754b38e07cd56fed28",
+    "NSXUSD/2023-04.csv.gz": "3cc46fa6f74af413b92011054e11670ca124e935a8d98c8e6e0f77c021f6ce5e",
+    "NSXUSD/2023-05.csv.gz": "e6b47b9a1b3215ca773781ad7cb01db02e1fddf00448d79faa0b9cb4ee4e0d7e",
+    "NSXUSD/2023-06.csv.gz": "2d71733b39820f14afa8a9fd1d2d4f635f1d8a0b0c53d766464a47d213554f95",
+    "NSXUSD/2023-07.csv.gz": "efb6d1e19c5bc90c60d0dcd663e3b66c4cc5516d573f1894a2812be36f7adf9a",
+    "NSXUSD/2023-08.csv.gz": "9d5f1cab47a7e8961d9f5ffe85942544491c8e6ca76c3162287e6b4b40808503",
+    "NSXUSD/2023-09.csv.gz": "4655729e3dc0e266d3b184bd6e8d81b766a0c810d29f951e00e3361c3911b647",
+    "NSXUSD/2023-10.csv.gz": "a0d16737d0c01f9dadf2a3717def2681f4f9a1d60fd3822591d4708e515f3897",
+    "NSXUSD/2023-11.csv.gz": "38c64ba8eada3676fe5f07de97a8db014f2f6a79266d05edd57021257118b66f",
+    "NSXUSD/2023-12.csv.gz": "7ea5318089a943f790c47842ec69cbc9126c795df79524abad8265e1700479c7",
+    "NSXUSD/2024-01.csv.gz": "009363960080c97d97f5e57725f4b83dc96502da3b73fd5662fc3621d524e8de",
+    "NSXUSD/2024-02.csv.gz": "9e9dd7d880aeeef23fad24485f928ff4ee939734bad26867ce0be9fa221b1c34",
+    "NSXUSD/2024-03.csv.gz": "7a38bc5aef53f538da775d69255de1108e1c42d9e084a0fdcbf50aa3cbc39509",
+    "NSXUSD/2024-04.csv.gz": "7f78bd3d12be7d64990e6c4768e5c3f2db0719077eaf1ff4f1658ddda62fbfbf",
+    "NSXUSD/2024-05.csv.gz": "b4e789bdf914e637eb3e57004212e9c0b332398fa86d226bfc0c0413aab917a2",
+    "NSXUSD/2024-06.csv.gz": "d1ec417f7847eb04601fdda376644b43203667957342b44e2e935c2ecff205a4",
+    "NSXUSD/2024-07.csv.gz": "538eb39106715e1899e3f67061d7fbdf6dff7f583afa0de54fc59adac8ef4928",
+    "NSXUSD/2024-08.csv.gz": "ea754462f6176d092556ea16f8516c0d6e3b6f20c4d0fadc8d309353d1d033fb",
+    "NSXUSD/2024-09.csv.gz": "e0489f3899a2701188eadc918567dbf0ea8af3e4cab25ab01961f59bc1b83ea9",
+    "NSXUSD/2024-10.csv.gz": "72b76d85f60431c04df940bad6434f50d007262d16beb0d76203f05c9cbf189f",
+    "NSXUSD/2024-11.csv.gz": "7d859a75fd3bb5edeae6eb2a9429e15c988fdfcea4a9fa47c17ce002b06dc6bd",
+    "NSXUSD/2024-12.csv.gz": "20554d4745335a1a2c41e273e8ae81d007e163ce9ff271bde8e32c7838f9125f",
+    "NSXUSD/2025-01.csv.gz": "9e0d4b3d8cef15f252ef21cfc988a1ae84aba8f191679e2ffece5b4353658d63",
+    "NSXUSD/2025-02.csv.gz": "adc2ad1e3918c7a4d5bd36103f798ef0ceefa8b1c739ee142b364569fbbe6588",
+    "NSXUSD/2025-03.csv.gz": "031a63b7681267afb567de937f696b6f800ac31aba55f5b1c3c057284f38f993",
+    "NSXUSD/2025-04.csv.gz": "78003bcc57a3a91bf4c12e1833efe596df58cc151cb7c2f9bea2b321157d025f",
+    "NSXUSD/2025-05.csv.gz": "6b28ab92b4c74f052cd20535adf8c548f0c379c30199632f0a7a5d3baebd76bd",
+    "NSXUSD/2025-06.csv.gz": "eea400025a0f7ae4317f672a0cf374df360928bc73d86ed979f2f93255164063",
+    "NSXUSD/2025-07.csv.gz": "a1cd5e789138b599dbba24cf0f103de3b0fd49d20908b6eebcf64d3ce5f2b0a9",
+    "NSXUSD/2025-08.csv.gz": "d9794d959aea541fbaff8c6e16917f0556246e54dfca7c945f12344e4381705a",
+    "NSXUSD/2025-09.csv.gz": "02f59b42120175c68a6657837bf49e63617b49ec75954e19160460b6e01c94d3",
+    "NSXUSD/2025-10.csv.gz": "695339eaad977dcee658a73bc1e04d6b07001d114567f48b1c86f86b41c3a562",
+    "NSXUSD/2025-11.csv.gz": "bf54bdb6e0cdf5f71ca7f875523d585ce865bd28a09be4459ff763434cf79ad2",
+    "NSXUSD/2025-12.csv.gz": "1503cd6b0bd6aed1adf17be636b68ea895b81a8211369cec52dac04982b56f58",
+    "NSXUSD/2026-01.csv.gz": "6e3b20c8560ecd8e379e1a0a0b75724ce99c413625774075ad34c2421a8c95bd",
+    "XAUUSD/2020-12.csv.gz": "6c29301c38a3b7a351ac547eadae71c77ed311f826c97d424f03b1dbb2b630cc",
+    "XAUUSD/2021-01.csv.gz": "abcbf2426cf76013627fe9c640e05e9607ec7c0a19b88e4642f93fee9055d4fb",
+    "XAUUSD/2021-02.csv.gz": "d154cf2bbbecee538330f92a43869bcab7250e05a4f3890200dfe6a139c80711",
+    "XAUUSD/2021-03.csv.gz": "e1adbdd6bc12bf3b99bbc52211ebb7381a9fb1a74047c4d60078fee1de6d8a5a",
+    "XAUUSD/2021-04.csv.gz": "5ac6010c6758f84c0ee24d3afa1d7de4dbc458e707f9c83ed154f625578c3209",
+    "XAUUSD/2021-05.csv.gz": "e478fc8a3e47a52e53e2f36a817bbb1e9b6f945c8ec2a638afb87eb7760abaf6",
+    "XAUUSD/2021-06.csv.gz": "b0abb6d3fa0f25dc21ac559faf91662e2f62751f1a5663c8755a0c745403a795",
+    "XAUUSD/2021-07.csv.gz": "7a2f1e0e92fc7eeefdd409994a8b044349b859e88a8b530b9d275c6f8257be2e",
+    "XAUUSD/2021-08.csv.gz": "ce0e61ae18df91a4e8e99064ea17f4f00e03611c91b4aad8fe891fd853e7b3e8",
+    "XAUUSD/2021-09.csv.gz": "edeb63692386266436b4a581f0f081dfd62652916fa610a32c1929dd69480f54",
+    "XAUUSD/2021-10.csv.gz": "4684c7a604ccb895a99b92171188522824cd5c12e04961bafb19f012ca79faff",
+    "XAUUSD/2021-11.csv.gz": "00640b423b6b067d55a6d9cea04fb441db28886b0c72a4e8fa44ba25fd4074d4",
+    "XAUUSD/2021-12.csv.gz": "c50d61d44a3b77754b54fea9db3c1e8875416730f5129e2102e694cd429b422a",
+    "XAUUSD/2022-01.csv.gz": "4ee1a03ef9fda960eb6cfe99edcd8a3fc6700572c156e40af397a11065a58678",
+    "XAUUSD/2022-02.csv.gz": "0cce2c87b5f00dcece45835dc3d618fc67f78fe92f05c87f2f4364077435306a",
+    "XAUUSD/2022-03.csv.gz": "8f1ba0951a03f3aeb6fb5062dc59fbd0ebcc8cadacae665440df5117362ff9da",
+    "XAUUSD/2022-04.csv.gz": "dd9a36f6226d5ee4ae03e65aa9f769b789ae0f5edd8e1ed7fb593ae2ffb6d479",
+    "XAUUSD/2022-05.csv.gz": "7cd7b609f82ff328465d49190be328b3c4d683ba9b487ec5b18b2c705edd9f7b",
+    "XAUUSD/2022-06.csv.gz": "82943bc4093c4a39a6555028d78dc853ccc370b1ffc1fb65b5eed7eae4990c80",
+    "XAUUSD/2022-07.csv.gz": "8e841872d2feb78b23f048669b2bf7feef4f71b9a1874fd112a82506c71038c4",
+    "XAUUSD/2022-08.csv.gz": "7ac63d1897ddb7178a967fe256f0d06f96e756ddcf1a4cb0e70c80196d1423c9",
+    "XAUUSD/2022-09.csv.gz": "89f5f3dded33c762334d5d3405e5d632346c950ec5729efd8d420252dc80186d",
+    "XAUUSD/2022-10.csv.gz": "84842b00cb8e44f8162be4ca9cc8fe7e07c560d75aaf05ca13b35f9eb42ad6fd",
+    "XAUUSD/2022-11.csv.gz": "4f0b98b0b701cc89e8f0ffdbbc766efcc604968bf1848c371c1e64fc072a55ce",
+    "XAUUSD/2022-12.csv.gz": "3762cb1307326d61dc4485e0959b2131704bbce168496fb9e402f4fd36c1e9a5",
+    "XAUUSD/2023-01.csv.gz": "7aa5e3ae2d8a14fcc382f6ee15189db0b1f6891bea34c8a715720c4ba7c9ac6d",
+    "XAUUSD/2023-02.csv.gz": "bb25fa2de080f6e68ae5853909ec354096ffe241c9ce1a891fb0aa2da6cd9a57",
+    "XAUUSD/2023-03.csv.gz": "882e753aa58cffd5a86fc0e939921ba1adb15375becb9a8d767ca0d0c00579a2",
+    "XAUUSD/2023-04.csv.gz": "7c152eb005bcef0589114cf86a4bb126c91cdb086d4c15fa9d2a84a4b4d0c4b0",
+    "XAUUSD/2023-05.csv.gz": "0711afdb9aaeb24677071fa76a040d4c2bda8a40ad7af1b5125f4e33c7682c64",
+    "XAUUSD/2023-06.csv.gz": "55ff100ec6071d60ba912aaa6014fb5a432f8176521c8462bc1f351595171d64",
+    "XAUUSD/2023-07.csv.gz": "29d6ce0c80b9f275008076cc05a527b6a91c65210bc297040db156fe4fccadaa",
+    "XAUUSD/2023-08.csv.gz": "f5e5d8e8fb5b972bcec0f950d4d9e71a71d1e0ddbd43f91f626ef25d6624b0f0",
+    "XAUUSD/2023-09.csv.gz": "b5ed59471b2a0c6fdecf17c7cba81400f1583f50543e2da427582953bdd0cc85",
+    "XAUUSD/2023-10.csv.gz": "665834815865001f9c4f1325edab537f2d0be4f8721e892524add658cbbb7fe5",
+    "XAUUSD/2023-11.csv.gz": "43411a1776207bee355a705da283eb92712edad2432de18694a5c4953a6df25f",
+    "XAUUSD/2023-12.csv.gz": "0674212f7764dcfab6c21d0723f00a3d3ff596c3302454358e054f3c61f2a673",
+    "XAUUSD/2024-01.csv.gz": "d15568e08b2880f78ee6d854536c30db43308425a2c35ef79841cd6cf9e91d1c",
+    "XAUUSD/2024-02.csv.gz": "516e4e89382adae1db532b4c365cb39bc84fbf4dd004686e9c32d37ad49541cc",
+    "XAUUSD/2024-03.csv.gz": "7ba5efc999bf75e573565db1b35c7bd3ebc09d2a7a85dd5cb3823e6e5d292b2a",
+    "XAUUSD/2024-04.csv.gz": "1be550a5a1e1a15e9e4899b9708e94de7def370da6e087153a404c470704baf7",
+    "XAUUSD/2024-05.csv.gz": "95697659ef6af7dc323002730afcc796a1bb4bf1ff2e22391c7e0417ebf36d38",
+    "XAUUSD/2024-06.csv.gz": "331a0daaa5153646906f594a129be3dbe13e56a1671c04833b33239b52e4c6c4",
+    "XAUUSD/2024-07.csv.gz": "b41f48ac8f8a54f922b4ae470824b9d07e4159d7ccc52e6cf3cb83278d291b8d",
+    "XAUUSD/2024-08.csv.gz": "b8fe107f8eff30d235e39797ad846caaa9ce248ff1991cc60620810222c90157",
+    "XAUUSD/2024-09.csv.gz": "1d166c7f5cfbaca73bb3818c28a0f6d8ccaaa8f381d0b3bc3e51315ec17451af",
+    "XAUUSD/2024-10.csv.gz": "9b3d628011d5b7ca4f438361f7f15750eaa6c001f85db53cbfb5ce107eef7ea4",
+    "XAUUSD/2024-11.csv.gz": "335eb70e5b66f51f4571216e694549a14175af1182651748f9ec14ddebf05ff2",
+    "XAUUSD/2024-12.csv.gz": "ace391cfbd55c619d74541664b53e9cab793622d81c2a76fce45d89a3aaa9fb3",
+    "XAUUSD/2025-01.csv.gz": "afb7b26ed9ad997d4b7e061aa72074e1b05055412224460df1e8a02234745297",
+    "XAUUSD/2025-02.csv.gz": "ce9a93b70353c7f38c73d99e51edd7c9276fb44e4dfad6643fd94faf00e8797e",
+    "XAUUSD/2025-03.csv.gz": "624aead3dc92515fb12710c8f54748578ca58c11e5aa396ceecb59cc8baae4dc",
+    "XAUUSD/2025-04.csv.gz": "a146e4e8c1269e63213b1520c8b4afe6307058b033cf025e014a133183ff264c",
+    "XAUUSD/2025-05.csv.gz": "0eee9e12a378eee63fb011f172e3204645d9f558569b0ad7c52cb2b0db7adc46",
+    "XAUUSD/2025-06.csv.gz": "fd7d3a0857fe145a4ea122b9438ffc3741984db09701456ab0227da8933ba19e",
+    "XAUUSD/2025-07.csv.gz": "62cc1b7b1ffd737ded775c4003a132797cd4aaf13585a3cd2238050e388e000e",
+    "XAUUSD/2025-08.csv.gz": "6d601b116a2f9c08ab22af3f560e3e7b06bee020ec13f12246cb15ccb669a183",
+    "XAUUSD/2025-09.csv.gz": "f398b9b74ab5fb57b1687c6ea0157313ac18a3e7eced47422cebb48f8db069b8",
+    "XAUUSD/2025-10.csv.gz": "24caa3bb7fa86b9617b064ad69868f08dcee285a7edfa313a1666ebbf26fa413",
+    "XAUUSD/2025-11.csv.gz": "1de8632df7b774c07f82d407a7ccb62fb9671bef18c807305bebce7108f3d690",
+    "XAUUSD/2025-12.csv.gz": "b9855537ab85210116656a905f39582a9f211da7b1f0c2e89d4fee9343a1191b",
+    "XAUUSD/2026-01.csv.gz": "e15fe22ac2f0dbaf1f7168b56d3934f800b03575b04ca46f2d85b6deefaa510c"
+  },
+  "outcome_only_months": [
+    "2026-01"
+  ],
+  "source_contracts": {
+    "BTCUSD": {
+      "setup_timeframe": "15m",
+      "source_interval_minutes": 5,
+      "source_timeframe": "5m"
+    },
+    "NSXUSD": {
+      "setup_timeframe": "15m",
+      "source_interval_minutes": 1,
+      "source_timeframe": "1m"
+    },
+    "XAUUSD": {
+      "setup_timeframe": "15m",
+      "source_interval_minutes": 1,
+      "source_timeframe": "1m"
+    }
+  },
+  "warmup_periods": {
+    "BTCUSD": [
+      "2020.csv.gz",
+      "2021.csv.gz"
+    ],
+    "XAUUSD_NSXUSD": [
+      "2020-12",
+      "all 2021 months"
+    ]
+  }
+}

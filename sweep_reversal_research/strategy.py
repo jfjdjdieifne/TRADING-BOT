@@ -174,18 +174,20 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def load_minutes(data_dir: Path, months: Sequence[str]) -> tuple[list[MinuteBar], dict[str, str]]:
-    """Load exactly the requested monthly files in UTC chronological order.
+def load_ohlc(data_dir: Path, files: Sequence[str]) -> tuple[list[MinuteBar], dict[str, str]]:
+    """Load exactly the requested compressed OHLC files in UTC order.
 
-    No data is silently downloaded, filled, interpolated, or forward-filled.
-    The returned hash map binds the replay to the bytes actually read.
+    The row type is called ``MinuteBar`` for backwards compatibility with the
+    original 1-minute runner, but it can also hold a native 5-minute
+    observation.  No data is silently downloaded, filled, interpolated, or
+    forward-filled.  The returned hash map binds a replay to the bytes read.
     """
 
-    requested = sorted(set(months))
+    requested = sorted(set(files))
     rows: list[MinuteBar] = []
     hashes: dict[str, str] = {}
-    for month in requested:
-        path = data_dir / f"{month}.csv.gz"
+    for filename in requested:
+        path = data_dir / filename
         if not path.exists():
             raise FileNotFoundError(path)
         hashes[path.name] = sha256_file(path)
@@ -208,13 +210,19 @@ def load_minutes(data_dir: Path, months: Sequence[str]) -> tuple[list[MinuteBar]
     normalised: list[MinuteBar] = []
     for row in rows:
         if row.timestamp in seen:
-            raise ValueError(f"duplicate minute timestamp: {row.timestamp.isoformat()}")
+            raise ValueError(f"duplicate timestamp: {row.timestamp.isoformat()}")
         seen.add(row.timestamp)
         normalised.append(MinuteBar(len(normalised), row.timestamp, row.open, row.high, row.low, row.close))
     return normalised, hashes
 
 
-def _flush_bucket(bucket: list[MinuteBar], out: list[Bar15]) -> None:
+def load_minutes(data_dir: Path, months: Sequence[str]) -> tuple[list[MinuteBar], dict[str, str]]:
+    """Backwards-compatible loader for monthly 1-minute files."""
+
+    return load_ohlc(data_dir, [f"{month}.csv.gz" for month in months])
+
+
+def _flush_bucket(bucket: list[MinuteBar], out: list[Bar15], source_interval_minutes: int) -> None:
     if not bucket:
         return
     start = bucket[0].timestamp.replace(
@@ -222,9 +230,10 @@ def _flush_bucket(bucket: list[MinuteBar], out: list[Bar15]) -> None:
         second=0,
         microsecond=0,
     )
-    expected = [start + ONE_MINUTE * offset for offset in range(15)]
+    source_step = ONE_MINUTE * source_interval_minutes
+    expected = [start + source_step * offset for offset in range(15 // source_interval_minutes)]
     actual = [row.timestamp for row in bucket]
-    complete = len(bucket) == 15 and actual == expected
+    complete = len(bucket) == len(expected) and actual == expected
     out.append(
         Bar15(
             index=len(out),
@@ -242,9 +251,17 @@ def _flush_bucket(bucket: list[MinuteBar], out: list[Bar15]) -> None:
     )
 
 
-def aggregate_15m(minutes: Sequence[MinuteBar]) -> list[Bar15]:
-    """Build left-closed 15-minute bars without filling market-data gaps."""
+def aggregate_15m(minutes: Sequence[MinuteBar], source_interval_minutes: int = 1) -> list[Bar15]:
+    """Build left-closed 15-minute bars without filling market-data gaps.
 
+    ``source_interval_minutes`` is 1 for the XAU/NSX files and 5 for the
+    native BTCUSD feed.  A 5-minute source therefore requires exactly three
+    contiguous observations per setup bar; it is not silently treated as a
+    1-minute feed.
+    """
+
+    if source_interval_minutes <= 0 or 15 % source_interval_minutes:
+        raise ValueError("source_interval_minutes must be a positive divisor of 15")
     result: list[Bar15] = []
     bucket: list[MinuteBar] = []
     bucket_key: datetime | None = None
@@ -254,10 +271,10 @@ def aggregate_15m(minutes: Sequence[MinuteBar]) -> list[Bar15]:
             bucket.append(row)
             bucket_key = key
         else:
-            _flush_bucket(bucket, result)
+            _flush_bucket(bucket, result, source_interval_minutes)
             bucket = [row]
             bucket_key = key
-    _flush_bucket(bucket, result)
+    _flush_bucket(bucket, result, source_interval_minutes)
     complete = [bar for bar in result if bar.complete]
     # Internal indices are positions in this returned sequence, not positions
     # in the unfiltered bucket stream.
@@ -404,10 +421,33 @@ def detect_signals(
     """
 
     swings = detect_swings(bars)
+    # The straightforward definitions above are useful for audit tests, but
+    # repeatedly scanning every historical swing at every bar is quadratic on
+    # multi-year BTC data.  Because swings are emitted in pivot order and a
+    # swing confirms at pivot + 1, these two causal indexes are equivalent to
+    # _latest_confirmed() and _target_before_swept_swing() while remaining
+    # linear in the number of bars.
+    first_opposite_before: dict[tuple[str, int], SwingPoint | None] = {}
+    first_by_kind: dict[str, SwingPoint | None] = {"HIGH": None, "LOW": None}
+    for point in swings:
+        wanted = "HIGH" if point.kind == "LOW" else "LOW"
+        first_opposite_before[(point.kind, point.pivot_index)] = first_by_kind[wanted]
+        if first_by_kind[point.kind] is None:
+            first_by_kind[point.kind] = point
+    confirmation_cursor = 0
+    latest_confirmed: dict[str, SwingPoint | None] = {"HIGH": None, "LOW": None}
+
     signals: list[Signal] = []
     lookback = 20
     first_signal_index = max(lookback + 1, 3)
     for sweep_index in range(first_signal_index, len(bars) - 1):
+        while (
+            confirmation_cursor < len(swings)
+            and swings[confirmation_cursor].confirmation_index < sweep_index
+        ):
+            point = swings[confirmation_cursor]
+            latest_confirmed[point.kind] = point
+            confirmation_cursor += 1
         sweep = bars[sweep_index]
         displacement_index = sweep_index + 1
         displacement = bars[displacement_index]
@@ -419,7 +459,7 @@ def detect_signals(
             continue
 
         for side, swept_kind in (("LONG", "LOW"), ("SHORT", "HIGH")):
-            swept = _latest_confirmed(swings, swept_kind, sweep_index)
+            swept = latest_confirmed[swept_kind]
             if swept is None:
                 continue
             if side == "LONG":
@@ -435,7 +475,7 @@ def detect_signals(
             large_ok = _is_large(displacement, prior, config)
             body_ok = displacement.body_fraction >= config.min_body_fraction
             fvg = _has_fvg(bars, sweep_index, displacement_index, side)
-            target = _target_before_swept_swing(swings, side, swept.pivot_index, sweep_index)
+            target = first_opposite_before.get((swept.kind, swept.pivot_index))
             target_level = target.price if target is not None else None
             entry = displacement.close
             stop = sweep.low - config.stop_buffer if side == "LONG" else sweep.high + config.stop_buffer
