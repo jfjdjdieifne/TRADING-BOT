@@ -1,0 +1,330 @@
+//@version=5
+strategy("SMC V8 Multi-Asset Sniper (XAUUSD / NAS100 / BTCUSD)", overlay=true, initial_capital=10000, currency=currency.USD, default_qty_type=strategy.cash, pyramiding=0, commission_type=strategy.commission.percent, commission_value=0.02, process_orders_on_close=false, calc_on_every_tick=false, max_bars_back=5000)
+
+// ============================================================================
+// INPUTS
+// ============================================================================
+assetModeInput = input.string("Auto", "Asset Mode", options=["Auto", "XAUUSD", "NAS100", "BTCUSD"])
+riskPct        = input.float(1.5, "Risk % Per Trade", minval=0.1, maxval=10.0, step=0.1) / 100.0
+useV3Clean     = input.bool(true, "XAU: V3_Pro_Clean (Skip 13-14 UTC)")
+useVisB        = input.bool(true, "XAU: VisB_Pro (5m FVG + 4H/1H BOS)")
+useAmd         = input.bool(true, "XAU/NAS100: AMD_Pro (Asian Sweep + 15m FVG)")
+useSniperLtf   = input.bool(true, "All: HTF Sweep -> LTF CHoCH+FVG Sniper")
+useBtcBeShield = input.bool(true, "BTC: Activate BE@3.0R (+1.0R Lock)")
+
+// Detect active asset mode
+tkrUpper = str.upper(syminfo.ticker)
+autoMode = str.contains(tkrUpper, "XAU") or str.contains(tkrUpper, "GOLD") ? "XAUUSD" : (str.contains(tkrUpper, "NAS") or str.contains(tkrUpper, "NSX") or str.contains(tkrUpper, "US100") or str.contains(tkrUpper, "NDX") or str.contains(tkrUpper, "USTEC")) ? "NAS100" : str.contains(tkrUpper, "BTC") ? "BTCUSD" : "XAUUSD"
+mode = assetModeInput == "Auto" ? autoMode : assetModeInput
+
+isXau = mode == "XAUUSD"
+isNsx = mode == "NAS100"
+isBtc = mode == "BTCUSD"
+
+// ============================================================================
+// CAUSAL HTF STRUCTURE & SWING HELPERS (ZERO-REPAINTING [1] + lookahead_on)
+// ============================================================================
+f_htf_bos(int k) =>
+    ph = ta.pivothigh(high, k, k)
+    pl = ta.pivotlow(low, k, k)
+    var float lastPh = na
+    var float lastPl = na
+    var int trend = 0
+    if not na(ph)
+        lastPh := ph
+    if not na(pl)
+        lastPl := pl
+    if not na(lastPh) and close > lastPh
+        trend := 1
+    else if not na(lastPl) and close < lastPl
+        trend := -1
+    atrVal = ta.atr(14)
+    [trend[1], lastPh[1], lastPl[1], atrVal[1]]
+
+f_htf_sweep_bar(int k, int minAge) =>
+    ph = ta.pivothigh(high, k, k)
+    pl = ta.pivotlow(low, k, k)
+    var float actPh = na
+    var int actPhBar = na
+    var float actPl = na
+    var int actPlBar = na
+    bool bullSweep = false
+    bool bearSweep = false
+    float bullSl = na
+    float bearSl = na
+    if not na(actPl) and (bar_index - actPlBar) >= minAge and low < actPl and close > actPl
+        bullSweep := true
+        bullSl := low
+    if not na(actPh) and (bar_index - actPhBar) >= minAge and high > actPh and close < actPh
+        bearSweep := true
+        bearSl := high
+    if not na(actPh) and high > actPh
+        actPh := na
+    if not na(actPl) and low < actPl
+        actPl := na
+    if not na(ph)
+        actPh := ph
+        actPhBar := bar_index - k
+    if not na(pl)
+        actPl := pl
+        actPlBar := bar_index - k
+    [bullSweep[1], bearSweep[1], bullSl[1], bearSl[1]]
+
+f_fvg_bar() =>
+    bool fvgBull = low > high[2] and close[1] > open[1]
+    bool fvgBear = high < low[2] and close[1] < open[1]
+    float bullGap = low - high[2]
+    float bearGap = low[2] - high
+    float b2Body = math.abs(close[1] - open[1])
+    [fvgBull[1], fvgBear[1], bullGap[1], bearGap[1], b2Body[1], low[1], high[1], low[2], high[2], close[1]]
+
+// Global non-repainting security calls (confirmed previous closed HTF bars)
+[tr1d, _p1dh, _p1dl, _atr1d] = request.security(syminfo.tickerid, "1D", f_htf_bos(2), barmerge.gaps_off, barmerge.lookahead_on)
+[tr4h, _p4hh, _p4hl, _atr4h] = request.security(syminfo.tickerid, "240", f_htf_bos(2), barmerge.gaps_off, barmerge.lookahead_on)
+[tr1h, ph1h, pl1h, atr1h]    = request.security(syminfo.tickerid, "60", f_htf_bos(2), barmerge.gaps_off, barmerge.lookahead_on)
+[bSw1h, sSw1h, bSl1h, sSl1h] = request.security(syminfo.tickerid, "60", f_htf_sweep_bar(3, 4), barmerge.gaps_off, barmerge.lookahead_on)
+[bSw15, sSw15, bSl15, sSl15] = request.security(syminfo.tickerid, "15", f_htf_sweep_bar(2, 2), barmerge.gaps_off, barmerge.lookahead_on)
+[_, _, _, atr15]             = request.security(syminfo.tickerid, "15", f_htf_bos(2), barmerge.gaps_off, barmerge.lookahead_on)
+[_, _, _, atr5]              = request.security(syminfo.tickerid, "5", f_htf_bos(2), barmerge.gaps_off, barmerge.lookahead_on)
+
+[fgB1h, fgS1h, gpB1h, gpS1h, _b2_1h, lo1h, hi1h, lo1h_1, hi1h_1, _cl1h] = request.security(syminfo.tickerid, "60", f_fvg_bar(), barmerge.gaps_off, barmerge.lookahead_on)
+[fgB15, fgS15, gpB15, gpS15, _b2_15, lo15, hi15, _l15_2, _h15_2, cl15] = request.security(syminfo.tickerid, "15", f_fvg_bar(), barmerge.gaps_off, barmerge.lookahead_on)
+[fgB5, fgS5, gpB5, gpS5, b2_5, lo5, hi5, lo5_1, hi5_1, _cl5]           = request.security(syminfo.tickerid, "5", f_fvg_bar(), barmerge.gaps_off, barmerge.lookahead_on)
+
+new1hBar  = ta.change(time("60")) != 0
+new15mBar = ta.change(time("15")) != 0
+new5mBar  = ta.change(time("5")) != 0
+
+// ============================================================================
+// SESSION / KILLZONE FILTERS (UTC)
+// ============================================================================
+hrUtc = hour(time, "UTC")
+inKz = (hrUtc >= 7 and hrUtc <= 10) or (hrUtc >= 12 and hrUtc <= 16)
+kzLtfOk = isBtc ? (hrUtc >= 9) : isNsx ? (inKz and hrUtc >= 9) : inKz
+
+// ============================================================================
+// LTF CAUSAL SWINGS & ATR
+// ============================================================================
+atrLtf = ta.atr(14)
+phLtf = ta.pivothigh(high, 2, 2)
+plLtf = ta.pivotlow(low, 2, 2)
+var float lastLtfSh = na
+var float lastLtfSl = na
+if not na(phLtf)
+    lastLtfSh := phLtf
+if not na(plLtf)
+    lastLtfSl := plLtf
+
+// ============================================================================
+// ASIAN RANGE & AMD MANIPULATION STATE (15m)
+// ============================================================================
+var float asiaHi = na
+var float asiaLo = na
+var int asiaDay = na
+var int amdManipSide = 0
+var float amdManipSl = na
+var int amdManipExp = -1
+
+curDay = dayofmonth(time, "UTC")
+if curDay != asiaDay
+    asiaDay := curDay
+    asiaHi := na
+    asiaLo := na
+if hrUtc < 6
+    asiaHi := na(asiaHi) ? high : math.max(asiaHi, high)
+    asiaLo := na(asiaLo) ? low : math.min(asiaLo, low)
+
+if new15mBar and hrUtc >= 6 and inKz and not na(asiaHi) and not na(asiaLo)
+    if lo15 < asiaLo and cl15 > asiaLo
+        amdManipSide := 1
+        amdManipSl := lo15
+        amdManipExp := bar_index + 120
+    else if hi15 > asiaHi and cl15 < asiaHi
+        amdManipSide := -1
+        amdManipSl := hi15
+        amdManipExp := bar_index + 120
+
+// ============================================================================
+// SWEEP CANDIDATE STATE (Sniper HTF -> LTF)
+// ============================================================================
+var int swSide = 0
+var float swSlBase = na
+var float swChoch = na
+var int swStartBar = -1
+
+if isXau and new15mBar
+    if bSw15
+        swSide := 1
+        swSlBase := bSl15
+        swChoch := lastLtfSh
+        swStartBar := bar_index
+    else if sSw15
+        swSide := -1
+        swSlBase := sSl15
+        swChoch := lastLtfSl
+        swStartBar := bar_index
+else if (isNsx or isBtc) and new1hBar
+    if bSw1h
+        swSide := 1
+        swSlBase := bSl1h
+        swChoch := lastLtfSh
+        swStartBar := bar_index
+    else if sSw1h
+        swSide := -1
+        swSlBase := sSl1h
+        swChoch := lastLtfSl
+        swStartBar := bar_index
+
+if swSide == 1 and low < swSlBase
+    swSide := 0
+if swSide == -1 and high > swSlBase
+    swSide := 0
+maxWait = isXau ? 20 : 60
+if swSide != 0 and (bar_index - swStartBar) > maxWait
+    swSide := 0
+
+// ============================================================================
+// ACTIVE POSITION & PENDING ORDER MANAGEMENT
+// ============================================================================
+var int posSide = 0
+var string posEngine = ""
+var float posEntry = na
+var float posSl = na
+var float posTp = na
+var float posRisk = na
+var float posTrailAfterR = na
+var float posBeActR = na
+var float posBeLockR = 1.0
+var bool posBeDone = false
+var bool posTrailActive = false
+
+var int pendExpBar = -1
+
+// Reset when flat
+if strategy.position_size == 0 and posSide != 0
+    posSide := 0
+    posEngine := ""
+    posEntry := na
+    posSl := na
+    posTp := na
+    posRisk := na
+    posBeDone := false
+    posTrailActive := false
+
+// Detect entry fill
+if strategy.position_size != 0 and posSide == 0
+    posSide := strategy.position_size > 0 ? 1 : -1
+    posEntry := strategy.position_avg_price
+    posRisk := math.abs(posEntry - posSl)
+    posBeDone := false
+    posTrailActive := false
+    pendExpBar := -1
+
+// Manage BE Shield & 1H Trailing Stop while in position
+if strategy.position_size != 0 and not na(posRisk) and posRisk > 0
+    if not na(posBeActR) and not posBeDone
+        hitBe = posSide == 1 ? high >= posEntry + posBeActR * posRisk : low <= posEntry - posBeActR * posRisk
+        if hitBe
+            posBeDone := true
+            lockPx = posSide == 1 ? posEntry + posBeLockR * posRisk : posEntry - posBeLockR * posRisk
+            posSl := posSide == 1 ? math.max(posSl, lockPx) : math.min(posSl, lockPx)
+
+    if not na(posTrailAfterR) and not posTrailActive
+        hitTr = posSide == 1 ? high >= posEntry + posTrailAfterR * posRisk : low <= posEntry - posTrailAfterR * posRisk
+        if hitTr
+            posTrailActive := true
+            lockPx = posSide == 1 ? posEntry + posBeLockR * posRisk : posEntry - posBeLockR * posRisk
+            posSl := posSide == 1 ? math.max(posSl, lockPx) : math.min(posSl, lockPx)
+
+    if posTrailActive and new1hBar
+        if posSide == 1 and not na(pl1h) and pl1h < close
+            posSl := math.max(posSl, pl1h)
+        else if posSide == -1 and not na(ph1h) and ph1h > close
+            posSl := math.min(posSl, ph1h)
+
+    if posSide == 1
+        strategy.exit("ExitLong", from_entry="Long", stop=posSl, limit=na(posTp) ? na : posTp)
+    else if posSide == -1
+        strategy.exit("ExitShort", from_entry="Short", stop=posSl, limit=na(posTp) ? na : posTp)
+
+// Cancel expired unfilled pending orders
+if strategy.position_size == 0 and pendExpBar >= 0 and bar_index > pendExpBar
+    strategy.cancel_all()
+    pendExpBar := -1
+
+// ============================================================================
+// ENTRY SIGNAL GENERATION (1-POSITION-PER-ASSET LOCK)
+// ============================================================================
+f_submit(int side, string eng, float trig, float sl, float tp, float trAfter, float beAct, float beLock, int expBars, float minR) =>
+    rDist = math.abs(trig - sl)
+    if strategy.position_size == 0 and rDist >= minR and rDist > 0
+        cashRisk = strategy.equity * riskPct
+        qty = cashRisk / (rDist * syminfo.pointvalue)
+        if qty > 0
+            posEngine := eng
+            posSl := sl
+            posTp := tp
+            posTrailAfterR := trAfter
+            posBeActR := beAct
+            posBeLockR := beLock
+            pendExpBar := bar_index + expBars
+            if side == 1
+                strategy.entry("Long", strategy.long, qty=qty, limit=trig, comment=eng)
+                strategy.exit("ExitLong", from_entry="Long", stop=sl, limit=na(tp) ? na : tp)
+            else
+                strategy.entry("Short", strategy.short, qty=qty, limit=trig, comment=eng)
+                strategy.exit("ExitShort", from_entry="Short", stop=sl, limit=na(tp) ? na : tp)
+
+if strategy.position_size == 0 and barstate.isconfirmed
+    minAbs = isXau ? 2.0 : isNsx ? 10.0 : 0.0
+    minPct = isBtc ? 0.0020 : 0.0010
+    minRisk = math.max(minAbs, close * minPct)
+
+    // 1) XAU: V3_Pro_Clean (1H FVG + 4H BOS, skip 13-14 UTC)
+    if isXau and useV3Clean and new1hBar and inKz and hrUtc != 13 and hrUtc != 14 and not na(atr1h)
+        if tr4h == 1 and fgB1h and gpB1h >= 0.20 * atr1h
+            f_submit(1, "V3_Pro_Clean", lo1h, lo1h_1 - 0.75 * atr1h, na, 2.0, na, 1.0, 180, minRisk)
+        else if tr4h == -1 and fgS1h and gpS1h >= 0.20 * atr1h
+            f_submit(-1, "V3_Pro_Clean", hi1h, hi1h_1 + 0.75 * atr1h, na, 2.0, na, 1.0, 180, minRisk)
+
+    // 2) XAU: VisB_Pro (5m FVG + 4H/1H BOS)
+    if isXau and useVisB and new5mBar and inKz and not na(atr5)
+        if tr4h == 1 and tr1h == 1 and fgB5 and gpB5 >= 0.25 * atr5 and b2_5 >= atr5
+            f_submit(1, "VisB_Pro", lo5, lo5_1 - atr5, na, 2.0, na, 1.0, 60, minRisk)
+        else if tr4h == -1 and tr1h == -1 and fgS5 and gpS5 >= 0.25 * atr5 and b2_5 >= atr5
+            f_submit(-1, "VisB_Pro", hi5, hi5_1 + atr5, na, 2.0, na, 1.0, 60, minRisk)
+
+    // 3) XAU & NAS100: AMD_Pro / NSX_AMD_1D (Asian sweep + 15m FVG)
+    if (isXau or isNsx) and useAmd and new15mBar and inKz and amdManipSide != 0 and bar_index <= amdManipExp and not na(atr15)
+        if amdManipSide == 1 and fgB15 and gpB15 >= 0.25 * atr15 and (not isNsx or tr1d == 1)
+            f_submit(1, isNsx ? "NSX_AMD_1D" : "AMD_Pro", lo15, amdManipSl - atr15, na, 2.0, na, 1.0, 90, minRisk)
+            amdManipSide := 0
+        else if amdManipSide == -1 and fgS15 and gpS15 >= 0.25 * atr15 and (not isNsx or tr1d == -1)
+            f_submit(-1, isNsx ? "NSX_AMD_1D" : "AMD_Pro", hi15, amdManipSl + atr15, na, 2.0, na, 1.0, 90, minRisk)
+            amdManipSide := 0
+
+    // 4) LTF Sniper (XAU_LTF1M 3R | NSX_1H1m_10R >=09h | BTC_15R_BE >=09h)
+    if useSniperLtf and kzLtfOk and swSide != 0 and not na(atrLtf)
+        b2Body = math.abs(close[1] - open[1])
+        if swSide == 1
+            okHtf = isNsx ? (tr4h == 1) : (tr4h == 1 and tr1h == 1)
+            if okHtf and not na(swChoch) and close > swChoch and (low - high[2]) >= 0.25 * atrLtf and close[1] > open[1] and b2Body >= atrLtf
+                trig = low
+                sl = swSlBase - atrLtf
+                rr = isXau ? 3.0 : isNsx ? 10.0 : 15.0
+                tp = trig + rr * (trig - sl)
+                beAct = (isBtc and useBtcBeShield) ? 3.0 : na
+                eng = isXau ? "XAU_LTF1M" : isNsx ? "NSX_1H1m_10R" : "BTC_15R_BE"
+                f_submit(1, eng, trig, sl, tp, na, beAct, 1.0, 20, minRisk)
+                swSide := 0
+        else if swSide == -1
+            okHtf = isNsx ? (tr4h == -1) : (tr4h == -1 and tr1h == -1)
+            if okHtf and not na(swChoch) and close < swChoch and (low[2] - high) >= 0.25 * atrLtf and close[1] < open[1] and b2Body >= atrLtf
+                trig = high
+                sl = swSlBase + atrLtf
+                rr = isXau ? 3.0 : isNsx ? 10.0 : 15.0
+                tp = trig - rr * (sl - trig)
+                beAct = (isBtc and useBtcBeShield) ? 3.0 : na
+                eng = isXau ? "XAU_LTF1M" : isNsx ? "NSX_1H1m_10R" : "BTC_15R_BE"
+                f_submit(-1, eng, trig, sl, tp, na, beAct, 1.0, 20, minRisk)
+                swSide := 0
