@@ -38,3 +38,6 @@ uploads/
 *.zip
 .env
 ict_vision/results_smoke/
+
+# --- scalper artifacts
+ict_vision/results_scalp/

@@ -153,8 +153,8 @@ def resolve_all(setup_df, b1, m15_a, m15_b, *, stop_pct=0.0002, tp_pct=0.0002,
         if end <= a:
             continue
         entry = float(b1.o[a])
-        stop = float(tr["c2_low"]) - stop_pct * entry
-        tgt = float(tr["tgt_hi"]) - tp_pct * entry
+        stop = float(tr["c2_low"]) * (1.0 - stop_pct)   # distance below the low
+        tgt = float(tr["tgt_hi"]) * (1.0 - tp_pct)
         risk = entry - stop
         if risk <= 0 or tgt <= entry:
             continue
@@ -207,16 +207,18 @@ def main() -> int:
     ap.add_argument("--spread", type=float, default=0.0)
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--mid", default="body", choices=["body", "range"])
+    ap.add_argument("--fill-minutes", type=int, default=1,
+                    help="resolution used for fills (1 for histdata, 5 for BTC)")
     a = ap.parse_args()
 
     print(f"loading {a.label} …")
-    b1 = load_all(a.data, minutes=1, cache=a.cache)
+    b1 = load_all(a.data, minutes=a.fill_minutes, cache=a.cache)
     b15 = load_all(a.data, minutes=15, cache=a.cache)
     if a.limit:
         b15 = to_bars(pd.DataFrame({"o": b15.o[:a.limit], "h": b15.h[:a.limit],
                                     "l": b15.l[:a.limit], "c": b15.c[:a.limit]},
                                    index=b15.idx[:a.limit]))
-    print(f"  1m {b1.n:,}   15m {b15.n:,}   {b15.idx[0]} -> {b15.idx[-1]}")
+    print(f"  fill {a.fill_minutes}m {b1.n:,}   15m {b15.n:,}   {b15.idx[0]} -> {b15.idx[-1]}")
     m15_a, m15_b = map_15m_to_1m(b15, b1)
 
     setups = build_setups(b15, mid_mode=a.mid)
@@ -231,7 +233,7 @@ def main() -> int:
     print("\n================= STOP-DISTANCE SWEEP (the decisive parameter) =================")
     print("   stop%      n    win%   meanR      t   tgt%   mean RR")
     best = None
-    for sp in (0.0002, 0.0005, 0.001, 0.002, 0.004, 0.008, 0.015):
+    for sp in (0.0002, 0.002, 0.005, 0.010, 0.020, 0.035, 0.060, 0.100):
         df = resolve_all(setups, b1, m15_a, m15_b, stop_pct=sp, cost_rt=a.spread)
         if len(df) < 20:
             continue
