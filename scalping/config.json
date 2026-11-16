@@ -1,0 +1,25 @@
+{
+  "comment": "Scalping engine defaults. All values are research starting points, not promises.",
+  "entry_mode": "combo",
+  "rr": 1.5,
+  "sl_atr_mult": 0.5,
+  "sl_min_atr": 0.5,
+  "require_candle_confirm": true,
+  "require_htf_align": true,
+  "killzone_utc": [7, 16],
+  "max_holding_bars": 12,
+  "use_breakeven": true,
+  "breakeven_at_r": 1.0,
+  "risk_pct": 0.01,
+  "fee_pct": 0.00075,
+  "slippage_pct": 0.0002,
+  "max_trades_per_day": 6,
+  "daily_loss_pct": 0.03,
+  "live": {
+    "exchange": "binance",
+    "symbol": "BTCUSDT",
+    "timeframe": "5m",
+    "paper_only": true,
+    "dry_run_note": "paper_only=true means NO real orders are sent."
+  }
+}

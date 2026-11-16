@@ -24,6 +24,7 @@ dist/
 memcheck/
 perf_lab/
 smoke/
+scalping/outputs/equity_*.csv
 .build_*.sha
 .closure_*.sha
 .tools_gate_*.txt
