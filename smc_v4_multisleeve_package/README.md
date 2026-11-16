@@ -180,21 +180,20 @@ synthetic offline example only.
 
 ## V9 QuantConnect export (testing draft)
 
-The QuantConnect upload set is split into three files so every file stays
-below QuantConnect Cloud's 32,000-character limit:
+The QuantConnect export is now a **single comprehensive file**:
 
-- `exports/quantconnect/V9_3Asset_1PosEach_DynamicProfile_QC.py` — small
-  algorithm launcher;
-- `exports/quantconnect/smc_core.py` — causal data structures, V9 profile
-  layer, gates, targets, and initialization;
-- `exports/quantconnect/smc_execution.py` — order lifecycle, risk controls,
-  and preserved V8 sleeve runtime.
+- `exports/quantconnect/smc_core.py` — the complete V8 sleeves plus the V9
+  profile, sweep/CHoCH, zone-target, risk, expiry, order lifecycle, and
+  telemetry logic.
 
-Together they form the self-contained QuantConnect-oriented export: the V8
-sleeves remain intact and the V9 profile, sweep/CHoCH, zone-target, risk,
-expiry, and telemetry layer are retained. The V8 reference file remains
-unchanged. Upload all three split files to the same QuantConnect project; do
-not upload the historical monolithic copy as `smc_core.py`.
+It is syntax-minified and internally shortens only private implementation
+names so the exact strategy fits under QuantConnect Cloud's 32,000-character
+per-file limit. The resulting file is approximately 29 KB. This changes no
+threshold, condition, order rule, risk formula, or execution behavior. Upload
+`smc_core.py` alone as the main algorithm file. The
+`V9_3Asset_1PosEach_DynamicProfile_QC.py` file is only a compatibility alias;
+do not upload the old 49 KB monolith or the removed split-module set.
+The V8 reference file remains unchanged.
 
 The export defaults to `v9_require_spot_cvd=1`. This is fail-closed because
 QuantConnect's XAU/NSX/BTC bars do not, by themselves, provide the declared
