@@ -1,0 +1,6501 @@
+{
+  "baseline": {
+    "full": {
+      "compound_100_1pct": {
+        "compound": true,
+        "final_equity": 646.51,
+        "max_dd_pct": 19.83,
+        "risk_pct": 1.0,
+        "start_capital": 100.0,
+        "total_return_pct": 546.5,
+        "yearly_equity": {
+          "2020": 154.06,
+          "2021": 179.92,
+          "2022": 207.48,
+          "2023": 286.45,
+          "2024": 334.89,
+          "2025": 434.47,
+          "2026": 646.51
+        }
+      },
+      "compound_100_2pct": {
+        "compound": true,
+        "final_equity": 3215.68,
+        "max_dd_pct": 36.87,
+        "risk_pct": 2.0,
+        "start_capital": 100.0,
+        "total_return_pct": 3115.7,
+        "yearly_equity": {
+          "2020": 227.56,
+          "2021": 301.3,
+          "2022": 391.79,
+          "2023": 721.32,
+          "2024": 952.07,
+          "2025": 1546.92,
+          "2026": 3215.68
+        }
+      },
+      "cost_usd_per_oz": 0.25,
+      "expectancy_r": 0.311092,
+      "gross_r": 221.906551,
+      "losses_or_zero": 392,
+      "max_consecutive_losses": 11,
+      "max_drawdown_r": 21.198272,
+      "net_r": 200.654166,
+      "positive_years": 7,
+      "profit_factor": 1.495662,
+      "trades": 645,
+      "win_rate_pct": 39.2248,
+      "wins": 253,
+      "yearly_net_r": {
+        "2020": 45.496363,
+        "2021": 17.060899,
+        "2022": 15.398526,
+        "2023": 34.093494,
+        "2024": 17.446781,
+        "2025": 27.869632,
+        "2026": 43.28847
+      },
+      "years": 7
+    },
+    "splits": {
+      "development_2020_02_to_2024_12": {
+        "compound_100_1pct": {
+          "compound": true,
+          "final_equity": 350.23,
+          "max_dd_pct": 19.83,
+          "risk_pct": 1.0,
+          "start_capital": 100.0,
+          "total_return_pct": 250.2,
+          "yearly_equity": {
+            "2020": 154.06,
+            "2021": 179.92,
+            "2022": 207.48,
+            "2023": 286.45,
+            "2024": 334.89,
+            "2025": 350.23
+          }
+        },
+        "compound_100_2pct": {
+          "compound": true,
+          "final_equity": 1039.29,
+          "max_dd_pct": 36.87,
+          "risk_pct": 2.0,
+          "start_capital": 100.0,
+          "total_return_pct": 939.3,
+          "yearly_equity": {
+            "2020": 227.56,
+            "2021": 301.3,
+            "2022": 391.79,
+            "2023": 721.32,
+            "2024": 952.07,
+            "2025": 1039.29
+          }
+        },
+        "cost_usd_per_oz": 0.25,
+        "expectancy_r": 0.282267,
+        "gross_r": 152.410951,
+        "losses_or_zero": 281,
+        "max_consecutive_losses": 11,
+        "max_drawdown_r": 21.198272,
+        "net_r": 134.076613,
+        "positive_years": 6,
+        "profit_factor": 1.459275,
+        "trades": 475,
+        "win_rate_pct": 40.8421,
+        "wins": 194,
+        "yearly_net_r": {
+          "2020": 45.496363,
+          "2021": 17.060899,
+          "2022": 15.398526,
+          "2023": 34.093494,
+          "2024": 17.446781,
+          "2025": 4.580549
+        },
+        "years": 6
+      },
+      "full_2020_02_to_2026_10": {
+        "compound_100_1pct": {
+          "compound": true,
+          "final_equity": 646.51,
+          "max_dd_pct": 19.83,
+          "risk_pct": 1.0,
+          "start_capital": 100.0,
+          "total_return_pct": 546.5,
+          "yearly_equity": {
+            "2020": 154.06,
+            "2021": 179.92,
+            "2022": 207.48,
+            "2023": 286.45,
+            "2024": 334.89,
+            "2025": 434.47,
+            "2026": 646.51
+          }
+        },
+        "compound_100_2pct": {
+          "compound": true,
+          "final_equity": 3215.68,
+          "max_dd_pct": 36.87,
+          "risk_pct": 2.0,
+          "start_capital": 100.0,
+          "total_return_pct": 3115.7,
+          "yearly_equity": {
+            "2020": 227.56,
+            "2021": 301.3,
+            "2022": 391.79,
+            "2023": 721.32,
+            "2024": 952.07,
+            "2025": 1546.92,
+            "2026": 3215.68
+          }
+        },
+        "cost_usd_per_oz": 0.25,
+        "expectancy_r": 0.311092,
+        "gross_r": 221.906551,
+        "losses_or_zero": 392,
+        "max_consecutive_losses": 11,
+        "max_drawdown_r": 21.198272,
+        "net_r": 200.654166,
+        "positive_years": 7,
+        "profit_factor": 1.495662,
+        "trades": 645,
+        "win_rate_pct": 39.2248,
+        "wins": 253,
+        "yearly_net_r": {
+          "2020": 45.496363,
+          "2021": 17.060899,
+          "2022": 15.398526,
+          "2023": 34.093494,
+          "2024": 17.446781,
+          "2025": 27.869632,
+          "2026": 43.28847
+        },
+        "years": 7
+      },
+      "holdout_2025_01_to_2026_10": {
+        "compound_100_1pct": {
+          "compound": true,
+          "final_equity": 184.6,
+          "max_dd_pct": 15.59,
+          "risk_pct": 1.0,
+          "start_capital": 100.0,
+          "total_return_pct": 84.6,
+          "yearly_equity": {
+            "2025": 124.05,
+            "2026": 184.6
+          }
+        },
+        "compound_100_2pct": {
+          "compound": true,
+          "final_equity": 309.41,
+          "max_dd_pct": 29.11,
+          "risk_pct": 2.0,
+          "start_capital": 100.0,
+          "total_return_pct": 209.4,
+          "yearly_equity": {
+            "2025": 148.84,
+            "2026": 309.41
+          }
+        },
+        "cost_usd_per_oz": 0.25,
+        "expectancy_r": 0.391633,
+        "gross_r": 69.4956,
+        "losses_or_zero": 111,
+        "max_consecutive_losses": 9,
+        "max_drawdown_r": 16.68301,
+        "net_r": 66.577553,
+        "positive_years": 2,
+        "profit_factor": 1.589758,
+        "trades": 170,
+        "win_rate_pct": 34.7059,
+        "wins": 59,
+        "yearly_net_r": {
+          "2025": 23.289083,
+          "2026": 43.28847
+        },
+        "years": 2
+      }
+    }
+  },
+  "research_contract": {
+    "data": "XAUUSD 1-minute OHLC archives from package/data/XAUUSD_1m_histdata",
+    "development_window": [
+      "2020-02-01T00:00:00+00:00",
+      "2025-01-01T00:00:00+00:00"
+    ],
+    "estimated_spread_for_filter_usd_per_oz": 0.5,
+    "feature_time_rule": "source completed bar end <= setup_time; setup close minus predeclared stop is the only risk proxy",
+    "holdout_used_for_selection": false,
+    "holdout_window": [
+      "2025-01-01T00:00:00+00:00",
+      "2026-11-01T00:00:00+00:00"
+    ],
+    "original_round_trip_cost_usd_per_oz": 0.25,
+    "signal_universe": "645 baseline V5_1PosLock signals; no new signal generation in this stage",
+    "source": "V5 byte-preserved clone; augmented variants are post-signal entry gates",
+    "stress_costs_usd_per_oz": [
+      0.5,
+      1.0
+    ]
+  },
+  "variants": {
+    "ABSTENTION": {
+      "dropped_baseline_losers_or_zero": 0,
+      "dropped_baseline_trades": 0,
+      "dropped_baseline_winners": 0,
+      "enabled_layers": [
+        "abstention"
+      ],
+      "full": {
+        "compound_100_1pct": {
+          "compound": true,
+          "final_equity": 646.51,
+          "max_dd_pct": 19.83,
+          "risk_pct": 1.0,
+          "start_capital": 100.0,
+          "total_return_pct": 546.5,
+          "yearly_equity": {
+            "2020": 154.06,
+            "2021": 179.92,
+            "2022": 207.48,
+            "2023": 286.45,
+            "2024": 334.89,
+            "2025": 434.47,
+            "2026": 646.51
+          }
+        },
+        "compound_100_2pct": {
+          "compound": true,
+          "final_equity": 3215.68,
+          "max_dd_pct": 36.87,
+          "risk_pct": 2.0,
+          "start_capital": 100.0,
+          "total_return_pct": 3115.7,
+          "yearly_equity": {
+            "2020": 227.56,
+            "2021": 301.3,
+            "2022": 391.79,
+            "2023": 721.32,
+            "2024": 952.07,
+            "2025": 1546.92,
+            "2026": 3215.68
+          }
+        },
+        "cost_usd_per_oz": 0.25,
+        "expectancy_r": 0.311092,
+        "gross_r": 221.906551,
+        "losses_or_zero": 392,
+        "max_consecutive_losses": 11,
+        "max_drawdown_r": 21.198272,
+        "net_r": 200.654166,
+        "positive_years": 7,
+        "profit_factor": 1.495662,
+        "trades": 645,
+        "win_rate_pct": 39.2248,
+        "wins": 253,
+        "yearly_net_r": {
+          "2020": 45.496363,
+          "2021": 17.060899,
+          "2022": 15.398526,
+          "2023": 34.093494,
+          "2024": 17.446781,
+          "2025": 27.869632,
+          "2026": 43.28847
+        },
+        "years": 7
+      },
+      "losers_turned_into_winners": 0,
+      "outcome_changed_by_filter": 0,
+      "reason_counts": {
+        "invalidation_level_broken_or_unavailable": 1
+      },
+      "retained_baseline_losers_or_zero": 392,
+      "retained_baseline_trades": 645,
+      "retained_baseline_winners": 253,
+      "selection_note": "predeclared before evaluation; no holdout tuning",
+      "splits": {
+        "development_2020_02_to_2024_12": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 350.23,
+            "max_dd_pct": 19.83,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 250.2,
+            "yearly_equity": {
+              "2020": 154.06,
+              "2021": 179.92,
+              "2022": 207.48,
+              "2023": 286.45,
+              "2024": 334.89,
+              "2025": 350.23
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 1039.29,
+            "max_dd_pct": 36.87,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 939.3,
+            "yearly_equity": {
+              "2020": 227.56,
+              "2021": 301.3,
+              "2022": 391.79,
+              "2023": 721.32,
+              "2024": 952.07,
+              "2025": 1039.29
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": 0.282267,
+          "gross_r": 152.410951,
+          "losses_or_zero": 281,
+          "max_consecutive_losses": 11,
+          "max_drawdown_r": 21.198272,
+          "net_r": 134.076613,
+          "positive_years": 6,
+          "profit_factor": 1.459275,
+          "trades": 475,
+          "win_rate_pct": 40.8421,
+          "wins": 194,
+          "yearly_net_r": {
+            "2020": 45.496363,
+            "2021": 17.060899,
+            "2022": 15.398526,
+            "2023": 34.093494,
+            "2024": 17.446781,
+            "2025": 4.580549
+          },
+          "years": 6
+        },
+        "full_2020_02_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 646.51,
+            "max_dd_pct": 19.83,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 546.5,
+            "yearly_equity": {
+              "2020": 154.06,
+              "2021": 179.92,
+              "2022": 207.48,
+              "2023": 286.45,
+              "2024": 334.89,
+              "2025": 434.47,
+              "2026": 646.51
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 3215.68,
+            "max_dd_pct": 36.87,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 3115.7,
+            "yearly_equity": {
+              "2020": 227.56,
+              "2021": 301.3,
+              "2022": 391.79,
+              "2023": 721.32,
+              "2024": 952.07,
+              "2025": 1546.92,
+              "2026": 3215.68
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": 0.311092,
+          "gross_r": 221.906551,
+          "losses_or_zero": 392,
+          "max_consecutive_losses": 11,
+          "max_drawdown_r": 21.198272,
+          "net_r": 200.654166,
+          "positive_years": 7,
+          "profit_factor": 1.495662,
+          "trades": 645,
+          "win_rate_pct": 39.2248,
+          "wins": 253,
+          "yearly_net_r": {
+            "2020": 45.496363,
+            "2021": 17.060899,
+            "2022": 15.398526,
+            "2023": 34.093494,
+            "2024": 17.446781,
+            "2025": 27.869632,
+            "2026": 43.28847
+          },
+          "years": 7
+        },
+        "holdout_2025_01_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 184.6,
+            "max_dd_pct": 15.59,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 84.6,
+            "yearly_equity": {
+              "2025": 124.05,
+              "2026": 184.6
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 309.41,
+            "max_dd_pct": 29.11,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 209.4,
+            "yearly_equity": {
+              "2025": 148.84,
+              "2026": 309.41
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": 0.391633,
+          "gross_r": 69.4956,
+          "losses_or_zero": 111,
+          "max_consecutive_losses": 9,
+          "max_drawdown_r": 16.68301,
+          "net_r": 66.577553,
+          "positive_years": 2,
+          "profit_factor": 1.589758,
+          "trades": 170,
+          "win_rate_pct": 34.7059,
+          "wins": 59,
+          "yearly_net_r": {
+            "2025": 23.289083,
+            "2026": 43.28847
+          },
+          "years": 2
+        }
+      },
+      "stress_costs": {
+        "cost_0.50": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 522.95,
+            "max_dd_pct": 22.8,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 423.0,
+            "yearly_equity": {
+              "2020": 150.14,
+              "2021": 168.07,
+              "2022": 187.26,
+              "2023": 248.21,
+              "2024": 278.95,
+              "2025": 354.72,
+              "2026": 522.95
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 2105.12,
+            "max_dd_pct": 41.46,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 2005.1,
+            "yearly_equity": {
+              "2020": 216.19,
+              "2021": 262.98,
+              "2022": 319.22,
+              "2023": 541.86,
+              "2024": 660.86,
+              "2025": 1031.61,
+              "2026": 2105.12
+            }
+          },
+          "cost_usd_per_oz": 0.5,
+          "expectancy_r": 0.278142,
+          "gross_r": 221.906551,
+          "losses_or_zero": 392,
+          "max_consecutive_losses": 11,
+          "max_drawdown_r": 24.95561,
+          "net_r": 179.40178,
+          "positive_years": 7,
+          "profit_factor": 1.42956,
+          "trades": 645,
+          "win_rate_pct": 39.2248,
+          "wins": 253,
+          "yearly_net_r": {
+            "2020": 42.903863,
+            "2021": 12.818384,
+            "2022": 11.957926,
+            "2023": 30.009845,
+            "2024": 13.497369,
+            "2025": 25.860777,
+            "2026": 42.353617
+          },
+          "years": 7
+        },
+        "cost_1.00": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 342.06,
+            "max_dd_pct": 28.4,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 242.1,
+            "yearly_equity": {
+              "2020": 142.6,
+              "2021": 146.64,
+              "2022": 152.51,
+              "2023": 186.33,
+              "2024": 193.5,
+              "2025": 236.38,
+              "2026": 342.06
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 901.11,
+            "max_dd_pct": 49.68,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 801.1,
+            "yearly_equity": {
+              "2020": 195.11,
+              "2021": 200.27,
+              "2022": 211.8,
+              "2023": 305.5,
+              "2024": 318.06,
+              "2025": 458.26,
+              "2026": 901.11
+            }
+          },
+          "cost_usd_per_oz": 1.0,
+          "expectancy_r": 0.212243,
+          "gross_r": 221.906551,
+          "losses_or_zero": 392,
+          "max_consecutive_losses": 11,
+          "max_drawdown_r": 32.470284,
+          "net_r": 136.89701,
+          "positive_years": 7,
+          "profit_factor": 1.308826,
+          "trades": 645,
+          "win_rate_pct": 39.2248,
+          "wins": 253,
+          "yearly_net_r": {
+            "2020": 37.718861,
+            "2021": 4.333355,
+            "2022": 5.076724,
+            "2023": 21.842547,
+            "2024": 5.598543,
+            "2025": 21.843067,
+            "2026": 40.483912
+          },
+          "years": 7
+        }
+      }
+    },
+    "ALL_DECLARED_LAYERS": {
+      "dropped_baseline_losers_or_zero": 392,
+      "dropped_baseline_trades": 645,
+      "dropped_baseline_winners": 253,
+      "enabled_layers": [
+        "equal_levels",
+        "liquidity_zone",
+        "sweep_reclaim",
+        "confirmed_mss",
+        "displacement",
+        "fvg",
+        "order_block",
+        "bpr",
+        "htf_premium_discount",
+        "retest_reaction",
+        "invalidation",
+        "abstention",
+        "volatility_relative",
+        "spread_cost_filter"
+      ],
+      "full": {
+        "compound_100_1pct": {
+          "compound": true,
+          "final_equity": 100.0,
+          "max_dd_pct": 0.0,
+          "risk_pct": 1.0,
+          "start_capital": 100.0,
+          "total_return_pct": 0.0,
+          "yearly_equity": {}
+        },
+        "compound_100_2pct": {
+          "compound": true,
+          "final_equity": 100.0,
+          "max_dd_pct": 0.0,
+          "risk_pct": 2.0,
+          "start_capital": 100.0,
+          "total_return_pct": 0.0,
+          "yearly_equity": {}
+        },
+        "cost_usd_per_oz": 0.25,
+        "expectancy_r": null,
+        "gross_r": 0,
+        "losses_or_zero": 0,
+        "max_consecutive_losses": 0,
+        "max_drawdown_r": 0.0,
+        "net_r": 0,
+        "positive_years": 0,
+        "profit_factor": null,
+        "trades": 0,
+        "win_rate_pct": null,
+        "wins": 0,
+        "yearly_net_r": {},
+        "years": 0
+      },
+      "losers_turned_into_winners": 0,
+      "outcome_changed_by_filter": 0,
+      "reason_counts": {
+        "invalidation_level_broken_or_unavailable": 1,
+        "layer_failed:bpr": 645,
+        "layer_failed:confirmed_mss": 26,
+        "layer_failed:displacement": 548,
+        "layer_failed:equal_levels": 591,
+        "layer_failed:fvg": 75,
+        "layer_failed:htf_premium_discount": 457,
+        "layer_failed:invalidation": 1,
+        "layer_failed:liquidity_zone": 642,
+        "layer_failed:order_block": 638,
+        "layer_failed:retest_reaction": 384,
+        "layer_failed:sweep_reclaim": 643,
+        "layer_failed:volatility_relative": 105
+      },
+      "retained_baseline_losers_or_zero": 0,
+      "retained_baseline_trades": 0,
+      "retained_baseline_winners": 0,
+      "selection_note": "predeclared before evaluation; no holdout tuning",
+      "splits": {
+        "development_2020_02_to_2024_12": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": null,
+          "gross_r": 0,
+          "losses_or_zero": 0,
+          "max_consecutive_losses": 0,
+          "max_drawdown_r": 0.0,
+          "net_r": 0,
+          "positive_years": 0,
+          "profit_factor": null,
+          "trades": 0,
+          "win_rate_pct": null,
+          "wins": 0,
+          "yearly_net_r": {},
+          "years": 0
+        },
+        "full_2020_02_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": null,
+          "gross_r": 0,
+          "losses_or_zero": 0,
+          "max_consecutive_losses": 0,
+          "max_drawdown_r": 0.0,
+          "net_r": 0,
+          "positive_years": 0,
+          "profit_factor": null,
+          "trades": 0,
+          "win_rate_pct": null,
+          "wins": 0,
+          "yearly_net_r": {},
+          "years": 0
+        },
+        "holdout_2025_01_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": null,
+          "gross_r": 0,
+          "losses_or_zero": 0,
+          "max_consecutive_losses": 0,
+          "max_drawdown_r": 0.0,
+          "net_r": 0,
+          "positive_years": 0,
+          "profit_factor": null,
+          "trades": 0,
+          "win_rate_pct": null,
+          "wins": 0,
+          "yearly_net_r": {},
+          "years": 0
+        }
+      },
+      "stress_costs": {
+        "cost_0.50": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "cost_usd_per_oz": 0.5,
+          "expectancy_r": null,
+          "gross_r": 0,
+          "losses_or_zero": 0,
+          "max_consecutive_losses": 0,
+          "max_drawdown_r": 0.0,
+          "net_r": 0,
+          "positive_years": 0,
+          "profit_factor": null,
+          "trades": 0,
+          "win_rate_pct": null,
+          "wins": 0,
+          "yearly_net_r": {},
+          "years": 0
+        },
+        "cost_1.00": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "cost_usd_per_oz": 1.0,
+          "expectancy_r": null,
+          "gross_r": 0,
+          "losses_or_zero": 0,
+          "max_consecutive_losses": 0,
+          "max_drawdown_r": 0.0,
+          "net_r": 0,
+          "positive_years": 0,
+          "profit_factor": null,
+          "trades": 0,
+          "win_rate_pct": null,
+          "wins": 0,
+          "yearly_net_r": {},
+          "years": 0
+        }
+      }
+    },
+    "BASELINE_NO_GATE": {
+      "dropped_baseline_losers_or_zero": 0,
+      "dropped_baseline_trades": 0,
+      "dropped_baseline_winners": 0,
+      "enabled_layers": [],
+      "full": {
+        "compound_100_1pct": {
+          "compound": true,
+          "final_equity": 646.51,
+          "max_dd_pct": 19.83,
+          "risk_pct": 1.0,
+          "start_capital": 100.0,
+          "total_return_pct": 546.5,
+          "yearly_equity": {
+            "2020": 154.06,
+            "2021": 179.92,
+            "2022": 207.48,
+            "2023": 286.45,
+            "2024": 334.89,
+            "2025": 434.47,
+            "2026": 646.51
+          }
+        },
+        "compound_100_2pct": {
+          "compound": true,
+          "final_equity": 3215.68,
+          "max_dd_pct": 36.87,
+          "risk_pct": 2.0,
+          "start_capital": 100.0,
+          "total_return_pct": 3115.7,
+          "yearly_equity": {
+            "2020": 227.56,
+            "2021": 301.3,
+            "2022": 391.79,
+            "2023": 721.32,
+            "2024": 952.07,
+            "2025": 1546.92,
+            "2026": 3215.68
+          }
+        },
+        "cost_usd_per_oz": 0.25,
+        "expectancy_r": 0.311092,
+        "gross_r": 221.906551,
+        "losses_or_zero": 392,
+        "max_consecutive_losses": 11,
+        "max_drawdown_r": 21.198272,
+        "net_r": 200.654166,
+        "positive_years": 7,
+        "profit_factor": 1.495662,
+        "trades": 645,
+        "win_rate_pct": 39.2248,
+        "wins": 253,
+        "yearly_net_r": {
+          "2020": 45.496363,
+          "2021": 17.060899,
+          "2022": 15.398526,
+          "2023": 34.093494,
+          "2024": 17.446781,
+          "2025": 27.869632,
+          "2026": 43.28847
+        },
+        "years": 7
+      },
+      "losers_turned_into_winners": 0,
+      "outcome_changed_by_filter": 0,
+      "reason_counts": {
+        "invalidation_level_broken_or_unavailable": 1
+      },
+      "retained_baseline_losers_or_zero": 392,
+      "retained_baseline_trades": 645,
+      "retained_baseline_winners": 253,
+      "selection_note": "predeclared before evaluation; no holdout tuning",
+      "splits": {
+        "development_2020_02_to_2024_12": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 350.23,
+            "max_dd_pct": 19.83,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 250.2,
+            "yearly_equity": {
+              "2020": 154.06,
+              "2021": 179.92,
+              "2022": 207.48,
+              "2023": 286.45,
+              "2024": 334.89,
+              "2025": 350.23
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 1039.29,
+            "max_dd_pct": 36.87,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 939.3,
+            "yearly_equity": {
+              "2020": 227.56,
+              "2021": 301.3,
+              "2022": 391.79,
+              "2023": 721.32,
+              "2024": 952.07,
+              "2025": 1039.29
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": 0.282267,
+          "gross_r": 152.410951,
+          "losses_or_zero": 281,
+          "max_consecutive_losses": 11,
+          "max_drawdown_r": 21.198272,
+          "net_r": 134.076613,
+          "positive_years": 6,
+          "profit_factor": 1.459275,
+          "trades": 475,
+          "win_rate_pct": 40.8421,
+          "wins": 194,
+          "yearly_net_r": {
+            "2020": 45.496363,
+            "2021": 17.060899,
+            "2022": 15.398526,
+            "2023": 34.093494,
+            "2024": 17.446781,
+            "2025": 4.580549
+          },
+          "years": 6
+        },
+        "full_2020_02_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 646.51,
+            "max_dd_pct": 19.83,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 546.5,
+            "yearly_equity": {
+              "2020": 154.06,
+              "2021": 179.92,
+              "2022": 207.48,
+              "2023": 286.45,
+              "2024": 334.89,
+              "2025": 434.47,
+              "2026": 646.51
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 3215.68,
+            "max_dd_pct": 36.87,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 3115.7,
+            "yearly_equity": {
+              "2020": 227.56,
+              "2021": 301.3,
+              "2022": 391.79,
+              "2023": 721.32,
+              "2024": 952.07,
+              "2025": 1546.92,
+              "2026": 3215.68
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": 0.311092,
+          "gross_r": 221.906551,
+          "losses_or_zero": 392,
+          "max_consecutive_losses": 11,
+          "max_drawdown_r": 21.198272,
+          "net_r": 200.654166,
+          "positive_years": 7,
+          "profit_factor": 1.495662,
+          "trades": 645,
+          "win_rate_pct": 39.2248,
+          "wins": 253,
+          "yearly_net_r": {
+            "2020": 45.496363,
+            "2021": 17.060899,
+            "2022": 15.398526,
+            "2023": 34.093494,
+            "2024": 17.446781,
+            "2025": 27.869632,
+            "2026": 43.28847
+          },
+          "years": 7
+        },
+        "holdout_2025_01_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 184.6,
+            "max_dd_pct": 15.59,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 84.6,
+            "yearly_equity": {
+              "2025": 124.05,
+              "2026": 184.6
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 309.41,
+            "max_dd_pct": 29.11,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 209.4,
+            "yearly_equity": {
+              "2025": 148.84,
+              "2026": 309.41
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": 0.391633,
+          "gross_r": 69.4956,
+          "losses_or_zero": 111,
+          "max_consecutive_losses": 9,
+          "max_drawdown_r": 16.68301,
+          "net_r": 66.577553,
+          "positive_years": 2,
+          "profit_factor": 1.589758,
+          "trades": 170,
+          "win_rate_pct": 34.7059,
+          "wins": 59,
+          "yearly_net_r": {
+            "2025": 23.289083,
+            "2026": 43.28847
+          },
+          "years": 2
+        }
+      },
+      "stress_costs": {
+        "cost_0.50": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 522.95,
+            "max_dd_pct": 22.8,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 423.0,
+            "yearly_equity": {
+              "2020": 150.14,
+              "2021": 168.07,
+              "2022": 187.26,
+              "2023": 248.21,
+              "2024": 278.95,
+              "2025": 354.72,
+              "2026": 522.95
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 2105.12,
+            "max_dd_pct": 41.46,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 2005.1,
+            "yearly_equity": {
+              "2020": 216.19,
+              "2021": 262.98,
+              "2022": 319.22,
+              "2023": 541.86,
+              "2024": 660.86,
+              "2025": 1031.61,
+              "2026": 2105.12
+            }
+          },
+          "cost_usd_per_oz": 0.5,
+          "expectancy_r": 0.278142,
+          "gross_r": 221.906551,
+          "losses_or_zero": 392,
+          "max_consecutive_losses": 11,
+          "max_drawdown_r": 24.95561,
+          "net_r": 179.40178,
+          "positive_years": 7,
+          "profit_factor": 1.42956,
+          "trades": 645,
+          "win_rate_pct": 39.2248,
+          "wins": 253,
+          "yearly_net_r": {
+            "2020": 42.903863,
+            "2021": 12.818384,
+            "2022": 11.957926,
+            "2023": 30.009845,
+            "2024": 13.497369,
+            "2025": 25.860777,
+            "2026": 42.353617
+          },
+          "years": 7
+        },
+        "cost_1.00": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 342.06,
+            "max_dd_pct": 28.4,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 242.1,
+            "yearly_equity": {
+              "2020": 142.6,
+              "2021": 146.64,
+              "2022": 152.51,
+              "2023": 186.33,
+              "2024": 193.5,
+              "2025": 236.38,
+              "2026": 342.06
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 901.11,
+            "max_dd_pct": 49.68,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 801.1,
+            "yearly_equity": {
+              "2020": 195.11,
+              "2021": 200.27,
+              "2022": 211.8,
+              "2023": 305.5,
+              "2024": 318.06,
+              "2025": 458.26,
+              "2026": 901.11
+            }
+          },
+          "cost_usd_per_oz": 1.0,
+          "expectancy_r": 0.212243,
+          "gross_r": 221.906551,
+          "losses_or_zero": 392,
+          "max_consecutive_losses": 11,
+          "max_drawdown_r": 32.470284,
+          "net_r": 136.89701,
+          "positive_years": 7,
+          "profit_factor": 1.308826,
+          "trades": 645,
+          "win_rate_pct": 39.2248,
+          "wins": 253,
+          "yearly_net_r": {
+            "2020": 37.718861,
+            "2021": 4.333355,
+            "2022": 5.076724,
+            "2023": 21.842547,
+            "2024": 5.598543,
+            "2025": 21.843067,
+            "2026": 40.483912
+          },
+          "years": 7
+        }
+      }
+    },
+    "BPR": {
+      "dropped_baseline_losers_or_zero": 392,
+      "dropped_baseline_trades": 645,
+      "dropped_baseline_winners": 253,
+      "enabled_layers": [
+        "bpr"
+      ],
+      "full": {
+        "compound_100_1pct": {
+          "compound": true,
+          "final_equity": 100.0,
+          "max_dd_pct": 0.0,
+          "risk_pct": 1.0,
+          "start_capital": 100.0,
+          "total_return_pct": 0.0,
+          "yearly_equity": {}
+        },
+        "compound_100_2pct": {
+          "compound": true,
+          "final_equity": 100.0,
+          "max_dd_pct": 0.0,
+          "risk_pct": 2.0,
+          "start_capital": 100.0,
+          "total_return_pct": 0.0,
+          "yearly_equity": {}
+        },
+        "cost_usd_per_oz": 0.25,
+        "expectancy_r": null,
+        "gross_r": 0,
+        "losses_or_zero": 0,
+        "max_consecutive_losses": 0,
+        "max_drawdown_r": 0.0,
+        "net_r": 0,
+        "positive_years": 0,
+        "profit_factor": null,
+        "trades": 0,
+        "win_rate_pct": null,
+        "wins": 0,
+        "yearly_net_r": {},
+        "years": 0
+      },
+      "losers_turned_into_winners": 0,
+      "outcome_changed_by_filter": 0,
+      "reason_counts": {
+        "invalidation_level_broken_or_unavailable": 1,
+        "layer_failed:bpr": 645
+      },
+      "retained_baseline_losers_or_zero": 0,
+      "retained_baseline_trades": 0,
+      "retained_baseline_winners": 0,
+      "selection_note": "predeclared before evaluation; no holdout tuning",
+      "splits": {
+        "development_2020_02_to_2024_12": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": null,
+          "gross_r": 0,
+          "losses_or_zero": 0,
+          "max_consecutive_losses": 0,
+          "max_drawdown_r": 0.0,
+          "net_r": 0,
+          "positive_years": 0,
+          "profit_factor": null,
+          "trades": 0,
+          "win_rate_pct": null,
+          "wins": 0,
+          "yearly_net_r": {},
+          "years": 0
+        },
+        "full_2020_02_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": null,
+          "gross_r": 0,
+          "losses_or_zero": 0,
+          "max_consecutive_losses": 0,
+          "max_drawdown_r": 0.0,
+          "net_r": 0,
+          "positive_years": 0,
+          "profit_factor": null,
+          "trades": 0,
+          "win_rate_pct": null,
+          "wins": 0,
+          "yearly_net_r": {},
+          "years": 0
+        },
+        "holdout_2025_01_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": null,
+          "gross_r": 0,
+          "losses_or_zero": 0,
+          "max_consecutive_losses": 0,
+          "max_drawdown_r": 0.0,
+          "net_r": 0,
+          "positive_years": 0,
+          "profit_factor": null,
+          "trades": 0,
+          "win_rate_pct": null,
+          "wins": 0,
+          "yearly_net_r": {},
+          "years": 0
+        }
+      },
+      "stress_costs": {
+        "cost_0.50": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "cost_usd_per_oz": 0.5,
+          "expectancy_r": null,
+          "gross_r": 0,
+          "losses_or_zero": 0,
+          "max_consecutive_losses": 0,
+          "max_drawdown_r": 0.0,
+          "net_r": 0,
+          "positive_years": 0,
+          "profit_factor": null,
+          "trades": 0,
+          "win_rate_pct": null,
+          "wins": 0,
+          "yearly_net_r": {},
+          "years": 0
+        },
+        "cost_1.00": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "cost_usd_per_oz": 1.0,
+          "expectancy_r": null,
+          "gross_r": 0,
+          "losses_or_zero": 0,
+          "max_consecutive_losses": 0,
+          "max_drawdown_r": 0.0,
+          "net_r": 0,
+          "positive_years": 0,
+          "profit_factor": null,
+          "trades": 0,
+          "win_rate_pct": null,
+          "wins": 0,
+          "yearly_net_r": {},
+          "years": 0
+        }
+      }
+    },
+    "CONFIRMED_MSS": {
+      "dropped_baseline_losers_or_zero": 19,
+      "dropped_baseline_trades": 26,
+      "dropped_baseline_winners": 7,
+      "enabled_layers": [
+        "confirmed_mss"
+      ],
+      "full": {
+        "compound_100_1pct": {
+          "compound": true,
+          "final_equity": 710.91,
+          "max_dd_pct": 16.27,
+          "risk_pct": 1.0,
+          "start_capital": 100.0,
+          "total_return_pct": 610.9,
+          "yearly_equity": {
+            "2020": 153.21,
+            "2021": 184.66,
+            "2022": 212.31,
+            "2023": 306.39,
+            "2024": 369.95,
+            "2025": 477.75,
+            "2026": 710.91
+          }
+        },
+        "compound_100_2pct": {
+          "compound": true,
+          "final_equity": 3903.65,
+          "max_dd_pct": 31.09,
+          "risk_pct": 2.0,
+          "start_capital": 100.0,
+          "total_return_pct": 3803.6,
+          "yearly_equity": {
+            "2020": 225.18,
+            "2021": 317.66,
+            "2022": 410.86,
+            "2023": 827.0,
+            "2024": 1166.06,
+            "2025": 1877.87,
+            "2026": 3903.65
+          }
+        },
+        "cost_usd_per_oz": 0.25,
+        "expectancy_r": 0.339177,
+        "gross_r": 230.085919,
+        "losses_or_zero": 373,
+        "max_consecutive_losses": 10,
+        "max_drawdown_r": 16.898782,
+        "net_r": 209.950324,
+        "positive_years": 7,
+        "profit_factor": 1.545359,
+        "trades": 619,
+        "win_rate_pct": 39.7415,
+        "wins": 246,
+        "yearly_net_r": {
+          "2020": 44.912471,
+          "2021": 20.198599,
+          "2022": 15.075396,
+          "2023": 38.488029,
+          "2024": 20.593718,
+          "2025": 27.39364,
+          "2026": 43.28847
+        },
+        "years": 7
+      },
+      "losers_turned_into_winners": 0,
+      "outcome_changed_by_filter": 0,
+      "reason_counts": {
+        "invalidation_level_broken_or_unavailable": 1,
+        "layer_failed:confirmed_mss": 26
+      },
+      "retained_baseline_losers_or_zero": 373,
+      "retained_baseline_trades": 619,
+      "retained_baseline_winners": 246,
+      "selection_note": "predeclared before evaluation; no holdout tuning",
+      "splits": {
+        "development_2020_02_to_2024_12": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 386.89,
+            "max_dd_pct": 16.27,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 286.9,
+            "yearly_equity": {
+              "2020": 153.21,
+              "2021": 184.66,
+              "2022": 212.31,
+              "2023": 306.39,
+              "2024": 369.95,
+              "2025": 386.89
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 1272.88,
+            "max_dd_pct": 31.09,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 1172.9,
+            "yearly_equity": {
+              "2020": 225.18,
+              "2021": 317.66,
+              "2022": 410.86,
+              "2023": 827.0,
+              "2024": 1166.06,
+              "2025": 1272.88
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": 0.318955,
+          "gross_r": 161.092769,
+          "losses_or_zero": 263,
+          "max_consecutive_losses": 10,
+          "max_drawdown_r": 16.898782,
+          "net_r": 143.848763,
+          "positive_years": 6,
+          "profit_factor": 1.526713,
+          "trades": 451,
+          "win_rate_pct": 41.6851,
+          "wins": 188,
+          "yearly_net_r": {
+            "2020": 44.912471,
+            "2021": 20.198599,
+            "2022": 15.075396,
+            "2023": 38.488029,
+            "2024": 20.593718,
+            "2025": 4.580549
+          },
+          "years": 6
+        },
+        "full_2020_02_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 710.91,
+            "max_dd_pct": 16.27,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 610.9,
+            "yearly_equity": {
+              "2020": 153.21,
+              "2021": 184.66,
+              "2022": 212.31,
+              "2023": 306.39,
+              "2024": 369.95,
+              "2025": 477.75,
+              "2026": 710.91
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 3903.65,
+            "max_dd_pct": 31.09,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 3803.6,
+            "yearly_equity": {
+              "2020": 225.18,
+              "2021": 317.66,
+              "2022": 410.86,
+              "2023": 827.0,
+              "2024": 1166.06,
+              "2025": 1877.87,
+              "2026": 3903.65
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": 0.339177,
+          "gross_r": 230.085919,
+          "losses_or_zero": 373,
+          "max_consecutive_losses": 10,
+          "max_drawdown_r": 16.898782,
+          "net_r": 209.950324,
+          "positive_years": 7,
+          "profit_factor": 1.545359,
+          "trades": 619,
+          "win_rate_pct": 39.7415,
+          "wins": 246,
+          "yearly_net_r": {
+            "2020": 44.912471,
+            "2021": 20.198599,
+            "2022": 15.075396,
+            "2023": 38.488029,
+            "2024": 20.593718,
+            "2025": 27.39364,
+            "2026": 43.28847
+          },
+          "years": 7
+        },
+        "holdout_2025_01_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 183.75,
+            "max_dd_pct": 14.72,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 83.8,
+            "yearly_equity": {
+              "2025": 123.48,
+              "2026": 183.75
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 306.68,
+            "max_dd_pct": 27.63,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 206.7,
+            "yearly_equity": {
+              "2025": 147.53,
+              "2026": 306.68
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": 0.393462,
+          "gross_r": 68.99315,
+          "losses_or_zero": 110,
+          "max_consecutive_losses": 9,
+          "max_drawdown_r": 15.662846,
+          "net_r": 66.101561,
+          "positive_years": 2,
+          "profit_factor": 1.590881,
+          "trades": 168,
+          "win_rate_pct": 34.5238,
+          "wins": 58,
+          "yearly_net_r": {
+            "2025": 22.813091,
+            "2026": 43.28847
+          },
+          "years": 2
+        }
+      },
+      "stress_costs": {
+        "cost_0.50": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 581.54,
+            "max_dd_pct": 19.11,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 481.5,
+            "yearly_equity": {
+              "2020": 149.51,
+              "2021": 172.97,
+              "2022": 192.52,
+              "2023": 267.81,
+              "2024": 311.55,
+              "2025": 394.46,
+              "2026": 581.54
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 2613.84,
+            "max_dd_pct": 35.7,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 2513.8,
+            "yearly_equity": {
+              "2020": 214.51,
+              "2021": 278.79,
+              "2022": 337.94,
+              "2023": 632.17,
+              "2024": 827.43,
+              "2025": 1280.91,
+              "2026": 2613.84
+            }
+          },
+          "cost_usd_per_oz": 0.5,
+          "expectancy_r": 0.306647,
+          "gross_r": 230.085919,
+          "losses_or_zero": 373,
+          "max_consecutive_losses": 10,
+          "max_drawdown_r": 20.331231,
+          "net_r": 189.814728,
+          "positive_years": 7,
+          "profit_factor": 1.47818,
+          "trades": 619,
+          "win_rate_pct": 39.7415,
+          "wins": 246,
+          "yearly_net_r": {
+            "2020": 42.455833,
+            "2021": 16.093785,
+            "2022": 11.830509,
+            "2023": 34.798915,
+            "2024": 16.870825,
+            "2025": 25.411243,
+            "2026": 42.353617
+          },
+          "years": 7
+        },
+        "cost_1.00": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 389.03,
+            "max_dd_pct": 24.51,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 289.0,
+            "yearly_equity": {
+              "2020": 142.39,
+              "2021": 151.75,
+              "2022": 158.28,
+              "2023": 204.57,
+              "2024": 220.9,
+              "2025": 268.83,
+              "2026": 389.03
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 1170.62,
+            "max_dd_pct": 44.01,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 1070.6,
+            "yearly_equity": {
+              "2020": 194.63,
+              "2021": 214.66,
+              "2022": 228.51,
+              "2023": 369.11,
+              "2024": 416.2,
+              "2025": 595.32,
+              "2026": 1170.62
+            }
+          },
+          "cost_usd_per_oz": 1.0,
+          "expectancy_r": 0.241589,
+          "gross_r": 230.085919,
+          "losses_or_zero": 373,
+          "max_consecutive_losses": 10,
+          "max_drawdown_r": 27.221526,
+          "net_r": 149.543536,
+          "positive_years": 7,
+          "profit_factor": 1.35529,
+          "trades": 619,
+          "win_rate_pct": 39.7415,
+          "wins": 246,
+          "yearly_net_r": {
+            "2020": 37.542557,
+            "2021": 7.884157,
+            "2022": 5.340735,
+            "2023": 27.420688,
+            "2024": 9.425037,
+            "2025": 21.44645,
+            "2026": 40.483912
+          },
+          "years": 7
+        }
+      }
+    },
+    "DISPLACEMENT": {
+      "dropped_baseline_losers_or_zero": 335,
+      "dropped_baseline_trades": 548,
+      "dropped_baseline_winners": 213,
+      "enabled_layers": [
+        "displacement"
+      ],
+      "full": {
+        "compound_100_1pct": {
+          "compound": true,
+          "final_equity": 147.3,
+          "max_dd_pct": 9.77,
+          "risk_pct": 1.0,
+          "start_capital": 100.0,
+          "total_return_pct": 47.3,
+          "yearly_equity": {
+            "2020": 102.71,
+            "2021": 103.38,
+            "2022": 99.34,
+            "2023": 118.71,
+            "2024": 114.25,
+            "2025": 126.21,
+            "2026": 147.3
+          }
+        },
+        "compound_100_2pct": {
+          "compound": true,
+          "final_equity": 208.41,
+          "max_dd_pct": 18.85,
+          "risk_pct": 2.0,
+          "start_capital": 100.0,
+          "total_return_pct": 108.4,
+          "yearly_equity": {
+            "2020": 105.13,
+            "2021": 106.13,
+            "2022": 97.73,
+            "2023": 137.84,
+            "2024": 127.28,
+            "2025": 154.17,
+            "2026": 208.41
+          }
+        },
+        "cost_usd_per_oz": 0.25,
+        "expectancy_r": 0.421194,
+        "gross_r": 44.292299,
+        "losses_or_zero": 57,
+        "max_consecutive_losses": 6,
+        "max_drawdown_r": 10.113874,
+        "net_r": 40.855824,
+        "positive_years": 5,
+        "profit_factor": 1.690874,
+        "trades": 97,
+        "win_rate_pct": 41.2371,
+        "wins": 40,
+        "yearly_net_r": {
+          "2020": 2.84489,
+          "2021": 0.842103,
+          "2022": -3.857916,
+          "2023": 18.493108,
+          "2024": -3.658943,
+          "2025": 10.344948,
+          "2026": 15.847634
+        },
+        "years": 7
+      },
+      "losers_turned_into_winners": 0,
+      "outcome_changed_by_filter": 0,
+      "reason_counts": {
+        "invalidation_level_broken_or_unavailable": 1,
+        "layer_failed:displacement": 548
+      },
+      "retained_baseline_losers_or_zero": 57,
+      "retained_baseline_trades": 97,
+      "retained_baseline_winners": 40,
+      "selection_note": "predeclared before evaluation; no holdout tuning",
+      "splits": {
+        "development_2020_02_to_2024_12": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 119.49,
+            "max_dd_pct": 9.77,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 19.5,
+            "yearly_equity": {
+              "2020": 102.71,
+              "2021": 103.38,
+              "2022": 99.34,
+              "2023": 118.71,
+              "2024": 114.25,
+              "2025": 119.49
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 138.94,
+            "max_dd_pct": 18.85,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 38.9,
+            "yearly_equity": {
+              "2020": 105.13,
+              "2021": 106.13,
+              "2022": 97.73,
+              "2023": 137.84,
+              "2024": 127.28,
+              "2025": 138.94
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": 0.253208,
+          "gross_r": 22.32588,
+          "losses_or_zero": 46,
+          "max_consecutive_losses": 6,
+          "max_drawdown_r": 10.113874,
+          "net_r": 19.24379,
+          "positive_years": 4,
+          "profit_factor": 1.401564,
+          "trades": 76,
+          "win_rate_pct": 39.4737,
+          "wins": 30,
+          "yearly_net_r": {
+            "2020": 2.84489,
+            "2021": 0.842103,
+            "2022": -3.857916,
+            "2023": 18.493108,
+            "2024": -3.658943,
+            "2025": 4.580549
+          },
+          "years": 6
+        },
+        "full_2020_02_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 147.3,
+            "max_dd_pct": 9.77,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 47.3,
+            "yearly_equity": {
+              "2020": 102.71,
+              "2021": 103.38,
+              "2022": 99.34,
+              "2023": 118.71,
+              "2024": 114.25,
+              "2025": 126.21,
+              "2026": 147.3
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 208.41,
+            "max_dd_pct": 18.85,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 108.4,
+            "yearly_equity": {
+              "2020": 105.13,
+              "2021": 106.13,
+              "2022": 97.73,
+              "2023": 137.84,
+              "2024": 127.28,
+              "2025": 154.17,
+              "2026": 208.41
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": 0.421194,
+          "gross_r": 44.292299,
+          "losses_or_zero": 57,
+          "max_consecutive_losses": 6,
+          "max_drawdown_r": 10.113874,
+          "net_r": 40.855824,
+          "positive_years": 5,
+          "profit_factor": 1.690874,
+          "trades": 97,
+          "win_rate_pct": 41.2371,
+          "wins": 40,
+          "yearly_net_r": {
+            "2020": 2.84489,
+            "2021": 0.842103,
+            "2022": -3.857916,
+            "2023": 18.493108,
+            "2024": -3.658943,
+            "2025": 10.344948,
+            "2026": 15.847634
+          },
+          "years": 7
+        },
+        "holdout_2025_01_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 123.28,
+            "max_dd_pct": 3.01,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 23.3,
+            "yearly_equity": {
+              "2025": 105.63,
+              "2026": 123.28
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 150.01,
+            "max_dd_pct": 5.96,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 50.0,
+            "yearly_equity": {
+              "2025": 110.96,
+              "2026": 150.01
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": 1.029144,
+          "gross_r": 21.96642,
+          "losses_or_zero": 11,
+          "max_consecutive_losses": 3,
+          "max_drawdown_r": 3.04267,
+          "net_r": 21.612034,
+          "positive_years": 2,
+          "profit_factor": 2.927183,
+          "trades": 21,
+          "win_rate_pct": 47.619,
+          "wins": 10,
+          "yearly_net_r": {
+            "2025": 5.7644,
+            "2026": 15.847634
+          },
+          "years": 2
+        }
+      },
+      "stress_costs": {
+        "cost_0.50": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 142.33,
+            "max_dd_pct": 10.65,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 42.3,
+            "yearly_equity": {
+              "2020": 102.49,
+              "2021": 102.48,
+              "2022": 97.77,
+              "2023": 115.96,
+              "2024": 110.82,
+              "2025": 122.11,
+              "2026": 142.33
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 194.61,
+            "max_dd_pct": 20.43,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 94.6,
+            "yearly_equity": {
+              "2020": 104.69,
+              "2021": 104.29,
+              "2022": 94.67,
+              "2023": 131.54,
+              "2024": 119.74,
+              "2025": 144.3,
+              "2026": 194.61
+            }
+          },
+          "cost_usd_per_oz": 0.5,
+          "expectancy_r": 0.385766,
+          "gross_r": 44.292299,
+          "losses_or_zero": 57,
+          "max_consecutive_losses": 6,
+          "max_drawdown_r": 11.086475,
+          "net_r": 37.419349,
+          "positive_years": 5,
+          "profit_factor": 1.6107,
+          "trades": 97,
+          "win_rate_pct": 41.2371,
+          "wins": 40,
+          "yearly_net_r": {
+            "2020": 2.634752,
+            "2021": 0.177366,
+            "2022": -4.57456,
+            "2023": 17.733652,
+            "2024": -4.364399,
+            "2025": 10.08831,
+            "2026": 15.724227
+          },
+          "years": 7
+        },
+        "cost_1.00": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 132.89,
+            "max_dd_pct": 12.38,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 32.9,
+            "yearly_equity": {
+              "2020": 102.06,
+              "2021": 100.71,
+              "2022": 94.7,
+              "2023": 110.64,
+              "2024": 104.25,
+              "2025": 114.28,
+              "2026": 132.89
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 169.65,
+            "max_dd_pct": 23.5,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 69.7,
+            "yearly_equity": {
+              "2020": 103.82,
+              "2021": 100.71,
+              "2022": 88.81,
+              "2023": 119.77,
+              "2024": 105.96,
+              "2025": 126.41,
+              "2026": 169.65
+            }
+          },
+          "cost_usd_per_oz": 1.0,
+          "expectancy_r": 0.314911,
+          "gross_r": 44.292299,
+          "losses_or_zero": 57,
+          "max_consecutive_losses": 6,
+          "max_drawdown_r": 13.031677,
+          "net_r": 30.546399,
+          "positive_years": 4,
+          "profit_factor": 1.466031,
+          "trades": 97,
+          "win_rate_pct": 41.2371,
+          "wins": 40,
+          "yearly_net_r": {
+            "2020": 2.214476,
+            "2021": -1.152107,
+            "2022": -6.007847,
+            "2023": 16.214741,
+            "2024": -5.77531,
+            "2025": 9.575034,
+            "2026": 15.477411
+          },
+          "years": 7
+        }
+      }
+    },
+    "EQUAL_LEVELS": {
+      "dropped_baseline_losers_or_zero": 358,
+      "dropped_baseline_trades": 591,
+      "dropped_baseline_winners": 233,
+      "enabled_layers": [
+        "equal_levels"
+      ],
+      "full": {
+        "compound_100_1pct": {
+          "compound": true,
+          "final_equity": 109.84,
+          "max_dd_pct": 9.93,
+          "risk_pct": 1.0,
+          "start_capital": 100.0,
+          "total_return_pct": 9.8,
+          "yearly_equity": {
+            "2020": 99.32,
+            "2021": 98.6,
+            "2022": 102.91,
+            "2023": 114.39,
+            "2024": 110.35,
+            "2025": 112.2,
+            "2026": 109.84
+          }
+        },
+        "compound_100_2pct": {
+          "compound": true,
+          "final_equity": 118.53,
+          "max_dd_pct": 19.0,
+          "risk_pct": 2.0,
+          "start_capital": 100.0,
+          "total_return_pct": 18.5,
+          "yearly_equity": {
+            "2020": 98.47,
+            "2021": 96.93,
+            "2022": 105.44,
+            "2023": 129.44,
+            "2024": 120.37,
+            "2025": 123.88,
+            "2026": 118.53
+          }
+        },
+        "cost_usd_per_oz": 0.25,
+        "expectancy_r": 0.190784,
+        "gross_r": 12.068613,
+        "losses_or_zero": 34,
+        "max_consecutive_losses": 7,
+        "max_drawdown_r": 10.373378,
+        "net_r": 10.302354,
+        "positive_years": 3,
+        "profit_factor": 1.293833,
+        "trades": 54,
+        "win_rate_pct": 37.037,
+        "wins": 20,
+        "yearly_net_r": {
+          "2020": -0.581076,
+          "2021": -0.673118,
+          "2022": 4.350816,
+          "2023": 10.917785,
+          "2024": -3.556022,
+          "2025": 1.904884,
+          "2026": -2.060916
+        },
+        "years": 7
+      },
+      "losers_turned_into_winners": 0,
+      "outcome_changed_by_filter": 0,
+      "reason_counts": {
+        "invalidation_level_broken_or_unavailable": 1,
+        "layer_failed:equal_levels": 591
+      },
+      "retained_baseline_losers_or_zero": 34,
+      "retained_baseline_trades": 54,
+      "retained_baseline_winners": 20,
+      "selection_note": "predeclared before evaluation; no holdout tuning",
+      "splits": {
+        "development_2020_02_to_2024_12": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 110.35,
+            "max_dd_pct": 5.04,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 10.4,
+            "yearly_equity": {
+              "2020": 99.32,
+              "2021": 98.6,
+              "2022": 102.91,
+              "2023": 114.39,
+              "2024": 110.35
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 120.37,
+            "max_dd_pct": 9.87,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 20.4,
+            "yearly_equity": {
+              "2020": 98.47,
+              "2021": 96.93,
+              "2022": 105.44,
+              "2023": 129.44,
+              "2024": 120.37
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": 0.298811,
+          "gross_r": 11.891428,
+          "losses_or_zero": 20,
+          "max_consecutive_losses": 5,
+          "max_drawdown_r": 5.14083,
+          "net_r": 10.458386,
+          "positive_years": 2,
+          "profit_factor": 1.502216,
+          "trades": 35,
+          "win_rate_pct": 42.8571,
+          "wins": 15,
+          "yearly_net_r": {
+            "2020": -0.581076,
+            "2021": -0.673118,
+            "2022": 4.350816,
+            "2023": 10.917785,
+            "2024": -3.556022
+          },
+          "years": 5
+        },
+        "full_2020_02_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 109.84,
+            "max_dd_pct": 9.93,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 9.8,
+            "yearly_equity": {
+              "2020": 99.32,
+              "2021": 98.6,
+              "2022": 102.91,
+              "2023": 114.39,
+              "2024": 110.35,
+              "2025": 112.2,
+              "2026": 109.84
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 118.53,
+            "max_dd_pct": 19.0,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 18.5,
+            "yearly_equity": {
+              "2020": 98.47,
+              "2021": 96.93,
+              "2022": 105.44,
+              "2023": 129.44,
+              "2024": 120.37,
+              "2025": 123.88,
+              "2026": 118.53
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": 0.190784,
+          "gross_r": 12.068613,
+          "losses_or_zero": 34,
+          "max_consecutive_losses": 7,
+          "max_drawdown_r": 10.373378,
+          "net_r": 10.302354,
+          "positive_years": 3,
+          "profit_factor": 1.293833,
+          "trades": 54,
+          "win_rate_pct": 37.037,
+          "wins": 20,
+          "yearly_net_r": {
+            "2020": -0.581076,
+            "2021": -0.673118,
+            "2022": 4.350816,
+            "2023": 10.917785,
+            "2024": -3.556022,
+            "2025": 1.904884,
+            "2026": -2.060916
+          },
+          "years": 7
+        },
+        "holdout_2025_01_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 99.53,
+            "max_dd_pct": 5.15,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": -0.5,
+            "yearly_equity": {
+              "2025": 101.68,
+              "2026": 99.53
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 98.48,
+            "max_dd_pct": 10.13,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": -1.5,
+            "yearly_equity": {
+              "2025": 102.92,
+              "2026": 98.48
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": -0.008212,
+          "gross_r": 0.177185,
+          "losses_or_zero": 14,
+          "max_consecutive_losses": 5,
+          "max_drawdown_r": 5.232547,
+          "net_r": -0.156032,
+          "positive_years": 1,
+          "profit_factor": 0.989041,
+          "trades": 19,
+          "win_rate_pct": 26.3158,
+          "wins": 5,
+          "yearly_net_r": {
+            "2025": 1.904884,
+            "2026": -2.060916
+          },
+          "years": 2
+        }
+      },
+      "stress_costs": {
+        "cost_0.50": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 107.92,
+            "max_dd_pct": 10.21,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 7.9,
+            "yearly_equity": {
+              "2020": 99.04,
+              "2021": 98.08,
+              "2022": 102.15,
+              "2023": 112.95,
+              "2024": 108.79,
+              "2025": 110.37,
+              "2026": 107.92
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 114.43,
+            "max_dd_pct": 19.51,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 14.4,
+            "yearly_equity": {
+              "2020": 97.91,
+              "2021": 95.9,
+              "2022": 103.88,
+              "2023": 126.22,
+              "2024": 116.98,
+              "2025": 119.87,
+              "2026": 114.43
+            }
+          },
+          "cost_usd_per_oz": 0.5,
+          "expectancy_r": 0.158076,
+          "gross_r": 12.068613,
+          "losses_or_zero": 34,
+          "max_consecutive_losses": 7,
+          "max_drawdown_r": 10.680276,
+          "net_r": 8.536095,
+          "positive_years": 3,
+          "profit_factor": 1.236301,
+          "trades": 54,
+          "win_rate_pct": 37.037,
+          "wins": 20,
+          "yearly_net_r": {
+            "2020": -0.865294,
+            "2021": -0.917671,
+            "2022": 4.132122,
+            "2023": 10.396101,
+            "2024": -3.719913,
+            "2025": 1.684693,
+            "2026": -2.173942
+          },
+          "years": 7
+        },
+        "cost_1.00": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 104.18,
+            "max_dd_pct": 10.76,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 4.2,
+            "yearly_equity": {
+              "2020": 98.48,
+              "2021": 97.05,
+              "2022": 100.63,
+              "2023": 110.13,
+              "2024": 105.72,
+              "2025": 106.79,
+              "2026": 104.18
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 106.65,
+            "max_dd_pct": 20.51,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 6.6,
+            "yearly_equity": {
+              "2020": 96.79,
+              "2021": 93.89,
+              "2022": 100.81,
+              "2023": 120.01,
+              "2024": 110.48,
+              "2025": 112.22,
+              "2026": 106.65
+            }
+          },
+          "cost_usd_per_oz": 1.0,
+          "expectancy_r": 0.092659,
+          "gross_r": 12.068613,
+          "losses_or_zero": 34,
+          "max_consecutive_losses": 7,
+          "max_drawdown_r": 11.294073,
+          "net_r": 5.003577,
+          "positive_years": 3,
+          "profit_factor": 1.130821,
+          "trades": 54,
+          "win_rate_pct": 37.037,
+          "wins": 20,
+          "yearly_net_r": {
+            "2020": -1.433731,
+            "2021": -1.406779,
+            "2022": 3.694734,
+            "2023": 9.352733,
+            "2024": -4.047697,
+            "2025": 1.24431,
+            "2026": -2.399994
+          },
+          "years": 7
+        }
+      }
+    },
+    "FVG": {
+      "dropped_baseline_losers_or_zero": 51,
+      "dropped_baseline_trades": 75,
+      "dropped_baseline_winners": 24,
+      "enabled_layers": [
+        "fvg"
+      ],
+      "full": {
+        "compound_100_1pct": {
+          "compound": true,
+          "final_equity": 631.97,
+          "max_dd_pct": 23.18,
+          "risk_pct": 1.0,
+          "start_capital": 100.0,
+          "total_return_pct": 532.0,
+          "yearly_equity": {
+            "2020": 155.46,
+            "2021": 170.8,
+            "2022": 204.43,
+            "2023": 285.69,
+            "2024": 319.69,
+            "2025": 414.68,
+            "2026": 631.97
+          }
+        },
+        "compound_100_2pct": {
+          "compound": true,
+          "final_equity": 3130.37,
+          "max_dd_pct": 41.9,
+          "risk_pct": 2.0,
+          "start_capital": 100.0,
+          "total_return_pct": 3030.4,
+          "yearly_equity": {
+            "2020": 231.9,
+            "2021": 272.44,
+            "2022": 382.44,
+            "2023": 722.5,
+            "2024": 877.87,
+            "2025": 1430.34,
+            "2026": 3130.37
+          }
+        },
+        "cost_usd_per_oz": 0.25,
+        "expectancy_r": 0.346369,
+        "gross_r": 215.219778,
+        "losses_or_zero": 341,
+        "max_consecutive_losses": 11,
+        "max_drawdown_r": 25.572201,
+        "net_r": 197.430571,
+        "positive_years": 7,
+        "profit_factor": 1.561646,
+        "trades": 570,
+        "win_rate_pct": 40.1754,
+        "wins": 229,
+        "yearly_net_r": {
+          "2020": 46.354172,
+          "2021": 10.828833,
+          "2022": 19.012842,
+          "2023": 35.241022,
+          "2024": 12.815083,
+          "2025": 27.690469,
+          "2026": 45.488149
+        },
+        "years": 7
+      },
+      "losers_turned_into_winners": 0,
+      "outcome_changed_by_filter": 0,
+      "reason_counts": {
+        "invalidation_level_broken_or_unavailable": 1,
+        "layer_failed:fvg": 75
+      },
+      "retained_baseline_losers_or_zero": 341,
+      "retained_baseline_trades": 570,
+      "retained_baseline_winners": 229,
+      "selection_note": "predeclared before evaluation; no holdout tuning",
+      "splits": {
+        "development_2020_02_to_2024_12": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 334.33,
+            "max_dd_pct": 23.18,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 234.3,
+            "yearly_equity": {
+              "2020": 155.46,
+              "2021": 170.8,
+              "2022": 204.43,
+              "2023": 285.69,
+              "2024": 319.69,
+              "2025": 334.33
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 958.29,
+            "max_dd_pct": 41.9,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 858.3,
+            "yearly_equity": {
+              "2020": 231.9,
+              "2021": 272.44,
+              "2022": 382.44,
+              "2023": 722.5,
+              "2024": 877.87,
+              "2025": 958.29
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": 0.300309,
+          "gross_r": 144.499329,
+          "losses_or_zero": 251,
+          "max_consecutive_losses": 11,
+          "max_drawdown_r": 25.572201,
+          "net_r": 128.832501,
+          "positive_years": 6,
+          "profit_factor": 1.495223,
+          "trades": 429,
+          "win_rate_pct": 41.4918,
+          "wins": 178,
+          "yearly_net_r": {
+            "2020": 46.354172,
+            "2021": 10.828833,
+            "2022": 19.012842,
+            "2023": 35.241022,
+            "2024": 12.815083,
+            "2025": 4.580549
+          },
+          "years": 6
+        },
+        "full_2020_02_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 631.97,
+            "max_dd_pct": 23.18,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 532.0,
+            "yearly_equity": {
+              "2020": 155.46,
+              "2021": 170.8,
+              "2022": 204.43,
+              "2023": 285.69,
+              "2024": 319.69,
+              "2025": 414.68,
+              "2026": 631.97
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 3130.37,
+            "max_dd_pct": 41.9,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 3030.4,
+            "yearly_equity": {
+              "2020": 231.9,
+              "2021": 272.44,
+              "2022": 382.44,
+              "2023": 722.5,
+              "2024": 877.87,
+              "2025": 1430.34,
+              "2026": 3130.37
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": 0.346369,
+          "gross_r": 215.219778,
+          "losses_or_zero": 341,
+          "max_consecutive_losses": 11,
+          "max_drawdown_r": 25.572201,
+          "net_r": 197.430571,
+          "positive_years": 7,
+          "profit_factor": 1.561646,
+          "trades": 570,
+          "win_rate_pct": 40.1754,
+          "wins": 229,
+          "yearly_net_r": {
+            "2020": 46.354172,
+            "2021": 10.828833,
+            "2022": 19.012842,
+            "2023": 35.241022,
+            "2024": 12.815083,
+            "2025": 27.690469,
+            "2026": 45.488149
+          },
+          "years": 7
+        },
+        "holdout_2025_01_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 189.02,
+            "max_dd_pct": 12.14,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 89.0,
+            "yearly_equity": {
+              "2025": 124.03,
+              "2026": 189.02
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 326.66,
+            "max_dd_pct": 23.06,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 226.7,
+            "yearly_equity": {
+              "2025": 149.26,
+              "2026": 326.66
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": 0.486511,
+          "gross_r": 70.720449,
+          "losses_or_zero": 90,
+          "max_consecutive_losses": 7,
+          "max_drawdown_r": 12.780959,
+          "net_r": 68.59807,
+          "positive_years": 2,
+          "profit_factor": 1.750768,
+          "trades": 141,
+          "win_rate_pct": 36.1702,
+          "wins": 51,
+          "yearly_net_r": {
+            "2025": 23.10992,
+            "2026": 45.488149
+          },
+          "years": 2
+        }
+      },
+      "stress_costs": {
+        "cost_0.50": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 529.2,
+            "max_dd_pct": 25.74,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 429.2,
+            "yearly_equity": {
+              "2020": 151.92,
+              "2021": 160.6,
+              "2022": 186.88,
+              "2023": 251.85,
+              "2024": 273.49,
+              "2025": 349.37,
+              "2026": 529.2
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 2196.24,
+            "max_dd_pct": 45.72,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 2096.2,
+            "yearly_equity": {
+              "2020": 221.53,
+              "2021": 240.94,
+              "2022": 319.71,
+              "2023": 561.76,
+              "2024": 642.76,
+              "2025": 1015.8,
+              "2026": 2196.24
+            }
+          },
+          "cost_usd_per_oz": 0.5,
+          "expectancy_r": 0.31516,
+          "gross_r": 215.219778,
+          "losses_or_zero": 341,
+          "max_consecutive_losses": 11,
+          "max_drawdown_r": 28.952022,
+          "net_r": 179.641363,
+          "positive_years": 7,
+          "profit_factor": 1.496189,
+          "trades": 570,
+          "win_rate_pct": 40.1754,
+          "wins": 229,
+          "yearly_net_r": {
+            "2020": 44.033692,
+            "2021": 6.973223,
+            "2022": 16.193183,
+            "2023": 31.594408,
+            "2024": 9.816279,
+            "2025": 26.160693,
+            "2026": 44.869886
+          },
+          "years": 7
+        },
+        "cost_1.00": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 370.99,
+            "max_dd_pct": 30.61,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 271.0,
+            "yearly_equity": {
+              "2020": 145.07,
+              "2021": 141.98,
+              "2022": 156.16,
+              "2023": 195.69,
+              "2024": 200.11,
+              "2025": 247.94,
+              "2026": 370.99
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 1080.04,
+            "max_dd_pct": 52.63,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 980.0,
+            "yearly_equity": {
+              "2020": 202.13,
+              "2021": 188.38,
+              "2022": 223.32,
+              "2023": 339.36,
+              "2024": 344.27,
+              "2025": 511.85,
+              "2026": 1080.04
+            }
+          },
+          "cost_usd_per_oz": 1.0,
+          "expectancy_r": 0.252742,
+          "gross_r": 215.219778,
+          "losses_or_zero": 341,
+          "max_consecutive_losses": 11,
+          "max_drawdown_r": 35.711665,
+          "net_r": 144.062947,
+          "positive_years": 6,
+          "profit_factor": 1.37606,
+          "trades": 570,
+          "win_rate_pct": 40.1754,
+          "wins": 229,
+          "yearly_net_r": {
+            "2020": 39.392731,
+            "2021": -0.737998,
+            "2022": 10.553863,
+            "2023": 24.301182,
+            "2024": 3.818669,
+            "2025": 23.101139,
+            "2026": 43.63336
+          },
+          "years": 7
+        }
+      }
+    },
+    "HTF_PREMIUM_DISCOUNT": {
+      "dropped_baseline_losers_or_zero": 274,
+      "dropped_baseline_trades": 457,
+      "dropped_baseline_winners": 183,
+      "enabled_layers": [
+        "htf_premium_discount"
+      ],
+      "full": {
+        "compound_100_1pct": {
+          "compound": true,
+          "final_equity": 125.52,
+          "max_dd_pct": 17.11,
+          "risk_pct": 1.0,
+          "start_capital": 100.0,
+          "total_return_pct": 25.5,
+          "yearly_equity": {
+            "2020": 104.34,
+            "2021": 112.65,
+            "2022": 118.23,
+            "2023": 124.24,
+            "2024": 131.86,
+            "2025": 136.75,
+            "2026": 125.52
+          }
+        },
+        "compound_100_2pct": {
+          "compound": true,
+          "final_equity": 150.02,
+          "max_dd_pct": 31.92,
+          "risk_pct": 2.0,
+          "start_capital": 100.0,
+          "total_return_pct": 50.0,
+          "yearly_equity": {
+            "2020": 108.32,
+            "2021": 125.53,
+            "2022": 137.28,
+            "2023": 150.66,
+            "2024": 168.13,
+            "2025": 179.07,
+            "2026": 150.02
+          }
+        },
+        "cost_usd_per_oz": 0.25,
+        "expectancy_r": 0.134272,
+        "gross_r": 31.550161,
+        "losses_or_zero": 118,
+        "max_consecutive_losses": 7,
+        "max_drawdown_r": 18.300193,
+        "net_r": 25.243055,
+        "positive_years": 6,
+        "profit_factor": 1.207258,
+        "trades": 188,
+        "win_rate_pct": 37.234,
+        "wins": 70,
+        "yearly_net_r": {
+          "2020": 4.504306,
+          "2021": 7.953242,
+          "2022": 5.22,
+          "2023": 5.274574,
+          "2024": 6.421086,
+          "2025": 4.154819,
+          "2026": -8.284973
+        },
+        "years": 7
+      },
+      "losers_turned_into_winners": 0,
+      "outcome_changed_by_filter": 0,
+      "reason_counts": {
+        "invalidation_level_broken_or_unavailable": 1,
+        "layer_failed:htf_premium_discount": 457
+      },
+      "retained_baseline_losers_or_zero": 118,
+      "retained_baseline_trades": 188,
+      "retained_baseline_winners": 70,
+      "selection_note": "predeclared before evaluation; no holdout tuning",
+      "splits": {
+        "development_2020_02_to_2024_12": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 137.9,
+            "max_dd_pct": 6.23,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 37.9,
+            "yearly_equity": {
+              "2020": 104.34,
+              "2021": 112.65,
+              "2022": 118.23,
+              "2023": 124.24,
+              "2024": 131.86,
+              "2025": 137.9
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 183.53,
+            "max_dd_pct": 12.25,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 83.5,
+            "yearly_equity": {
+              "2020": 108.32,
+              "2021": 125.53,
+              "2022": 137.28,
+              "2023": 150.66,
+              "2024": 168.13,
+              "2025": 183.53
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": 0.257225,
+          "gross_r": 39.260294,
+          "losses_or_zero": 76,
+          "max_consecutive_losses": 5,
+          "max_drawdown_r": 6.354766,
+          "net_r": 33.953758,
+          "positive_years": 6,
+          "profit_factor": 1.429004,
+          "trades": 132,
+          "win_rate_pct": 42.4242,
+          "wins": 56,
+          "yearly_net_r": {
+            "2020": 4.504306,
+            "2021": 7.953242,
+            "2022": 5.22,
+            "2023": 5.274574,
+            "2024": 6.421086,
+            "2025": 4.580549
+          },
+          "years": 6
+        },
+        "full_2020_02_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 125.52,
+            "max_dd_pct": 17.11,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 25.5,
+            "yearly_equity": {
+              "2020": 104.34,
+              "2021": 112.65,
+              "2022": 118.23,
+              "2023": 124.24,
+              "2024": 131.86,
+              "2025": 136.75,
+              "2026": 125.52
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 150.02,
+            "max_dd_pct": 31.92,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 50.0,
+            "yearly_equity": {
+              "2020": 108.32,
+              "2021": 125.53,
+              "2022": 137.28,
+              "2023": 150.66,
+              "2024": 168.13,
+              "2025": 179.07,
+              "2026": 150.02
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": 0.134272,
+          "gross_r": 31.550161,
+          "losses_or_zero": 118,
+          "max_consecutive_losses": 7,
+          "max_drawdown_r": 18.300193,
+          "net_r": 25.243055,
+          "positive_years": 6,
+          "profit_factor": 1.207258,
+          "trades": 188,
+          "win_rate_pct": 37.234,
+          "wins": 70,
+          "yearly_net_r": {
+            "2020": 4.504306,
+            "2021": 7.953242,
+            "2022": 5.22,
+            "2023": 5.274574,
+            "2024": 6.421086,
+            "2025": 4.154819,
+            "2026": -8.284973
+          },
+          "years": 7
+        },
+        "holdout_2025_01_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 91.02,
+            "max_dd_pct": 17.11,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": -9.0,
+            "yearly_equity": {
+              "2025": 99.17,
+              "2026": 91.02
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 81.74,
+            "max_dd_pct": 31.92,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": -18.3,
+            "yearly_equity": {
+              "2025": 97.57,
+              "2026": 81.74
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": -0.155548,
+          "gross_r": -7.710133,
+          "losses_or_zero": 42,
+          "max_consecutive_losses": 7,
+          "max_drawdown_r": 18.300193,
+          "net_r": -8.710702,
+          "positive_years": 0,
+          "profit_factor": 0.795762,
+          "trades": 56,
+          "win_rate_pct": 25.0,
+          "wins": 14,
+          "yearly_net_r": {
+            "2025": -0.42573,
+            "2026": -8.284973
+          },
+          "years": 2
+        }
+      },
+      "stress_costs": {
+        "cost_0.50": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 117.86,
+            "max_dd_pct": 17.7,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 17.9,
+            "yearly_equity": {
+              "2020": 103.62,
+              "2021": 110.65,
+              "2022": 114.75,
+              "2023": 119.54,
+              "2024": 125.08,
+              "2025": 128.86,
+              "2026": 117.86
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 132.27,
+            "max_dd_pct": 32.89,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 32.3,
+            "yearly_equity": {
+              "2020": 106.84,
+              "2021": 121.13,
+              "2022": 129.32,
+              "2023": 139.47,
+              "2024": 151.3,
+              "2025": 159.02,
+              "2026": 132.27
+            }
+          },
+          "cost_usd_per_oz": 0.5,
+          "expectancy_r": 0.100723,
+          "gross_r": 31.550161,
+          "losses_or_zero": 118,
+          "max_consecutive_losses": 7,
+          "max_drawdown_r": 19.009868,
+          "net_r": 18.93595,
+          "positive_years": 6,
+          "profit_factor": 1.150775,
+          "trades": 188,
+          "win_rate_pct": 37.234,
+          "wins": 70,
+          "yearly_net_r": {
+            "2020": 3.815309,
+            "2021": 6.852524,
+            "2022": 4.020387,
+            "2023": 4.39947,
+            "2024": 5.004643,
+            "2025": 3.485234,
+            "2026": -8.641617
+          },
+          "years": 7
+        },
+        "cost_1.00": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 103.89,
+            "max_dd_pct": 18.86,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 3.9,
+            "yearly_equity": {
+              "2020": 102.2,
+              "2021": 106.76,
+              "2022": 108.09,
+              "2023": 110.65,
+              "2024": 112.54,
+              "2025": 114.41,
+              "2026": 103.89
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 102.79,
+            "max_dd_pct": 34.78,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 2.8,
+            "yearly_equity": {
+              "2020": 103.93,
+              "2021": 112.78,
+              "2022": 114.72,
+              "2023": 119.48,
+              "2024": 122.48,
+              "2025": 125.36,
+              "2026": 102.79
+            }
+          },
+          "cost_usd_per_oz": 1.0,
+          "expectancy_r": 0.033626,
+          "gross_r": 31.550161,
+          "losses_or_zero": 118,
+          "max_consecutive_losses": 7,
+          "max_drawdown_r": 20.429218,
+          "net_r": 6.321739,
+          "positive_years": 6,
+          "profit_factor": 1.047467,
+          "trades": 188,
+          "win_rate_pct": 37.234,
+          "wins": 70,
+          "yearly_net_r": {
+            "2020": 2.437315,
+            "2021": 4.651088,
+            "2022": 1.621161,
+            "2023": 2.649262,
+            "2024": 2.171756,
+            "2025": 2.146063,
+            "2026": -9.354905
+          },
+          "years": 7
+        }
+      }
+    },
+    "IMBALANCE_OB_FVG": {
+      "dropped_baseline_losers_or_zero": 392,
+      "dropped_baseline_trades": 645,
+      "dropped_baseline_winners": 253,
+      "enabled_layers": [
+        "displacement",
+        "fvg",
+        "order_block"
+      ],
+      "full": {
+        "compound_100_1pct": {
+          "compound": true,
+          "final_equity": 100.0,
+          "max_dd_pct": 0.0,
+          "risk_pct": 1.0,
+          "start_capital": 100.0,
+          "total_return_pct": 0.0,
+          "yearly_equity": {}
+        },
+        "compound_100_2pct": {
+          "compound": true,
+          "final_equity": 100.0,
+          "max_dd_pct": 0.0,
+          "risk_pct": 2.0,
+          "start_capital": 100.0,
+          "total_return_pct": 0.0,
+          "yearly_equity": {}
+        },
+        "cost_usd_per_oz": 0.25,
+        "expectancy_r": null,
+        "gross_r": 0,
+        "losses_or_zero": 0,
+        "max_consecutive_losses": 0,
+        "max_drawdown_r": 0.0,
+        "net_r": 0,
+        "positive_years": 0,
+        "profit_factor": null,
+        "trades": 0,
+        "win_rate_pct": null,
+        "wins": 0,
+        "yearly_net_r": {},
+        "years": 0
+      },
+      "losers_turned_into_winners": 0,
+      "outcome_changed_by_filter": 0,
+      "reason_counts": {
+        "invalidation_level_broken_or_unavailable": 1,
+        "layer_failed:displacement": 548,
+        "layer_failed:fvg": 75,
+        "layer_failed:order_block": 638
+      },
+      "retained_baseline_losers_or_zero": 0,
+      "retained_baseline_trades": 0,
+      "retained_baseline_winners": 0,
+      "selection_note": "predeclared before evaluation; no holdout tuning",
+      "splits": {
+        "development_2020_02_to_2024_12": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": null,
+          "gross_r": 0,
+          "losses_or_zero": 0,
+          "max_consecutive_losses": 0,
+          "max_drawdown_r": 0.0,
+          "net_r": 0,
+          "positive_years": 0,
+          "profit_factor": null,
+          "trades": 0,
+          "win_rate_pct": null,
+          "wins": 0,
+          "yearly_net_r": {},
+          "years": 0
+        },
+        "full_2020_02_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": null,
+          "gross_r": 0,
+          "losses_or_zero": 0,
+          "max_consecutive_losses": 0,
+          "max_drawdown_r": 0.0,
+          "net_r": 0,
+          "positive_years": 0,
+          "profit_factor": null,
+          "trades": 0,
+          "win_rate_pct": null,
+          "wins": 0,
+          "yearly_net_r": {},
+          "years": 0
+        },
+        "holdout_2025_01_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": null,
+          "gross_r": 0,
+          "losses_or_zero": 0,
+          "max_consecutive_losses": 0,
+          "max_drawdown_r": 0.0,
+          "net_r": 0,
+          "positive_years": 0,
+          "profit_factor": null,
+          "trades": 0,
+          "win_rate_pct": null,
+          "wins": 0,
+          "yearly_net_r": {},
+          "years": 0
+        }
+      },
+      "stress_costs": {
+        "cost_0.50": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "cost_usd_per_oz": 0.5,
+          "expectancy_r": null,
+          "gross_r": 0,
+          "losses_or_zero": 0,
+          "max_consecutive_losses": 0,
+          "max_drawdown_r": 0.0,
+          "net_r": 0,
+          "positive_years": 0,
+          "profit_factor": null,
+          "trades": 0,
+          "win_rate_pct": null,
+          "wins": 0,
+          "yearly_net_r": {},
+          "years": 0
+        },
+        "cost_1.00": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "cost_usd_per_oz": 1.0,
+          "expectancy_r": null,
+          "gross_r": 0,
+          "losses_or_zero": 0,
+          "max_consecutive_losses": 0,
+          "max_drawdown_r": 0.0,
+          "net_r": 0,
+          "positive_years": 0,
+          "profit_factor": null,
+          "trades": 0,
+          "win_rate_pct": null,
+          "wins": 0,
+          "yearly_net_r": {},
+          "years": 0
+        }
+      }
+    },
+    "INVALIDATION": {
+      "dropped_baseline_losers_or_zero": 1,
+      "dropped_baseline_trades": 1,
+      "dropped_baseline_winners": 0,
+      "enabled_layers": [
+        "invalidation"
+      ],
+      "full": {
+        "compound_100_1pct": {
+          "compound": true,
+          "final_equity": 653.22,
+          "max_dd_pct": 19.83,
+          "risk_pct": 1.0,
+          "start_capital": 100.0,
+          "total_return_pct": 553.2,
+          "yearly_equity": {
+            "2020": 154.06,
+            "2021": 179.92,
+            "2022": 207.48,
+            "2023": 286.45,
+            "2024": 334.89,
+            "2025": 438.98,
+            "2026": 653.22
+          }
+        },
+        "compound_100_2pct": {
+          "compound": true,
+          "final_equity": 3283.07,
+          "max_dd_pct": 36.87,
+          "risk_pct": 2.0,
+          "start_capital": 100.0,
+          "total_return_pct": 3183.1,
+          "yearly_equity": {
+            "2020": 227.56,
+            "2021": 301.3,
+            "2022": 391.79,
+            "2023": 721.32,
+            "2024": 952.07,
+            "2025": 1579.34,
+            "2026": 3283.07
+          }
+        },
+        "cost_usd_per_oz": 0.25,
+        "expectancy_r": 0.313169,
+        "gross_r": 222.906551,
+        "losses_or_zero": 391,
+        "max_consecutive_losses": 11,
+        "max_drawdown_r": 21.198272,
+        "net_r": 201.680566,
+        "positive_years": 7,
+        "profit_factor": 1.499464,
+        "trades": 644,
+        "win_rate_pct": 39.2857,
+        "wins": 253,
+        "yearly_net_r": {
+          "2020": 45.496363,
+          "2021": 17.060899,
+          "2022": 15.398526,
+          "2023": 34.093494,
+          "2024": 17.446781,
+          "2025": 28.896032,
+          "2026": 43.28847
+        },
+        "years": 7
+      },
+      "losers_turned_into_winners": 0,
+      "outcome_changed_by_filter": 0,
+      "reason_counts": {
+        "invalidation_level_broken_or_unavailable": 1,
+        "layer_failed:invalidation": 1
+      },
+      "retained_baseline_losers_or_zero": 391,
+      "retained_baseline_trades": 644,
+      "retained_baseline_winners": 253,
+      "selection_note": "predeclared before evaluation; no holdout tuning",
+      "splits": {
+        "development_2020_02_to_2024_12": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 350.23,
+            "max_dd_pct": 19.83,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 250.2,
+            "yearly_equity": {
+              "2020": 154.06,
+              "2021": 179.92,
+              "2022": 207.48,
+              "2023": 286.45,
+              "2024": 334.89,
+              "2025": 350.23
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 1039.29,
+            "max_dd_pct": 36.87,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 939.3,
+            "yearly_equity": {
+              "2020": 227.56,
+              "2021": 301.3,
+              "2022": 391.79,
+              "2023": 721.32,
+              "2024": 952.07,
+              "2025": 1039.29
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": 0.282267,
+          "gross_r": 152.410951,
+          "losses_or_zero": 281,
+          "max_consecutive_losses": 11,
+          "max_drawdown_r": 21.198272,
+          "net_r": 134.076613,
+          "positive_years": 6,
+          "profit_factor": 1.459275,
+          "trades": 475,
+          "win_rate_pct": 40.8421,
+          "wins": 194,
+          "yearly_net_r": {
+            "2020": 45.496363,
+            "2021": 17.060899,
+            "2022": 15.398526,
+            "2023": 34.093494,
+            "2024": 17.446781,
+            "2025": 4.580549
+          },
+          "years": 6
+        },
+        "full_2020_02_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 653.22,
+            "max_dd_pct": 19.83,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 553.2,
+            "yearly_equity": {
+              "2020": 154.06,
+              "2021": 179.92,
+              "2022": 207.48,
+              "2023": 286.45,
+              "2024": 334.89,
+              "2025": 438.98,
+              "2026": 653.22
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 3283.07,
+            "max_dd_pct": 36.87,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 3183.1,
+            "yearly_equity": {
+              "2020": 227.56,
+              "2021": 301.3,
+              "2022": 391.79,
+              "2023": 721.32,
+              "2024": 952.07,
+              "2025": 1579.34,
+              "2026": 3283.07
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": 0.313169,
+          "gross_r": 222.906551,
+          "losses_or_zero": 391,
+          "max_consecutive_losses": 11,
+          "max_drawdown_r": 21.198272,
+          "net_r": 201.680566,
+          "positive_years": 7,
+          "profit_factor": 1.499464,
+          "trades": 644,
+          "win_rate_pct": 39.2857,
+          "wins": 253,
+          "yearly_net_r": {
+            "2020": 45.496363,
+            "2021": 17.060899,
+            "2022": 15.398526,
+            "2023": 34.093494,
+            "2024": 17.446781,
+            "2025": 28.896032,
+            "2026": 43.28847
+          },
+          "years": 7
+        },
+        "holdout_2025_01_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 186.51,
+            "max_dd_pct": 14.71,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 86.5,
+            "yearly_equity": {
+              "2025": 125.34,
+              "2026": 186.51
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 315.9,
+            "max_dd_pct": 27.62,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 215.9,
+            "yearly_equity": {
+              "2025": 151.96,
+              "2026": 315.9
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": 0.400023,
+          "gross_r": 70.4956,
+          "losses_or_zero": 110,
+          "max_consecutive_losses": 9,
+          "max_drawdown_r": 15.65661,
+          "net_r": 67.603953,
+          "positive_years": 2,
+          "profit_factor": 1.604344,
+          "trades": 169,
+          "win_rate_pct": 34.9112,
+          "wins": 59,
+          "yearly_net_r": {
+            "2025": 24.315483,
+            "2026": 43.28847
+          },
+          "years": 2
+        }
+      },
+      "stress_costs": {
+        "cost_0.50": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 528.52,
+            "max_dd_pct": 22.8,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 428.5,
+            "yearly_equity": {
+              "2020": 150.14,
+              "2021": 168.07,
+              "2022": 187.26,
+              "2023": 248.21,
+              "2024": 278.95,
+              "2025": 358.49,
+              "2026": 528.52
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 2150.4,
+            "max_dd_pct": 41.46,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 2050.4,
+            "yearly_equity": {
+              "2020": 216.19,
+              "2021": 262.98,
+              "2022": 319.22,
+              "2023": 541.86,
+              "2024": 660.86,
+              "2025": 1053.8,
+              "2026": 2150.4
+            }
+          },
+          "cost_usd_per_oz": 0.5,
+          "expectancy_r": 0.280209,
+          "gross_r": 222.906551,
+          "losses_or_zero": 391,
+          "max_consecutive_losses": 11,
+          "max_drawdown_r": 24.95561,
+          "net_r": 180.454581,
+          "positive_years": 7,
+          "profit_factor": 1.433173,
+          "trades": 644,
+          "win_rate_pct": 39.2857,
+          "wins": 253,
+          "yearly_net_r": {
+            "2020": 42.903863,
+            "2021": 12.818384,
+            "2022": 11.957926,
+            "2023": 30.009845,
+            "2024": 13.497369,
+            "2025": 26.913578,
+            "2026": 42.353617
+          },
+          "years": 7
+        },
+        "cost_1.00": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 345.89,
+            "max_dd_pct": 28.4,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 245.9,
+            "yearly_equity": {
+              "2020": 142.6,
+              "2021": 146.64,
+              "2022": 152.51,
+              "2023": 186.33,
+              "2024": 193.5,
+              "2025": 239.02,
+              "2026": 345.89
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 921.49,
+            "max_dd_pct": 49.68,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 821.5,
+            "yearly_equity": {
+              "2020": 195.11,
+              "2021": 200.27,
+              "2022": 211.8,
+              "2023": 305.5,
+              "2024": 318.06,
+              "2025": 468.62,
+              "2026": 921.49
+            }
+          },
+          "cost_usd_per_oz": 1.0,
+          "expectancy_r": 0.21429,
+          "gross_r": 222.906551,
+          "losses_or_zero": 391,
+          "max_consecutive_losses": 11,
+          "max_drawdown_r": 32.470284,
+          "net_r": 138.002612,
+          "positive_years": 7,
+          "profit_factor": 1.312099,
+          "trades": 644,
+          "win_rate_pct": 39.2857,
+          "wins": 253,
+          "yearly_net_r": {
+            "2020": 37.718861,
+            "2021": 4.333355,
+            "2022": 5.076724,
+            "2023": 21.842547,
+            "2024": 5.598543,
+            "2025": 22.94867,
+            "2026": 40.483912
+          },
+          "years": 7
+        }
+      }
+    },
+    "LIQUIDITY_EQUAL_SWEEP": {
+      "dropped_baseline_losers_or_zero": 392,
+      "dropped_baseline_trades": 645,
+      "dropped_baseline_winners": 253,
+      "enabled_layers": [
+        "equal_levels",
+        "liquidity_zone",
+        "sweep_reclaim"
+      ],
+      "full": {
+        "compound_100_1pct": {
+          "compound": true,
+          "final_equity": 100.0,
+          "max_dd_pct": 0.0,
+          "risk_pct": 1.0,
+          "start_capital": 100.0,
+          "total_return_pct": 0.0,
+          "yearly_equity": {}
+        },
+        "compound_100_2pct": {
+          "compound": true,
+          "final_equity": 100.0,
+          "max_dd_pct": 0.0,
+          "risk_pct": 2.0,
+          "start_capital": 100.0,
+          "total_return_pct": 0.0,
+          "yearly_equity": {}
+        },
+        "cost_usd_per_oz": 0.25,
+        "expectancy_r": null,
+        "gross_r": 0,
+        "losses_or_zero": 0,
+        "max_consecutive_losses": 0,
+        "max_drawdown_r": 0.0,
+        "net_r": 0,
+        "positive_years": 0,
+        "profit_factor": null,
+        "trades": 0,
+        "win_rate_pct": null,
+        "wins": 0,
+        "yearly_net_r": {},
+        "years": 0
+      },
+      "losers_turned_into_winners": 0,
+      "outcome_changed_by_filter": 0,
+      "reason_counts": {
+        "invalidation_level_broken_or_unavailable": 1,
+        "layer_failed:equal_levels": 591,
+        "layer_failed:liquidity_zone": 642,
+        "layer_failed:sweep_reclaim": 643
+      },
+      "retained_baseline_losers_or_zero": 0,
+      "retained_baseline_trades": 0,
+      "retained_baseline_winners": 0,
+      "selection_note": "predeclared before evaluation; no holdout tuning",
+      "splits": {
+        "development_2020_02_to_2024_12": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": null,
+          "gross_r": 0,
+          "losses_or_zero": 0,
+          "max_consecutive_losses": 0,
+          "max_drawdown_r": 0.0,
+          "net_r": 0,
+          "positive_years": 0,
+          "profit_factor": null,
+          "trades": 0,
+          "win_rate_pct": null,
+          "wins": 0,
+          "yearly_net_r": {},
+          "years": 0
+        },
+        "full_2020_02_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": null,
+          "gross_r": 0,
+          "losses_or_zero": 0,
+          "max_consecutive_losses": 0,
+          "max_drawdown_r": 0.0,
+          "net_r": 0,
+          "positive_years": 0,
+          "profit_factor": null,
+          "trades": 0,
+          "win_rate_pct": null,
+          "wins": 0,
+          "yearly_net_r": {},
+          "years": 0
+        },
+        "holdout_2025_01_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": null,
+          "gross_r": 0,
+          "losses_or_zero": 0,
+          "max_consecutive_losses": 0,
+          "max_drawdown_r": 0.0,
+          "net_r": 0,
+          "positive_years": 0,
+          "profit_factor": null,
+          "trades": 0,
+          "win_rate_pct": null,
+          "wins": 0,
+          "yearly_net_r": {},
+          "years": 0
+        }
+      },
+      "stress_costs": {
+        "cost_0.50": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "cost_usd_per_oz": 0.5,
+          "expectancy_r": null,
+          "gross_r": 0,
+          "losses_or_zero": 0,
+          "max_consecutive_losses": 0,
+          "max_drawdown_r": 0.0,
+          "net_r": 0,
+          "positive_years": 0,
+          "profit_factor": null,
+          "trades": 0,
+          "win_rate_pct": null,
+          "wins": 0,
+          "yearly_net_r": {},
+          "years": 0
+        },
+        "cost_1.00": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "cost_usd_per_oz": 1.0,
+          "expectancy_r": null,
+          "gross_r": 0,
+          "losses_or_zero": 0,
+          "max_consecutive_losses": 0,
+          "max_drawdown_r": 0.0,
+          "net_r": 0,
+          "positive_years": 0,
+          "profit_factor": null,
+          "trades": 0,
+          "win_rate_pct": null,
+          "wins": 0,
+          "yearly_net_r": {},
+          "years": 0
+        }
+      }
+    },
+    "LIQUIDITY_ZONE": {
+      "dropped_baseline_losers_or_zero": 390,
+      "dropped_baseline_trades": 642,
+      "dropped_baseline_winners": 252,
+      "enabled_layers": [
+        "liquidity_zone"
+      ],
+      "full": {
+        "compound_100_1pct": {
+          "compound": true,
+          "final_equity": 99.88,
+          "max_dd_pct": 2.13,
+          "risk_pct": 1.0,
+          "start_capital": 100.0,
+          "total_return_pct": -0.1,
+          "yearly_equity": {
+            "2024": 99.88
+          }
+        },
+        "compound_100_2pct": {
+          "compound": true,
+          "final_equity": 99.7,
+          "max_dd_pct": 4.23,
+          "risk_pct": 2.0,
+          "start_capital": 100.0,
+          "total_return_pct": -0.3,
+          "yearly_equity": {
+            "2024": 99.7
+          }
+        },
+        "cost_usd_per_oz": 0.25,
+        "expectancy_r": -0.029262,
+        "gross_r": 0.146718,
+        "losses_or_zero": 2,
+        "max_consecutive_losses": 2,
+        "max_drawdown_r": 2.137979,
+        "net_r": -0.087786,
+        "positive_years": 0,
+        "profit_factor": 0.95894,
+        "trades": 3,
+        "win_rate_pct": 33.3333,
+        "wins": 1,
+        "yearly_net_r": {
+          "2024": -0.087786
+        },
+        "years": 1
+      },
+      "losers_turned_into_winners": 0,
+      "outcome_changed_by_filter": 0,
+      "reason_counts": {
+        "invalidation_level_broken_or_unavailable": 1,
+        "layer_failed:liquidity_zone": 642
+      },
+      "retained_baseline_losers_or_zero": 2,
+      "retained_baseline_trades": 3,
+      "retained_baseline_winners": 1,
+      "selection_note": "predeclared before evaluation; no holdout tuning",
+      "splits": {
+        "development_2020_02_to_2024_12": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 99.88,
+            "max_dd_pct": 2.13,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": -0.1,
+            "yearly_equity": {
+              "2024": 99.88
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 99.7,
+            "max_dd_pct": 4.23,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": -0.3,
+            "yearly_equity": {
+              "2024": 99.7
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": -0.029262,
+          "gross_r": 0.146718,
+          "losses_or_zero": 2,
+          "max_consecutive_losses": 2,
+          "max_drawdown_r": 2.137979,
+          "net_r": -0.087786,
+          "positive_years": 0,
+          "profit_factor": 0.95894,
+          "trades": 3,
+          "win_rate_pct": 33.3333,
+          "wins": 1,
+          "yearly_net_r": {
+            "2024": -0.087786
+          },
+          "years": 1
+        },
+        "full_2020_02_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 99.88,
+            "max_dd_pct": 2.13,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": -0.1,
+            "yearly_equity": {
+              "2024": 99.88
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 99.7,
+            "max_dd_pct": 4.23,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": -0.3,
+            "yearly_equity": {
+              "2024": 99.7
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": -0.029262,
+          "gross_r": 0.146718,
+          "losses_or_zero": 2,
+          "max_consecutive_losses": 2,
+          "max_drawdown_r": 2.137979,
+          "net_r": -0.087786,
+          "positive_years": 0,
+          "profit_factor": 0.95894,
+          "trades": 3,
+          "win_rate_pct": 33.3333,
+          "wins": 1,
+          "yearly_net_r": {
+            "2024": -0.087786
+          },
+          "years": 1
+        },
+        "holdout_2025_01_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": null,
+          "gross_r": 0,
+          "losses_or_zero": 0,
+          "max_consecutive_losses": 0,
+          "max_drawdown_r": 0.0,
+          "net_r": 0,
+          "positive_years": 0,
+          "profit_factor": null,
+          "trades": 0,
+          "win_rate_pct": null,
+          "wins": 0,
+          "yearly_net_r": {},
+          "years": 0
+        }
+      },
+      "stress_costs": {
+        "cost_0.50": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 99.65,
+            "max_dd_pct": 2.26,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": -0.4,
+            "yearly_equity": {
+              "2024": 99.65
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 99.23,
+            "max_dd_pct": 4.5,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": -0.8,
+            "yearly_equity": {
+              "2024": 99.23
+            }
+          },
+          "cost_usd_per_oz": 0.5,
+          "expectancy_r": -0.10743,
+          "gross_r": 0.146718,
+          "losses_or_zero": 2,
+          "max_consecutive_losses": 2,
+          "max_drawdown_r": 2.275957,
+          "net_r": -0.322289,
+          "positive_years": 0,
+          "profit_factor": 0.858394,
+          "trades": 3,
+          "win_rate_pct": 33.3333,
+          "wins": 1,
+          "yearly_net_r": {
+            "2024": -0.322289
+          },
+          "years": 1
+        },
+        "cost_1.00": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 99.18,
+            "max_dd_pct": 2.54,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": -0.8,
+            "yearly_equity": {
+              "2024": 99.18
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 98.31,
+            "max_dd_pct": 5.04,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": -1.7,
+            "yearly_equity": {
+              "2024": 98.31
+            }
+          },
+          "cost_usd_per_oz": 1.0,
+          "expectancy_r": -0.263766,
+          "gross_r": 0.146718,
+          "losses_or_zero": 2,
+          "max_consecutive_losses": 2,
+          "max_drawdown_r": 2.551914,
+          "net_r": -0.791297,
+          "positive_years": 0,
+          "profit_factor": 0.68992,
+          "trades": 3,
+          "win_rate_pct": 33.3333,
+          "wins": 1,
+          "yearly_net_r": {
+            "2024": -0.791297
+          },
+          "years": 1
+        }
+      }
+    },
+    "ORDER_BLOCK": {
+      "dropped_baseline_losers_or_zero": 387,
+      "dropped_baseline_trades": 638,
+      "dropped_baseline_winners": 251,
+      "enabled_layers": [
+        "order_block"
+      ],
+      "full": {
+        "compound_100_1pct": {
+          "compound": true,
+          "final_equity": 99.69,
+          "max_dd_pct": 5.03,
+          "risk_pct": 1.0,
+          "start_capital": 100.0,
+          "total_return_pct": -0.3,
+          "yearly_equity": {
+            "2021": 102.0,
+            "2022": 104.97,
+            "2024": 102.79,
+            "2025": 101.75,
+            "2026": 99.69
+          }
+        },
+        "compound_100_2pct": {
+          "compound": true,
+          "final_equity": 99.21,
+          "max_dd_pct": 9.85,
+          "risk_pct": 2.0,
+          "start_capital": 100.0,
+          "total_return_pct": -0.8,
+          "yearly_equity": {
+            "2021": 104.0,
+            "2022": 110.06,
+            "2024": 105.51,
+            "2025": 103.38,
+            "2026": 99.21
+          }
+        },
+        "cost_usd_per_oz": 0.25,
+        "expectancy_r": -0.031603,
+        "gross_r": 0.047509,
+        "losses_or_zero": 5,
+        "max_consecutive_losses": 5,
+        "max_drawdown_r": 5.132379,
+        "net_r": -0.221219,
+        "positive_years": 2,
+        "profit_factor": 0.956897,
+        "trades": 7,
+        "win_rate_pct": 28.5714,
+        "wins": 2,
+        "yearly_net_r": {
+          "2021": 2.002451,
+          "2022": 2.908709,
+          "2024": -2.087072,
+          "2025": -1.010737,
+          "2026": -2.03457
+        },
+        "years": 5
+      },
+      "losers_turned_into_winners": 0,
+      "outcome_changed_by_filter": 0,
+      "reason_counts": {
+        "invalidation_level_broken_or_unavailable": 1,
+        "layer_failed:order_block": 638
+      },
+      "retained_baseline_losers_or_zero": 5,
+      "retained_baseline_trades": 7,
+      "retained_baseline_winners": 2,
+      "selection_note": "predeclared before evaluation; no holdout tuning",
+      "splits": {
+        "development_2020_02_to_2024_12": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 102.79,
+            "max_dd_pct": 2.08,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 2.8,
+            "yearly_equity": {
+              "2021": 102.0,
+              "2022": 104.97,
+              "2024": 102.79
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 105.51,
+            "max_dd_pct": 4.13,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 5.5,
+            "yearly_equity": {
+              "2021": 104.0,
+              "2022": 110.06,
+              "2024": 105.51
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": 0.706022,
+          "gross_r": 3.047509,
+          "losses_or_zero": 2,
+          "max_consecutive_losses": 2,
+          "max_drawdown_r": 2.087072,
+          "net_r": 2.824087,
+          "positive_years": 2,
+          "profit_factor": 2.353133,
+          "trades": 4,
+          "win_rate_pct": 50.0,
+          "wins": 2,
+          "yearly_net_r": {
+            "2021": 2.002451,
+            "2022": 2.908709,
+            "2024": -2.087072
+          },
+          "years": 3
+        },
+        "full_2020_02_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 99.69,
+            "max_dd_pct": 5.03,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": -0.3,
+            "yearly_equity": {
+              "2021": 102.0,
+              "2022": 104.97,
+              "2024": 102.79,
+              "2025": 101.75,
+              "2026": 99.69
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 99.21,
+            "max_dd_pct": 9.85,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": -0.8,
+            "yearly_equity": {
+              "2021": 104.0,
+              "2022": 110.06,
+              "2024": 105.51,
+              "2025": 103.38,
+              "2026": 99.21
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": -0.031603,
+          "gross_r": 0.047509,
+          "losses_or_zero": 5,
+          "max_consecutive_losses": 5,
+          "max_drawdown_r": 5.132379,
+          "net_r": -0.221219,
+          "positive_years": 2,
+          "profit_factor": 0.956897,
+          "trades": 7,
+          "win_rate_pct": 28.5714,
+          "wins": 2,
+          "yearly_net_r": {
+            "2021": 2.002451,
+            "2022": 2.908709,
+            "2024": -2.087072,
+            "2025": -1.010737,
+            "2026": -2.03457
+          },
+          "years": 5
+        },
+        "holdout_2025_01_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 96.99,
+            "max_dd_pct": 3.01,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": -3.0,
+            "yearly_equity": {
+              "2025": 98.99,
+              "2026": 96.99
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 94.03,
+            "max_dd_pct": 5.97,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": -6.0,
+            "yearly_equity": {
+              "2025": 97.98,
+              "2026": 94.03
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": -1.015102,
+          "gross_r": -3.0,
+          "losses_or_zero": 3,
+          "max_consecutive_losses": 3,
+          "max_drawdown_r": 3.045307,
+          "net_r": -3.045307,
+          "positive_years": 0,
+          "profit_factor": 0.0,
+          "trades": 3,
+          "win_rate_pct": 0.0,
+          "wins": 0,
+          "yearly_net_r": {
+            "2025": -1.010737,
+            "2026": -2.03457
+          },
+          "years": 2
+        }
+      },
+      "stress_costs": {
+        "cost_0.50": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 99.43,
+            "max_dd_pct": 5.16,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": -0.6,
+            "yearly_equity": {
+              "2021": 101.94,
+              "2022": 104.83,
+              "2024": 102.56,
+              "2025": 101.52,
+              "2026": 99.43
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 98.69,
+            "max_dd_pct": 10.1,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": -1.3,
+            "yearly_equity": {
+              "2021": 103.88,
+              "2022": 109.77,
+              "2024": 105.05,
+              "2025": 102.9,
+              "2026": 98.69
+            }
+          },
+          "cost_usd_per_oz": 0.5,
+          "expectancy_r": -0.069993,
+          "gross_r": 0.047509,
+          "losses_or_zero": 5,
+          "max_consecutive_losses": 5,
+          "max_drawdown_r": 5.264758,
+          "net_r": -0.489948,
+          "positive_years": 2,
+          "profit_factor": 0.906938,
+          "trades": 7,
+          "win_rate_pct": 28.5714,
+          "wins": 2,
+          "yearly_net_r": {
+            "2021": 1.941176,
+            "2022": 2.833634,
+            "2024": -2.174145,
+            "2025": -1.021474,
+            "2026": -2.06914
+          },
+          "years": 5
+        },
+        "cost_1.00": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 98.9,
+            "max_dd_pct": 5.41,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": -1.1,
+            "yearly_equity": {
+              "2021": 101.82,
+              "2022": 104.55,
+              "2024": 102.11,
+              "2025": 101.05,
+              "2026": 98.9
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 97.65,
+            "max_dd_pct": 10.58,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": -2.4,
+            "yearly_equity": {
+              "2021": 103.64,
+              "2022": 109.2,
+              "2024": 104.13,
+              "2025": 101.96,
+              "2026": 97.65
+            }
+          },
+          "cost_usd_per_oz": 1.0,
+          "expectancy_r": -0.146772,
+          "gross_r": 0.047509,
+          "losses_or_zero": 5,
+          "max_consecutive_losses": 5,
+          "max_drawdown_r": 5.529516,
+          "net_r": -1.027405,
+          "positive_years": 2,
+          "profit_factor": 0.814196,
+          "trades": 7,
+          "win_rate_pct": 28.5714,
+          "wins": 2,
+          "yearly_net_r": {
+            "2021": 1.818627,
+            "2022": 2.683483,
+            "2024": -2.348289,
+            "2025": -1.042947,
+            "2026": -2.138279
+          },
+          "years": 5
+        }
+      }
+    },
+    "RETEST_REACTION": {
+      "dropped_baseline_losers_or_zero": 233,
+      "dropped_baseline_trades": 384,
+      "dropped_baseline_winners": 151,
+      "enabled_layers": [
+        "retest_reaction"
+      ],
+      "full": {
+        "compound_100_1pct": {
+          "compound": true,
+          "final_equity": 194.36,
+          "max_dd_pct": 22.36,
+          "risk_pct": 1.0,
+          "start_capital": 100.0,
+          "total_return_pct": 94.4,
+          "yearly_equity": {
+            "2020": 117.46,
+            "2021": 128.05,
+            "2022": 122.54,
+            "2023": 131.15,
+            "2024": 146.09,
+            "2025": 164.92,
+            "2026": 194.36
+          }
+        },
+        "compound_100_2pct": {
+          "compound": true,
+          "final_equity": 345.58,
+          "max_dd_pct": 40.41,
+          "risk_pct": 2.0,
+          "start_capital": 100.0,
+          "total_return_pct": 245.6,
+          "yearly_equity": {
+            "2020": 136.59,
+            "2021": 160.47,
+            "2022": 145.74,
+            "2023": 165.43,
+            "2024": 202.59,
+            "2025": 254.65,
+            "2026": 345.58
+          }
+        },
+        "cost_usd_per_oz": 0.25,
+        "expectancy_r": 0.272529,
+        "gross_r": 80.538455,
+        "losses_or_zero": 159,
+        "max_consecutive_losses": 11,
+        "max_drawdown_r": 24.718559,
+        "net_r": 71.130013,
+        "positive_years": 6,
+        "profit_factor": 1.431411,
+        "trades": 261,
+        "win_rate_pct": 39.0805,
+        "wins": 102,
+        "yearly_net_r": {
+          "2020": 16.607232,
+          "2021": 9.231969,
+          "2022": -3.965298,
+          "2023": 7.253244,
+          "2024": 11.464109,
+          "2025": 12.829432,
+          "2026": 17.709325
+        },
+        "years": 7
+      },
+      "losers_turned_into_winners": 0,
+      "outcome_changed_by_filter": 0,
+      "reason_counts": {
+        "invalidation_level_broken_or_unavailable": 1,
+        "layer_failed:retest_reaction": 384
+      },
+      "retained_baseline_losers_or_zero": 159,
+      "retained_baseline_trades": 261,
+      "retained_baseline_winners": 102,
+      "selection_note": "predeclared before evaluation; no holdout tuning",
+      "splits": {
+        "development_2020_02_to_2024_12": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 152.79,
+            "max_dd_pct": 22.36,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 52.8,
+            "yearly_equity": {
+              "2020": 117.46,
+              "2021": 128.05,
+              "2022": 122.54,
+              "2023": 131.15,
+              "2024": 146.09,
+              "2025": 152.79
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 221.14,
+            "max_dd_pct": 40.41,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 121.1,
+            "yearly_equity": {
+              "2020": 136.59,
+              "2021": 160.47,
+              "2022": 145.74,
+              "2023": 165.43,
+              "2024": 202.59,
+              "2025": 221.14
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": 0.229299,
+          "gross_r": 53.317218,
+          "losses_or_zero": 116,
+          "max_consecutive_losses": 11,
+          "max_drawdown_r": 24.718559,
+          "net_r": 45.171805,
+          "positive_years": 5,
+          "profit_factor": 1.373155,
+          "trades": 197,
+          "win_rate_pct": 41.1168,
+          "wins": 81,
+          "yearly_net_r": {
+            "2020": 16.607232,
+            "2021": 9.231969,
+            "2022": -3.965298,
+            "2023": 7.253244,
+            "2024": 11.464109,
+            "2025": 4.580549
+          },
+          "years": 6
+        },
+        "full_2020_02_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 194.36,
+            "max_dd_pct": 22.36,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 94.4,
+            "yearly_equity": {
+              "2020": 117.46,
+              "2021": 128.05,
+              "2022": 122.54,
+              "2023": 131.15,
+              "2024": 146.09,
+              "2025": 164.92,
+              "2026": 194.36
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 345.58,
+            "max_dd_pct": 40.41,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 245.6,
+            "yearly_equity": {
+              "2020": 136.59,
+              "2021": 160.47,
+              "2022": 145.74,
+              "2023": 165.43,
+              "2024": 202.59,
+              "2025": 254.65,
+              "2026": 345.58
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": 0.272529,
+          "gross_r": 80.538455,
+          "losses_or_zero": 159,
+          "max_consecutive_losses": 11,
+          "max_drawdown_r": 24.718559,
+          "net_r": 71.130013,
+          "positive_years": 6,
+          "profit_factor": 1.431411,
+          "trades": 261,
+          "win_rate_pct": 39.0805,
+          "wins": 102,
+          "yearly_net_r": {
+            "2020": 16.607232,
+            "2021": 9.231969,
+            "2022": -3.965298,
+            "2023": 7.253244,
+            "2024": 11.464109,
+            "2025": 12.829432,
+            "2026": 17.709325
+          },
+          "years": 7
+        },
+        "holdout_2025_01_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 127.21,
+            "max_dd_pct": 10.63,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 27.2,
+            "yearly_equity": {
+              "2025": 107.94,
+              "2026": 127.21
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 156.27,
+            "max_dd_pct": 20.22,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 56.3,
+            "yearly_equity": {
+              "2025": 115.15,
+              "2026": 156.27
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": 0.405597,
+          "gross_r": 27.221237,
+          "losses_or_zero": 43,
+          "max_consecutive_losses": 11,
+          "max_drawdown_r": 11.176626,
+          "net_r": 25.958208,
+          "positive_years": 2,
+          "profit_factor": 1.592329,
+          "trades": 64,
+          "win_rate_pct": 32.8125,
+          "wins": 21,
+          "yearly_net_r": {
+            "2025": 8.248883,
+            "2026": 17.709325
+          },
+          "years": 2
+        }
+      },
+      "stress_costs": {
+        "cost_0.50": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 176.92,
+            "max_dd_pct": 24.81,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 76.9,
+            "yearly_equity": {
+              "2020": 116.36,
+              "2021": 124.77,
+              "2022": 117.21,
+              "2023": 123.4,
+              "2024": 134.7,
+              "2025": 150.67,
+              "2026": 176.92
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 286.35,
+            "max_dd_pct": 44.13,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 186.4,
+            "yearly_equity": {
+              "2020": 134.07,
+              "2021": 152.37,
+              "2022": 133.33,
+              "2023": 146.45,
+              "2024": 172.22,
+              "2025": 212.57,
+              "2026": 286.35
+            }
+          },
+          "cost_usd_per_oz": 0.5,
+          "expectancy_r": 0.236481,
+          "gross_r": 80.538455,
+          "losses_or_zero": 159,
+          "max_consecutive_losses": 11,
+          "max_drawdown_r": 27.911796,
+          "net_r": 61.721572,
+          "positive_years": 6,
+          "profit_factor": 1.361463,
+          "trades": 261,
+          "win_rate_pct": 39.0805,
+          "wins": 102,
+          "yearly_net_r": {
+            "2020": 15.666309,
+            "2021": 7.571179,
+            "2022": -5.81776,
+            "2023": 5.611652,
+            "2024": 9.440123,
+            "2025": 11.908312,
+            "2026": 17.341757
+          },
+          "years": 7
+        },
+        "cost_1.00": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 146.58,
+            "max_dd_pct": 29.81,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 46.6,
+            "yearly_equity": {
+              "2020": 114.2,
+              "2021": 118.45,
+              "2022": 107.22,
+              "2023": 109.23,
+              "2024": 114.5,
+              "2025": 125.75,
+              "2026": 146.58
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 196.5,
+            "max_dd_pct": 51.45,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 96.5,
+            "yearly_equity": {
+              "2020": 129.15,
+              "2021": 137.36,
+              "2022": 111.55,
+              "2023": 114.73,
+              "2024": 124.4,
+              "2025": 148.02,
+              "2026": 196.5
+            }
+          },
+          "cost_usd_per_oz": 1.0,
+          "expectancy_r": 0.164386,
+          "gross_r": 80.538455,
+          "losses_or_zero": 159,
+          "max_consecutive_losses": 11,
+          "max_drawdown_r": 34.671843,
+          "net_r": 42.904689,
+          "positive_years": 6,
+          "profit_factor": 1.235081,
+          "trades": 261,
+          "win_rate_pct": 39.0805,
+          "wins": 102,
+          "yearly_net_r": {
+            "2020": 13.784464,
+            "2021": 4.2496,
+            "2022": -9.522684,
+            "2023": 2.328468,
+            "2024": 5.39215,
+            "2025": 10.066071,
+            "2026": 16.60662
+          },
+          "years": 7
+        }
+      }
+    },
+    "RISK_AWARE": {
+      "dropped_baseline_losers_or_zero": 292,
+      "dropped_baseline_trades": 487,
+      "dropped_baseline_winners": 195,
+      "enabled_layers": [
+        "htf_premium_discount",
+        "invalidation",
+        "abstention",
+        "volatility_relative",
+        "spread_cost_filter"
+      ],
+      "full": {
+        "compound_100_1pct": {
+          "compound": true,
+          "final_equity": 118.83,
+          "max_dd_pct": 12.8,
+          "risk_pct": 1.0,
+          "start_capital": 100.0,
+          "total_return_pct": 18.8,
+          "yearly_equity": {
+            "2020": 99.16,
+            "2021": 106.08,
+            "2022": 103.84,
+            "2023": 113.68,
+            "2024": 122.84,
+            "2025": 128.17,
+            "2026": 118.83
+          }
+        },
+        "compound_100_2pct": {
+          "compound": true,
+          "final_equity": 135.53,
+          "max_dd_pct": 24.61,
+          "risk_pct": 2.0,
+          "start_capital": 100.0,
+          "total_return_pct": 35.5,
+          "yearly_equity": {
+            "2020": 97.99,
+            "2021": 111.54,
+            "2022": 106.29,
+            "2023": 126.75,
+            "2024": 146.7,
+            "2025": 158.52,
+            "2026": 135.53
+          }
+        },
+        "cost_usd_per_oz": 0.25,
+        "expectancy_r": 0.122548,
+        "gross_r": 25.110319,
+        "losses_or_zero": 100,
+        "max_consecutive_losses": 9,
+        "max_drawdown_r": 13.254007,
+        "net_r": 19.362575,
+        "positive_years": 4,
+        "profit_factor": 1.187057,
+        "trades": 158,
+        "win_rate_pct": 36.7089,
+        "wins": 58,
+        "yearly_net_r": {
+          "2020": -0.665713,
+          "2021": 7.026025,
+          "2022": -1.865928,
+          "2023": 9.321634,
+          "2024": 8.19615,
+          "2025": 4.631221,
+          "2026": -7.280813
+        },
+        "years": 7
+      },
+      "losers_turned_into_winners": 0,
+      "outcome_changed_by_filter": 0,
+      "reason_counts": {
+        "invalidation_level_broken_or_unavailable": 1,
+        "layer_failed:htf_premium_discount": 457,
+        "layer_failed:invalidation": 1,
+        "layer_failed:volatility_relative": 105
+      },
+      "retained_baseline_losers_or_zero": 100,
+      "retained_baseline_trades": 158,
+      "retained_baseline_winners": 58,
+      "selection_note": "predeclared before evaluation; no holdout tuning",
+      "splits": {
+        "development_2020_02_to_2024_12": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 122.84,
+            "max_dd_pct": 9.0,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 22.8,
+            "yearly_equity": {
+              "2020": 99.16,
+              "2021": 106.08,
+              "2022": 103.84,
+              "2023": 113.68,
+              "2024": 122.84
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 146.7,
+            "max_dd_pct": 17.27,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 46.7,
+            "yearly_equity": {
+              "2020": 97.99,
+              "2021": 111.54,
+              "2022": 106.29,
+              "2023": 126.75,
+              "2024": 146.7
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": 0.203816,
+          "gross_r": 26.820451,
+          "losses_or_zero": 64,
+          "max_consecutive_losses": 9,
+          "max_drawdown_r": 9.380341,
+          "net_r": 22.012168,
+          "positive_years": 3,
+          "profit_factor": 1.328919,
+          "trades": 108,
+          "win_rate_pct": 40.7407,
+          "wins": 44,
+          "yearly_net_r": {
+            "2020": -0.665713,
+            "2021": 7.026025,
+            "2022": -1.865928,
+            "2023": 9.321634,
+            "2024": 8.19615
+          },
+          "years": 5
+        },
+        "full_2020_02_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 118.83,
+            "max_dd_pct": 12.8,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 18.8,
+            "yearly_equity": {
+              "2020": 99.16,
+              "2021": 106.08,
+              "2022": 103.84,
+              "2023": 113.68,
+              "2024": 122.84,
+              "2025": 128.17,
+              "2026": 118.83
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 135.53,
+            "max_dd_pct": 24.61,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 35.5,
+            "yearly_equity": {
+              "2020": 97.99,
+              "2021": 111.54,
+              "2022": 106.29,
+              "2023": 126.75,
+              "2024": 146.7,
+              "2025": 158.52,
+              "2026": 135.53
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": 0.122548,
+          "gross_r": 25.110319,
+          "losses_or_zero": 100,
+          "max_consecutive_losses": 9,
+          "max_drawdown_r": 13.254007,
+          "net_r": 19.362575,
+          "positive_years": 4,
+          "profit_factor": 1.187057,
+          "trades": 158,
+          "win_rate_pct": 36.7089,
+          "wins": 58,
+          "yearly_net_r": {
+            "2020": -0.665713,
+            "2021": 7.026025,
+            "2022": -1.865928,
+            "2023": 9.321634,
+            "2024": 8.19615,
+            "2025": 4.631221,
+            "2026": -7.280813
+          },
+          "years": 7
+        },
+        "holdout_2025_01_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 96.74,
+            "max_dd_pct": 12.8,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": -3.3,
+            "yearly_equity": {
+              "2025": 104.34,
+              "2026": 96.74
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 92.39,
+            "max_dd_pct": 24.61,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": -7.6,
+            "yearly_equity": {
+              "2025": 108.06,
+              "2026": 92.39
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": -0.052992,
+          "gross_r": -1.710133,
+          "losses_or_zero": 36,
+          "max_consecutive_losses": 7,
+          "max_drawdown_r": 13.254007,
+          "net_r": -2.649593,
+          "positive_years": 1,
+          "profit_factor": 0.927584,
+          "trades": 50,
+          "win_rate_pct": 28.0,
+          "wins": 14,
+          "yearly_net_r": {
+            "2025": 4.631221,
+            "2026": -7.280813
+          },
+          "years": 2
+        }
+      },
+      "stress_costs": {
+        "cost_0.50": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 112.2,
+            "max_dd_pct": 13.38,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 12.2,
+            "yearly_equity": {
+              "2020": 98.54,
+              "2021": 104.35,
+              "2022": 101.03,
+              "2023": 109.83,
+              "2024": 117.07,
+              "2025": 121.44,
+              "2026": 112.2
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 120.83,
+            "max_dd_pct": 25.61,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 20.8,
+            "yearly_equity": {
+              "2020": 96.77,
+              "2021": 107.92,
+              "2022": 100.61,
+              "2023": 118.3,
+              "2024": 133.25,
+              "2025": 142.33,
+              "2026": 120.83
+            }
+          },
+          "cost_usd_per_oz": 0.5,
+          "expectancy_r": 0.08617,
+          "gross_r": 25.110319,
+          "losses_or_zero": 100,
+          "max_consecutive_losses": 9,
+          "max_drawdown_r": 13.917495,
+          "net_r": 13.614831,
+          "positive_years": 4,
+          "profit_factor": 1.127214,
+          "trades": 158,
+          "win_rate_pct": 36.7089,
+          "wins": 58,
+          "yearly_net_r": {
+            "2020": -1.29225,
+            "2021": 5.99809,
+            "2022": -2.951268,
+            "2023": 8.61297,
+            "2024": 6.836342,
+            "2025": 4.044245,
+            "2026": -7.633298
+          },
+          "years": 7
+        },
+        "cost_1.00": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 100.02,
+            "max_dd_pct": 14.52,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {
+              "2020": 97.31,
+              "2021": 100.95,
+              "2022": 95.63,
+              "2023": 102.5,
+              "2024": 106.34,
+              "2025": 109.02,
+              "2026": 100.02
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 96.0,
+            "max_dd_pct": 27.58,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": -4.0,
+            "yearly_equity": {
+              "2020": 94.36,
+              "2021": 101.01,
+              "2022": 90.13,
+              "2023": 103.03,
+              "2024": 109.92,
+              "2025": 114.71,
+              "2026": 96.0
+            }
+          },
+          "cost_usd_per_oz": 1.0,
+          "expectancy_r": 0.013414,
+          "gross_r": 25.110319,
+          "losses_or_zero": 100,
+          "max_consecutive_losses": 9,
+          "max_drawdown_r": 15.244472,
+          "net_r": 2.119344,
+          "positive_years": 4,
+          "profit_factor": 1.018583,
+          "trades": 158,
+          "win_rate_pct": 36.7089,
+          "wins": 58,
+          "yearly_net_r": {
+            "2020": -2.545324,
+            "2021": 3.942219,
+            "2022": -5.121947,
+            "2023": 7.195641,
+            "2024": 4.116728,
+            "2025": 2.870295,
+            "2026": -8.338268
+          },
+          "years": 7
+        }
+      }
+    },
+    "SPREAD_COST_FILTER": {
+      "dropped_baseline_losers_or_zero": 0,
+      "dropped_baseline_trades": 0,
+      "dropped_baseline_winners": 0,
+      "enabled_layers": [
+        "spread_cost_filter"
+      ],
+      "full": {
+        "compound_100_1pct": {
+          "compound": true,
+          "final_equity": 646.51,
+          "max_dd_pct": 19.83,
+          "risk_pct": 1.0,
+          "start_capital": 100.0,
+          "total_return_pct": 546.5,
+          "yearly_equity": {
+            "2020": 154.06,
+            "2021": 179.92,
+            "2022": 207.48,
+            "2023": 286.45,
+            "2024": 334.89,
+            "2025": 434.47,
+            "2026": 646.51
+          }
+        },
+        "compound_100_2pct": {
+          "compound": true,
+          "final_equity": 3215.68,
+          "max_dd_pct": 36.87,
+          "risk_pct": 2.0,
+          "start_capital": 100.0,
+          "total_return_pct": 3115.7,
+          "yearly_equity": {
+            "2020": 227.56,
+            "2021": 301.3,
+            "2022": 391.79,
+            "2023": 721.32,
+            "2024": 952.07,
+            "2025": 1546.92,
+            "2026": 3215.68
+          }
+        },
+        "cost_usd_per_oz": 0.25,
+        "expectancy_r": 0.311092,
+        "gross_r": 221.906551,
+        "losses_or_zero": 392,
+        "max_consecutive_losses": 11,
+        "max_drawdown_r": 21.198272,
+        "net_r": 200.654166,
+        "positive_years": 7,
+        "profit_factor": 1.495662,
+        "trades": 645,
+        "win_rate_pct": 39.2248,
+        "wins": 253,
+        "yearly_net_r": {
+          "2020": 45.496363,
+          "2021": 17.060899,
+          "2022": 15.398526,
+          "2023": 34.093494,
+          "2024": 17.446781,
+          "2025": 27.869632,
+          "2026": 43.28847
+        },
+        "years": 7
+      },
+      "losers_turned_into_winners": 0,
+      "outcome_changed_by_filter": 0,
+      "reason_counts": {
+        "invalidation_level_broken_or_unavailable": 1
+      },
+      "retained_baseline_losers_or_zero": 392,
+      "retained_baseline_trades": 645,
+      "retained_baseline_winners": 253,
+      "selection_note": "predeclared before evaluation; no holdout tuning",
+      "splits": {
+        "development_2020_02_to_2024_12": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 350.23,
+            "max_dd_pct": 19.83,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 250.2,
+            "yearly_equity": {
+              "2020": 154.06,
+              "2021": 179.92,
+              "2022": 207.48,
+              "2023": 286.45,
+              "2024": 334.89,
+              "2025": 350.23
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 1039.29,
+            "max_dd_pct": 36.87,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 939.3,
+            "yearly_equity": {
+              "2020": 227.56,
+              "2021": 301.3,
+              "2022": 391.79,
+              "2023": 721.32,
+              "2024": 952.07,
+              "2025": 1039.29
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": 0.282267,
+          "gross_r": 152.410951,
+          "losses_or_zero": 281,
+          "max_consecutive_losses": 11,
+          "max_drawdown_r": 21.198272,
+          "net_r": 134.076613,
+          "positive_years": 6,
+          "profit_factor": 1.459275,
+          "trades": 475,
+          "win_rate_pct": 40.8421,
+          "wins": 194,
+          "yearly_net_r": {
+            "2020": 45.496363,
+            "2021": 17.060899,
+            "2022": 15.398526,
+            "2023": 34.093494,
+            "2024": 17.446781,
+            "2025": 4.580549
+          },
+          "years": 6
+        },
+        "full_2020_02_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 646.51,
+            "max_dd_pct": 19.83,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 546.5,
+            "yearly_equity": {
+              "2020": 154.06,
+              "2021": 179.92,
+              "2022": 207.48,
+              "2023": 286.45,
+              "2024": 334.89,
+              "2025": 434.47,
+              "2026": 646.51
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 3215.68,
+            "max_dd_pct": 36.87,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 3115.7,
+            "yearly_equity": {
+              "2020": 227.56,
+              "2021": 301.3,
+              "2022": 391.79,
+              "2023": 721.32,
+              "2024": 952.07,
+              "2025": 1546.92,
+              "2026": 3215.68
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": 0.311092,
+          "gross_r": 221.906551,
+          "losses_or_zero": 392,
+          "max_consecutive_losses": 11,
+          "max_drawdown_r": 21.198272,
+          "net_r": 200.654166,
+          "positive_years": 7,
+          "profit_factor": 1.495662,
+          "trades": 645,
+          "win_rate_pct": 39.2248,
+          "wins": 253,
+          "yearly_net_r": {
+            "2020": 45.496363,
+            "2021": 17.060899,
+            "2022": 15.398526,
+            "2023": 34.093494,
+            "2024": 17.446781,
+            "2025": 27.869632,
+            "2026": 43.28847
+          },
+          "years": 7
+        },
+        "holdout_2025_01_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 184.6,
+            "max_dd_pct": 15.59,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 84.6,
+            "yearly_equity": {
+              "2025": 124.05,
+              "2026": 184.6
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 309.41,
+            "max_dd_pct": 29.11,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 209.4,
+            "yearly_equity": {
+              "2025": 148.84,
+              "2026": 309.41
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": 0.391633,
+          "gross_r": 69.4956,
+          "losses_or_zero": 111,
+          "max_consecutive_losses": 9,
+          "max_drawdown_r": 16.68301,
+          "net_r": 66.577553,
+          "positive_years": 2,
+          "profit_factor": 1.589758,
+          "trades": 170,
+          "win_rate_pct": 34.7059,
+          "wins": 59,
+          "yearly_net_r": {
+            "2025": 23.289083,
+            "2026": 43.28847
+          },
+          "years": 2
+        }
+      },
+      "stress_costs": {
+        "cost_0.50": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 522.95,
+            "max_dd_pct": 22.8,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 423.0,
+            "yearly_equity": {
+              "2020": 150.14,
+              "2021": 168.07,
+              "2022": 187.26,
+              "2023": 248.21,
+              "2024": 278.95,
+              "2025": 354.72,
+              "2026": 522.95
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 2105.12,
+            "max_dd_pct": 41.46,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 2005.1,
+            "yearly_equity": {
+              "2020": 216.19,
+              "2021": 262.98,
+              "2022": 319.22,
+              "2023": 541.86,
+              "2024": 660.86,
+              "2025": 1031.61,
+              "2026": 2105.12
+            }
+          },
+          "cost_usd_per_oz": 0.5,
+          "expectancy_r": 0.278142,
+          "gross_r": 221.906551,
+          "losses_or_zero": 392,
+          "max_consecutive_losses": 11,
+          "max_drawdown_r": 24.95561,
+          "net_r": 179.40178,
+          "positive_years": 7,
+          "profit_factor": 1.42956,
+          "trades": 645,
+          "win_rate_pct": 39.2248,
+          "wins": 253,
+          "yearly_net_r": {
+            "2020": 42.903863,
+            "2021": 12.818384,
+            "2022": 11.957926,
+            "2023": 30.009845,
+            "2024": 13.497369,
+            "2025": 25.860777,
+            "2026": 42.353617
+          },
+          "years": 7
+        },
+        "cost_1.00": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 342.06,
+            "max_dd_pct": 28.4,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 242.1,
+            "yearly_equity": {
+              "2020": 142.6,
+              "2021": 146.64,
+              "2022": 152.51,
+              "2023": 186.33,
+              "2024": 193.5,
+              "2025": 236.38,
+              "2026": 342.06
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 901.11,
+            "max_dd_pct": 49.68,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 801.1,
+            "yearly_equity": {
+              "2020": 195.11,
+              "2021": 200.27,
+              "2022": 211.8,
+              "2023": 305.5,
+              "2024": 318.06,
+              "2025": 458.26,
+              "2026": 901.11
+            }
+          },
+          "cost_usd_per_oz": 1.0,
+          "expectancy_r": 0.212243,
+          "gross_r": 221.906551,
+          "losses_or_zero": 392,
+          "max_consecutive_losses": 11,
+          "max_drawdown_r": 32.470284,
+          "net_r": 136.89701,
+          "positive_years": 7,
+          "profit_factor": 1.308826,
+          "trades": 645,
+          "win_rate_pct": 39.2248,
+          "wins": 253,
+          "yearly_net_r": {
+            "2020": 37.718861,
+            "2021": 4.333355,
+            "2022": 5.076724,
+            "2023": 21.842547,
+            "2024": 5.598543,
+            "2025": 21.843067,
+            "2026": 40.483912
+          },
+          "years": 7
+        }
+      }
+    },
+    "STRUCTURE_SWEEP_MSS": {
+      "dropped_baseline_losers_or_zero": 391,
+      "dropped_baseline_trades": 644,
+      "dropped_baseline_winners": 253,
+      "enabled_layers": [
+        "sweep_reclaim",
+        "confirmed_mss",
+        "displacement"
+      ],
+      "full": {
+        "compound_100_1pct": {
+          "compound": true,
+          "final_equity": 98.93,
+          "max_dd_pct": 1.07,
+          "risk_pct": 1.0,
+          "start_capital": 100.0,
+          "total_return_pct": -1.1,
+          "yearly_equity": {
+            "2024": 98.93
+          }
+        },
+        "compound_100_2pct": {
+          "compound": true,
+          "final_equity": 97.87,
+          "max_dd_pct": 2.13,
+          "risk_pct": 2.0,
+          "start_capital": 100.0,
+          "total_return_pct": -2.1,
+          "yearly_equity": {
+            "2024": 97.87
+          }
+        },
+        "cost_usd_per_oz": 0.25,
+        "expectancy_r": -1.065325,
+        "gross_r": -1.0,
+        "losses_or_zero": 1,
+        "max_consecutive_losses": 1,
+        "max_drawdown_r": 1.065325,
+        "net_r": -1.065325,
+        "positive_years": 0,
+        "profit_factor": 0.0,
+        "trades": 1,
+        "win_rate_pct": 0.0,
+        "wins": 0,
+        "yearly_net_r": {
+          "2024": -1.065325
+        },
+        "years": 1
+      },
+      "losers_turned_into_winners": 0,
+      "outcome_changed_by_filter": 0,
+      "reason_counts": {
+        "invalidation_level_broken_or_unavailable": 1,
+        "layer_failed:confirmed_mss": 26,
+        "layer_failed:displacement": 548,
+        "layer_failed:sweep_reclaim": 643
+      },
+      "retained_baseline_losers_or_zero": 1,
+      "retained_baseline_trades": 1,
+      "retained_baseline_winners": 0,
+      "selection_note": "predeclared before evaluation; no holdout tuning",
+      "splits": {
+        "development_2020_02_to_2024_12": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 98.93,
+            "max_dd_pct": 1.07,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": -1.1,
+            "yearly_equity": {
+              "2024": 98.93
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 97.87,
+            "max_dd_pct": 2.13,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": -2.1,
+            "yearly_equity": {
+              "2024": 97.87
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": -1.065325,
+          "gross_r": -1.0,
+          "losses_or_zero": 1,
+          "max_consecutive_losses": 1,
+          "max_drawdown_r": 1.065325,
+          "net_r": -1.065325,
+          "positive_years": 0,
+          "profit_factor": 0.0,
+          "trades": 1,
+          "win_rate_pct": 0.0,
+          "wins": 0,
+          "yearly_net_r": {
+            "2024": -1.065325
+          },
+          "years": 1
+        },
+        "full_2020_02_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 98.93,
+            "max_dd_pct": 1.07,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": -1.1,
+            "yearly_equity": {
+              "2024": 98.93
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 97.87,
+            "max_dd_pct": 2.13,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": -2.1,
+            "yearly_equity": {
+              "2024": 97.87
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": -1.065325,
+          "gross_r": -1.0,
+          "losses_or_zero": 1,
+          "max_consecutive_losses": 1,
+          "max_drawdown_r": 1.065325,
+          "net_r": -1.065325,
+          "positive_years": 0,
+          "profit_factor": 0.0,
+          "trades": 1,
+          "win_rate_pct": 0.0,
+          "wins": 0,
+          "yearly_net_r": {
+            "2024": -1.065325
+          },
+          "years": 1
+        },
+        "holdout_2025_01_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": null,
+          "gross_r": 0,
+          "losses_or_zero": 0,
+          "max_consecutive_losses": 0,
+          "max_drawdown_r": 0.0,
+          "net_r": 0,
+          "positive_years": 0,
+          "profit_factor": null,
+          "trades": 0,
+          "win_rate_pct": null,
+          "wins": 0,
+          "yearly_net_r": {},
+          "years": 0
+        }
+      },
+      "stress_costs": {
+        "cost_0.50": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 98.87,
+            "max_dd_pct": 1.13,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": -1.1,
+            "yearly_equity": {
+              "2024": 98.87
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 97.74,
+            "max_dd_pct": 2.26,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": -2.3,
+            "yearly_equity": {
+              "2024": 97.74
+            }
+          },
+          "cost_usd_per_oz": 0.5,
+          "expectancy_r": -1.130651,
+          "gross_r": -1.0,
+          "losses_or_zero": 1,
+          "max_consecutive_losses": 1,
+          "max_drawdown_r": 1.130651,
+          "net_r": -1.130651,
+          "positive_years": 0,
+          "profit_factor": 0.0,
+          "trades": 1,
+          "win_rate_pct": 0.0,
+          "wins": 0,
+          "yearly_net_r": {
+            "2024": -1.130651
+          },
+          "years": 1
+        },
+        "cost_1.00": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 98.74,
+            "max_dd_pct": 1.26,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": -1.3,
+            "yearly_equity": {
+              "2024": 98.74
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 97.48,
+            "max_dd_pct": 2.52,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": -2.5,
+            "yearly_equity": {
+              "2024": 97.48
+            }
+          },
+          "cost_usd_per_oz": 1.0,
+          "expectancy_r": -1.261301,
+          "gross_r": -1.0,
+          "losses_or_zero": 1,
+          "max_consecutive_losses": 1,
+          "max_drawdown_r": 1.261301,
+          "net_r": -1.261301,
+          "positive_years": 0,
+          "profit_factor": 0.0,
+          "trades": 1,
+          "win_rate_pct": 0.0,
+          "wins": 0,
+          "yearly_net_r": {
+            "2024": -1.261301
+          },
+          "years": 1
+        }
+      }
+    },
+    "SWEEP_RECLAIM": {
+      "dropped_baseline_losers_or_zero": 390,
+      "dropped_baseline_trades": 643,
+      "dropped_baseline_winners": 253,
+      "enabled_layers": [
+        "sweep_reclaim"
+      ],
+      "full": {
+        "compound_100_1pct": {
+          "compound": true,
+          "final_equity": 97.93,
+          "max_dd_pct": 2.07,
+          "risk_pct": 1.0,
+          "start_capital": 100.0,
+          "total_return_pct": -2.1,
+          "yearly_equity": {
+            "2020": 98.99,
+            "2024": 97.93
+          }
+        },
+        "compound_100_2pct": {
+          "compound": true,
+          "final_equity": 95.89,
+          "max_dd_pct": 4.11,
+          "risk_pct": 2.0,
+          "start_capital": 100.0,
+          "total_return_pct": -4.1,
+          "yearly_equity": {
+            "2020": 97.97,
+            "2024": 95.89
+          }
+        },
+        "cost_usd_per_oz": 0.25,
+        "expectancy_r": -1.039217,
+        "gross_r": -2.0,
+        "losses_or_zero": 2,
+        "max_consecutive_losses": 2,
+        "max_drawdown_r": 2.078433,
+        "net_r": -2.078433,
+        "positive_years": 0,
+        "profit_factor": 0.0,
+        "trades": 2,
+        "win_rate_pct": 0.0,
+        "wins": 0,
+        "yearly_net_r": {
+          "2020": -1.013108,
+          "2024": -1.065325
+        },
+        "years": 2
+      },
+      "losers_turned_into_winners": 0,
+      "outcome_changed_by_filter": 0,
+      "reason_counts": {
+        "invalidation_level_broken_or_unavailable": 1,
+        "layer_failed:sweep_reclaim": 643
+      },
+      "retained_baseline_losers_or_zero": 2,
+      "retained_baseline_trades": 2,
+      "retained_baseline_winners": 0,
+      "selection_note": "predeclared before evaluation; no holdout tuning",
+      "splits": {
+        "development_2020_02_to_2024_12": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 97.93,
+            "max_dd_pct": 2.07,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": -2.1,
+            "yearly_equity": {
+              "2020": 98.99,
+              "2024": 97.93
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 95.89,
+            "max_dd_pct": 4.11,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": -4.1,
+            "yearly_equity": {
+              "2020": 97.97,
+              "2024": 95.89
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": -1.039217,
+          "gross_r": -2.0,
+          "losses_or_zero": 2,
+          "max_consecutive_losses": 2,
+          "max_drawdown_r": 2.078433,
+          "net_r": -2.078433,
+          "positive_years": 0,
+          "profit_factor": 0.0,
+          "trades": 2,
+          "win_rate_pct": 0.0,
+          "wins": 0,
+          "yearly_net_r": {
+            "2020": -1.013108,
+            "2024": -1.065325
+          },
+          "years": 2
+        },
+        "full_2020_02_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 97.93,
+            "max_dd_pct": 2.07,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": -2.1,
+            "yearly_equity": {
+              "2020": 98.99,
+              "2024": 97.93
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 95.89,
+            "max_dd_pct": 4.11,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": -4.1,
+            "yearly_equity": {
+              "2020": 97.97,
+              "2024": 95.89
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": -1.039217,
+          "gross_r": -2.0,
+          "losses_or_zero": 2,
+          "max_consecutive_losses": 2,
+          "max_drawdown_r": 2.078433,
+          "net_r": -2.078433,
+          "positive_years": 0,
+          "profit_factor": 0.0,
+          "trades": 2,
+          "win_rate_pct": 0.0,
+          "wins": 0,
+          "yearly_net_r": {
+            "2020": -1.013108,
+            "2024": -1.065325
+          },
+          "years": 2
+        },
+        "holdout_2025_01_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 100.0,
+            "max_dd_pct": 0.0,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 0.0,
+            "yearly_equity": {}
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": null,
+          "gross_r": 0,
+          "losses_or_zero": 0,
+          "max_consecutive_losses": 0,
+          "max_drawdown_r": 0.0,
+          "net_r": 0,
+          "positive_years": 0,
+          "profit_factor": null,
+          "trades": 0,
+          "win_rate_pct": null,
+          "wins": 0,
+          "yearly_net_r": {},
+          "years": 0
+        }
+      },
+      "stress_costs": {
+        "cost_0.50": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 97.85,
+            "max_dd_pct": 2.15,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": -2.1,
+            "yearly_equity": {
+              "2020": 98.97,
+              "2024": 97.85
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 95.73,
+            "max_dd_pct": 4.27,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": -4.3,
+            "yearly_equity": {
+              "2020": 97.95,
+              "2024": 95.73
+            }
+          },
+          "cost_usd_per_oz": 0.5,
+          "expectancy_r": -1.078433,
+          "gross_r": -2.0,
+          "losses_or_zero": 2,
+          "max_consecutive_losses": 2,
+          "max_drawdown_r": 2.156867,
+          "net_r": -2.156867,
+          "positive_years": 0,
+          "profit_factor": 0.0,
+          "trades": 2,
+          "win_rate_pct": 0.0,
+          "wins": 0,
+          "yearly_net_r": {
+            "2020": -1.026216,
+            "2024": -1.130651
+          },
+          "years": 2
+        },
+        "cost_1.00": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 97.7,
+            "max_dd_pct": 2.3,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": -2.3,
+            "yearly_equity": {
+              "2020": 98.95,
+              "2024": 97.7
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 95.43,
+            "max_dd_pct": 4.57,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": -4.6,
+            "yearly_equity": {
+              "2020": 97.9,
+              "2024": 95.43
+            }
+          },
+          "cost_usd_per_oz": 1.0,
+          "expectancy_r": -1.156867,
+          "gross_r": -2.0,
+          "losses_or_zero": 2,
+          "max_consecutive_losses": 2,
+          "max_drawdown_r": 2.313734,
+          "net_r": -2.313734,
+          "positive_years": 0,
+          "profit_factor": 0.0,
+          "trades": 2,
+          "win_rate_pct": 0.0,
+          "wins": 0,
+          "yearly_net_r": {
+            "2020": -1.052433,
+            "2024": -1.261301
+          },
+          "years": 2
+        }
+      }
+    },
+    "VOLATILITY_RELATIVE": {
+      "dropped_baseline_losers_or_zero": 61,
+      "dropped_baseline_trades": 105,
+      "dropped_baseline_winners": 44,
+      "enabled_layers": [
+        "volatility_relative"
+      ],
+      "full": {
+        "compound_100_1pct": {
+          "compound": true,
+          "final_equity": 452.24,
+          "max_dd_pct": 18.91,
+          "risk_pct": 1.0,
+          "start_capital": 100.0,
+          "total_return_pct": 352.2,
+          "yearly_equity": {
+            "2020": 123.91,
+            "2021": 150.88,
+            "2022": 172.78,
+            "2023": 232.48,
+            "2024": 275.98,
+            "2025": 347.83,
+            "2026": 452.24
+          }
+        },
+        "compound_100_2pct": {
+          "compound": true,
+          "final_equity": 1645.31,
+          "max_dd_pct": 34.54,
+          "risk_pct": 2.0,
+          "start_capital": 100.0,
+          "total_return_pct": 1545.3,
+          "yearly_equity": {
+            "2020": 149.67,
+            "2021": 216.28,
+            "2022": 278.26,
+            "2023": 488.78,
+            "2024": 667.41,
+            "2025": 1027.25,
+            "2026": 1645.31
+          }
+        },
+        "cost_usd_per_oz": 0.25,
+        "expectancy_r": 0.300933,
+        "gross_r": 181.599989,
+        "losses_or_zero": 331,
+        "max_consecutive_losses": 10,
+        "max_drawdown_r": 20.749663,
+        "net_r": 162.503799,
+        "positive_years": 7,
+        "profit_factor": 1.474409,
+        "trades": 540,
+        "win_rate_pct": 38.7037,
+        "wins": 209,
+        "yearly_net_r": {
+          "2020": 22.778699,
+          "2021": 21.018326,
+          "2022": 14.541649,
+          "2023": 31.28819,
+          "2024": 18.800114,
+          "2025": 24.785497,
+          "2026": 29.291324
+        },
+        "years": 7
+      },
+      "losers_turned_into_winners": 0,
+      "outcome_changed_by_filter": 0,
+      "reason_counts": {
+        "invalidation_level_broken_or_unavailable": 1,
+        "layer_failed:volatility_relative": 105
+      },
+      "retained_baseline_losers_or_zero": 331,
+      "retained_baseline_trades": 540,
+      "retained_baseline_winners": 209,
+      "selection_note": "predeclared before evaluation; no holdout tuning",
+      "splits": {
+        "development_2020_02_to_2024_12": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 275.98,
+            "max_dd_pct": 15.56,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 176.0,
+            "yearly_equity": {
+              "2020": 123.91,
+              "2021": 150.88,
+              "2022": 172.78,
+              "2023": 232.48,
+              "2024": 275.98
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 667.41,
+            "max_dd_pct": 29.06,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 567.4,
+            "yearly_equity": {
+              "2020": 149.67,
+              "2021": 216.28,
+              "2022": 278.26,
+              "2023": 488.78,
+              "2024": 667.41
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": 0.280173,
+          "gross_r": 124.739877,
+          "losses_or_zero": 230,
+          "max_consecutive_losses": 10,
+          "max_drawdown_r": 16.661062,
+          "net_r": 108.426978,
+          "positive_years": 5,
+          "profit_factor": 1.452297,
+          "trades": 387,
+          "win_rate_pct": 40.5685,
+          "wins": 157,
+          "yearly_net_r": {
+            "2020": 22.778699,
+            "2021": 21.018326,
+            "2022": 14.541649,
+            "2023": 31.28819,
+            "2024": 18.800114
+          },
+          "years": 5
+        },
+        "full_2020_02_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 452.24,
+            "max_dd_pct": 18.91,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 352.2,
+            "yearly_equity": {
+              "2020": 123.91,
+              "2021": 150.88,
+              "2022": 172.78,
+              "2023": 232.48,
+              "2024": 275.98,
+              "2025": 347.83,
+              "2026": 452.24
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 1645.31,
+            "max_dd_pct": 34.54,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 1545.3,
+            "yearly_equity": {
+              "2020": 149.67,
+              "2021": 216.28,
+              "2022": 278.26,
+              "2023": 488.78,
+              "2024": 667.41,
+              "2025": 1027.25,
+              "2026": 1645.31
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": 0.300933,
+          "gross_r": 181.599989,
+          "losses_or_zero": 331,
+          "max_consecutive_losses": 10,
+          "max_drawdown_r": 20.749663,
+          "net_r": 162.503799,
+          "positive_years": 7,
+          "profit_factor": 1.474409,
+          "trades": 540,
+          "win_rate_pct": 38.7037,
+          "wins": 209,
+          "yearly_net_r": {
+            "2020": 22.778699,
+            "2021": 21.018326,
+            "2022": 14.541649,
+            "2023": 31.28819,
+            "2024": 18.800114,
+            "2025": 24.785497,
+            "2026": 29.291324
+          },
+          "years": 7
+        },
+        "holdout_2025_01_to_2026_10": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 163.87,
+            "max_dd_pct": 18.91,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 63.9,
+            "yearly_equity": {
+              "2025": 126.04,
+              "2026": 163.87
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 246.52,
+            "max_dd_pct": 34.54,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 146.5,
+            "yearly_equity": {
+              "2025": 153.92,
+              "2026": 246.52
+            }
+          },
+          "cost_usd_per_oz": 0.25,
+          "expectancy_r": 0.353443,
+          "gross_r": 56.860112,
+          "losses_or_zero": 101,
+          "max_consecutive_losses": 10,
+          "max_drawdown_r": 20.749663,
+          "net_r": 54.076821,
+          "positive_years": 2,
+          "profit_factor": 1.525968,
+          "trades": 153,
+          "win_rate_pct": 33.9869,
+          "wins": 52,
+          "yearly_net_r": {
+            "2025": 24.785497,
+            "2026": 29.291324
+          },
+          "years": 2
+        }
+      },
+      "stress_costs": {
+        "cost_0.50": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 373.76,
+            "max_dd_pct": 19.6,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 273.8,
+            "yearly_equity": {
+              "2020": 121.02,
+              "2021": 142.02,
+              "2022": 157.67,
+              "2023": 204.65,
+              "2024": 234.5,
+              "2025": 290.04,
+              "2026": 373.76
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 1124.28,
+            "max_dd_pct": 35.64,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 1024.3,
+            "yearly_equity": {
+              "2020": 142.79,
+              "2021": 191.67,
+              "2022": 231.78,
+              "2023": 378.92,
+              "2024": 482.05,
+              "2025": 714.53,
+              "2026": 1124.28
+            }
+          },
+          "cost_usd_per_oz": 0.5,
+          "expectancy_r": 0.26557,
+          "gross_r": 181.599989,
+          "losses_or_zero": 331,
+          "max_consecutive_losses": 10,
+          "max_drawdown_r": 21.592692,
+          "net_r": 143.407608,
+          "positive_years": 7,
+          "profit_factor": 1.405017,
+          "trades": 540,
+          "win_rate_pct": 38.7037,
+          "wins": 209,
+          "yearly_net_r": {
+            "2020": 20.407515,
+            "2021": 17.323711,
+            "2022": 11.444372,
+            "2023": 27.678459,
+            "2024": 15.260021,
+            "2025": 22.897882,
+            "2026": 28.395648
+          },
+          "years": 7
+        },
+        "cost_1.00": {
+          "compound_100_1pct": {
+            "compound": true,
+            "final_equity": 255.21,
+            "max_dd_pct": 21.17,
+            "risk_pct": 1.0,
+            "start_capital": 100.0,
+            "total_return_pct": 155.2,
+            "yearly_equity": {
+              "2020": 115.44,
+              "2021": 125.82,
+              "2022": 131.29,
+              "2023": 158.57,
+              "2024": 169.27,
+              "2025": 201.61,
+              "2026": 255.21
+            }
+          },
+          "compound_100_2pct": {
+            "compound": true,
+            "final_equity": 524.38,
+            "max_dd_pct": 39.85,
+            "risk_pct": 2.0,
+            "start_capital": 100.0,
+            "total_return_pct": 424.4,
+            "yearly_equity": {
+              "2020": 129.95,
+              "2021": 150.48,
+              "2022": 160.72,
+              "2023": 227.54,
+              "2024": 251.22,
+              "2025": 345.33,
+              "2026": 524.38
+            }
+          },
+          "cost_usd_per_oz": 1.0,
+          "expectancy_r": 0.194843,
+          "gross_r": 181.599989,
+          "losses_or_zero": 331,
+          "max_consecutive_losses": 10,
+          "max_drawdown_r": 23.278749,
+          "net_r": 105.215227,
+          "positive_years": 7,
+          "profit_factor": 1.278969,
+          "trades": 540,
+          "win_rate_pct": 38.7037,
+          "wins": 209,
+          "yearly_net_r": {
+            "2020": 15.665146,
+            "2021": 9.934483,
+            "2022": 5.249818,
+            "2023": 20.458998,
+            "2024": 8.179835,
+            "2025": 19.122651,
+            "2026": 26.604296
+          },
+          "years": 7
+        }
+      }
+    }
+  }
+}

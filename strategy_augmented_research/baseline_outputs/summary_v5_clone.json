@@ -1,0 +1,76 @@
+{
+  "baseline": {
+    "expectancy_r": 0.311092,
+    "max_dd_r": 21.198272,
+    "profit_factor": 1.495662,
+    "total_r": 200.654166,
+    "trades": 645,
+    "win_rate_pct": 39.2248,
+    "wins": 253,
+    "yearly_net_r": {
+      "2020": 52.347536,
+      "2021": 11.145349,
+      "2022": 13.437979,
+      "2023": 35.118419,
+      "2024": 22.02733,
+      "2025": 23.289083,
+      "2026": 43.28847
+    }
+  },
+  "compound_100": {
+    "risk_1pct": {
+      "compound": true,
+      "final_equity": 646.51,
+      "max_dd_pct": 19.83,
+      "risk_pct": 1.0,
+      "start_capital": 100.0,
+      "total_return_pct": 546.5,
+      "yearly_equity": {
+        "2020": 154.06,
+        "2021": 179.92,
+        "2022": 207.48,
+        "2023": 286.45,
+        "2024": 334.89,
+        "2025": 434.47,
+        "2026": 646.51
+      }
+    },
+    "risk_2pct": {
+      "compound": true,
+      "final_equity": 3215.68,
+      "max_dd_pct": 36.87,
+      "risk_pct": 2.0,
+      "start_capital": 100.0,
+      "total_return_pct": 3115.7,
+      "yearly_equity": {
+        "2020": 227.56,
+        "2021": 301.3,
+        "2022": 391.79,
+        "2023": 721.32,
+        "2024": 952.07,
+        "2025": 1546.92,
+        "2026": 3215.68
+      }
+    }
+  },
+  "contract": {
+    "cost_model": "gross OHLC plus fixed $0.25/oz round-trip cost in original engine",
+    "engine": "V5: V3_Pro + VisB_Pro + VisA + AMD_Pro",
+    "entry_source": "causal HTF structure and lower-timeframe triggers",
+    "portfolio": "one open position globally across V5 sleeves"
+  },
+  "evaluation": {
+    "cost_usd_per_oz": 0.25,
+    "end_utc_exclusive": "2026-11-01T00:00:00+00:00",
+    "start_utc": "2020-02-01T00:00:00+00:00"
+  },
+  "original_source_sha256": {
+    "engine/__init__.py": "b497d9c50e361a5f34c8df9cd55176330dd4eac856e365f37f0bcde24d081340",
+    "engine/causal_primitives.py": "83f1c3a954c01d23f0b5527456453e1051c4666a661e1021ec0152d3a67d98a7",
+    "engine/dynamic_profile.py": "b80a74a67b72dd666e2710723f87a346f1d7a7eb1aadab4ffb62034588c03d2f",
+    "engine/smc_v3_trend_engine.py": "23ee3034d9867f6adf4b1f02fe227dffa530b825fda216c3df1471608ac84306",
+    "engine/smc_v4_portfolio.py": "bec70ed41027dfcc29e8766d2645d4ef734b998dd7347533e314a5eb658517f0",
+    "run_v4_multisleeve_backtest.py": "edb88bf866d276af70e9b2569cc9aaf2cb4a3f177a4573736aad972efd562ef0"
+  },
+  "source": "strategy_augmented_research/original_v5 (byte-preserved copy)"
+}

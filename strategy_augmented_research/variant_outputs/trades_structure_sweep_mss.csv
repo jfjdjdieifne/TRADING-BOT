@@ -1,0 +1,2 @@
+engine,side,setup_time,entry_time,exit_time,entry_idx,exit_idx,entry_price,sl_price,tp_price,exit_price,outcome,gross_usd,net_usd,gross_r,net_r,risk_usd,planned_rr
+VisA,SHORT,2024-12-09 10:35:00+00:00,2024-12-09 10:35:00+00:00,2024-12-09 11:24:00+00:00,1705421,1705470,2655.448,2659.275,2645.915,2659.275,SL,-3.8270000000002256,-4.0770000000002256,-1.0,-1.0653253200940647,3.8270000000002256,2.490985105826846
