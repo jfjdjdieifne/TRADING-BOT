@@ -10,8 +10,8 @@ form:
 * displacement is the *next* completed candle only (S + 1), never S + 2/S + 3;
 * the displacement must point in the same direction as the trade and may create
   the three-candle wick-to-wick FVG;
-* the target is the nearest prior confirmed opposite swing before the swept
-  swing (long: prior swing high before the swept low; short: prior swing low
+* the target is the first prior confirmed opposite swing before the swept
+  swing (long: first swing high before the swept low; short: first swing low
   before the swept high);
 * outcomes are measured on the following three completed setup candles using
   the underlying one-minute OHLC bars.
@@ -329,7 +329,10 @@ def _target_before_swept_swing(
         and point.pivot_index < swept_pivot_index
         and point.confirmation_index < sweep_index
     ]
-    return max(eligible, key=lambda point: point.pivot_index) if eligible else None
+    # The contract calls for the first opposite swing before the swept swing,
+    # not the latest/nearest one selected with max().  The pivot index is the
+    # causal chronological order of the confirmed swings.
+    return min(eligible, key=lambda point: point.pivot_index) if eligible else None
 
 
 def _is_large(displacement: Bar15, prior: Sequence[Bar15], config: StrategyConfig) -> bool:

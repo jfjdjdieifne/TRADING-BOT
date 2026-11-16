@@ -11,9 +11,15 @@
 cd sweep_reversal_research
 python test_strategy.py
 python run_2021.py
+python run_2021_account.py
 ```
 
-النتائج المثبتة في `results_2021_six_months/`:
+`run_2021_account.py` هو replay الحساب الكامل من يناير إلى ديسمبر 2021، برصيد
+ابتدائي `$100`، ومخاطرة أساسية 1% من equity الحالي مع compounding، مع منع أي
+تداخل LONG/SHORT. مخرجاته في `results_2021_account/` وتشمل `summary.json`,
+`monthly_summary.csv`, `weekly_summary.csv`, `taken_trades.csv` و`ACCOUNT_REPORT_AR.md`.
+
+النتائج التشخيصية السابقة في `results_2021_six_months/`:
 
 - `REPORT_AR.md` — شرح عربي وتصحيح اتجاه 2021.
 - `summary.json` — أرقام قابلة للقراءة آلياً وبصمات البيانات.
@@ -30,8 +36,8 @@ python run_2021.py
    إغلاق تحته.
 3. displacement هو الشمعة التالية مباشرة `S+1` فقط. لا يوجد S+2/S+3 في النسخة
    المصححة.
-4. target للشراء هو أقرب high مؤكد قبل swept low؛ وللبيع أقرب low مؤكد قبل
-   swept high.
+4. target للشراء هو أول high مؤكد قبل swept low؛ وللبيع أول low مؤكد قبل
+   swept high (أي لا نختار swing لاحقاً بأثر رجعي).
 5. الـ small/hammer candle بعد displacement معلومة وصفية لاحقة وليست شرطاً
    يخفي look-ahead.
 6. القياس الأساسي يدخل عند إغلاق displacement ويقيس الشموع الثلاث التالية على

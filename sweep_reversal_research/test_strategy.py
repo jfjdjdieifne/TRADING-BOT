@@ -112,6 +112,36 @@ class StrategyTests(unittest.TestCase):
         self.assertEqual(signal.target_level, 103.0)
         self.assertEqual(signal.target_pivot_index, 24)
 
+    def test_target_uses_first_opposite_swing_not_latest_prior_swing(self) -> None:
+        # There are three confirmed HIGH swings before the swept LOW.  The
+        # contract requires the first one (index 20), not the latest one
+        # (index 24) that a max(...)-based implementation would choose.
+        rows = [(100.0, 100.2, 99.8, 100.0)] * 20
+        rows += [
+            (100.0, 103.0, 99.9, 102.0),  # 20 first HIGH target
+            (102.0, 102.2, 100.2, 101.0),
+            (101.0, 102.5, 100.5, 102.0),  # 22 second HIGH
+            (102.0, 102.2, 100.0, 101.0),
+            (101.0, 104.0, 100.5, 103.0),  # 24 latest HIGH; must not be used
+            (103.0, 103.2, 101.0, 102.0),
+            (102.0, 102.2, 98.0, 100.0),  # 26 LOW later swept
+            (100.0, 100.4, 99.7, 100.1),  # 27 confirms LOW
+            (100.1, 100.3, 97.5, 99.0),   # 28 LONG sweep
+            (99.0, 104.0, 99.0, 102.5),   # 29 green displacement
+        ]
+        bars, _ = make_bars(rows)
+        config = StrategyConfig("FIRST_TARGET", require_fvg=False, large_mode="none", min_body_fraction=0.0)
+        signals = [
+            signal
+            for signal in detect_signals(bars, config)
+            if signal.side == "LONG" and signal.sweep_index == 28
+        ]
+        self.assertEqual(len(signals), 1)
+        signal = signals[0]
+        self.assertTrue(signal.eligible)
+        self.assertEqual(signal.target_pivot_index, 20)
+        self.assertEqual(signal.target_level, 103.0)
+
     def test_displacement_is_exactly_one_candle_after_sweep(self) -> None:
         rows = [(100.0, 100.2, 99.8, 100.0)] * 24
         rows += [

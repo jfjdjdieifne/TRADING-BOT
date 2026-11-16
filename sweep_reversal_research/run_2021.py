@@ -107,9 +107,9 @@ def _signal_row(signal: Signal, config: StrategyConfig) -> dict:
         else signal.sweep_extreme + config.stop_buffer
     )
     row["target_definition"] = (
-        "nearest confirmed swing high before swept low"
+        "first confirmed swing high before swept low"
         if signal.side == "LONG"
-        else "nearest confirmed swing low before swept high"
+        else "first confirmed swing low before swept high"
     )
     row["eval_month"] = _month(signal.sweep_time)
     return row
@@ -312,7 +312,7 @@ def main() -> None:
             "swing_confirmation": "strict three-candle swing; pivot becomes available on the next completed candle",
             "displacement_timing": "exactly S+1; S+2 and S+3 are rejected, not silently accepted",
             "fvg": "wick-to-wick low(D) > high(S-1) for long / high(D) < low(S-1) for short",
-            "target": "nearest prior confirmed opposite swing before the swept swing: HIGH before swept LOW for long, LOW before swept HIGH for short",
+            "target": "first prior confirmed opposite swing before the swept swing: HIGH before swept LOW for long, LOW before swept HIGH for short",
             "stop": "one source tick (0.001 XAU price unit) beyond sweep extreme",
             "entry": "close of the completed displacement candle",
             "horizon": "three following completed 15m bars; 1m OHLC orders exits, stop-first on same-minute ambiguity",
