@@ -1,0 +1,2667 @@
+{
+  "account_contract": {
+    "base_risk_pct": 0.01,
+    "max_acceptable_drawdown_pct": null,
+    "max_concurrent_positions": 1,
+    "no_fees": true,
+    "no_lookahead": true,
+    "profile_note": "",
+    "risk_curves": [
+      0.005,
+      0.01,
+      0.02
+    ],
+    "same_timestamp_policy": "discard all candidates sharing an entry timestamp",
+    "signal_contract": {
+      "horizon_bars": 3,
+      "large_mode": "range_p80",
+      "large_percentile": 80.0,
+      "min_body_fraction": 0.6,
+      "name": "STRICT_FVG_P80",
+      "require_fvg": true,
+      "stop_buffer": 0.001
+    },
+    "starting_equity": 100.0,
+    "target_definition": "first prior confirmed opposite swing before the swept swing: HIGH before swept LOW for long, LOW before swept HIGH for short"
+  },
+  "account_curves": {
+    "0.5%_compounded": {
+      "final_equity_after_all_2021_entries_closed": 100.2394,
+      "max_drawdown_dollars": 1.1503,
+      "max_drawdown_pct_of_peak": 1.1445,
+      "mean_r": 0.01491,
+      "negative_trades": 16,
+      "positive_trades": 18,
+      "profit_dollars": 0.2394,
+      "return_pct": 0.2394,
+      "risk_pct": 0.005,
+      "start_equity": 100.0,
+      "total_r": 0.506935,
+      "trades": 34
+    },
+    "1%_compounded": {
+      "final_equity_after_all_2021_entries_closed": 100.4506,
+      "max_drawdown_dollars": 2.3116,
+      "max_drawdown_pct_of_peak": 2.2885,
+      "mean_r": 0.01491,
+      "negative_trades": 16,
+      "positive_trades": 18,
+      "profit_dollars": 0.4506,
+      "return_pct": 0.4506,
+      "risk_pct": 0.01,
+      "start_equity": 100.0,
+      "total_r": 0.506935,
+      "trades": 34
+    },
+    "2%_compounded": {
+      "final_equity_after_all_2021_entries_closed": 100.788,
+      "max_drawdown_dollars": 4.6656,
+      "max_drawdown_pct_of_peak": 4.5739,
+      "mean_r": 0.01491,
+      "negative_trades": 16,
+      "positive_trades": 18,
+      "profit_dollars": 0.788,
+      "return_pct": 0.788,
+      "risk_pct": 0.02,
+      "start_equity": 100.0,
+      "total_r": 0.506935,
+      "trades": 34
+    },
+    "fixed_$1_per_trade": {
+      "final_equity_after_all_2021_entries_closed": 100.5069,
+      "max_drawdown_dollars": null,
+      "max_drawdown_pct_of_peak": null,
+      "mean_r": 0.01491,
+      "negative_trades": 16,
+      "positive_trades": 18,
+      "profit_dollars": 0.5069,
+      "return_pct": 0.5069,
+      "risk_pct": null,
+      "start_equity": 100.0,
+      "total_r": 0.506935,
+      "trades": 34
+    }
+  },
+  "activity_metrics": {
+    "avg_pnl_per_calendar_day_at_base_risk": 0.001234,
+    "avg_pnl_per_trade_day_at_base_risk": 0.013253,
+    "avg_trades_per_calendar_day": 0.093151,
+    "avg_trades_per_trade_day": 1.0,
+    "calendar_days": 365,
+    "flat_pnl_days": 0,
+    "max_trades_in_one_day": 1,
+    "negative_pnl_days": 16,
+    "positive_pnl_days": 18,
+    "taken_trades": 34,
+    "total_pnl_at_base_risk": 0.450592,
+    "trade_day_coverage_pct": 9.3151,
+    "trade_days": 34
+  },
+  "candidate_counts": {
+    "all_signals": 4852,
+    "concurrent_blocked": 0,
+    "eligible_signals": 34,
+    "no_executable_outcome": 0,
+    "same_time_conflicts": 0,
+    "taken": 34
+  },
+  "dataset": {
+    "complete_15m_bars": 27448,
+    "evaluation_end_utc_exclusive": "2022-01-01T00:00:00+00:00",
+    "evaluation_months": [
+      "2021-01",
+      "2021-02",
+      "2021-03",
+      "2021-04",
+      "2021-05",
+      "2021-06",
+      "2021-07",
+      "2021-08",
+      "2021-09",
+      "2021-10",
+      "2021-11",
+      "2021-12"
+    ],
+    "evaluation_start_utc": "2021-01-01T00:00:00+00:00",
+    "input_sha256": {
+      "2020-12.csv.gz": "6c29301c38a3b7a351ac547eadae71c77ed311f826c97d424f03b1dbb2b630cc",
+      "2021-01.csv.gz": "abcbf2426cf76013627fe9c640e05e9607ec7c0a19b88e4642f93fee9055d4fb",
+      "2021-02.csv.gz": "d154cf2bbbecee538330f92a43869bcab7250e05a4f3890200dfe6a139c80711",
+      "2021-03.csv.gz": "e1adbdd6bc12bf3b99bbc52211ebb7381a9fb1a74047c4d60078fee1de6d8a5a",
+      "2021-04.csv.gz": "5ac6010c6758f84c0ee24d3afa1d7de4dbc458e707f9c83ed154f625578c3209",
+      "2021-05.csv.gz": "e478fc8a3e47a52e53e2f36a817bbb1e9b6f945c8ec2a638afb87eb7760abaf6",
+      "2021-06.csv.gz": "b0abb6d3fa0f25dc21ac559faf91662e2f62751f1a5663c8755a0c745403a795",
+      "2021-07.csv.gz": "7a2f1e0e92fc7eeefdd409994a8b044349b859e88a8b530b9d275c6f8257be2e",
+      "2021-08.csv.gz": "ce0e61ae18df91a4e8e99064ea17f4f00e03611c91b4aad8fe891fd853e7b3e8",
+      "2021-09.csv.gz": "edeb63692386266436b4a581f0f081dfd62652916fa610a32c1929dd69480f54",
+      "2021-10.csv.gz": "4684c7a604ccb895a99b92171188522824cd5c12e04961bafb19f012ca79faff",
+      "2021-11.csv.gz": "00640b423b6b067d55a6d9cea04fb441db28886b0c72a4e8fa44ba25fd4074d4",
+      "2021-12.csv.gz": "c50d61d44a3b77754b54fea9db3c1e8875416730f5129e2102e694cd429b422a",
+      "2022-01.csv.gz": "4ee1a03ef9fda960eb6cfe99edcd8a3fc6700572c156e40af397a11065a58678"
+    },
+    "minutes_loaded": 412279,
+    "outcome_only_months": [
+      "2022-01"
+    ],
+    "path_timeframe": "1m",
+    "setup_timeframe": "15m",
+    "symbol": "XAUUSD",
+    "warmup_months": [
+      "2020-12"
+    ]
+  },
+  "monthly_entry_ledger": [
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 2,
+      "equity_after_period_at_base_risk": 99.398514,
+      "equity_before_period_at_base_risk": 100.0,
+      "negative_trades": 2,
+      "period": "2021-01",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": -0.601486,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": -0.602383,
+      "taken_trades": 2,
+      "target_hits": 0,
+      "time_exits": 2
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 2,
+      "equity_after_period_at_base_risk": 101.010258,
+      "equity_before_period_at_base_risk": 99.398514,
+      "negative_trades": 0,
+      "period": "2021-02",
+      "positive_trades": 2,
+      "profit_usd_at_base_risk": 1.611744,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 1.620309,
+      "taken_trades": 2,
+      "target_hits": 1,
+      "time_exits": 1
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 3,
+      "equity_after_period_at_base_risk": 100.939947,
+      "equity_before_period_at_base_risk": 101.010258,
+      "negative_trades": 1,
+      "period": "2021-03",
+      "positive_trades": 2,
+      "profit_usd_at_base_risk": -0.07031,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": -0.069542,
+      "taken_trades": 3,
+      "target_hits": 0,
+      "time_exits": 3
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 4,
+      "equity_after_period_at_base_risk": 100.284005,
+      "equity_before_period_at_base_risk": 100.939947,
+      "negative_trades": 3,
+      "period": "2021-04",
+      "positive_trades": 1,
+      "profit_usd_at_base_risk": -0.655942,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": -0.650242,
+      "taken_trades": 4,
+      "target_hits": 0,
+      "time_exits": 4
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 4,
+      "equity_after_period_at_base_risk": 99.903026,
+      "equity_before_period_at_base_risk": 100.284005,
+      "negative_trades": 2,
+      "period": "2021-05",
+      "positive_trades": 2,
+      "profit_usd_at_base_risk": -0.380979,
+      "same_time_conflicts": 0,
+      "stop_hits": 1,
+      "sum_r": -0.367425,
+      "taken_trades": 4,
+      "target_hits": 0,
+      "time_exits": 3
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 3,
+      "equity_after_period_at_base_risk": 100.614001,
+      "equity_before_period_at_base_risk": 99.903026,
+      "negative_trades": 0,
+      "period": "2021-06",
+      "positive_trades": 3,
+      "profit_usd_at_base_risk": 0.710974,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.710112,
+      "taken_trades": 3,
+      "target_hits": 0,
+      "time_exits": 3
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 3,
+      "equity_after_period_at_base_risk": 99.457793,
+      "equity_before_period_at_base_risk": 100.614001,
+      "negative_trades": 2,
+      "period": "2021-07",
+      "positive_trades": 1,
+      "profit_usd_at_base_risk": -1.156207,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": -1.151912,
+      "taken_trades": 3,
+      "target_hits": 0,
+      "time_exits": 3
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 1,
+      "equity_after_period_at_base_risk": 98.917379,
+      "equity_before_period_at_base_risk": 99.457793,
+      "negative_trades": 1,
+      "period": "2021-08",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": -0.540414,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": -0.54336,
+      "taken_trades": 1,
+      "target_hits": 0,
+      "time_exits": 1
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 5,
+      "equity_after_period_at_base_risk": 98.698641,
+      "equity_before_period_at_base_risk": 98.917379,
+      "negative_trades": 3,
+      "period": "2021-09",
+      "positive_trades": 2,
+      "profit_usd_at_base_risk": -0.218738,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": -0.21699,
+      "taken_trades": 5,
+      "target_hits": 0,
+      "time_exits": 5
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 4,
+      "equity_after_period_at_base_risk": 101.486398,
+      "equity_before_period_at_base_risk": 98.698641,
+      "negative_trades": 0,
+      "period": "2021-10",
+      "positive_trades": 4,
+      "profit_usd_at_base_risk": 2.787757,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 2.798691,
+      "taken_trades": 4,
+      "target_hits": 1,
+      "time_exits": 3
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 1,
+      "equity_after_period_at_base_risk": 100.471534,
+      "equity_before_period_at_base_risk": 101.486398,
+      "negative_trades": 1,
+      "period": "2021-11",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": -1.014864,
+      "same_time_conflicts": 0,
+      "stop_hits": 1,
+      "sum_r": -1.0,
+      "taken_trades": 1,
+      "target_hits": 0,
+      "time_exits": 0
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 2,
+      "equity_after_period_at_base_risk": 100.450591,
+      "equity_before_period_at_base_risk": 100.471534,
+      "negative_trades": 1,
+      "period": "2021-12",
+      "positive_trades": 1,
+      "profit_usd_at_base_risk": -0.020943,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": -0.020323,
+      "taken_trades": 2,
+      "target_hits": 0,
+      "time_exits": 2
+    }
+  ],
+  "taken_trades": [
+    {
+      "displacement_index": 2885,
+      "entry_price": 1838.538,
+      "entry_time": "2021-01-15T14:00:00+00:00",
+      "equity_after_by_rate": {
+        "0.005": 99.833333,
+        "0.01": 99.666667,
+        "0.02": 99.333333
+      },
+      "equity_before_by_rate": {
+        "0.005": 100.0,
+        "0.01": 100.0,
+        "0.02": 100.0
+      },
+      "exit_month": "2021-01",
+      "exit_price": 1842.535,
+      "exit_time": "2021-01-15T14:45:00+00:00",
+      "mae_r": 0.5687599032607743,
+      "mfe_r": 0.0917354682678601,
+      "period_label": "2021-01",
+      "pnl_dollars_by_rate": {
+        "0.005": -0.166667,
+        "0.01": -0.333333,
+        "0.02": -0.666667
+      },
+      "r_multiple": -0.33333333333333964,
+      "risk_dollars_by_rate": {
+        "0.005": 0.5,
+        "0.01": 1.0,
+        "0.02": 2.0
+      },
+      "side": "SHORT",
+      "signal_time": "2021-01-15T13:45:00+00:00",
+      "state": "TIME",
+      "stop_price": 1850.529,
+      "sweep_extreme": 1850.528,
+      "sweep_index": 2884,
+      "swept_level": 1849.538,
+      "target_price": 1777.255,
+      "week_label": "2021-W02"
+    },
+    {
+      "displacement_index": 3792,
+      "entry_price": 1855.155,
+      "entry_time": "2021-01-29T14:45:00+00:00",
+      "equity_after_by_rate": {
+        "0.005": 99.699033,
+        "0.01": 99.398514,
+        "0.02": 98.798822
+      },
+      "equity_before_by_rate": {
+        "0.005": 99.833333,
+        "0.01": 99.666667,
+        "0.02": 99.333333
+      },
+      "exit_month": "2021-01",
+      "exit_price": 1860.635,
+      "exit_time": "2021-01-29T15:30:00+00:00",
+      "mae_r": 0.5964257659073142,
+      "mfe_r": 0.13108798114690107,
+      "period_label": "2021-01",
+      "pnl_dollars_by_rate": {
+        "0.005": -0.134301,
+        "0.01": -0.268153,
+        "0.02": -0.534512
+      },
+      "r_multiple": -0.26904948939513135,
+      "risk_dollars_by_rate": {
+        "0.005": 0.499167,
+        "0.01": 0.996667,
+        "0.02": 1.986667
+      },
+      "side": "SHORT",
+      "signal_time": "2021-01-29T14:30:00+00:00",
+      "state": "TIME",
+      "stop_price": 1875.523,
+      "sweep_extreme": 1875.522,
+      "sweep_index": 3791,
+      "swept_level": 1868.772,
+      "target_price": 1777.255,
+      "week_label": "2021-W04"
+    },
+    {
+      "displacement_index": 4156,
+      "entry_price": 1809.825,
+      "entry_time": "2021-02-04T13:45:00+00:00",
+      "equity_after_by_rate": {
+        "0.005": 100.46837,
+        "0.01": 100.93255,
+        "0.02": 101.848383
+      },
+      "equity_before_by_rate": {
+        "0.005": 99.699033,
+        "0.01": 99.398514,
+        "0.02": 98.798822
+      },
+      "exit_month": "2021-02",
+      "exit_price": 1794.915,
+      "exit_time": "2021-02-04T14:30:00+00:00",
+      "mae_r": 0.09978263119759431,
+      "mfe_r": 1.798261049580825,
+      "period_label": "2021-02",
+      "pnl_dollars_by_rate": {
+        "0.005": 0.769337,
+        "0.01": 1.534036,
+        "0.02": 3.049561
+      },
+      "r_multiple": 1.5433184970500302,
+      "risk_dollars_by_rate": {
+        "0.005": 0.498495,
+        "0.01": 0.993985,
+        "0.02": 1.975976
+      },
+      "side": "SHORT",
+      "signal_time": "2021-02-04T13:30:00+00:00",
+      "state": "TIME",
+      "stop_price": 1819.4859999999999,
+      "sweep_extreme": 1819.485,
+      "sweep_index": 4155,
+      "swept_level": 1815.705,
+      "target_price": 1777.255,
+      "week_label": "2021-W05"
+    },
+    {
+      "displacement_index": 4967,
+      "entry_price": 1778.401,
+      "entry_time": "2021-02-17T13:30:00+00:00",
+      "equity_after_by_rate": {
+        "0.005": 100.507045,
+        "0.01": 101.010258,
+        "0.02": 102.005209
+      },
+      "equity_before_by_rate": {
+        "0.005": 100.46837,
+        "0.01": 100.93255,
+        "0.02": 101.848383
+      },
+      "exit_month": "2021-02",
+      "exit_price": 1777.255,
+      "exit_time": "2021-02-17T13:30:00+00:00",
+      "mae_r": 0.0,
+      "mfe_r": 0.1768894860597944,
+      "period_label": "2021-02",
+      "pnl_dollars_by_rate": {
+        "0.005": 0.038675,
+        "0.01": 0.077708,
+        "0.02": 0.156827
+      },
+      "r_multiple": 0.07699025864964454,
+      "risk_dollars_by_rate": {
+        "0.005": 0.502342,
+        "0.01": 1.009325,
+        "0.02": 2.036968
+      },
+      "side": "SHORT",
+      "signal_time": "2021-02-17T13:15:00+00:00",
+      "state": "TARGET",
+      "stop_price": 1793.286,
+      "sweep_extreme": 1793.285,
+      "sweep_index": 4966,
+      "swept_level": 1791.662,
+      "target_price": 1777.255,
+      "week_label": "2021-W07"
+    },
+    {
+      "displacement_index": 5897,
+      "entry_price": 1720.865,
+      "entry_time": "2021-03-03T16:15:00+00:00",
+      "equity_after_by_rate": {
+        "0.005": 100.444188,
+        "0.01": 100.883913,
+        "0.02": 101.750031
+      },
+      "equity_before_by_rate": {
+        "0.005": 100.507045,
+        "0.01": 101.010258,
+        "0.02": 102.005209
+      },
+      "exit_month": "2021-03",
+      "exit_price": 1718.543,
+      "exit_time": "2021-03-03T17:00:00+00:00",
+      "mae_r": 0.1439344968756741,
+      "mfe_r": 0.2245205774617472,
+      "period_label": "2021-03",
+      "pnl_dollars_by_rate": {
+        "0.005": -0.062858,
+        "0.01": -0.126344,
+        "0.02": -0.255178
+      },
+      "r_multiple": -0.12508080155139553,
+      "risk_dollars_by_rate": {
+        "0.005": 0.502535,
+        "0.01": 1.010103,
+        "0.02": 2.040104
+      },
+      "side": "LONG",
+      "signal_time": "2021-03-03T16:00:00+00:00",
+      "state": "TIME",
+      "stop_price": 1702.301,
+      "sweep_extreme": 1702.302,
+      "sweep_index": 5896,
+      "swept_level": 1708.033,
+      "target_price": 1780.428,
+      "week_label": "2021-W09"
+    },
+    {
+      "displacement_index": 6987,
+      "entry_price": 1742.098,
+      "entry_time": "2021-03-19T11:45:00+00:00",
+      "equity_after_by_rate": {
+        "0.005": 100.448533,
+        "0.01": 100.892643,
+        "0.02": 101.76764
+      },
+      "equity_before_by_rate": {
+        "0.005": 100.444188,
+        "0.01": 100.883913,
+        "0.02": 101.750031
+      },
+      "exit_month": "2021-03",
+      "exit_price": 1742.161,
+      "exit_time": "2021-03-19T12:30:00+00:00",
+      "mae_r": 0.26782035434693846,
+      "mfe_r": 0.13871720917456365,
+      "period_label": "2021-03",
+      "pnl_dollars_by_rate": {
+        "0.005": 0.004346,
+        "0.01": 0.008729,
+        "0.02": 0.017608
+      },
+      "r_multiple": 0.008652657601991801,
+      "risk_dollars_by_rate": {
+        "0.005": 0.502221,
+        "0.01": 1.008839,
+        "0.02": 2.035001
+      },
+      "side": "LONG",
+      "signal_time": "2021-03-19T11:30:00+00:00",
+      "state": "TIME",
+      "stop_price": 1734.817,
+      "sweep_extreme": 1734.818,
+      "sweep_index": 6986,
+      "swept_level": 1734.918,
+      "target_price": 1780.428,
+      "week_label": "2021-W11"
+    },
+    {
+      "displacement_index": 7362,
+      "entry_price": 1739.835,
+      "entry_time": "2021-03-25T13:30:00+00:00",
+      "equity_after_by_rate": {
+        "0.005": 100.472081,
+        "0.01": 100.939947,
+        "0.02": 101.863069
+      },
+      "equity_before_by_rate": {
+        "0.005": 100.448533,
+        "0.01": 100.892643,
+        "0.02": 101.76764
+      },
+      "exit_month": "2021-03",
+      "exit_price": 1740.368,
+      "exit_time": "2021-03-25T14:15:00+00:00",
+      "mae_r": 0.2680330752990889,
+      "mfe_r": 0.48847642505277217,
+      "period_label": "2021-03",
+      "pnl_dollars_by_rate": {
+        "0.005": 0.023548,
+        "0.01": 0.047305,
+        "0.02": 0.09543
+      },
+      "r_multiple": 0.04688599577761301,
+      "risk_dollars_by_rate": {
+        "0.005": 0.502243,
+        "0.01": 1.008926,
+        "0.02": 2.035353
+      },
+      "side": "LONG",
+      "signal_time": "2021-03-25T13:15:00+00:00",
+      "state": "TIME",
+      "stop_price": 1728.467,
+      "sweep_extreme": 1728.468,
+      "sweep_index": 7361,
+      "swept_level": 1729.778,
+      "target_price": 1780.428,
+      "week_label": "2021-W12"
+    },
+    {
+      "displacement_index": 8066,
+      "entry_price": 1741.875,
+      "entry_time": "2021-04-07T07:45:00+00:00",
+      "equity_after_by_rate": {
+        "0.005": 100.292881,
+        "0.01": 100.579878,
+        "0.02": 101.136346
+      },
+      "equity_before_by_rate": {
+        "0.005": 100.472081,
+        "0.01": 100.939947,
+        "0.02": 101.863069
+      },
+      "exit_month": "2021-04",
+      "exit_price": 1740.085,
+      "exit_time": "2021-04-07T08:30:00+00:00",
+      "mae_r": 0.5135512156237512,
+      "mfe_r": 0.04643284176961855,
+      "period_label": "2021-04",
+      "pnl_dollars_by_rate": {
+        "0.005": -0.1792,
+        "0.01": -0.360069,
+        "0.02": -0.726723
+      },
+      "r_multiple": -0.35671582303705723,
+      "risk_dollars_by_rate": {
+        "0.005": 0.50236,
+        "0.01": 1.009399,
+        "0.02": 2.037261
+      },
+      "side": "LONG",
+      "signal_time": "2021-04-07T07:30:00+00:00",
+      "state": "TIME",
+      "stop_price": 1736.857,
+      "sweep_extreme": 1736.858,
+      "sweep_index": 8065,
+      "swept_level": 1737.438,
+      "target_price": 1780.428,
+      "week_label": "2021-W14"
+    },
+    {
+      "displacement_index": 8523,
+      "entry_price": 1746.098,
+      "entry_time": "2021-04-14T07:15:00+00:00",
+      "equity_after_by_rate": {
+        "0.005": 100.403132,
+        "0.01": 100.80101,
+        "0.02": 101.581055
+      },
+      "equity_before_by_rate": {
+        "0.005": 100.292881,
+        "0.01": 100.579878,
+        "0.02": 101.136346
+      },
+      "exit_month": "2021-04",
+      "exit_price": 1747.048,
+      "exit_time": "2021-04-14T08:00:00+00:00",
+      "mae_r": 0.17102522564222347,
+      "mfe_r": 0.4929414487387531,
+      "period_label": "2021-04",
+      "pnl_dollars_by_rate": {
+        "0.005": 0.11025,
+        "0.01": 0.221131,
+        "0.02": 0.44471
+      },
+      "r_multiple": 0.21985651469568726,
+      "risk_dollars_by_rate": {
+        "0.005": 0.501464,
+        "0.01": 1.005799,
+        "0.02": 2.022727
+      },
+      "side": "LONG",
+      "signal_time": "2021-04-14T07:00:00+00:00",
+      "state": "TIME",
+      "stop_price": 1741.777,
+      "sweep_extreme": 1741.778,
+      "sweep_index": 8522,
+      "swept_level": 1743.298,
+      "target_price": 1780.428,
+      "week_label": "2021-W15"
+    },
+    {
+      "displacement_index": 8989,
+      "entry_price": 1781.938,
+      "entry_time": "2021-04-21T08:45:00+00:00",
+      "equity_after_by_rate": {
+        "0.005": 100.340163,
+        "0.01": 100.674574,
+        "0.02": 101.326227
+      },
+      "equity_before_by_rate": {
+        "0.005": 100.403132,
+        "0.01": 100.80101,
+        "0.02": 101.581055
+      },
+      "exit_month": "2021-04",
+      "exit_price": 1782.738,
+      "exit_time": "2021-04-21T09:30:00+00:00",
+      "mae_r": 0.29633113828784785,
+      "mfe_r": 0.20272812793981412,
+      "period_label": "2021-04",
+      "pnl_dollars_by_rate": {
+        "0.005": -0.062968,
+        "0.01": -0.126436,
+        "0.02": -0.254829
+      },
+      "r_multiple": -0.1254311696456512,
+      "risk_dollars_by_rate": {
+        "0.005": 0.502016,
+        "0.01": 1.00801,
+        "0.02": 2.031621
+      },
+      "side": "SHORT",
+      "signal_time": "2021-04-21T08:30:00+00:00",
+      "state": "TIME",
+      "stop_price": 1788.316,
+      "sweep_extreme": 1788.315,
+      "sweep_index": 8988,
+      "swept_level": 1786.758,
+      "target_price": 1777.255,
+      "week_label": "2021-W16"
+    },
+    {
+      "displacement_index": 9099,
+      "entry_price": 1782.548,
+      "entry_time": "2021-04-22T13:15:00+00:00",
+      "equity_after_by_rate": {
+        "0.005": 100.145528,
+        "0.01": 100.284005,
+        "0.02": 100.540034
+      },
+      "equity_before_by_rate": {
+        "0.005": 100.340163,
+        "0.01": 100.674574,
+        "0.02": 101.326227
+      },
+      "exit_month": "2021-04",
+      "exit_price": 1785.008,
+      "exit_time": "2021-04-22T14:00:00+00:00",
+      "mae_r": 0.7585554328970234,
+      "mfe_r": 0.017820533038962034,
+      "period_label": "2021-04",
+      "pnl_dollars_by_rate": {
+        "0.005": -0.194636,
+        "0.01": -0.390568,
+        "0.02": -0.786193
+      },
+      "r_multiple": -0.3879514272196936,
+      "risk_dollars_by_rate": {
+        "0.005": 0.501701,
+        "0.01": 1.006746,
+        "0.02": 2.026525
+      },
+      "side": "SHORT",
+      "signal_time": "2021-04-22T13:00:00+00:00",
+      "state": "TIME",
+      "stop_price": 1788.889,
+      "sweep_extreme": 1788.888,
+      "sweep_index": 9098,
+      "swept_level": 1788.298,
+      "target_price": 1777.255,
+      "week_label": "2021-W16"
+    },
+    {
+      "displacement_index": 10154,
+      "entry_price": 1830.975,
+      "entry_time": "2021-05-10T01:30:00+00:00",
+      "equity_after_by_rate": {
+        "0.005": 99.779351,
+        "0.01": 99.550639,
+        "0.02": 99.069557
+      },
+      "equity_before_by_rate": {
+        "0.005": 100.145528,
+        "0.01": 100.284005,
+        "0.02": 100.540034
+      },
+      "exit_month": "2021-05",
+      "exit_price": 1834.815,
+      "exit_time": "2021-05-10T02:15:00+00:00",
+      "mae_r": 0.7413825937916676,
+      "mfe_r": 0.09274423919250711,
+      "period_label": "2021-05",
+      "pnl_dollars_by_rate": {
+        "0.005": -0.366177,
+        "0.01": -0.733366,
+        "0.02": -1.470477
+      },
+      "r_multiple": -0.7312892782327486,
+      "risk_dollars_by_rate": {
+        "0.005": 0.500728,
+        "0.01": 1.00284,
+        "0.02": 2.010801
+      },
+      "side": "SHORT",
+      "signal_time": "2021-05-10T01:15:00+00:00",
+      "state": "TIME",
+      "stop_price": 1836.2259999999999,
+      "sweep_extreme": 1836.225,
+      "sweep_index": 10153,
+      "swept_level": 1835.498,
+      "target_price": 1777.255,
+      "week_label": "2021-W19"
+    },
+    {
+      "displacement_index": 10458,
+      "entry_price": 1817.858,
+      "entry_time": "2021-05-13T08:45:00+00:00",
+      "equity_after_by_rate": {
+        "0.005": 100.265914,
+        "0.01": 100.521535,
+        "0.02": 101.001965
+      },
+      "equity_before_by_rate": {
+        "0.005": 99.779351,
+        "0.01": 99.550639,
+        "0.02": 99.069557
+      },
+      "exit_month": "2021-05",
+      "exit_price": 1814.268,
+      "exit_time": "2021-05-13T09:30:00+00:00",
+      "mae_r": 0.10866612333607352,
+      "mfe_r": 1.1437109481119236,
+      "period_label": "2021-05",
+      "pnl_dollars_by_rate": {
+        "0.005": 0.486563,
+        "0.01": 0.970896,
+        "0.02": 1.932408
+      },
+      "r_multiple": 0.9752784569410158,
+      "risk_dollars_by_rate": {
+        "0.005": 0.498897,
+        "0.01": 0.995506,
+        "0.02": 1.981391
+      },
+      "side": "SHORT",
+      "signal_time": "2021-05-13T08:30:00+00:00",
+      "state": "TIME",
+      "stop_price": 1821.539,
+      "sweep_extreme": 1821.538,
+      "sweep_index": 10457,
+      "swept_level": 1820.745,
+      "target_price": 1777.255,
+      "week_label": "2021-W19"
+    },
+    {
+      "displacement_index": 10749,
+      "entry_price": 1865.408,
+      "entry_time": "2021-05-18T12:30:00+00:00",
+      "equity_after_by_rate": {
+        "0.005": 99.764585,
+        "0.01": 99.51632,
+        "0.02": 98.981926
+      },
+      "equity_before_by_rate": {
+        "0.005": 100.265914,
+        "0.01": 100.521535,
+        "0.02": 101.001965
+      },
+      "exit_month": "2021-05",
+      "exit_price": 1869.046,
+      "exit_time": "2021-05-18T12:47:00+00:00",
+      "mae_r": 1.150907091808674,
+      "mfe_r": 0.0,
+      "period_label": "2021-05",
+      "pnl_dollars_by_rate": {
+        "0.005": -0.50133,
+        "0.01": -1.005215,
+        "0.02": -2.020039
+      },
+      "r_multiple": -1.0,
+      "risk_dollars_by_rate": {
+        "0.005": 0.50133,
+        "0.01": 1.005215,
+        "0.02": 2.020039
+      },
+      "side": "SHORT",
+      "signal_time": "2021-05-18T12:15:00+00:00",
+      "state": "STOP",
+      "stop_price": 1869.046,
+      "sweep_extreme": 1869.045,
+      "sweep_index": 10748,
+      "swept_level": 1868.955,
+      "target_price": 1777.255,
+      "week_label": "2021-W20"
+    },
+    {
+      "displacement_index": 11306,
+      "entry_price": 1902.468,
+      "entry_time": "2021-05-26T14:15:00+00:00",
+      "equity_after_by_rate": {
+        "0.005": 99.95842,
+        "0.01": 99.903026,
+        "0.02": 99.751185
+      },
+      "equity_before_by_rate": {
+        "0.005": 99.764585,
+        "0.01": 99.51632,
+        "0.02": 98.981926
+      },
+      "exit_month": "2021-05",
+      "exit_price": 1899.118,
+      "exit_time": "2021-05-26T15:00:00+00:00",
+      "mae_r": 0.564899663612106,
+      "mfe_r": 0.39786567683564744,
+      "period_label": "2021-05",
+      "pnl_dollars_by_rate": {
+        "0.005": 0.193836,
+        "0.01": 0.386706,
+        "0.02": 0.76926
+      },
+      "r_multiple": 0.38858601090362926,
+      "risk_dollars_by_rate": {
+        "0.005": 0.498823,
+        "0.01": 0.995163,
+        "0.02": 1.979639
+      },
+      "side": "SHORT",
+      "signal_time": "2021-05-26T14:00:00+00:00",
+      "state": "TIME",
+      "stop_price": 1911.089,
+      "sweep_extreme": 1911.088,
+      "sweep_index": 11305,
+      "swept_level": 1908.868,
+      "target_price": 1777.255,
+      "week_label": "2021-W21"
+    },
+    {
+      "displacement_index": 12012,
+      "entry_price": 1897.928,
+      "entry_time": "2021-06-08T03:00:00+00:00",
+      "equity_after_by_rate": {
+        "0.005": 100.016522,
+        "0.01": 100.019166,
+        "0.02": 99.983111
+      },
+      "equity_before_by_rate": {
+        "0.005": 99.95842,
+        "0.01": 99.903026,
+        "0.02": 99.751185
+      },
+      "exit_month": "2021-06",
+      "exit_price": 1897.428,
+      "exit_time": "2021-06-08T03:45:00+00:00",
+      "mae_r": 0.22948151592649815,
+      "mfe_r": 0.2720297605208304,
+      "period_label": "2021-06",
+      "pnl_dollars_by_rate": {
+        "0.005": 0.058102,
+        "0.01": 0.116139,
+        "0.02": 0.231926
+      },
+      "r_multiple": 0.11625203441060405,
+      "risk_dollars_by_rate": {
+        "0.005": 0.499792,
+        "0.01": 0.99903,
+        "0.02": 1.995024
+      },
+      "side": "SHORT",
+      "signal_time": "2021-06-08T02:45:00+00:00",
+      "state": "TIME",
+      "stop_price": 1902.229,
+      "sweep_extreme": 1902.228,
+      "sweep_index": 12011,
+      "swept_level": 1899.888,
+      "target_price": 1777.255,
+      "week_label": "2021-W23"
+    },
+    {
+      "displacement_index": 12397,
+      "entry_price": 1860.908,
+      "entry_time": "2021-06-14T07:30:00+00:00",
+      "equity_after_by_rate": {
+        "0.005": 100.142723,
+        "0.01": 100.271574,
+        "0.02": 100.487745
+      },
+      "equity_before_by_rate": {
+        "0.005": 100.016522,
+        "0.01": 100.019166,
+        "0.02": 99.983111
+      },
+      "exit_month": "2021-06",
+      "exit_price": 1859.598,
+      "exit_time": "2021-06-14T08:15:00+00:00",
+      "mae_r": 0.2908880755153115,
+      "mfe_r": 0.560200346753975,
+      "period_label": "2021-06",
+      "pnl_dollars_by_rate": {
+        "0.005": 0.126201,
+        "0.01": 0.252408,
+        "0.02": 0.504634
+      },
+      "r_multiple": 0.25235985359274465,
+      "risk_dollars_by_rate": {
+        "0.005": 0.500083,
+        "0.01": 1.000192,
+        "0.02": 1.999662
+      },
+      "side": "SHORT",
+      "signal_time": "2021-06-14T07:15:00+00:00",
+      "state": "TIME",
+      "stop_price": 1866.099,
+      "sweep_extreme": 1866.098,
+      "sweep_index": 12396,
+      "swept_level": 1865.658,
+      "target_price": 1777.255,
+      "week_label": "2021-W24"
+    },
+    {
+      "displacement_index": 13205,
+      "entry_price": 1777.648,
+      "entry_time": "2021-06-25T02:30:00+00:00",
+      "equity_after_by_rate": {
+        "0.005": 100.313716,
+        "0.01": 100.614001,
+        "0.02": 101.174076
+      },
+      "equity_before_by_rate": {
+        "0.005": 100.142723,
+        "0.01": 100.271574,
+        "0.02": 100.487745
+      },
+      "exit_month": "2021-06",
+      "exit_price": 1779.028,
+      "exit_time": "2021-06-25T03:15:00+00:00",
+      "mae_r": 0.18064835436773793,
+      "mfe_r": 0.3934669636229075,
+      "period_label": "2021-06",
+      "pnl_dollars_by_rate": {
+        "0.005": 0.170994,
+        "0.01": 0.342427,
+        "0.02": 0.686331
+      },
+      "r_multiple": 0.3414996288047834,
+      "risk_dollars_by_rate": {
+        "0.005": 0.500714,
+        "0.01": 1.002716,
+        "0.02": 2.009755
+      },
+      "side": "LONG",
+      "signal_time": "2021-06-25T02:15:00+00:00",
+      "state": "TIME",
+      "stop_price": 1773.607,
+      "sweep_extreme": 1773.608,
+      "sweep_index": 13204,
+      "swept_level": 1773.918,
+      "target_price": 1780.428,
+      "week_label": "2021-W25"
+    },
+    {
+      "displacement_index": 13573,
+      "entry_price": 1770.748,
+      "entry_time": "2021-07-01T02:30:00+00:00",
+      "equity_after_by_rate": {
+        "0.005": 100.324956,
+        "0.01": 100.636548,
+        "0.02": 101.219421
+      },
+      "equity_before_by_rate": {
+        "0.005": 100.313716,
+        "0.01": 100.614001,
+        "0.02": 101.174076
+      },
+      "exit_month": "2021-07",
+      "exit_price": 1770.865,
+      "exit_time": "2021-07-01T03:15:00+00:00",
+      "mae_r": 0.13273319287492494,
+      "mfe_r": 0.23501244972224877,
+      "period_label": "2021-07",
+      "pnl_dollars_by_rate": {
+        "0.005": 0.01124,
+        "0.01": 0.022547,
+        "0.02": 0.045345
+      },
+      "r_multiple": 0.022409500095759764,
+      "risk_dollars_by_rate": {
+        "0.005": 0.501569,
+        "0.01": 1.00614,
+        "0.02": 2.023482
+      },
+      "side": "LONG",
+      "signal_time": "2021-07-01T02:15:00+00:00",
+      "state": "TIME",
+      "stop_price": 1765.527,
+      "sweep_extreme": 1765.528,
+      "sweep_index": 13572,
+      "swept_level": 1767.378,
+      "target_price": 1780.428,
+      "week_label": "2021-W26"
+    },
+    {
+      "displacement_index": 15215,
+      "entry_price": 1794.915,
+      "entry_time": "2021-07-27T03:00:00+00:00",
+      "equity_after_by_rate": {
+        "0.005": 99.927043,
+        "0.01": 99.838251,
+        "0.02": 99.61358
+      },
+      "equity_before_by_rate": {
+        "0.005": 100.324956,
+        "0.01": 100.636548,
+        "0.02": 101.219421
+      },
+      "exit_month": "2021-07",
+      "exit_price": 1797.758,
+      "exit_time": "2021-07-27T03:45:00+00:00",
+      "mae_r": 0.8295200892856882,
+      "mfe_r": 0.097656249999973,
+      "period_label": "2021-07",
+      "pnl_dollars_by_rate": {
+        "0.005": -0.397913,
+        "0.01": -0.798297,
+        "0.02": -1.605842
+      },
+      "r_multiple": -0.7932477678571503,
+      "risk_dollars_by_rate": {
+        "0.005": 0.501625,
+        "0.01": 1.006365,
+        "0.02": 2.024388
+      },
+      "side": "SHORT",
+      "signal_time": "2021-07-27T02:45:00+00:00",
+      "state": "TIME",
+      "stop_price": 1798.499,
+      "sweep_extreme": 1798.498,
+      "sweep_index": 15214,
+      "swept_level": 1797.788,
+      "target_price": 1777.255,
+      "week_label": "2021-W30"
+    },
+    {
+      "displacement_index": 15535,
+      "entry_price": 1822.718,
+      "entry_time": "2021-07-30T14:00:00+00:00",
+      "equity_after_by_rate": {
+        "0.005": 99.736646,
+        "0.01": 99.457793,
+        "0.02": 98.854377
+      },
+      "equity_before_by_rate": {
+        "0.005": 99.927043,
+        "0.01": 99.838251,
+        "0.02": 99.61358
+      },
+      "exit_month": "2021-07",
+      "exit_price": 1825.408,
+      "exit_time": "2021-07-30T14:45:00+00:00",
+      "mae_r": 0.5046040515653654,
+      "mfe_r": 0.15299617509564517,
+      "period_label": "2021-07",
+      "pnl_dollars_by_rate": {
+        "0.005": -0.190398,
+        "0.01": -0.380457,
+        "0.02": -0.759203
+      },
+      "r_multiple": -0.3810738064881483,
+      "risk_dollars_by_rate": {
+        "0.005": 0.499635,
+        "0.01": 0.998383,
+        "0.02": 1.992272
+      },
+      "side": "SHORT",
+      "signal_time": "2021-07-30T13:45:00+00:00",
+      "state": "TIME",
+      "stop_price": 1829.777,
+      "sweep_extreme": 1829.776,
+      "sweep_index": 15534,
+      "swept_level": 1828.548,
+      "target_price": 1777.255,
+      "week_label": "2021-W30"
+    },
+    {
+      "displacement_index": 15582,
+      "entry_price": 1809.548,
+      "entry_time": "2021-08-02T02:45:00+00:00",
+      "equity_after_by_rate": {
+        "0.005": 99.465681,
+        "0.01": 98.917379,
+        "0.02": 97.780107
+      },
+      "equity_before_by_rate": {
+        "0.005": 99.736646,
+        "0.01": 99.457793,
+        "0.02": 98.854377
+      },
+      "exit_month": "2021-08",
+      "exit_price": 1812.048,
+      "exit_time": "2021-08-02T03:30:00+00:00",
+      "mae_r": 0.5433601391002092,
+      "mfe_r": 0.21082373397088708,
+      "period_label": "2021-08",
+      "pnl_dollars_by_rate": {
+        "0.005": -0.270965,
+        "0.01": -0.540414,
+        "0.02": -1.074271
+      },
+      "r_multiple": -0.5433601391002092,
+      "risk_dollars_by_rate": {
+        "0.005": 0.498683,
+        "0.01": 0.994578,
+        "0.02": 1.977088
+      },
+      "side": "SHORT",
+      "signal_time": "2021-08-02T02:30:00+00:00",
+      "state": "TIME",
+      "stop_price": 1814.149,
+      "sweep_extreme": 1814.148,
+      "sweep_index": 15581,
+      "swept_level": 1813.865,
+      "target_price": 1777.255,
+      "week_label": "2021-W31"
+    },
+    {
+      "displacement_index": 18270,
+      "entry_price": 1793.404,
+      "entry_time": "2021-09-10T14:00:00+00:00",
+      "equity_after_by_rate": {
+        "0.005": 99.3874,
+        "0.01": 98.761681,
+        "0.02": 97.472291
+      },
+      "equity_before_by_rate": {
+        "0.005": 99.465681,
+        "0.01": 98.917379,
+        "0.02": 97.780107
+      },
+      "exit_month": "2021-09",
+      "exit_price": 1794.497,
+      "exit_time": "2021-09-10T14:45:00+00:00",
+      "mae_r": 0.3677995391705216,
+      "mfe_r": 0.5472350230414713,
+      "period_label": "2021-09",
+      "pnl_dollars_by_rate": {
+        "0.005": -0.078281,
+        "0.01": -0.155698,
+        "0.02": -0.307816
+      },
+      "r_multiple": -0.15740207373273055,
+      "risk_dollars_by_rate": {
+        "0.005": 0.497328,
+        "0.01": 0.989174,
+        "0.02": 1.955602
+      },
+      "side": "SHORT",
+      "signal_time": "2021-09-10T13:45:00+00:00",
+      "state": "TIME",
+      "stop_price": 1800.348,
+      "sweep_extreme": 1800.347,
+      "sweep_index": 18269,
+      "swept_level": 1797.614,
+      "target_price": 1777.255,
+      "week_label": "2021-W36"
+    },
+    {
+      "displacement_index": 18336,
+      "entry_price": 1789.185,
+      "entry_time": "2021-09-13T07:30:00+00:00",
+      "equity_after_by_rate": {
+        "0.005": 99.568115,
+        "0.01": 99.120835,
+        "0.02": 98.181221
+      },
+      "equity_before_by_rate": {
+        "0.005": 99.3874,
+        "0.01": 98.761681,
+        "0.02": 97.472291
+      },
+      "exit_month": "2021-09",
+      "exit_price": 1787.598,
+      "exit_time": "2021-09-13T08:15:00+00:00",
+      "mae_r": 0.399404216315342,
+      "mfe_r": 0.47135655362053186,
+      "period_label": "2021-09",
+      "pnl_dollars_by_rate": {
+        "0.005": 0.180715,
+        "0.01": 0.359154,
+        "0.02": 0.70893
+      },
+      "r_multiple": 0.3636571952337253,
+      "risk_dollars_by_rate": {
+        "0.005": 0.496937,
+        "0.01": 0.987617,
+        "0.02": 1.949446
+      },
+      "side": "SHORT",
+      "signal_time": "2021-09-13T07:15:00+00:00",
+      "state": "TIME",
+      "stop_price": 1793.549,
+      "sweep_extreme": 1793.548,
+      "sweep_index": 18335,
+      "swept_level": 1792.488,
+      "target_price": 1777.255,
+      "week_label": "2021-W37"
+    },
+    {
+      "displacement_index": 18546,
+      "entry_price": 1796.537,
+      "entry_time": "2021-09-15T14:00:00+00:00",
+      "equity_after_by_rate": {
+        "0.005": 99.494516,
+        "0.01": 98.974298,
+        "0.02": 97.890924
+      },
+      "equity_before_by_rate": {
+        "0.005": 99.568115,
+        "0.01": 99.120835,
+        "0.02": 98.181221
+      },
+      "exit_month": "2021-09",
+      "exit_price": 1798.017,
+      "exit_time": "2021-09-15T14:45:00+00:00",
+      "mae_r": 0.3427230046948408,
+      "mfe_r": 0.2156627709519641,
+      "period_label": "2021-09",
+      "pnl_dollars_by_rate": {
+        "0.005": -0.073599,
+        "0.01": -0.146538,
+        "0.02": -0.290297
+      },
+      "r_multiple": -0.14783737888323076,
+      "risk_dollars_by_rate": {
+        "0.005": 0.497841,
+        "0.01": 0.991208,
+        "0.02": 1.963624
+      },
+      "side": "SHORT",
+      "signal_time": "2021-09-15T13:45:00+00:00",
+      "state": "TIME",
+      "stop_price": 1806.548,
+      "sweep_extreme": 1806.547,
+      "sweep_index": 18545,
+      "swept_level": 1803.328,
+      "target_price": 1777.255,
+      "week_label": "2021-W37"
+    },
+    {
+      "displacement_index": 19161,
+      "entry_price": 1754.008,
+      "entry_time": "2021-09-24T06:45:00+00:00",
+      "equity_after_by_rate": {
+        "0.005": 99.711565,
+        "0.01": 99.406127,
+        "0.02": 98.745129
+      },
+      "equity_before_by_rate": {
+        "0.005": 99.494516,
+        "0.01": 98.974298,
+        "0.02": 97.890924
+      },
+      "exit_month": "2021-09",
+      "exit_price": 1755.354,
+      "exit_time": "2021-09-24T07:30:00+00:00",
+      "mae_r": 0.188006482982146,
+      "mfe_r": 0.8136142625607654,
+      "period_label": "2021-09",
+      "pnl_dollars_by_rate": {
+        "0.005": 0.21705,
+        "0.01": 0.43183,
+        "0.02": 0.854205
+      },
+      "r_multiple": 0.43630470016207057,
+      "risk_dollars_by_rate": {
+        "0.005": 0.497473,
+        "0.01": 0.989743,
+        "0.02": 1.957818
+      },
+      "side": "LONG",
+      "signal_time": "2021-09-24T06:30:00+00:00",
+      "state": "TIME",
+      "stop_price": 1750.923,
+      "sweep_extreme": 1750.924,
+      "sweep_index": 19160,
+      "swept_level": 1751.688,
+      "target_price": 1780.428,
+      "week_label": "2021-W38"
+    },
+    {
+      "displacement_index": 19376,
+      "entry_price": 1740.348,
+      "entry_time": "2021-09-28T14:30:00+00:00",
+      "equity_after_by_rate": {
+        "0.005": 99.356735,
+        "0.01": 98.698641,
+        "0.02": 97.339566
+      },
+      "equity_before_by_rate": {
+        "0.005": 99.711565,
+        "0.01": 99.406127,
+        "0.02": 98.745129
+      },
+      "exit_month": "2021-09",
+      "exit_price": 1732.248,
+      "exit_time": "2021-09-28T15:15:00+00:00",
+      "mae_r": 0.943678059924448,
+      "mfe_r": 0.07029259291801815,
+      "period_label": "2021-09",
+      "pnl_dollars_by_rate": {
+        "0.005": -0.35483,
+        "0.01": -0.707486,
+        "0.02": -1.405563
+      },
+      "r_multiple": -0.7117125032949662,
+      "risk_dollars_by_rate": {
+        "0.005": 0.498558,
+        "0.01": 0.994061,
+        "0.02": 1.974903
+      },
+      "side": "LONG",
+      "signal_time": "2021-09-28T14:15:00+00:00",
+      "state": "TIME",
+      "stop_price": 1728.967,
+      "sweep_extreme": 1728.968,
+      "sweep_index": 19375,
+      "swept_level": 1732.788,
+      "target_price": 1780.428,
+      "week_label": "2021-W39"
+    },
+    {
+      "displacement_index": 20263,
+      "entry_price": 1759.868,
+      "entry_time": "2021-10-12T06:15:00+00:00",
+      "equity_after_by_rate": {
+        "0.005": 99.652873,
+        "0.01": 99.286993,
+        "0.02": 98.500065
+      },
+      "equity_before_by_rate": {
+        "0.005": 99.356735,
+        "0.01": 98.698641,
+        "0.02": 97.339566
+      },
+      "exit_month": "2021-10",
+      "exit_price": 1761.645,
+      "exit_time": "2021-10-12T07:00:00+00:00",
+      "mae_r": 0.11405568601137832,
+      "mfe_r": 0.7101643743710049,
+      "period_label": "2021-10",
+      "pnl_dollars_by_rate": {
+        "0.005": 0.296137,
+        "0.01": 0.588351,
+        "0.02": 1.160499
+      },
+      "r_multiple": 0.5961086883596266,
+      "risk_dollars_by_rate": {
+        "0.005": 0.496784,
+        "0.01": 0.986986,
+        "0.02": 1.946791
+      },
+      "side": "LONG",
+      "signal_time": "2021-10-12T06:00:00+00:00",
+      "state": "TIME",
+      "stop_price": 1756.887,
+      "sweep_extreme": 1756.888,
+      "sweep_index": 20262,
+      "swept_level": 1757.048,
+      "target_price": 1780.428,
+      "week_label": "2021-W41"
+    },
+    {
+      "displacement_index": 20388,
+      "entry_price": 1768.014,
+      "entry_time": "2021-10-13T14:30:00+00:00",
+      "equity_after_by_rate": {
+        "0.005": 100.260123,
+        "0.01": 100.497035,
+        "0.02": 100.900968
+      },
+      "equity_before_by_rate": {
+        "0.005": 99.652873,
+        "0.01": 99.286993,
+        "0.02": 98.500065
+      },
+      "exit_month": "2021-10",
+      "exit_price": 1780.428,
+      "exit_time": "2021-10-13T14:57:00+00:00",
+      "mae_r": 0.0,
+      "mfe_r": 1.3724720204201968,
+      "period_label": "2021-10",
+      "pnl_dollars_by_rate": {
+        "0.005": 0.607251,
+        "0.01": 1.210042,
+        "0.02": 2.400903
+      },
+      "r_multiple": 1.2187315923817308,
+      "risk_dollars_by_rate": {
+        "0.005": 0.498264,
+        "0.01": 0.99287,
+        "0.02": 1.970001
+      },
+      "side": "LONG",
+      "signal_time": "2021-10-13T14:15:00+00:00",
+      "state": "TARGET",
+      "stop_price": 1757.828,
+      "sweep_extreme": 1757.829,
+      "sweep_index": 20387,
+      "swept_level": 1758.121,
+      "target_price": 1780.428,
+      "week_label": "2021-W41"
+    },
+    {
+      "displacement_index": 20606,
+      "entry_price": 1770.569,
+      "entry_time": "2021-10-18T00:15:00+00:00",
+      "equity_after_by_rate": {
+        "0.005": 100.29401,
+        "0.01": 100.564968,
+        "0.02": 101.037381
+      },
+      "equity_before_by_rate": {
+        "0.005": 100.260123,
+        "0.01": 100.497035,
+        "0.02": 100.900968
+      },
+      "exit_month": "2021-10",
+      "exit_price": 1770.874,
+      "exit_time": "2021-10-18T01:00:00+00:00",
+      "mae_r": 0.29122340425528975,
+      "mfe_r": 0.30917553191489344,
+      "period_label": "2021-10",
+      "pnl_dollars_by_rate": {
+        "0.005": 0.033887,
+        "0.01": 0.067934,
+        "0.02": 0.136413
+      },
+      "r_multiple": 0.06759751773051141,
+      "risk_dollars_by_rate": {
+        "0.005": 0.501301,
+        "0.01": 1.00497,
+        "0.02": 2.018019
+      },
+      "side": "LONG",
+      "signal_time": "2021-10-18T00:00:00+00:00",
+      "state": "TIME",
+      "stop_price": 1766.057,
+      "sweep_extreme": 1766.058,
+      "sweep_index": 20605,
+      "swept_level": 1766.594,
+      "target_price": 1780.428,
+      "week_label": "2021-W41"
+    },
+    {
+      "displacement_index": 21038,
+      "entry_price": 1800.638,
+      "entry_time": "2021-10-22T16:30:00+00:00",
+      "equity_after_by_rate": {
+        "0.005": 100.753483,
+        "0.01": 101.486398,
+        "0.02": 102.888898
+      },
+      "equity_before_by_rate": {
+        "0.005": 100.29401,
+        "0.01": 100.564968,
+        "0.02": 101.037381
+      },
+      "exit_month": "2021-10",
+      "exit_price": 1788.625,
+      "exit_time": "2021-10-22T17:15:00+00:00",
+      "mae_r": 0.0053390282968624175,
+      "mfe_r": 1.3614522156967255,
+      "period_label": "2021-10",
+      "pnl_dollars_by_rate": {
+        "0.005": 0.459474,
+        "0.01": 0.92143,
+        "0.02": 1.851517
+      },
+      "r_multiple": 0.9162535275722542,
+      "risk_dollars_by_rate": {
+        "0.005": 0.50147,
+        "0.01": 1.00565,
+        "0.02": 2.020748
+      },
+      "side": "SHORT",
+      "signal_time": "2021-10-22T16:15:00+00:00",
+      "state": "TIME",
+      "stop_price": 1813.749,
+      "sweep_extreme": 1813.748,
+      "sweep_index": 21037,
+      "swept_level": 1812.318,
+      "target_price": 1777.255,
+      "week_label": "2021-W42"
+    },
+    {
+      "displacement_index": 23113,
+      "entry_price": 1792.718,
+      "entry_time": "2021-11-24T06:30:00+00:00",
+      "equity_after_by_rate": {
+        "0.005": 100.249716,
+        "0.01": 100.471534,
+        "0.02": 100.83112
+      },
+      "equity_before_by_rate": {
+        "0.005": 100.753483,
+        "0.01": 101.486398,
+        "0.02": 102.888898
+      },
+      "exit_month": "2021-11",
+      "exit_price": 1795.709,
+      "exit_time": "2021-11-24T07:09:00+00:00",
+      "mae_r": 1.0187228351721966,
+      "mfe_r": 0.16048144433300585,
+      "period_label": "2021-11",
+      "pnl_dollars_by_rate": {
+        "0.005": -0.503767,
+        "0.01": -1.014864,
+        "0.02": -2.057778
+      },
+      "r_multiple": -1.0,
+      "risk_dollars_by_rate": {
+        "0.005": 0.503767,
+        "0.01": 1.014864,
+        "0.02": 2.057778
+      },
+      "side": "SHORT",
+      "signal_time": "2021-11-24T06:15:00+00:00",
+      "state": "STOP",
+      "stop_price": 1795.709,
+      "sweep_extreme": 1795.708,
+      "sweep_index": 23112,
+      "swept_level": 1795.595,
+      "target_price": 1777.255,
+      "week_label": "2021-W47"
+    },
+    {
+      "displacement_index": 24165,
+      "entry_price": 1778.608,
+      "entry_time": "2021-12-10T01:45:00+00:00",
+      "equity_after_by_rate": {
+        "0.005": 100.359202,
+        "0.01": 100.690991,
+        "0.02": 101.271605
+      },
+      "equity_before_by_rate": {
+        "0.005": 100.249716,
+        "0.01": 100.471534,
+        "0.02": 100.83112
+      },
+      "exit_month": "2021-12",
+      "exit_price": 1779.305,
+      "exit_time": "2021-12-10T02:30:00+00:00",
+      "mae_r": 0.2977123158884476,
+      "mfe_r": 0.2936383578815783,
+      "period_label": "2021-12",
+      "pnl_dollars_by_rate": {
+        "0.005": 0.109486,
+        "0.01": 0.219457,
+        "0.02": 0.440484
+      },
+      "r_multiple": 0.21842682544660283,
+      "risk_dollars_by_rate": {
+        "0.005": 0.501249,
+        "0.01": 1.004715,
+        "0.02": 2.016622
+      },
+      "side": "LONG",
+      "signal_time": "2021-12-10T01:30:00+00:00",
+      "state": "TIME",
+      "stop_price": 1775.417,
+      "sweep_extreme": 1775.418,
+      "sweep_index": 24164,
+      "swept_level": 1775.548,
+      "target_price": 1780.428,
+      "week_label": "2021-W49"
+    },
+    {
+      "displacement_index": 24304,
+      "entry_price": 1783.128,
+      "entry_time": "2021-12-13T13:30:00+00:00",
+      "equity_after_by_rate": {
+        "0.005": 100.239398,
+        "0.01": 100.450591,
+        "0.02": 100.788033
+      },
+      "equity_before_by_rate": {
+        "0.005": 100.359202,
+        "0.01": 100.690991,
+        "0.02": 101.271605
+      },
+      "exit_month": "2021-12",
+      "exit_price": 1784.778,
+      "exit_time": "2021-12-13T14:15:00+00:00",
+      "mae_r": 0.25466647373751644,
+      "mfe_r": 0.20691650991170948,
+      "period_label": "2021-12",
+      "pnl_dollars_by_rate": {
+        "0.005": -0.119804,
+        "0.01": -0.2404,
+        "0.02": -0.483572
+      },
+      "r_multiple": -0.23874981912893606,
+      "risk_dollars_by_rate": {
+        "0.005": 0.501796,
+        "0.01": 1.00691,
+        "0.02": 2.025432
+      },
+      "side": "SHORT",
+      "signal_time": "2021-12-13T13:15:00+00:00",
+      "state": "TIME",
+      "stop_price": 1790.039,
+      "sweep_extreme": 1790.038,
+      "sweep_index": 24303,
+      "swept_level": 1789.889,
+      "target_price": 1777.255,
+      "week_label": "2021-W50"
+    }
+  ],
+  "weekly_entry_ledger": [
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 0,
+      "equity_after_period_at_base_risk": 100.0,
+      "equity_before_period_at_base_risk": 100.0,
+      "negative_trades": 0,
+      "period": "2020-W53",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": 0.0,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.0,
+      "taken_trades": 0,
+      "target_hits": 0,
+      "time_exits": 0
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 0,
+      "equity_after_period_at_base_risk": 100.0,
+      "equity_before_period_at_base_risk": 100.0,
+      "negative_trades": 0,
+      "period": "2021-W01",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": 0.0,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.0,
+      "taken_trades": 0,
+      "target_hits": 0,
+      "time_exits": 0
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 1,
+      "equity_after_period_at_base_risk": 99.666667,
+      "equity_before_period_at_base_risk": 100.0,
+      "negative_trades": 1,
+      "period": "2021-W02",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": -0.333333,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": -0.333333,
+      "taken_trades": 1,
+      "target_hits": 0,
+      "time_exits": 1
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 0,
+      "equity_after_period_at_base_risk": 99.666667,
+      "equity_before_period_at_base_risk": 99.666667,
+      "negative_trades": 0,
+      "period": "2021-W03",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": 0.0,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.0,
+      "taken_trades": 0,
+      "target_hits": 0,
+      "time_exits": 0
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 1,
+      "equity_after_period_at_base_risk": 99.398514,
+      "equity_before_period_at_base_risk": 99.666667,
+      "negative_trades": 1,
+      "period": "2021-W04",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": -0.268153,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": -0.269049,
+      "taken_trades": 1,
+      "target_hits": 0,
+      "time_exits": 1
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 1,
+      "equity_after_period_at_base_risk": 100.93255,
+      "equity_before_period_at_base_risk": 99.398514,
+      "negative_trades": 0,
+      "period": "2021-W05",
+      "positive_trades": 1,
+      "profit_usd_at_base_risk": 1.534036,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 1.543318,
+      "taken_trades": 1,
+      "target_hits": 0,
+      "time_exits": 1
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 0,
+      "equity_after_period_at_base_risk": 100.93255,
+      "equity_before_period_at_base_risk": 100.93255,
+      "negative_trades": 0,
+      "period": "2021-W06",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": 0.0,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.0,
+      "taken_trades": 0,
+      "target_hits": 0,
+      "time_exits": 0
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 1,
+      "equity_after_period_at_base_risk": 101.010258,
+      "equity_before_period_at_base_risk": 100.93255,
+      "negative_trades": 0,
+      "period": "2021-W07",
+      "positive_trades": 1,
+      "profit_usd_at_base_risk": 0.077708,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.07699,
+      "taken_trades": 1,
+      "target_hits": 1,
+      "time_exits": 0
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 0,
+      "equity_after_period_at_base_risk": 101.010258,
+      "equity_before_period_at_base_risk": 101.010258,
+      "negative_trades": 0,
+      "period": "2021-W08",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": 0.0,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.0,
+      "taken_trades": 0,
+      "target_hits": 0,
+      "time_exits": 0
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 1,
+      "equity_after_period_at_base_risk": 100.883913,
+      "equity_before_period_at_base_risk": 101.010258,
+      "negative_trades": 1,
+      "period": "2021-W09",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": -0.126344,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": -0.125081,
+      "taken_trades": 1,
+      "target_hits": 0,
+      "time_exits": 1
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 0,
+      "equity_after_period_at_base_risk": 100.883913,
+      "equity_before_period_at_base_risk": 100.883913,
+      "negative_trades": 0,
+      "period": "2021-W10",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": 0.0,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.0,
+      "taken_trades": 0,
+      "target_hits": 0,
+      "time_exits": 0
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 1,
+      "equity_after_period_at_base_risk": 100.892643,
+      "equity_before_period_at_base_risk": 100.883913,
+      "negative_trades": 0,
+      "period": "2021-W11",
+      "positive_trades": 1,
+      "profit_usd_at_base_risk": 0.008729,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.008653,
+      "taken_trades": 1,
+      "target_hits": 0,
+      "time_exits": 1
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 1,
+      "equity_after_period_at_base_risk": 100.939947,
+      "equity_before_period_at_base_risk": 100.892643,
+      "negative_trades": 0,
+      "period": "2021-W12",
+      "positive_trades": 1,
+      "profit_usd_at_base_risk": 0.047305,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.046886,
+      "taken_trades": 1,
+      "target_hits": 0,
+      "time_exits": 1
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 0,
+      "equity_after_period_at_base_risk": 100.939947,
+      "equity_before_period_at_base_risk": 100.939947,
+      "negative_trades": 0,
+      "period": "2021-W13",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": 0.0,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.0,
+      "taken_trades": 0,
+      "target_hits": 0,
+      "time_exits": 0
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 1,
+      "equity_after_period_at_base_risk": 100.579878,
+      "equity_before_period_at_base_risk": 100.939947,
+      "negative_trades": 1,
+      "period": "2021-W14",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": -0.360069,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": -0.356716,
+      "taken_trades": 1,
+      "target_hits": 0,
+      "time_exits": 1
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 1,
+      "equity_after_period_at_base_risk": 100.80101,
+      "equity_before_period_at_base_risk": 100.579878,
+      "negative_trades": 0,
+      "period": "2021-W15",
+      "positive_trades": 1,
+      "profit_usd_at_base_risk": 0.221131,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.219857,
+      "taken_trades": 1,
+      "target_hits": 0,
+      "time_exits": 1
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 2,
+      "equity_after_period_at_base_risk": 100.284005,
+      "equity_before_period_at_base_risk": 100.80101,
+      "negative_trades": 2,
+      "period": "2021-W16",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": -0.517004,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": -0.513383,
+      "taken_trades": 2,
+      "target_hits": 0,
+      "time_exits": 2
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 0,
+      "equity_after_period_at_base_risk": 100.284005,
+      "equity_before_period_at_base_risk": 100.284005,
+      "negative_trades": 0,
+      "period": "2021-W17",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": 0.0,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.0,
+      "taken_trades": 0,
+      "target_hits": 0,
+      "time_exits": 0
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 0,
+      "equity_after_period_at_base_risk": 100.284005,
+      "equity_before_period_at_base_risk": 100.284005,
+      "negative_trades": 0,
+      "period": "2021-W18",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": 0.0,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.0,
+      "taken_trades": 0,
+      "target_hits": 0,
+      "time_exits": 0
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 2,
+      "equity_after_period_at_base_risk": 100.521535,
+      "equity_before_period_at_base_risk": 100.284005,
+      "negative_trades": 1,
+      "period": "2021-W19",
+      "positive_trades": 1,
+      "profit_usd_at_base_risk": 0.23753,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.243989,
+      "taken_trades": 2,
+      "target_hits": 0,
+      "time_exits": 2
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 1,
+      "equity_after_period_at_base_risk": 99.51632,
+      "equity_before_period_at_base_risk": 100.521535,
+      "negative_trades": 1,
+      "period": "2021-W20",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": -1.005215,
+      "same_time_conflicts": 0,
+      "stop_hits": 1,
+      "sum_r": -1.0,
+      "taken_trades": 1,
+      "target_hits": 0,
+      "time_exits": 0
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 1,
+      "equity_after_period_at_base_risk": 99.903026,
+      "equity_before_period_at_base_risk": 99.51632,
+      "negative_trades": 0,
+      "period": "2021-W21",
+      "positive_trades": 1,
+      "profit_usd_at_base_risk": 0.386706,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.388586,
+      "taken_trades": 1,
+      "target_hits": 0,
+      "time_exits": 1
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 0,
+      "equity_after_period_at_base_risk": 99.903026,
+      "equity_before_period_at_base_risk": 99.903026,
+      "negative_trades": 0,
+      "period": "2021-W22",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": 0.0,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.0,
+      "taken_trades": 0,
+      "target_hits": 0,
+      "time_exits": 0
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 1,
+      "equity_after_period_at_base_risk": 100.019166,
+      "equity_before_period_at_base_risk": 99.903026,
+      "negative_trades": 0,
+      "period": "2021-W23",
+      "positive_trades": 1,
+      "profit_usd_at_base_risk": 0.116139,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.116252,
+      "taken_trades": 1,
+      "target_hits": 0,
+      "time_exits": 1
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 1,
+      "equity_after_period_at_base_risk": 100.271574,
+      "equity_before_period_at_base_risk": 100.019166,
+      "negative_trades": 0,
+      "period": "2021-W24",
+      "positive_trades": 1,
+      "profit_usd_at_base_risk": 0.252408,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.25236,
+      "taken_trades": 1,
+      "target_hits": 0,
+      "time_exits": 1
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 1,
+      "equity_after_period_at_base_risk": 100.614001,
+      "equity_before_period_at_base_risk": 100.271574,
+      "negative_trades": 0,
+      "period": "2021-W25",
+      "positive_trades": 1,
+      "profit_usd_at_base_risk": 0.342427,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.3415,
+      "taken_trades": 1,
+      "target_hits": 0,
+      "time_exits": 1
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 1,
+      "equity_after_period_at_base_risk": 100.636548,
+      "equity_before_period_at_base_risk": 100.614001,
+      "negative_trades": 0,
+      "period": "2021-W26",
+      "positive_trades": 1,
+      "profit_usd_at_base_risk": 0.022547,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.02241,
+      "taken_trades": 1,
+      "target_hits": 0,
+      "time_exits": 1
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 0,
+      "equity_after_period_at_base_risk": 100.636548,
+      "equity_before_period_at_base_risk": 100.636548,
+      "negative_trades": 0,
+      "period": "2021-W27",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": 0.0,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.0,
+      "taken_trades": 0,
+      "target_hits": 0,
+      "time_exits": 0
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 0,
+      "equity_after_period_at_base_risk": 100.636548,
+      "equity_before_period_at_base_risk": 100.636548,
+      "negative_trades": 0,
+      "period": "2021-W28",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": 0.0,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.0,
+      "taken_trades": 0,
+      "target_hits": 0,
+      "time_exits": 0
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 0,
+      "equity_after_period_at_base_risk": 100.636548,
+      "equity_before_period_at_base_risk": 100.636548,
+      "negative_trades": 0,
+      "period": "2021-W29",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": 0.0,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.0,
+      "taken_trades": 0,
+      "target_hits": 0,
+      "time_exits": 0
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 2,
+      "equity_after_period_at_base_risk": 99.457793,
+      "equity_before_period_at_base_risk": 100.636548,
+      "negative_trades": 2,
+      "period": "2021-W30",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": -1.178754,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": -1.174322,
+      "taken_trades": 2,
+      "target_hits": 0,
+      "time_exits": 2
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 1,
+      "equity_after_period_at_base_risk": 98.917379,
+      "equity_before_period_at_base_risk": 99.457793,
+      "negative_trades": 1,
+      "period": "2021-W31",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": -0.540414,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": -0.54336,
+      "taken_trades": 1,
+      "target_hits": 0,
+      "time_exits": 1
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 0,
+      "equity_after_period_at_base_risk": 98.917379,
+      "equity_before_period_at_base_risk": 98.917379,
+      "negative_trades": 0,
+      "period": "2021-W32",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": 0.0,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.0,
+      "taken_trades": 0,
+      "target_hits": 0,
+      "time_exits": 0
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 0,
+      "equity_after_period_at_base_risk": 98.917379,
+      "equity_before_period_at_base_risk": 98.917379,
+      "negative_trades": 0,
+      "period": "2021-W33",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": 0.0,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.0,
+      "taken_trades": 0,
+      "target_hits": 0,
+      "time_exits": 0
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 0,
+      "equity_after_period_at_base_risk": 98.917379,
+      "equity_before_period_at_base_risk": 98.917379,
+      "negative_trades": 0,
+      "period": "2021-W34",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": 0.0,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.0,
+      "taken_trades": 0,
+      "target_hits": 0,
+      "time_exits": 0
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 0,
+      "equity_after_period_at_base_risk": 98.917379,
+      "equity_before_period_at_base_risk": 98.917379,
+      "negative_trades": 0,
+      "period": "2021-W35",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": 0.0,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.0,
+      "taken_trades": 0,
+      "target_hits": 0,
+      "time_exits": 0
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 1,
+      "equity_after_period_at_base_risk": 98.761681,
+      "equity_before_period_at_base_risk": 98.917379,
+      "negative_trades": 1,
+      "period": "2021-W36",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": -0.155698,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": -0.157402,
+      "taken_trades": 1,
+      "target_hits": 0,
+      "time_exits": 1
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 2,
+      "equity_after_period_at_base_risk": 98.974298,
+      "equity_before_period_at_base_risk": 98.761681,
+      "negative_trades": 1,
+      "period": "2021-W37",
+      "positive_trades": 1,
+      "profit_usd_at_base_risk": 0.212616,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.21582,
+      "taken_trades": 2,
+      "target_hits": 0,
+      "time_exits": 2
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 1,
+      "equity_after_period_at_base_risk": 99.406127,
+      "equity_before_period_at_base_risk": 98.974298,
+      "negative_trades": 0,
+      "period": "2021-W38",
+      "positive_trades": 1,
+      "profit_usd_at_base_risk": 0.43183,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.436305,
+      "taken_trades": 1,
+      "target_hits": 0,
+      "time_exits": 1
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 1,
+      "equity_after_period_at_base_risk": 98.698641,
+      "equity_before_period_at_base_risk": 99.406127,
+      "negative_trades": 1,
+      "period": "2021-W39",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": -0.707486,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": -0.711713,
+      "taken_trades": 1,
+      "target_hits": 0,
+      "time_exits": 1
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 0,
+      "equity_after_period_at_base_risk": 98.698641,
+      "equity_before_period_at_base_risk": 98.698641,
+      "negative_trades": 0,
+      "period": "2021-W40",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": 0.0,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.0,
+      "taken_trades": 0,
+      "target_hits": 0,
+      "time_exits": 0
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 3,
+      "equity_after_period_at_base_risk": 100.564968,
+      "equity_before_period_at_base_risk": 98.698641,
+      "negative_trades": 0,
+      "period": "2021-W41",
+      "positive_trades": 3,
+      "profit_usd_at_base_risk": 1.866327,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 1.882438,
+      "taken_trades": 3,
+      "target_hits": 1,
+      "time_exits": 2
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 1,
+      "equity_after_period_at_base_risk": 101.486398,
+      "equity_before_period_at_base_risk": 100.564968,
+      "negative_trades": 0,
+      "period": "2021-W42",
+      "positive_trades": 1,
+      "profit_usd_at_base_risk": 0.92143,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.916254,
+      "taken_trades": 1,
+      "target_hits": 0,
+      "time_exits": 1
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 0,
+      "equity_after_period_at_base_risk": 101.486398,
+      "equity_before_period_at_base_risk": 101.486398,
+      "negative_trades": 0,
+      "period": "2021-W43",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": 0.0,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.0,
+      "taken_trades": 0,
+      "target_hits": 0,
+      "time_exits": 0
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 0,
+      "equity_after_period_at_base_risk": 101.486398,
+      "equity_before_period_at_base_risk": 101.486398,
+      "negative_trades": 0,
+      "period": "2021-W44",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": 0.0,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.0,
+      "taken_trades": 0,
+      "target_hits": 0,
+      "time_exits": 0
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 0,
+      "equity_after_period_at_base_risk": 101.486398,
+      "equity_before_period_at_base_risk": 101.486398,
+      "negative_trades": 0,
+      "period": "2021-W45",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": 0.0,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.0,
+      "taken_trades": 0,
+      "target_hits": 0,
+      "time_exits": 0
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 0,
+      "equity_after_period_at_base_risk": 101.486398,
+      "equity_before_period_at_base_risk": 101.486398,
+      "negative_trades": 0,
+      "period": "2021-W46",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": 0.0,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.0,
+      "taken_trades": 0,
+      "target_hits": 0,
+      "time_exits": 0
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 1,
+      "equity_after_period_at_base_risk": 100.471534,
+      "equity_before_period_at_base_risk": 101.486398,
+      "negative_trades": 1,
+      "period": "2021-W47",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": -1.014864,
+      "same_time_conflicts": 0,
+      "stop_hits": 1,
+      "sum_r": -1.0,
+      "taken_trades": 1,
+      "target_hits": 0,
+      "time_exits": 0
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 0,
+      "equity_after_period_at_base_risk": 100.471534,
+      "equity_before_period_at_base_risk": 100.471534,
+      "negative_trades": 0,
+      "period": "2021-W48",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": 0.0,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.0,
+      "taken_trades": 0,
+      "target_hits": 0,
+      "time_exits": 0
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 1,
+      "equity_after_period_at_base_risk": 100.690991,
+      "equity_before_period_at_base_risk": 100.471534,
+      "negative_trades": 0,
+      "period": "2021-W49",
+      "positive_trades": 1,
+      "profit_usd_at_base_risk": 0.219457,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.218427,
+      "taken_trades": 1,
+      "target_hits": 0,
+      "time_exits": 1
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 1,
+      "equity_after_period_at_base_risk": 100.450591,
+      "equity_before_period_at_base_risk": 100.690991,
+      "negative_trades": 1,
+      "period": "2021-W50",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": -0.2404,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": -0.23875,
+      "taken_trades": 1,
+      "target_hits": 0,
+      "time_exits": 1
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 0,
+      "equity_after_period_at_base_risk": 100.450591,
+      "equity_before_period_at_base_risk": 100.450591,
+      "negative_trades": 0,
+      "period": "2021-W51",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": 0.0,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.0,
+      "taken_trades": 0,
+      "target_hits": 0,
+      "time_exits": 0
+    },
+    {
+      "concurrent_blocked": 0,
+      "eligible_signals": 0,
+      "equity_after_period_at_base_risk": 100.450591,
+      "equity_before_period_at_base_risk": 100.450591,
+      "negative_trades": 0,
+      "period": "2021-W52",
+      "positive_trades": 0,
+      "profit_usd_at_base_risk": 0.0,
+      "same_time_conflicts": 0,
+      "stop_hits": 0,
+      "sum_r": 0.0,
+      "taken_trades": 0,
+      "target_hits": 0,
+      "time_exits": 0
+    }
+  ],
+  "zero_lookahead": {
+    "all_identical": true,
+    "checks": [
+      {
+        "cutoff": "2021-02-01T00:00:00+00:00",
+        "full_signals_before_cutoff": 392,
+        "identical": true,
+        "prefix_signals": 392
+      },
+      {
+        "cutoff": "2021-03-01T00:00:00+00:00",
+        "full_signals_before_cutoff": 745,
+        "identical": true,
+        "prefix_signals": 745
+      },
+      {
+        "cutoff": "2021-04-01T00:00:00+00:00",
+        "full_signals_before_cutoff": 1230,
+        "identical": true,
+        "prefix_signals": 1230
+      },
+      {
+        "cutoff": "2021-05-01T00:00:00+00:00",
+        "full_signals_before_cutoff": 1653,
+        "identical": true,
+        "prefix_signals": 1653
+      },
+      {
+        "cutoff": "2021-06-01T00:00:00+00:00",
+        "full_signals_before_cutoff": 2057,
+        "identical": true,
+        "prefix_signals": 2057
+      },
+      {
+        "cutoff": "2021-07-01T00:00:00+00:00",
+        "full_signals_before_cutoff": 2477,
+        "identical": true,
+        "prefix_signals": 2477
+      },
+      {
+        "cutoff": "2021-08-01T00:00:00+00:00",
+        "full_signals_before_cutoff": 2889,
+        "identical": true,
+        "prefix_signals": 2889
+      },
+      {
+        "cutoff": "2021-09-01T00:00:00+00:00",
+        "full_signals_before_cutoff": 3295,
+        "identical": true,
+        "prefix_signals": 3295
+      },
+      {
+        "cutoff": "2021-10-01T00:00:00+00:00",
+        "full_signals_before_cutoff": 3663,
+        "identical": true,
+        "prefix_signals": 3663
+      },
+      {
+        "cutoff": "2021-11-01T00:00:00+00:00",
+        "full_signals_before_cutoff": 4025,
+        "identical": true,
+        "prefix_signals": 4025
+      },
+      {
+        "cutoff": "2021-12-01T00:00:00+00:00",
+        "full_signals_before_cutoff": 4460,
+        "identical": true,
+        "prefix_signals": 4460
+      }
+    ],
+    "outcomes_read_only_after_signal": true,
+    "passed": 11,
+    "total": 11
+  }
+}
