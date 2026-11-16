@@ -37,3 +37,4 @@ __pycache__/
 uploads/
 *.zip
 .env
+ict_vision/results_smoke/
