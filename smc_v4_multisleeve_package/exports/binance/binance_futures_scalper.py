@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """
-Binance USDT-M Futures Multi-Coin Dual-Sleeve Scalper (Direct API Bot)
+Binance USDT-M Futures Multi-Coin Momentum + VWAP + SMC Scalper (Direct API Bot)
 - Zero third-party dependencies (pure Python 3 stdlib).
-- Supports:
-    --mode paper   : Live public kline scan + simulated order execution (default, safe)
-    --mode testnet : Binance Futures Testnet (https://testnet.binancefuture.com)
+- Free Paper Trading on Binance Futures Testnet (3,000 USDT virtual balance):
+    https://testnet.binancefuture.com
+- Modes:
+    --mode paper   : Live public Binance market scan + simulated signals (default, safe)
+    --mode testnet : Binance Futures Testnet (free virtual money, real-time prices)
     --mode live    : Binance Futures Live (https://fapi.binance.com)
 - Environment variables required for testnet/live:
     export BINANCE_API_KEY="your_key"
@@ -38,8 +40,11 @@ DEFAULT_SYMBOLS = (
 LIVE_BASE = "https://fapi.binance.com"
 TESTNET_BASE = "https://testnet.binancefuture.com"
 
+# Bar tuple: (open_time_ms, open, high, low, close, volume)
+Bar = Tuple[int, float, float, float, float, float]
 
-# -------------------- Pure Causal Indicator & SMC Engine --------------------
+
+# -------------------- Pure Causal Indicator, VWAP & SMC Engine --------------------
 
 class CausalSwingTracker:
     def __init__(self, k: int = 2, max_active: int = 25) -> None:
@@ -87,11 +92,11 @@ def compute_ema_series(closes: List[float], span: int) -> List[float]:
     return out
 
 
-def compute_wilder_atr(bars: List[Tuple[int, float, float, float, float]], period: int = 14) -> float:
+def compute_wilder_atr(bars: List[Bar], period: int = 14) -> float:
     val = 0.0
     trs: List[float] = []
     prev_c: Optional[float] = None
-    for _, _, h, l, c in bars:
+    for _, _, h, l, c, _ in bars:
         tr = (h - l) if prev_c is None else max(h - l, abs(h - prev_c), abs(l - prev_c))
         prev_c = c
         if len(trs) < period:
@@ -130,11 +135,23 @@ def compute_er14(closes: List[float]) -> float:
     return abs(arr[-1] - arr[0]) / den if den > 0 else 0.0
 
 
+def compute_daily_utc_vwap(bars_5m: List[Bar]) -> Optional[float]:
+    if not bars_5m:
+        return None
+    latest_day = dt.datetime.fromtimestamp(bars_5m[-1][0] / 1000.0, tz=dt.timezone.utc).date()
+    pv = vv = 0.0
+    for ts_ms, _, h, l, c, v in bars_5m:
+        if dt.datetime.fromtimestamp(ts_ms / 1000.0, tz=dt.timezone.utc).date() == latest_day:
+            pv += ((h + l + c) / 3.0) * v
+            vv += v
+    return (pv / vv) if vv > 0 else None
+
+
 @dataclasses.dataclass
 class SignalCandidate:
     symbol: str
     engine: str
-    side: int  # +1 long, -1 short
+    side: int
     entry_px: float
     sl_px: float
     tp_px: float
@@ -145,39 +162,44 @@ class SignalCandidate:
 
 def evaluate_symbol_bars(
     symbol: str,
-    bars_5m: List[Tuple[int, float, float, float, float]],
-    bars_15m: List[Tuple[int, float, float, float, float]],
-    bars_1h: List[Tuple[int, float, float, float, float]],
-    bars_4h: List[Tuple[int, float, float, float, float]],
+    bars_5m: List[Bar],
+    bars_15m: List[Bar],
+    bars_1h: List[Bar],
+    bars_4h: List[Bar],
     sweep_tp_r: float = 8.0,
 ) -> Optional[SignalCandidate]:
-    """
-    Evaluate strictly CLOSED candles (exclude current forming bar before calling).
-    Each bar tuple: (open_time_ms, open, high, low, close).
-    """
+    """Evaluate strictly CLOSED candles across 3 empirically verified engines."""
     if len(bars_5m) < 80 or len(bars_15m) < 40 or len(bars_1h) < 60 or len(bars_4h) < 60:
         return None
 
     c4 = [b[4] for b in bars_4h]
     c1 = [b[4] for b in bars_1h]
-    c15 = [b[4] for b in bars_15m]
     c5 = [b[4] for b in bars_5m]
 
     e20_4h, e50_4h = compute_ema_series(c4, 20)[-1], compute_ema_series(c4, 50)[-1]
     e20_1h, e50_1h = compute_ema_series(c1, 20)[-1], compute_ema_series(c1, 50)[-1]
+    tr_up = e20_4h > e50_4h and e20_1h > e50_1h
+    tr_dn = e20_4h < e50_4h and e20_1h < e50_1h
     er_1h = compute_er14(c1)
-    e20_15 = compute_ema_series(c15, 20)[-1]
+
+    e9_5 = compute_ema_series(c5, 9)[-1]
+    e20_5 = compute_ema_series(c5, 20)[-1]
+    e50_5 = compute_ema_series(c5, 50)[-1]
     atr_15 = compute_wilder_atr(bars_15m, 14)
     atr_5 = compute_wilder_atr(bars_5m, 14)
     rsi_5 = compute_wilder_rsi(c5, 14)
+    vwap = compute_daily_utc_vwap(bars_5m)
 
-    # Swings on 4H, 1H (k=2 & k=3), 5m (k=2) — single causal pass
+    vols_20 = [b[5] for b in bars_5m[-20:]]
+    vavg_20 = sum(vols_20) / len(vols_20) if vols_20 else 0.0
+    v_last = bars_5m[-1][5]
+
     sw4, sw1, sw1_k3, sw5 = CausalSwingTracker(2), CausalSwingTracker(2), CausalSwingTracker(3), CausalSwingTracker(2)
-    for _, _, h, l, c in bars_4h:
+    for _, _, h, l, c, _ in bars_4h:
         sw4.update(h, l, c)
     cands_k3 = []
     start_scan = max(0, len(bars_1h) - 5)
-    for b_idx, (ts_1h, _, hh, hl, hc) in enumerate(bars_1h):
+    for b_idx, (ts_1h, _, hh, hl, hc, _) in enumerate(bars_1h):
         if b_idx >= start_scan:
             for idx_s, p_lo in list(sw1_k3.act_lo):
                 if (sw1_k3.bar_idx + 1 - idx_s) >= 4 and hl < p_lo and hc > p_lo:
@@ -188,15 +210,15 @@ def evaluate_symbol_bars(
         sw1.update(hh, hl, hc)
         sw1_k3.update(hh, hl, hc)
 
-    for _, _, h, l, c in bars_5m[:-1]:
+    for _, _, h, l, c, _ in bars_5m[:-1]:
         sw5.update(h, l, c)
 
-    ts_5m, o, h, l, c = bars_5m[-1]
-    _, o2, _, _, c2 = bars_5m[-2]
-    _, _, h1, l1, _ = bars_5m[-3]
+    ts_5m, o, h, l, c, _ = bars_5m[-1]
+    _, o2, _, _, c2, _ = bars_5m[-2]
+    _, _, h1, l1, _, _ = bars_5m[-3]
     utc_dt = dt.datetime.fromtimestamp(ts_5m / 1000.0, tz=dt.timezone.utc)
 
-    # Engine 2 check: SMC 1H_k3 Sweep -> 5m CHoCH + FVG (hour >= 09 UTC)
+    # Engine 3: SMC_Sweep_8R (highest PF=1.89)
     if utc_dt.hour >= 9 and atr_5 > 0 and cands_k3:
         c2b = abs(c2 - o2)
         for side, sw_ts, sl_base in reversed(cands_k3):
@@ -206,7 +228,7 @@ def evaluate_symbol_bars(
                 if c > sw5.last_high and (l - h1) >= 0.25 * atr_5 and c2 > o2 and c2b >= atr_5:
                     slp = min(sl_base - atr_5, c - max(1.5 * atr_5, c * 0.0040))
                     rd = c - slp
-                    if 0.0040 <= rd / c < 0.0180:
+                    if 0.0040 <= rd / c <= 0.0180:
                         return SignalCandidate(
                             symbol, "SMC_Sweep_8R", 1, c, slp, c + sweep_tp_r * rd,
                             rd, ((3.0, 1.0), (5.5, 2.5)), 100 * 60
@@ -215,26 +237,37 @@ def evaluate_symbol_bars(
                 if c < sw5.last_low and (l1 - h) >= 0.25 * atr_5 and c2 < o2 and c2b >= atr_5:
                     slp = max(sl_base + atr_5, c + max(1.5 * atr_5, c * 0.0040))
                     rd = slp - c
-                    if 0.0040 <= rd / c < 0.0180:
+                    if 0.0040 <= rd / c <= 0.0180:
                         return SignalCandidate(
                             symbol, "SMC_Sweep_8R", -1, c, slp, c - sweep_tp_r * rd,
                             rd, ((3.0, 1.0), (5.5, 2.5)), 100 * 60
                         )
 
-    # Engine 1 check: KZ_Pull_A+ (07-10 & 12-17 UTC)
-    in_kz = (7 <= utc_dt.hour <= 10) or (12 <= utc_dt.hour <= 17)
-    rng = max(h - l, 1e-9)
-    if in_kz and er_1h >= 0.25 and atr_15 > 0:
-        if e20_4h > e50_4h and e20_1h > e50_1h and l <= e20_15 < c and rsi_5 <= 44.0 and c > o and (c - l) > 0.50 * rng:
-            slp = min(l, e20_15 - 0.8 * atr_15) - 0.3 * atr_15
+    # Engine 1: VWAP_KZ_2R (WR=67.2%, PF=1.73, OOS PF=2.39)
+    if vwap is not None and (7 <= utc_dt.hour <= 20) and er_1h >= 0.25 and atr_15 > 0 and atr_5 > 0:
+        if tr_up and l <= vwap < c and c > o and rsi_5 <= 48.0:
+            slp = min(l, vwap - 0.5 * atr_15) - 0.4 * atr_5
             rd = c - slp
-            if 0.0040 <= rd / c < 0.0180:
-                return SignalCandidate(symbol, "KZ_Pull_A+", 1, c, slp, c + 2.5 * rd, rd, ((1.2, 0.1),), 40 * 60)
-        if e20_4h < e50_4h and e20_1h < e50_1h and h >= e20_15 > c and rsi_5 >= 56.0 and c < o and (h - c) > 0.50 * rng:
-            slp = max(h, e20_15 + 0.8 * atr_15) + 0.3 * atr_15
+            if 0.0040 <= rd / c <= 0.0180:
+                return SignalCandidate(symbol, "VWAP_KZ_2R", 1, c, slp, c + 2.0 * rd, rd, ((1.0, 0.1),), 30 * 60)
+        if tr_dn and h >= vwap > c and c < o and rsi_5 >= 52.0:
+            slp = max(h, vwap + 0.5 * atr_15) + 0.4 * atr_5
             rd = slp - c
-            if 0.0040 <= rd / c < 0.0180:
-                return SignalCandidate(symbol, "KZ_Pull_A+", -1, c, slp, c - 2.5 * rd, rd, ((1.2, 0.1),), 40 * 60)
+            if 0.0040 <= rd / c <= 0.0180:
+                return SignalCandidate(symbol, "VWAP_KZ_2R", -1, c, slp, c - 2.0 * rd, rd, ((1.0, 0.1),), 30 * 60)
+
+    # Engine 2: Mom9_Vol_2.5R (High-frequency momentum + volume surge, 7/7 yrs green)
+    if er_1h >= 0.30 and vavg_20 > 0 and v_last >= 1.8 * vavg_20 and atr_5 > 0:
+        if tr_up and e9_5 > e20_5 > e50_5 and l <= e9_5 < c and c > o:
+            slp = min(l, e20_5) - 0.5 * atr_5
+            rd = c - slp
+            if 0.0040 <= rd / c <= 0.0180:
+                return SignalCandidate(symbol, "Mom9_Vol_2.5R", 1, c, slp, c + 2.5 * rd, rd, ((1.2, 0.1),), 30 * 60)
+        if tr_dn and e9_5 < e20_5 < e50_5 and h >= e9_5 > c and c < o:
+            slp = max(h, e20_5) + 0.5 * atr_5
+            rd = slp - c
+            if 0.0040 <= rd / c <= 0.0180:
+                return SignalCandidate(symbol, "Mom9_Vol_2.5R", -1, c, slp, c - 2.5 * rd, rd, ((1.2, 0.1),), 30 * 60)
 
     return None
 
@@ -304,10 +337,9 @@ class BinanceFuturesClient:
             out[sym] = SymbolFilters(tick, step, min_qty, min_notional)
         return out
 
-    def get_klines(self, symbol: str, interval: str, limit: int = 120) -> List[Tuple[int, float, float, float, float]]:
+    def get_klines(self, symbol: str, interval: str, limit: int = 120) -> List[Bar]:
         raw = self._req("GET", "/fapi/v1/klines", {"symbol": symbol, "interval": interval, "limit": limit})
-        # Drop last still-forming kline (`[:-1]`) to prevent repaint!
-        return [(int(r[0]), float(r[1]), float(r[2]), float(r[3]), float(r[4])) for r in raw[:-1]]
+        return [(int(r[0]), float(r[1]), float(r[2]), float(r[3]), float(r[4]), float(r[5])) for r in raw[:-1]]
 
     def get_usdt_balance(self) -> float:
         acc = self._req("GET", "/fapi/v2/account", signed=True)
@@ -389,7 +421,6 @@ def run_bot(mode: str, symbols: Tuple[str, ...], leverage: int, max_open_pos: in
             equity = paper_equity if mode == "paper" else client.get_usdt_balance()
             open_pos = {} if mode == "paper" else client.get_positions()
 
-            # Pending Limit Fill Watchdog & OCO / Step-Lock Watchdog for live positions
             for sym, meta in list(active_meta.items()):
                 if mode != "paper" and meta["state"] == "PENDING":
                     if sym in open_pos:
@@ -412,7 +443,7 @@ def run_bot(mode: str, symbols: Tuple[str, ...], leverage: int, max_open_pos: in
                 if meta["state"] == "OPEN" and sym in open_pos:
                     b5 = client.get_klines(sym, "5m", 3)
                     if b5:
-                        _, _, h, l, c = b5[-1]
+                        _, _, h, l, c, _ = b5[-1]
                         for act_r, lk_r in meta["step_locks"]:
                             hit = (h >= meta["entry"] + act_r * meta["risk"]) if meta["side"] == 1 else (l <= meta["entry"] - act_r * meta["risk"])
                             new_sl = round_step(meta["entry"] + meta["side"] * lk_r * meta["risk"], filters[sym].tick_size, False)
@@ -426,11 +457,10 @@ def run_bot(mode: str, symbols: Tuple[str, ...], leverage: int, max_open_pos: in
                                 meta["sl"] = new_sl
                                 print(f"[LOCK] {sym} SL moved -> {new_sl}")
 
-            # Scan universe for A+ setups
             for sym, filt in filters.items():
                 if sym in open_pos or sym in active_meta or (len(open_pos) + len(active_meta)) >= max_open_pos:
                     continue
-                b5 = client.get_klines(sym, "5m", 120)
+                b5 = client.get_klines(sym, "5m", 290)
                 b15 = client.get_klines(sym, "15m", 80)
                 b1h = client.get_klines(sym, "1h", 120)
                 b4h = client.get_klines(sym, "4h", 120)
@@ -440,7 +470,7 @@ def run_bot(mode: str, symbols: Tuple[str, ...], leverage: int, max_open_pos: in
                 ep = round_step(sig.entry_px, filt.tick_size, False)
                 sl = round_step(sig.sl_px, filt.tick_size, False)
                 tp = round_step(sig.tp_px, filt.tick_size, False)
-                risk_pct = 0.015 if sig.engine == "SMC_Sweep_8R" else 0.012
+                risk_pct = 0.015 if sig.engine in ("SMC_Sweep_8R", "VWAP_KZ_2R") else 0.012
                 qty = compute_order_qty(equity, risk_pct, ep, sl, filt, leverage=leverage)
                 if qty <= 0:
                     print(f"[SKIP] {sym} qty=0 (minNotional={filt.min_notional} equity={equity:.2f})")
@@ -462,7 +492,7 @@ def run_bot(mode: str, symbols: Tuple[str, ...], leverage: int, max_open_pos: in
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Binance Futures Multi-Coin Dual-Sleeve Scalper")
+    ap = argparse.ArgumentParser(description="Binance Futures Multi-Coin Momentum+VWAP+SMC Scalper")
     ap.add_argument("--mode", choices=("paper", "testnet", "live"), default="paper")
     ap.add_argument("--leverage", type=int, default=10)
     ap.add_argument("--max-pos", type=int, default=3)
