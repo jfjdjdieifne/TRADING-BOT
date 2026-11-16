@@ -271,16 +271,17 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
 
         # 1H Trailing Stop Update for active position (V3_Pro, VisB_Pro, AMD_Pro, NSX_AMD_1D)
         if st.in_position and st.trailing_active and st.trail_mode == "1h" and st.sl_ticket is not None:
-            if st.active_side == 1 and nl is not None:
-                new_sl = self._round_price(st.symbol, max(st.sl_price, float(nl[1])))
-                if new_sl > st.sl_price and new_sl < float(bar.Close):
-                    st.sl_price = new_sl
-                    st.sl_ticket.update(UpdateOrderFields(stop_price=new_sl))
-            elif st.active_side == -1 and nh is not None:
-                new_sl = self._round_price(st.symbol, min(st.sl_price, float(nh[1])))
-                if new_sl < st.sl_price and new_sl > float(bar.Close):
-                    st.sl_price = new_sl
-                    st.sl_ticket.update(UpdateOrderFields(stop_price=new_sl))
+            if st.sl_ticket.status not in (OrderStatus.FILLED, OrderStatus.CANCELED, OrderStatus.INVALID):
+                if st.active_side == 1 and nl is not None:
+                    new_sl = self._round_price(st.symbol, max(st.sl_price, float(nl[1])))
+                    if new_sl > st.sl_price and new_sl < float(bar.Close):
+                        st.sl_price = new_sl
+                        st.sl_ticket.update_stop_price(new_sl)
+                elif st.active_side == -1 and nh is not None:
+                    new_sl = self._round_price(st.symbol, min(st.sl_price, float(nh[1])))
+                    if new_sl < st.sl_price and new_sl > float(bar.Close):
+                        st.sl_price = new_sl
+                        st.sl_ticket.update_stop_price(new_sl)
 
         # V3_Pro_Clean on XAUUSD (1H FVG + 4H BOS, skip 13:00-14:59 UTC)
         if st.symbol == self.xau_sym and len(st.bars_1h) >= 3 and st.atr_1h.value is not None:
@@ -416,7 +417,8 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
 
         # 1) Manage active position BE / Trailing activation
         if st.in_position and st.risk_dist > 0 and st.sl_ticket is not None:
-            if st.be_act_r is not None and not st.be_done:
+            can_update_sl = st.sl_ticket.status not in (OrderStatus.FILLED, OrderStatus.CANCELED, OrderStatus.INVALID)
+            if st.be_act_r is not None and not st.be_done and can_update_sl:
                 hit_be = (h >= st.entry_price + st.be_act_r * st.risk_dist) if st.active_side == 1 \
                     else (l <= st.entry_price - st.be_act_r * st.risk_dist)
                 if hit_be:
@@ -426,10 +428,11 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
                         st.entry_price + st.be_lock_r * st.risk_dist if st.active_side == 1
                         else st.entry_price - st.be_lock_r * st.risk_dist,
                     )
-                    if (st.active_side == 1 and lock_px > st.sl_price) or (st.active_side == -1 and lock_px < st.sl_price):
+                    if (st.active_side == 1 and lock_px > st.sl_price and lock_px < c) or \
+                       (st.active_side == -1 and lock_px < st.sl_price and lock_px > c):
                         st.sl_price = lock_px
-                        st.sl_ticket.update(UpdateOrderFields(stop_price=lock_px))
-            if st.trail_after_r is not None and not st.trailing_active:
+                        st.sl_ticket.update_stop_price(lock_px)
+            if st.trail_after_r is not None and not st.trailing_active and can_update_sl:
                 hit_tr = (h >= st.entry_price + st.trail_after_r * st.risk_dist) if st.active_side == 1 \
                     else (l <= st.entry_price - st.trail_after_r * st.risk_dist)
                 if hit_tr:
@@ -440,9 +443,10 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
                         st.entry_price + st.be_lock_r * st.risk_dist if st.active_side == 1
                         else st.entry_price - st.be_lock_r * st.risk_dist,
                     )
-                    if (st.active_side == 1 and lock_px > st.sl_price) or (st.active_side == -1 and lock_px < st.sl_price):
+                    if (st.active_side == 1 and lock_px > st.sl_price and lock_px < c) or \
+                       (st.active_side == -1 and lock_px < st.sl_price and lock_px > c):
                         st.sl_price = lock_px
-                        st.sl_ticket.update(UpdateOrderFields(stop_price=lock_px))
+                        st.sl_ticket.update_stop_price(lock_px)
 
         # 2) Check pending limit fills causally
         kz_ok = ((not use_kz) or self._in_killzone_utc(dt)) and (min_hour_utc is None or dt.hour >= min_hour_utc)
