@@ -151,3 +151,29 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 .venv/bin/python run_v7_multiasset_backtest.py
 .venv/bin/python run_v4_multisleeve_backtest.py
 ```
+
+## V9 Dynamic Profile Research Layer (kept separate from the V8 reference)
+
+`engine/dynamic_profile.py` is the first implementation of the requested
+contextual profile switcher. It is a sequential, zero-lookahead planner, not a
+replacement for the frozen `exports/quantconnect/V8_3Asset_1PosEach_QC.py`.
+
+It includes:
+
+- prior-100-bar volume z-score and prior-ATR(14) ADI;
+- hard `AGGRESSIVE` gate requiring volume, velocity, and declared Spot
+  executed-flow/CVD convergence;
+- causal three-candle FVGs, body-confirmed BOS/CHoCH, explicit HTF sweep input;
+- shallow-FVG entry, protected impulse stop, deep-OB fallback, target/R:R gate,
+  and monotonic trailing-stop primitive;
+- no broker submission and no implicit OHLCV-as-CVD fallback.
+
+Run its focused tests from the package root:
+
+```bash
+.venv/bin/pytest -q tests/test_dynamic_profile.py
+```
+
+The Arabic design, source limits, and live-readiness checklist are in
+`V9_DYNAMIC_PROFILE_DESIGN_AR.md`. `V9_DYNAMIC_PROFILE_EXAMPLE.py` is a
+synthetic offline example only.
