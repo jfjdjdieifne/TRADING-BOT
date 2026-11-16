@@ -37,6 +37,32 @@ def grid(quick: bool):
                    max_holding_bars=mb, use_breakeven=False)
 
 
+def orb_grid():
+    """Opening-range breakout grid with the cheapest realistic Binance futures
+    fee schedule (maker entry / taker exit). Wider stops lower the cost/R."""
+    rrs = [1.0, 1.5, 2.0]
+    sl_atrs = [0.5, 1.0, 2.0]
+    max_bars = [12, 24]
+    for rr, sl, mb in itertools.product(rrs, sl_atrs, max_bars):
+        yield dict(entry_mode="orb", rr=rr, sl_atr_mult=sl, sl_min_atr=sl,
+                   max_holding_bars=mb, use_breakeven=False,
+                   entry_fee_pct=0.0002, exit_fee_pct=0.0005,
+                   slippage_pct=0.0002)
+
+
+def cfg_from_row(r, extra_fees: bool = False):
+    kw = dict(entry_mode=r["entry_mode"], rr=float(r["rr"]),
+              sl_atr_mult=float(r["sl_atr_mult"]),
+              sl_min_atr=float(r["sl_min_atr"]) if "sl_min_atr" in r else 0.5,
+              max_holding_bars=int(r["max_holding_bars"]),
+              use_breakeven=False)
+    if extra_fees:
+        for k in ("entry_fee_pct", "exit_fee_pct", "slippage_pct", "min_confluence"):
+            if k in r:
+                kw[k] = float(r[k])
+    return EngineConfig(**kw)
+
+
 def run_one(df, cfg: EngineConfig, risk=0.01):
     eng, eq = simulate(df, cfg, initial_equity=100.0, risk_pct=risk)
     return compute_metrics(eng.trades, eq, 100.0), eng
@@ -46,9 +72,12 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--asset", choices=["btc5m", "xau1m", "nsx1m"], default="btc5m")
     p.add_argument("--quick", action="store_true")
+    p.add_argument("--orb", action="store_true",
+                   help="use the session-opening-range (ORB) grid with futures-maker fees")
     p.add_argument("--risk", type=float, default=0.01)
     p.add_argument("--top", type=int, default=6)
     a = p.parse_args()
+    tag = f"orb_{a.asset}" if a.orb else a.asset
 
     if a.asset == "btc5m":
         train = data.load_btc_5m([2025])
@@ -61,7 +90,7 @@ def main():
         test = data.load_nsx_1m(["2026-10"])
 
     rows = []
-    for g in grid(a.quick):
+    for g in (orb_grid() if a.orb else grid(a.quick)):
         cfg = EngineConfig(**g)
         try:
             m, _ = run_one(train, cfg, a.risk)
@@ -70,15 +99,16 @@ def main():
             continue
         rows.append({**g, "n": m["n"], "wr": round(m["wr_pct"], 1),
                      "gross_r": round(m["gross_r"], 1), "net_r": round(m["net_r"], 1),
+                     "avg_cost_r": round(m.get("avg_cost_r", 0.0), 3),
                      "pf": round(m["pf"], 3), "dd": round(m["max_dd_pct"], 1),
                      "t": round(m["t_stat"], 2), "exp": round(m["expectancy_r"], 3)})
 
     df = pd.DataFrame(rows).sort_values("net_r", ascending=False)
     OUT.mkdir(exist_ok=True)
-    df.to_csv(OUT / f"research_{a.asset}_train.csv", index=False)
+    df.to_csv(OUT / f"research_{tag}_train.csv", index=False)
 
     print("=" * 96)
-    print(f"TRAIN {a.asset}  {train.index[0].date()}..{train.index[-1].date()}  "
+    print(f"TRAIN {tag}  {train.index[0].date()}..{train.index[-1].date()}  "
           f"({len(train)} bars)   configs={len(df)}")
     print("-" * 96)
     print(f"{'mode':7} {'rr':>4} {'sl':>4} {'bars':>4} | {'N':>4} {'WR%':>5} "
@@ -94,17 +124,14 @@ def main():
     print(f"TEST (held-out) {a.asset}  {test.index[0].date()}..{test.index[-1].date()}")
     val = []
     for _, r in df.head(a.top).iterrows():
-        cfg = EngineConfig(entry_mode=r["entry_mode"], rr=float(r["rr"]),
-                           sl_atr_mult=float(r["sl_atr_mult"]), sl_min_atr=0.5,
-                           max_holding_bars=int(r["max_holding_bars"]),
-                           use_breakeven=False)
+        cfg = cfg_from_row(r, extra_fees=a.orb)
         m, _ = run_one(test, cfg, a.risk)
         val.append({**r.to_dict(), "test_n": m["n"], "test_wr": round(m["wr_pct"], 1),
                     "test_gross_r": round(m["gross_r"], 1),
                     "test_net_r": round(m["net_r"], 1), "test_pf": round(m["pf"], 3),
                     "test_dd": round(m["max_dd_pct"], 1), "test_t": round(m["t_stat"], 2)})
     vdf = pd.DataFrame(val)
-    vdf.to_csv(OUT / f"research_{a.asset}_test.csv", index=False)
+    vdf.to_csv(OUT / f"research_{tag}_test.csv", index=False)
     for _, r in vdf.iterrows():
         print(f"{r['entry_mode']:7} rr={r['rr']} sl={r['sl_atr_mult']} "
               f"bars={r['max_holding_bars']} -> TEST N={r['test_n']} "

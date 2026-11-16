@@ -51,6 +51,11 @@ class EngineConfig:
     vwap_z_max: float = 2.0
     vwap_pullback_r: float = 0.5
     mr_z: float = 2.0                # ATR deviation from session mean for mr mode
+    # opening-range breakout (ORB)
+    orb_min_width_atr: float = 0.3   # ignore ranges thinner than this * ATR
+    orb_require_disp: bool = True    # require a displacement candle on the break
+    orb_sessions: tuple = ("london", "ny", "overlap")
+    min_confluence: float = 0.0     # 0..1 gate on the golden-trade score
 
 
 @dataclass
@@ -142,7 +147,10 @@ class ScalpingEngine:
         attached by the simulator).
         """
         c = self.cfg
-        t = self.n
+        # Live mode passes rolling-window indicator arrays, so the newest bar is
+        # the LAST row, not row `self.n`. `bar["_t"]` lets the caller pin the
+        # index explicitly (backtests leave it unset -> self.n alignment).
+        t = int(bar.get("_t", self.n))
         self.n += 1
         ts = bar["time"]
         o, h, l, cl, v = (float(bar["open"]), float(bar["high"]),
@@ -162,6 +170,11 @@ class ScalpingEngine:
             self.cum_n += 1
         # volume-weighted when volume exists, else equal-weighted typical mean
         self.vwap = (self.cum_pv / self.cum_v) if self.cum_v > 0 else (self.cum_tp / self.cum_n)
+        # Multi-symbol live mode computes the session VWAP per symbol from that
+        # symbol's own history; a single engine can't accumulate N sessions at
+        # once. The simulator leaves `_vwap` unset and uses the accumulator.
+        if bar.get("_vwap") is not None:
+            self.vwap = float(bar["_vwap"])
 
         # attach precomputed arrays
         self.atr = bar["_atr"]
@@ -171,6 +184,8 @@ class ScalpingEngine:
         self.ob_list = bar["_ob"]
         self.fvg_list = bar["_fvg"]
         self._disp = bar["_disp"]
+        self._sessions = bar.get("_sessions", {})
+        self._confluence = bar.get("_confluence", None)
         self._bar_idx = t
 
         # ---------------- position management (on this closed bar) ------- #
@@ -216,6 +231,32 @@ class ScalpingEngine:
                     side, reason = -1, "sweep_bear"
                     sl = max(h, self.swing.high[t]) + c.sl_atr_mult * atr_now
                     trigger = cl
+
+        # 1a) opening-range breakout at strong session opens (ORB)
+        if side == 0 and c.entry_mode in ("orb", "combo"):
+            for sname in c.orb_sessions:
+                sess = self._sessions.get(sname)
+                if not sess:
+                    continue
+                or_hi_a, or_lo_a, br_hi, br_lo, in_win = sess
+                if not in_win[t] or np.isnan(or_hi_a[t]):
+                    continue
+                width = or_hi_a[t] - or_lo_a[t]
+                if width <= 0 or width < c.orb_min_width_atr * atr_now:
+                    continue
+                disp_ok = (h - l) >= 0.8 * atr_now
+                if br_hi[t] and (htf == 1 or not c.require_htf_align):
+                    if (not c.orb_require_disp) or disp_ok:
+                        side, reason = 1, f"orb_{sname}_bull"
+                        sl = min(l, or_lo_a[t]) - c.sl_atr_mult * atr_now
+                        trigger = cl
+                        break
+                if br_lo[t] and (htf == -1 or not c.require_htf_align):
+                    if (not c.orb_require_disp) or disp_ok:
+                        side, reason = -1, f"orb_{sname}_bear"
+                        sl = max(h, or_hi_a[t]) + c.sl_atr_mult * atr_now
+                        trigger = cl
+                        break
 
         # 1b) break-of-structure continuation (displacement through a level)
         if side == 0 and c.entry_mode in ("bos", "combo"):
@@ -292,6 +333,8 @@ class ScalpingEngine:
                 trigger = cl
 
         if side == 0 or np.isnan(sl):
+            return None
+        if self._confluence is not None and self._confluence[t] < c.min_confluence:
             return None
         risk = (trigger - sl) if side == 1 else (sl - trigger)
         floor = max(c.sl_min_atr * atr_now, 1e-9)
@@ -376,6 +419,10 @@ def attach_indicators(df: pd.DataFrame, cfg: EngineConfig) -> dict:
     bull_sweep, bear_sweep = sweep_events(h, l, c, swing)
     bull_c, bear_c = candle_patterns(o, h, l, c)
     htf_close, htf_swing = _htf_bias_series(df, cfg.htf_rule, cfg.k_swing)
+    from .sessions import all_session_arrays
+    from .confluence import setup_quality
+    htf_trend = _htf_trend_array(htf_close, htf_swing)
+    conf, _parts = setup_quality(df, atr, htf_trend)
     return {
         "atr": atr,
         "swing": swing,
@@ -386,6 +433,9 @@ def attach_indicators(df: pd.DataFrame, cfg: EngineConfig) -> dict:
         "disp": displacement(c, o, atr, 1.0),
         "htf_close": htf_close,
         "htf_swing": htf_swing,
+        "htf_trend": htf_trend,
+        "confluence": conf,
+        "sessions": all_session_arrays(df),
     }
 
 
@@ -434,7 +484,8 @@ def simulate(df: pd.DataFrame, config: EngineConfig | None = None,
             "_atr": atr, "_swing": swing, "_htf_close": htf_close,
             "_htf_swing": htf_swing, "_ob": obs, "_fvg": fv,
             "_sweeps": (bull_sweep, bear_sweep), "_candles": (bull_c, bear_c),
-            "_disp": disp,
+            "_disp": disp, "_sessions": ind["sessions"],
+            "_confluence": ind["confluence"],
         }
         eng.equity = eng.equity  # keep
         # execute pending signal at this bar's open
@@ -467,6 +518,17 @@ def simulate(df: pd.DataFrame, config: EngineConfig | None = None,
         eng._close(eng.pos, c[-1], times[-1], "eod")
 
     return eng, equity_curve
+
+
+def _htf_trend_array(htf_close: np.ndarray, htf_swing) -> np.ndarray:
+    c = np.asarray(htf_close, dtype=float)
+    sh = np.asarray(htf_swing.high, dtype=float)
+    sl = np.asarray(htf_swing.low, dtype=float)
+    out = np.zeros(len(c), dtype=np.int64)
+    valid = ~np.isnan(sh) & ~np.isnan(sl)
+    out[valid & (c > sh)] = 1
+    out[valid & (c < sl)] = -1
+    return out
 
 
 def _htf_bias_series(df: pd.DataFrame, rule: str, k: int):

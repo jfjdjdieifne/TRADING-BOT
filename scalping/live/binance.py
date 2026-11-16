@@ -27,11 +27,34 @@ WS_PROD = "wss://stream.binance.com:9443"
 REST_TEST = "https://testnet.binance.vision"
 WS_TEST = "wss://testnet.binance.vision"
 
+# USDⓈ-M futures — cheaper fees, short side always available, and this is the
+# market `scanner.py` ranks. Spot stays the default for backwards compatibility.
+REST_FUT = "https://fapi.binance.com"
+WS_FUT = "wss://fstream.binance.com"
+REST_FUT_TEST = "https://testnet.binancefuture.com"
+WS_FUT_TEST = "wss://stream.binancefuture.com"
+
+PATHS = {
+    "spot": {"klines": "/api/v3/klines", "order": "/api/v3/order",
+             "account": "/api/v3/account", "openOrders": "/api/v3/openOrders"},
+    "futures": {"klines": "/fapi/v1/klines", "order": "/fapi/v1/order",
+                "account": "/fapi/v2/account", "openOrders": "/fapi/v1/openOrders"},
+}
+
 
 class BinanceClient:
-    def __init__(self, testnet: bool = False, paper_only: bool = True):
-        self.rest = REST_TEST if testnet else REST_PROD
-        self.ws_url = WS_TEST if testnet else WS_PROD
+    def __init__(self, testnet: bool = False, paper_only: bool = True,
+                 market: str = "spot"):
+        if market not in PATHS:
+            raise ValueError(f"market must be one of {list(PATHS)}")
+        self.market = market
+        if market == "futures":
+            self.rest = REST_FUT_TEST if testnet else REST_FUT
+            self.ws_url = WS_FUT_TEST if testnet else WS_FUT
+        else:
+            self.rest = REST_TEST if testnet else REST_PROD
+            self.ws_url = WS_TEST if testnet else WS_PROD
+        self.paths = PATHS[market]
         self.paper_only = paper_only
         self.api_key = os.environ.get("BINANCE_API_KEY", "")
         self.api_secret = os.environ.get("BINANCE_API_SECRET", "")
@@ -77,11 +100,11 @@ class BinanceClient:
 
     # ------------------------------------------------------------------ #
     def klines(self, symbol: str, interval: str = "5m", limit: int = 500):
-        return self._get("/api/v3/klines",
+        return self._get(self.paths["klines"],
                          {"symbol": symbol, "interval": interval, "limit": limit})
 
     def account(self):
-        return self._get("/api/v3/account", signed=True)
+        return self._get(self.paths["account"], signed=True)
 
     def place_market_order(self, symbol: str, side: str, quantity: float,
                            quote_qty: float | None = None):
@@ -91,7 +114,7 @@ class BinanceClient:
         else:
             params["quantity"] = f"{quantity:.8f}"
         params["newOrderRespType"] = "RESULT"
-        return self._post("/api/v3/order", params)
+        return self._post(self.paths["order"], params)
 
     def place_stop_market(self, symbol: str, side: str, quantity: float,
                           stop_price: float):
@@ -99,7 +122,7 @@ class BinanceClient:
                   "quantity": f"{quantity:.8f}",
                   "stopPrice": f"{stop_price:.8f}",
                   "workingType": "MARK_PRICE", "closePosition": "true"}
-        return self._post("/api/v3/order", params)
+        return self._post(self.paths["order"], params)
 
     def place_take_profit(self, symbol: str, side: str, quantity: float,
                           stop_price: float):
@@ -107,10 +130,10 @@ class BinanceClient:
                   "quantity": f"{quantity:.8f}",
                   "stopPrice": f"{stop_price:.8f}",
                   "workingType": "MARK_PRICE", "closePosition": "true"}
-        return self._post("/api/v3/order", params)
+        return self._post(self.paths["order"], params)
 
     def cancel_all(self, symbol: str):
-        return self._delete("/api/v3/openOrders", {"symbol": symbol})
+        return self._delete(self.paths["openOrders"], {"symbol": symbol})
 
     def _delete(self, path: str, params: dict):
         if self.paper_only:
@@ -129,10 +152,11 @@ class BinanceClient:
 # --------------------------------------------------------------------------- #
 # WebSocket
 # --------------------------------------------------------------------------- #
-async def stream_klines(symbol: str, interval: str, on_kline, testnet: bool = False):
+async def stream_klines(symbol: str, interval: str, on_kline, testnet: bool = False,
+                        market: str = "spot", on_aggtrade=None):
     """Consume combined kline + aggTrade streams. `on_kline(bar)` on close."""
     import websockets
-    base = WS_TEST if testnet else WS_PROD
+    base = (WS_FUT_TEST if testnet else WS_FUT) if market == "futures" else (WS_TEST if testnet else WS_PROD)
     streams = f"{symbol.lower()}@kline_{interval}/{symbol.lower()}@aggTrade"
     url = f"{base}/stream?streams={streams}"
     async with websockets.connect(url, ping_interval=20, ping_timeout=20) as ws:
@@ -148,7 +172,7 @@ async def stream_klines(symbol: str, interval: str, on_kline, testnet: bool = Fa
                         "low": float(k["l"]), "close": float(k["c"]),
                         "volume": float(k["v"]),
                     })
-            elif payload.get("e") == "aggTrade":
+            elif payload.get("e") == "aggTrade" and on_aggtrade is not None:
                 on_aggtrade(float(payload["p"]), int(payload["T"]))
 
 

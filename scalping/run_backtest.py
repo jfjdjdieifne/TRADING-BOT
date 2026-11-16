@@ -40,6 +40,9 @@ def build_config(a) -> EngineConfig:
         daily_loss_pct=a.daily_loss,
         use_breakeven=not a.no_be,
         mr_z=a.mr_z,
+        orb_min_width_atr=a.orb_min_width,
+        orb_require_disp=not a.orb_no_disp,
+        min_confluence=a.min_confluence,
     )
 
 
@@ -48,7 +51,8 @@ def main():
     p.add_argument("--asset", choices=["btc5m", "xau1m", "nsx1m"], default="btc5m")
     p.add_argument("--years", type=int, nargs="*", default=[2025, 2026])
     p.add_argument("--months", nargs="*", default=None)
-    p.add_argument("--mode", choices=["sweep", "ob", "vwap", "bos", "reclaim", "mr", "combo"],
+    p.add_argument("--mode", choices=["sweep", "ob", "vwap", "bos", "reclaim", "mr",
+                                      "orb", "combo"],
                    default="combo")
     p.add_argument("--rr", type=float, default=1.5)
     p.add_argument("--sl-atr", type=float, default=0.5)
@@ -65,6 +69,9 @@ def main():
     p.add_argument("--max-trades", type=int, default=6)
     p.add_argument("--daily-loss", type=float, default=0.03)
     p.add_argument("--mr-z", type=float, default=2.0)
+    p.add_argument("--orb-min-width", type=float, default=0.3)
+    p.add_argument("--orb-no-disp", action="store_true")
+    p.add_argument("--min-confluence", type=float, default=0.0)
     p.add_argument("--no-confirm", action="store_true")
     p.add_argument("--no-htf", action="store_true")
     p.add_argument("--no-be", action="store_true")

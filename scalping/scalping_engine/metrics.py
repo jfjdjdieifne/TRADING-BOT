@@ -9,7 +9,7 @@ def compute_metrics(trades, equity_curve=None, initial_equity: float = 100.0) ->
     import pandas as pd
     if not trades:
         return {"n": 0, "wr_pct": 0.0, "pf": 0.0, "net_r": 0.0, "gross_r": 0.0,
-                "net_pct": 0.0,
+                "avg_cost_r": 0.0, "total_cost_r": 0.0, "net_pct": 0.0,
                 "expectancy_r": 0.0, "max_dd_pct": 0.0, "t_stat": 0.0,
                 "avg_win_r": 0.0, "avg_loss_r": 0.0, "avg_bars": 0.0,
                 "final_equity": initial_equity, "reasons": {}, "exits": {}}
@@ -40,6 +40,8 @@ def compute_metrics(trades, equity_curve=None, initial_equity: float = 100.0) ->
         final = float(eq[-1])
 
     gross_r = float(sum(t.pnl_r + t.fees / t.risk_usd for t in trades)) if trades else 0.0
+    avg_cost_r = float(np.mean([t.fees / t.risk_usd for t in trades])) if trades else 0.0
+    total_cost_r = float(sum(t.fees / t.risk_usd for t in trades)) if trades else 0.0
     reasons, exits = {}, {}
     for tr in trades:
         reasons[tr.reason] = reasons.get(tr.reason, 0) + 1
@@ -51,6 +53,8 @@ def compute_metrics(trades, equity_curve=None, initial_equity: float = 100.0) ->
         "pf": float(pf),
         "net_r": float(r.sum()),
         "gross_r": gross_r,
+        "avg_cost_r": avg_cost_r,
+        "total_cost_r": total_cost_r,
         "net_pct": float((final - initial_equity) / initial_equity * 100.0),
         "expectancy_r": float(mean_r),
         "max_dd_pct": float(max_dd * 100.0),
@@ -68,6 +72,7 @@ def fmt(m: dict) -> str:
     return (
         f"N={m['n']}  WR={m['wr_pct']:.1f}%  PF={m['pf']:.3f}  "
         f"net={m['net_r']:.2f}R ({m['net_pct']:+.1f}%)  "
+        f"gross={m.get('gross_r', 0.0):.2f}R  cost={m.get('avg_cost_r', 0.0):.2f}R/tr  "
         f"exp={m['expectancy_r']:.3f}R  maxDD={m['max_dd_pct']:.1f}%  "
         f"t={m['t_stat']:.2f}  final=${m['final_equity']:.2f}"
     )

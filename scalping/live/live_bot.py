@@ -58,7 +58,8 @@ def replay(df: pd.DataFrame, cfg: EngineConfig, risk_pct: float = 0.01,
             "_htf_close": ind["htf_close"], "_htf_swing": ind["htf_swing"],
             "_ob": ind["ob"], "_fvg": ind["fvg"],
             "_sweeps": ind["sweeps"], "_candles": ind["candles"],
-            "_disp": ind["disp"],
+            "_disp": ind["disp"], "_sessions": ind["sessions"],
+            "_confluence": ind["confluence"], "_t": t,
         }
         if pending is not None and pending_bar == t:
             side = pending.side
@@ -97,16 +98,20 @@ class Position:
     qty: float
     reason: str
     opened_ms: int
+    risk: float = 0.0
+    bars: int = 0
+    be: bool = False
 
 
 class LiveBot:
     def __init__(self, cfg: EngineConfig, symbol="BTCUSDT", interval="5m",
-                 paper_only=True, testnet=False, window=600):
+                 paper_only=True, testnet=False, window=300, market="spot"):
         self.cfg = cfg
         self.symbol = symbol
         self.interval = interval
         self.paper_only = paper_only
-        self.client = BinanceClient(testnet=testnet, paper_only=paper_only)
+        self.client = BinanceClient(testnet=testnet, paper_only=paper_only,
+                                    market=market)
         self.window = window
         self.engine = ScalpingEngine(cfg)
         self.engine.equity = 100.0
@@ -132,8 +137,32 @@ class LiveBot:
                 "Low": float(k[3]), "Close": float(k[4]), "Volume": float(k[5]),
             })
         self.hist = pd.DataFrame(rows).set_index("Datetime")
+        self._seed_vwap()
         print(f"[seed] {len(self.hist)} {self.interval} bars "
               f"{self.hist.index[0]} .. {self.hist.index[-1]}")
+
+    def _seed_vwap(self):
+        """Seed the session VWAP accumulator from today's *closed* seeded bars,
+        so live VWAP matches the backtest instead of starting from zero."""
+        df = self.hist
+        if df.empty:
+            return
+        day = df.index[-1].date()
+        today = df[df.index.date == day]
+        if len(today) > 1:
+            today = today.iloc[:-1]          # last row may still be the open bar
+        if today.empty:
+            return
+        typical = (today["High"] + today["Low"] + today["Close"]) / 3.0
+        v = today["Volume"]
+        e = self.engine
+        e.cum_pv = float((typical * v).sum())
+        e.cum_v = float(v.sum())
+        e.cum_tp = float(typical.sum())
+        e.cum_n = len(today)
+        e.last_day = day
+        e.vwap = (e.cum_pv / e.cum_v) if e.cum_v > 0 else (
+            e.cum_tp / e.cum_n if e.cum_n else np.nan)
 
     def _indicators(self):
         if len(self.hist) < 30:
@@ -163,7 +192,8 @@ class LiveBot:
             "_htf_close": ind["htf_close"], "_htf_swing": ind["htf_swing"],
             "_ob": ind["ob"], "_fvg": ind["fvg"],
             "_sweeps": ind["sweeps"], "_candles": ind["candles"],
-            "_disp": ind["disp"],
+            "_disp": ind["disp"], "_sessions": ind["sessions"],
+            "_confluence": ind["confluence"], "_t": t,
         }
         # manage open position on this closed bar
         if self.pos is not None:
@@ -189,7 +219,9 @@ class LiveBot:
             return
         qty = self.engine.equity * self.cfg.risk_pct / risk
         tp = entry + side * self.cfg.rr * risk
-        self.pos = Position(side, entry, sig.sl, tp, qty, sig.reason, int(time.time() * 1000))
+        self.pos = Position(side, entry, sig.sl, tp, qty, sig.reason,
+                            int(time.time() * 1000), risk=risk)
+        self.tick_hi, self.tick_lo = np.nan, np.nan   # only post-entry ticks count
         verb = "PAPER" if self.paper_only else "LIVE"
         print(f"[{verb}] OPEN {('LONG' if side==1 else 'SHORT')} {self.symbol} "
               f"{qty:.6f} @ {entry:.2f}  sl={sig.sl:.2f} tp={tp:.2f}  ({sig.reason})")
@@ -205,10 +237,12 @@ class LiveBot:
                 print(f"[error] order failed: {e}")
                 self.pos = None
 
-    def _manage(self, high, low, close, ts):
+    def _check_sl_tp(self, high, low, ts) -> bool:
+        """Tick-safe SL/TP check (no bar counting)."""
         p = self.pos
-        exit_px = None
-        why = ""
+        if p is None:
+            return False
+        exit_px, why = None, ""
         if p.side == 1:
             if low <= p.sl:
                 exit_px, why = p.sl, "sl"
@@ -220,9 +254,33 @@ class LiveBot:
             elif low <= p.tp:
                 exit_px, why = p.tp, "tp"
         if exit_px is None:
+            return False
+        self._close_at(exit_px, why, ts)
+        return True
+
+    def _manage(self, high, low, close, ts):
+        """One closed bar: SL/TP, breakeven, max holding time."""
+        p = self.pos
+        if p is None:
             return
+        if self._check_sl_tp(high, low, ts):
+            return
+        p.bars += 1
+        if self.cfg.use_breakeven and not p.be and p.risk > 0:
+            r = ((close - p.entry) if p.side == 1 else (p.entry - close)) / p.risk
+            if r >= self.cfg.breakeven_at_r:
+                p.sl = p.entry
+                p.be = True
+        if p.bars >= self.cfg.max_holding_bars:
+            self._close_at(close, "time", ts)
+
+    def _close_at(self, exit_px, why, ts):
+        p = self.pos
         gross = (exit_px - p.entry) * p.qty * p.side
-        fees = (p.entry * p.qty + exit_px * p.qty) * self.cfg.fee_pct
+        ef = self.cfg.entry_fee_pct if self.cfg.entry_fee_pct is not None else self.cfg.fee_pct
+        xf = self.cfg.exit_fee_pct if self.cfg.exit_fee_pct is not None else self.cfg.fee_pct
+        fees = (p.entry * p.qty * ef + exit_px * p.qty * xf
+                + (p.entry + exit_px) * p.qty * self.cfg.slippage_pct)
         pnl = gross - fees
         self.engine.equity += pnl
         self.day_pnl += pnl
@@ -241,8 +299,8 @@ class LiveBot:
         self.tick_hi = price if np.isnan(self.tick_hi) else max(self.tick_hi, price)
         self.tick_lo = price if np.isnan(self.tick_lo) else min(self.tick_lo, price)
         if self.pos is not None:
-            self._manage(self.tick_hi, self.tick_lo, price,
-                         pd.Timestamp(ts_ms, unit="ms", tz="UTC"))
+            self._check_sl_tp(self.tick_hi, self.tick_lo,
+                              pd.Timestamp(ts_ms, unit="ms", tz="UTC"))
             return
         # real-time sweep detection against the last closed bar's swing level
         if len(self.hist) < 30:
@@ -314,11 +372,27 @@ def main():
     ap.add_argument("--max-bars", type=int, default=12)
     ap.add_argument("--risk", type=float, default=0.01)
     ap.add_argument("--testnet", action="store_true")
-    ap.add_argument("--window", type=int, default=600)
+    ap.add_argument("--window", type=int, default=300,
+                    help="rolling bars kept per symbol (300 x 5m = 25h)")
+    ap.add_argument("--bars", type=int, default=400,
+                    help="bars to feed in multi-symbol offline replay")
+    ap.add_argument("--market", choices=["spot", "futures"], default="futures")
+    ap.add_argument("--scan", action="store_true",
+                    help="scan ALL Binance USDT futures and trade the top-ranked symbols")
+    ap.add_argument("--symbols", default="",
+                    help="comma-separated symbol list (multi-symbol mode)")
+    ap.add_argument("--top", type=int, default=8)
+    ap.add_argument("--min-volume", type=float, default=20.0,
+                    help="minimum 24h quote volume in millions USDT")
+    ap.add_argument("--rescan-min", type=float, default=30.0)
+    ap.add_argument("--min-confluence", type=float, default=0.0)
     a = ap.parse_args()
 
     cfg = EngineConfig(entry_mode=a.entry_mode, rr=a.rr, risk_pct=a.risk,
-                       sl_atr_mult=a.sl_atr, max_holding_bars=a.max_bars)
+                       sl_atr_mult=a.sl_atr, max_holding_bars=a.max_bars,
+                       min_confluence=a.min_confluence,
+                       entry_fee_pct=0.0002, exit_fee_pct=0.0005,
+                       slippage_pct=0.0002)
 
     if a.mode == "replay":
         from scalping_engine import data
@@ -328,6 +402,22 @@ def main():
             df = data.load_xau_1m(a.months)
         else:
             df = data.load_nsx_1m(a.months)
+        if a.scan or a.symbols:
+            from .multi_bot import MultiSymbolBot, synthetic_frames
+            syms = [s.strip().upper() for s in a.symbols.split(",") if s.strip()] or None
+            syms = (syms or ["BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT",
+                             "XRPUSDT", "DOGEUSDT", "ADAUSDT", "AVAXUSDT"])[:min(a.top, 4)]
+            bot = MultiSymbolBot(cfg, symbols=syms, paper_only=True, testnet=True,
+                                 window=a.window)
+            print("=" * 70)
+            print("SYNTHETIC MULTI-SYMBOL REPLAY — local BTC 5m data transformed "
+                  "into stand-in symbols (NOT real coins, NOT live market)")
+            s = bot.replay(synthetic_frames(df, syms), bars=a.bars)
+            print("=" * 70)
+            print(f"MULTI REPLAY  symbols={len(syms)}  bars={s['bars']}  "
+                  f"signals={s['signals']}  trades={s['trades']}  "
+                  f"WR={s['wr_pct']}%  net=${s['net_usd']}  equity=${s['equity']}")
+            return
         eng = replay(df, cfg, a.risk)
         m = compute_metrics(eng.trades, initial_equity=100.0)
         print("=" * 70)
@@ -339,10 +429,24 @@ def main():
     if not a.testnet and not os.environ.get("BINANCE_API_KEY"):
         print("Refusing to connect without BINANCE_API_KEY (use --testnet or set keys).")
         return
-    bot = LiveBot(cfg, symbol=a.symbol, interval=a.interval,
-                  paper_only=(a.mode != "live"), testnet=a.testnet, window=a.window)
-    print(f"[bot] mode={a.mode} symbol={a.symbol} interval={a.interval} "
-          f"paper_only={bot.paper_only} entry_mode={a.entry_mode}")
+
+    if a.scan or a.symbols:
+        from .multi_bot import MultiSymbolBot
+        syms = [s.strip().upper() for s in a.symbols.split(",") if s.strip()] or None
+        bot = MultiSymbolBot(cfg, symbols=syms, interval=a.interval,
+                             paper_only=(a.mode != "live"), testnet=a.testnet,
+                             window=a.window, market=a.market, top=a.top,
+                             min_volume_m=a.min_volume, rescan_min=a.rescan_min)
+        print(f"[bot] mode={a.mode} MULTI-SYMBOL scan={bool(a.scan)} "
+              f"top={a.top} interval={a.interval} market={a.market} "
+              f"paper_only={bot.paper_only} entry_mode={a.entry_mode} "
+              f"min_confluence={a.min_confluence}")
+    else:
+        bot = LiveBot(cfg, symbol=a.symbol, interval=a.interval,
+                      paper_only=(a.mode != "live"), testnet=a.testnet,
+                      window=a.window, market=a.market)
+        print(f"[bot] mode={a.mode} symbol={a.symbol} interval={a.interval} "
+              f"paper_only={bot.paper_only} entry_mode={a.entry_mode}")
     asyncio.run(bot.run())
 
 

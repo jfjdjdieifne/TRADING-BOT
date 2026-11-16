@@ -25,6 +25,8 @@ memcheck/
 perf_lab/
 smoke/
 scalping/outputs/equity_*.csv
+scalping/outputs/summary_*.json
+scalping/outputs/trades_*.csv
 .build_*.sha
 .closure_*.sha
 .tools_gate_*.txt
