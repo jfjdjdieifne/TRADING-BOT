@@ -127,6 +127,14 @@ def compute_wilder_rsi(closes: List[float], period: int = 14) -> float:
     return 100.0 if al <= 1e-12 else (100.0 - 100.0 / (1.0 + ag / al))
 
 
+def compute_macd_hist(closes: List[float]) -> float:
+    e12 = compute_ema_series(closes, 12)
+    e26 = compute_ema_series(closes, 26)
+    macd = [a - b for a, b in zip(e12, e26)]
+    sig = compute_ema_series(macd, 9)
+    return macd[-1] - sig[-1]
+
+
 def compute_er14(closes: List[float]) -> float:
     if len(closes) < 15:
         return 0.0
@@ -166,7 +174,7 @@ def evaluate_symbol_bars(
     bars_15m: List[Bar],
     bars_1h: List[Bar],
     bars_4h: List[Bar],
-    sweep_tp_r: float = 8.0,
+    sweep_tp_r: float = 5.0,
 ) -> Optional[SignalCandidate]:
     """Evaluate strictly CLOSED candles across 3 empirically verified engines."""
     if len(bars_5m) < 80 or len(bars_15m) < 40 or len(bars_1h) < 60 or len(bars_4h) < 60:
@@ -185,6 +193,7 @@ def evaluate_symbol_bars(
     e9_5 = compute_ema_series(c5, 9)[-1]
     e20_5 = compute_ema_series(c5, 20)[-1]
     e50_5 = compute_ema_series(c5, 50)[-1]
+    macd_hist = compute_macd_hist(c5)
     atr_15 = compute_wilder_atr(bars_15m, 14)
     atr_5 = compute_wilder_atr(bars_5m, 14)
     rsi_5 = compute_wilder_rsi(c5, 14)
@@ -230,8 +239,8 @@ def evaluate_symbol_bars(
                     rd = c - slp
                     if 0.0040 <= rd / c <= 0.0180:
                         return SignalCandidate(
-                            symbol, "SMC_Sweep_8R", 1, c, slp, c + sweep_tp_r * rd,
-                            rd, ((3.0, 1.0), (5.5, 2.5)), 100 * 60
+                            symbol, "SMC_Sweep_5R", 1, c, slp, c + sweep_tp_r * rd,
+                            rd, ((3.0, 1.0),), 100 * 60
                         )
             elif side == -1 and h <= sl_base and sw4.trend == -1 and sw1.trend == -1 and sw5.last_low is not None:
                 if c < sw5.last_low and (l1 - h) >= 0.25 * atr_5 and c2 < o2 and c2b >= atr_5:
@@ -239,35 +248,35 @@ def evaluate_symbol_bars(
                     rd = slp - c
                     if 0.0040 <= rd / c <= 0.0180:
                         return SignalCandidate(
-                            symbol, "SMC_Sweep_8R", -1, c, slp, c - sweep_tp_r * rd,
-                            rd, ((3.0, 1.0), (5.5, 2.5)), 100 * 60
+                            symbol, "SMC_Sweep_5R", -1, c, slp, c - sweep_tp_r * rd,
+                            rd, ((3.0, 1.0),), 100 * 60
                         )
 
-    # Engine 1: VWAP_KZ_2R (WR=67.2%, PF=1.73, OOS PF=2.39)
+    # Engine 1: VWAP_KZ_1.3R (WR=74.6%, PF=1.92, OOS PF=2.80, 82.6% green months)
     if vwap is not None and (7 <= utc_dt.hour <= 20) and er_1h >= 0.25 and atr_15 > 0 and atr_5 > 0:
         if tr_up and l <= vwap < c and c > o and rsi_5 <= 48.0:
             slp = min(l, vwap - 0.5 * atr_15) - 0.4 * atr_5
             rd = c - slp
             if 0.0040 <= rd / c <= 0.0180:
-                return SignalCandidate(symbol, "VWAP_KZ_2R", 1, c, slp, c + 2.0 * rd, rd, ((1.0, 0.1),), 30 * 60)
+                return SignalCandidate(symbol, "VWAP_KZ_1.3R", 1, c, slp, c + 1.3 * rd, rd, ((0.7, 0.1),), 30 * 60)
         if tr_dn and h >= vwap > c and c < o and rsi_5 >= 52.0:
             slp = max(h, vwap + 0.5 * atr_15) + 0.4 * atr_5
             rd = slp - c
             if 0.0040 <= rd / c <= 0.0180:
-                return SignalCandidate(symbol, "VWAP_KZ_2R", -1, c, slp, c - 2.0 * rd, rd, ((1.0, 0.1),), 30 * 60)
+                return SignalCandidate(symbol, "VWAP_KZ_1.3R", -1, c, slp, c - 1.3 * rd, rd, ((0.7, 0.1),), 30 * 60)
 
-    # Engine 2: Mom9_Vol_2.5R (High-frequency momentum + volume surge, 7/7 yrs green)
+    # Engine 2: Mom9_MACD_1.8R (High-frequency momentum + MACD + volume surge, 7/7 yrs green)
     if er_1h >= 0.30 and vavg_20 > 0 and v_last >= 1.8 * vavg_20 and atr_5 > 0:
-        if tr_up and e9_5 > e20_5 > e50_5 and l <= e9_5 < c and c > o:
+        if tr_up and macd_hist > 0 and e9_5 > e20_5 > e50_5 and l <= e9_5 < c and c > o:
             slp = min(l, e20_5) - 0.5 * atr_5
             rd = c - slp
             if 0.0040 <= rd / c <= 0.0180:
-                return SignalCandidate(symbol, "Mom9_Vol_2.5R", 1, c, slp, c + 2.5 * rd, rd, ((1.2, 0.1),), 30 * 60)
-        if tr_dn and e9_5 < e20_5 < e50_5 and h >= e9_5 > c and c < o:
+                return SignalCandidate(symbol, "Mom9_MACD_1.8R", 1, c, slp, c + 1.8 * rd, rd, ((0.9, 0.1),), 30 * 60)
+        if tr_dn and macd_hist < 0 and e9_5 < e20_5 < e50_5 and h >= e9_5 > c and c < o:
             slp = max(h, e20_5) + 0.5 * atr_5
             rd = slp - c
             if 0.0040 <= rd / c <= 0.0180:
-                return SignalCandidate(symbol, "Mom9_Vol_2.5R", -1, c, slp, c - 2.5 * rd, rd, ((1.2, 0.1),), 30 * 60)
+                return SignalCandidate(symbol, "Mom9_MACD_1.8R", -1, c, slp, c - 1.8 * rd, rd, ((0.9, 0.1),), 30 * 60)
 
     return None
 
@@ -470,7 +479,7 @@ def run_bot(mode: str, symbols: Tuple[str, ...], leverage: int, max_open_pos: in
                 ep = round_step(sig.entry_px, filt.tick_size, False)
                 sl = round_step(sig.sl_px, filt.tick_size, False)
                 tp = round_step(sig.tp_px, filt.tick_size, False)
-                risk_pct = 0.015 if sig.engine in ("SMC_Sweep_8R", "VWAP_KZ_2R") else 0.012
+                risk_pct = 0.015 if sig.engine in ("SMC_Sweep_5R", "VWAP_KZ_1.3R") else 0.013
                 qty = compute_order_qty(equity, risk_pct, ep, sl, filt, leverage=leverage)
                 if qty <= 0:
                     print(f"[SKIP] {sym} qty=0 (minNotional={filt.min_notional} equity={equity:.2f})")

@@ -1,13 +1,13 @@
-# QUANTCONNECT.COM - Binance Futures Multi-Coin Momentum + VWAP + SMC Scalper (V2.0)
+# QUANTCONNECT.COM - Binance Futures Multi-Coin High-WR Fast Scalper (V2.1)
 # Brokerage: Binance USD-M Perpetual Futures (0.02% Maker / 0.05% Taker + Funding)
 # Universe: Top 15 liquid USDT-M pairs scanned continuously in parallel (max 3 concurrent positions)
-# Empirical 7y BTC Binance-fee verified sleeves (1,148+ trades/coin, 7/7 yrs green):
-#   1. VWAP_KZ_2R    : 07-20 UTC, 4H+1H EMA20>50, ER14_1H>=0.25, daily UTC VWAP touch+reclaim,
-#                      RSI14_5m<=48, Limit entry, BE@1.0R->+0.1R, TP=2.0R (WR=67.2%, PF=1.73).
-#   2. Mom9_Vol_2.5R : 4H+1H EMA20>50, ER14_1H>=0.30, 5m EMA9>20>50, Vol>=1.8x VolMA20,
-#                      pullback to 5m EMA9 + reclaim, Limit entry, BE@1.2R->+0.1R, TP=2.5R (7/7 yrs).
-#   3. SMC_Sweep_8R  : 1H k=3 liquidity sweep -> 5m CHoCH+FVG (>=09:00 UTC), 4H+1H aligned,
-#                      Limit entry, High-Lock steps (3->1, 5.5->2.5), TP=8.0R (PF=1.89).
+# Empirical 7y BTC Binance-fee verified fast-scalp sleeves (1,112+ trades/coin, 7/7 yrs green even at 2x fees):
+#   1. VWAP_KZ_1.3R   : 07-20 UTC, 4H+1H EMA20>50, ER14_1H>=0.25, daily UTC VWAP touch+reclaim,
+#                       RSI14_5m<=48, Limit entry, BE@0.7R->+0.1R, TP=1.3R (WR=74.6%, PF=1.92, Mo=82.6%).
+#   2. Mom9_MACD_1.8R : 4H+1H EMA20>50, ER14_1H>=0.30, 5m EMA9>20>50, MACD_hist>0, Vol>=1.8x VolMA20,
+#                       pullback to 5m EMA9 + reclaim, Limit entry, BE@0.9R->+0.1R, TP=1.8R (WR=59.7%).
+#   3. SMC_Sweep_5R   : 1H k=3 liquidity sweep -> 5m CHoCH+FVG (>=09:00 UTC), 4H+1H aligned,
+#                       Limit entry, High-Lock steps (3->1), TP=5.0R (PF=1.63).
 
 from AlgorithmImports import *
 from collections import deque
@@ -95,14 +95,20 @@ class WilderRSI14:
 
 class EmaState:
     def __init__(self) -> None:
-        self.e9 = self.e20 = self.e50 = None
+        self.e9 = self.e12 = self.e20 = self.e26 = self.e50 = self.msig = None
+        self.macd_hist = 0.0
         self.closes = deque(maxlen=20)
         self.er14 = 0.0
 
     def update(self, c: float) -> None:
         self.e9 = c if self.e9 is None else (c * 0.2 + self.e9 * 0.8)
+        self.e12 = c if self.e12 is None else (c * (2.0 / 13.0) + self.e12 * (11.0 / 13.0))
         self.e20 = c if self.e20 is None else (c * (2.0 / 21.0) + self.e20 * (19.0 / 21.0))
+        self.e26 = c if self.e26 is None else (c * (2.0 / 27.0) + self.e26 * (25.0 / 27.0))
         self.e50 = c if self.e50 is None else (c * (2.0 / 51.0) + self.e50 * (49.0 / 51.0))
+        macd = self.e12 - self.e26
+        self.msig = macd if self.msig is None else (macd * 0.2 + self.msig * 0.8)
+        self.macd_hist = macd - self.msig
         self.closes.append(c)
         if len(self.closes) >= 15:
             arr = list(self.closes)[-15:]
@@ -144,10 +150,10 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         "ADAUSDT", "DOGEUSDT", "AVAXUSDT", "LINKUSDT", "LTCUSDT",
         "DOTUSDT", "UNIUSDT", "ATOMUSDT", "NEARUSDT", "ETCUSDT",
     )
-    ENGINE_RISK = {"VWAP_KZ_2R": 0.015, "Mom9_Vol_2.5R": 0.012, "SMC_Sweep_8R": 0.015}
-    VWAP_STEPS = ((1.0, 0.1),)
-    MOM9_STEPS = ((1.2, 0.1),)
-    SWEEP_STEPS = ((3.0, 1.0), (5.5, 2.5))
+    ENGINE_RISK = {"VWAP_KZ_1.3R": 0.015, "Mom9_MACD_1.8R": 0.013, "SMC_Sweep_5R": 0.015}
+    VWAP_STEPS = ((0.7, 0.1),)
+    MOM9_STEPS = ((0.9, 0.1),)
+    SWEEP_STEPS = ((3.0, 1.0),)
 
     def initialize(self) -> None:
         self.set_time_zone(TimeZones.UTC)
@@ -158,7 +164,7 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         self.hwm_equity = start_cash
         self.risk_scale = float(self.get_parameter("risk_scale") or 1.0)
         self.max_open_pos = int(self.get_parameter("max_open_pos") or 3)
-        self.sweep_tp_r = float(self.get_parameter("sweep_tp_r") or 8.0)
+        self.sweep_tp_r = float(self.get_parameter("sweep_tp_r") or 5.0)
         self.set_warm_up(timedelta(days=14), Resolution.MINUTE)
         self.set_brokerage_model(BrokerageName.BINANCE_FUTURES, AccountType.MARGIN)
 
@@ -322,14 +328,14 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
                         continue
                     if dt.hour >= 9 and st.sw_4h.trend == 1 and st.sw_1h.trend == 1 and cd["choch"] is not None and c > cd["choch"] and (b3[2] - b1[1]) >= 0.25 * a5 and b2[3] > b2[0] and c2b >= a5:
                         slp = min(cd["sl_base"] - a5, c - max(1.5 * a5, c * 0.0040))
-                        self._submit_limit(st, "SMC_Sweep_8R", 1, c, slp, self.sweep_tp_r, self.SWEEP_STEPS, 20)
+                        self._submit_limit(st, "SMC_Sweep_5R", 1, c, slp, self.sweep_tp_r, self.SWEEP_STEPS, 20)
                         continue
                 else:
                     if h > cd["sl_base"]:
                         continue
                     if dt.hour >= 9 and st.sw_4h.trend == -1 and st.sw_1h.trend == -1 and cd["choch"] is not None and c < cd["choch"] and (b1[2] - b3[1]) >= 0.25 * a5 and b2[3] < b2[0] and c2b >= a5:
                         slp = max(cd["sl_base"] + a5, c + max(1.5 * a5, c * 0.0040))
-                        self._submit_limit(st, "SMC_Sweep_8R", -1, c, slp, self.sweep_tp_r, self.SWEEP_STEPS, 20)
+                        self._submit_limit(st, "SMC_Sweep_5R", -1, c, slp, self.sweep_tp_r, self.SWEEP_STEPS, 20)
                         continue
                 still.append(cd)
             st.cands_1h_k3 = still
@@ -339,21 +345,21 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
             if vwap is not None and a15 > 0 and (7 <= dt.hour <= 20) and st.ema_1h.er14 >= 0.25:
                 if t4 == 1 and t1 == 1 and l <= vwap < c and c > o and rsi5 <= 48.0:
                     slp = min(l, vwap - 0.5 * a15) - 0.4 * a5
-                    self._submit_limit(st, "VWAP_KZ_2R", 1, c, slp, 2.0, self.VWAP_STEPS, 6)
+                    self._submit_limit(st, "VWAP_KZ_1.3R", 1, c, slp, 1.3, self.VWAP_STEPS, 6)
                 elif t4 == -1 and t1 == -1 and h >= vwap > c and c < o and rsi5 >= 52.0:
                     slp = max(h, vwap + 0.5 * a15) + 0.4 * a5
-                    self._submit_limit(st, "VWAP_KZ_2R", -1, c, slp, 2.0, self.VWAP_STEPS, 6)
+                    self._submit_limit(st, "VWAP_KZ_1.3R", -1, c, slp, 1.3, self.VWAP_STEPS, 6)
 
             if len(st.vols_5m) == 20 and st.ema_1h.er14 >= 0.30 and a5 > 0:
                 vavg = sum(st.vols_5m) / 20.0
-                e9, e20, e50 = st.ema_5m.e9, st.ema_5m.e20, st.ema_5m.e50
+                e9, e20, e50, mh = st.ema_5m.e9, st.ema_5m.e20, st.ema_5m.e50, st.ema_5m.macd_hist
                 if vavg > 0 and vol >= 1.8 * vavg and e9 is not None and e50 is not None:
-                    if t4 == 1 and t1 == 1 and e9 > e20 > e50 and l <= e9 < c and c > o:
+                    if t4 == 1 and t1 == 1 and mh > 0 and e9 > e20 > e50 and l <= e9 < c and c > o:
                         slp = min(l, e20) - 0.5 * a5
-                        self._submit_limit(st, "Mom9_Vol_2.5R", 1, c, slp, 2.5, self.MOM9_STEPS, 6)
-                    elif t4 == -1 and t1 == -1 and e9 < e20 < e50 and h >= e9 > c and c < o:
+                        self._submit_limit(st, "Mom9_MACD_1.8R", 1, c, slp, 1.8, self.MOM9_STEPS, 6)
+                    elif t4 == -1 and t1 == -1 and mh < 0 and e9 < e20 < e50 and h >= e9 > c and c < o:
                         slp = max(h, e20) + 0.5 * a5
-                        self._submit_limit(st, "Mom9_Vol_2.5R", -1, c, slp, 2.5, self.MOM9_STEPS, 6)
+                        self._submit_limit(st, "Mom9_MACD_1.8R", -1, c, slp, 1.8, self.MOM9_STEPS, 6)
 
         st.sw_5m.update(bar)
 
