@@ -1,10 +1,10 @@
-# QUANTCONNECT.COM - SMC V8.2 Multi-Asset Sniper (Elite-4 High-PF, Step-Lock, UTC-Aligned)
+# QUANTCONNECT.COM - SMC V8.3 Multi-Asset Sniper (Elite-4, True-UTC, High-Lock BTC)
 # Assets: XAUUSD (OANDA CFD), NAS100USD (OANDA CFD), BTCUSD (Coinbase Crypto)
-# Default Elite-4 Sleeves (NSX_1H1m_10R, XAU_LTF1M, VisA disabled for OANDA spread resilience):
-#   XAUUSD   : V3_Pro_Clean (15m + BE@1.5R->+0.2R + 1H trail), VisB_Pro (1H->5m + 1H trail)
-#   NAS100USD: NSX_AMD_1D (15m+1D + 1H trail)
-#   BTCUSD   : BTC_15R_BE (1H->5m >=09h UTC, TP=12R + progressive step-locks)
-# Optional param: use_amd_pro=1 enables AMD_Pro (confirm reclaim), risk_scale=1.0 scales sizing.
+# Fixes vs V8.2:
+#   1. Uses self.utc_time (not bar.EndTime Exchange TZ) so 4H/1D bars & killzones align to true UTC.
+#   2. Removes V3 1.5R->0.2R choke (pure 2.5R 1H trail) and BTC 2R->0.2R choke (BE@3R + 5.5/8.5/11.5R locks, 15R TP).
+#   3. Blocks OANDA CFD rollover (20:00-23:59 UTC) & Friday late XAUUSD (>=18:00 UTC) entries.
+#   4. Balanced sizing (1.5%/1.0%) with 8%->0.60x / 12%->0.40x realized-HWM DD brake.
 
 from AlgorithmImports import *
 from collections import defaultdict, deque
@@ -103,7 +103,7 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
         "NSX_AMD_1D": 0.010,
         "AMD_Pro": 0.008,
     }
-    BTC_STEPS = ((2.0, 0.2), (3.0, 1.0), (5.0, 2.5), (7.0, 4.5), (9.0, 6.5))
+    BTC_STEPS = ((3.0, 1.0), (5.5, 2.5), (8.5, 5.5), (11.5, 8.5))
 
     def initialize(self) -> None:
         self.set_time_zone(TimeZones.UTC)
@@ -130,7 +130,7 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
         self.trade_counts, self.invalid_counts = defaultdict(int), defaultdict(int)
         self.oco_cleanups = 0
         for sym, st in self.assets.items():
-            # UTC-exact 4H and 1D bars are aggregated inside on_1h to avoid OANDA market-break drift
+            # UTC-exact 4H and 1D bars are aggregated inside on_1h using self.utc_time
             self.consolidate(sym, timedelta(hours=1), lambda b, s=st: self.on_1h(s, b))
             self.consolidate(sym, timedelta(minutes=15), lambda b, s=st: self.on_15m(s, b))
             self.consolidate(sym, timedelta(minutes=5), lambda b, s=st: self.on_5m(s, b))
@@ -143,6 +143,15 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
     def _in_ny(dt) -> bool:
         return 12 <= dt.hour < 17
 
+    def _cfd_blocked(self, st: AssetState, dt) -> bool:
+        if st.symbol == self.btc_sym:
+            return False
+        if dt.hour >= 20 or dt.hour < 1:
+            return True
+        if st.symbol == self.xau_sym and dt.weekday() == 4 and dt.hour >= 18:
+            return True
+        return False
+
     @staticmethod
     def _bar(data: Slice, sym: Symbol):
         if sym in data.quote_bars:
@@ -152,7 +161,7 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
     def _effective_risk_pct(self, engine: str) -> float:
         eq = float(self.portfolio.total_portfolio_value)
         dd = (self.hwm_equity - eq) / self.hwm_equity if self.hwm_equity > 0 else 0.0
-        brake = 0.30 if dd >= 0.09 else (0.50 if dd >= 0.06 else 1.0)
+        brake = 0.40 if dd >= 0.12 else (0.60 if dd >= 0.08 else 1.0)
         return self.ENGINE_RISK.get(engine, 0.010) * brake * self.risk_scale
 
     def _round_qty(self, sym: Symbol, raw_qty: float, is_long: bool) -> float:
@@ -184,8 +193,13 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
 
     def _try_lock_sl(self, st: AssetState, lock_px: float, cur_c: float) -> None:
         lp = self._round_px(st.symbol, lock_px)
-        if (st.active_side == 1 and lp > st.sl_price and lp < cur_c) or (
-            st.active_side == -1 and lp < st.sl_price and lp > cur_c
+        sec = self.securities[st.symbol]
+        ref_long = float(getattr(sec, "bid_price", 0.0) or 0.0)
+        ref_short = float(getattr(sec, "ask_price", 0.0) or 0.0)
+        ref_long = ref_long if ref_long > 0 else cur_c
+        ref_short = ref_short if ref_short > 0 else cur_c
+        if (st.active_side == 1 and lp > st.sl_price and lp < ref_long) or (
+            st.active_side == -1 and lp < st.sl_price and lp > ref_short
         ):
             st.sl_price = lp
             st.sl_ticket.update_stop_price(lp)
@@ -207,9 +221,7 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
                       is_market: bool = False, require_confirm: bool = False) -> None:
         if self.is_warming_up or st.in_position or st.pending_ticket is not None or st.confirm_setup is not None:
             return
-        if not self.is_market_open(st.symbol):
-            return
-        if st.symbol != self.btc_sym and self.time.hour == 22:
+        if not self.is_market_open(st.symbol) or self._cfd_blocked(st, self.utc_time):
             return
         if self.portfolio[st.symbol].invested:
             self.transactions.cancel_open_orders(st.symbol)
@@ -255,7 +267,6 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
             st.pending_ticket = ticket
 
     def _update_utc_htf(self, st: AssetState, dt, o: float, h: float, l: float, c: float) -> None:
-        # Flush UTC-aligned 4H and 1D bars immediately on boundary (or bucket change across breaks)
         ref = dt - timedelta(minutes=1)
         b4_key = (ref.date(), ref.hour // 4)
         if st.b4h_bucket is not None and b4_key != st.b4h_bucket and st.b4h_ohlc is not None:
@@ -285,7 +296,7 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
 
     def on_1h(self, st: AssetState, bar) -> None:
         h, l, c, o = float(bar.High), float(bar.Low), float(bar.Close), float(bar.Open)
-        self._update_utc_htf(st, bar.EndTime, o, h, l, c)
+        self._update_utc_htf(st, self.utc_time, o, h, l, c)
         k3 = st.sw_1h_k3
         for idx_s, p_lo in list(k3.act_lo):
             if (k3.bar_idx + 1 - idx_s) >= 4 and l < p_lo and c > p_lo:
@@ -310,10 +321,10 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
 
     def on_15m(self, st: AssetState, bar) -> None:
         st.idx_15m += 1
+        dt = self.utc_time
         h, l, c, o = float(bar.High), float(bar.Low), float(bar.Close), float(bar.Open)
         a15 = st.atr_15m.update(h, l, c)
-        st.bars_15m.append((bar.EndTime, o, h, l, c))
-        dt = bar.EndTime
+        st.bars_15m.append((dt, o, h, l, c))
 
         if st.symbol == self.xau_sym and len(st.bars_15m) >= 3 and self._in_ny(dt) and dt.hour not in (13, 14):
             b1, b2, b3 = st.bars_15m[-3], st.bars_15m[-2], st.bars_15m[-1]
@@ -322,12 +333,12 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
                 bos_up = (b2[4] <= st.sw_15m.last_high < b3[4]) or (b1[4] <= st.sw_15m.last_high < b2[4])
                 if bos_up and (b3[3] - b1[2]) >= max(0.20, 0.30 * a15) and b2[4] > b2[1] and c2b >= a15:
                     self._submit_entry(st, "V3_Pro_Clean", 1, b3[3], min(b1[3], b2[3]) - buf,
-                                       trail_after_r=2.5, step_locks=((1.5, 0.2),), expire_bars=300, min_risk=1.0, skip_hours=(13, 14))
+                                       trail_after_r=2.5, expire_bars=300, min_risk=1.0, skip_hours=(13, 14))
             elif st.sw_4h.trend == -1 and st.sw_1h.trend == -1 and st.sw_15m.last_low is not None:
                 bos_dn = (b2[4] >= st.sw_15m.last_low > b3[4]) or (b1[4] >= st.sw_15m.last_low > b2[4])
                 if bos_dn and (b1[3] - b3[2]) >= max(0.20, 0.30 * a15) and b2[4] < b2[1] and c2b >= a15:
                     self._submit_entry(st, "V3_Pro_Clean", -1, b3[2], max(b1[2], b2[2]) + buf,
-                                       trail_after_r=2.5, step_locks=((1.5, 0.2),), expire_bars=300, min_risk=1.0, skip_hours=(13, 14))
+                                       trail_after_r=2.5, expire_bars=300, min_risk=1.0, skip_hours=(13, 14))
 
         run_amd = (st.symbol == self.nsx_sym) or (st.symbol == self.xau_sym and self.use_amd_pro)
         if run_amd and len(st.bars_15m) >= 10 and a15 > 0:
@@ -367,11 +378,12 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
 
     def on_5m(self, st: AssetState, bar) -> None:
         st.idx_5m += 1
+        dt = self.utc_time
         h, l, c, o = float(bar.High), float(bar.Low), float(bar.Close), float(bar.Open)
         a5 = st.atr_5m.update(h, l, c)
-        st.bars_5m.append((bar.EndTime, o, h, l, c))
+        st.bars_5m.append((dt, o, h, l, c))
 
-        if st.symbol == self.xau_sym and len(st.bars_5m) >= 3 and self._in_kz(bar.EndTime):
+        if st.symbol == self.xau_sym and len(st.bars_5m) >= 3 and self._in_kz(dt):
             b1, b2, b3 = st.bars_5m[-3], st.bars_5m[-2], st.bars_5m[-1]
             c2b, buf = abs(b2[4] - b2[1]), max(1.0, 0.5 * a5)
             still = []
@@ -381,9 +393,10 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
                 if sc["side"] == 1:
                     if l < sc["sl_base"]:
                         continue
-                    if st.sw_4h.trend == 1 and sc["choch"] is not None and c > sc["choch"] and (b3[3] - b1[2]) >= max(0.20, 0.20 * a5) and b2[4] > b2[1] and c2b >= 0.8 * a5:
-                        self._submit_entry(st, "VisB_Pro", 1, b3[3], sc["sl_base"] - buf, trail_after_r=1.5, expire_bars=90, min_risk=1.0)
-                        continue
+                    if sw_4h_ok := (st.sw_4h.trend == 1 and sc["choch"] is not None and c > sc["choch"]):
+                        if (b3[3] - b1[2]) >= max(0.20, 0.20 * a5) and b2[4] > b2[1] and c2b >= 0.8 * a5:
+                            self._submit_entry(st, "VisB_Pro", 1, b3[3], sc["sl_base"] - buf, trail_after_r=1.5, expire_bars=90, min_risk=1.0)
+                            continue
                 else:
                     if h > sc["sl_base"]:
                         continue
@@ -396,7 +409,7 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
         st.sw_5m.update(bar)
         if st.symbol == self.btc_sym:
             st.atr_5m.val = a5
-            self._ltf_bar(st, bar, 9, 0.0, 0.0020, 12.0, self.BTC_STEPS, "BTC_15R_BE", True)
+            self._ltf_bar(st, bar, 9, 0.0, 0.0020, 15.0, self.BTC_STEPS, "BTC_15R_BE", True)
 
     def on_data(self, data: Slice) -> None:
         for sym, st in self.assets.items():
@@ -415,7 +428,7 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
         cs = st.confirm_setup
         if cs is None or st.in_position or st.pending_ticket is not None:
             return
-        if st.ltf_idx > cs["exp"] or (cs["skip_hours"] and dt.hour in cs["skip_hours"]) or ((l <= cs["sl"]) if cs["side"] == 1 else (h >= cs["sl"])):
+        if st.ltf_idx > cs["exp"] or self._cfd_blocked(st, dt) or (cs["skip_hours"] and dt.hour in cs["skip_hours"]) or ((l <= cs["sl"]) if cs["side"] == 1 else (h >= cs["sl"])):
             st.confirm_setup = None
             return
         if not cs["touched"] and ((l <= cs["trig"]) if cs["side"] == 1 else (h >= cs["trig"])):
@@ -430,7 +443,7 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
     def _ltf_bar(self, st: AssetState, bar, min_hr, min_abs: float, min_pct: float,
                  fixed_rr: float, step_locks, eng: str, allow_entries: bool) -> None:
         st.ltf_idx += 1
-        dt = bar.EndTime
+        dt = self.utc_time
         o, h, l, c = float(bar.Open), float(bar.High), float(bar.Low), float(bar.Close)
         a1 = st.atr_ltf.update(h, l, c)
         st.bars_ltf.append((dt, o, h, l, c))
@@ -449,7 +462,7 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
 
         if st.pending_ticket is not None and st.pending_meta is not None:
             pm = st.pending_meta
-            if st.ltf_idx > pm["expire_idx"] or ((l <= pm["sl"]) if pm["side"] == 1 else (h >= pm["sl"])) or (pm["skip_hours"] and dt.hour in pm["skip_hours"]):
+            if st.ltf_idx > pm["expire_idx"] or self._cfd_blocked(st, dt) or ((l <= pm["sl"]) if pm["side"] == 1 else (h >= pm["sl"])) or (pm["skip_hours"] and dt.hour in pm["skip_hours"]):
                 self._cancel_pending(st)
 
         if not self.is_warming_up:
@@ -534,9 +547,9 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
             self.hwm_equity = eq_now
 
     def on_end_of_algorithm(self) -> None:
-        self.log(f"=== V8.2 Asset Telemetry (oco_cleanups={self.oco_cleanups}) ===")
+        self.log(f"=== V8.3 Asset Telemetry (oco_cleanups={self.oco_cleanups}) ===")
         for st in self.assets.values():
             self.log(f"  {st.name:10s} | bars={st.bars_seen} | submitted={st.orders_submitted} | invalid={self.invalid_counts[st.name]}")
-        self.log("=== V8.2 Trade Breakdown by (Asset, Engine) ===")
+        self.log("=== V8.3 Trade Breakdown by (Asset, Engine) ===")
         for (asset, eng), cnt in sorted(self.trade_counts.items()):
             self.log(f"  {asset:10s} | {eng:14s}: {cnt} trades")
