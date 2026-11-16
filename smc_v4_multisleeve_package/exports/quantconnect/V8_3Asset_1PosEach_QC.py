@@ -9,7 +9,7 @@ import math
 class CausalSwingTracker:
     """Strict causal k-swing tracker: swing at index i-k confirms only when bar i closes."""
 
-    def __init__(self, k: int = 2, maxlen: int = 200):
+    def __init__(self, k: int = 2, maxlen: int = 220):
         self.k = k
         self.bars = deque(maxlen=max(maxlen, 2 * k + 5))
         self.last_high = None
@@ -23,40 +23,35 @@ class CausalSwingTracker:
 
     def update(self, bar):
         self.bar_idx += 1
-        self.bars.append((bar.EndTime, float(bar.Open), float(bar.High), float(bar.Low), float(bar.Close)))
+        o, h, l, c = float(bar.Open), float(bar.High), float(bar.Low), float(bar.Close)
+        self.bars.append((bar.EndTime, o, h, l, c))
         n = len(self.bars)
         k = self.k
         new_high = None
         new_low = None
-        c_close = float(bar.Close)
-        c_high = float(bar.High)
-        c_low = float(bar.Low)
 
-        # BOS check on close (matches build_causal_htf_structure)
-        if self.prev_high_for_bos is not None and c_close > self.prev_high_for_bos:
+        # Causal BOS check on close (matches build_causal_htf_structure)
+        if self.prev_high_for_bos is not None and c > self.prev_high_for_bos:
             self.trend = 1
-        elif self.prev_low_for_bos is not None and c_close < self.prev_low_for_bos:
+        elif self.prev_low_for_bos is not None and c < self.prev_low_for_bos:
             self.trend = -1
 
-        # Invalidate swept active levels prior to adding newly confirmed swing
-        self.active_swings_high = deque([s for s in self.active_swings_high if c_high <= s[1]], maxlen=60)
-        self.active_swings_low = deque([s for s in self.active_swings_low if c_low >= s[1]], maxlen=60)
+        # Remove swept active levels
+        self.active_swings_high = deque([s for s in self.active_swings_high if h <= s[1]], maxlen=60)
+        self.active_swings_low = deque([s for s in self.active_swings_low if l >= s[1]], maxlen=60)
 
         if n >= 2 * k + 1:
             mid = n - 1 - k
             mid_idx = self.bar_idx - k
             mh = self.bars[mid][2]
             ml = self.bars[mid][3]
-            is_sh = all(self.bars[j][2] <= mh for j in range(mid - k, mid + k + 1) if j != mid)
-            is_sl = all(self.bars[j][3] >= ml for j in range(mid - k, mid + k + 1) if j != mid)
-            if is_sh:
+            if all(self.bars[j][2] <= mh for j in range(mid - k, mid + k + 1) if j != mid):
                 self.last_high = mh
                 self.prev_high_for_bos = mh
                 new_high = (mid_idx, mh)
-                # Ensure swing high wasn't already broken during confirmation window [mid+1 .. n-1]
                 if max(self.bars[j][2] for j in range(mid + 1, n)) <= mh:
                     self.active_swings_high.append((mid_idx, mh))
-            if is_sl:
+            if all(self.bars[j][3] >= ml for j in range(mid - k, mid + k + 1) if j != mid):
                 self.last_low = ml
                 self.prev_low_for_bos = ml
                 new_low = (mid_idx, ml)
@@ -75,28 +70,22 @@ class CausalATR14:
         self.value = None
 
     def update(self, high: float, low: float, close: float) -> float:
-        if self.prev_close is None:
-            tr = high - low
-        else:
-            tr = max(high - low, abs(high - self.prev_close), abs(low - self.prev_close))
+        tr = (high - low) if self.prev_close is None else max(
+            high - low, abs(high - self.prev_close), abs(low - self.prev_close)
+        )
         self.prev_close = close
-        if self.value is None:
-            self.value = tr
-        else:
-            self.value = self.alpha * tr + (1.0 - self.alpha) * self.value
+        self.value = tr if self.value is None else (self.alpha * tr + (1.0 - self.alpha) * self.value)
         return self.value
 
 
 class AssetState:
-    """Per-asset causal state, multi-timeframe trackers, pending limit, and active OCO tickets."""
+    """Per-asset causal state, multi-timeframe trackers, pending limits, and active OCO tickets."""
 
-    def __init__(self, name: str, symbol: Symbol, is_crypto: bool = False):
+    def __init__(self, name: str, symbol: Symbol):
         self.name = name
         self.symbol = symbol
-        self.is_crypto = is_crypto
 
-        # Multi-timeframe trackers
-        self.sw_ltf = CausalSwingTracker(k=2)   # 1m (or 5m for BTC)
+        self.sw_ltf = CausalSwingTracker(k=2)     # 1m for XAU/NAS100, 5m for BTC
         self.sw_5m = CausalSwingTracker(k=2)
         self.sw_15m = CausalSwingTracker(k=2)
         self.sw_1h = CausalSwingTracker(k=2)
@@ -107,83 +96,89 @@ class AssetState:
         self.atr_ltf = CausalATR14(14)
         self.atr_5m = CausalATR14(14)
         self.atr_15m = CausalATR14(14)
-        self.atr_1h = CausalATR14(14)
 
         self.bars_ltf = deque(maxlen=15)
         self.bars_5m = deque(maxlen=15)
-        self.bars_15m = deque(maxlen=15)
+        self.bars_15m = deque(maxlen=20)
         self.bars_1h = deque(maxlen=15)
 
-        # Sniper HTF-sweep candidate queues
-        self.cands_1h_k3 = []   # for XAU_1H1m, NSX_1H1m_10R, BTC_15R_BE
-        self.cands_15m_k2 = []  # for XAU_LTF1M
+        # Sweep candidate queues
+        self.cands_1h_k3_5m = []   # XAU VisB_Pro (1H_k3 -> 5m CHoCH+FVG)
+        self.cands_1h_k3_ltf = []  # NSX_1H1m_10R / BTC_15R_BE
+        self.cands_15m_k2 = []     # XAU_LTF1M (15m_k2 -> 1m CHoCH+FVG)
 
-        # AMD manipulation state (15m)
-        self.amd_asian_hi = None
-        self.amd_asian_lo = None
-        self.amd_asian_day = None
+        # AMD manipulation queue (15m 8-bar box)
         self.amd_manips = []
 
-        # Pending limit orders (max 1 active position per asset; pending cancelled on fill/expiry)
-        self.pending = []  # list of dicts
+        # Pending limit orders (at most 1 active position per asset)
+        self.pending = []
 
         # Active position tracking
         self.in_position = False
         self.active_engine = ""
-        self.active_side = 0      # +1 long, -1 short
+        self.active_side = 0
         self.entry_price = 0.0
         self.sl_price = 0.0
-        self.tp_price = 0.0
+        self.tp_price = None
         self.risk_dist = 0.0
         self.trail_after_r = None
         self.be_act_r = None
         self.be_lock_r = 1.0
         self.be_done = False
         self.trailing_active = False
-        self.trail_mode = None    # "1h" or None
-        self.qty = 0.0
+        self.trail_mode = None
         self.entry_ticket = None
         self.sl_ticket = None
         self.tp_ticket = None
+
         self.ltf_idx = 0
+        self.idx_5m = 0
+        self.idx_15m = 0
 
 
 class V8MultiAssetSniperAlgorithm(QCAlgorithm):
     """
     SMC V8 Microscopy-Upgraded Multi-Asset Portfolio (XAUUSD + NAS100USD + BTCUSD)
-    1-Position-Per-Asset Lock (`V8_3Asset_1PosEach`) — Strictly Zero-Lookahead.
+    1-Position-Per-Asset Lock (`V8_3Asset_1PosEach`) — Strictly Zero-Lookahead, UTC-aligned.
 
-    Upgrades included from V8 forensic microscopy:
-    1. XAUUSD (1m): V3_Pro_Clean (drops 13-14 UTC chop) + VisB_Pro + VisA + AMD_Pro + XAU_LTF1M (3R)
-    2. NAS100USD (1m): NSX_AMD_1D (1D BOS aligned) + NSX_1H1m_10R (>= 09:00 UTC, 4H aligned, 10R TP)
-    3. BTCUSD (5m): BTC_15R_BE (>= 09:00 UTC, 4H+1H aligned, 15R TP + BE@3.0R -> +1.0R shield)
+    Exact V8 Sleeves:
+    - XAUUSD (1m): V3_Pro_Clean (15m BOS+FVG, skip 13-14 UTC) + VisB_Pro (1H_k3 sweep -> 5m CHoCH+FVG)
+                   + AMD_Pro (15m 8-bar box sweep+breakout) + XAU_LTF1M (15m_k2 sweep -> 1m, 3R)
+    - NAS100USD (1m): NSX_AMD_1D (15m 8-bar box + 1D BOS) + NSX_1H1m_10R (>=09h UTC, 4H BOS, 10R)
+    - BTCUSD (5m): BTC_15R_BE (>=09h UTC, 4H+1H BOS, 15R + BE@3.0R -> +1.0R shield)
     """
 
     def initialize(self) -> None:
+        self.set_time_zone(TimeZones.UTC)
         self.set_start_date(2020, 2, 1)
         self.set_end_date(2026, 10, 31)
-        self.set_cash(10000)  # Adjust starting cash as desired (e.g. 100 or 10000)
+        self.set_cash(100000)  # $100k ensures NAS100USD (lot_size=1) & 3 concurrent assets size cleanly
 
         self.risk_pct = float(self.get_parameter("risk_pct") or 0.015)
         self.set_warm_up(timedelta(days=30), Resolution.MINUTE)
 
-        # Subscribe to 3 uncorrelated instruments in one USD Margin portfolio (supports both Long & Short)
-        xau_sym = self.add_cfd("XAUUSD", Resolution.MINUTE, Market.OANDA).symbol
-        nsx_sym = self.add_cfd("NAS100USD", Resolution.MINUTE, Market.OANDA).symbol
-        btc_sym = self.add_crypto("BTCUSD", Resolution.MINUTE, Market.BITFINEX, leverage=10).symbol
+        xau_sec = self.add_cfd("XAUUSD", Resolution.MINUTE, Market.OANDA, leverage=50)
+        nsx_sec = self.add_cfd("NAS100USD", Resolution.MINUTE, Market.OANDA, leverage=50)
+        btc_sec = self.add_crypto("BTCUSD", Resolution.MINUTE, Market.BITFINEX, leverage=10)
+        # Enable margin shorting on BTCUSD in the same multi-asset portfolio
+        btc_sec.set_buying_power_model(SecurityMarginModel(10.0))
+
+        self.xau_sym = xau_sec.symbol
+        self.nsx_sym = nsx_sec.symbol
+        self.btc_sym = btc_sec.symbol
 
         self.assets = {
-            xau_sym: AssetState("XAUUSD", xau_sym, is_crypto=False),
-            nsx_sym: AssetState("NAS100USD", nsx_sym, is_crypto=False),
-            btc_sym: AssetState("BTCUSD", btc_sym, is_crypto=True),
+            self.xau_sym: AssetState("XAUUSD", self.xau_sym),
+            self.nsx_sym: AssetState("NAS100USD", self.nsx_sym),
+            self.btc_sym: AssetState("BTCUSD", self.btc_sym),
         }
-        self.xau_sym = xau_sym
-        self.nsx_sym = nsx_sym
-        self.btc_sym = btc_sym
 
-        # Register causal consolidators (on_data receives 1m; BTC consolidates to 5m for its LTF engine)
         for sym, st in self.assets.items():
-            self.consolidate(sym, timedelta(minutes=5), lambda b, s=st: self.on_5m(s, b))
+            if sym == self.btc_sym:
+                # Consolidate BTC explicitly using QuoteBar/TradeBar safely via standard 5m/15m/1h/4h/1d
+                self.consolidate(sym, timedelta(minutes=5), lambda b, s=st: self.on_5m(s, b))
+            else:
+                self.consolidate(sym, timedelta(minutes=5), lambda b, s=st: self.on_5m(s, b))
             self.consolidate(sym, timedelta(minutes=15), lambda b, s=st: self.on_15m(s, b))
             self.consolidate(sym, timedelta(hours=1), lambda b, s=st: self.on_1h(s, b))
             self.consolidate(sym, timedelta(hours=4), lambda b, s=st: self.on_4h(s, b))
@@ -206,7 +201,7 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
 
     def _round_qty(self, sym: Symbol, raw_qty: float, is_long: bool) -> float:
         sec = self.securities[sym]
-        lot = float(sec.symbol_properties.lot_size or 1.0)
+        lot = float(sec.symbol_properties.lot_size or 0.01)
         min_size = float(sec.symbol_properties.minimum_order_size or lot)
         steps = math.floor(abs(raw_qty) / lot)
         qty = steps * lot
@@ -223,7 +218,8 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
 
     def _place_pending(self, st: AssetState, engine: str, side: int, trig: float, sl: float,
                        tp: float = None, trail_after_r: float = None, be_act_r: float = None,
-                       be_lock_r: float = 1.0, expire_bars: int = 20, min_risk: float = 0.0) -> None:
+                       be_lock_r: float = 1.0, expire_bars: int = 20, min_risk: float = 0.0,
+                       kz_required: bool = True, skip_hours=None) -> None:
         if self.is_warming_up or st.in_position:
             return
         risk = (trig - sl) if side == 1 else (sl - trig)
@@ -239,6 +235,8 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
             "be_act_r": be_act_r,
             "be_lock_r": be_lock_r,
             "expire_idx": st.ltf_idx + expire_bars,
+            "kz_required": kz_required,
+            "skip_hours": skip_hours,
         })
 
     # ------------------------- HTF Consolidators -------------------------
@@ -250,136 +248,154 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
         st.sw_4h.update(bar)
 
     def on_1h(self, st: AssetState, bar) -> None:
-        h = float(bar.High)
-        l = float(bar.Low)
-        c = float(bar.Close)
-        o = float(bar.Open)
-        st.atr_1h.update(h, l, c)
+        h, l, c, o = float(bar.High), float(bar.Low), float(bar.Close), float(bar.Open)
         st.bars_1h.append((bar.EndTime, o, h, l, c))
 
         # Check 1H_k3 sweeps BEFORE updating sw_1h_k3
         k3 = st.sw_1h_k3
         for idx_s, p_low in list(k3.active_swings_low):
             if (k3.bar_idx + 1 - idx_s) >= 4 and l < p_low and c > p_low:
-                st.cands_1h_k3.append({"side": 1, "start_idx": st.ltf_idx, "sl_base": l, "choch": st.sw_ltf.last_high})
+                if st.symbol == self.xau_sym:
+                    st.cands_1h_k3_5m.append({"side": 1, "start_i": st.idx_5m, "sl_base": l, "choch": st.sw_5m.last_high})
+                else:
+                    st.cands_1h_k3_ltf.append({"side": 1, "start_i": st.ltf_idx, "sl_base": l, "choch": st.sw_ltf.last_high})
         for idx_s, p_hi in list(k3.active_swings_high):
             if (k3.bar_idx + 1 - idx_s) >= 4 and h > p_hi and c < p_hi:
-                st.cands_1h_k3.append({"side": -1, "start_idx": st.ltf_idx, "sl_base": h, "choch": st.sw_ltf.last_low})
+                if st.symbol == self.xau_sym:
+                    st.cands_1h_k3_5m.append({"side": -1, "start_i": st.idx_5m, "sl_base": h, "choch": st.sw_5m.last_low})
+                else:
+                    st.cands_1h_k3_ltf.append({"side": -1, "start_i": st.ltf_idx, "sl_base": h, "choch": st.sw_ltf.last_low})
 
         nh, nl = st.sw_1h.update(bar)
         st.sw_1h_k3.update(bar)
 
-        # 1H Trailing Stop Update for active position (V3_Pro, VisB_Pro, AMD_Pro, NSX_AMD_1D)
+        # 1H Trailing Stop Update for active position (V3_Pro_Clean, VisB_Pro, AMD_Pro, NSX_AMD_1D)
         if st.in_position and st.trailing_active and st.trail_mode == "1h" and st.sl_ticket is not None:
             if st.sl_ticket.status not in (OrderStatus.FILLED, OrderStatus.CANCELED, OrderStatus.INVALID):
                 if st.active_side == 1 and nl is not None:
                     new_sl = self._round_price(st.symbol, max(st.sl_price, float(nl[1])))
-                    if new_sl > st.sl_price and new_sl < float(bar.Close):
+                    if new_sl > st.sl_price and new_sl < c:
                         st.sl_price = new_sl
                         st.sl_ticket.update_stop_price(new_sl)
                 elif st.active_side == -1 and nh is not None:
                     new_sl = self._round_price(st.symbol, min(st.sl_price, float(nh[1])))
-                    if new_sl < st.sl_price and new_sl > float(bar.Close):
+                    if new_sl < st.sl_price and new_sl > c:
                         st.sl_price = new_sl
                         st.sl_ticket.update_stop_price(new_sl)
 
-        # V3_Pro_Clean on XAUUSD (1H FVG + 4H BOS, skip 13:00-14:59 UTC)
-        if st.symbol == self.xau_sym and len(st.bars_1h) >= 3 and st.atr_1h.value is not None:
-            dt = bar.EndTime
-            if self._in_killzone_utc(dt) and dt.hour not in (13, 14) and st.sw_4h.trend != 0:
-                b1, b2, b3 = st.bars_1h[-3], st.bars_1h[-2], st.bars_1h[-1]
-                a = st.atr_1h.value
-                buf = 0.75 * a
-                if st.sw_4h.trend == 1 and b3[3] - b1[2] >= 0.20 * a and b2[4] > b2[1]:
-                    trig, sl = b3[3], b2[3] - buf
-                    self._place_pending(st, "V3_Pro_Clean", 1, trig, sl, trail_after_r=2.0,
-                                        be_lock_r=1.0, expire_bars=180, min_risk=2.0)
-                elif st.sw_4h.trend == -1 and b1[3] - b3[2] >= 0.20 * a and b2[4] < b2[1]:
-                    trig, sl = b3[2], b2[2] + buf
-                    self._place_pending(st, "V3_Pro_Clean", -1, trig, sl, trail_after_r=2.0,
-                                        be_lock_r=1.0, expire_bars=180, min_risk=2.0)
-
     def on_15m(self, st: AssetState, bar) -> None:
+        st.idx_15m += 1
         h, l, c, o = float(bar.High), float(bar.Low), float(bar.Close), float(bar.Open)
         a15 = st.atr_15m.update(h, l, c)
         st.bars_15m.append((bar.EndTime, o, h, l, c))
+        dt = bar.EndTime
 
-        # Check 15m_k2 sweeps for XAU_LTF1M
+        # 15m_k2 sweeps for XAU_LTF1M
         if st.symbol == self.xau_sym:
             for idx_s, p_low in list(st.sw_15m.active_swings_low):
                 if (st.sw_15m.bar_idx + 1 - idx_s) >= 2 and l < p_low and c > p_low:
-                    st.cands_15m_k2.append({"side": 1, "start_idx": st.ltf_idx, "sl_base": l, "choch": st.sw_ltf.last_high})
+                    st.cands_15m_k2.append({"side": 1, "start_i": st.ltf_idx, "sl_base": l, "choch": st.sw_ltf.last_high})
             for idx_s, p_hi in list(st.sw_15m.active_swings_high):
                 if (st.sw_15m.bar_idx + 1 - idx_s) >= 2 and h > p_hi and c < p_hi:
-                    st.cands_15m_k2.append({"side": -1, "start_idx": st.ltf_idx, "sl_base": h, "choch": st.sw_ltf.last_low})
+                    st.cands_15m_k2.append({"side": -1, "start_i": st.ltf_idx, "sl_base": h, "choch": st.sw_ltf.last_low})
+
+        # V3_Pro_Clean on XAUUSD (15m BOS + FVG + 4H&1H dual BOS, skip 13-14 UTC)
+        if st.symbol == self.xau_sym and len(st.bars_15m) >= 3 and self._in_killzone_utc(dt) and dt.hour not in (13, 14):
+            b1, b2, b3 = st.bars_15m[-3], st.bars_15m[-2], st.bars_15m[-1]
+            c2b = abs(b2[4] - b2[1])
+            buf = max(1.0, 0.75 * a15)
+            if st.sw_4h.trend == 1 and st.sw_1h.trend == 1 and st.sw_15m.last_high is not None:
+                gap_l = b3[3] - b1[2]
+                bos_up = (b2[4] <= st.sw_15m.last_high and b3[4] > st.sw_15m.last_high) or \
+                         (b1[4] <= st.sw_15m.last_high and b2[4] > st.sw_15m.last_high)
+                if bos_up and gap_l >= max(0.20, 0.30 * a15) and b2[4] > b2[1] and c2b >= 1.0 * a15:
+                    trig = b3[3]
+                    sl = min(b1[3], b2[3]) - buf
+                    self._place_pending(st, "V3_Pro_Clean", 1, trig, sl, trail_after_r=2.5,
+                                        be_lock_r=1.0, expire_bars=300, min_risk=1.0,
+                                        kz_required=True, skip_hours=(13, 14))
+            elif st.sw_4h.trend == -1 and st.sw_1h.trend == -1 and st.sw_15m.last_low is not None:
+                gap_s = b1[3] - b3[2]
+                bos_dn = (b2[4] >= st.sw_15m.last_low and b3[4] < st.sw_15m.last_low) or \
+                         (b1[4] >= st.sw_15m.last_low and b2[4] < st.sw_15m.last_low)
+                if bos_dn and gap_s >= max(0.20, 0.30 * a15) and b2[4] < b2[1] and c2b >= 1.0 * a15:
+                    trig = b3[2]
+                    sl = max(b1[2], b2[2]) + buf
+                    self._place_pending(st, "V3_Pro_Clean", -1, trig, sl, trail_after_r=2.5,
+                                        be_lock_r=1.0, expire_bars=300, min_risk=1.0,
+                                        kz_required=True, skip_hours=(13, 14))
+
+        # AMD_Pro (XAUUSD) & NSX_AMD_1D (NAS100USD): 8-bar (2h) 15m box sweep + breakout + 1H BOS (+ 1D BOS on NAS100)
+        if st.symbol in (self.xau_sym, self.nsx_sym) and len(st.bars_15m) >= 10 and a15 > 0:
+            box_bars = list(st.bars_15m)[-9:-1]
+            box_hi = max(b[2] for b in box_bars)
+            box_lo = min(b[3] for b in box_bars)
+            if (box_hi - box_lo) <= 2.0 * a15:
+                if l < box_lo and c >= box_lo - 0.8 * a15:
+                    st.amd_manips.append({"side": 1, "r_hi": box_hi, "r_lo": box_lo, "ext": l, "si": st.idx_15m})
+                if h > box_hi and c <= box_hi + 0.8 * a15:
+                    st.amd_manips.append({"side": -1, "r_hi": box_hi, "r_lo": box_lo, "ext": h, "si": st.idx_15m})
+
+            b1, b2, b3 = st.bars_15m[-3], st.bars_15m[-2], st.bars_15m[-1]
+            c2b = abs(b2[4] - b2[1])
+            still_m = []
+            for mp in st.amd_manips:
+                if st.idx_15m - mp["si"] > 8:
+                    continue
+                if mp["side"] == 1:
+                    mp["ext"] = min(mp["ext"], l)
+                    ok_1d = (st.symbol != self.nsx_sym) or (st.sw_1d.trend == 1)
+                    if ok_1d and c > mp["r_hi"] and (b3[3] - b1[2]) >= 0.25 * a15 and b2[4] > b2[1] and c2b >= 1.0 * a15 and st.sw_1h.trend == 1 and self._in_killzone_utc(dt):
+                        eng = "NSX_AMD_1D" if st.symbol == self.nsx_sym else "AMD_Pro"
+                        self._place_pending(st, eng, 1, b3[3], mp["ext"] - 0.5 * a15, trail_after_r=2.5,
+                                            be_lock_r=1.0, expire_bars=300, min_risk=0.5, kz_required=True)
+                        continue
+                else:
+                    mp["ext"] = max(mp["ext"], h)
+                    ok_1d = (st.symbol != self.nsx_sym) or (st.sw_1d.trend == -1)
+                    if ok_1d and c < mp["r_lo"] and (b1[3] - b3[2]) >= 0.25 * a15 and b2[4] < b2[1] and c2b >= 1.0 * a15 and st.sw_1h.trend == -1 and self._in_killzone_utc(dt):
+                        eng = "NSX_AMD_1D" if st.symbol == self.nsx_sym else "AMD_Pro"
+                        self._place_pending(st, eng, -1, b3[2], mp["ext"] + 0.5 * a15, trail_after_r=2.5,
+                                            be_lock_r=1.0, expire_bars=300, min_risk=0.5, kz_required=True)
+                        continue
+                still_m.append(mp)
+            st.amd_manips = still_m
 
         st.sw_15m.update(bar)
 
-        # Asian range (00:00-05:59 UTC) for AMD_Pro (XAU) & NSX_AMD_1D (NAS100)
-        dt = bar.EndTime
-        day_key = dt.date()
-        if st.amd_asian_day != day_key:
-            st.amd_asian_day = day_key
-            st.amd_asian_hi = None
-            st.amd_asian_lo = None
-        if dt.hour < 6:
-            st.amd_asian_hi = h if st.amd_asian_hi is None else max(st.amd_asian_hi, h)
-            st.amd_asian_lo = l if st.amd_asian_lo is None else min(st.amd_asian_lo, l)
-        elif st.amd_asian_hi is not None and st.amd_asian_lo is not None and self._in_killzone_utc(dt):
-            if l < st.amd_asian_lo and c > st.amd_asian_lo:
-                st.amd_manips.append({"side": 1, "sl_base": l, "exp": st.ltf_idx + 120})
-            if h > st.amd_asian_hi and c < st.amd_asian_hi:
-                st.amd_manips.append({"side": -1, "sl_base": h, "exp": st.ltf_idx + 120})
-
-        # AMD_Pro (XAU) / NSX_AMD_1D (NAS100) FVG entry after Asian sweep
-        if st.symbol in (self.xau_sym, self.nsx_sym) and len(st.bars_15m) >= 3 and self._in_killzone_utc(dt):
-            b1, b2, b3 = st.bars_15m[-3], st.bars_15m[-2], st.bars_15m[-1]
-            still = []
-            for mp in st.amd_manips:
-                if st.ltf_idx > mp["exp"]:
-                    continue
-                if mp["side"] == 1:
-                    if st.symbol == self.nsx_sym and st.sw_1d.trend != 1:
-                        still.append(mp)
-                        continue
-                    if b3[3] - b1[2] >= 0.25 * a15 and b2[4] > b2[1]:
-                        trig, sl = b3[3], mp["sl_base"] - a15
-                        min_r = 2.0 if st.symbol == self.xau_sym else 10.0
-                        eng = "AMD_Pro" if st.symbol == self.xau_sym else "NSX_AMD_1D"
-                        self._place_pending(st, eng, 1, trig, sl, trail_after_r=2.0,
-                                            be_lock_r=1.0, expire_bars=90, min_risk=min_r)
-                        continue
-                else:
-                    if st.symbol == self.nsx_sym and st.sw_1d.trend != -1:
-                        still.append(mp)
-                        continue
-                    if b1[3] - b3[2] >= 0.25 * a15 and b2[4] < b2[1]:
-                        trig, sl = b3[2], mp["sl_base"] + a15
-                        min_r = 2.0 if st.symbol == self.xau_sym else 10.0
-                        eng = "AMD_Pro" if st.symbol == self.xau_sym else "NSX_AMD_1D"
-                        self._place_pending(st, eng, -1, trig, sl, trail_after_r=2.0,
-                                            be_lock_r=1.0, expire_bars=90, min_risk=min_r)
-                        continue
-                still.append(mp)
-            st.amd_manips = still
-
     def on_5m(self, st: AssetState, bar) -> None:
+        st.idx_5m += 1
         h, l, c, o = float(bar.High), float(bar.Low), float(bar.Close), float(bar.Open)
         a5 = st.atr_5m.update(h, l, c)
         st.bars_5m.append((bar.EndTime, o, h, l, c))
 
-        # VisB_Pro & VisA on XAUUSD (5m)
+        # VisB_Pro on XAUUSD: requires 1H_k3 sweep -> 5m CHoCH + FVG + 4H BOS
         if st.symbol == self.xau_sym and len(st.bars_5m) >= 3 and self._in_killzone_utc(bar.EndTime):
             b1, b2, b3 = st.bars_5m[-3], st.bars_5m[-2], st.bars_5m[-1]
             c2b = abs(b2[4] - b2[1])
-            if st.sw_4h.trend == 1 and st.sw_1h.trend == 1:
-                if b3[3] - b1[2] >= 0.25 * a5 and b2[4] > b2[1] and c2b >= 1.0 * a5:
-                    self._place_pending(st, "VisB_Pro", 1, b3[3], b2[3] - a5, trail_after_r=2.0,
-                                        be_lock_r=1.0, expire_bars=60, min_risk=2.0)
-            elif st.sw_4h.trend == -1 and st.sw_1h.trend == -1:
-                if b1[3] - b3[2] >= 0.25 * a5 and b2[4] < b2[1] and c2b >= 1.0 * a5:
-                    self._place_pending(st, "VisB_Pro", -1, b3[2], b2[2] + a5, trail_after_r=2.0,
-                                        be_lock_r=1.0, expire_bars=60, min_risk=2.0)
+            buf = max(1.0, 0.5 * a5)
+            still = []
+            for sc in st.cands_1h_k3_5m:
+                if st.idx_5m - sc["start_i"] > 12:
+                    continue
+                if sc["side"] == 1:
+                    if l < sc["sl_base"]:
+                        continue
+                    gap = b3[3] - b1[2]
+                    if st.sw_4h.trend == 1 and sc["choch"] is not None and c > sc["choch"] and gap >= max(0.20, 0.25 * a5) and b2[4] > b2[1] and c2b >= 1.0 * a5:
+                        self._place_pending(st, "VisB_Pro", 1, b3[3], sc["sl_base"] - buf, trail_after_r=2.5,
+                                            be_lock_r=1.0, expire_bars=90, min_risk=1.0, kz_required=True)
+                        continue
+                else:
+                    if h > sc["sl_base"]:
+                        continue
+                    gap = b1[3] - b3[2]
+                    if st.sw_4h.trend == -1 and sc["choch"] is not None and c < sc["choch"] and gap >= max(0.20, 0.25 * a5) and b2[4] < b2[1] and c2b >= 1.0 * a5:
+                        self._place_pending(st, "VisB_Pro", -1, b3[2], sc["sl_base"] + buf, trail_after_r=2.5,
+                                            be_lock_r=1.0, expire_bars=90, min_risk=1.0, kz_required=True)
+                        continue
+                still.append(sc)
+            st.cands_1h_k3_5m = still
 
         st.sw_5m.update(bar)
 
@@ -449,16 +465,18 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
                         st.sl_ticket.update_stop_price(lock_px)
 
         # 2) Check pending limit fills causally
-        kz_ok = ((not use_kz) or self._in_killzone_utc(dt)) and (min_hour_utc is None or dt.hour >= min_hour_utc)
         new_pending = []
         for p in st.pending:
             if st.ltf_idx > p["expire_idx"]:
                 continue
+            p_kz_ok = (not p["kz_required"]) or self._in_killzone_utc(dt)
+            if p["skip_hours"] and dt.hour in p["skip_hours"]:
+                p_kz_ok = False
             if p["side"] == 1:
                 if o <= p["sl"] or l <= p["sl"]:
                     continue
                 if l <= p["trig"]:
-                    if st.in_position or not kz_ok:
+                    if st.in_position or not p_kz_ok or not self.is_market_open(st.symbol):
                         if not st.in_position:
                             new_pending.append(p)
                         continue
@@ -468,7 +486,7 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
                 if o >= p["sl"] or h >= p["sl"]:
                     continue
                 if h >= p["trig"]:
-                    if st.in_position or not kz_ok:
+                    if st.in_position or not p_kz_ok or not self.is_market_open(st.symbol):
                         if not st.in_position:
                             new_pending.append(p)
                         continue
@@ -478,7 +496,8 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
         st.pending = new_pending
 
         # 3) Detect LTF CHoCH + FVG setups from active HTF sweeps
-        cands = st.cands_15m_k2 if use_15m_cands else st.cands_1h_k3
+        kz_ok = ((not use_kz) or self._in_killzone_utc(dt)) and (min_hour_utc is None or dt.hour >= min_hour_utc)
+        cands = st.cands_15m_k2 if use_15m_cands else st.cands_1h_k3_ltf
         max_wait = 20 if use_15m_cands else 60
         if len(st.bars_ltf) >= 3 and kz_ok and not self.is_warming_up:
             b1, b2, b3 = st.bars_ltf[-3], st.bars_ltf[-2], st.bars_ltf[-1]
@@ -487,7 +506,7 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
             min_r = max(min_risk_abs, c * min_risk_pct)
             still = []
             for sc in cands:
-                if st.ltf_idx - sc["start_idx"] > max_wait:
+                if st.ltf_idx - sc["start_i"] > max_wait:
                     continue
                 if sc["side"] == 1:
                     if l < sc["sl_base"]:
@@ -498,7 +517,8 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
                         sl = sc["sl_base"] - buf
                         tp = trig + fixed_rr * (trig - sl)
                         self._place_pending(st, engine_label, 1, trig, sl, tp=tp, be_act_r=be_act_r,
-                                            be_lock_r=be_lock_r, expire_bars=20, min_risk=min_r)
+                                            be_lock_r=be_lock_r, expire_bars=20, min_risk=min_r,
+                                            kz_required=use_kz)
                         continue
                 else:
                     if h > sc["sl_base"]:
@@ -509,18 +529,18 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
                         sl = sc["sl_base"] + buf
                         tp = trig - fixed_rr * (sl - trig)
                         self._place_pending(st, engine_label, -1, trig, sl, tp=tp, be_act_r=be_act_r,
-                                            be_lock_r=be_lock_r, expire_bars=20, min_risk=min_r)
+                                            be_lock_r=be_lock_r, expire_bars=20, min_risk=min_r,
+                                            kz_required=use_kz)
                         continue
                 still.append(sc)
             if use_15m_cands:
                 st.cands_15m_k2 = still
             else:
-                st.cands_1h_k3 = still
+                st.cands_1h_k3_ltf = still
 
         st.sw_ltf.update(bar)
 
     def _execute_entry(self, st: AssetState, p: dict) -> None:
-        sec = self.securities[st.symbol]
         fill_est = p["trig"]
         risk_per_unit = abs(fill_est - p["sl"])
         if risk_per_unit <= 0:
@@ -544,10 +564,12 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
         st.be_done = False
         st.trailing_active = False
         st.trail_mode = None
-        st.qty = qty
-        st.pending = []  # Clear remaining pending orders for this asset
+        st.pending = []
 
         st.entry_ticket = self.market_order(st.symbol, qty, tag=p["engine"])
+        if st.entry_ticket.status == OrderStatus.FILLED and st.entry_ticket.average_fill_price > 0:
+            st.entry_price = float(st.entry_ticket.average_fill_price)
+            st.risk_dist = abs(st.entry_price - st.sl_price)
         st.sl_ticket = self.stop_market_order(st.symbol, -qty, st.sl_price, tag=f"{p['engine']}_SL")
         if st.tp_price is not None:
             st.tp_ticket = self.limit_order(st.symbol, -qty, st.tp_price, tag=f"{p['engine']}_TP")
