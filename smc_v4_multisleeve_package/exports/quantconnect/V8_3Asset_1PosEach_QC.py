@@ -1,10 +1,10 @@
-# QUANTCONNECT.COM - SMC V8.3 Multi-Asset Sniper (Elite-4, True-UTC, High-Lock BTC)
+# QUANTCONNECT.COM - SMC V8.4 Multi-Asset Sniper (Regime-Gated + NSX Chop Sleeve)
 # Assets: XAUUSD (OANDA CFD), NAS100USD (OANDA CFD), BTCUSD (Coinbase Crypto)
-# Fixes vs V8.2:
-#   1. Uses self.utc_time (not bar.EndTime Exchange TZ) so 4H/1D bars & killzones align to true UTC.
-#   2. Removes V3 1.5R->0.2R choke (pure 2.5R 1H trail) and BTC 2R->0.2R choke (BE@3R + 5.5/8.5/11.5R locks, 15R TP).
-#   3. Blocks OANDA CFD rollover (20:00-23:59 UTC) & Friday late XAUUSD (>=18:00 UTC) entries.
-#   4. Balanced sizing (1.5%/1.0%) with 8%->0.60x / 12%->0.40x realized-HWM DD brake.
+# Fixes vs V8.3:
+#   1. Tracks causal UTC 1D Efficiency Ratio (ER14) & EMA20 inside _update_utc_htf.
+#   2. Gates NSX_AMD_1D to trending momentum (ER14 >= 0.20 & 1D Close aligned with EMA20).
+#   3. Adds NSX_VisB_Chop (1H_k3 sweep + 5m CHoCH, 1.5R->1H trail) on NAS100USD during 1D chop (ER14 < 0.25).
+#   4. Caps BTC_15R_BE initial stop distance at < 1.8% of price (avoids unreachable 15R targets).
 
 from AlgorithmImports import *
 from collections import defaultdict, deque
@@ -86,6 +86,7 @@ class AssetState:
         self.cands_1h_k3_5m, self.cands_1h_k3_ltf, self.amd_manips = [], [], []
         self.b4h_bucket, self.b4h_ohlc = None, None
         self.b1d_date, self.b1d_ohlc = None, None
+        self.d1_closes, self.d1_ema20, self.d1_er14, self.d1_last_c = deque(maxlen=20), None, 0.0, 0.0
         self.pending_ticket = self.pending_meta = self.confirm_setup = None
         self.in_position, self.active_engine, self.active_side = False, None, 0
         self.entry_price = self.sl_price = self.risk_dist = self.qty = 0.0
@@ -101,6 +102,7 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
         "V3_Pro_Clean": 0.015,
         "BTC_15R_BE": 0.015,
         "NSX_AMD_1D": 0.010,
+        "NSX_VisB_Chop": 0.010,
         "AMD_Pro": 0.008,
     }
     BTC_STEPS = ((3.0, 1.0), (5.5, 2.5), (8.5, 5.5), (11.5, 8.5))
@@ -266,6 +268,17 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
         if st.pending_meta is not None:
             st.pending_ticket = ticket
 
+    def _push_1d(self, st: AssetState, h: float, l: float, c: float) -> None:
+        st.sw_1d.update_hlc(h, l, c)
+        st.d1_closes.append(c)
+        st.d1_last_c = c
+        k = 2.0 / 21.0
+        st.d1_ema20 = c if st.d1_ema20 is None else (c * k + st.d1_ema20 * (1.0 - k))
+        if len(st.d1_closes) >= 15:
+            arr = list(st.d1_closes)[-15:]
+            den = sum(abs(arr[j] - arr[j - 1]) for j in range(1, len(arr)))
+            st.d1_er14 = abs(arr[-1] - arr[0]) / den if den > 0 else 0.0
+
     def _update_utc_htf(self, st: AssetState, dt, o: float, h: float, l: float, c: float) -> None:
         ref = dt - timedelta(minutes=1)
         b4_key = (ref.date(), ref.hour // 4)
@@ -283,7 +296,7 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
 
         d_key = ref.date()
         if st.b1d_date is not None and d_key != st.b1d_date and st.b1d_ohlc is not None:
-            st.sw_1d.update_hlc(st.b1d_ohlc[1], st.b1d_ohlc[2], st.b1d_ohlc[3])
+            self._push_1d(st, st.b1d_ohlc[1], st.b1d_ohlc[2], st.b1d_ohlc[3])
             st.b1d_ohlc = None
         if st.b1d_ohlc is None:
             st.b1d_ohlc = (o, h, l, c)
@@ -291,7 +304,7 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
             st.b1d_ohlc = (st.b1d_ohlc[0], max(st.b1d_ohlc[1], h), min(st.b1d_ohlc[2], l), c)
         st.b1d_date = d_key
         if dt.hour == 0 and dt.minute == 0:
-            st.sw_1d.update_hlc(st.b1d_ohlc[1], st.b1d_ohlc[2], st.b1d_ohlc[3])
+            self._push_1d(st, st.b1d_ohlc[1], st.b1d_ohlc[2], st.b1d_ohlc[3])
             st.b1d_ohlc = None
 
     def on_1h(self, st: AssetState, bar) -> None:
@@ -300,13 +313,13 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
         k3 = st.sw_1h_k3
         for idx_s, p_lo in list(k3.act_lo):
             if (k3.bar_idx + 1 - idx_s) >= 4 and l < p_lo and c > p_lo:
-                if st.symbol == self.xau_sym:
+                if st.symbol == self.xau_sym or (st.symbol == self.nsx_sym and st.d1_er14 < 0.25):
                     st.cands_1h_k3_5m.append({"side": 1, "start_i": st.idx_5m, "sl_base": l, "choch": st.sw_5m.last_high})
                 elif st.symbol == self.btc_sym:
                     st.cands_1h_k3_ltf.append({"side": 1, "start_i": st.ltf_idx, "sl_base": l, "choch": st.sw_ltf.last_high})
         for idx_s, p_hi in list(k3.act_hi):
             if (k3.bar_idx + 1 - idx_s) >= 4 and h > p_hi and c < p_hi:
-                if st.symbol == self.xau_sym:
+                if st.symbol == self.xau_sym or (st.symbol == self.nsx_sym and st.d1_er14 < 0.25):
                     st.cands_1h_k3_5m.append({"side": -1, "start_i": st.idx_5m, "sl_base": h, "choch": st.sw_5m.last_low})
                 elif st.symbol == self.btc_sym:
                     st.cands_1h_k3_ltf.append({"side": -1, "start_i": st.ltf_idx, "sl_base": h, "choch": st.sw_ltf.last_low})
@@ -360,14 +373,18 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
                     continue
                 if mp["side"] == 1:
                     mp["ext"] = min(mp["ext"], l)
-                    ok_1d = (not is_nsx) or (st.sw_1d.trend == 1)
+                    ok_1d = (not is_nsx) or (
+                        st.sw_1d.trend == 1 and st.d1_er14 >= 0.20 and st.d1_ema20 is not None and st.d1_last_c > st.d1_ema20
+                    )
                     if ok_1d and c > mp["r_hi"] and (b3[3] - b1[2]) >= 0.25 * a15 and b2[4] > b2[1] and c2b >= 0.8 * a15 and st.sw_1h.trend == 1 and self._in_kz(dt):
                         self._submit_entry(st, eng, 1, b3[3], mp["ext"] - 0.5 * a15, trail_after_r=2.0,
                                            expire_bars=300, min_risk=min_r, require_confirm=(not is_nsx))
                         continue
                 else:
                     mp["ext"] = max(mp["ext"], h)
-                    ok_1d = (not is_nsx) or (st.sw_1d.trend == -1)
+                    ok_1d = (not is_nsx) or (
+                        st.sw_1d.trend == -1 and st.d1_er14 >= 0.20 and st.d1_ema20 is not None and st.d1_last_c < st.d1_ema20
+                    )
                     if ok_1d and c < mp["r_lo"] and (b1[3] - b3[2]) >= 0.25 * a15 and b2[4] < b2[1] and c2b >= 0.8 * a15 and st.sw_1h.trend == -1 and self._in_kz(dt):
                         self._submit_entry(st, eng, -1, b3[2], mp["ext"] + 0.5 * a15, trail_after_r=2.0,
                                            expire_bars=300, min_risk=min_r, require_confirm=(not is_nsx))
@@ -383,9 +400,15 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
         a5 = st.atr_5m.update(h, l, c)
         st.bars_5m.append((dt, o, h, l, c))
 
-        if st.symbol == self.xau_sym and len(st.bars_5m) >= 3 and self._in_kz(dt):
+        is_xau = st.symbol == self.xau_sym
+        is_nsx_chop = st.symbol == self.nsx_sym and st.d1_er14 < 0.25
+        if (is_xau or is_nsx_chop) and len(st.bars_5m) >= 3 and self._in_kz(dt):
             b1, b2, b3 = st.bars_5m[-3], st.bars_5m[-2], st.bars_5m[-1]
-            c2b, buf = abs(b2[4] - b2[1]), max(1.0, 0.5 * a5)
+            c2b = abs(b2[4] - b2[1])
+            buf = max(1.0 if is_xau else 4.0, 0.5 * a5)
+            min_fvg = max(0.20, 0.20 * a5) if is_xau else 0.20 * a5
+            v_eng = "VisB_Pro" if is_xau else "NSX_VisB_Chop"
+            v_min_r = 1.0 if is_xau else 5.0
             still = []
             for sc in st.cands_1h_k3_5m:
                 if st.idx_5m - sc["start_i"] > 12:
@@ -393,18 +416,19 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
                 if sc["side"] == 1:
                     if l < sc["sl_base"]:
                         continue
-                    if sw_4h_ok := (st.sw_4h.trend == 1 and sc["choch"] is not None and c > sc["choch"]):
-                        if (b3[3] - b1[2]) >= max(0.20, 0.20 * a5) and b2[4] > b2[1] and c2b >= 0.8 * a5:
-                            self._submit_entry(st, "VisB_Pro", 1, b3[3], sc["sl_base"] - buf, trail_after_r=1.5, expire_bars=90, min_risk=1.0)
-                            continue
+                    if st.sw_4h.trend == 1 and sc["choch"] is not None and c > sc["choch"] and (b3[3] - b1[2]) >= min_fvg and b2[4] > b2[1] and c2b >= 0.8 * a5:
+                        self._submit_entry(st, v_eng, 1, b3[3], sc["sl_base"] - buf, trail_after_r=1.5, expire_bars=90, min_risk=v_min_r)
+                        continue
                 else:
                     if h > sc["sl_base"]:
                         continue
-                    if st.sw_4h.trend == -1 and sc["choch"] is not None and c < sc["choch"] and (b1[3] - b3[2]) >= max(0.20, 0.20 * a5) and b2[4] < b2[1] and c2b >= 0.8 * a5:
-                        self._submit_entry(st, "VisB_Pro", -1, b3[2], sc["sl_base"] + buf, trail_after_r=1.5, expire_bars=90, min_risk=1.0)
+                    if st.sw_4h.trend == -1 and sc["choch"] is not None and c < sc["choch"] and (b1[3] - b3[2]) >= min_fvg and b2[4] < b2[1] and c2b >= 0.8 * a5:
+                        self._submit_entry(st, v_eng, -1, b3[2], sc["sl_base"] + buf, trail_after_r=1.5, expire_bars=90, min_risk=v_min_r)
                         continue
                 still.append(sc)
             st.cands_1h_k3_5m = still
+        elif st.symbol == self.nsx_sym and st.cands_1h_k3_5m:
+            st.cands_1h_k3_5m = [sc for sc in st.cands_1h_k3_5m if st.idx_5m - sc["start_i"] <= 12]
 
         st.sw_5m.update(bar)
         if st.symbol == self.btc_sym:
@@ -481,7 +505,8 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
                     if st.sw_4h.trend == 1 and st.sw_1h.trend == 1 and sc["choch"] is not None and b3[4] > sc["choch"] and (b3[3] - b1[2]) >= 0.25 * a1 and b2[4] > b2[1] and c2b >= a1:
                         trig, sl = b3[3], sc["sl_base"] - buf
                         sl = self._floor_sl(st, 1, trig, sl, min_r, c)
-                        self._submit_entry(st, eng, 1, trig, sl, tp=trig + fixed_rr * (trig - sl), step_locks=step_locks, expire_bars=20, min_risk=min_r)
+                        if eng != "BTC_15R_BE" or (trig - sl) / max(1.0, c) < 0.018:
+                            self._submit_entry(st, eng, 1, trig, sl, tp=trig + fixed_rr * (trig - sl), step_locks=step_locks, expire_bars=20, min_risk=min_r)
                         continue
                 else:
                     if h > sc["sl_base"]:
@@ -489,7 +514,8 @@ class V8MultiAssetSniperAlgorithm(QCAlgorithm):
                     if st.sw_4h.trend == -1 and st.sw_1h.trend == -1 and sc["choch"] is not None and b3[4] < sc["choch"] and (b1[3] - b3[2]) >= 0.25 * a1 and b2[4] < b2[1] and c2b >= a1:
                         trig, sl = b3[2], sc["sl_base"] + buf
                         sl = self._floor_sl(st, -1, trig, sl, min_r, c)
-                        self._submit_entry(st, eng, -1, trig, sl, tp=trig - fixed_rr * (sl - trig), step_locks=step_locks, expire_bars=20, min_risk=min_r)
+                        if eng != "BTC_15R_BE" or (sl - trig) / max(1.0, c) < 0.018:
+                            self._submit_entry(st, eng, -1, trig, sl, tp=trig - fixed_rr * (sl - trig), step_locks=step_locks, expire_bars=20, min_risk=min_r)
                         continue
                 still.append(sc)
             st.cands_1h_k3_ltf = still
