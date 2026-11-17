@@ -435,3 +435,189 @@ class KinematicMonitor:
             best_sl = (entry_px - best_rho * a4) if side == 1 else (entry_px + best_rho * a4)
         return float(best_sl), float(best_rho), src
 
+
+@dataclass
+class BPRZone:
+    side: int  # +1=bullish inversion (short FVG inverted upward), -1=bearish inversion
+    low: float
+    high: float
+    mid: float
+    sweep_extreme: float
+    created_idx: int
+    k_velocity: float
+    vacuum_score: float
+
+
+@dataclass
+class CompressionVacuumSetup:
+    side: int  # +1=long reversal (floor swept + snapped up), -1=short reversal (ceiling swept + snapped down)
+    barrier_px: float
+    sweep_extreme: float
+    snap_level: float
+    origin_anchor: float
+    approach_ker: float
+    vacuum_score: float
+    implied_r: float
+    trigger_idx: int
+
+
+class SceneGraphPhysicsDetector:
+    """V7.0 Intraday 15m/5m Visual Scene-Graph Physics (Compression-Vacuum Snap & BPR/iFVG Polarity Inversion)."""
+
+    def __init__(
+        self,
+        max_approach_ker: float = 0.42,
+        min_bpr_k: float = 1.25,
+        min_implied_r: float = 3.2,
+    ) -> None:
+        self.max_approach_ker = float(max_approach_ker)
+        self.min_bpr_k = float(min_bpr_k)
+        self.min_implied_r = float(min_implied_r)
+
+    @staticmethod
+    def _compute_overlap_ratio(h: np.ndarray, l: np.ndarray) -> float:
+        if len(h) < 3:
+            return 0.0
+        overlaps = np.maximum(0.0, np.minimum(h[1:], h[:-1]) - np.maximum(l[1:], l[:-1]))
+        spans = np.maximum(h[1:] - l[1:], 1e-12)
+        return float(np.mean(np.clip(overlaps / spans, 0.0, 1.0)))
+
+    def detect_compression_vacuum(
+        self,
+        o: np.ndarray,
+        h: np.ndarray,
+        l: np.ndarray,
+        c: np.ndarray,
+        atr: np.ndarray,
+        bar_idx: int,
+        barriers_hi: List[float],
+        barriers_lo: List[float],
+        lookback: int = 24,
+    ) -> Optional[CompressionVacuumSetup]:
+        """Setup Physics A: Flat Liquidity Barrier + Slow Overlapping Compression Approach + Vacuum Snap."""
+        if bar_idx < lookback + 3 or atr[bar_idx] <= 0:
+            return None
+        a_now = max(float(atr[bar_idx]), 1e-12)
+        win_o = o[bar_idx - lookback:bar_idx + 1]
+        win_h = h[bar_idx - lookback:bar_idx + 1]
+        win_l = l[bar_idx - lookback:bar_idx + 1]
+        win_c = c[bar_idx - lookback:bar_idx + 1]
+
+        # Check bearish waterfall (ceiling barrier swept at bar_idx or bar_idx-1, snap down)
+        if c[bar_idx] < o[bar_idx] and abs(c[bar_idx] - o[bar_idx]) >= 0.65 * a_now:
+            sw_hi = max(float(h[bar_idx]), float(h[bar_idx - 1]))
+            hit_barriers = [b for b in barriers_hi if sw_hi > b and float(c[bar_idx]) < b]
+            if hit_barriers:
+                barrier = min(hit_barriers, key=lambda b: abs(b - sw_hi))
+                # Compression approach in prior 5..lookback-1 bars: rising lows & high overlap / low KER
+                app_c = win_c[:-2]
+                den = float(np.sum(np.abs(np.diff(app_c))))
+                app_ker = abs(float(app_c[-1] - app_c[0])) / den if den > 1e-12 else 0.0
+                overlap = self._compute_overlap_ratio(win_h[:-2], win_l[:-2])
+                origin_idx = int(np.argmin(win_l[:-4]))
+                origin_px = float(win_l[origin_idx])
+                # Rising lows check: second half lows higher than origin
+                mid_pt = min(len(win_l) - 3, max(origin_idx + 1, len(win_l) - 6))
+                seg_l = win_l[mid_pt:-2]
+                rising_lows = len(seg_l) > 0 and float(np.min(seg_l)) > origin_px + 0.4 * a_now
+                # Nearest internal compression low to snap below
+                snap_lvl = float(np.min(win_l[-6:-1]))
+                if (app_ker <= self.max_approach_ker or overlap >= 0.36) and rising_lows and c[bar_idx] < snap_lvl:
+                    sl_dist = (sw_hi + 0.20 * a_now) - float(c[bar_idx])
+                    tgt_dist = float(c[bar_idx]) - origin_px
+                    imp_r = tgt_dist / max(sl_dist, 1e-12)
+                    vac_sc = float(np.clip(0.55 * overlap + 0.45 * (1.0 - min(app_ker, 1.0)), 0.0, 1.0))
+                    if imp_r >= self.min_implied_r and 0.35 * a_now <= sl_dist <= 2.8 * a_now:
+                        return CompressionVacuumSetup(
+                            side=-1, barrier_px=float(barrier), sweep_extreme=sw_hi,
+                            snap_level=snap_lvl, origin_anchor=origin_px,
+                            approach_ker=app_ker, vacuum_score=vac_sc,
+                            implied_r=imp_r, trigger_idx=bar_idx,
+                        )
+
+        # Check bullish waterfall (floor barrier swept at bar_idx or bar_idx-1, snap up)
+        if c[bar_idx] > o[bar_idx] and abs(c[bar_idx] - o[bar_idx]) >= 0.65 * a_now:
+            sw_lo = min(float(l[bar_idx]), float(l[bar_idx - 1]))
+            hit_barriers = [b for b in barriers_lo if sw_lo < b and float(c[bar_idx]) > b]
+            if hit_barriers:
+                barrier = min(hit_barriers, key=lambda b: abs(b - sw_lo))
+                app_c = win_c[:-2]
+                den = float(np.sum(np.abs(np.diff(app_c))))
+                app_ker = abs(float(app_c[-1] - app_c[0])) / den if den > 1e-12 else 0.0
+                overlap = self._compute_overlap_ratio(win_h[:-2], win_l[:-2])
+                origin_idx = int(np.argmax(win_h[:-4]))
+                origin_px = float(win_h[origin_idx])
+                mid_pt = min(len(win_h) - 3, max(origin_idx + 1, len(win_h) - 6))
+                seg_h = win_h[mid_pt:-2]
+                falling_highs = len(seg_h) > 0 and float(np.max(seg_h)) < origin_px - 0.4 * a_now
+                snap_lvl = float(np.max(win_h[-6:-1]))
+                if (app_ker <= self.max_approach_ker or overlap >= 0.36) and falling_highs and c[bar_idx] > snap_lvl:
+                    sl_dist = float(c[bar_idx]) - (sw_lo - 0.20 * a_now)
+                    tgt_dist = origin_px - float(c[bar_idx])
+                    imp_r = tgt_dist / max(sl_dist, 1e-12)
+                    vac_sc = float(np.clip(0.55 * overlap + 0.45 * (1.0 - min(app_ker, 1.0)), 0.0, 1.0))
+                    if imp_r >= self.min_implied_r and 0.35 * a_now <= sl_dist <= 2.8 * a_now:
+                        return CompressionVacuumSetup(
+                            side=1, barrier_px=float(barrier), sweep_extreme=sw_lo,
+                            snap_level=snap_lvl, origin_anchor=origin_px,
+                            approach_ker=app_ker, vacuum_score=vac_sc,
+                            implied_r=imp_r, trigger_idx=bar_idx,
+                        )
+        return None
+
+    def detect_bpr_ifvg(
+        self,
+        o: np.ndarray,
+        h: np.ndarray,
+        l: np.ndarray,
+        c: np.ndarray,
+        atr: np.ndarray,
+        bar_idx: int,
+        barriers_hi: List[float],
+        barriers_lo: List[float],
+        lookback_manip: int = 8,
+    ) -> Optional[BPRZone]:
+        """Setup Physics B: Liquidity Sweep + Manipulation FVG inverted by high-K reversal FVG (BPR/iFVG)."""
+        if bar_idx < lookback_manip + 4 or atr[bar_idx] <= 0:
+            return None
+        a_now = max(float(atr[bar_idx]), 1e-12)
+
+        # Check bullish reversal FVG at bar_idx (l[bar_idx] > h[bar_idx-2]) inverting a recent bearish FVG into a floor sweep
+        if l[bar_idx] > h[bar_idx - 2] and (l[bar_idx] - h[bar_idx - 2]) >= 0.20 * a_now and c[bar_idx - 1] > o[bar_idx - 1]:
+            rev_lo, rev_hi = float(h[bar_idx - 2]), float(l[bar_idx])
+            win_lo = float(np.min(l[bar_idx - lookback_manip:bar_idx]))
+            if any(win_lo < b for b in barriers_lo):
+                # Search prior manipulation bearish FVG in [bar_idx - lookback_manip .. bar_idx - 2]
+                for m in range(bar_idx - 2, max(2, bar_idx - lookback_manip), -1):
+                    if h[m] < l[m - 2] and (l[m - 2] - h[m]) >= 0.15 * a_now:
+                        man_lo, man_hi = float(h[m]), float(l[m - 2])
+                        bpr_lo, bpr_hi = max(rev_lo, man_lo), min(rev_hi, man_hi)
+                        if bpr_hi > bpr_lo:
+                            k_vel, _, _ = KinematicMonitor.compute_kinematic_ratio(o, h, l, c, atr, m - 2, m, bar_idx)
+                            # Reversal velocity vs manipulation velocity
+                            v_rev = abs(float(c[bar_idx]) - win_lo) / max(1, bar_idx - m)
+                            v_man = abs(float(c[m]) - float(o[m - 2])) / 2.0
+                            k_inv = v_rev / max(v_man, 1e-12)
+                            if k_inv >= self.min_bpr_k or k_vel >= self.min_bpr_k:
+                                vac = float(np.clip((bpr_hi - bpr_lo) / a_now, 0.0, 1.0))
+                                return BPRZone(1, bpr_lo, bpr_hi, 0.5 * (bpr_lo + bpr_hi), win_lo, bar_idx, max(k_inv, k_vel), vac)
+
+        # Check bearish reversal FVG at bar_idx (h[bar_idx] < l[bar_idx-2]) inverting a recent bullish FVG into a ceiling sweep
+        if h[bar_idx] < l[bar_idx - 2] and (l[bar_idx - 2] - h[bar_idx]) >= 0.20 * a_now and c[bar_idx - 1] < o[bar_idx - 1]:
+            rev_lo, rev_hi = float(h[bar_idx]), float(l[bar_idx - 2])
+            win_hi = float(np.max(h[bar_idx - lookback_manip:bar_idx]))
+            if any(win_hi > b for b in barriers_hi):
+                for m in range(bar_idx - 2, max(2, bar_idx - lookback_manip), -1):
+                    if l[m] > h[m - 2] and (l[m] - h[m - 2]) >= 0.15 * a_now:
+                        man_lo, man_hi = float(h[m - 2]), float(l[m])
+                        bpr_lo, bpr_hi = max(rev_lo, man_lo), min(rev_hi, man_hi)
+                        if bpr_hi > bpr_lo:
+                            v_rev = abs(win_hi - float(c[bar_idx])) / max(1, bar_idx - m)
+                            v_man = abs(float(c[m]) - float(o[m - 2])) / 2.0
+                            k_inv = v_rev / max(v_man, 1e-12)
+                            if k_inv >= self.min_bpr_k:
+                                vac = float(np.clip((bpr_hi - bpr_lo) / a_now, 0.0, 1.0))
+                                return BPRZone(-1, bpr_lo, bpr_hi, 0.5 * (bpr_lo + bpr_hi), win_hi, bar_idx, k_inv, vac)
+        return None
+
+

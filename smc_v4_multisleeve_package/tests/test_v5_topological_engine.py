@@ -206,7 +206,7 @@ def test_binance_bot_and_qc_v5_parity():
 
     algo = qc_mod.BinanceFuturesMultiCoinScalper()
     algo.initialize()
-    assert len(algo.coins) == 15 and len(algo._consolidators) == 75
+    assert len(algo.coins) == len(algo.TICKERS) and len(algo._consolidators) == 5 * len(algo.TICKERS)
     btc_sym = next(s for s in algo.coins if s.value == "BTCUSDT")
     st = algo.coins[btc_sym]
     BarObj = lambda o, h, l, c, v=1e3: types.SimpleNamespace(Open=o, High=h, Low=l, Close=c, Volume=v)

@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
 """
-Binance USDT-M Futures Multi-Coin V6.0 Cognitive Fractal + Bayesian Prosecutor Bot
+Binance USDT-M Futures Multi-Coin V7.0 Intraday Cashflow Sniper + 4H Cognitive
 - Zero third-party dependencies (pure Python 3 stdlib).
-- Dual-Engine Causal Portfolio (zero HTF lookahead, real Binance fees+slip+funding):
-    1) Primary 4H Engine (--no-4h-trend to disable): 4H_V6_Cognitive
-       - Fractal 1H/4H Structural Stop Compression (bounded [1.50, 2.00] * ATR_4H, no arbitrary % clamp)
-       - Continuous Soft-AND Confluence Tensor + Cross-Asset BTC 4H Regime Veto
-       - 2-Stage Risk-Free Pyramiding: Stage-1 (+2.0R -> BE+0.35R + 0.50x) + Stage-2 (+4.2R, KER>0.40 -> 0.35x)
-       - Climax Elastic Ratchet: tightens 3.5 -> 2.0 * ATR_4H at >=10R..14R cluster profit
-       - N=239, WR=40.6%, Net=+112.4R, PF=2.05, DD=9.4R, ClusterMax=+14.9R, Cl>=10R=6, 7/7 yrs green
+- 3-Sleeve Causal Portfolio across the 10-Coin High-Liquidity Basket (zero HTF lookahead, real Binance VIP0 fees+slip+funding):
+    1) V7 Intraday Scene-Graph Physics (--no-v7 to disable): V7_CompVacuum + V7_BPR_Snap/Retest
+       - 5m Compression-Vacuum Snap & Sweep+BPR/iFVG on 1H Liquidity Pools + 4H KER>=0.15
+       - Cashflow Exit: 35% Partial Bank @ +3.0R -> BE+0.50R Lock -> +10R Vacuum Runner
+       - N=183, WR=33.9%, Net=+80.1R, PF=1.58, DD=17.3R | IS=+64.1R(1.87) | OOS=+16.0R(1.25)
     2) Secondary 1H->5m Engine (--no-smc to disable): SMC_Sweep_V6
-       - Bayesian Prosecutor: Temporal Sweep Decay (PRICE_ACCEPTANCE veto) + KER4>=0.15 + HTF Freight-Train Veto
-       - N=87, WR=36.8%, Net=+88.9R, PF=2.40, DD=9.0R, 7/7 yrs green (OOS PF=3.10)
-    Combined Dual-Engine (smc_risk_mult=0.50): N=326, WR=39.6%, Net=+156.9R, PF=2.13, DD=11.8R (<12R), 7/7 yrs green
-    Combined Dual-Engine (smc_risk_mult=1.00): N=326, WR=39.6%, Net=+201.3R, PF=2.18, DD=16.1R, Cl>=10R=12, 7/7 yrs green
+       - Bayesian Prosecutor: Temporal Sweep Decay + KER4>=0.15 + HTF Freight-Train Veto
+       - N=87, WR=36.8%, Net=+88.9R, PF=2.40, DD=9.0R, 7/7 yrs green | OOS PF=3.10
+    3) Primary 4H Engine (--no-4h-trend to disable): 4H_V6_Cognitive
+       - Fractal 1H/4H Structural Stop Compression + 2-Stage Risk-Free Pyramiding + Climax Ratchet
+       - N=240, WR=40.8%, Net=+109.1R, PF=2.05, DD=8.2R, 7/7 yrs green | OOS PF=1.94
+    Combined 3-Sleeve BTC Single-Asset: N=510, WR=37.6%, Net=+278.1R, PF=1.91, DD=18.7R, 7/7 yrs green
+- Small-Account Cashflow Engine (--small-account): $100+ equity, 2.5%-3.0% risk, <=15x leverage, -2.5R daily circuit breaker.
 """
 
 from __future__ import annotations
@@ -35,9 +36,8 @@ from typing import Dict, List, Optional, Tuple
 
 
 DEFAULT_SYMBOLS = (
-    "BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT",
-    "ADAUSDT", "DOGEUSDT", "AVAXUSDT", "LINKUSDT", "LTCUSDT",
-    "DOTUSDT", "UNIUSDT", "ATOMUSDT", "NEARUSDT", "ETCUSDT",
+    "BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", "XRPUSDT",
+    "DOGEUSDT", "ADAUSDT", "AVAXUSDT", "LINKUSDT", "SUIUSDT",
 )
 
 LIVE_BASE = "https://fapi.binance.com"
@@ -46,11 +46,157 @@ TESTNET_BASE = "https://testnet.binancefuture.com"
 Bar = Tuple[int, float, float, float, float, float]
 
 
-# -------------------- Pure Causal V6 Topological, Kernel, Kinematics & Prosecutor Math --------------------
+# -------------------- Pure Causal V6/V7 Topological, Kernel, Scene-Graph Physics & Prosecutor Math --------------------
 
 def sigmoid(x: float, x0: float = 0.0, k: float = 1.0) -> float:
     z = max(-60.0, min(60.0, -k * (x - x0)))
     return 1.0 / (1.0 + math.exp(z))
+
+
+def _ker_slice(closes: List[float]) -> float:
+    if len(closes) < 3:
+        return 0.0
+    den = sum(abs(closes[i] - closes[i - 1]) for i in range(1, len(closes)))
+    return abs(closes[-1] - closes[0]) / den if den > 1e-12 else 0.0
+
+
+def detect_v7_comp_vacuum(
+    bars_5m: List[Bar],
+    atr5: float,
+    barriers_hi: List[float],
+    barriers_lo: List[float],
+    trend_4h: int,
+    max_approach_ker: float = 0.42,
+    min_implied_r: float = 3.0,
+) -> Optional[Tuple[int, float, float]]:
+    """V7 Setup A: Compression grind into 1H liquidity barrier + sweep & 4H-aligned snap."""
+    if atr5 <= 0 or len(bars_5m) < 30 or trend_4h == 0:
+        return None
+    _, o0, h0, l0, c0, _ = bars_5m[-1]
+    rng0 = h0 - l0
+    body0 = abs(c0 - o0)
+    if rng0 <= 0 or body0 < 0.45 * rng0 or rng0 < 0.90 * atr5:
+        return None
+    win = bars_5m[-30:]
+    win_h = [b[2] for b in win]
+    win_l = [b[3] for b in win]
+    win_c = [b[4] for b in win]
+
+    if trend_4h == 1 and c0 > o0 and barriers_lo:
+        if (body0 / atr5) < 1.05:
+            return None
+        origin_idx = max(range(len(win_h) - 5), key=lambda k: win_h[k])
+        origin_px = win_h[origin_idx]
+        mid_pt = min(len(win_l) - 3, max(origin_idx + 1, len(win_l) - 6))
+        app_c = win_c[origin_idx:mid_pt + 1]
+        if len(app_c) >= 4 and _ker_slice(app_c) <= max_approach_ker:
+            seg_l = win_l[mid_pt:-1]
+            sweep_low = min(l0, min(seg_l) if seg_l else l0)
+            sl_dist = abs(c0 - (sweep_low - atr5))
+            if sl_dist > 0 and (origin_px - c0) / sl_dist >= min_implied_r:
+                for lv in barriers_lo:
+                    if sweep_low < lv and c0 > lv and (lv - sweep_low) <= 2.2 * atr5:
+                        return (1, sweep_low, origin_px)
+
+    if trend_4h == -1 and c0 < o0 and barriers_hi:
+        if (body0 / atr5) < 1.05:
+            return None
+        origin_idx = min(range(len(win_l) - 5), key=lambda k: win_l[k])
+        origin_px = win_l[origin_idx]
+        mid_pt = min(len(win_h) - 3, max(origin_idx + 1, len(win_h) - 6))
+        app_c = win_c[origin_idx:mid_pt + 1]
+        if len(app_c) >= 4 and _ker_slice(app_c) <= max_approach_ker:
+            seg_h = win_h[mid_pt:-1]
+            sweep_high = max(h0, max(seg_h) if seg_h else h0)
+            sl_dist = abs((sweep_high + atr5) - c0)
+            if sl_dist > 0 and (c0 - origin_px) / sl_dist >= min_implied_r:
+                for lv in barriers_hi:
+                    if sweep_high > lv and c0 < lv and (sweep_high - lv) <= 2.2 * atr5:
+                        return (-1, sweep_high, origin_px)
+    return None
+
+
+def _bpr_at_bar(
+    bars: List[Bar],
+    idx: int,
+    atr5: float,
+    barriers_hi: List[float],
+    barriers_lo: List[float],
+    trend_4h: int,
+    trend_1h: int,
+    min_bpr_k: float = 1.20,
+) -> Optional[dict]:
+    if atr5 <= 0 or idx < 15 or trend_4h == 0 or trend_4h != trend_1h:
+        return None
+    _, _, h2, l2, _, _ = bars[idx - 2]
+    _, o_d, _, _, c_d, _ = bars[idx - 1]
+    _, _, h0, l0, c0, _ = bars[idx]
+    disp_body = abs(c_d - o_d)
+    k_vel = disp_body / atr5
+    if k_vel < min_bpr_k:
+        return None
+    sub = bars[max(0, idx - 11):idx + 1]
+    sub_h = [b[2] for b in sub]
+    sub_l = [b[3] for b in sub]
+
+    if trend_4h == 1 and c_d > o_d and c0 > h2 and (l0 - h2) >= 0.12 * atr5 and barriers_lo:
+        d_lo, d_hi = h2, l0
+        sweep_low = min(sub_l)
+        if any(sweep_low < lv and c_d > lv and (lv - sweep_low) <= 2.5 * atr5 for lv in barriers_lo):
+            for m in range(max(1, idx - 9), idx - 2):
+                if bars[m - 1][3] - bars[m + 1][2] >= 0.10 * atr5 and bars[m][4] < bars[m][1]:
+                    ov_lo = max(d_lo, bars[m + 1][2])
+                    ov_hi = min(d_hi, bars[m - 1][3])
+                    if ov_hi > ov_lo:
+                        vac = min(1.0, (k_vel - 1.0) * 0.45 + 0.35)
+                        return {"side": 1, "low": ov_lo, "high": ov_hi, "mid": 0.5 * (ov_lo + ov_hi), "sweep": sweep_low, "k": k_vel, "vac": vac}
+    if trend_4h == -1 and c_d < o_d and c0 < l2 and (l2 - h0) >= 0.12 * atr5 and barriers_hi:
+        d_lo, d_hi = h0, l2
+        sweep_high = max(sub_h)
+        if any(sweep_high > lv and c_d < lv and (sweep_high - lv) <= 2.5 * atr5 for lv in barriers_hi):
+            for m in range(max(1, idx - 9), idx - 2):
+                if bars[m + 1][3] - bars[m - 1][2] >= 0.10 * atr5 and bars[m][4] > bars[m][1]:
+                    ov_lo = max(d_lo, bars[m - 1][2])
+                    ov_hi = min(d_hi, bars[m + 1][3])
+                    if ov_hi > ov_lo:
+                        vac = min(1.0, (k_vel - 1.0) * 0.45 + 0.35)
+                        return {"side": -1, "low": ov_lo, "high": ov_hi, "mid": 0.5 * (ov_lo + ov_hi), "sweep": sweep_high, "k": k_vel, "vac": vac}
+    return None
+
+
+def detect_v7_bpr_signal(
+    bars_5m: List[Bar],
+    atr5: float,
+    barriers_hi: List[float],
+    barriers_lo: List[float],
+    trend_4h: int,
+    trend_1h: int,
+) -> Optional[Tuple[str, int, float]]:
+    """Stateless causal check at bars_5m[-1]: immediate high-velocity BPR snap OR 6-bar causal retest."""
+    n = len(bars_5m)
+    bpr_now = _bpr_at_bar(bars_5m, n - 1, atr5, barriers_hi, barriers_lo, trend_4h, trend_1h)
+    if bpr_now is not None and bpr_now["vac"] >= 0.55 and bpr_now["k"] >= 1.60:
+        slp = (bpr_now["sweep"] - atr5) if bpr_now["side"] == 1 else (bpr_now["sweep"] + atr5)
+        return ("V7_BPR_Snap", bpr_now["side"], slp)
+
+    _, o, h, l, c, _ = bars_5m[-1]
+    for back in range(1, min(7, n - 16)):
+        c_idx = (n - 1) - back
+        bpr = _bpr_at_bar(bars_5m, c_idx, atr5, barriers_hi, barriers_lo, trend_4h, trend_1h)
+        if bpr is None or (bpr["vac"] >= 0.55 and bpr["k"] >= 1.60):
+            continue
+        intervening = bars_5m[c_idx + 1:n - 1]
+        if bpr["side"] == 1:
+            if any(b[3] < bpr["sweep"] for b in intervening) or l < bpr["sweep"]:
+                continue
+            if l <= bpr["high"] and c > o and c >= bpr["mid"]:
+                return ("V7_BPR_Retest", 1, bpr["sweep"] - atr5)
+        else:
+            if any(b[2] > bpr["sweep"] for b in intervening) or h > bpr["sweep"]:
+                continue
+            if h >= bpr["low"] and c < o and c <= bpr["mid"]:
+                return ("V7_BPR_Retest", -1, bpr["sweep"] + atr5)
+    return None
 
 
 def soft_and_log_odds(
@@ -394,6 +540,9 @@ class SignalCandidate:
     is_market: bool = False
     trail_atr_mult: Optional[float] = None
     risk_mult: float = 1.0
+    bank_r: float = 0.0
+    bank_frac: float = 0.0
+    be_lock_r: float = 0.50
 
 
 def evaluate_symbol_bars(
@@ -403,6 +552,8 @@ def evaluate_symbol_bars(
     bars_1h: List[Bar],
     bars_4h: List[Bar],
     bars_1d: Optional[List[Bar]] = None,
+    use_v7: bool = True,
+    v7_risk_mult: float = 1.0,
     use_4h_trend: bool = True,
     v6_mode: str = "hybrid",
     donch_lb: int = 20,
@@ -414,7 +565,7 @@ def evaluate_symbol_bars(
     sweep_tp_r: float = 10.0,
     enable_fast_scalp: bool = False,
 ) -> Optional[SignalCandidate]:
-    """Evaluate strictly CLOSED candles using 100% causal V6.0 Cognitive Fractal + Prosecutor rules."""
+    """Evaluate strictly CLOSED candles using 100% causal V7.0 Intraday Physics + V6.0 Cognitive + Prosecutor rules."""
     if len(bars_5m) < 80 or len(bars_15m) < 40 or len(bars_1h) < 60 or len(bars_4h) < max(60, donch_lb + 3):
         return None
 
@@ -519,7 +670,29 @@ def evaluate_symbol_bars(
     _, _, h1, l1, _, _ = bars_5m[-3]
     utc_dt = dt.datetime.fromtimestamp(ts_5m / 1000.0, tz=dt.timezone.utc)
 
-    # 2) Secondary 1H->5m Engine: SMC_Sweep_V6 (PF=2.40, OOS PF=3.10, DD=9.0R, 7/7 yrs green)
+    # 2) V7.0 Intraday Scene-Graph Physics (5m Compression-Vacuum Snap + Sweep BPR/iFVG)
+    if use_v7 and atr_5 > 0 and ker_4h >= 0.15:
+        b_hi = [x[1] for x in sw1.act_hi[-8:]]
+        b_lo = [x[1] for x in sw1.act_lo[-8:]]
+        v7_sig: Optional[Tuple[str, int, float]] = None
+        ca = detect_v7_comp_vacuum(bars_5m, atr_5, b_hi, b_lo, sw4.trend)
+        if ca is not None:
+            sd_v7, sw_ex, _ = ca
+            slp_v7 = (sw_ex - atr_5) if sd_v7 == 1 else (sw_ex + atr_5)
+            v7_sig = ("V7_CompVacuum", sd_v7, slp_v7)
+        if v7_sig is None:
+            v7_sig = detect_v7_bpr_signal(bars_5m, atr_5, b_hi, b_lo, sw4.trend, sw1.trend)
+        if v7_sig is not None:
+            eng_v7, sd_v7, slp_v7 = v7_sig
+            rd_v7 = abs(c - slp_v7)
+            if 0.0045 <= (rd_v7 / c) <= 0.0180:
+                return SignalCandidate(
+                    symbol, eng_v7, sd_v7, c, slp_v7, c + sd_v7 * sweep_tp_r * rd_v7,
+                    rd_v7, (), 40 * 60, is_market=False, risk_mult=v7_risk_mult,
+                    bank_r=3.0, bank_frac=0.35, be_lock_r=0.50,
+                )
+
+    # 3) Secondary 1H->5m Engine: SMC_Sweep_V6 (PF=2.40, OOS PF=3.10, DD=9.0R, 7/7 yrs green)
     if use_smc and utc_dt.hour >= 9 and atr_5 > 0 and cands_k3 and ker_4h >= 0.15:
         c2b = abs(c2 - o2)
         rvol5 = (v_last / vavg_20) if vavg_20 > 0 else 1.0
@@ -741,6 +914,8 @@ def run_bot(
     leverage: int,
     max_open_pos: int,
     paper_equity: float,
+    use_v7: bool = True,
+    v7_risk_mult: float = 1.0,
     use_4h_trend: bool = True,
     v6_mode: str = "hybrid",
     use_pyramid: bool = True,
@@ -751,6 +926,9 @@ def run_bot(
     smc_risk_mult: float = 0.50,
     sweep_tp_r: float = 10.0,
     enable_fast_scalp: bool = False,
+    small_account: bool = False,
+    risk_pct: float = 0.015,
+    daily_dd_cap_r: float = -2.5,
 ) -> None:
     base_url = TESTNET_BASE if mode == "testnet" else LIVE_BASE
     api_key = os.environ.get("BINANCE_API_KEY", "")
@@ -760,7 +938,12 @@ def run_bot(
 
     client = BinanceFuturesClient(base_url, api_key, api_secret)
     filters = client.load_filters(symbols)
-    print(f"[INIT] V6.0 mode={mode} syms={len(filters)}/{len(symbols)} 4H={use_4h_trend}({v6_mode}) pyr={use_pyramid}(st2={use_stage2_pyramid}) smc={use_smc}({smc_risk_mult:.2f}x) lev={leverage}x")
+    slot_frac = 0.85 if small_account else 0.30
+    print(
+        f"[INIT] V7.0 mode={mode} syms={len(filters)}/{len(symbols)} v7={use_v7}({v7_risk_mult:.2f}x) "
+        f"4H={use_4h_trend}({v6_mode}) smc={use_smc}({smc_risk_mult:.2f}x) small_acct={small_account} "
+        f"risk={risk_pct*100:.2f}% lev={leverage}x daily_cb={daily_dd_cap_r:.1f}R"
+    )
 
     if mode in ("testnet", "live"):
         for sym in filters:
@@ -771,8 +954,14 @@ def run_bot(
 
     hwm_equity = paper_equity
     active_meta: Dict[str, dict] = {}
+    daily_r_day = dt.datetime.now(dt.timezone.utc).date()
+    daily_r_pnl = 0.0
     while True:
         try:
+            now_day = dt.datetime.now(dt.timezone.utc).date()
+            if now_day != daily_r_day:
+                daily_r_day = now_day
+                daily_r_pnl = 0.0
             equity = paper_equity if mode == "paper" else client.get_usdt_balance()
             hwm_equity = max(hwm_equity, equity)
             dd = (hwm_equity - equity) / hwm_equity if hwm_equity > 0 else 0.0
@@ -798,8 +987,13 @@ def run_bot(
                     continue
                 if mode != "paper" and meta["state"] == "OPEN" and sym not in open_pos:
                     client.cancel_all(sym)
+                    b5_close = client.get_klines(sym, "5m", 2)
+                    if b5_close and meta.get("risk", 0.0) > 0:
+                        c_last = b5_close[-1][4]
+                        rem_f = (1.0 - meta.get("bank_frac", 0.0)) if meta.get("partial_taken") else 1.0
+                        daily_r_pnl += rem_f * (((c_last - meta["entry"]) * meta["side"]) / meta["risk"])
                     active_meta.pop(sym, None)
-                    print(f"[CLOSE] {sym} position closed -> open orders cleaned")
+                    print(f"[CLOSE] {sym} position closed -> open orders cleaned | daily_r={daily_r_pnl:+.2f}R")
                     continue
                 if meta["state"] == "OPEN" and sym in open_pos:
                     exit_side = "SELL" if meta["side"] == 1 else "BUY"
@@ -854,7 +1048,7 @@ def run_bot(
                                 )
                                 if use_pyramid and meta.get("pyramid_armed") and meta.get("pyr_stage", 0) == 0 and pb1:
                                     sl_p1 = round_step(c4 - meta["side"] * 1.5 * atr4, filters[sym].tick_size, False)
-                                    qty_p1 = compute_order_qty(equity, 0.0075 * dd_brake, c4, sl_p1, filters[sym], leverage=leverage)
+                                    qty_p1 = compute_order_qty(equity, 0.50 * risk_pct * dd_brake, c4, sl_p1, filters[sym], leverage=leverage, max_slot_frac=slot_frac)
                                     if qty_p1 > 0:
                                         side_str = "BUY" if meta["side"] == 1 else "SELL"
                                         client.place_market(sym, side_str, qty_p1)
@@ -872,7 +1066,7 @@ def run_bot(
                                     )
                                     if pb2:
                                         sl_p2 = round_step(c4 - meta["side"] * 1.4 * atr4, filters[sym].tick_size, False)
-                                        qty_p2 = compute_order_qty(equity, 0.00525 * dd_brake, c4, sl_p2, filters[sym], leverage=leverage)
+                                        qty_p2 = compute_order_qty(equity, 0.35 * risk_pct * dd_brake, c4, sl_p2, filters[sym], leverage=leverage, max_slot_frac=slot_frac)
                                         if qty_p2 > 0:
                                             side_str = "BUY" if meta["side"] == 1 else "SELL"
                                             client.place_market(sym, side_str, qty_p2)
@@ -884,10 +1078,28 @@ def run_bot(
                                             meta["sl"] = comb_sl
                                             meta["pyr_stage"] = 2
                                             print(f"[PYRAMID ST2 +0.35x] {sym} {side_str} +{qty_p2} SL->{comb_sl}")
-                    elif meta["step_locks"]:
+                    elif meta.get("bank_frac", 0.0) > 0 or meta["step_locks"]:
                         b5 = client.get_klines(sym, "5m", 3)
                         if b5:
                             _, _, h, l, c, _ = b5[-1]
+                            meta["best_px"] = max(meta["best_px"], h) if meta["side"] == 1 else min(meta["best_px"], l)
+                            mfe_r = ((meta["best_px"] - meta["entry"]) * meta["side"]) / max(meta["risk"], 1e-12)
+                            if meta.get("bank_frac", 0.0) > 0 and (not meta.get("partial_taken")) and mfe_r >= meta.get("bank_r", 3.0):
+                                part_qty = round_step(qty_abs * meta["bank_frac"], filters[sym].step_size, True)
+                                rem_qty = round_step(qty_abs - part_qty, filters[sym].step_size, True)
+                                if part_qty >= filters[sym].min_qty and rem_qty >= filters[sym].min_qty:
+                                    client.cancel_all(sym)
+                                    client.place_market(sym, exit_side, part_qty, reduce_only=True)
+                                    lk_sl = round_step(meta["entry"] + meta["side"] * meta.get("be_lock_r", 0.50) * meta["risk"], filters[sym].tick_size, False)
+                                    if (meta["side"] == 1 and lk_sl > meta["sl"] and lk_sl < c) or (meta["side"] == -1 and lk_sl < meta["sl"] and lk_sl > c):
+                                        meta["sl"] = lk_sl
+                                    client.place_stop_market(sym, exit_side, rem_qty, meta["sl"])
+                                    if meta["tp"] is not None:
+                                        client.place_tp_limit(sym, exit_side, rem_qty, meta["tp"])
+                                    meta["partial_taken"] = True
+                                    daily_r_pnl += meta["bank_frac"] * meta.get("bank_r", 3.0)
+                                    qty_abs = rem_qty
+                                    print(f"[V7 BANK35] {sym} banked {part_qty} @ >=+{meta.get('bank_r', 3.0):.1f}R, SL->{meta['sl']}")
                             for act_r, lk_r in meta["step_locks"]:
                                 hit = (h >= meta["entry"] + act_r * meta["risk"]) if meta["side"] == 1 else (l <= meta["entry"] - act_r * meta["risk"])
                                 new_sl = round_step(meta["entry"] + meta["side"] * lk_r * meta["risk"], filters[sym].tick_size, False)
@@ -900,6 +1112,10 @@ def run_bot(
                                     meta["sl"] = new_sl
                                     print(f"[LOCK] {sym} SL moved -> {new_sl}")
 
+            if daily_r_pnl <= daily_dd_cap_r:
+                time.sleep(30)
+                continue
+
             for sym, filt in filters.items():
                 if sym in open_pos or sym in active_meta or (len(open_pos) + len(active_meta)) >= max_open_pos:
                     continue
@@ -911,6 +1127,7 @@ def run_bot(
                 btc_fn = None if sym == "BTCUSDT" else (lambda sd: _btc_regime_score_from_4h(btc_4h_cache, sd))
                 sig = evaluate_symbol_bars(
                     sym, b5, b15, b1h, b4h, b1d,
+                    use_v7=use_v7, v7_risk_mult=v7_risk_mult,
                     use_4h_trend=use_4h_trend, v6_mode=v6_mode, donch_lb=donch_lb,
                     trail_atr_mult=trail_atr_mult, btc_regime_fn=btc_fn,
                     use_smc=use_smc, smc_risk_mult=smc_risk_mult,
@@ -921,7 +1138,7 @@ def run_bot(
                 ep = round_step(sig.entry_px, filt.tick_size, False)
                 sl = round_step(sig.sl_px, filt.tick_size, False)
                 tp = round_step(sig.tp_px, filt.tick_size, False) if sig.tp_px is not None else None
-                qty = compute_order_qty(equity, 0.015 * sig.risk_mult * dd_brake, ep, sl, filt, leverage=leverage)
+                qty = compute_order_qty(equity, risk_pct * sig.risk_mult * dd_brake, ep, sl, filt, leverage=leverage, max_slot_frac=slot_frac)
                 if qty <= 0:
                     print(f"[SKIP] {sym} qty=0 (minNotional={filt.min_notional} equity={equity:.2f})")
                     continue
@@ -937,6 +1154,8 @@ def run_bot(
                         "sl": sl, "tp": tp, "risk": abs(ep - sl), "step_locks": sig.step_locks,
                         "trail_mult": sig.trail_atr_mult, "last_4h_ts": b4h[-1][0] if b4h else 0,
                         "pyramid_armed": False, "pyr_stage": 0,
+                        "bank_r": sig.bank_r, "bank_frac": sig.bank_frac, "be_lock_r": sig.be_lock_r,
+                        "partial_taken": False,
                         "expires_at": time.time() + sig.expire_sec,
                     }
         except urllib.error.URLError as exc:
@@ -947,11 +1166,16 @@ def run_bot(
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Binance Futures Multi-Coin V6.0 Cognitive Fractal + Prosecutor Bot")
+    ap = argparse.ArgumentParser(description="Binance Futures Multi-Coin V7.0 Intraday Cashflow + 4H Cognitive Bot")
     ap.add_argument("--mode", choices=("paper", "testnet", "live"), default="paper")
     ap.add_argument("--leverage", type=int, default=10)
     ap.add_argument("--max-pos", type=int, default=3)
     ap.add_argument("--paper-equity", type=float, default=500.0)
+    ap.add_argument("--small-account", action="store_true", help="Enable $100 small-account mode (3.0% risk, 15x lev, -2.5R daily CB)")
+    ap.add_argument("--risk-pct", type=float, default=None, help="Override base risk per trade (e.g. 0.025 or 0.03)")
+    ap.add_argument("--daily-stop-r", type=float, default=-2.5, help="Daily realized R circuit breaker (default -2.5R)")
+    ap.add_argument("--no-v7", action="store_true", help="Disable V7.0 Intraday Scene-Graph Physics engine")
+    ap.add_argument("--v7-risk-mult", type=float, default=1.0, help="Risk multiplier for V7 Intraday Physics")
     ap.add_argument("--no-4h-trend", action="store_true", help="Disable primary 4H_V6_Cognitive engine")
     ap.add_argument("--v6-mode", "--v5-mode", dest="v6_mode", choices=("hybrid", "topological"), default="hybrid")
     ap.add_argument("--no-pyramid", action="store_true", help="Disable risk-free 2-stage pyramiding")
@@ -960,17 +1184,22 @@ def main() -> None:
     ap.add_argument("--trail-atr-mult", type=float, default=3.5)
     ap.add_argument("--no-smc", action="store_true", help="Disable secondary SMC_Sweep_V6 engine")
     ap.add_argument("--smc-risk-mult", type=float, default=0.50, help="Risk multiplier for SMC_Sweep_V6 (0.50 -> DD<12R, 1.00 -> max R)")
-    ap.add_argument("--sweep-tp-r", type=float, default=10.0, help="TP multiple in R for SMC_Sweep (10.0 or 15.0)")
+    ap.add_argument("--sweep-tp-r", type=float, default=10.0, help="TP multiple in R for V7 & SMC_Sweep")
     ap.add_argument("--enable-fast-scalp", action="store_true", help="Enable experimental fast scalp sleeves")
     ap.add_argument("--symbols", type=str, default=",".join(DEFAULT_SYMBOLS))
     args = ap.parse_args()
     syms = tuple(s.strip().upper() for s in args.symbols.split(",") if s.strip())
+    lev = 15 if (args.small_account and args.leverage == 10) else args.leverage
+    risk_pct = args.risk_pct if args.risk_pct is not None else (0.03 if args.small_account else 0.015)
+    smc_mult = 1.0 if (args.small_account and args.smc_risk_mult == 0.50) else args.smc_risk_mult
     run_bot(
-        args.mode, syms, args.leverage, args.max_pos, args.paper_equity,
+        args.mode, syms, lev, args.max_pos, args.paper_equity,
+        use_v7=not args.no_v7, v7_risk_mult=args.v7_risk_mult,
         use_4h_trend=not args.no_4h_trend, v6_mode=args.v6_mode, use_pyramid=not args.no_pyramid,
         use_stage2_pyramid=not args.no_stage2_pyramid, donch_lb=args.donch_lb,
         trail_atr_mult=args.trail_atr_mult, use_smc=not args.no_smc,
-        smc_risk_mult=args.smc_risk_mult, sweep_tp_r=args.sweep_tp_r, enable_fast_scalp=args.enable_fast_scalp,
+        smc_risk_mult=smc_mult, sweep_tp_r=args.sweep_tp_r, enable_fast_scalp=args.enable_fast_scalp,
+        small_account=args.small_account, risk_pct=risk_pct, daily_dd_cap_r=args.daily_stop_r,
     )
 
 

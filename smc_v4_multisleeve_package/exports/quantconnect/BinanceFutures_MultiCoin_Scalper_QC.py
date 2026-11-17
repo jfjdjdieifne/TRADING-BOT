@@ -1,11 +1,13 @@
-# QUANTCONNECT.COM - Binance Futures Multi-Coin V6.0 Cognitive Fractal + Bayesian Prosecutor
-# Audited with ZERO HTF lookahead on 718,418 BTC 5m bars (2020-2026, real Binance fees+slip+funding):
-#   1) Primary 4H Engine (use_4h_trend=true): 4H_V6_Cognitive (Fractal 1H/4H Compression + 2-Stage Pyramid + Climax Ratchet)
-#      - N=239, WR=40.6%, Net=+112.4R, PF=2.05, DD=9.4R, ClusterMax=+14.9R, Cl>=10R=6, 7/7 yrs green
-#   2) Secondary 1H->5m Engine (use_smc=true): SMC_Sweep_V6 (Bayesian Prosecutor + Temporal Sweep Decay + KER4>=0.15)
-#      - N=87, WR=36.8%, Net=+88.9R, PF=2.40, DD=9.0R, 7/7 yrs green (OOS PF=3.10)
-#   Combined Dual-Engine (smc_risk_mult=0.50): N=326, WR=39.6%, Net=+156.9R, PF=2.13, DD=11.8R (<12R), 7/7 yrs green
-#   Combined Dual-Engine (smc_risk_mult=1.00): N=326, WR=39.6%, Net=+201.3R, PF=2.18, DD=16.1R, Cl>=10R=12, 7/7 yrs green
+# QUANTCONNECT.COM - Binance Futures Multi-Coin V7.0 Intraday Cashflow Sniper + 4H Cognitive
+# Audited with ZERO HTF lookahead on 823,154 BTC 5m bars (2020-2026, real Binance VIP0 fees+slip+funding):
+#   1) Sleeve 1 (use_v7=true): V7_Intraday_Physics (5m Compression-Vacuum Snap + Sweep BPR/iFVG + 35%@3R->BE+0.5R)
+#      - N=183, WR=33.9%, Net=+80.1R, PF=1.58, DD=17.3R | IS=+64.1R(1.87) | OOS=+16.0R(1.25)
+#   2) Sleeve 2 (use_smc=true): SMC_Sweep_V6 (1H Sweep -> 5m CHoCH+FVG + Bayesian Prosecutor)
+#      - N=87, WR=36.8%, Net=+88.9R, PF=2.40, DD=9.0R, 7/7 yrs green | OOS PF=3.10
+#   3) Sleeve 3 (use_4h_trend=true): 4H_V6_Cognitive (Fractal 1H/4H Compression + 2-Stage Pyramid + Climax Ratchet)
+#      - N=240, WR=40.8%, Net=+109.1R, PF=2.05, DD=8.2R, 7/7 yrs green | OOS PF=1.94
+#   Combined 3-Sleeve BTC Single-Asset: N=510, WR=37.6%, Net=+278.1R, PF=1.91, DD=18.7R, 7/7 yrs green
+#   10-Coin High-Liquidity Basket + $100 Small-Account Engine (2.5%-3.0% risk, <=15x lev, -2.5R daily CB)
 
 from AlgorithmImports import *
 from collections import deque
@@ -15,6 +17,118 @@ import math
 def _sigmoid(x: float, x0: float = 0.0, k: float = 1.0) -> float:
     z = max(-60.0, min(60.0, -k * (x - x0)))
     return 1.0 / (1.0 + math.exp(z))
+
+
+def _ker_slice(closes: list[float]) -> float:
+    if len(closes) < 3:
+        return 0.0
+    den = sum(abs(closes[i] - closes[i - 1]) for i in range(1, len(closes)))
+    return abs(closes[-1] - closes[0]) / den if den > 1e-12 else 0.0
+
+
+def _detect_v7_comp_vacuum(
+    bars: list[tuple[float, float, float, float]],
+    atr5: float,
+    barriers_hi: list[float],
+    barriers_lo: list[float],
+    trend_4h: int,
+    max_approach_ker: float = 0.42,
+    min_implied_r: float = 3.0,
+) -> tuple[int, float, float] | None:
+    """V7 Setup A: Compression grind into 1H liquidity barrier + sweep & 4H-aligned snap."""
+    if atr5 <= 0 or len(bars) < 30 or trend_4h == 0:
+        return None
+    o0, h0, l0, c0 = bars[-1]
+    rng0 = h0 - l0
+    body0 = abs(c0 - o0)
+    if rng0 <= 0 or body0 < 0.45 * rng0 or rng0 < 0.90 * atr5:
+        return None
+    win = bars[-30:]
+    win_h = [b[1] for b in win]
+    win_l = [b[2] for b in win]
+    win_c = [b[3] for b in win]
+
+    if trend_4h == 1 and c0 > o0 and barriers_lo:
+        k_vel = body0 / atr5
+        if k_vel < 1.05:
+            return None
+        origin_idx = max(range(len(win_h) - 5), key=lambda k: win_h[k])
+        origin_px = win_h[origin_idx]
+        mid_pt = min(len(win_l) - 3, max(origin_idx + 1, len(win_l) - 6))
+        app_c = win_c[origin_idx:mid_pt + 1]
+        if len(app_c) >= 4 and _ker_slice(app_c) <= max_approach_ker:
+            seg_l = win_l[mid_pt:-1]
+            sweep_low = min(l0, min(seg_l) if seg_l else l0)
+            sl_dist = abs(c0 - (sweep_low - atr5))
+            if sl_dist > 0 and (origin_px - c0) / sl_dist >= min_implied_r:
+                for lv in barriers_lo:
+                    if sweep_low < lv and c0 > lv and (lv - sweep_low) <= 2.2 * atr5:
+                        return (1, sweep_low, origin_px)
+
+    if trend_4h == -1 and c0 < o0 and barriers_hi:
+        k_vel = body0 / atr5
+        if k_vel < 1.05:
+            return None
+        origin_idx = min(range(len(win_l) - 5), key=lambda k: win_l[k])
+        origin_px = win_l[origin_idx]
+        mid_pt = min(len(win_h) - 3, max(origin_idx + 1, len(win_h) - 6))
+        app_c = win_c[origin_idx:mid_pt + 1]
+        if len(app_c) >= 4 and _ker_slice(app_c) <= max_approach_ker:
+            seg_h = win_h[mid_pt:-1]
+            sweep_high = max(h0, max(seg_h) if seg_h else h0)
+            sl_dist = abs((sweep_high + atr5) - c0)
+            if sl_dist > 0 and (c0 - origin_px) / sl_dist >= min_implied_r:
+                for lv in barriers_hi:
+                    if sweep_high > lv and c0 < lv and (sweep_high - lv) <= 2.2 * atr5:
+                        return (-1, sweep_high, origin_px)
+    return None
+
+
+def _detect_v7_bpr(
+    bars: list[tuple[float, float, float, float]],
+    atr5: float,
+    barriers_hi: list[float],
+    barriers_lo: list[float],
+    trend_4h: int,
+    trend_1h: int,
+    min_bpr_k: float = 1.20,
+) -> dict | None:
+    """V7 Setup B: Sweep + Overlapping Balanced Price Range (BPR/iFVG) Polarity Inversion."""
+    if atr5 <= 0 or len(bars) < 16 or trend_4h == 0 or trend_4h != trend_1h:
+        return None
+    b2, b1, b0 = bars[-3], bars[-2], bars[-1]
+    o_d, h_d, l_d, c_d = b1
+    disp_body = abs(c_d - o_d)
+    k_vel = disp_body / atr5
+    if k_vel < min_bpr_k:
+        return None
+    sub = bars[-12:]
+    sub_h = [b[1] for b in sub]
+    sub_l = [b[2] for b in sub]
+
+    if trend_4h == 1 and c_d > o_d and b0[3] > b2[1] and (b0[2] - b2[1]) >= 0.12 * atr5 and barriers_lo:
+        d_lo, d_hi = b2[1], b0[2]
+        sweep_low = min(sub_l)
+        if any(sweep_low < lv and c_d > lv and (lv - sweep_low) <= 2.5 * atr5 for lv in barriers_lo):
+            for m in range(len(bars) - 10, len(bars) - 3):
+                if bars[m - 1][2] - bars[m + 1][1] >= 0.10 * atr5 and bars[m][3] < bars[m][0]:
+                    ov_lo = max(d_lo, bars[m + 1][1])
+                    ov_hi = min(d_hi, bars[m - 1][2])
+                    if ov_hi > ov_lo:
+                        vac = min(1.0, (k_vel - 1.0) * 0.45 + 0.35)
+                        return {"side": 1, "low": ov_lo, "high": ov_hi, "mid": 0.5 * (ov_lo + ov_hi), "sweep": sweep_low, "k": k_vel, "vac": vac}
+    if trend_4h == -1 and c_d < o_d and b0[3] < b2[2] and (b2[2] - b0[1]) >= 0.12 * atr5 and barriers_hi:
+        d_lo, d_hi = b0[1], b2[2]
+        sweep_high = max(sub_h)
+        if any(sweep_high > lv and c_d < lv and (sweep_high - lv) <= 2.5 * atr5 for lv in barriers_hi):
+            for m in range(len(bars) - 10, len(bars) - 3):
+                if bars[m + 1][2] - bars[m - 1][1] >= 0.10 * atr5 and bars[m][3] > bars[m][0]:
+                    ov_lo = max(d_lo, bars[m - 1][1])
+                    ov_hi = min(d_hi, bars[m + 1][2])
+                    if ov_hi > ov_lo:
+                        vac = min(1.0, (k_vel - 1.0) * 0.45 + 0.35)
+                        return {"side": -1, "low": ov_lo, "high": ov_hi, "mid": 0.5 * (ov_lo + ov_hi), "sweep": sweep_high, "k": k_vel, "vac": vac}
+    return None
 
 
 def _soft_and_log_odds(scores: dict, weights: dict, veto_floors: dict | None = None) -> float:
@@ -281,28 +395,32 @@ class CoinState:
 
         self.vols_5m = deque(maxlen=20)
         self.vwap_day, self.vwap_pv, self.vwap_v = None, 0.0, 0.0
-        self.bars_5m = deque(maxlen=6)
+        self.bars_5m = deque(maxlen=40)
         self.cands_1h_k3 = []
+        self.pending_bpr = None
         self.idx_5m = self.cooldown_until = 0
 
         self.pending_ticket = self.pending_meta = None
         self.in_position, self.active_engine, self.active_side = False, None, 0
         self.entry_price = self.sl_price = self.risk_dist = self.qty = self.best_px = 0.0
         self.tp_price = self.trail_atr_mult = None
-        self.pyramid_armed = self.pyramid_done = False
+        self.pyramid_armed = self.pyramid_done = self.partial_taken = False
         self.pyramid_stage = 0
         self.step_locks = ()
-        self.sl_ticket = self.tp_ticket = None
+        self.bank_r = self.bank_frac = self.be_lock_r = 0.0
+        self.sl_ticket = self.tp_ticket = self.partial_ticket = None
         self.canceled_sl_ids = set()
 
 
 class BinanceFuturesMultiCoinScalper(QCAlgorithm):
     TICKERS = (
-        "BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT",
-        "ADAUSDT", "DOGEUSDT", "AVAXUSDT", "LINKUSDT", "LTCUSDT",
-        "DOTUSDT", "UNIUSDT", "ATOMUSDT", "NEARUSDT", "ETCUSDT",
+        "BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", "XRPUSDT",
+        "DOGEUSDT", "ADAUSDT", "AVAXUSDT", "LINKUSDT", "SUIUSDT",
     )
     ENGINE_RISK = {
+        "V7_CompVacuum": 0.015,
+        "V7_BPR_Snap": 0.015,
+        "V7_BPR_Retest": 0.015,
         "4H_V6_Cognitive": 0.015,
         "SMC_Sweep_V6": 0.015,
         "VWAP_Sniper": 0.015,
@@ -319,14 +437,24 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         start_cash = float(self.get_parameter("start_cash") or 10000.0)
         self.set_account_currency("USDT", start_cash)
         self.hwm_equity = start_cash
+        self.small_account_mode = (
+            str(self.get_parameter("small_account_mode") or ("true" if start_cash <= 500.0 else "false")).lower() == "true"
+        )
+        self.small_risk_pct = float(self.get_parameter("small_risk_pct") or 0.03)
+        self.max_leverage = float(self.get_parameter("max_leverage") or (15.0 if self.small_account_mode else 10.0))
+        self.daily_dd_cap_r = float(self.get_parameter("daily_dd_cap_r") or -2.5)
+        self.daily_r_day = None
+        self.daily_r_pnl = 0.0
         self.risk_scale = float(self.get_parameter("risk_scale") or 1.0)
-        self.max_open_pos = int(self.get_parameter("max_open_pos") or 3)
+        self.max_open_pos = int(self.get_parameter("max_open_pos") or (2 if self.small_account_mode else 3))
+        self.use_v7 = str(self.get_parameter("use_v7") or "true").lower() == "true"
+        self.v7_risk_mult = float(self.get_parameter("v7_risk_mult") or 1.0)
         self.use_4h_trend = str(self.get_parameter("use_4h_trend") or "true").lower() == "true"
         self.v6_mode = str(self.get_parameter("v6_mode") or self.get_parameter("v5_mode") or "hybrid").lower()
         self.use_pyramid = str(self.get_parameter("use_pyramid") or "true").lower() == "true"
         self.use_stage2_pyramid = str(self.get_parameter("use_stage2_pyramid") or "true").lower() == "true"
         self.use_smc = str(self.get_parameter("use_smc") or "true").lower() == "true"
-        self.smc_risk_mult = float(self.get_parameter("smc_risk_mult") or 0.50)
+        self.smc_risk_mult = float(self.get_parameter("smc_risk_mult") or (1.0 if self.small_account_mode else 0.50))
         self.enable_fast_scalp = str(self.get_parameter("enable_fast_scalp") or "false").lower() == "true"
         self.sweep_tp_r = float(self.get_parameter("sweep_tp_r") or 10.0)
         self.donch_lb = int(self.get_parameter("donch_lb") or 20)
@@ -337,8 +465,8 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
 
         self.coins, self.trade_counts, self.invalid_counts = {}, {}, {}
         for tk in self.TICKERS:
-            sec = self.add_crypto_future(tk, Resolution.MINUTE, Market.BINANCE, leverage=10)
-            st = CoinState(tk, sec.symbol, 10.0)
+            sec = self.add_crypto_future(tk, Resolution.MINUTE, Market.BINANCE, leverage=int(self.max_leverage))
+            st = CoinState(tk, sec.symbol, self.max_leverage)
             st.donch_hi_4h = deque(maxlen=self.donch_lb)
             st.donch_lo_4h = deque(maxlen=self.donch_lb)
             self.coins[sec.symbol] = st
@@ -353,11 +481,19 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
     def _open_count(self) -> int:
         return sum(1 for st in self.coins.values() if st.in_position or st.pending_ticket is not None)
 
+    def _daily_circuit_ok(self) -> bool:
+        d = self.utc_time.date()
+        if self.daily_r_day != d:
+            self.daily_r_day = d
+            self.daily_r_pnl = 0.0
+        return self.daily_r_pnl > self.daily_dd_cap_r
+
     def _effective_risk_pct(self, engine: str, mult: float = 1.0) -> float:
         eq = float(self.portfolio.total_portfolio_value)
         dd = (self.hwm_equity - eq) / self.hwm_equity if self.hwm_equity > 0 else 0.0
         brake = 0.50 if dd >= 0.12 else (0.70 if dd >= 0.08 else 1.0)
-        return self.ENGINE_RISK.get(engine, 0.015) * brake * self.risk_scale * mult
+        base = self.small_risk_pct if self.small_account_mode else self.ENGINE_RISK.get(engine, 0.015)
+        return base * brake * self.risk_scale * mult
 
     def _round_qty(self, sym: Symbol, raw_qty: float, is_long: bool) -> float:
         sp = self.securities[sym].symbol_properties
@@ -377,7 +513,8 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         if px <= 0:
             return 0.0
         rem = max(0.0, float(self.portfolio.margin_remaining))
-        slot_cap = float(self.portfolio.total_portfolio_value) * st.leverage * 0.30
+        slot_frac = 0.85 if self.small_account_mode else 0.30
+        slot_cap = float(self.portfolio.total_portfolio_value) * st.leverage * slot_frac
         max_notional = min(rem * st.leverage * 0.85, slot_cap)
         return min(abs(raw_qty), max_notional / px) if max_notional > 0 else 0.0
 
@@ -407,6 +544,8 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
 
     def _can_enter(self, st: CoinState) -> bool:
         if self.is_warming_up or st.in_position or st.pending_ticket is not None:
+            return False
+        if not self._daily_circuit_ok():
             return False
         if st.idx_5m < st.cooldown_until or self._open_count() >= self.max_open_pos:
             return False
@@ -476,7 +615,8 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
 
     def _submit_limit(self, st: CoinState, engine: str, side: int, trig: float, sl: float,
                       tp_r: float, step_locks, expire_bars: int, sl_max: float = 0.0180,
-                      sl_min: float = 0.0040, risk_mult: float = 1.0) -> None:
+                      sl_min: float = 0.0040, risk_mult: float = 1.0,
+                      bank_r: float = 0.0, bank_frac: float = 0.0, be_lock_r: float = 0.50) -> None:
         if not self._can_enter(st):
             return
         cur_px = float(self.securities[st.symbol].price)
@@ -497,6 +637,7 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
             "engine": engine, "side": side, "trig": trig_px, "sl": sl_px, "tp": tp_px,
             "risk": risk, "qty": qty, "step_locks": step_locks, "trail_mult": None,
             "is_pyramid": False, "pyr_stage": 0, "exp": st.idx_5m + expire_bars,
+            "bank_r": bank_r, "bank_frac": bank_frac, "be_lock_r": be_lock_r,
         }
         t = self.limit_order(st.symbol, qty, trig_px, tag=engine)
         if t.status == OrderStatus.INVALID:
@@ -688,6 +829,27 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         vwap = (st.vwap_pv / st.vwap_v) if st.vwap_v > 0 else None
 
         if st.in_position and st.risk_dist > 0 and st.sl_ticket is not None:
+            st.best_px = max(st.best_px, h) if st.active_side == 1 else min(st.best_px, l)
+            mfe_r = ((st.best_px - st.entry_price) * st.active_side) / max(st.risk_dist, 1e-12)
+            # V7 Fast Daily Cashflow Bank (35% @ +3.0R -> move SL to BE + 0.50R)
+            if st.bank_frac > 0.0 and (not st.partial_taken) and mfe_r >= st.bank_r:
+                st.partial_taken = True
+                part_qty = self._round_qty(st.symbol, abs(st.qty) * st.bank_frac, st.active_side == 1)
+                rem_qty = self._round_qty(st.symbol, abs(st.qty) - abs(part_qty), st.active_side == 1)
+                if abs(part_qty) > 0 and abs(rem_qty) > 0:
+                    st.partial_ticket = self.market_order(st.symbol, -part_qty, tag=f"{st.active_engine}_BANK35")
+                    st.qty = rem_qty
+                    for tk_obj in (st.sl_ticket, st.tp_ticket):
+                        if tk_obj is not None and tk_obj.status not in (OrderStatus.FILLED, OrderStatus.CANCELED, OrderStatus.INVALID):
+                            st.canceled_sl_ids.add(tk_obj.order_id)
+                            tk_obj.cancel()
+                    lk_px = self._round_px(st.symbol, st.entry_price + st.active_side * st.be_lock_r * st.risk_dist)
+                    if (st.active_side == 1 and lk_px > st.sl_price and lk_px < c) or (st.active_side == -1 and lk_px < st.sl_price and lk_px > c):
+                        st.sl_price = lk_px
+                    st.sl_ticket = self.stop_market_order(st.symbol, -st.qty, st.sl_price, tag=f"{st.active_engine}_SL")
+                    if st.tp_price is not None:
+                        st.tp_ticket = self.limit_order(st.symbol, -st.qty, st.tp_price, tag=f"{st.active_engine}_TP")
+                    self.daily_r_pnl += st.bank_frac * st.bank_r
             for act_r, lk_r in st.step_locks:
                 hit = (h >= st.entry_price + act_r * st.risk_dist) if st.active_side == 1 else (l <= st.entry_price - act_r * st.risk_dist)
                 if hit:
@@ -701,6 +863,44 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         if not self.is_warming_up and len(st.bars_5m) >= 3:
             b1, b2, b3 = st.bars_5m[-3], st.bars_5m[-2], st.bars_5m[-1]
             c2b = abs(b2[3] - b2[0])
+
+            # V7.0 Intraday Scene-Graph Physics (5m Compression-Vacuum + Sweep BPR/iFVG)
+            if self.use_v7 and a5 > 0 and st.last_ker_4h >= 0.15 and self._can_enter(st):
+                b_hi = [x[1] for x in st.sw_1h.act_hi[-8:]]
+                b_lo = [x[1] for x in st.sw_1h.act_lo[-8:]]
+                v7_sig = None
+                ca = _detect_v7_comp_vacuum(list(st.bars_5m), a5, b_hi, b_lo, st.sw_4h.trend)
+                if ca is not None:
+                    sd, sw_ex, _ = ca
+                    slp = (sw_ex - a5) if sd == 1 else (sw_ex + a5)
+                    v7_sig = ("V7_CompVacuum", sd, slp)
+                if v7_sig is None:
+                    pbpr = st.pending_bpr
+                    if pbpr is not None:
+                        if (st.idx_5m - pbpr["idx"]) > 6 or (pbpr["side"] == 1 and l < pbpr["sweep"]) or (pbpr["side"] == -1 and h > pbpr["sweep"]):
+                            st.pending_bpr = None
+                        elif ((pbpr["side"] == 1 and l <= pbpr["high"] and c > o and c >= pbpr["mid"]) or (pbpr["side"] == -1 and h >= pbpr["low"] and c < o and c <= pbpr["mid"])):
+                            if pbpr["side"] == st.sw_4h.trend and pbpr["side"] == st.sw_1h.trend:
+                                slp = (pbpr["sweep"] - a5) if pbpr["side"] == 1 else (pbpr["sweep"] + a5)
+                                v7_sig = ("V7_BPR_Retest", pbpr["side"], slp)
+                            st.pending_bpr = None
+                    if v7_sig is None:
+                        bpr = _detect_v7_bpr(list(st.bars_5m), a5, b_hi, b_lo, st.sw_4h.trend, st.sw_1h.trend)
+                        if bpr is not None:
+                            if bpr["vac"] >= 0.55 and bpr["k"] >= 1.60:
+                                slp = (bpr["sweep"] - a5) if bpr["side"] == 1 else (bpr["sweep"] + a5)
+                                v7_sig = ("V7_BPR_Snap", bpr["side"], slp)
+                            else:
+                                bpr["idx"] = st.idx_5m
+                                st.pending_bpr = bpr
+                if v7_sig is not None:
+                    eng_v7, sd_v7, slp_v7 = v7_sig
+                    self._submit_limit(
+                        st, eng_v7, sd_v7, c, slp_v7, self.sweep_tp_r, (), 8,
+                        0.0180, 0.0045, risk_mult=self.v7_risk_mult,
+                        bank_r=3.0, bank_frac=0.35, be_lock_r=0.50,
+                    )
+
             still = []
             for cd in st.cands_1h_k3:
                 if st.idx_5m - cd["start_i"] > 60:
@@ -797,6 +997,10 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         if oe.status != OrderStatus.FILLED:
             return
 
+        if st.partial_ticket is not None and oe.order_id == st.partial_ticket.order_id:
+            st.partial_ticket = None
+            return
+
         if st.pending_meta is not None and st.in_position and st.pending_meta.get("is_pyramid") and abs(float(oe.fill_quantity)) > 0:
             pm = st.pending_meta
             st.pending_ticket = st.pending_meta = None
@@ -821,13 +1025,20 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
             st.sl_price, st.tp_price = pm["sl"], pm["tp"]
             st.risk_dist, st.qty = pm["risk"], float(oe.fill_quantity)
             st.step_locks, st.trail_atr_mult = pm["step_locks"], pm["trail_mult"]
-            st.pyramid_armed = st.pyramid_done = False
+            st.bank_r = float(pm.get("bank_r", 0.0))
+            st.bank_frac = float(pm.get("bank_frac", 0.0))
+            st.be_lock_r = float(pm.get("be_lock_r", 0.50))
+            st.pyramid_armed = st.pyramid_done = st.partial_taken = False
             st.pyramid_stage = 0
             self.trade_counts[st.ticker] += 1
             st.sl_ticket = self.stop_market_order(st.symbol, -st.qty, st.sl_price, tag=f"{st.active_engine}_SL")
             if st.tp_price is not None:
                 st.tp_ticket = self.limit_order(st.symbol, -st.qty, st.tp_price, tag=f"{st.active_engine}_TP")
         elif st.in_position:
+            rem_frac = (1.0 - st.bank_frac) if st.partial_taken else 1.0
+            realized_r = rem_frac * (((float(oe.fill_price) - st.entry_price) * st.active_side) / max(st.risk_dist, 1e-12))
+            self._daily_circuit_ok()
+            self.daily_r_pnl += realized_r
             for tk_obj in (st.sl_ticket, st.tp_ticket):
                 if tk_obj is not None and tk_obj.order_id != oe.order_id and tk_obj.status not in (
                     OrderStatus.FILLED, OrderStatus.CANCELED, OrderStatus.INVALID
@@ -844,15 +1055,16 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
 
     @staticmethod
     def _reset_pos(st: CoinState) -> None:
-        st.in_position = st.pyramid_armed = st.pyramid_done = False
+        st.in_position = st.pyramid_armed = st.pyramid_done = st.partial_taken = False
         st.pyramid_stage = 0
-        st.active_engine = st.tp_price = st.trail_atr_mult = st.sl_ticket = st.tp_ticket = None
+        st.active_engine = st.tp_price = st.trail_atr_mult = st.sl_ticket = st.tp_ticket = st.partial_ticket = None
         st.active_side = 0
         st.entry_price = st.sl_price = st.risk_dist = st.qty = st.best_px = 0.0
+        st.bank_r = st.bank_frac = st.be_lock_r = 0.0
         st.step_locks = ()
 
     def on_end_of_algorithm(self) -> None:
-        self.log(f"=== Binance Multi-Coin V6.0 Cognitive+Prosecutor | Trades={sum(self.trade_counts.values())} | Eq={self.portfolio.total_portfolio_value:.2f} USDT ===")
+        self.log(f"=== Binance Multi-Coin V7.0 Intraday Cashflow+4H | Trades={sum(self.trade_counts.values())} | Eq={self.portfolio.total_portfolio_value:.2f} USDT ===")
         for tk in self.TICKERS:
             if self.trade_counts[tk] > 0 or self.invalid_counts[tk] > 0:
                 self.log(f"  {tk:10s}: trades={self.trade_counts[tk]} invalid={self.invalid_counts[tk]}")

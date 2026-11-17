@@ -10,12 +10,16 @@ import pandas as pd
 
 from .exit_manager import (
     AdaptiveExitManager,
+    IntradayCashflowExitManager,
     ProtectedSwingDetector,
     TradePositionState,
 )
 from .liquidity_mapper import LiquidityPoolMapper
 from .perception_engine import (
+    BPRZone,
+    CompressionVacuumSetup,
     KinematicMonitor,
+    SceneGraphPhysicsDetector,
     TopologicalSwing,
     VisualPerceptionEngine,
     compute_atr_series,
@@ -1084,4 +1088,431 @@ def run_smc_sweep_causal_backtest(
             break
 
     return trades, _summarize_trades(trades)
+
+
+class SmallAccountCashflowManager:
+    """V7.0 $100 Small-Account Cashflow Sizer, -2.5R Daily Circuit Breaker & Payout Ledger."""
+
+    def __init__(
+        self,
+        starting_equity: float = 100.0,
+        risk_pct: float = 0.03,
+        max_leverage: float = 15.0,
+        daily_dd_cap_r: float = -2.5,
+        min_notional_usd: float = 5.0,
+    ) -> None:
+        self.starting_equity = float(starting_equity)
+        self.risk_pct = float(risk_pct)
+        self.max_leverage = float(max_leverage)
+        self.daily_dd_cap_r = float(daily_dd_cap_r)
+        self.min_notional_usd = float(min_notional_usd)
+
+    def compute_position_notional(self, equity: float, stop_distance_pct: float) -> Tuple[float, float]:
+        """Return (risk_usd, notional_usd) capped at safe max_leverage."""
+        if equity <= 0 or stop_distance_pct <= 0:
+            return 0.0, 0.0
+        risk_usd = equity * self.risk_pct
+        raw_notional = risk_usd / stop_distance_pct
+        max_notional = equity * self.max_leverage
+        notional = min(raw_notional, max_notional)
+        eff_risk = notional * stop_distance_pct
+        if notional < self.min_notional_usd:
+            return 0.0, 0.0
+        return float(eff_risk), float(notional)
+
+    def simulate_cashflow(
+        self,
+        trades: List[dict],
+        compounded: bool = False,
+        basket_mult: float = 1.0,
+        mode: Optional[str] = None,
+    ) -> Dict[str, object]:
+        """Simulate real dollar cashflow with -2.5R daily circuit breaker.
+
+        When `compounded=False` (Fixed-Risk Cash-Withdrawal mode), risk_usd stays locked at
+        `starting_equity * risk_pct` and net dollar profits are banked cleanly.
+        `basket_mult` scales simulated multi-coin trade stream conservatively when projecting
+        across a liquid N-coin basket.
+        """
+        if mode is not None:
+            compounded = str(mode).lower().startswith("comp")
+        ordered = sorted(trades, key=lambda t: t["entry_time"])
+        eq = self.starting_equity
+        peak_eq = eq
+        max_dd_usd = 0.0
+        max_dd_pct = 0.0
+        daily_r: Dict[object, float] = {}
+        daily_usd: Dict[object, float] = {}
+        weekly_usd: Dict[Tuple[int, int], float] = {}
+        monthly_usd: Dict[Tuple[int, int], float] = {}
+        accepted_r: List[float] = []
+        skipped_circuit = 0
+
+        for t in ordered:
+            day = t["entry_time"].date()
+            if daily_r.get(day, 0.0) <= self.daily_dd_cap_r:
+                skipped_circuit += 1
+                continue
+            sl_pct = max(float(t.get("sl_pct", 0.01)), 1e-4)
+            base_eq = eq if compounded else self.starting_equity
+            risk_usd, _ = self.compute_position_notional(base_eq, sl_pct)
+            if risk_usd <= 0:
+                continue
+            r_val = float(t["net_r"])
+            pnl_usd = risk_usd * r_val
+            accepted_r.append(r_val)
+            daily_r[day] = daily_r.get(day, 0.0) + r_val
+            daily_usd[day] = daily_usd.get(day, 0.0) + pnl_usd
+            iso = t["entry_time"].isocalendar()
+            wk = (int(iso.year), int(iso.week))
+            mo = (int(t["entry_time"].year), int(t["entry_time"].month))
+            weekly_usd[wk] = weekly_usd.get(wk, 0.0) + pnl_usd
+            monthly_usd[mo] = monthly_usd.get(mo, 0.0) + pnl_usd
+
+            if compounded:
+                eq = max(1.0, eq + pnl_usd)
+                peak_eq = max(peak_eq, eq)
+                dd_u = peak_eq - eq
+                max_dd_usd = max(max_dd_usd, dd_u)
+                max_dd_pct = max(max_dd_pct, 100.0 * dd_u / peak_eq)
+            else:
+                eq += pnl_usd
+                peak_eq = max(peak_eq, eq)
+                dd_u = peak_eq - eq
+                max_dd_usd = max(max_dd_usd, dd_u)
+                max_dd_pct = max(max_dd_pct, 100.0 * dd_u / max(self.starting_equity, peak_eq))
+
+        if not ordered:
+            return {"n": 0, "net_usd": 0.0}
+
+        span_days = max(1.0, (ordered[-1]["entry_time"] - ordered[0]["entry_time"]).total_seconds() / 86400.0)
+        span_weeks = max(1.0, span_days / 7.0)
+        span_months = max(1.0, span_days / 30.4375)
+        tot_usd = sum(daily_usd.values())
+        gp = sum(r for r in accepted_r if r > 0)
+        gl = -sum(r for r in accepted_r if r < 0)
+        days_5_10 = sum(1 for v in daily_usd.values() if v >= 5.0)
+        days_ge_10 = sum(1 for v in daily_usd.values() if v >= 10.0)
+        wks_ge_25 = sum(1 for v in weekly_usd.values() if v >= 25.0)
+
+        return {
+            "mode": "COMPOUNDED" if compounded else "FIXED_WITHDRAWAL",
+            "n": len(accepted_r),
+            "skipped_circuit": skipped_circuit,
+            "trades_per_month": round((len(accepted_r) * basket_mult) / span_months, 2),
+            "trades_per_week": round((len(accepted_r) * basket_mult) / span_weeks, 2),
+            "wr": round(100.0 * sum(1 for r in accepted_r if r > 0) / max(1, len(accepted_r)), 1),
+            "pf": round(gp / gl if gl > 0 else 99.0, 2),
+            "net_r": round(sum(accepted_r), 2),
+            "final_equity_usd": round(eq, 2),
+            "net_usd": round(tot_usd, 2),
+            "avg_daily_usd_single": round(tot_usd / span_days, 2),
+            "avg_weekly_usd_single": round(tot_usd / span_weeks, 2),
+            "avg_monthly_usd_single": round(tot_usd / span_months, 2),
+            "avg_daily_usd_basket": round((tot_usd * basket_mult) / span_days, 2),
+            "avg_weekly_usd_basket": round((tot_usd * basket_mult) / span_weeks, 2),
+            "avg_monthly_usd_basket": round((tot_usd * basket_mult) / span_months, 2),
+            "days_ge_5usd": days_5_10,
+            "days_ge_10usd": days_ge_10,
+            "weeks_ge_25usd": wks_ge_25,
+            "max_dd_usd": round(max_dd_usd, 2),
+            "max_dd_pct": round(max_dd_pct, 1),
+        }
+
+
+class IntradayCashflowSniperV7:
+    """V7.0 Intraday 5m/1H Scene-Graph Physics Coordinator."""
+
+    def __init__(
+        self,
+        use_setup_a: bool = True,
+        use_setup_b: bool = True,
+        use_killzones: bool = False,
+        bank_r: float = 3.0,
+        bank_frac: float = 0.35,
+        be_lock_r: float = 0.50,
+        runner_tp_r: float = 10.0,
+        stagnation_bars: int = 0,
+        min_conviction: float = 0.35,
+    ) -> None:
+        self.perception = VisualPerceptionEngine()
+        self.physics = SceneGraphPhysicsDetector(max_approach_ker=0.42, min_bpr_k=1.20, min_implied_r=3.0)
+        self.liq_mapper = LiquidityPoolMapper(self.perception)
+        self.regime = RegimeFilterEngine()
+        self.prosecutor = AdversarialCrossExaminer(grace_bars=1, decay_lambda=0.65, min_conviction=min_conviction)
+        self.exit_mgr = IntradayCashflowExitManager(
+            bank_r=bank_r,
+            bank_frac=bank_frac,
+            be_lock_r=be_lock_r,
+            runner_tp_r=runner_tp_r,
+            stagnation_bars=stagnation_bars,
+        )
+        self.prot_exec = ProtectedSwingDetector()
+        self.use_setup_a = bool(use_setup_a)
+        self.use_setup_b = bool(use_setup_b)
+        self.use_killzones = bool(use_killzones)
+
+    @staticmethod
+    def in_intraday_killzone(utc_hour: int, utc_min: int) -> bool:
+        """London Open (07:00-11:00), NY Open (12:30-17:00), Asian Close/Sweep (00:00-02:30)."""
+        hm = utc_hour * 60 + utc_min
+        return (0 <= hm <= 150) or (420 <= hm <= 660) or (750 <= hm <= 1020)
+
+
+def run_v7_intraday_backtest(
+    df_5m: pd.DataFrame,
+    eval_start: pd.Timestamp,
+    eval_end: pd.Timestamp,
+    use_setup_a: bool = True,
+    use_setup_b: bool = True,
+    use_killzones: bool = False,
+    bank_r: float = 3.0,
+    bank_frac: float = 0.35,
+    be_lock_r: float = 0.50,
+    runner_tp_r: float = 10.0,
+    stagnation_bars: int = 0,
+    min_ker4: float = 0.15,
+    min_sl_pct: float = 0.0045,
+    max_sl_pct: float = 0.0180,
+    use_htf_macro_align: bool = True,
+    include_smc_sweep: bool = False,
+    fee_mult: float = 1.0,
+) -> Tuple[List[dict], Dict[str, object]]:
+    """Strictly causal 5m/1H/4H V7.0 Intraday Cashflow Sniper backtest (Binance VIP0 fees + funding)."""
+    agg = {"Open": "first", "High": "max", "Low": "min", "Close": "last", "Volume": "sum"}
+    df15 = df_5m.resample("15min").agg(agg).dropna()
+    df1h = df_5m.resample("1h").agg(agg).dropna()
+    df4h = df_5m.resample("4h").agg(agg).dropna()
+
+    o5, h5, l5, c5 = (df_5m[col].to_numpy(float) for col in ("Open", "High", "Low", "Close"))
+    ts5_ns = df_5m.index.as_unit("ns").asi8
+    ts5_sec = ts5_ns / 1e9
+    close5_ns = ts5_ns + int(300 * 1e9)
+    atr5 = compute_atr_series(h5, l5, c5, 14)
+
+    _, h15, l15, c15 = (df15[col].to_numpy(float) for col in ("Open", "High", "Low", "Close"))
+    ts15_ns = df15.index.as_unit("ns").asi8
+    close15_ns = ts15_ns + int(900 * 1e9)
+    atr15 = compute_atr_series(h15, l15, c15, 14)
+
+    o1, h1, l1, c1 = (df1h[col].to_numpy(float) for col in ("Open", "High", "Low", "Close"))
+    ts1_ns = df1h.index.as_unit("ns").asi8
+    close1_ns = ts1_ns + int(3600 * 1e9)
+    atr1 = compute_atr_series(h1, l1, c1, 14)
+
+    o4, h4, l4, c4 = (df4h[col].to_numpy(float) for col in ("Open", "High", "Low", "Close"))
+    ts4_ns = df4h.index.as_unit("ns").asi8
+    close4_ns = ts4_ns + int(14400 * 1e9)
+    atr4 = compute_atr_series(h4, l4, c4, 14)
+
+    sniper = IntradayCashflowSniperV7(
+        use_setup_a=use_setup_a,
+        use_setup_b=use_setup_b,
+        use_killzones=use_killzones,
+        bank_r=bank_r,
+        bank_frac=bank_frac,
+        be_lock_r=be_lock_r,
+        runner_tp_r=runner_tp_r,
+        stagnation_bars=stagnation_bars,
+    )
+    reg_4 = sniper.regime.precompute_frame_features(df4h)
+
+    sw15 = sniper.perception.detect_causal_swings(ts15_ns, h15, l15, c15, atr15, max_swings=40000)
+    sw15_by_conf: Dict[int, List[TopologicalSwing]] = {}
+    for s in sw15:
+        sw15_by_conf.setdefault(s.confirm_idx, []).append(s)
+
+    sw1 = sniper.perception.detect_causal_swings(ts1_ns, h1, l1, c1, atr1, max_swings=24000)
+    sw1_by_conf: Dict[int, List[TopologicalSwing]] = {}
+    for s in sw1:
+        sw1_by_conf.setdefault(s.confirm_idx, []).append(s)
+
+    sw4 = sniper.perception.detect_causal_swings(ts4_ns, h4, l4, c4, atr4, max_swings=6000)
+    sw4_by_conf: Dict[int, List[TopologicalSwing]] = {}
+    for s in sw4:
+        sw4_by_conf.setdefault(s.confirm_idx, []).append(s)
+
+    vis1: List[TopologicalSwing] = []
+    cur_hi4 = cur_lo4 = cur_hi1 = cur_lo1 = None
+    tr4 = tr1 = 0
+    pending_bpr: Optional[BPRZone] = None
+    positions: List[TradePositionState] = []
+    closed_trades: List[dict] = []
+    p15 = p1 = p4 = cid = cool = 0
+    eval0_ns = int(eval_start.as_unit("ns").value)
+    eval1_ns = int(eval_end.as_unit("ns").value)
+
+    for i5 in range(100, len(df_5m)):
+        c_ns = int(close5_ns[i5])
+        if c_ns >= eval1_ns:
+            break
+        while p4 < len(df4h) and close4_ns[p4] <= c_ns:
+            for s in sw4_by_conf.get(p4, []):
+                if s.side == 1:
+                    cur_hi4 = s.price
+                else:
+                    cur_lo4 = s.price
+            if cur_hi4 is not None and c4[p4] > cur_hi4:
+                tr4 = 1
+            elif cur_lo4 is not None and c4[p4] < cur_lo4:
+                tr4 = -1
+            p4 += 1
+
+        while p1 < len(df1h) and close1_ns[p1] <= c_ns:
+            for s in sw1_by_conf.get(p1, []):
+                if s.side == 1:
+                    cur_hi1 = s.price
+                else:
+                    cur_lo1 = s.price
+                vis1.append(s)
+            vis1 = vis1[-24:]
+            if cur_hi1 is not None and c1[p1] > cur_hi1:
+                tr1 = 1
+            elif cur_lo1 is not None and c1[p1] < cur_lo1:
+                tr1 = -1
+            if vis1:
+                sniper.liq_mapper.ingest_structural_swings(vis1, l1[:p1 + 1], h1[:p1 + 1], float(atr1[p1]), "1H")
+            p1 += 1
+
+        while p15 < len(df15) and close15_ns[p15] <= c_ns:
+            sniper.prot_exec.update(i5, float(c15[p15]), sw15_by_conf.get(p15, []))
+            p15 += 1
+
+        sniper.liq_mapper.step_bar(float(ts5_sec[i5]), float(o5[i5]), float(h5[i5]), float(l5[i5]), float(c5[i5]), float(atr5[i5]))
+
+        if p4 < 30 or p1 < 30 or c_ns < eval0_ns:
+            continue
+
+        # 1) Manage active intraday positions
+        still: List[TradePositionState] = []
+        for pos in positions:
+            closed, gross_r, _ = sniper.exit_mgr.step_bar(
+                pos, i5, float(h5[i5]), float(l5[i5]), float(c5[i5]), float(atr5[i5]), sniper.prot_exec, pos.meta.get("target_px")
+            )
+            if closed:
+                hrs = max(0.1, (i5 - pos.entry_bar) * (5.0 / 60.0))
+                fee_in = 0.0002
+                fee_out = 0.0002 if pos.exit_reason == "VACUUM_TP" else 0.0007
+                cost = fee_mult * ((fee_in + fee_out + 0.0001 * (hrs / 8.0)) / (pos.risk_dist / pos.entry_price)) * pos.risk_mult
+                closed_trades.append({
+                    "cluster_id": pos.trade_id,
+                    "entry_time": pos.entry_ts,
+                    "exit_time": pd.Timestamp(c_ns, tz="UTC"),
+                    "side": pos.side,
+                    "entry_price": pos.entry_price,
+                    "init_sl": pos.init_sl,
+                    "sl_pct": pos.risk_dist / pos.entry_price,
+                    "gross_r": gross_r,
+                    "net_r": gross_r - cost,
+                    "is_pyramid": pos.is_pyramid,
+                    "setup": pos.meta.get("setup", "V7"),
+                    "outcome": pos.exit_reason,
+                    "hold_hours": hrs,
+                    "reasoning_chain": pos.meta.get("reasoning_chain", {}),
+                })
+                cool = i5 + 3
+            else:
+                still.append(pos)
+        positions = still
+
+        if positions or i5 <= cool:
+            continue
+
+        rs4 = sniper.regime.evaluate_bar(reg_4, p4 - 1)
+        if rs4.ker < min_ker4:
+            continue
+
+        if sniper.use_killzones:
+            ts_dt = pd.Timestamp(ts5_ns[i5], tz="UTC")
+            if not sniper.in_intraday_killzone(ts_dt.hour, ts_dt.minute):
+                pending_bpr = None
+                continue
+
+        a5 = float(atr5[i5])
+        if a5 <= 0:
+            continue
+        if pending_bpr is None and (h5[i5] - l5[i5]) < 0.70 * a5:
+            continue
+
+        # Tier 1/2/3 HTF & Session liquidity barriers (clean 1H pools + 1H structural swings)
+        barriers_hi = [
+            p.price for p in sniper.liq_mapper.pools.values()
+            if p.side == 1 and p.status in ("UNTAPPED", "SWEPT_WITH_REJECTION")
+        ] + [s.price for s in vis1[-8:] if s.side == 1]
+        barriers_lo = [
+            p.price for p in sniper.liq_mapper.pools.values()
+            if p.side == -1 and p.status in ("UNTAPPED", "SWEPT_WITH_REJECTION")
+        ] + [s.price for s in vis1[-8:] if s.side == -1]
+
+        entry_sig: Optional[Tuple[int, float, float, float, str, dict]] = None
+
+        # Setup A: Compression Approach + Flat HTF Liquidity Sweep + 4H Trend Snap
+        if sniper.use_setup_a:
+            ca = sniper.physics.detect_compression_vacuum(o5, h5, l5, c5, atr5, i5, barriers_hi, barriers_lo, lookback=30)
+            if ca is not None and ((not use_htf_macro_align) or ca.side == tr4):
+                ep = float(c5[i5])
+                slp = (ca.sweep_extreme - 1.0 * a5) if ca.side == 1 else (ca.sweep_extreme + 1.0 * a5)
+                entry_sig = (
+                    ca.side, ep, slp, ca.origin_anchor, "V7_CompVacuum",
+                    {"ker4": round(rs4.ker, 2), "vac": round(ca.vacuum_score, 2), "imp_r": round(ca.implied_r, 2)},
+                )
+
+        # Setup B: Sweep + BPR / iFVG Polarity Inversion (1H & 4H Trend-Aligned Pullback/Snap)
+        if entry_sig is None and sniper.use_setup_b:
+            if pending_bpr is not None:
+                if (i5 - pending_bpr.created_idx) > 6 or (pending_bpr.side == 1 and l5[i5] < pending_bpr.sweep_extreme) or (pending_bpr.side == -1 and h5[i5] > pending_bpr.sweep_extreme):
+                    pending_bpr = None
+                else:
+                    retest_ok = (
+                        (pending_bpr.side == 1 and l5[i5] <= pending_bpr.high and c5[i5] > o5[i5] and c5[i5] >= pending_bpr.mid)
+                        or (pending_bpr.side == -1 and h5[i5] >= pending_bpr.low and c5[i5] < o5[i5] and c5[i5] <= pending_bpr.mid)
+                    )
+                    if retest_ok and ((not use_htf_macro_align) or (pending_bpr.side == tr4 and pending_bpr.side == tr1)):
+                        ep = float(c5[i5])
+                        slp = (pending_bpr.sweep_extreme - 1.0 * a5) if pending_bpr.side == 1 else (pending_bpr.sweep_extreme + 1.0 * a5)
+                        entry_sig = (
+                            pending_bpr.side, ep, slp, ep + pending_bpr.side * runner_tp_r * abs(ep - slp), "V7_BPR_Retest",
+                            {"ker4": round(rs4.ker, 2), "k_vel": round(pending_bpr.k_velocity, 2), "vac": round(pending_bpr.vacuum_score, 2)},
+                        )
+                        pending_bpr = None
+                    elif retest_ok:
+                        pending_bpr = None
+            if entry_sig is None:
+                bpr = sniper.physics.detect_bpr_ifvg(o5, h5, l5, c5, atr5, i5, barriers_hi, barriers_lo, lookback_manip=10)
+                if bpr is not None and ((not use_htf_macro_align) or (bpr.side == tr4 and bpr.side == tr1)):
+                    if bpr.vacuum_score >= 0.55 and bpr.k_velocity >= 1.60:
+                        ep = float(c5[i5])
+                        slp = (bpr.sweep_extreme - 1.0 * a5) if bpr.side == 1 else (bpr.sweep_extreme + 1.0 * a5)
+                        entry_sig = (
+                            bpr.side, ep, slp, ep + bpr.side * runner_tp_r * abs(ep - slp), "V7_BPR_Snap",
+                            {"ker4": round(rs4.ker, 2), "k_vel": round(bpr.k_velocity, 2), "vac": round(bpr.vacuum_score, 2)},
+                        )
+                    else:
+                        pending_bpr = bpr
+
+        if entry_sig is None:
+            continue
+
+        side, ep, slp, tgt_px, setup_tag, sc_meta = entry_sig
+        rd = abs(ep - slp)
+        sl_pct = rd / ep
+        if rd <= 0 or not (min_sl_pct <= sl_pct <= max_sl_pct):
+            continue
+
+        cid += 1
+        positions.append(
+            TradePositionState(
+                trade_id=cid, side=side, entry_bar=i5,
+                entry_ts=pd.Timestamp(c_ns, tz="UTC"), entry_price=ep,
+                init_sl=slp, cur_sl=slp, risk_dist=rd,
+                meta={"setup": setup_tag, "target_px": tgt_px, "reasoning_chain": sc_meta},
+            )
+        )
+
+    if include_smc_sweep:
+        tr_smc, _ = run_smc_sweep_causal_backtest(df_5m, eval_start, eval_end, use_v6_prosecutor=True, fee_mult=fee_mult, tp_r=runner_tp_r)
+        closed_trades = sorted(closed_trades + tr_smc, key=lambda t: t["entry_time"])
+
+    return closed_trades, _summarize_trades(closed_trades)
+
 

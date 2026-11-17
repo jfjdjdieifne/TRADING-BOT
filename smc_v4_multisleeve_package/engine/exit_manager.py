@@ -284,3 +284,104 @@ class AdaptiveExitManager:
                 note = "PYRAMID_ARMED"
 
         return False, 0.0, note
+
+
+class IntradayCashflowExitManager:
+    """V7.0 Intraday Cashflow Exit: 35% Bank @ +3.0R -> BE+0.50R -> Runner to +10R (Protected Swing trail after +6R)."""
+
+    def __init__(
+        self,
+        bank_r: float = 3.0,
+        bank_frac: float = 0.35,
+        be_lock_r: float = 0.50,
+        runner_tp_r: float = 10.0,
+        stagnation_bars: int = 0,
+        prot_trail_mfe_r: float = 6.0,
+    ) -> None:
+        self.bank_r = float(bank_r)
+        self.bank_frac = float(bank_frac)
+        self.be_lock_r = float(be_lock_r)
+        self.runner_tp_r = float(runner_tp_r)
+        self.stagnation_bars = int(stagnation_bars)
+        self.prot_trail_mfe_r = float(prot_trail_mfe_r)
+
+    def step_bar(
+        self,
+        pos: TradePositionState,
+        bar_idx: int,
+        bar_h: float,
+        bar_l: float,
+        bar_c: float,
+        atr_exec: float,
+        prot_swing: Optional[ProtectedSwingDetector] = None,
+        target_px: Optional[float] = None,
+    ) -> Tuple[bool, float, str]:
+        """Step one closed 5m (or 15m) execution bar. Returns (closed, realized_gross_r, note)."""
+        rd = pos.risk_dist
+        if rd <= 0:
+            return True, 0.0, "INVALID_RD"
+
+        # 1) Stop-Loss check (conservative intrabar SL first)
+        if (pos.side == 1 and bar_l <= pos.cur_sl) or (pos.side == -1 and bar_h >= pos.cur_sl):
+            r_rem = pos.qty_rem * (((pos.cur_sl - pos.entry_price) * pos.side) / rd)
+            pos.realized_r += r_rem
+            pos.qty_rem = 0.0
+            pos.exit_reason = "RUNNER_SL" if pos.partial_taken else ("BE" if pos.be_moved else "SL")
+            return True, pos.realized_r * pos.risk_mult, pos.exit_reason
+
+        pos.best_px = max(pos.best_px, bar_h) if pos.side == 1 else min(pos.best_px, bar_l)
+        cur_mfe_r = ((pos.best_px - pos.entry_price) * pos.side) / rd
+        pos.peak_mfe_r = max(pos.peak_mfe_r, cur_mfe_r)
+        cur_r = ((bar_c - pos.entry_price) * pos.side) / rd
+
+        # 2) Fast Daily Cashflow Bank (35% @ +3.0R -> BE + 0.50R)
+        note = ""
+        if (not pos.partial_taken) and self.bank_frac > 0.0 and cur_mfe_r >= self.bank_r and pos.qty_rem > self.bank_frac:
+            pos.realized_r += self.bank_frac * self.bank_r
+            pos.qty_rem -= self.bank_frac
+            pos.partial_taken = True
+            be_px = pos.entry_price + pos.side * self.be_lock_r * rd
+            if (pos.side == 1 and be_px > pos.cur_sl and be_px < bar_c) or (
+                pos.side == -1 and be_px < pos.cur_sl and be_px > bar_c
+            ):
+                pos.cur_sl = be_px
+                pos.be_moved = True
+            pos.pyramid_armed = True
+            note = "BANKED_PARTIAL"
+
+        # 3) Hard Runner Target (+10R vacuum cap or extended Origin_Anchor)
+        tp_cap = pos.entry_price + pos.side * self.runner_tp_r * rd
+        if target_px is None:
+            tp_px = tp_cap
+        else:
+            # Never truncate runner below runner_tp_r; extend only if structural Origin_Anchor is >= runner_tp_r
+            tp_px = tp_cap
+
+        if (pos.side == 1 and bar_h >= tp_px) or (pos.side == -1 and bar_l <= tp_px):
+            tp_r = ((tp_px - pos.entry_price) * pos.side) / rd
+            pos.realized_r += pos.qty_rem * tp_r
+            pos.qty_rem = 0.0
+            pos.exit_reason = "VACUUM_TP"
+            return True, pos.realized_r * pos.risk_mult, "VACUUM_TP"
+
+        # 4) Trail remaining runner behind Protected Swings only once runner is deep in profit (>= +6.0R)
+        if pos.partial_taken and cur_mfe_r >= self.prot_trail_mfe_r and prot_swing is not None:
+            ps = prot_swing.latest_floor_or_ceiling(pos.side)
+            if ps is not None and ps.bos_idx > pos.entry_bar:
+                buf = 0.25 * max(atr_exec, 0.0)
+                cand = (ps.price - buf) if pos.side == 1 else (ps.price + buf)
+                if (pos.side == 1 and cand > pos.cur_sl and cand < bar_c) or (
+                    pos.side == -1 and cand < pos.cur_sl and cand > bar_c
+                ):
+                    pos.cur_sl = cand
+
+        # 5) Optional Intraday Stagnation / Time-Stop Guard (disabled when stagnation_bars <= 0)
+        bars_held = bar_idx - pos.entry_bar
+        if self.stagnation_bars > 0 and (not pos.partial_taken) and bars_held >= self.stagnation_bars and (-0.30 <= cur_r <= 0.80):
+            pos.realized_r += pos.qty_rem * cur_r
+            pos.qty_rem = 0.0
+            pos.exit_reason = "TIME_SCRATCH"
+            return True, pos.realized_r * pos.risk_mult, "TIME_SCRATCH"
+
+        return False, 0.0, note
+
