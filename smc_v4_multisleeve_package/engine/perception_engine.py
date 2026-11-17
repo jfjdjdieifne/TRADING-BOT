@@ -750,4 +750,144 @@ class DailySessionLiquidityTracker:
         return hi, lo
 
 
+def build_causal_topo_events(
+    ts_ns: np.ndarray,
+    h: np.ndarray,
+    l: np.ndarray,
+    c: np.ndarray,
+    atr: np.ndarray,
+    zig_mult: float = 1.15,
+) -> Dict[int, List[TopologicalSwing]]:
+    """Strictly causal O(N) ATR-ZigZag topological swing events (zero k=2/k=3 fractals, zero future leakage)."""
+    n = len(c)
+    events: Dict[int, List[TopologicalSwing]] = {}
+    if n < 2:
+        return events
+    direction = 0
+    piv_idx = 0
+    piv_hi = float(h[0])
+    piv_lo = float(l[0])
+    run_lo = float(l[0])
+    run_hi = float(h[0])
+    for i in range(1, n):
+        hi = float(h[i])
+        lo = float(l[i])
+        th = zig_mult * max(float(atr[i]), 1e-12)
+        if lo < run_lo:
+            run_lo = lo
+        if hi > run_hi:
+            run_hi = hi
+        if direction == 0:
+            if hi - piv_lo >= th:
+                prom = (hi - piv_lo) / max(float(atr[piv_idx]), 1e-12)
+                events.setdefault(i, []).append(
+                    TopologicalSwing(
+                        idx=piv_idx,
+                        confirm_idx=i,
+                        ts_ns=int(ts_ns[piv_idx]),
+                        side=-1,
+                        price=piv_lo,
+                        prominence_atr=prom,
+                        clean_air_bars=i - piv_idx,
+                        structural_weight=float(sigmoid(prom, 1.4, 1.25)),
+                        wick_close=float(c[piv_idx]),
+                        mitigated=False,
+                    )
+                )
+                direction = 1
+                piv_idx, piv_hi, run_lo = i, hi, lo
+            elif piv_hi - lo >= th:
+                prom = (piv_hi - lo) / max(float(atr[piv_idx]), 1e-12)
+                events.setdefault(i, []).append(
+                    TopologicalSwing(
+                        idx=piv_idx,
+                        confirm_idx=i,
+                        ts_ns=int(ts_ns[piv_idx]),
+                        side=1,
+                        price=piv_hi,
+                        prominence_atr=prom,
+                        clean_air_bars=i - piv_idx,
+                        structural_weight=float(sigmoid(prom, 1.4, 1.25)),
+                        wick_close=float(c[piv_idx]),
+                        mitigated=False,
+                    )
+                )
+                direction = -1
+                piv_idx, piv_lo, run_hi = i, lo, hi
+            else:
+                if hi > piv_hi:
+                    piv_hi, piv_idx = hi, i
+                if lo < piv_lo:
+                    piv_lo, piv_idx = lo, i
+        elif direction == 1:
+            if hi >= piv_hi:
+                piv_hi, piv_idx, run_lo = hi, i, lo
+            elif piv_hi - lo >= th:
+                prom = (piv_hi - run_lo) / max(float(atr[piv_idx]), 1e-12)
+                events.setdefault(i, []).append(
+                    TopologicalSwing(
+                        idx=piv_idx,
+                        confirm_idx=i,
+                        ts_ns=int(ts_ns[piv_idx]),
+                        side=1,
+                        price=piv_hi,
+                        prominence_atr=prom,
+                        clean_air_bars=i - piv_idx,
+                        structural_weight=float(sigmoid(prom, 1.4, 1.25)),
+                        wick_close=float(c[piv_idx]),
+                        mitigated=False,
+                    )
+                )
+                direction = -1
+                piv_idx, piv_lo, run_hi = i, lo, hi
+        else:
+            if lo <= piv_lo:
+                piv_lo, piv_idx, run_hi = lo, i, hi
+            elif hi - piv_lo >= th:
+                prom = (run_hi - piv_lo) / max(float(atr[piv_idx]), 1e-12)
+                events.setdefault(i, []).append(
+                    TopologicalSwing(
+                        idx=piv_idx,
+                        confirm_idx=i,
+                        ts_ns=int(ts_ns[piv_idx]),
+                        side=-1,
+                        price=piv_lo,
+                        prominence_atr=prom,
+                        clean_air_bars=i - piv_idx,
+                        structural_weight=float(sigmoid(prom, 1.4, 1.25)),
+                        wick_close=float(c[piv_idx]),
+                        mitigated=False,
+                    )
+                )
+                direction = 1
+                piv_idx, piv_hi, run_lo = i, hi, lo
+    return events
+
+
+def build_causal_topo_swing_dict(df_tf: "pd.DataFrame", zig_mult: float = 1.15) -> Dict[int, list]:
+    """Causal SwingPoint event map derived from ATR-ZigZag topology (zero k=2/k=3 fractals)."""
+    from .causal_primitives import SwingPoint
+
+    h = df_tf["High"].to_numpy(float)
+    l = df_tf["Low"].to_numpy(float)
+    c = df_tf["Close"].to_numpy(float)
+    ts_ns = df_tf.index.as_unit("ns").asi8
+    atr = compute_atr_series(h, l, c, 14)
+    topo_ev = build_causal_topo_events(ts_ns, h, l, c, atr, zig_mult=zig_mult)
+    out: Dict[int, list] = {}
+    for ci, evs in topo_ev.items():
+        out[ci] = [
+            SwingPoint(
+                candle_idx=s.idx,
+                confirm_idx=s.confirm_idx,
+                confirm_time=s.ts_ns,
+                price=s.price,
+                kind=("high" if s.side == 1 else "low"),
+            )
+            for s in evs
+        ]
+    return out
+
+
+
 

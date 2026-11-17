@@ -1606,3 +1606,348 @@ def run_v9_multiasset_portfolio(
         "real_multiasset_summary": _summarize_trades(all_tr),
     }
 
+
+def run_v10_xau_topo_backtest(
+    df_xau_1m: pd.DataFrame,
+    eval_start: pd.Timestamp,
+    eval_end: pd.Timestamp,
+    *,
+    asset: str = "XAUUSD",
+    zig_4h: float = 0.85,
+    zig_1h: float = 1.15,
+    zig_15m: float = 1.00,
+    zig_5m: float = 1.15,
+    fvg_depth: float = 0.50,
+    min_sl_pct: float = 0.0005,
+    max_sl_pct: float = 0.0150,
+    fee_mult: float = 0.5,
+    include_v6_4h: bool = False,
+) -> tuple[List[dict], Dict[str, Any]]:
+    """V10.0 Topological XAUUSD_1m VisB Engine (ZERO k=2/k=3 fractals + 45/40/15 Front-Loaded Exit).
+
+    Uses causal ATR-ZigZag topology (`zig_4h=0.85, zig_1h=1.15`) + 0.50*FVG midpoint entry +
+    V10FrontLoadedCashflowExitManager (`45% @ 2.2R -> +0.35R BE`, `40% @ 4.5R -> +2.0R`, `15% @ 10R`
+    + 15m Topological Protected Swing trail).
+    """
+    from .exit_manager import ProtectedSwingDetector, TradePositionState, V10FrontLoadedCashflowExitManager
+    from .perception_engine import build_causal_topo_events, compute_atr_series
+    from .strategy_brain import _summarize_trades, run_v6_cognitive_backtest
+
+    df_sub = df_xau_1m.loc[df_xau_1m.index < eval_end]
+    df5 = resample_causal_tf(df_sub, "5min")
+    df15 = resample_causal_tf(df_sub, "15min")
+    df1h = resample_causal_tf(df_sub, "1h")
+    df4h = resample_causal_tf(df_sub, "4h")
+
+    h1m = df_sub["High"].to_numpy(float)
+    l1m = df_sub["Low"].to_numpy(float)
+    c1m = df_sub["Close"].to_numpy(float)
+    ts1m = df_sub.index.as_unit("ns").asi8
+    atr1m = causal_atr14(h1m, l1m, c1m)
+
+    o5, h5, l5, c5 = (df5[k].to_numpy(float) for k in ("Open", "High", "Low", "Close"))
+    ts5 = df5.index.as_unit("ns").asi8
+    atr5 = compute_atr_series(h5, l5, c5, 14)
+
+    h15, l15, c15 = (df15[k].to_numpy(float) for k in ("High", "Low", "Close"))
+    ts15 = df15.index.as_unit("ns").asi8
+    atr15 = compute_atr_series(h15, l15, c15, 14)
+
+    h1h, l1h, c1h = (df1h[k].to_numpy(float) for k in ("High", "Low", "Close"))
+    ts1h = df1h.index.as_unit("ns").asi8
+    atr1h = compute_atr_series(h1h, l1h, c1h, 14)
+
+    h4h, l4h, c4h = df4h["High"].to_numpy(float), df4h["Low"].to_numpy(float), df4h["Close"].to_numpy(float)
+    ts4h = df4h.index.as_unit("ns").asi8
+    atr4h = compute_atr_series(h4h, l4h, c4h, 14)
+
+    sw5_d = build_causal_topo_events(ts5, h5, l5, c5, atr5, zig_mult=zig_5m)
+    sw15_d = build_causal_topo_events(ts15, h15, l15, c15, atr15, zig_mult=zig_15m)
+    sw1h_d = build_causal_topo_events(ts1h, h1h, l1h, c1h, atr1h, zig_mult=zig_1h)
+    sw4h_d = build_causal_topo_events(ts4h, h4h, l4h, c4h, atr4h, zig_mult=zig_4h)
+
+    exit_mgr = V10FrontLoadedCashflowExitManager()
+    prot15 = ProtectedSwingDetector()
+
+    tr4h = tr1h = 0
+    sh4h = sl4h = sh1h = sl1h = sh5 = sl5 = None
+    act1h_hi: list = []
+    act1h_lo: list = []
+    p5 = p15 = p1h = p4h = 0
+    sweeps: list = []
+    pos: Optional[TradePositionState] = None
+    pend: Optional[dict] = None
+    cool = 0
+    cid = 0
+    trades: List[dict] = []
+
+    eval0_ns = int(eval_start.as_unit("ns").value)
+    eval1_ns = int(eval_end.as_unit("ns").value)
+    hrs1m = pd.to_datetime(ts1m, utc=True).hour.to_numpy()
+
+    for i in range(60, len(df_sub)):
+        t_ns = int(ts1m[i]) + 60 * 10**9
+        if t_ns >= eval1_ns:
+            break
+
+        while p4h < len(df4h) and ts4h[p4h] + 14400 * 10**9 <= t_ns:
+            for s in sw4h_d.get(p4h, []):
+                if s.side == 1:
+                    sh4h = s.price
+                else:
+                    sl4h = s.price
+            if sh4h is not None and c4h[p4h] > sh4h:
+                tr4h = 1
+            elif sl4h is not None and c4h[p4h] < sl4h:
+                tr4h = -1
+            p4h += 1
+
+        while p1h < len(df1h) and ts1h[p1h] + 3600 * 10**9 <= t_ns:
+            hh, hl, hc = float(h1h[p1h]), float(l1h[p1h]), float(c1h[p1h])
+            for sw in act1h_lo:
+                if (p1h - sw.idx) >= 3 and hl < sw.price and hc > sw.price:
+                    sweeps.append((1, t_ns, hl))
+            for sw in act1h_hi:
+                if (p1h - sw.idx) >= 3 and hh > sw.price and hc < sw.price:
+                    sweeps.append((-1, t_ns, hh))
+            for s in sw1h_d.get(p1h, []):
+                if s.side == 1:
+                    sh1h = s.price
+                    act1h_hi.append(s)
+                    act1h_hi = act1h_hi[-16:]
+                else:
+                    sl1h = s.price
+                    act1h_lo.append(s)
+                    act1h_lo = act1h_lo[-16:]
+            act1h_hi = [x for x in act1h_hi if hh <= x.price]
+            act1h_lo = [x for x in act1h_lo if hl >= x.price]
+            if sh1h is not None and hc > sh1h:
+                tr1h = 1
+            elif sl1h is not None and hc < sl1h:
+                tr1h = -1
+            p1h += 1
+
+        while p15 < len(df15) and ts15[p15] + 900 * 10**9 <= t_ns:
+            prot15.update(i, float(c15[p15]), sw15_d.get(p15, []))
+            p15 += 1
+
+        new5 = False
+        while p5 < len(df5) and ts5[p5] + 300 * 10**9 <= t_ns:
+            for s in sw5_d.get(p5, []):
+                if s.side == 1:
+                    sh5 = s.price
+                else:
+                    sl5 = s.price
+            p5 += 1
+            new5 = True
+
+        if pos is not None:
+            closed, gross_r, _ = exit_mgr.step_bar(pos, i, float(h1m[i]), float(l1m[i]), float(c1m[i]), float(atr1m[i]), prot15, None)
+            if closed:
+                hrs = max(0.05, (i - pos.entry_bar) / 60.0)
+                t1_b = pos.meta.get("t1_bar")
+                t2_b = pos.meta.get("t2_bar")
+                t1_hrs = round((t1_b - pos.entry_bar) / 60.0, 2) if t1_b is not None else None
+                t2_hrs = round((t2_b - pos.entry_bar) / 60.0, 2) if t2_b is not None else None
+                t1_ts = (pos.entry_ts + pd.Timedelta(hours=t1_hrs)) if t1_hrs is not None else None
+                cost = fee_mult * (0.0005 / max(pos.risk_dist / pos.entry_price, 1e-9))
+                trades.append({
+                    "cluster_id": pos.trade_id,
+                    "asset": asset,
+                    "entry_time": pos.entry_ts,
+                    "exit_time": pd.Timestamp(t_ns, tz="UTC"),
+                    "t1_time": t1_ts,
+                    "side": pos.side,
+                    "entry_price": pos.entry_price,
+                    "init_sl": pos.init_sl,
+                    "sl_pct": pos.risk_dist / pos.entry_price,
+                    "gross_r": gross_r,
+                    "net_r": gross_r - cost,
+                    "is_pyramid": False,
+                    "is_aplus": True,
+                    "conviction": 0.78,
+                    "setup": "V10_XAU_VisB",
+                    "engine": "V10_XAU_VisB",
+                    "outcome": pos.exit_reason,
+                    "hold_hours": hrs,
+                    "t1_hours": t1_hrs,
+                    "t2_hours": t2_hrs,
+                })
+                pos = None
+                cool = i + 5
+            continue
+
+        if t_ns < eval0_ns or p4h < 15 or p1h < 25 or p5 < 10:
+            continue
+
+        if pend is not None:
+            if i > pend["exp"]:
+                pend = None
+            elif (pend["sd"] == 1 and l1m[i] <= pend["ep"]) or (pend["sd"] == -1 and h1m[i] >= pend["ep"]):
+                cid += 1
+                pos = TradePositionState(
+                    trade_id=cid,
+                    side=pend["sd"],
+                    entry_bar=i,
+                    entry_ts=pd.Timestamp(t_ns, tz="UTC"),
+                    entry_price=pend["ep"],
+                    init_sl=pend["sl"],
+                    cur_sl=pend["sl"],
+                    risk_dist=pend["rd"],
+                    meta={"setup": "V10_XAU_VisB"},
+                )
+                pend = None
+            continue
+
+        if i <= cool or not new5 or p5 < 4:
+            continue
+        hr = int(hrs1m[i])
+        if hr not in (9, 10, 12, 13, 14, 15, 16):
+            continue
+
+        sweeps = [x for x in sweeps if (t_ns - x[1]) <= 6 * 3600 * 10**9][-10:]
+        a5 = float(atr5[p5 - 1])
+        if a5 <= 0:
+            continue
+        b1, b2, b3 = p5 - 3, p5 - 2, p5 - 1
+        for sd, _, sl_b in reversed(sweeps):
+            if sd != tr4h or sd != tr1h:
+                continue
+            ep = slp = 0.0
+            if sd == 1 and l5[b3] >= sl_b and sh5 is not None and c5[b3] > sh5 and (l5[b3] - h5[b1]) >= 0.25 * a5 and c5[b2] > o5[b2]:
+                gap = l5[b3] - h5[b1]
+                ep = float(l5[b3] - fvg_depth * gap)
+                slp = min(sl_b - a5, ep - max(1.3 * a5, ep * 0.0010))
+            elif sd == -1 and h5[b3] <= sl_b and sl5 is not None and c5[b3] < sl5 and (l5[b1] - h5[b3]) >= 0.25 * a5 and c5[b2] < o5[b2]:
+                gap = l5[b1] - h5[b3]
+                ep = float(h5[b3] + fvg_depth * gap)
+                slp = max(sl_b + a5, ep + max(1.3 * a5, ep * 0.0010))
+            else:
+                continue
+            rd = abs(ep - slp)
+            if ep > 0 and min_sl_pct <= (rd / ep) <= max_sl_pct:
+                pend = {"sd": sd, "ep": ep, "sl": slp, "rd": rd, "exp": i + 120}
+                break
+
+    if include_v6_4h:
+        tr_v6, _ = run_v6_cognitive_backtest(df5, eval_start, eval_end, fee_mult=fee_mult)
+        for _t in tr_v6:
+            _t["asset"] = asset
+            _t.setdefault("setup", "4H_V6_Cognitive")
+            _t.setdefault("engine", "4H_V6_Cognitive")
+            if _t.get("t1_time") is None:
+                _t["t1_time"] = _t["exit_time"]
+            trades.append(_t)
+
+    trades = sorted(trades, key=lambda t: t["entry_time"])
+    return trades, _summarize_trades(trades)
+
+
+def run_v10_nsx_topo_backtest(
+    df_nsx_5m: pd.DataFrame,
+    eval_start: pd.Timestamp,
+    eval_end: pd.Timestamp,
+    *,
+    asset: str = "NSXUSD",
+    fee_mult: float = 0.5,
+) -> tuple[List[dict], Dict[str, Any]]:
+    """V10.0 NSXUSD_5m Physics Front-Loaded Engine (ZERO k=2/k=3 fractals + 45/40/15)."""
+    from .strategy_brain import _summarize_trades, run_v8_intraday_backtest
+
+    tr_nsx, _ = run_v8_intraday_backtest(
+        df_nsx_5m,
+        eval_start,
+        eval_end,
+        include_smc_sweep=False,
+        fee_mult=fee_mult,
+        use_killzones=True,
+        min_sl_pct=0.0005,
+        max_sl_pct=0.0150,
+        min_ker4=0.15,
+        min_rvol_entry=0.90,
+        min_clearance_r=3.0,
+        bank_r=2.2,
+        bank_frac=0.45,
+        be_lock_r=0.35,
+        bank2_r=4.5,
+        bank2_frac=0.40,
+        be2_lock_r=2.0,
+        runner_tp_r=10.0,
+    )
+    for _t in tr_nsx:
+        _t["asset"] = asset
+        orig_s = str(_t.get("setup", "V8_CompVacuum"))
+        new_s = orig_s.replace("V8_", "V10_NSX_")
+        _t["setup"] = new_s
+        _t["engine"] = new_s
+        if _t.get("t1_hours") is not None and _t.get("t1_time") is None:
+            _t["t1_time"] = _t["entry_time"] + pd.Timedelta(hours=float(_t["t1_hours"]))
+    tr_nsx = sorted(tr_nsx, key=lambda t: t["entry_time"])
+    return tr_nsx, _summarize_trades(tr_nsx)
+
+
+def run_v10_multiasset_portfolio(
+    df_btc_5m: pd.DataFrame,
+    df_xau_1m: Optional[pd.DataFrame],
+    df_nsx_5m: Optional[pd.DataFrame],
+    eval_start: pd.Timestamp,
+    eval_end: pd.Timestamp,
+    *,
+    include_btc_topo_sweeps: bool = True,
+    include_xau_v6_4h: bool = False,
+    btc_fee_mult: float = 1.0,
+    cfd_fee_mult: float = 0.5,
+) -> dict[str, Any]:
+    """Run V10.0 Front-Loaded Cashflow Multi-Asset Portfolio across BTCUSD_5m, XAUUSD_1m, and NSXUSD_5m."""
+    from .strategy_brain import _summarize_trades, run_v10_btc_frontloaded_backtest
+
+    btc_tr, btc_sum = run_v10_btc_frontloaded_backtest(
+        df_btc_5m,
+        eval_start,
+        eval_end,
+        asset="BTCUSD",
+        include_physics_45=True,
+        include_v6_4h=True,
+        include_topo_sweeps=include_btc_topo_sweeps,
+        fee_mult=btc_fee_mult,
+    )
+    all_tr = list(btc_tr)
+
+    xau_tr: List[dict] = []
+    xau_sum: Dict[str, Any] = {}
+    if df_xau_1m is not None and len(df_xau_1m) > 500:
+        xau_tr, xau_sum = run_v10_xau_topo_backtest(
+            df_xau_1m,
+            eval_start,
+            eval_end,
+            asset="XAUUSD",
+            fee_mult=cfd_fee_mult,
+            include_v6_4h=include_xau_v6_4h,
+        )
+        all_tr.extend(xau_tr)
+
+    nsx_tr: List[dict] = []
+    nsx_sum: Dict[str, Any] = {}
+    if df_nsx_5m is not None and len(df_nsx_5m) > 200:
+        nsx_tr, nsx_sum = run_v10_nsx_topo_backtest(
+            df_nsx_5m,
+            eval_start,
+            eval_end,
+            asset="NSXUSD",
+            fee_mult=cfd_fee_mult,
+        )
+        all_tr.extend(nsx_tr)
+
+    all_tr = sorted(all_tr, key=lambda t: t["entry_time"])
+    return {
+        "btc_trades": btc_tr,
+        "btc_summary": btc_sum,
+        "xau_trades": xau_tr,
+        "xau_summary": xau_sum,
+        "nsx_trades": nsx_tr,
+        "nsx_summary": nsx_sum,
+        "real_multiasset_trades": all_tr,
+        "real_multiasset_summary": _summarize_trades(all_tr),
+    }
+
+

@@ -18,6 +18,7 @@ from .exit_manager import (
     ProtectedSwing,
     ProtectedSwingDetector,
     TradePositionState,
+    V10FrontLoadedCashflowExitManager,
 )
 from .liquidity_mapper import LiquidityPool, LiquidityPoolMapper
 from .perception_engine import (
@@ -29,6 +30,8 @@ from .perception_engine import (
     SessionSweepSignal,
     TopologicalSwing,
     VisualPerceptionEngine,
+    build_causal_topo_events,
+    build_causal_topo_swing_dict,
     compute_atr_series,
     gaussian_rbf,
     sigmoid,
@@ -51,6 +54,9 @@ from .smc_v4_portfolio import (
     run_smc_v7_multiasset_portfolio,
     run_smc_v8_multiasset_portfolio,
     run_v9_multiasset_portfolio,
+    run_v10_multiasset_portfolio,
+    run_v10_nsx_topo_backtest,
+    run_v10_xau_topo_backtest,
     simulate_compounded_account,
 )
 from .strategy_brain import (
@@ -67,6 +73,8 @@ from .strategy_brain import (
     run_v7_intraday_backtest,
     run_v8_intraday_backtest,
     run_v9_daily_session_backtest,
+    run_v10_btc_frontloaded_backtest,
+    run_v10_btc_topo_sweeps_backtest,
 )
 
 __all__ = [
@@ -96,10 +104,13 @@ __all__ = [
     "SwingPoint",
     "TopologicalSwing",
     "TradePositionState",
+    "V10FrontLoadedCashflowExitManager",
     "VisualPerceptionEngine",
     "apply_cost_reprice",
     "build_causal_htf_structure",
     "build_causal_swing_events",
+    "build_causal_topo_events",
+    "build_causal_topo_swing_dict",
     "causal_atr14",
     "compute_atr_series",
     "detect_swings_causal",
@@ -128,6 +139,11 @@ __all__ = [
     "run_v8_intraday_backtest",
     "run_v9_daily_session_backtest",
     "run_v9_multiasset_portfolio",
+    "run_v10_btc_frontloaded_backtest",
+    "run_v10_btc_topo_sweeps_backtest",
+    "run_v10_multiasset_portfolio",
+    "run_v10_nsx_topo_backtest",
+    "run_v10_xau_topo_backtest",
     "sigmoid",
     "simulate_compounded_account",
     "soft_and_log_odds",

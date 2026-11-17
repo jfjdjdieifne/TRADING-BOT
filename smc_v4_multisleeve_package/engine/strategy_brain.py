@@ -15,6 +15,7 @@ from .exit_manager import (
     IntradayCashflowExitManager,
     ProtectedSwingDetector,
     TradePositionState,
+    V10FrontLoadedCashflowExitManager,
 )
 from .liquidity_mapper import LiquidityPoolMapper
 from .perception_engine import (
@@ -26,6 +27,7 @@ from .perception_engine import (
     SessionSweepSignal,
     TopologicalSwing,
     VisualPerceptionEngine,
+    build_causal_topo_events,
     compute_atr_series,
     sigmoid,
     soft_and_log_odds,
@@ -1127,6 +1129,40 @@ class SmallAccountCashflowManager:
         self.max_concurrent_risk_slots = max_concurrent_risk_slots
         self.slot_recycling = bool(slot_recycling)
 
+    @classmethod
+    def daily_hunter_100(cls) -> "SmallAccountCashflowManager":
+        """V10.0 DAILY_HUNTER_$100: 3.0% std / 4.5% A+, 2.0% DD throttle, 4 risk slots, -2.0R/day CB, $25 50/50 vault skim."""
+        return cls(
+            starting_equity=100.0,
+            risk_pct=0.030,
+            aplus_risk_pct=0.045,
+            throttle_risk_pct=0.020,
+            throttle_dd_pct=0.10,
+            skim_step_usd=25.0,
+            skim_frac=0.50,
+            max_leverage=15.0,
+            daily_dd_cap_r=-2.0,
+            max_concurrent_risk_slots=4,
+            slot_recycling=True,
+        )
+
+    @classmethod
+    def turbo_sniper_100(cls) -> "SmallAccountCashflowManager":
+        """V10.0 TURBO_SNIPER_$100: 4.0% std / 5.5% A+, 2.5% DD throttle, 4 risk slots, -2.5R/day CB, $20 50/50 vault skim."""
+        return cls(
+            starting_equity=100.0,
+            risk_pct=0.040,
+            aplus_risk_pct=0.055,
+            throttle_risk_pct=0.025,
+            throttle_dd_pct=0.10,
+            skim_step_usd=20.0,
+            skim_frac=0.50,
+            max_leverage=15.0,
+            daily_dd_cap_r=-2.5,
+            max_concurrent_risk_slots=4,
+            slot_recycling=True,
+        )
+
     def resolve_risk_pct(
         self,
         equity: float,
@@ -1141,7 +1177,25 @@ class SmallAccountCashflowManager:
             conv = float(trade.get("conviction", trade.get("reasoning_chain", {}).get("conviction", 0.0)) or 0.0)
             is_aplus = bool(
                 trade.get("is_aplus", False)
-                or setup in ("SMC_Sweep_V6", "V7_BPR_Snap", "V8_BPR_Snap", "V9_LON", "V9_1H_K2", "V9_15M_NY", "V9_BPR_Snap")
+                or setup in (
+                    "SMC_Sweep_V6",
+                    "V7_BPR_Snap",
+                    "V8_BPR_Snap",
+                    "V9_LON",
+                    "V9_1H_K2",
+                    "V9_15M_NY",
+                    "V9_BPR_Snap",
+                    "V10_CompVac",
+                    "V10_BPR_Snap",
+                    "V10_BPR_Retest",
+                    "V10_XAU_VisB",
+                    "V10_NSX_CompVac",
+                    "V10_NSX_BPR_Snap",
+                    "V10_LON",
+                    "V10_1H_TOPO",
+                    "V10_15M_TOPO",
+                    "4H_V6_Cognitive",
+                )
                 or conv >= 0.72
             )
             if is_aplus:
@@ -1343,9 +1397,10 @@ class SmallAccountCashflowManager:
         trades: List[dict],
         mode: str = "ratchet_cashflow",
         recent_weeks: int = 52,
+        basket_mult: float = 1.0,
     ) -> Dict[str, object]:
-        """Run strict 1.0x real-asset cashflow audit and produce Day / 52-Week / Month / Rolling-Month-1 ledgers."""
-        sim = self.simulate_cashflow(trades, mode=mode, basket_mult=1.0)
+        """Run real-asset cashflow audit and produce Day / 52-Week / Month / Rolling-Month-1 ledgers."""
+        sim = self.simulate_cashflow(trades, mode=mode, basket_mult=basket_mult)
         ledger = sim.get("trade_ledger", [])
         if not ledger:
             return {"summary": sim, "daily": [], "weekly_52": [], "monthly": [], "rolling_m1": {}}
@@ -2261,6 +2316,378 @@ def run_v9_daily_session_backtest(
 
     closed_trades = sorted(closed_trades, key=lambda t: t["entry_time"])
     return closed_trades, _summarize_trades(closed_trades)
+
+
+def run_v10_btc_topo_sweeps_backtest(
+    df_5m: pd.DataFrame,
+    eval_start: pd.Timestamp,
+    eval_end: pd.Timestamp,
+    *,
+    asset: str = "BTCUSD",
+    use_lon: bool = True,
+    use_1h_topo: bool = True,
+    use_15m_topo: bool = True,
+    zig_4h: float = 1.25,
+    zig_1h: float = 1.15,
+    zig_15m: float = 1.15,
+    zig_5m: float = 0.50,
+    min_prom_atr: float = 1.40,
+    min_rvol_entry: float = 1.20,
+    min_clearance_r: float = 2.5,
+    min_ker4: float = 0.15,
+    min_sl_pct: float = 0.0020,
+    max_sl_pct: float = 0.0180,
+    dedup_same_side_bars: int = 12,
+    fee_mult: float = 1.0,
+) -> Tuple[List[dict], Dict[str, object]]:
+    """V10.0 Topological Liquidity Sweep Engine (ZERO k=2/k=3 fractals + 45/40/15 Front-Loaded Exit).
+
+    Replaces k=2/k=3 fractals with strictly causal ATR-ZigZag TopologicalSwings, validates every
+    setup through AdversarialCrossExaminer (RVOL >= 1.20, prominence >= 1.40 ATR, wall clearance >= 2.5R),
+    and executes the V10FrontLoadedCashflowExitManager 45/40/15 cascade (2.2R -> +0.35R BE, 4.5R -> +2.0R, 10R runner).
+    """
+    agg = {"Open": "first", "High": "max", "Low": "min", "Close": "last", "Volume": "sum"}
+    df15 = df_5m.resample("15min").agg(agg).dropna()
+    df1h = df_5m.resample("1h").agg(agg).dropna()
+    df4h = df_5m.resample("4h").agg(agg).dropna()
+
+    o5, h5, l5, c5 = (df_5m[col].to_numpy(float) for col in ("Open", "High", "Low", "Close"))
+    ts5_ns = df_5m.index.as_unit("ns").asi8
+    close5_ns = ts5_ns + int(300 * 1e9)
+    atr5 = compute_atr_series(h5, l5, c5, 14)
+
+    h15, l15, c15 = (df15[col].to_numpy(float) for col in ("High", "Low", "Close"))
+    ts15_ns = df15.index.as_unit("ns").asi8
+    close15_ns = ts15_ns + int(900 * 1e9)
+    atr15 = compute_atr_series(h15, l15, c15, 14)
+
+    h1, l1, c1 = (df1h[col].to_numpy(float) for col in ("High", "Low", "Close"))
+    ts1_ns = df1h.index.as_unit("ns").asi8
+    close1_ns = ts1_ns + int(3600 * 1e9)
+    atr1 = compute_atr_series(h1, l1, c1, 14)
+
+    o4, h4, l4, c4 = (df4h[col].to_numpy(float) for col in ("Open", "High", "Low", "Close"))
+    ts4_ns = df4h.index.as_unit("ns").asi8
+    close4_ns = ts4_ns + int(14400 * 1e9)
+    atr4 = compute_atr_series(h4, l4, c4, 14)
+
+    rf = RegimeFilterEngine()
+    reg4 = rf.precompute_frame_features(df4h)
+    reg5 = rf.precompute_frame_features(df_5m)
+    ker4_arr = reg4["ker"]
+    br4_arr = reg4["body_ratio"]
+    rvol5_arr = reg5["rvol"]
+    ts_dt_arr = pd.to_datetime(ts5_ns, utc=True)
+
+    sw15_c = build_causal_topo_events(ts15_ns, h15, l15, c15, atr15, zig_mult=zig_15m)
+    sw1_c = build_causal_topo_events(ts1_ns, h1, l1, c1, atr1, zig_mult=zig_1h)
+    sw4_c = build_causal_topo_events(ts4_ns, h4, l4, c4, atr4, zig_mult=zig_4h)
+    sw5_c = build_causal_topo_events(ts5_ns, h5, l5, c5, atr5, zig_mult=zig_5m)
+
+    perc = VisualPerceptionEngine()
+    sess = DailySessionLiquidityTracker(expiry_hours=5.0)
+    pros = AdversarialCrossExaminer(min_conviction=0.55)
+    exit_mgr = V10FrontLoadedCashflowExitManager()
+    prot15 = ProtectedSwingDetector()
+
+    p15 = p1 = p4 = 0
+    act1_hi: List[TopologicalSwing] = []
+    act1_lo: List[TopologicalSwing] = []
+    act15_hi: List[TopologicalSwing] = []
+    act15_lo: List[TopologicalSwing] = []
+    topo4_hi = topo4_lo = topo1_hi = topo1_lo = topo5_hi = topo5_lo = None
+    tr4 = tr1 = 0
+    c_1h: List[Tuple[int, int, float, float]] = []
+    c_15: List[Tuple[int, int, float, float]] = []
+
+    eval0_ns = int(eval_start.as_unit("ns").value)
+    eval1_ns = int(eval_end.as_unit("ns").value)
+    sleeves = ("LON", "1H_TOPO", "15M_TOPO")
+    pos_map: Dict[str, Optional[TradePositionState]] = {s: None for s in sleeves}
+    pend_map: Dict[str, Optional[dict]] = {s: None for s in sleeves}
+    last_side_bar = {1: -999, -1: -999}
+    closed_trades: List[dict] = []
+    cid = 0
+
+    for i5 in range(100, len(df_5m)):
+        c5_ns = int(close5_ns[i5])
+        if c5_ns >= eval1_ns:
+            break
+        dt5 = ts_dt_arr[i5]
+        hr5 = dt5.hour
+        a5 = float(atr5[i5])
+        sess.step_bar(dt5, c5_ns, float(o5[i5]), float(h5[i5]), float(l5[i5]), float(c5[i5]), a5)
+
+        while p4 < len(df4h) and close4_ns[p4] <= c5_ns:
+            for s in sw4_c.get(p4, []):
+                if s.side == 1:
+                    topo4_hi = s.price
+                else:
+                    topo4_lo = s.price
+            if topo4_hi is not None and c4[p4] > topo4_hi:
+                tr4 = 1
+            elif topo4_lo is not None and c4[p4] < topo4_lo:
+                tr4 = -1
+            p4 += 1
+
+        while p1 < len(df1h) and close1_ns[p1] <= c5_ns:
+            hh, hl, hc = float(h1[p1]), float(l1[p1]), float(c1[p1])
+            c_1h = [x for x in c_1h if (c5_ns - x[1]) <= 5 * 3600 * 10**9][-10:]
+            for sw in act1_lo:
+                if (p1 - sw.idx) >= 3 and sw.prominence_atr >= min_prom_atr and hl < sw.price and hc > sw.price:
+                    c_1h.append((1, int(close1_ns[p1]), hl, sw.structural_weight))
+            for sw in act1_hi:
+                if (p1 - sw.idx) >= 3 and sw.prominence_atr >= min_prom_atr and hh > sw.price and hc < sw.price:
+                    c_1h.append((-1, int(close1_ns[p1]), hh, sw.structural_weight))
+            for sw in sw1_c.get(p1, []):
+                if sw.side == 1:
+                    topo1_hi = sw.price
+                    act1_hi.append(sw)
+                    act1_hi = act1_hi[-24:]
+                else:
+                    topo1_lo = sw.price
+                    act1_lo.append(sw)
+                    act1_lo = act1_lo[-24:]
+            act1_hi = [x for x in act1_hi if hh <= x.price]
+            act1_lo = [x for x in act1_lo if hl >= x.price]
+            if topo1_hi is not None and hc > topo1_hi:
+                tr1 = 1
+            elif topo1_lo is not None and hc < topo1_lo:
+                tr1 = -1
+            p1 += 1
+
+        while p15 < len(df15) and close15_ns[p15] <= c5_ns:
+            hh, hl, hc = float(h15[p15]), float(l15[p15]), float(c15[p15])
+            new15 = sw15_c.get(p15, [])
+            prot15.update(i5, hc, new15)
+            c_15 = [x for x in c_15 if (c5_ns - x[1]) <= 3 * 3600 * 10**9][-10:]
+            for sw in act15_lo:
+                if (p15 - sw.idx) >= 4 and sw.prominence_atr >= min_prom_atr and hl < sw.price and hc > sw.price:
+                    c_15.append((1, int(close15_ns[p15]), hl, sw.structural_weight))
+            for sw in act15_hi:
+                if (p15 - sw.idx) >= 4 and sw.prominence_atr >= min_prom_atr and hh > sw.price and hc < sw.price:
+                    c_15.append((-1, int(close15_ns[p15]), hh, sw.structural_weight))
+            for sw in new15:
+                if sw.side == 1:
+                    act15_hi.append(sw)
+                    act15_hi = act15_hi[-24:]
+                else:
+                    act15_lo.append(sw)
+                    act15_lo = act15_lo[-24:]
+            act15_hi = [x for x in act15_hi if hh <= x.price]
+            act15_lo = [x for x in act15_lo if hl >= x.price]
+            p15 += 1
+
+        for sw in sw5_c.get(i5 - 1, []):
+            if sw.side == 1:
+                topo5_hi = sw.price
+            else:
+                topo5_lo = sw.price
+
+        for slv in sleeves:
+            pos = pos_map[slv]
+            if pos is None:
+                continue
+            closed, gross_r, _ = exit_mgr.step_bar(pos, i5, float(h5[i5]), float(l5[i5]), float(c5[i5]), a5, prot15, None)
+            if closed:
+                hrs = max(0.08, (i5 - pos.entry_bar) * (5.0 / 60.0))
+                t1_b = pos.meta.get("t1_bar")
+                t2_b = pos.meta.get("t2_bar")
+                t1_hrs = round((t1_b - pos.entry_bar) * (5.0 / 60.0), 2) if t1_b is not None else None
+                t2_hrs = round((t2_b - pos.entry_bar) * (5.0 / 60.0), 2) if t2_b is not None else None
+                t1_ts = (pos.entry_ts + pd.Timedelta(hours=t1_hrs)) if t1_hrs is not None else None
+                fee_in = 0.0002
+                fee_out = 0.0002 if pos.exit_reason == "VACUUM_TP" else 0.0007
+                cost = fee_mult * ((fee_in + fee_out + 0.0001 * (hrs / 8.0)) / (pos.risk_dist / pos.entry_price))
+                closed_trades.append({
+                    "cluster_id": pos.trade_id,
+                    "asset": asset,
+                    "entry_time": pos.entry_ts,
+                    "exit_time": pd.Timestamp(c5_ns, tz="UTC"),
+                    "t1_time": t1_ts,
+                    "side": pos.side,
+                    "entry_price": pos.entry_price,
+                    "init_sl": pos.init_sl,
+                    "sl_pct": pos.risk_dist / pos.entry_price,
+                    "gross_r": gross_r,
+                    "net_r": gross_r - cost,
+                    "is_pyramid": False,
+                    "is_aplus": True,
+                    "conviction": float(pos.meta.get("reasoning_chain", {}).get("conviction", 0.78)),
+                    "setup": f"V10_{slv}",
+                    "engine": f"V10_{slv}",
+                    "outcome": pos.exit_reason,
+                    "hold_hours": hrs,
+                    "t1_hours": t1_hrs,
+                    "t2_hours": t2_hrs,
+                    "reasoning_chain": dict(pos.meta.get("reasoning_chain", {})),
+                })
+                pos_map[slv] = None
+
+        if c5_ns < eval0_ns or p4 < 30 or p1 < 30 or a5 <= 0:
+            continue
+
+        for slv in sleeves:
+            pend = pend_map[slv]
+            if pend is not None and pos_map[slv] is None:
+                if i5 > pend["exp"]:
+                    pend_map[slv] = None
+                elif (pend["sd"] == 1 and l5[i5] <= pend["ep"]) or (pend["sd"] == -1 and h5[i5] >= pend["ep"]):
+                    same_unprot = any(
+                        p is not None and p.side == pend["sd"] and not exit_mgr.is_zero_risk(p)
+                        for p in pos_map.values()
+                    )
+                    if (not same_unprot) and (i5 - last_side_bar[pend["sd"]] >= dedup_same_side_bars):
+                        cid += 1
+                        last_side_bar[pend["sd"]] = i5
+                        pos_map[slv] = TradePositionState(
+                            trade_id=cid,
+                            side=pend["sd"],
+                            entry_bar=i5,
+                            entry_ts=pd.Timestamp(c5_ns, tz="UTC"),
+                            entry_price=pend["ep"],
+                            init_sl=pend["sl"],
+                            cur_sl=pend["sl"],
+                            risk_dist=pend["rd"],
+                            meta={"setup": f"V10_{slv}", "reasoning_chain": pend["meta"]},
+                        )
+                    pend_map[slv] = None
+
+        k4 = float(ker4_arr[p4 - 1])
+        rv5 = float(rvol5_arr[i5])
+        if k4 < min_ker4 or rv5 < min_rvol_entry or abs(c5[i5 - 1] - o5[i5 - 1]) < 1.15 * a5:
+            continue
+
+        lon_cand = [(s.side, s.sweep_ns, s.sweep_extreme, 0.80) for s in sess.active_lon_sweeps]
+        for slv, clist, ok_hr in (
+            ("LON", lon_cand, use_lon and hr5 >= 12),
+            ("1H_TOPO", c_1h, use_1h_topo and hr5 >= 9),
+            ("15M_TOPO", c_15, use_15m_topo and (12 <= hr5 <= 21) and rv5 >= min_rvol_entry),
+        ):
+            if (not ok_hr) or pos_map[slv] is not None or pend_map[slv] is not None:
+                continue
+            for sd, _, sl_b, sw_w in reversed(clist):
+                if sd != tr1 or sd != tr4:
+                    continue
+                ok = False
+                ep = slp = 0.0
+                if sd == 1 and l5[i5] >= sl_b and topo5_hi is not None:
+                    if c5[i5] > topo5_hi and (l5[i5] - h5[i5 - 2]) >= 0.30 * a5 and c5[i5 - 1] > o5[i5 - 1]:
+                        slp = min(sl_b - a5, c5[i5] - max(1.5 * a5, c5[i5] * 0.0020))
+                        ep = float(l5[i5])
+                        ok = True
+                elif sd == -1 and h5[i5] <= sl_b and topo5_lo is not None:
+                    if c5[i5] < topo5_lo and (l5[i5 - 2] - h5[i5]) >= 0.30 * a5 and c5[i5 - 1] < o5[i5 - 1]:
+                        slp = max(sl_b + a5, c5[i5] + max(1.5 * a5, c5[i5] * 0.0020))
+                        ep = float(h5[i5])
+                        ok = True
+                if ok:
+                    rd = abs(ep - slp)
+                    if not (min_sl_pct <= (rd / ep) <= max_sl_pct):
+                        continue
+                    opp = [x.price for x in (act1_hi if sd == 1 else act1_lo)[-6:]]
+                    disp = perc.displacement_score(o5[i5 - 1], h5[i5 - 1], l5[i5 - 1], c5[i5 - 1], a5)
+                    verdict = pros.cross_examine(
+                        side=sd,
+                        entry_px=ep,
+                        risk_dist=rd,
+                        thesis_scores={
+                            "sweep": sw_w,
+                            "disp": disp,
+                            "vac": 0.72,
+                            "ker4": float(sigmoid(k4, 0.25, 9.0)),
+                            "rvol": float(sigmoid(rv5, 1.3, 2.0)),
+                        },
+                        thesis_weights={"sweep": 1.1, "disp": 1.2, "vac": 0.8, "ker4": 1.0, "rvol": 0.8},
+                        opposing_htf_walls=opp,
+                        ker_4h=k4,
+                        body_ratio_4h=float(br4_arr[p4 - 1]),
+                        dir_4h_candle=(1 if c4[p4 - 1] > o4[p4 - 1] else -1),
+                        htf_trend_1h=tr1,
+                        htf_trend_4h=tr4,
+                        rvol_entry=rv5,
+                        rvol_opp=1.0,
+                        sweep_bars_accepted=0,
+                        is_counter_trend_sweep=False,
+                        min_clearance_r=min_clearance_r,
+                    )
+                    if not verdict.approved:
+                        continue
+                    pend_map[slv] = {
+                        "sd": sd,
+                        "ep": ep,
+                        "sl": slp,
+                        "rd": rd,
+                        "exp": i5 + 8,
+                        "meta": dict(verdict.reasoning_chain),
+                    }
+                    break
+
+    closed_trades = sorted(closed_trades, key=lambda t: t["entry_time"])
+    return closed_trades, _summarize_trades(closed_trades)
+
+
+def run_v10_btc_frontloaded_backtest(
+    df_5m: pd.DataFrame,
+    eval_start: pd.Timestamp,
+    eval_end: pd.Timestamp,
+    *,
+    asset: str = "BTCUSD",
+    include_physics_45: bool = True,
+    include_v6_4h: bool = True,
+    include_topo_sweeps: bool = False,
+    fee_mult: float = 1.0,
+) -> Tuple[List[dict], Dict[str, object]]:
+    """V10.0 BTCUSD_5m Front-Loaded Cashflow Portfolio (zero k=2/k=3 fractals).
+
+    Combines:
+      1) `V10_BTC_Physics` (CompVacuum + BPR/iFVG + AdversarialCrossExaminer + 45/40/15 @ 2.2R/4.5R/10R)
+      2) `4H_V6_Cognitive` (VisualPerceptionEngine 4H topological swings + AdversarialCrossExaminer)
+      3) Optional `V10_Topo_Sweeps` (`LON` + `1H_TOPO` + `15M_TOPO` + 45/40/15)
+    """
+    trades: List[dict] = []
+    if include_physics_45:
+        tr_phys, _ = run_v8_intraday_backtest(
+            df_5m,
+            eval_start,
+            eval_end,
+            include_smc_sweep=False,
+            fee_mult=fee_mult,
+            bank_r=2.2,
+            bank_frac=0.45,
+            be_lock_r=0.35,
+            bank2_r=4.5,
+            bank2_frac=0.40,
+            be2_lock_r=2.0,
+            runner_tp_r=10.0,
+        )
+        for _t in tr_phys:
+            _t["asset"] = asset
+            orig_s = str(_t.get("setup", "V8_CompVacuum"))
+            new_s = orig_s.replace("V8_", "V10_")
+            _t["setup"] = new_s
+            _t["engine"] = new_s
+            if _t.get("t1_hours") is not None and _t.get("t1_time") is None:
+                _t["t1_time"] = _t["entry_time"] + pd.Timedelta(hours=float(_t["t1_hours"]))
+            trades.append(_t)
+
+    if include_v6_4h:
+        tr_v6, _ = run_v6_cognitive_backtest(df_5m, eval_start, eval_end, fee_mult=fee_mult)
+        for _t in tr_v6:
+            _t["asset"] = asset
+            _t.setdefault("setup", "4H_V6_Cognitive")
+            _t.setdefault("engine", "4H_V6_Cognitive")
+            if _t.get("t1_time") is None:
+                _t["t1_time"] = _t["exit_time"]
+            trades.append(_t)
+
+    if include_topo_sweeps:
+        tr_topo, _ = run_v10_btc_topo_sweeps_backtest(df_5m, eval_start, eval_end, asset=asset, fee_mult=fee_mult)
+        trades.extend(tr_topo)
+
+    trades = sorted(trades, key=lambda t: t["entry_time"])
+    return trades, _summarize_trades(trades)
+
 
 
 

@@ -466,3 +466,39 @@ class HighVelocityCashflowExitManager(IntradayCashflowExitManager):
         return False
 
 
+class V10FrontLoadedCashflowExitManager(HighVelocityCashflowExitManager):
+    """V10.0 Front-Loaded 45/40/15 Cashflow Exit Manager.
+
+    - Tier 1: Bank 45% at +2.2R -> immediately move SL to BE + 0.35R (Zero-Risk Slot Recycling)
+    - Tier 2: Bank 40% at min(Origin_Anchor_R, +4.5R) -> lock +2.00R
+    - Tier 3: Trail remaining 15% moonbag via 15m Topological Protected Swings up to +10.0R
+    """
+
+    def __init__(
+        self,
+        bank_r: float = 2.2,
+        bank_frac: float = 0.45,
+        be_lock_r: float = 0.35,
+        bank2_r: float = 4.5,
+        bank2_frac: float = 0.40,
+        be2_lock_r: float = 2.00,
+        runner_tp_r: float = 10.0,
+        stagnation_bars: int = 0,
+        prot_trail_mfe_r: float = 5.0,
+        atr_ratchet_mult: float = 0.0,
+    ) -> None:
+        super().__init__(
+            bank_r=bank_r,
+            bank_frac=bank_frac,
+            be_lock_r=be_lock_r,
+            bank2_r=bank2_r,
+            bank2_frac=bank2_frac,
+            be2_lock_r=be2_lock_r,
+            runner_tp_r=runner_tp_r,
+            stagnation_bars=stagnation_bars,
+            prot_trail_mfe_r=prot_trail_mfe_r,
+            atr_ratchet_mult=atr_ratchet_mult,
+        )
+
+
+

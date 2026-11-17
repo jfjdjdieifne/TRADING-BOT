@@ -1,11 +1,12 @@
-# QUANTCONNECT.COM - Binance Futures Multi-Coin V9.0 Daily Session Velocity + V8 Physics + 4H Cognitive
+# QUANTCONNECT.COM - Binance Futures Multi-Coin V10.0 Front-Loaded Cashflow + Topological Swings + 4H Cognitive
 # Audited with ZERO HTF lookahead on 823,154 BTC 5m bars (2020-2026, real Binance VIP0 fees+slip+funding):
-#   1) Sleeve 1 (use_v9=true): V9_DailySession_Sweeps (`LON` 07-12 UTC H/L swept >=12 UTC, `1H_K2` swept >=09 UTC,
-#      `15M_NY` 12-21 UTC RVOL>=1.20) -> 5m BOS + FVG -> HighVelocityCashflow (15%@+2.0R->BE+0.35R, 20%@+4.5R->+2.0R, 65%@+10R)
-#   2) Sleeve 2 (use_v8=true): V8_Intraday_Physics (5m Compression-Vacuum + BPR/iFVG + Bayesian Prosecutor + 3-Tier Exit)
-#   3) Sleeve 3 (use_4h_trend=true): 4H_V6_Cognitive (Fractal 1H/4H Compression + 2-Stage Pyramid + Climax Ratchet)
-#   - Combined BTCUSD_5m V9+V8+V6 (1.0x real asset, zero synthetic multipliers): N=712 (8.8/mo), WR=41.4%, Net=+357.4R, PF=1.86, 7/7 yrs green
-#   - $100 Zero-Risk Slot-Recycled Ratchet (1.0%/1.4% <18% MaxDD, or 1.5%/2.0% high-cashflow, 50/50 HWM skim, -2.0R daily CB)
+#   1) Sleeve 1 (use_v10_sweeps=true): V10 Topological Session Sweeps (ZERO k=2/k=3: ATR-ZigZag `prom>=1.40` +
+#      `LON` 07-12 UTC swept >=12 UTC + `1H_TOPO` + `15M_TOPO` + Prosecutor) -> 45/40/15 Front-Loaded Exit
+#   2) Sleeve 2 (use_v8=true): V10_Intraday_Physics (5m CompVacuum + BPR/iFVG + Bayesian Prosecutor + 45/40/15 @ 2.2R/4.5R/10R)
+#   3) Sleeve 3 (use_4h_trend=true): 4H_V6_Cognitive (Topological 4H Swings + 2-Stage Pyramid + Climax Ratchet)
+#   - Account Profiles: `DAILY_HUNTER` (3.0%/4.5%, thr=2.0%, 4 risk slots, -2.0R/day CB, $25 50/50 vault skim)
+#     and `TURBO_SNIPER` (4.0%/5.5%, thr=2.5%, 4 risk slots, -2.5R/day CB, $20 50/50 vault skim)
+#   - Zero-Risk Slot Recycling: frees risk slot immediately once Tier-1 banks 45% @ +2.2R and locks BE+0.35R.
 
 from AlgorithmImports import *
 from collections import deque
@@ -230,43 +231,75 @@ class CausalSwingTracker:
 
 
 class CausalTopologicalZigZag:
-    """Scale-free volatility-adjusted topological swing tracker (1.25*ATR confirmation)."""
+    """Scale-free volatility-adjusted topological swing tracker (ZERO k=2/k=3 fractals)."""
 
-    def __init__(self, atr_mult: float = 1.25) -> None:
+    def __init__(self, atr_mult: float = 1.15, max_active: int = 24) -> None:
         self.atr_mult = atr_mult
+        self.max_active = max_active
         self.dir = 0
+        self.bar_idx = -1
+        self.piv_idx = 0
         self.piv_hi = self.piv_lo = None
+        self.run_hi = self.run_lo = None
         self.last_hi = self.last_lo = None
+        self.trend = 0
+        self.act_hi = []
+        self.act_lo = []
 
-    def update(self, h: float, l: float, atr: float) -> None:
-        if atr <= 0:
-            return
-        th = self.atr_mult * atr
+    def update(self, h: float, l: float, atr: float, c: float | None = None) -> None:
+        self.bar_idx += 1
         if self.piv_hi is None:
-            self.piv_hi, self.piv_lo = h, l
+            self.piv_hi = self.run_hi = h
+            self.piv_lo = self.run_lo = l
+            self.piv_idx = self.bar_idx
             return
-        if self.dir == 0:
-            if h - self.piv_lo >= th:
-                self.last_lo = self.piv_lo
-                self.dir, self.piv_hi = 1, h
-            elif self.piv_hi - l >= th:
-                self.last_hi = self.piv_hi
-                self.dir, self.piv_lo = -1, l
+        self.run_hi = max(self.run_hi, h)
+        self.run_lo = min(self.run_lo, l)
+        if atr > 0:
+            th = self.atr_mult * atr
+            if self.dir == 0:
+                if h - self.piv_lo >= th:
+                    prom = (h - self.piv_lo) / max(atr, 1e-12)
+                    self.last_lo = self.piv_lo
+                    self.act_lo.append((self.piv_idx, self.piv_lo, prom))
+                    self.act_lo = self.act_lo[-self.max_active:]
+                    self.dir, self.piv_hi, self.piv_idx, self.run_lo = 1, h, self.bar_idx, l
+                elif self.piv_hi - l >= th:
+                    prom = (self.piv_hi - l) / max(atr, 1e-12)
+                    self.last_hi = self.piv_hi
+                    self.act_hi.append((self.piv_idx, self.piv_hi, prom))
+                    self.act_hi = self.act_hi[-self.max_active:]
+                    self.dir, self.piv_lo, self.piv_idx, self.run_hi = -1, l, self.bar_idx, h
+                else:
+                    if h > self.piv_hi:
+                        self.piv_hi, self.piv_idx = h, self.bar_idx
+                    if l < self.piv_lo:
+                        self.piv_lo, self.piv_idx = l, self.bar_idx
+            elif self.dir == 1:
+                if h >= self.piv_hi:
+                    self.piv_hi, self.piv_idx, self.run_lo = h, self.bar_idx, l
+                elif self.piv_hi - l >= th:
+                    prom = (self.piv_hi - self.run_lo) / max(atr, 1e-12)
+                    self.last_hi = self.piv_hi
+                    self.act_hi.append((self.piv_idx, self.piv_hi, prom))
+                    self.act_hi = self.act_hi[-self.max_active:]
+                    self.dir, self.piv_lo, self.piv_idx, self.run_hi = -1, l, self.bar_idx, h
             else:
-                self.piv_hi = max(self.piv_hi, h)
-                self.piv_lo = min(self.piv_lo, l)
-        elif self.dir == 1:
-            if h >= self.piv_hi:
-                self.piv_hi = h
-            elif self.piv_hi - l >= th:
-                self.last_hi = self.piv_hi
-                self.dir, self.piv_lo = -1, l
-        else:
-            if l <= self.piv_lo:
-                self.piv_lo = l
-            elif h - self.piv_lo >= th:
-                self.last_lo = self.piv_lo
-                self.dir, self.piv_hi = 1, h
+                if l <= self.piv_lo:
+                    self.piv_lo, self.piv_idx, self.run_hi = l, self.bar_idx, h
+                elif h - self.piv_lo >= th:
+                    prom = (self.run_hi - self.piv_lo) / max(atr, 1e-12)
+                    self.last_lo = self.piv_lo
+                    self.act_lo.append((self.piv_idx, self.piv_lo, prom))
+                    self.act_lo = self.act_lo[-self.max_active:]
+                    self.dir, self.piv_hi, self.piv_idx, self.run_lo = 1, h, self.bar_idx, l
+        self.act_hi = [x for x in self.act_hi if h <= x[1]]
+        self.act_lo = [x for x in self.act_lo if l >= x[1]]
+        px = c if c is not None else 0.5 * (h + l)
+        if self.last_hi is not None and px > self.last_hi:
+            self.trend = 1
+        elif self.last_lo is not None and px < self.last_lo:
+            self.trend = -1
 
 
 class WilderATR14:
@@ -412,6 +445,9 @@ class CoinState:
         self.sw_5m = CausalSwingTracker(2)
         self.session_tracker = DailySessionTracker(expiry_bars_5m=60)
         self.topo_4h = CausalTopologicalZigZag(1.25)
+        self.topo_1h = CausalTopologicalZigZag(1.15)
+        self.topo_15m = CausalTopologicalZigZag(1.15)
+        self.topo_5m = CausalTopologicalZigZag(0.50)
         self.ema_1d, self.ema_4h, self.ema_1h = EmaState(), EmaState(), EmaState()
         self.ema_15m, self.ema_5m = EmaState(), EmaState()
         self.atr_4h, self.adx_4h = WilderATR14(), WilderADX14()
@@ -465,6 +501,12 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         "DOGEUSDT", "ADAUSDT", "AVAXUSDT", "LINKUSDT", "SUIUSDT",
     )
     ENGINE_RISK = {
+        "V10_LON": 0.015,
+        "V10_1H_TOPO": 0.015,
+        "V10_15M_TOPO": 0.015,
+        "V10_CompVac": 0.015,
+        "V10_BPR_Snap": 0.020,
+        "V10_BPR_Retest": 0.015,
         "V9_LON": 0.015,
         "V9_1H_K2": 0.015,
         "V9_15M_NY": 0.015,
@@ -492,22 +534,28 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         self.hwm_equity = start_cash
         self.skim_anchor = start_cash
         self.withdrawn_vault_usd = 0.0
-        self.skim_step_usd = float(self.get_parameter("skim_step_usd") or 25.0)
-        self.skim_frac = float(self.get_parameter("skim_frac") or 0.50)
         self.small_account_mode = (
             str(self.get_parameter("small_account_mode") or ("true" if start_cash <= 500.0 else "false")).lower() == "true"
         )
-        self.small_risk_pct = float(self.get_parameter("small_risk_pct") or 0.015)
-        self.small_aplus_risk_pct = float(self.get_parameter("small_aplus_risk_pct") or 0.020)
-        self.small_throttle_risk_pct = float(self.get_parameter("small_throttle_risk_pct") or 0.010)
+        self.v10_profile = str(self.get_parameter("v10_profile") or "DAILY_HUNTER").upper()
+        if self.v10_profile == "TURBO_SNIPER":
+            def_std, def_ap, def_thr, def_skim, def_cb = 0.040, 0.055, 0.025, 20.0, -2.5
+        else:
+            def_std, def_ap, def_thr, def_skim, def_cb = 0.030, 0.045, 0.020, 25.0, -2.0
+        self.skim_step_usd = float(self.get_parameter("skim_step_usd") or def_skim)
+        self.skim_frac = float(self.get_parameter("skim_frac") or 0.50)
+        self.small_risk_pct = float(self.get_parameter("small_risk_pct") or def_std)
+        self.small_aplus_risk_pct = float(self.get_parameter("small_aplus_risk_pct") or def_ap)
+        self.small_throttle_risk_pct = float(self.get_parameter("small_throttle_risk_pct") or def_thr)
         self.max_leverage = float(self.get_parameter("max_leverage") or (15.0 if self.small_account_mode else 10.0))
-        self.daily_dd_cap_r = float(self.get_parameter("daily_dd_cap_r") or -2.0)
+        self.daily_dd_cap_r = float(self.get_parameter("daily_dd_cap_r") or def_cb)
         self.daily_r_day = None
         self.daily_r_pnl = 0.0
+        self.use_v10 = str(self.get_parameter("use_v10") or "true").lower() == "true"
         self.use_v9 = str(self.get_parameter("use_v9") or "true").lower() == "true"
         self.v9_risk_mult = float(self.get_parameter("v9_risk_mult") or 1.0)
         self.risk_scale = float(self.get_parameter("risk_scale") or 1.0)
-        self.max_open_pos = int(self.get_parameter("max_open_pos") or (2 if self.small_account_mode else 3))
+        self.max_open_pos = int(self.get_parameter("max_open_pos") or (4 if self.small_account_mode else 3))
         self.use_v8 = str(self.get_parameter("use_v8") or self.get_parameter("use_v7") or "true").lower() == "true"
         self.use_v7 = self.use_v8
         self.v8_risk_mult = float(self.get_parameter("v8_risk_mult") or self.get_parameter("v7_risk_mult") or 1.0)
@@ -568,7 +616,10 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         if self.small_account_mode:
             if dd > 0.08:
                 base = self.small_throttle_risk_pct
-            elif is_aplus or engine in ("SMC_Sweep_V6", "V8_BPR_Snap", "V7_BPR_Snap", "V9_LON", "V9_1H_K2", "V9_15M_NY"):
+            elif is_aplus or engine in (
+                "SMC_Sweep_V6", "V10_BPR_Snap", "V10_CompVac", "V10_LON", "V10_1H_TOPO", "V10_15M_TOPO",
+                "V8_BPR_Snap", "V7_BPR_Snap", "V9_LON", "V9_1H_K2", "V9_15M_NY", "4H_V6_Cognitive",
+            ):
                 base = self.small_aplus_risk_pct
             else:
                 base = self.small_risk_pct
@@ -866,7 +917,7 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         st.highs_4h.append(h)
         st.lows_4h.append(l)
         st.vols_4h.append(vol)
-        st.topo_4h.update(h, l, a4)
+        st.topo_4h.update(h, l, a4, c)
         st.sw_4h.update(bar)
         st.ema_4h.update(c)
 
@@ -889,15 +940,25 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
             if (k3.bar_idx + 1 - idx_s) >= 4 and h > p_hi and c < p_hi:
                 st.cands_1h_k3.append({"side": -1, "start_i": st.idx_5m, "sl_base": h, "choch": st.sw_5m.last_low, "b_acc": 0, "sw_sc": _sigmoid((h - max(float(bar.Open), c)) / max(a1, 1e-12), 0.45, 3.5)})
 
-        k2 = st.sw_1h
         st.cands_1h_k2 = [x for x in st.cands_1h_k2 if (st.idx_5m - x["start_i"]) <= 60][-10:]
-        for idx_s, p_lo in list(k2.act_lo):
-            if (k2.bar_idx + 1 - idx_s) >= 3 and l < p_lo and c > p_lo:
-                st.cands_1h_k2.append({"side": 1, "start_i": st.idx_5m, "sl_base": l})
-        for idx_s, p_hi in list(k2.act_hi):
-            if (k2.bar_idx + 1 - idx_s) >= 3 and h > p_hi and c < p_hi:
-                st.cands_1h_k2.append({"side": -1, "start_i": st.idx_5m, "sl_base": h})
+        if self.use_v10:
+            t1 = st.topo_1h
+            for idx_s, p_lo, prom in list(t1.act_lo):
+                if (t1.bar_idx + 1 - idx_s) >= 3 and prom >= 1.40 and l < p_lo and c > p_lo:
+                    st.cands_1h_k2.append({"side": 1, "start_i": st.idx_5m, "sl_base": l})
+            for idx_s, p_hi, prom in list(t1.act_hi):
+                if (t1.bar_idx + 1 - idx_s) >= 3 and prom >= 1.40 and h > p_hi and c < p_hi:
+                    st.cands_1h_k2.append({"side": -1, "start_i": st.idx_5m, "sl_base": h})
+        else:
+            k2 = st.sw_1h
+            for idx_s, p_lo in list(k2.act_lo):
+                if (k2.bar_idx + 1 - idx_s) >= 3 and l < p_lo and c > p_lo:
+                    st.cands_1h_k2.append({"side": 1, "start_i": st.idx_5m, "sl_base": l})
+            for idx_s, p_hi in list(k2.act_hi):
+                if (k2.bar_idx + 1 - idx_s) >= 3 and h > p_hi and c < p_hi:
+                    st.cands_1h_k2.append({"side": -1, "start_i": st.idx_5m, "sl_base": h})
 
+        st.topo_1h.update(h, l, a1, c)
         st.sw_1h.update(bar)
         k3.update(bar)
         st.ema_1h.update(c)
@@ -905,17 +966,27 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
 
     def on_15m(self, st: CoinState, bar) -> None:
         h, l, c = float(bar.High), float(bar.Low), float(bar.Close)
-        st.atr_15m.update(h, l, c)
+        a15 = st.atr_15m.update(h, l, c)
         st.ema_15m.update(c)
-        k15 = st.sw_15m_k3
         st.cands_15m_ny = [x for x in st.cands_15m_ny if (st.idx_5m - x["start_i"]) <= 36][-10:]
-        for idx_s, p_lo in list(k15.act_lo):
-            if (k15.bar_idx + 1 - idx_s) >= 4 and l < p_lo and c > p_lo:
-                st.cands_15m_ny.append({"side": 1, "start_i": st.idx_5m, "sl_base": l})
-        for idx_s, p_hi in list(k15.act_hi):
-            if (k15.bar_idx + 1 - idx_s) >= 4 and h > p_hi and c < p_hi:
-                st.cands_15m_ny.append({"side": -1, "start_i": st.idx_5m, "sl_base": h})
-        k15.update(bar)
+        if self.use_v10:
+            t15 = st.topo_15m
+            for idx_s, p_lo, prom in list(t15.act_lo):
+                if (t15.bar_idx + 1 - idx_s) >= 4 and prom >= 1.40 and l < p_lo and c > p_lo:
+                    st.cands_15m_ny.append({"side": 1, "start_i": st.idx_5m, "sl_base": l})
+            for idx_s, p_hi, prom in list(t15.act_hi):
+                if (t15.bar_idx + 1 - idx_s) >= 4 and prom >= 1.40 and h > p_hi and c < p_hi:
+                    st.cands_15m_ny.append({"side": -1, "start_i": st.idx_5m, "sl_base": h})
+        else:
+            k15 = st.sw_15m_k3
+            for idx_s, p_lo in list(k15.act_lo):
+                if (k15.bar_idx + 1 - idx_s) >= 4 and l < p_lo and c > p_lo:
+                    st.cands_15m_ny.append({"side": 1, "start_i": st.idx_5m, "sl_base": l})
+            for idx_s, p_hi in list(k15.act_hi):
+                if (k15.bar_idx + 1 - idx_s) >= 4 and h > p_hi and c < p_hi:
+                    st.cands_15m_ny.append({"side": -1, "start_i": st.idx_5m, "sl_base": h})
+        st.topo_15m.update(h, l, a15, c)
+        st.sw_15m_k3.update(bar)
 
     def on_5m(self, st: CoinState, bar) -> None:
         st.idx_5m += 1
@@ -1056,40 +1127,50 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
                         )
                         if ok_p8:
                             self._submit_limit(
-                                st, eng_v8, sd_v8, c, slp_v8, self.sweep_tp_r, (), 8,
+                                st, eng_v8.replace("V8_", "V10_") if self.use_v10 else eng_v8, sd_v8, c, slp_v8,
+                                10.0 if self.use_v10 else self.sweep_tp_r, (), 8,
                                 0.0180, 0.0045, risk_mult=self.v8_risk_mult,
-                                bank_r=2.8, bank_frac=0.40, be_lock_r=0.50,
-                                bank2_r=5.5, bank2_frac=0.40, be2_lock_r=2.50,
+                                bank_r=2.2 if self.use_v10 else 2.8,
+                                bank_frac=0.45 if self.use_v10 else 0.40,
+                                be_lock_r=0.35 if self.use_v10 else 0.50,
+                                bank2_r=4.5 if self.use_v10 else 5.5,
+                                bank2_frac=0.40,
+                                be2_lock_r=2.00 if self.use_v10 else 2.50,
                                 origin_px=orig_v8, is_aplus=(eng_v8 == "V8_BPR_Snap" or conv8 >= 0.72),
                             )
 
-            # V9.0 Daily Session & Multi-TF Liquidity Sweeps (LON, 1H_K2, 15M_NY) + HighVelocityCashflow 15/20/65
-            if self.use_v9 and a5 > 0 and st.last_ker_4h >= 0.15 and c2b >= a5 and self._can_enter(st):
+            # V10.0 / V9.0 Topological Daily Session & Multi-TF Liquidity Sweeps -> 45/40/15 Front-Loaded Cashflow
+            if self.use_v9 and a5 > 0 and st.last_ker_4h >= 0.15 and c2b >= (1.15 * a5 if self.use_v10 else a5) and self._can_enter(st):
                 vavg5 = (sum(st.vols_5m) / len(st.vols_5m)) if st.vols_5m else 1.0
                 rvol5 = (vol / vavg5) if vavg5 > 0 else 1.0
+                htf1_tr = st.topo_1h.trend if self.use_v10 else st.sw_1h.trend
+                htf4_tr = st.topo_4h.trend if self.use_v10 else st.sw_4h.trend
+                sw5_hi = st.topo_5m.last_hi if self.use_v10 else st.sw_5m.last_high
+                sw5_lo = st.topo_5m.last_lo if self.use_v10 else st.sw_5m.last_low
+                slv_names = ("V10_LON", "V10_1H_TOPO", "V10_15M_TOPO") if self.use_v10 else ("V9_LON", "V9_1H_K2", "V9_15M_NY")
                 for slv_tag, clist, ok_hr in (
-                    ("V9_LON", st.session_tracker.cands_lon, dt.hour >= 12),
-                    ("V9_1H_K2", st.cands_1h_k2, dt.hour >= 9),
-                    ("V9_15M_NY", st.cands_15m_ny, (12 <= dt.hour <= 21) and rvol5 >= 1.20),
+                    (slv_names[0], st.session_tracker.cands_lon, dt.hour >= 12),
+                    (slv_names[1], st.cands_1h_k2, dt.hour >= 9),
+                    (slv_names[2], st.cands_15m_ny, (12 <= dt.hour <= 21) and rvol5 >= 1.20),
                 ):
                     if not ok_hr:
                         continue
                     placed_v9 = False
                     for cd in reversed(clist):
                         sd = cd["side"]
-                        if sd != st.sw_1h.trend or sd != st.sw_4h.trend:
+                        if sd != htf1_tr or sd != htf4_tr:
                             continue
                         if (st.idx_5m - st.last_v9_side_bar.get(sd, -999)) < 12:
                             continue
                         ok_fvg = False
                         ep_v9 = slp_v9 = 0.0
-                        if sd == 1 and l >= cd["sl_base"] and st.sw_5m.last_high is not None:
-                            if c > st.sw_5m.last_high and (l - b1[1]) >= 0.25 * a5 and b2[3] > b2[0]:
+                        if sd == 1 and l >= cd["sl_base"] and sw5_hi is not None:
+                            if c > sw5_hi and (l - b1[1]) >= (0.30 if self.use_v10 else 0.25) * a5 and b2[3] > b2[0]:
                                 slp_v9 = min(cd["sl_base"] - a5, c - max(1.5 * a5, c * 0.0020))
                                 ep_v9 = l
                                 ok_fvg = True
-                        elif sd == -1 and h <= cd["sl_base"] and st.sw_5m.last_low is not None:
-                            if c < st.sw_5m.last_low and (b1[2] - h) >= 0.25 * a5 and b2[3] < b2[0]:
+                        elif sd == -1 and h <= cd["sl_base"] and sw5_lo is not None:
+                            if c < sw5_lo and (b1[2] - h) >= (0.30 if self.use_v10 else 0.25) * a5 and b2[3] < b2[0]:
                                 slp_v9 = max(cd["sl_base"] + a5, c + max(1.5 * a5, c * 0.0020))
                                 ep_v9 = h
                                 ok_fvg = True
@@ -1098,8 +1179,12 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
                             self._submit_limit(
                                 st, slv_tag, sd, ep_v9, slp_v9, 10.0, (), 8,
                                 0.0180, 0.0020, risk_mult=self.v9_risk_mult,
-                                bank_r=2.0, bank_frac=0.15, be_lock_r=0.35,
-                                bank2_r=4.5, bank2_frac=0.20, be2_lock_r=2.00,
+                                bank_r=2.2 if self.use_v10 else 2.0,
+                                bank_frac=0.45 if self.use_v10 else 0.15,
+                                be_lock_r=0.35,
+                                bank2_r=4.5,
+                                bank2_frac=0.40 if self.use_v10 else 0.20,
+                                be2_lock_r=2.00,
                                 is_aplus=True,
                             )
                             placed_v9 = True
@@ -1168,6 +1253,7 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
                             slp = max(h, e20) + 0.5 * a5
                             self._submit_limit(st, "Mom9_Sniper", -1, c, slp, 1.8, self.MOM9_STEPS, 6)
 
+        st.topo_5m.update(h, l, a5, c)
         st.sw_5m.update(bar)
 
     def on_data(self, data: Slice) -> None:
