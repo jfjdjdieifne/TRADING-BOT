@@ -13,6 +13,7 @@ from .causal_primitives import (
 )
 from .exit_manager import (
     AdaptiveExitManager,
+    HighVelocityCashflowExitManager,
     IntradayCashflowExitManager,
     ProtectedSwing,
     ProtectedSwingDetector,
@@ -22,8 +23,10 @@ from .liquidity_mapper import LiquidityPool, LiquidityPoolMapper
 from .perception_engine import (
     BPRZone,
     CompressionVacuumSetup,
+    DailySessionLiquidityTracker,
     KinematicMonitor,
     SceneGraphPhysicsDetector,
+    SessionSweepSignal,
     TopologicalSwing,
     VisualPerceptionEngine,
     compute_atr_series,
@@ -47,10 +50,12 @@ from .smc_v4_portfolio import (
     run_smc_v6_xau_portfolio,
     run_smc_v7_multiasset_portfolio,
     run_smc_v8_multiasset_portfolio,
+    run_v9_multiasset_portfolio,
     simulate_compounded_account,
 )
 from .strategy_brain import (
     AdversarialCrossExaminer,
+    DailySessionSniperV9,
     InstitutionalStrategyBrain,
     IntradayCashflowSniperV7,
     IntradayCashflowSniperV8,
@@ -61,6 +66,7 @@ from .strategy_brain import (
     run_v6_cognitive_backtest,
     run_v7_intraday_backtest,
     run_v8_intraday_backtest,
+    run_v9_daily_session_backtest,
 )
 
 __all__ = [
@@ -68,6 +74,9 @@ __all__ = [
     "AdversarialCrossExaminer",
     "BPRZone",
     "CompressionVacuumSetup",
+    "DailySessionLiquidityTracker",
+    "DailySessionSniperV9",
+    "HighVelocityCashflowExitManager",
     "InstitutionalStrategyBrain",
     "IntradayCashflowExitManager",
     "IntradayCashflowSniperV7",
@@ -82,6 +91,7 @@ __all__ = [
     "RegimeSnapshot",
     "SMCV3Config",
     "SceneGraphPhysicsDetector",
+    "SessionSweepSignal",
     "SmallAccountCashflowManager",
     "SwingPoint",
     "TopologicalSwing",
@@ -116,6 +126,8 @@ __all__ = [
     "run_v6_cognitive_backtest",
     "run_v7_intraday_backtest",
     "run_v8_intraday_backtest",
+    "run_v9_daily_session_backtest",
+    "run_v9_multiasset_portfolio",
     "sigmoid",
     "simulate_compounded_account",
     "soft_and_log_odds",

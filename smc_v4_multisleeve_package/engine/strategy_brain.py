@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections import deque
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
@@ -10,6 +11,7 @@ import pandas as pd
 
 from .exit_manager import (
     AdaptiveExitManager,
+    HighVelocityCashflowExitManager,
     IntradayCashflowExitManager,
     ProtectedSwingDetector,
     TradePositionState,
@@ -18,8 +20,10 @@ from .liquidity_mapper import LiquidityPoolMapper
 from .perception_engine import (
     BPRZone,
     CompressionVacuumSetup,
+    DailySessionLiquidityTracker,
     KinematicMonitor,
     SceneGraphPhysicsDetector,
+    SessionSweepSignal,
     TopologicalSwing,
     VisualPerceptionEngine,
     compute_atr_series,
@@ -1106,6 +1110,8 @@ class SmallAccountCashflowManager:
         daily_dd_cap_r: float = -2.5,
         min_notional_usd: float = 5.0,
         use_conviction_scaling: bool = True,
+        max_concurrent_risk_slots: Optional[int] = None,
+        slot_recycling: bool = True,
     ) -> None:
         self.starting_equity = float(starting_equity)
         self.risk_pct = float(risk_pct)
@@ -1118,6 +1124,8 @@ class SmallAccountCashflowManager:
         self.daily_dd_cap_r = float(daily_dd_cap_r)
         self.min_notional_usd = float(min_notional_usd)
         self.use_conviction_scaling = bool(use_conviction_scaling)
+        self.max_concurrent_risk_slots = max_concurrent_risk_slots
+        self.slot_recycling = bool(slot_recycling)
 
     def resolve_risk_pct(
         self,
@@ -1133,7 +1141,7 @@ class SmallAccountCashflowManager:
             conv = float(trade.get("conviction", trade.get("reasoning_chain", {}).get("conviction", 0.0)) or 0.0)
             is_aplus = bool(
                 trade.get("is_aplus", False)
-                or setup in ("SMC_Sweep_V6", "V7_BPR_Snap", "V8_BPR_Snap")
+                or setup in ("SMC_Sweep_V6", "V7_BPR_Snap", "V8_BPR_Snap", "V9_LON", "V9_1H_K2", "V9_15M_NY", "V9_BPR_Snap")
                 or conv >= 0.72
             )
             if is_aplus:
@@ -1191,16 +1199,31 @@ class SmallAccountCashflowManager:
         weekly_usd: Dict[Tuple[int, int], float] = {}
         monthly_usd: Dict[Tuple[int, int], float] = {}
         accepted_r: List[float] = []
+        accepted_trades: List[dict] = []
+        open_risk_slots: List[dict] = []
         skipped_circuit = 0
+        skipped_slots = 0
         m1_end = (ordered[0]["entry_time"] + pd.Timedelta(days=30)) if ordered else None
         m1_usd = 0.0
         m1_trades = 0
 
         for t in ordered:
-            day = t["entry_time"].date()
+            et = t["entry_time"]
+            day = et.date()
             if daily_r.get(day, 0.0) <= self.daily_dd_cap_r:
                 skipped_circuit += 1
                 continue
+            if self.max_concurrent_risk_slots is not None:
+                # Zero-Risk Slot Recycling: slots unlock once Tier-1 locks BE+0.35R (`t1_time`), or upon exit
+                open_risk_slots = [
+                    s for s in open_risk_slots
+                    if (s.get("exit_time") is not None and s["exit_time"] > et)
+                    and ((not self.slot_recycling) or (s.get("t1_time") is None) or s["t1_time"] > et)
+                ]
+                if len(open_risk_slots) >= int(self.max_concurrent_risk_slots):
+                    skipped_slots += 1
+                    continue
+
             sl_pct = max(float(t.get("sl_pct", 0.01)), 1e-4)
             base_eq = eq if (is_comp or is_ratchet) else self.starting_equity
             rp = self.resolve_risk_pct(eq, peak_eq, t)
@@ -1210,14 +1233,20 @@ class SmallAccountCashflowManager:
             r_val = float(t["net_r"])
             pnl_usd = risk_usd * r_val
             accepted_r.append(r_val)
+            t1_hrs = t.get("t1_hours")
+            t1_ts = t.get("t1_time")
+            if t1_ts is None and t1_hrs is not None:
+                t1_ts = et + pd.Timedelta(hours=float(t1_hrs))
+            open_risk_slots.append({"entry_time": et, "exit_time": t.get("exit_time", et), "t1_time": t1_ts})
+
             daily_r[day] = daily_r.get(day, 0.0) + r_val
             daily_usd[day] = daily_usd.get(day, 0.0) + pnl_usd
-            iso = t["entry_time"].isocalendar()
+            iso = et.isocalendar()
             wk = (int(iso.year), int(iso.week))
-            mo = (int(t["entry_time"].year), int(t["entry_time"].month))
+            mo = (int(et.year), int(et.month))
             weekly_usd[wk] = weekly_usd.get(wk, 0.0) + pnl_usd
             monthly_usd[mo] = monthly_usd.get(mo, 0.0) + pnl_usd
-            if m1_end is not None and t["entry_time"] <= m1_end:
+            if m1_end is not None and et <= m1_end:
                 m1_usd += pnl_usd
                 m1_trades += 1
 
@@ -1247,6 +1276,21 @@ class SmallAccountCashflowManager:
                 max_dd_usd = max(max_dd_usd, dd_u)
                 max_dd_pct = max(max_dd_pct, 100.0 * dd_u / max(self.starting_equity, peak_eq))
 
+            accepted_trades.append({
+                "entry_time": et,
+                "exit_time": t.get("exit_time", et),
+                "asset": t.get("asset", "BTCUSD"),
+                "setup": t.get("setup", ""),
+                "side": int(t.get("side", 0)),
+                "risk_pct": round(rp * 100.0, 2),
+                "risk_usd": round(risk_usd, 2),
+                "net_r": round(r_val, 3),
+                "pnl_usd": round(pnl_usd, 2),
+                "equity_after": round(eq, 2),
+                "vault_after": round(withdrawn_vault_usd, 2),
+                "total_wealth_after": round(eq + withdrawn_vault_usd, 2),
+            })
+
         if not ordered:
             return {"n": 0, "net_usd": 0.0}
 
@@ -1266,6 +1310,7 @@ class SmallAccountCashflowManager:
             "mode": mode_lbl,
             "n": len(accepted_r),
             "skipped_circuit": skipped_circuit,
+            "skipped_slots": skipped_slots,
             "trades_per_month": round((len(accepted_r) * basket_mult) / span_months, 2),
             "trades_per_week": round((len(accepted_r) * basket_mult) / span_weeks, 2),
             "wr": round(100.0 * sum(1 for r in accepted_r if r > 0) / max(1, len(accepted_r)), 1),
@@ -1290,6 +1335,95 @@ class SmallAccountCashflowManager:
             "weeks_ge_25usd": wks_ge_25,
             "max_dd_usd": round(max_dd_usd, 2),
             "max_dd_pct": round(max_dd_pct, 1),
+            "trade_ledger": accepted_trades,
+        }
+
+    def simulate_granular_audit(
+        self,
+        trades: List[dict],
+        mode: str = "ratchet_cashflow",
+        recent_weeks: int = 52,
+    ) -> Dict[str, object]:
+        """Run strict 1.0x real-asset cashflow audit and produce Day / 52-Week / Month / Rolling-Month-1 ledgers."""
+        sim = self.simulate_cashflow(trades, mode=mode, basket_mult=1.0)
+        ledger = sim.get("trade_ledger", [])
+        if not ledger:
+            return {"summary": sim, "daily": [], "weekly_52": [], "monthly": [], "rolling_m1": {}}
+
+        df_l = pd.DataFrame(ledger)
+        df_l["entry_time"] = pd.to_datetime(df_l["entry_time"], utc=True)
+        df_l["date"] = df_l["entry_time"].dt.strftime("%Y-%m-%d")
+        df_l["week"] = df_l["entry_time"].dt.strftime("%G-W%V")
+        df_l["month"] = df_l["entry_time"].dt.strftime("%Y-%m")
+
+        daily_rows = []
+        for dt_str, grp in df_l.groupby("date", sort=True):
+            daily_rows.append({
+                "date": dt_str,
+                "trades": int(len(grp)),
+                "wins": int((grp["net_r"] > 0).sum()),
+                "net_r": round(float(grp["net_r"].sum()), 2),
+                "pnl_usd": round(float(grp["pnl_usd"].sum()), 2),
+                "end_equity": round(float(grp["equity_after"].iloc[-1]), 2),
+                "end_vault": round(float(grp["vault_after"].iloc[-1]), 2),
+                "total_wealth": round(float(grp["total_wealth_after"].iloc[-1]), 2),
+            })
+
+        weekly_rows = []
+        for wk_str, grp in df_l.groupby("week", sort=True):
+            weekly_rows.append({
+                "week": wk_str,
+                "trades": int(len(grp)),
+                "wins": int((grp["net_r"] > 0).sum()),
+                "net_r": round(float(grp["net_r"].sum()), 2),
+                "pnl_usd": round(float(grp["pnl_usd"].sum()), 2),
+                "end_equity": round(float(grp["equity_after"].iloc[-1]), 2),
+                "end_vault": round(float(grp["vault_after"].iloc[-1]), 2),
+                "total_wealth": round(float(grp["total_wealth_after"].iloc[-1]), 2),
+            })
+
+        monthly_rows = []
+        for mo_str, grp in df_l.groupby("month", sort=True):
+            monthly_rows.append({
+                "month": mo_str,
+                "trades": int(len(grp)),
+                "wr": round(100.0 * float((grp["net_r"] > 0).mean()), 1),
+                "net_r": round(float(grp["net_r"].sum()), 2),
+                "pnl_usd": round(float(grp["pnl_usd"].sum()), 2),
+                "end_equity": round(float(grp["equity_after"].iloc[-1]), 2),
+                "end_vault": round(float(grp["vault_after"].iloc[-1]), 2),
+                "total_wealth": round(float(grp["total_wealth_after"].iloc[-1]), 2),
+            })
+
+        # Rolling fresh-$100 30-day Month-1 simulation across every calendar month start
+        ordered = sorted(trades, key=lambda t: t["entry_time"])
+        m1_profits: List[float] = []
+        if ordered:
+            t_start = ordered[0]["entry_time"].normalize()
+            t_end = ordered[-1]["entry_time"] - pd.Timedelta(days=30)
+            cur = t_start
+            while cur <= t_end:
+                nxt = cur + pd.Timedelta(days=30)
+                sub = [t for t in ordered if cur <= t["entry_time"] < nxt]
+                sub_sim = self.simulate_cashflow(sub, mode=mode, basket_mult=1.0)
+                m1_profits.append(float(sub_sim.get("total_wealth_usd", self.starting_equity)) - self.starting_equity)
+                cur += pd.DateOffset(months=1)
+
+        rolling_m1 = {
+            "windows": len(m1_profits),
+            "median_usd": round(float(np.median(m1_profits)), 2) if m1_profits else 0.0,
+            "mean_usd": round(float(np.mean(m1_profits)), 2) if m1_profits else 0.0,
+            "p75_usd": round(float(np.percentile(m1_profits, 75)), 2) if m1_profits else 0.0,
+            "p90_usd": round(float(np.percentile(m1_profits, 90)), 2) if m1_profits else 0.0,
+            "pct_green": round(100.0 * sum(1 for x in m1_profits if x > 0) / max(1, len(m1_profits)), 1),
+        }
+
+        return {
+            "summary": sim,
+            "daily": daily_rows,
+            "weekly_52": weekly_rows[-recent_weeks:] if recent_weeks > 0 else weekly_rows,
+            "monthly": monthly_rows,
+            "rolling_m1": rolling_m1,
         }
 
 
@@ -1781,5 +1915,352 @@ def _run_intraday_sniper_core(
         closed_trades = sorted(closed_trades + tr_smc, key=lambda t: t["entry_time"])
 
     return closed_trades, _summarize_trades(closed_trades)
+
+
+class DailySessionSniperV9:
+    """V9.0 Daily Session & Structural Liquidity Sweep Coordinator + Zero-Risk Slot Recycling."""
+
+    def __init__(
+        self,
+        bank_r: float = 2.0,
+        bank_frac: float = 0.15,
+        be_lock_r: float = 0.35,
+        bank2_r: float = 4.5,
+        bank2_frac: float = 0.20,
+        be2_lock_r: float = 2.00,
+        runner_tp_r: float = 10.0,
+        prot_trail_mfe_r: float = 5.0,
+        expiry_hours: float = 5.0,
+    ) -> None:
+        self.session_tracker = DailySessionLiquidityTracker(expiry_hours=expiry_hours)
+        self.regime = RegimeFilterEngine()
+        self.exit_mgr = HighVelocityCashflowExitManager(
+            bank_r=bank_r,
+            bank_frac=bank_frac,
+            be_lock_r=be_lock_r,
+            bank2_r=bank2_r,
+            bank2_frac=bank2_frac,
+            be2_lock_r=be2_lock_r,
+            runner_tp_r=runner_tp_r,
+            prot_trail_mfe_r=prot_trail_mfe_r,
+        )
+        self.prot_exec = ProtectedSwingDetector()
+
+
+def _step_causal_fractal_swing(
+    buf_h: deque,
+    buf_l: deque,
+    k: int,
+    bar_i: int,
+    act_hi: List[List[float]],
+    act_lo: List[List[float]],
+    last_hi: Optional[float],
+    last_lo: Optional[float],
+) -> Tuple[List[List[float]], List[List[float]], Optional[float], Optional[float]]:
+    """Strictly causal (2k+1)-bar pivot detector confirmed at bar_i for center bar (bar_i - k)."""
+    if len(buf_h) == 2 * k + 1:
+        m = k
+        ch, cl = float(buf_h[m]), float(buf_l[m])
+        if all(ch >= buf_h[j] for j in range(len(buf_h)) if j != m) and any(ch > buf_h[j] for j in range(len(buf_h)) if j != m):
+            last_hi = ch
+            act_hi.append([bar_i - k, ch])
+            act_hi = act_hi[-25:]
+        if all(cl <= buf_l[j] for j in range(len(buf_l)) if j != m) and any(cl < buf_l[j] for j in range(len(buf_l)) if j != m):
+            last_lo = cl
+            act_lo.append([bar_i - k, cl])
+            act_lo = act_lo[-25:]
+    return act_hi, act_lo, last_hi, last_lo
+
+
+def run_v9_daily_session_backtest(
+    df_5m: pd.DataFrame,
+    eval_start: pd.Timestamp,
+    eval_end: pd.Timestamp,
+    asset: str = "BTCUSD",
+    use_lon: bool = True,
+    use_1h_k2: bool = True,
+    use_15m_ny: bool = True,
+    include_v8_physics: bool = True,
+    include_v6_4h: bool = True,
+    htf_align_mode: str = "tr4_eq_tr1",
+    bank_r: float = 2.0,
+    bank_frac: float = 0.15,
+    be_lock_r: float = 0.35,
+    bank2_r: float = 4.5,
+    bank2_frac: float = 0.20,
+    be2_lock_r: float = 2.00,
+    runner_tp_r: float = 10.0,
+    min_ker4: float = 0.15,
+    min_rvol_15m_ny: float = 1.20,
+    min_sl_pct: float = 0.0020,
+    max_sl_pct: float = 0.0180,
+    dedup_same_side_bars: int = 12,
+    fee_mult: float = 1.0,
+) -> Tuple[List[dict], Dict[str, object]]:
+    """Strictly causal V9.0 Daily Session & Multi-TF Liquidity Sweep + V8 Physics + V6 Cognitive backtest.
+
+    Executes causal Session Sweeps (`LON` 07-12 UTC H/L swept >=12 UTC, `1H_K2` 1H k=2 swept >=09 UTC,
+    `15M_NY` 15m k=3 swept 12-21 UTC with RVOL>=1.20) confirmed by 5m BOS + 0.25*ATR5 FVG retest,
+    managed by `HighVelocityCashflowExitManager` with BE+0.35R Zero-Risk Slot Recycling.
+    """
+    agg = {"Open": "first", "High": "max", "Low": "min", "Close": "last", "Volume": "sum"}
+    df15 = df_5m.resample("15min").agg(agg).dropna()
+    df1h = df_5m.resample("1h").agg(agg).dropna()
+    df4h = df_5m.resample("4h").agg(agg).dropna()
+
+    o5, h5, l5, c5 = (df_5m[col].to_numpy(float) for col in ("Open", "High", "Low", "Close"))
+    ts5_ns = df_5m.index.as_unit("ns").asi8
+    close5_ns = ts5_ns + int(300 * 1e9)
+    atr5 = compute_atr_series(h5, l5, c5, 14)
+
+    h15, l15, c15 = (df15[col].to_numpy(float) for col in ("High", "Low", "Close"))
+    close15_ns = df15.index.as_unit("ns").asi8 + int(900 * 1e9)
+    h1, l1, c1 = (df1h[col].to_numpy(float) for col in ("High", "Low", "Close"))
+    close1_ns = df1h.index.as_unit("ns").asi8 + int(3600 * 1e9)
+    h4, l4, c4 = (df4h[col].to_numpy(float) for col in ("High", "Low", "Close"))
+    close4_ns = df4h.index.as_unit("ns").asi8 + int(14400 * 1e9)
+    e20_4h = pd.Series(c4).ewm(span=20, adjust=False).mean().to_numpy(float)
+
+    sniper = DailySessionSniperV9(
+        bank_r=bank_r,
+        bank_frac=bank_frac,
+        be_lock_r=be_lock_r,
+        bank2_r=bank2_r,
+        bank2_frac=bank2_frac,
+        be2_lock_r=be2_lock_r,
+        runner_tp_r=runner_tp_r,
+    )
+    reg4 = sniper.regime.precompute_frame_features(df4h)
+    reg5 = sniper.regime.precompute_frame_features(df_5m)
+    ker4_arr, rvol5_arr = reg4["ker"], reg5["rvol"]
+
+    b4h, b4l = deque(maxlen=5), deque(maxlen=5)
+    l4_hi = l4_lo = None
+    tr4 = 0
+    b1h, b1l = deque(maxlen=5), deque(maxlen=5)
+    k2_hi: List[List[float]] = []
+    k2_lo: List[List[float]] = []
+    l1_hi = l1_lo = None
+    tr1 = 0
+    b15_h, b15_l = deque(maxlen=7), deque(maxlen=7)
+    k15_hi: List[List[float]] = []
+    k15_lo: List[List[float]] = []
+    b5h, b5l = deque(maxlen=5), deque(maxlen=5)
+    l5_hi = l5_lo = None
+
+    c_k2: List[Tuple[int, int, float]] = []
+    c_15: List[Tuple[int, int, float]] = []
+    p15 = p1 = p4 = 0
+    ts_dt_arr = pd.to_datetime(ts5_ns, utc=True)
+    eval0_ns = int(eval_start.as_unit("ns").value)
+    eval1_ns = int(eval_end.as_unit("ns").value)
+
+    sleeves = ("LON", "1H_K2", "15M_NY")
+    pos_map: Dict[str, Optional[TradePositionState]] = {s: None for s in sleeves}
+    pend_map: Dict[str, Optional[dict]] = {s: None for s in sleeves}
+    last_side_bar: Dict[int, int] = {1: -999, -1: -999}
+    closed_trades: List[dict] = []
+    cid = 0
+
+    for i5 in range(80, len(df_5m)):
+        c5_ns = int(close5_ns[i5])
+        if c5_ns >= eval1_ns:
+            break
+        dt5 = ts_dt_arr[i5]
+        hr5 = int(dt5.hour)
+        a5 = float(atr5[i5])
+
+        sniper.session_tracker.step_bar(dt5, c5_ns, float(o5[i5]), float(h5[i5]), float(l5[i5]), float(c5[i5]), a5)
+
+        while p4 < len(df4h) and close4_ns[p4] <= c5_ns:
+            b4h.append(h4[p4])
+            b4l.append(l4[p4])
+            _, _, l4_hi, l4_lo = _step_causal_fractal_swing(b4h, b4l, 2, p4, [], [], l4_hi, l4_lo)
+            if l4_hi is not None and c4[p4] > l4_hi:
+                tr4 = 1
+            elif l4_lo is not None and c4[p4] < l4_lo:
+                tr4 = -1
+            p4 += 1
+
+        while p1 < len(df1h) and close1_ns[p1] <= c5_ns:
+            hh, hl, hc = float(h1[p1]), float(l1[p1]), float(c1[p1])
+            c_k2 = [x for x in c_k2 if (c5_ns - x[1]) <= 5 * 3600 * 10**9][-10:]
+            for idx_s, p_lo in k2_lo:
+                if (p1 - idx_s) >= 3 and hl < p_lo and hc > p_lo:
+                    c_k2.append((1, int(close1_ns[p1]), hl))
+            for idx_s, p_hi in k2_hi:
+                if (p1 - idx_s) >= 3 and hh > p_hi and hc < p_hi:
+                    c_k2.append((-1, int(close1_ns[p1]), hh))
+            b1h.append(hh)
+            b1l.append(hl)
+            k2_hi, k2_lo, l1_hi, l1_lo = _step_causal_fractal_swing(b1h, b1l, 2, p1, k2_hi, k2_lo, l1_hi, l1_lo)
+            k2_hi = [x for x in k2_hi if hh <= x[1]]
+            k2_lo = [x for x in k2_lo if hl >= x[1]]
+            if l1_hi is not None and hc > l1_hi:
+                tr1 = 1
+            elif l1_lo is not None and hc < l1_lo:
+                tr1 = -1
+            p1 += 1
+
+        while p15 < len(df15) and close15_ns[p15] <= c5_ns:
+            hh, hl, hc = float(h15[p15]), float(l15[p15]), float(c15[p15])
+            c_15 = [x for x in c_15 if (c5_ns - x[1]) <= 3 * 3600 * 10**9][-10:]
+            for idx_s, p_lo in k15_lo:
+                if (p15 - idx_s) >= 4 and hl < p_lo and hc > p_lo:
+                    c_15.append((1, int(close15_ns[p15]), hl))
+            for idx_s, p_hi in k15_hi:
+                if (p15 - idx_s) >= 4 and hh > p_hi and hc < p_hi:
+                    c_15.append((-1, int(close15_ns[p15]), hh))
+            b15_h.append(hh)
+            b15_l.append(hl)
+            k15_hi, k15_lo, _, _ = _step_causal_fractal_swing(b15_h, b15_l, 3, p15, k15_hi, k15_lo, None, None)
+            k15_hi = [x for x in k15_hi if hh <= x[1]]
+            k15_lo = [x for x in k15_lo if hl >= x[1]]
+            p15 += 1
+
+        b5h.append(h5[i5 - 1])
+        b5l.append(l5[i5 - 1])
+        _, _, l5_hi, l5_lo = _step_causal_fractal_swing(b5h, b5l, 2, i5 - 1, [], [], l5_hi, l5_lo)
+
+        # 1) Manage active V9 positions via HighVelocityCashflowExitManager
+        for slv in sleeves:
+            pos = pos_map[slv]
+            if pos is None:
+                continue
+            closed, gross_r, _ = sniper.exit_mgr.step_bar(
+                pos, i5, float(h5[i5]), float(l5[i5]), float(c5[i5]), a5, sniper.prot_exec, None
+            )
+            if closed:
+                hrs = max(0.08, (i5 - pos.entry_bar) * (5.0 / 60.0))
+                t1_b = pos.meta.get("t1_bar")
+                t2_b = pos.meta.get("t2_bar")
+                t1_hrs = round((t1_b - pos.entry_bar) * (5.0 / 60.0), 2) if t1_b is not None else None
+                t2_hrs = round((t2_b - pos.entry_bar) * (5.0 / 60.0), 2) if t2_b is not None else None
+                t1_ts = (pos.entry_ts + pd.Timedelta(hours=t1_hrs)) if t1_hrs is not None else None
+                fee_in = 0.0002
+                fee_out = 0.0002 if pos.exit_reason == "VACUUM_TP" else 0.0007
+                cost = fee_mult * ((fee_in + fee_out + 0.0001 * (hrs / 8.0)) / (pos.risk_dist / pos.entry_price))
+                closed_trades.append({
+                    "cluster_id": pos.trade_id,
+                    "asset": asset,
+                    "entry_time": pos.entry_ts,
+                    "exit_time": pd.Timestamp(c5_ns, tz="UTC"),
+                    "t1_time": t1_ts,
+                    "side": pos.side,
+                    "entry_price": pos.entry_price,
+                    "init_sl": pos.init_sl,
+                    "sl_pct": pos.risk_dist / pos.entry_price,
+                    "gross_r": gross_r,
+                    "net_r": gross_r - cost,
+                    "is_pyramid": False,
+                    "is_aplus": True,
+                    "conviction": 0.78,
+                    "setup": f"V9_{slv}",
+                    "outcome": pos.exit_reason,
+                    "hold_hours": hrs,
+                    "t1_hours": t1_hrs,
+                    "t2_hours": t2_hrs,
+                    "reasoning_chain": dict(pos.meta.get("reasoning_chain", {})),
+                })
+                pos_map[slv] = None
+
+        if c5_ns < eval0_ns or p4 < 30 or p1 < 30:
+            continue
+
+        # 2) Fill pending 5m FVG limit orders (with Zero-Risk Slot Recycling & cross-sleeve same-side dedup)
+        for slv in sleeves:
+            pend = pend_map[slv]
+            if pend is not None and pos_map[slv] is None:
+                if i5 > pend["exp"]:
+                    pend_map[slv] = None
+                elif (pend["sd"] == 1 and l5[i5] <= pend["ep"]) or (pend["sd"] == -1 and h5[i5] >= pend["ep"]):
+                    same_unprot = any(
+                        p is not None and p.side == pend["sd"] and not HighVelocityCashflowExitManager.is_zero_risk(p)
+                        for p in pos_map.values()
+                    )
+                    if (not same_unprot) and (i5 - last_side_bar[pend["sd"]] >= dedup_same_side_bars):
+                        cid += 1
+                        last_side_bar[pend["sd"]] = i5
+                        pos_map[slv] = TradePositionState(
+                            trade_id=cid,
+                            side=pend["sd"],
+                            entry_bar=i5,
+                            entry_ts=pd.Timestamp(c5_ns, tz="UTC"),
+                            entry_price=pend["ep"],
+                            init_sl=pend["sl"],
+                            cur_sl=pend["sl"],
+                            risk_dist=pend["rd"],
+                            meta={"setup": f"V9_{slv}", "reasoning_chain": pend["meta"]},
+                        )
+                    pend_map[slv] = None
+
+        if a5 <= 0 or abs(c5[i5 - 1] - o5[i5 - 1]) < 1.0 * a5:
+            continue
+        k4 = float(ker4_arr[p4 - 1])
+        rv5 = float(rvol5_arr[i5])
+        if k4 < min_ker4:
+            continue
+        e4_tr = 1 if c4[p4 - 1] > e20_4h[p4 - 1] else -1
+
+        lon_cand = [(s.side, s.sweep_ns, s.sweep_extreme) for s in sniper.session_tracker.active_lon_sweeps]
+        for slv, clist, ok_hr in (
+            ("LON", lon_cand, use_lon and hr5 >= 12),
+            ("1H_K2", c_k2, use_1h_k2 and hr5 >= 9),
+            ("15M_NY", c_15, use_15m_ny and (12 <= hr5 <= 21) and rv5 >= min_rvol_15m_ny),
+        ):
+            if (not ok_hr) or pos_map[slv] is not None or pend_map[slv] is not None:
+                continue
+            for sd, _, sl_b in reversed(clist):
+                if htf_align_mode == "tr4_eq_tr1" and (sd != tr1 or sd != tr4):
+                    continue
+                if htf_align_mode == "e4_and_tr1" and (sd != tr1 or sd != e4_tr):
+                    continue
+                ok = False
+                ep = slp = 0.0
+                if sd == 1 and l5[i5] >= sl_b and l5_hi is not None:
+                    if c5[i5] > l5_hi and (l5[i5] - h5[i5 - 2]) >= 0.25 * a5 and c5[i5 - 1] > o5[i5 - 1]:
+                        slp = min(sl_b - a5, c5[i5] - max(1.5 * a5, c5[i5] * 0.0020))
+                        ep = float(l5[i5])
+                        ok = True
+                elif sd == -1 and h5[i5] <= sl_b and l5_lo is not None:
+                    if c5[i5] < l5_lo and (l5[i5 - 2] - h5[i5]) >= 0.25 * a5 and c5[i5 - 1] < o5[i5 - 1]:
+                        slp = max(sl_b + a5, c5[i5] + max(1.5 * a5, c5[i5] * 0.0020))
+                        ep = float(h5[i5])
+                        ok = True
+                if ok:
+                    rd = abs(ep - slp)
+                    if ep > 0 and min_sl_pct <= (rd / ep) <= max_sl_pct:
+                        pend_map[slv] = {
+                            "sd": sd,
+                            "ep": ep,
+                            "sl": slp,
+                            "rd": rd,
+                            "exp": i5 + 8,
+                            "meta": {"ker4": round(k4, 2), "rvol5": round(rv5, 2), "source": slv},
+                        }
+                        break
+
+    if include_v8_physics:
+        tr_v8, _ = run_v8_intraday_backtest(df_5m, eval_start, eval_end, include_smc_sweep=False, fee_mult=fee_mult)
+        for _t in tr_v8:
+            _t["asset"] = asset
+            _t.setdefault("engine", _t.get("setup", "V8_Physics"))
+            if _t.get("t1_hours") is not None and _t.get("t1_time") is None:
+                _t["t1_time"] = _t["entry_time"] + pd.Timedelta(hours=float(_t["t1_hours"]))
+        closed_trades.extend(tr_v8)
+
+    if include_v6_4h:
+        tr_v6, _ = run_v6_cognitive_backtest(df_5m, eval_start, eval_end, fee_mult=fee_mult)
+        for _t in tr_v6:
+            _t["asset"] = asset
+            _t.setdefault("setup", "4H_V6_Cognitive")
+            _t.setdefault("engine", "4H_V6_Cognitive")
+            if _t.get("t1_time") is None:
+                _t["t1_time"] = _t["exit_time"]
+        closed_trades.extend(tr_v6)
+
+    closed_trades = sorted(closed_trades, key=lambda t: t["entry_time"])
+    return closed_trades, _summarize_trades(closed_trades)
+
 
 

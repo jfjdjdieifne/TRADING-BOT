@@ -1,19 +1,15 @@
 #!/usr/bin/env python3
 """
-Binance USDT-M Futures Multi-Coin V8.0 Intraday Cashflow & Conviction-Ratchet + 4H Cognitive
+Binance USDT-M Futures Multi-Coin V9.0 Daily Session Velocity + V8 Physics + 4H Cognitive
 - Zero third-party dependencies (pure Python 3 stdlib).
 - 3-Sleeve Causal Portfolio across the 10-Coin High-Liquidity Basket (zero HTF lookahead, real Binance VIP0 fees+slip+funding):
-    1) V8 Intraday Scene-Graph Physics (--no-v8 / --no-v7 to disable): V8_CompVacuum + V8_BPR_Snap/Retest
-       - 5m Compression-Vacuum & Sweep+BPR/iFVG + Bayesian Prosecutor (HTF Brick-Wall Clearance, RVOL>=0.9, 4H Ext<=2.5*ATR)
-       - 3-Tier Origin-Anchor Cashflow Exit: 40%@+2.8R->BE+0.50R, 40%@min(Origin_Anchor,+5.5R)->+2.50R, 20%@+12R
-       - N=81, WR=44.4%, Net=+61.0R, PF=2.21, DD=7.5R | IS=+37.5R(2.36) | OOS=+23.5R(2.03)
-    2) Secondary 1H->5m Engine (--no-smc to disable): SMC_Sweep_V6
-       - Bayesian Prosecutor: Temporal Sweep Decay + KER4>=0.15 + HTF Freight-Train Veto
-       - N=87, WR=36.8%, Net=+88.9R, PF=2.40, DD=9.0R, 7/7 yrs green | OOS PF=3.10
+    1) V9 Daily Session & Multi-TF Liquidity Sweeps (--no-v9 to disable): V9_LON + V9_1H_K2 + V9_15M_NY
+       - Causal London (07-12 UTC) H/L swept >=12 UTC, 1H k=2 swept >=09 UTC, 15m k=3 NY (12-21 UTC, RVOL>=1.20)
+       - 5m Candle-Close BOS + 0.25*ATR5 FVG Retest + HighVelocityCashflow (15%@+2.0R->BE+0.35R, 20%@+4.5R->+2.0R, 65%@+10R)
+       - Combined BTCUSD_5m V9+V8+V6 (1.0x real asset): N=712 (8.8/mo), WR=41.4%, Net=+357.4R, PF=1.86, 7/7 yrs green
+    2) V8 Intraday Scene-Graph Physics (--no-v8 / --no-v7 to disable): V8_CompVacuum + V8_BPR_Snap/Retest
     3) Primary 4H Engine (--no-4h-trend to disable): 4H_V6_Cognitive
-       - Fractal 1H/4H Structural Stop Compression + 2-Stage Risk-Free Pyramiding + Climax Ratchet
-       - N=240, WR=40.8%, Net=+109.1R, PF=2.05, DD=8.2R, 7/7 yrs green | OOS PF=1.94
-- Small-Account Conviction-Ratchet Engine (--small-account): 2.5% std / 4.0% A+, 50/50 HWM profit skim (+$25), >10% DD throttle (2.0%), <=15x lev, -2.5R daily CB.
+- Small-Account Zero-Risk Slot-Recycled Ratchet (--small-account): 1.5% std / 2.0% A+ (or 1.0%/1.4% <18% MaxDD), 50/50 HWM skim, -2.0R daily CB.
 """
 
 from __future__ import annotations
@@ -578,6 +574,114 @@ class SignalCandidate:
     is_aplus: bool = False
 
 
+def detect_v9_daily_session_sweeps(
+    symbol: str,
+    bars_5m: List[Bar],
+    bars_15m: List[Bar],
+    bars_1h: List[Bar],
+    sw4_trend: int,
+    sw1: CausalSwingTracker,
+    sw5: CausalSwingTracker,
+    atr_5: float,
+    ker_4h: float,
+    rvol5: float,
+    v9_risk_mult: float = 1.0,
+) -> Optional[SignalCandidate]:
+    """V9.0 Daily Session (London 07-12 UTC), 1H k=2, and 15m k=3 NY (12-21 UTC) Liquidity Sweep -> 5m BOS + FVG."""
+    if atr_5 <= 0 or ker_4h < 0.15 or len(bars_5m) < 20 or len(bars_15m) < 20 or len(bars_1h) < 10:
+        return None
+    ts_5m, o, h, l, c, _ = bars_5m[-1]
+    _, o2, _, _, c2, _ = bars_5m[-2]
+    _, _, h1, l1, _, _ = bars_5m[-3]
+    c2b = abs(c2 - o2)
+    if c2b < 1.0 * atr_5:
+        return None
+    utc_dt = dt.datetime.fromtimestamp(ts_5m / 1000.0, tz=dt.timezone.utc)
+    cur_day = utc_dt.date()
+    hr5 = utc_dt.hour
+
+    # 1) Causal London 07-12 UTC High/Low swept >=12 UTC
+    lon_hi = lon_lo = None
+    lon_hi_sw = lon_lo_sw = False
+    cands_lon: List[Tuple[int, int, float]] = []
+    for b_ts, _, bh, bl, bc, _ in bars_5m:
+        bdt = dt.datetime.fromtimestamp(b_ts / 1000.0, tz=dt.timezone.utc)
+        if bdt.date() != cur_day:
+            continue
+        if 7 <= bdt.hour < 12:
+            lon_hi = bh if lon_hi is None else max(lon_hi, bh)
+            lon_lo = bl if lon_lo is None else min(lon_lo, bl)
+        elif bdt.hour >= 12:
+            if lon_lo is not None and not lon_lo_sw and bl < lon_lo and bc > lon_lo:
+                lon_lo_sw = True
+                cands_lon.append((1, b_ts, bl))
+            if lon_hi is not None and not lon_hi_sw and bh > lon_hi and bc < lon_hi:
+                lon_hi_sw = True
+                cands_lon.append((-1, b_ts, bh))
+
+    # 2) Causal 1H k=2 structural sweep
+    sw1_k2 = CausalSwingTracker(2)
+    cands_k2: List[Tuple[int, int, float]] = []
+    start_1h = max(0, len(bars_1h) - 6)
+    for idx_1h, (ts_1h, _, hh, hl, hc, _) in enumerate(bars_1h):
+        if idx_1h >= start_1h:
+            for idx_s, p_lo in list(sw1_k2.act_lo):
+                if (sw1_k2.bar_idx + 1 - idx_s) >= 3 and hl < p_lo and hc > p_lo:
+                    cands_k2.append((1, ts_1h, hl))
+            for idx_s, p_hi in list(sw1_k2.act_hi):
+                if (sw1_k2.bar_idx + 1 - idx_s) >= 3 and hh > p_hi and hc < p_hi:
+                    cands_k2.append((-1, ts_1h, hh))
+        sw1_k2.update(hh, hl, hc)
+
+    # 3) Causal 15m k=3 NY sweep
+    sw15_k3 = CausalSwingTracker(3)
+    cands_15: List[Tuple[int, int, float]] = []
+    start_15 = max(0, len(bars_15m) - 12)
+    for idx_15, (ts_15, _, hh, hl, hc, _) in enumerate(bars_15m):
+        if idx_15 >= start_15:
+            for idx_s, p_lo in list(sw15_k3.act_lo):
+                if (sw15_k3.bar_idx + 1 - idx_s) >= 4 and hl < p_lo and hc > p_lo:
+                    cands_15.append((1, ts_15, hl))
+            for idx_s, p_hi in list(sw15_k3.act_hi):
+                if (sw15_k3.bar_idx + 1 - idx_s) >= 4 and hh > p_hi and hc < p_hi:
+                    cands_15.append((-1, ts_15, hh))
+        sw15_k3.update(hh, hl, hc)
+
+    for slv_tag, clist, ok_hr, exp_ms in (
+        ("V9_LON", cands_lon, hr5 >= 12, 5 * 3600 * 1000),
+        ("V9_1H_K2", cands_k2, hr5 >= 9, 5 * 3600 * 1000),
+        ("V9_15M_NY", cands_15, (12 <= hr5 <= 21) and rvol5 >= 1.20, 3 * 3600 * 1000),
+    ):
+        if not ok_hr:
+            continue
+        for sd, sw_ts, sl_b in reversed(clist):
+            if (ts_5m - sw_ts) > exp_ms or sd != sw1.trend or sd != sw4_trend:
+                continue
+            ep = slp = 0.0
+            ok = False
+            if sd == 1 and l >= sl_b and sw5.last_high is not None:
+                if c > sw5.last_high and (l - h1) >= 0.25 * atr_5 and c2 > o2:
+                    slp = min(sl_b - atr_5, c - max(1.5 * atr_5, c * 0.0020))
+                    ep = l
+                    ok = True
+            elif sd == -1 and h <= sl_b and sw5.last_low is not None:
+                if c < sw5.last_low and (l1 - h) >= 0.25 * atr_5 and c2 < o2:
+                    slp = max(sl_b + atr_5, c + max(1.5 * atr_5, c * 0.0020))
+                    ep = h
+                    ok = True
+            if ok:
+                rd = abs(ep - slp)
+                if 0.0020 <= (rd / max(ep, 1e-12)) <= 0.0180:
+                    return SignalCandidate(
+                        symbol, slv_tag, sd, ep, slp, ep + sd * 10.0 * rd,
+                        rd, (), 40 * 60, is_market=False, risk_mult=v9_risk_mult,
+                        bank_r=2.0, bank_frac=0.15, be_lock_r=0.35,
+                        bank2_r=4.5, bank2_frac=0.20, be2_lock_r=2.00,
+                        is_aplus=True,
+                    )
+    return None
+
+
 def evaluate_symbol_bars(
     symbol: str,
     bars_5m: List[Bar],
@@ -598,8 +702,10 @@ def evaluate_symbol_bars(
     sweep_tp_r: float = 12.0,
     enable_fast_scalp: bool = False,
     use_v8: Optional[bool] = None,
+    use_v9: bool = True,
+    v9_risk_mult: float = 1.0,
 ) -> Optional[SignalCandidate]:
-    """Evaluate strictly CLOSED candles using 100% causal V8.0 Intraday Physics + Bayesian Prosecutor + V6.0 Cognitive rules."""
+    """Evaluate strictly CLOSED candles using 100% causal V9.0 Daily Session + V8 Physics + V6 Cognitive rules."""
     if len(bars_5m) < 80 or len(bars_15m) < 40 or len(bars_1h) < 60 or len(bars_4h) < max(60, donch_lb + 3):
         return None
     v8_enabled = use_v7 if use_v8 is None else bool(use_v8)
@@ -753,6 +859,25 @@ def evaluate_symbol_bars(
                         bank2_r=5.5, bank2_frac=0.40, be2_lock_r=2.50,
                         origin_px=orig_v8, is_aplus=(eng_v8 == "V8_BPR_Snap" or conv8 >= 0.72),
                     )
+
+    # 2b) V9.0 Daily Session & Multi-TF Liquidity Sweeps (LON, 1H_K2, 15M_NY) -> 15/20/65 Cashflow
+    if use_v9 and atr_5 > 0 and ker_4h >= 0.15:
+        rvol5 = (v_last / vavg_20) if vavg_20 > 0 else 1.0
+        v9_sig = detect_v9_daily_session_sweeps(
+            symbol=symbol,
+            bars_5m=bars_5m,
+            bars_15m=bars_15m,
+            bars_1h=bars_1h,
+            sw4_trend=sw4.trend,
+            sw1=sw1,
+            sw5=sw5,
+            atr_5=atr_5,
+            ker_4h=ker_4h,
+            rvol5=rvol5,
+            v9_risk_mult=v9_risk_mult,
+        )
+        if v9_sig is not None:
+            return v9_sig
 
     # 3) Secondary 1H->5m Engine: SMC_Sweep_V6 (PF=2.40, OOS PF=3.10, DD=9.0R, 7/7 yrs green)
     if use_smc and utc_dt.hour >= 9 and atr_5 > 0 and cands_k3 and ker_4h >= 0.15:
@@ -990,7 +1115,9 @@ def run_bot(
     enable_fast_scalp: bool = False,
     small_account: bool = False,
     risk_pct: float = 0.015,
-    daily_dd_cap_r: float = -2.5,
+    daily_dd_cap_r: float = -2.0,
+    use_v9: bool = True,
+    v9_risk_mult: float = 1.0,
 ) -> None:
     base_url = TESTNET_BASE if mode == "testnet" else LIVE_BASE
     api_key = os.environ.get("BINANCE_API_KEY", "")
@@ -1002,9 +1129,9 @@ def run_bot(
     filters = client.load_filters(symbols)
     slot_frac = 0.85 if small_account else 0.30
     print(
-        f"[INIT] V7.0 mode={mode} syms={len(filters)}/{len(symbols)} v7={use_v7}({v7_risk_mult:.2f}x) "
-        f"4H={use_4h_trend}({v6_mode}) smc={use_smc}({smc_risk_mult:.2f}x) small_acct={small_account} "
-        f"risk={risk_pct*100:.2f}% lev={leverage}x daily_cb={daily_dd_cap_r:.1f}R"
+        f"[INIT] V9.0 mode={mode} syms={len(filters)}/{len(symbols)} v9={use_v9}({v9_risk_mult:.2f}x) "
+        f"v8={use_v7}({v7_risk_mult:.2f}x) 4H={use_4h_trend}({v6_mode}) smc={use_smc}({smc_risk_mult:.2f}x) "
+        f"small_acct={small_account} risk={risk_pct*100:.2f}% lev={leverage}x daily_cb={daily_dd_cap_r:.1f}R"
     )
 
     if mode in ("testnet", "live"):
@@ -1017,8 +1144,8 @@ def run_bot(
     hwm_equity = paper_equity
     skim_anchor = paper_equity
     withdrawn_vault_usd = 0.0
-    aplus_risk_pct = 0.040
-    throttle_risk_pct = 0.020
+    aplus_risk_pct = 0.020
+    throttle_risk_pct = 0.010
     active_meta: Dict[str, dict] = {}
     daily_r_day = dt.datetime.now(dt.timezone.utc).date()
     daily_r_pnl = 0.0
@@ -1215,7 +1342,18 @@ def run_bot(
                 continue
 
             for sym, filt in filters.items():
-                if sym in open_pos or sym in active_meta or (len(open_pos) + len(active_meta)) >= max_open_pos:
+                open_risk_slots = sum(
+                    1 for s in set(open_pos) | set(active_meta)
+                    if not (
+                        s in active_meta
+                        and active_meta[s].get("state") == "OPEN"
+                        and (
+                            (active_meta[s]["side"] == 1 and active_meta[s]["sl"] >= active_meta[s]["entry"])
+                            or (active_meta[s]["side"] == -1 and active_meta[s]["sl"] <= active_meta[s]["entry"])
+                        )
+                    )
+                )
+                if sym in open_pos or sym in active_meta or open_risk_slots >= max_open_pos:
                     continue
                 b5 = client.get_klines(sym, "5m", 290)
                 b15 = client.get_klines(sym, "15m", 80)
@@ -1230,6 +1368,7 @@ def run_bot(
                     trail_atr_mult=trail_atr_mult, btc_regime_fn=btc_fn,
                     use_smc=use_smc, smc_risk_mult=smc_risk_mult,
                     sweep_tp_r=sweep_tp_r, enable_fast_scalp=enable_fast_scalp,
+                    use_v9=use_v9, v9_risk_mult=v9_risk_mult,
                 )
                 if sig is None:
                     continue
@@ -1237,7 +1376,7 @@ def run_bot(
                 sl = round_step(sig.sl_px, filt.tick_size, False)
                 tp = round_step(sig.tp_px, filt.tick_size, False) if sig.tp_px is not None else None
                 if small_account:
-                    eff_rp = throttle_risk_pct if dd > 0.10 else (aplus_risk_pct if sig.is_aplus else risk_pct)
+                    eff_rp = throttle_risk_pct if dd > 0.08 else (aplus_risk_pct if sig.is_aplus else risk_pct)
                     qty = compute_order_qty(active_eq, eff_rp * sig.risk_mult, ep, sl, filt, leverage=leverage, max_slot_frac=slot_frac)
                 else:
                     qty = compute_order_qty(equity, risk_pct * sig.risk_mult * dd_brake, ep, sl, filt, leverage=leverage, max_slot_frac=slot_frac)
@@ -1270,14 +1409,16 @@ def run_bot(
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Binance Futures Multi-Coin V8.0 Intraday Cashflow & Conviction-Ratchet Bot")
+    ap = argparse.ArgumentParser(description="Binance Futures Multi-Coin V9.0 Daily Session Velocity + V8 Physics + 4H Cognitive Bot")
     ap.add_argument("--mode", choices=("paper", "testnet", "live"), default="paper")
     ap.add_argument("--leverage", type=int, default=10)
     ap.add_argument("--max-pos", type=int, default=3)
     ap.add_argument("--paper-equity", type=float, default=500.0)
-    ap.add_argument("--small-account", action="store_true", help="Enable $100 Conviction-Ratchet mode (2.5% std / 4.0% A+, 50/50 HWM skim, 15x lev, -2.5R daily CB)")
-    ap.add_argument("--risk-pct", type=float, default=None, help="Override base risk per trade (e.g. 0.025 or 0.03)")
-    ap.add_argument("--daily-stop-r", type=float, default=-2.5, help="Daily realized R circuit breaker (default -2.5R)")
+    ap.add_argument("--small-account", action="store_true", help="Enable $100 Zero-Risk Slot-Recycled Ratchet mode (1.5% std / 2.0% A+, 50/50 HWM skim, 15x lev, -2.0R daily CB)")
+    ap.add_argument("--risk-pct", type=float, default=None, help="Override base risk per trade (e.g. 0.010 or 0.015)")
+    ap.add_argument("--daily-stop-r", type=float, default=-2.0, help="Daily realized R circuit breaker (default -2.0R)")
+    ap.add_argument("--no-v9", action="store_true", help="Disable V9.0 Daily Session & Multi-TF Liquidity Sweeps")
+    ap.add_argument("--v9-risk-mult", type=float, default=1.0, help="Risk multiplier for V9 Daily Session Sweeps")
     ap.add_argument("--no-v8", "--no-v7", dest="no_v8", action="store_true", help="Disable V8.0 Intraday Scene-Graph Physics engine")
     ap.add_argument("--v8-risk-mult", "--v7-risk-mult", dest="v8_risk_mult", type=float, default=1.0, help="Risk multiplier for V8 Intraday Physics")
     ap.add_argument("--no-4h-trend", action="store_true", help="Disable primary 4H_V6_Cognitive engine")
@@ -1294,7 +1435,7 @@ def main() -> None:
     args = ap.parse_args()
     syms = tuple(s.strip().upper() for s in args.symbols.split(",") if s.strip())
     lev = 15 if (args.small_account and args.leverage == 10) else args.leverage
-    risk_pct = args.risk_pct if args.risk_pct is not None else (0.025 if args.small_account else 0.015)
+    risk_pct = args.risk_pct if args.risk_pct is not None else (0.015 if args.small_account else 0.015)
     smc_mult = 1.0 if (args.small_account and args.smc_risk_mult == 0.50) else args.smc_risk_mult
     run_bot(
         args.mode, syms, lev, args.max_pos, args.paper_equity,
@@ -1304,6 +1445,7 @@ def main() -> None:
         trail_atr_mult=args.trail_atr_mult, use_smc=not args.no_smc,
         smc_risk_mult=smc_mult, sweep_tp_r=args.sweep_tp_r, enable_fast_scalp=args.enable_fast_scalp,
         small_account=args.small_account, risk_pct=risk_pct, daily_dd_cap_r=args.daily_stop_r,
+        use_v9=not args.no_v9, v9_risk_mult=args.v9_risk_mult,
     )
 
 

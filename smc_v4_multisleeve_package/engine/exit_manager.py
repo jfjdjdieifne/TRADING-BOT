@@ -418,3 +418,51 @@ class IntradayCashflowExitManager:
 
         return False, 0.0, note
 
+
+class HighVelocityCashflowExitManager(IntradayCashflowExitManager):
+    """V9.0 High-Velocity Cashflow Exit & Zero-Risk Slot Recycling Manager.
+
+    Supports both:
+      - V9 High-Velocity 45/40/15 cashflow preset (45% @ +2.3R -> BE+0.35R, 40% @ +4.2R/Origin -> +2.0R, 15% runner)
+      - V9 Liquidity-Sweep 15/20/65 preset (15% @ +2.0R -> BE+0.35R, 20% @ +4.5R -> +2.0R, 65% runner @ +10.0R)
+    Once Tier-1 locks SL >= BE + 0.35R, `is_zero_risk(pos)` returns True so the capital slot recycles immediately.
+    """
+
+    def __init__(
+        self,
+        bank_r: float = 2.3,
+        bank_frac: float = 0.45,
+        be_lock_r: float = 0.35,
+        bank2_r: float = 4.2,
+        bank2_frac: float = 0.40,
+        be2_lock_r: float = 2.00,
+        runner_tp_r: float = 10.0,
+        stagnation_bars: int = 0,
+        prot_trail_mfe_r: float = 5.0,
+        atr_ratchet_mult: float = 0.0,
+    ) -> None:
+        super().__init__(
+            bank_r=bank_r,
+            bank_frac=bank_frac,
+            be_lock_r=be_lock_r,
+            bank2_r=bank2_r,
+            bank2_frac=bank2_frac,
+            be2_lock_r=be2_lock_r,
+            runner_tp_r=runner_tp_r,
+            stagnation_bars=stagnation_bars,
+            prot_trail_mfe_r=prot_trail_mfe_r,
+            atr_ratchet_mult=atr_ratchet_mult,
+        )
+
+    @staticmethod
+    def is_zero_risk(pos: TradePositionState) -> bool:
+        """True once stop-loss has locked >= entry (+BE_lock), freeing the risk slot."""
+        if pos.be_moved:
+            return True
+        if pos.side == 1 and pos.cur_sl >= pos.entry_price:
+            return True
+        if pos.side == -1 and pos.cur_sl <= pos.entry_price:
+            return True
+        return False
+
+

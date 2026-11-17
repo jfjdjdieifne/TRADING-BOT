@@ -15,7 +15,7 @@ V5 Upgraded Sleeves (Causal 1H Trailing & AMD/PO3 Expansion):
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 import pandas as pd
@@ -1519,3 +1519,90 @@ def run_smc_v8_multiasset_portfolio(
         "nsx_v8_1pos": nsx_v8_1pos,
         "btc_15r_be": btc_15r_be,
     }
+
+
+def run_v9_multiasset_portfolio(
+    df_btc_5m: pd.DataFrame,
+    df_xau_5m: Optional[pd.DataFrame],
+    df_nsx_5m: Optional[pd.DataFrame],
+    eval_start: pd.Timestamp,
+    eval_end: pd.Timestamp,
+    *,
+    btc_fee_mult: float = 1.0,
+    cfd_fee_mult: float = 0.5,
+) -> dict[str, Any]:
+    """Run V9.0 Real Multi-Asset Portfolio across BTCUSD_5m, XAUUSD_5m, and NSXUSD_5m (ZERO synthetic multipliers).
+
+    - `BTCUSD`: V9_Session_Sweeps (`LON` + `1H_K2` + `15M_NY`) + `V8_Physics` + `V6_4H_Cognitive`
+    - `XAUUSD`: V9_1H_K2 (`e4_and_tr1` alignment) + `V8_Physics` + `V6_4H_Cognitive`
+    - `NSXUSD`: V9_1H_K2 (`e4_and_tr1` alignment) + `V8_Physics` (V6_4H excluded on NSX where it underperforms)
+    """
+    from .strategy_brain import _summarize_trades, run_v9_daily_session_backtest
+
+    btc_tr, btc_sum = run_v9_daily_session_backtest(
+        df_btc_5m,
+        eval_start,
+        eval_end,
+        asset="BTCUSD",
+        use_lon=True,
+        use_1h_k2=True,
+        use_15m_ny=True,
+        include_v8_physics=True,
+        include_v6_4h=True,
+        htf_align_mode="tr4_eq_tr1",
+        fee_mult=btc_fee_mult,
+    )
+    all_tr = list(btc_tr)
+
+    xau_tr: List[dict] = []
+    xau_sum: Dict[str, Any] = {}
+    if df_xau_5m is not None and len(df_xau_5m) > 200:
+        xau_tr, xau_sum = run_v9_daily_session_backtest(
+            df_xau_5m,
+            eval_start,
+            eval_end,
+            asset="XAUUSD",
+            use_lon=False,
+            use_1h_k2=True,
+            use_15m_ny=False,
+            include_v8_physics=True,
+            include_v6_4h=True,
+            htf_align_mode="e4_and_tr1",
+            min_sl_pct=0.0005,
+            max_sl_pct=0.0150,
+            fee_mult=cfd_fee_mult,
+        )
+        all_tr.extend(xau_tr)
+
+    nsx_tr: List[dict] = []
+    nsx_sum: Dict[str, Any] = {}
+    if df_nsx_5m is not None and len(df_nsx_5m) > 200:
+        nsx_tr, nsx_sum = run_v9_daily_session_backtest(
+            df_nsx_5m,
+            eval_start,
+            eval_end,
+            asset="NSXUSD",
+            use_lon=False,
+            use_1h_k2=True,
+            use_15m_ny=False,
+            include_v8_physics=True,
+            include_v6_4h=False,
+            htf_align_mode="e4_and_tr1",
+            min_sl_pct=0.0005,
+            max_sl_pct=0.0150,
+            fee_mult=cfd_fee_mult,
+        )
+        all_tr.extend(nsx_tr)
+
+    all_tr = sorted(all_tr, key=lambda t: t["entry_time"])
+    return {
+        "btc_trades": btc_tr,
+        "btc_summary": btc_sum,
+        "xau_trades": xau_tr,
+        "xau_summary": xau_sum,
+        "nsx_trades": nsx_tr,
+        "nsx_summary": nsx_sum,
+        "real_multiasset_trades": all_tr,
+        "real_multiasset_summary": _summarize_trades(all_tr),
+    }
+

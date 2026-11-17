@@ -617,7 +617,137 @@ class SceneGraphPhysicsDetector:
                             k_inv = v_rev / max(v_man, 1e-12)
                             if k_inv >= self.min_bpr_k:
                                 vac = float(np.clip((bpr_hi - bpr_lo) / a_now, 0.0, 1.0))
-                                return BPRZone(-1, bpr_lo, bpr_hi, 0.5 * (bpr_lo + bpr_hi), win_hi, bar_idx, k_inv, vac)
+                                return BPRZone(-1, bpr_lo, bpr_hi, 0.5 * (bpr_hi + bpr_lo), win_hi, bar_idx, k_inv, vac)
         return None
+
+
+@dataclass
+class SessionSweepSignal:
+    source: str  # "LON", "ASIA", "PD", "1H_K2", "15M_NY"
+    side: int  # +1=bullish sweep of low, -1=bearish sweep of high
+    sweep_ns: int
+    sweep_extreme: float
+    level_price: float
+    wick_score: float = 0.0
+
+
+class DailySessionLiquidityTracker:
+    """Strictly causal Daily Session Liquidity Cycle Tracker (Asia, London, Previous Day High/Low)."""
+
+    def __init__(self, expiry_hours: float = 5.0) -> None:
+        self.expiry_ns = int(expiry_hours * 3600 * 1e9)
+        self.cur_day: Optional[object] = None
+        self.pdh: Optional[float] = None
+        self.pdl: Optional[float] = None
+        self.day_hi: float = -1e18
+        self.day_lo: float = 1e18
+        self.asia_hi: Optional[float] = None
+        self.asia_lo: Optional[float] = None
+        self.lon_hi: Optional[float] = None
+        self.lon_lo: Optional[float] = None
+        self.asia_hi_sw: bool = False
+        self.asia_lo_sw: bool = False
+        self.lon_hi_sw: bool = False
+        self.lon_lo_sw: bool = False
+        self.pdh_sw: bool = False
+        self.pdl_sw: bool = False
+        self.active_lon_sweeps: List[SessionSweepSignal] = []
+        self.active_asia_sweeps: List[SessionSweepSignal] = []
+        self.active_pd_sweeps: List[SessionSweepSignal] = []
+
+    def step_bar(
+        self,
+        bar_open_dt: object,
+        close_ns: int,
+        o: float,
+        h: float,
+        l: float,
+        c: float,
+        atr5: float,
+    ) -> List[SessionSweepSignal]:
+        """Update session liquidity boundaries using ONLY completed bar OHLC up to `close_ns`."""
+        d = bar_open_dt.date()
+        hr = int(bar_open_dt.hour)
+        if self.cur_day != d:
+            if self.cur_day is not None and self.day_hi > 0 and self.day_lo < 1e17:
+                self.pdh, self.pdl = float(self.day_hi), float(self.day_lo)
+                self.pdh_sw = self.pdl_sw = False
+            self.cur_day = d
+            self.day_hi, self.day_lo = float(h), float(l)
+            self.asia_hi = self.asia_lo = self.lon_hi = self.lon_lo = None
+            self.asia_hi_sw = self.asia_lo_sw = self.lon_hi_sw = self.lon_lo_sw = False
+        else:
+            if h > self.day_hi:
+                self.day_hi = float(h)
+            if l < self.day_lo:
+                self.day_lo = float(l)
+
+        if hr < 7:
+            self.asia_hi = float(h) if self.asia_hi is None else max(self.asia_hi, float(h))
+            self.asia_lo = float(l) if self.asia_lo is None else min(self.asia_lo, float(l))
+        elif hr < 12:
+            self.lon_hi = float(h) if self.lon_hi is None else max(self.lon_hi, float(h))
+            self.lon_lo = float(l) if self.lon_lo is None else min(self.lon_lo, float(l))
+
+        self.active_lon_sweeps = [s for s in self.active_lon_sweeps if (close_ns - s.sweep_ns) <= self.expiry_ns][-6:]
+        self.active_asia_sweeps = [s for s in self.active_asia_sweeps if (close_ns - s.sweep_ns) <= self.expiry_ns][-6:]
+        self.active_pd_sweeps = [s for s in self.active_pd_sweeps if (close_ns - s.sweep_ns) <= self.expiry_ns][-6:]
+
+        emitted: List[SessionSweepSignal] = []
+        if atr5 <= 0:
+            return emitted
+
+        # London session H/L swept in NY (hr >= 12)
+        if hr >= 12 and self.lon_lo is not None and not self.lon_lo_sw and l < self.lon_lo and c > self.lon_lo:
+            self.lon_lo_sw = True
+            sig = SessionSweepSignal("LON", 1, close_ns, float(l), float(self.lon_lo), VisualPerceptionEngine.rejection_wick_score(o, h, l, c, 1, atr5))
+            self.active_lon_sweeps.append(sig)
+            emitted.append(sig)
+        if hr >= 12 and self.lon_hi is not None and not self.lon_hi_sw and h > self.lon_hi and c < self.lon_hi:
+            self.lon_hi_sw = True
+            sig = SessionSweepSignal("LON", -1, close_ns, float(h), float(self.lon_hi), VisualPerceptionEngine.rejection_wick_score(o, h, l, c, -1, atr5))
+            self.active_lon_sweeps.append(sig)
+            emitted.append(sig)
+
+        # Asia session H/L swept in London/NY (hr >= 7)
+        if hr >= 7 and self.asia_lo is not None and not self.asia_lo_sw and l < self.asia_lo and c > self.asia_lo:
+            self.asia_lo_sw = True
+            sig = SessionSweepSignal("ASIA", 1, close_ns, float(l), float(self.asia_lo), VisualPerceptionEngine.rejection_wick_score(o, h, l, c, 1, atr5))
+            self.active_asia_sweeps.append(sig)
+            emitted.append(sig)
+        if hr >= 7 and self.asia_hi is not None and not self.asia_hi_sw and h > self.asia_hi and c < self.asia_hi:
+            self.asia_hi_sw = True
+            sig = SessionSweepSignal("ASIA", -1, close_ns, float(h), float(self.asia_hi), VisualPerceptionEngine.rejection_wick_score(o, h, l, c, -1, atr5))
+            self.active_asia_sweeps.append(sig)
+            emitted.append(sig)
+
+        # Previous Day High/Low swept
+        if self.pdl is not None and not self.pdl_sw and l < self.pdl and c > self.pdl:
+            self.pdl_sw = True
+            sig = SessionSweepSignal("PD", 1, close_ns, float(l), float(self.pdl), VisualPerceptionEngine.rejection_wick_score(o, h, l, c, 1, atr5))
+            self.active_pd_sweeps.append(sig)
+            emitted.append(sig)
+        if self.pdh is not None and not self.pdh_sw and h > self.pdh and c < self.pdh:
+            self.pdh_sw = True
+            sig = SessionSweepSignal("PD", -1, close_ns, float(h), float(self.pdh), VisualPerceptionEngine.rejection_wick_score(o, h, l, c, -1, atr5))
+            self.active_pd_sweeps.append(sig)
+            emitted.append(sig)
+
+        return emitted
+
+    def current_session_barriers(self, hr: int) -> Tuple[List[float], List[float]]:
+        """Return currently formed session high/low liquidity pools (strictly causal)."""
+        hi, lo = [], []
+        if self.pdh is not None and self.pdl is not None:
+            hi.append(self.pdh)
+            lo.append(self.pdl)
+        if hr >= 7 and self.asia_hi is not None and self.asia_lo is not None:
+            hi.append(self.asia_hi)
+            lo.append(self.asia_lo)
+        if hr >= 12 and self.lon_hi is not None and self.lon_lo is not None:
+            hi.append(self.lon_hi)
+            lo.append(self.lon_lo)
+        return hi, lo
+
 
 
