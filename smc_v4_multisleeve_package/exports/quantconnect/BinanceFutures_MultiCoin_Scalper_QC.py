@@ -1,11 +1,13 @@
-# QUANTCONNECT.COM - Binance Futures Multi-Coin Causal SMC Engine (V3.0 Verified)
+# QUANTCONNECT.COM - Binance Futures Multi-Coin Causal 4H Trend + 1H SMC Engine (V4.0 Verified)
 # Audited with ZERO HTF lookahead on 718,418 BTC 5m bars (2020-2026, real Binance fees+slip+funding):
-#   - Primary Verified Engine (use_smc=true, default):
-#     SMC_Sweep_10R (1H k=3 Sweep -> 5m CHoCH+FVG, 4H+1H dual BOS, >=09:00 UTC, BE@3.0R->+1.0R, TP=10R):
-#     1-coin BTC: N=144, WR=31.2%, Net=+78.0R, PF=1.71, DD=17.3R (IS=+49.2R PF=1.85 | OOS=+28.8R PF=1.55)
-#     Survives 2.0x Binance fees (+55.9R, PF=1.45). Set sweep_tp_r=15 for V8 BTC_15R_BE (+76.7R, PF=1.73, 5/7 yrs).
-#   - Optional Experimental Fast Scalp (enable_fast_scalp=false by default):
-#     VWAP_Sniper / Mom9_Sniper drop to PF~1.12 (OOS <= 0R) when unclosed-HTF lookahead is removed.
+#   1) Primary 4H Engine (use_4h_trend=true, default): 4H_Donch20_Trail
+#      4H Donchian(20) Breakout + 1D EMA20/50 + 4H ADX14 >= 20, SL = 2.0*ATR14_4H, Pure 3.5*ATR14_4H Chandelier Trail.
+#      1-coin BTC: N=167, WR=36.5%, Net=+79.7R, PF=1.99, DD=7.8R, 7/7 Years Green (IS=+47.6R PF=2.07 | OOS=+32.1R PF=1.89)
+#      Survives 2.0x Binance fees (+67.2R, PF=1.76, 7/7 Years Green).
+#   2) Secondary 1H->5m Engine (use_smc=true, default): SMC_Sweep_10R
+#      1H (k=3, age>=4) Sweep + 4H/1H Swing Trend + 5m CHoCH+FVG, >=09:00 UTC, BE@3.0R->+1.0R, TP=10R.
+#      1-coin BTC: N=144, WR=31.2%, Net=+78.0R, PF=1.71, DD=17.3R (IS=+49.2R PF=1.85 | OOS=+28.8R PF=1.55)
+#   Combined Dual-Engine (1-coin BTC): N=311, Net=+157.7R, PF=1.83, 7/7 Years Green (IS=+96.8R PF=1.95 | OOS=+60.9R PF=1.69)
 
 from AlgorithmImports import *
 from collections import deque
@@ -51,18 +53,53 @@ class CausalSwingTracker:
 class WilderATR14:
     def __init__(self) -> None:
         self.prev_close = None
-        self.trs = []
         self.val = 0.0
+        self.init = False
 
     def update(self, h: float, l: float, c: float) -> float:
         tr = (h - l) if self.prev_close is None else max(h - l, abs(h - self.prev_close), abs(l - self.prev_close))
         self.prev_close = c
-        if len(self.trs) < 14:
-            self.trs.append(tr)
-            self.val = sum(self.trs) / len(self.trs)
+        if not self.init:
+            self.val = tr
+            self.init = True
         else:
             self.val = (self.val * 13.0 + tr) / 14.0
         return self.val
+
+
+class WilderADX14:
+    def __init__(self) -> None:
+        self.prev_h = self.prev_l = self.prev_c = None
+        self.atr = self.pdm = self.mdm = self.adx = 0.0
+        self.init = self.dx_init = False
+
+    def update(self, h: float, l: float, c: float) -> float:
+        if self.prev_h is None:
+            self.prev_h, self.prev_l, self.prev_c = h, l, c
+            self.atr = max(h - l, 1e-12)
+            self.init = True
+            return 0.0
+        tr = max(h - l, abs(h - self.prev_c), abs(l - self.prev_c))
+        up, dn = h - self.prev_h, self.prev_l - l
+        p = up if (up > dn and up > 0) else 0.0
+        m = dn if (dn > up and dn > 0) else 0.0
+        self.prev_h, self.prev_l, self.prev_c = h, l, c
+        alpha = 1.0 / 14.0
+        self.atr = (1.0 - alpha) * self.atr + alpha * tr
+        self.pdm = (1.0 - alpha) * self.pdm + alpha * p
+        self.mdm = (1.0 - alpha) * self.mdm + alpha * m
+        if self.atr <= 1e-12:
+            return self.adx
+        pdi = 100.0 * self.pdm / self.atr
+        mdi = 100.0 * self.mdm / self.atr
+        den = pdi + mdi
+        dx = (100.0 * abs(pdi - mdi) / den) if den > 1e-12 else 0.0
+        if not self.dx_init:
+            self.adx = dx
+            self.dx_init = True
+        else:
+            self.adx = (1.0 - alpha) * self.adx + alpha * dx
+        return self.adx
 
 
 class WilderRSI14:
@@ -127,8 +164,13 @@ class CoinState:
         self.sw_5m = CausalSwingTracker(2)
         self.ema_1d, self.ema_4h, self.ema_1h = EmaState(), EmaState(), EmaState()
         self.ema_15m, self.ema_5m = EmaState(), EmaState()
+        self.atr_4h, self.adx_4h = WilderATR14(), WilderADX14()
         self.atr_15m, self.atr_5m = WilderATR14(), WilderATR14()
         self.rsi_1h, self.rsi_5m = WilderRSI14(), WilderRSI14()
+        self.donch_hi_4h = deque(maxlen=20)
+        self.donch_lo_4h = deque(maxlen=20)
+        self.prev_4h_c = self.prev_4h_hi20 = self.prev_4h_lo20 = None
+        self.idx_4h = self.cooldown_4h = 0
         self.vols_5m = deque(maxlen=20)
         self.vwap_day, self.vwap_pv, self.vwap_v = None, 0.0, 0.0
         self.bars_5m = deque(maxlen=6)
@@ -136,8 +178,8 @@ class CoinState:
         self.idx_5m = self.cooldown_until = 0
         self.pending_ticket = self.pending_meta = None
         self.in_position, self.active_engine, self.active_side = False, None, 0
-        self.entry_price = self.sl_price = self.risk_dist = self.qty = 0.0
-        self.tp_price = None
+        self.entry_price = self.sl_price = self.risk_dist = self.qty = self.best_px = 0.0
+        self.tp_price = self.trail_atr_mult = None
         self.step_locks = ()
         self.sl_ticket = self.tp_ticket = None
         self.canceled_sl_ids = set()
@@ -149,7 +191,12 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         "ADAUSDT", "DOGEUSDT", "AVAXUSDT", "LINKUSDT", "LTCUSDT",
         "DOTUSDT", "UNIUSDT", "ATOMUSDT", "NEARUSDT", "ETCUSDT",
     )
-    ENGINE_RISK = {"VWAP_Sniper": 0.015, "Mom9_Sniper": 0.015, "SMC_Sweep_10R": 0.015}
+    ENGINE_RISK = {
+        "4H_Donch20_Trail": 0.015,
+        "SMC_Sweep_10R": 0.015,
+        "VWAP_Sniper": 0.015,
+        "Mom9_Sniper": 0.015,
+    }
     VWAP_STEPS = ((0.7, 0.1),)
     MOM9_STEPS = ((0.9, 0.1),)
     SWEEP_STEPS = ((3.0, 1.0),)
@@ -163,16 +210,21 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         self.hwm_equity = start_cash
         self.risk_scale = float(self.get_parameter("risk_scale") or 1.0)
         self.max_open_pos = int(self.get_parameter("max_open_pos") or 3)
+        self.use_4h_trend = str(self.get_parameter("use_4h_trend") or "true").lower() == "true"
         self.use_smc = str(self.get_parameter("use_smc") or "true").lower() == "true"
         self.enable_fast_scalp = str(self.get_parameter("enable_fast_scalp") or "false").lower() == "true"
         self.sweep_tp_r = float(self.get_parameter("sweep_tp_r") or 10.0)
-        self.set_warm_up(timedelta(days=20), Resolution.MINUTE)
+        self.donch_lb = int(self.get_parameter("donch_lb") or 20)
+        self.trail_atr_mult = float(self.get_parameter("trail_atr_mult") or 3.5)
+        self.set_warm_up(timedelta(days=65), Resolution.MINUTE)
         self.set_brokerage_model(BrokerageName.BINANCE_FUTURES, AccountType.MARGIN)
 
         self.coins, self.trade_counts, self.invalid_counts = {}, {}, {}
         for tk in self.TICKERS:
             sec = self.add_crypto_future(tk, Resolution.MINUTE, Market.BINANCE, leverage=10)
             st = CoinState(tk, sec.symbol, 10.0)
+            st.donch_hi_4h = deque(maxlen=self.donch_lb)
+            st.donch_lo_4h = deque(maxlen=self.donch_lb)
             self.coins[sec.symbol] = st
             self.trade_counts[tk] = 0
             self.invalid_counts[tk] = 0
@@ -220,8 +272,13 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
             st.pending_ticket.cancel()
         st.pending_ticket = st.pending_meta = None
 
-    def _replace_sl(self, st: CoinState, lock_px: float, cur_c: float) -> None:
+    def _replace_sl(self, st: CoinState, lock_px: float, cur_c: float, market_if_crossed: bool = False) -> None:
         lp = self._round_px(st.symbol, lock_px)
+        if market_if_crossed and ((st.active_side == 1 and lp >= cur_c) or (st.active_side == -1 and lp <= cur_c)):
+            self.transactions.cancel_open_orders(st.symbol)
+            self.liquidate(st.symbol, tag=f"{st.active_engine}_TRAIL_MKT")
+            self._reset_pos(st)
+            return
         if not ((st.active_side == 1 and lp > st.sl_price and lp < cur_c) or
                 (st.active_side == -1 and lp < st.sl_price and lp > cur_c)):
             return
@@ -232,20 +289,48 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         st.sl_price = lp
         st.sl_ticket = self.stop_market_order(st.symbol, -st.qty, lp, tag=f"{st.active_engine}_SL")
 
-    def _submit_limit(self, st: CoinState, engine: str, side: int, trig: float, sl: float,
-                      tp_r: float, step_locks, expire_bars: int, sl_max: float = 0.0180,
-                      sl_min: float = 0.0040) -> None:
+    def _can_enter(self, st: CoinState) -> bool:
         if self.is_warming_up or st.in_position or st.pending_ticket is not None:
-            return
+            return False
         if st.idx_5m < st.cooldown_until or self._open_count() >= self.max_open_pos:
-            return
+            return False
         if self.portfolio[st.symbol].invested:
             self.transactions.cancel_open_orders(st.symbol)
             self.liquidate(st.symbol, tag="ORPHAN_CLEAN")
+            return False
+        return float(self.securities[st.symbol].price) > 0
+
+    def _submit_market(self, st: CoinState, engine: str, side: int, ref_px: float, sl: float,
+                       trail_mult: float, sl_max: float = 0.080, sl_min: float = 0.005) -> None:
+        if not self._can_enter(st):
             return
         cur_px = float(self.securities[st.symbol].price)
-        if cur_px <= 0:
+        sl_px = self._round_px(st.symbol, sl)
+        risk = (cur_px - sl_px) if side == 1 else (sl_px - cur_px)
+        sl_pct = risk / cur_px
+        if risk <= 0 or sl_pct < sl_min or sl_pct > sl_max:
             return
+        risk_usd = float(self.portfolio.total_portfolio_value) * self._effective_risk_pct(engine)
+        qty = self._round_qty(st.symbol, self._clamp_qty(st, risk_usd / risk, cur_px), side == 1)
+        if qty == 0.0:
+            return
+        st.pending_meta = {
+            "engine": engine, "side": side, "trig": cur_px, "sl": sl_px, "tp": None,
+            "risk": risk, "qty": qty, "step_locks": (), "trail_mult": trail_mult, "exp": st.idx_5m + 3,
+        }
+        t = self.market_order(st.symbol, qty, tag=engine)
+        if t.status == OrderStatus.INVALID:
+            st.pending_meta = st.pending_ticket = None
+            return
+        if st.pending_meta is not None:
+            st.pending_ticket = t
+
+    def _submit_limit(self, st: CoinState, engine: str, side: int, trig: float, sl: float,
+                      tp_r: float, step_locks, expire_bars: int, sl_max: float = 0.0180,
+                      sl_min: float = 0.0040) -> None:
+        if not self._can_enter(st):
+            return
+        cur_px = float(self.securities[st.symbol].price)
         trig_px = self._round_px(st.symbol, trig)
         sl_px = self._round_px(st.symbol, sl)
         risk = (trig_px - sl_px) if side == 1 else (sl_px - trig_px)
@@ -261,7 +346,7 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
             return
         st.pending_meta = {
             "engine": engine, "side": side, "trig": trig_px, "sl": sl_px, "tp": tp_px,
-            "risk": risk, "qty": qty, "step_locks": step_locks, "exp": st.idx_5m + expire_bars,
+            "risk": risk, "qty": qty, "step_locks": step_locks, "trail_mult": None, "exp": st.idx_5m + expire_bars,
         }
         t = self.limit_order(st.symbol, qty, trig_px, tag=engine)
         if t.status == OrderStatus.INVALID:
@@ -274,8 +359,39 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         st.ema_1d.update(float(bar.Close))
 
     def on_4h(self, st: CoinState, bar) -> None:
+        st.idx_4h += 1
+        h, l, c = float(bar.High), float(bar.Low), float(bar.Close)
+        a4 = st.atr_4h.update(h, l, c)
+        adx4 = st.adx_4h.update(h, l, c)
+
+        # Update Chandelier Trail for open 4H_Donch20_Trail position on closed 4H bar
+        if st.in_position and st.trail_atr_mult is not None and a4 > 0 and st.sl_ticket is not None:
+            if st.active_side == 1:
+                st.best_px = max(st.best_px, h)
+                self._replace_sl(st, st.best_px - st.trail_atr_mult * a4, c, market_if_crossed=True)
+            else:
+                st.best_px = min(st.best_px, l)
+                self._replace_sl(st, st.best_px + st.trail_atr_mult * a4, c, market_if_crossed=True)
+
+        # Evaluate causal 4H Donchian Breakout against strictly prior N closed 4H bars + closed 1D EMA
+        hi_n = max(st.donch_hi_4h) if len(st.donch_hi_4h) == self.donch_lb else None
+        lo_n = min(st.donch_lo_4h) if len(st.donch_lo_4h) == self.donch_lb else None
+        if (
+            self.use_4h_trend and not self.is_warming_up and hi_n is not None and lo_n is not None
+            and st.prev_4h_c is not None and st.prev_4h_hi20 is not None and a4 > 0
+            and st.idx_4h >= st.cooldown_4h and adx4 >= 20.0
+        ):
+            t1d = st.ema_1d.trend
+            if t1d == 1 and c > hi_n and st.prev_4h_c <= st.prev_4h_hi20:
+                self._submit_market(st, "4H_Donch20_Trail", 1, c, c - 2.0 * a4, self.trail_atr_mult)
+            elif t1d == -1 and c < lo_n and st.prev_4h_c >= st.prev_4h_lo20:
+                self._submit_market(st, "4H_Donch20_Trail", -1, c, c + 2.0 * a4, self.trail_atr_mult)
+
+        st.prev_4h_c, st.prev_4h_hi20, st.prev_4h_lo20 = c, hi_n, lo_n
+        st.donch_hi_4h.append(h)
+        st.donch_lo_4h.append(l)
         st.sw_4h.update(bar)
-        st.ema_4h.update(float(bar.Close))
+        st.ema_4h.update(c)
 
     def on_1h(self, st: CoinState, bar) -> None:
         h, l, c = float(bar.High), float(bar.Low), float(bar.Close)
@@ -407,11 +523,14 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
             st.in_position = True
             st.active_engine, st.active_side = pm["engine"], pm["side"]
             st.entry_price = float(oe.fill_price)
+            st.best_px = st.entry_price
             st.sl_price, st.tp_price = pm["sl"], pm["tp"]
-            st.risk_dist, st.qty, st.step_locks = pm["risk"], float(oe.fill_quantity), pm["step_locks"]
+            st.risk_dist, st.qty = pm["risk"], float(oe.fill_quantity)
+            st.step_locks, st.trail_atr_mult = pm["step_locks"], pm["trail_mult"]
             self.trade_counts[st.ticker] += 1
             st.sl_ticket = self.stop_market_order(st.symbol, -st.qty, st.sl_price, tag=f"{st.active_engine}_SL")
-            st.tp_ticket = self.limit_order(st.symbol, -st.qty, st.tp_price, tag=f"{st.active_engine}_TP")
+            if st.tp_price is not None:
+                st.tp_ticket = self.limit_order(st.symbol, -st.qty, st.tp_price, tag=f"{st.active_engine}_TP")
         elif st.in_position:
             for tk_obj in (st.sl_ticket, st.tp_ticket):
                 if tk_obj is not None and tk_obj.order_id != oe.order_id and tk_obj.status not in (
@@ -421,6 +540,7 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
             if self.portfolio[st.symbol].invested:
                 self.liquidate(st.symbol, tag="RESIDUAL_CLOSE")
             st.cooldown_until = st.idx_5m + 4
+            st.cooldown_4h = st.idx_4h + 1
             self._reset_pos(st)
             eq = float(self.portfolio.total_portfolio_value)
             if eq > self.hwm_equity:
@@ -429,13 +549,13 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
     @staticmethod
     def _reset_pos(st: CoinState) -> None:
         st.in_position = False
-        st.active_engine = st.tp_price = st.sl_ticket = st.tp_ticket = None
+        st.active_engine = st.tp_price = st.trail_atr_mult = st.sl_ticket = st.tp_ticket = None
         st.active_side = 0
-        st.entry_price = st.sl_price = st.risk_dist = st.qty = 0.0
+        st.entry_price = st.sl_price = st.risk_dist = st.qty = st.best_px = 0.0
         st.step_locks = ()
 
     def on_end_of_algorithm(self) -> None:
-        self.log(f"=== Binance Multi-Coin Sniper V3.0 | Trades={sum(self.trade_counts.values())} | Eq={self.portfolio.total_portfolio_value:.2f} USDT ===")
+        self.log(f"=== Binance Multi-Coin 4H+1H Causal V4.0 | Trades={sum(self.trade_counts.values())} | Eq={self.portfolio.total_portfolio_value:.2f} USDT ===")
         for tk in self.TICKERS:
             if self.trade_counts[tk] > 0 or self.invalid_counts[tk] > 0:
                 self.log(f"  {tk:10s}: trades={self.trade_counts[tk]} invalid={self.invalid_counts[tk]}")
