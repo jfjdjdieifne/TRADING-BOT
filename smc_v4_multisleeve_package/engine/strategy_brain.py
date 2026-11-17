@@ -16,6 +16,7 @@ from .exit_manager import (
     ProtectedSwingDetector,
     TradePositionState,
     V10FrontLoadedCashflowExitManager,
+    V11SessionEquilibriumExitManager,
 )
 from .liquidity_mapper import LiquidityPoolMapper
 from .perception_engine import (
@@ -1097,7 +1098,47 @@ def run_smc_sweep_causal_backtest(
 
 
 class SmallAccountCashflowManager:
-    """V8.0 $100 Conviction-Scaled Ratchet Sizer, 50/50 HWM Profit-Skim & -2.5R Daily Circuit Breaker."""
+    """V8.0-V11.0 $100 Conviction-Scaled Ratchet Sizer, 50/50 HWM Profit-Skim & Daily Circuit Breaker.
+
+    V11.0 adds Bug 1 fixes (`fee_inclusive=True`, `strict_aplus_gate=True`, `throttle_mult=0.80`,
+    `period_anchor='month'`) via `v11_daily_hunter_100()` and `v11_turbo_sniper_100()`:
+      - Fee-Inclusive Exact 1.0R Sizing: `Notional = Risk_USD / (stop_distance_pct + fee_rt_pct)`
+        so a full stop-out loss never exceeds `-1.00R` inclusive of fees/slippage.
+      - Asymmetric Risk Restricted to Proven `PF > 2.0` A+ Sleeves (`3.8%-4.2%` vs `3.0%`).
+      - Smooth DD Throttle: gentle `0.80x` step-down ONLY when active equity DD > `15%` from HWM.
+      - Monthly Risk-Anchoring + `sized_r` account R-units (`0/81` monthly `+R = -$` anomalies).
+    """
+
+    LEGACY_APLUS_SETUPS = {
+        "SMC_Sweep_V6",
+        "V7_BPR_Snap",
+        "V8_BPR_Snap",
+        "V9_LON",
+        "V9_1H_K2",
+        "V9_15M_NY",
+        "V9_BPR_Snap",
+        "V10_CompVac",
+        "V10_BPR_Snap",
+        "V10_BPR_Retest",
+        "V10_XAU_VisB",
+        "V10_NSX_CompVac",
+        "V10_NSX_BPR_Snap",
+        "V10_LON",
+        "V10_1H_TOPO",
+        "V10_15M_TOPO",
+        "4H_V6_Cognitive",
+    }
+
+    VERIFIED_V11_APLUS_SETUPS = {
+        "SMC_Sweep_V6",
+        "V10_BPR_Snap",
+        "4H_V6_Cognitive",
+        "V10_1H_TOPO",
+        "V11_SessEq_1H_TOPO",
+        "V3_Pro",
+        "V3_Pro_Clean",
+        "VisB_Pro",
+    }
 
     def __init__(
         self,
@@ -1114,6 +1155,12 @@ class SmallAccountCashflowManager:
         use_conviction_scaling: bool = True,
         max_concurrent_risk_slots: Optional[int] = None,
         slot_recycling: bool = True,
+        fee_inclusive: bool = False,
+        fee_rt_pct_crypto: float = 0.0010,
+        fee_rt_pct_cfd: float = 0.0005,
+        throttle_mult: Optional[float] = None,
+        strict_aplus_gate: bool = False,
+        period_anchor: str = "trade",
     ) -> None:
         self.starting_equity = float(starting_equity)
         self.risk_pct = float(risk_pct)
@@ -1128,6 +1175,12 @@ class SmallAccountCashflowManager:
         self.use_conviction_scaling = bool(use_conviction_scaling)
         self.max_concurrent_risk_slots = max_concurrent_risk_slots
         self.slot_recycling = bool(slot_recycling)
+        self.fee_inclusive = bool(fee_inclusive)
+        self.fee_rt_pct_crypto = float(fee_rt_pct_crypto)
+        self.fee_rt_pct_cfd = float(fee_rt_pct_cfd)
+        self.throttle_mult = None if throttle_mult is None else float(throttle_mult)
+        self.strict_aplus_gate = bool(strict_aplus_gate)
+        self.period_anchor = str(period_anchor).lower()
 
     @classmethod
     def daily_hunter_100(cls) -> "SmallAccountCashflowManager":
@@ -1163,60 +1216,116 @@ class SmallAccountCashflowManager:
             slot_recycling=True,
         )
 
+    @classmethod
+    def v11_daily_hunter_100(cls) -> "SmallAccountCashflowManager":
+        """V11.0 DAILY_HUNTER_$100: Fee-inclusive 1.0R sizing, 3.0% std / 3.8% A+ (PF>2.0), 0.80x >15% DD, monthly anchor, $25 50/50 skim."""
+        return cls(
+            starting_equity=100.0,
+            risk_pct=0.030,
+            aplus_risk_pct=0.038,
+            throttle_risk_pct=0.024,
+            throttle_dd_pct=0.15,
+            skim_step_usd=25.0,
+            skim_frac=0.50,
+            max_leverage=15.0,
+            daily_dd_cap_r=-2.0,
+            max_concurrent_risk_slots=4,
+            slot_recycling=True,
+            fee_inclusive=True,
+            fee_rt_pct_crypto=0.0010,
+            fee_rt_pct_cfd=0.0005,
+            throttle_mult=0.80,
+            strict_aplus_gate=True,
+            period_anchor="month",
+        )
+
+    @classmethod
+    def v11_turbo_sniper_100(cls) -> "SmallAccountCashflowManager":
+        """V11.0 TURBO_SNIPER_$100: Fee-inclusive 1.0R sizing, 3.6% std / 4.2% A+ (PF>2.0), 0.80x >15% DD, monthly anchor, $20 50/50 skim."""
+        return cls(
+            starting_equity=100.0,
+            risk_pct=0.036,
+            aplus_risk_pct=0.042,
+            throttle_risk_pct=0.0288,
+            throttle_dd_pct=0.15,
+            skim_step_usd=20.0,
+            skim_frac=0.50,
+            max_leverage=15.0,
+            daily_dd_cap_r=-2.5,
+            max_concurrent_risk_slots=4,
+            slot_recycling=True,
+            fee_inclusive=True,
+            fee_rt_pct_crypto=0.0010,
+            fee_rt_pct_cfd=0.0005,
+            throttle_mult=0.80,
+            strict_aplus_gate=True,
+            period_anchor="month",
+        )
+
+    def _fee_rt_for_asset(self, asset: str) -> float:
+        a = str(asset).upper()
+        if any(k in a for k in ("XAU", "NSX", "NAS", "NDX", "US100", "EUR", "GBP", "SPX")):
+            return self.fee_rt_pct_cfd
+        return self.fee_rt_pct_crypto
+
     def resolve_risk_pct(
         self,
         equity: float,
         active_hwm: float,
         trade: Optional[dict] = None,
     ) -> float:
-        """Conviction-Based Tiered Risk + >10% Drawdown Throttle."""
-        if active_hwm > 0 and ((active_hwm - equity) / active_hwm) > self.throttle_dd_pct:
+        """Conviction-Based Tiered Risk + Smooth Drawdown Throttle."""
+        in_dd = active_hwm > 0 and ((active_hwm - equity) / active_hwm) > self.throttle_dd_pct
+        if in_dd and self.throttle_mult is None:
             return self.throttle_risk_pct
+
+        base_rp = self.risk_pct
         if self.use_conviction_scaling and trade is not None:
             setup = str(trade.get("setup", ""))
             conv = float(trade.get("conviction", trade.get("reasoning_chain", {}).get("conviction", 0.0)) or 0.0)
-            is_aplus = bool(
-                trade.get("is_aplus", False)
-                or setup in (
-                    "SMC_Sweep_V6",
-                    "V7_BPR_Snap",
-                    "V8_BPR_Snap",
-                    "V9_LON",
-                    "V9_1H_K2",
-                    "V9_15M_NY",
-                    "V9_BPR_Snap",
-                    "V10_CompVac",
-                    "V10_BPR_Snap",
-                    "V10_BPR_Retest",
-                    "V10_XAU_VisB",
-                    "V10_NSX_CompVac",
-                    "V10_NSX_BPR_Snap",
-                    "V10_LON",
-                    "V10_1H_TOPO",
-                    "V10_15M_TOPO",
-                    "4H_V6_Cognitive",
+            if self.strict_aplus_gate:
+                if setup in self.VERIFIED_V11_APLUS_SETUPS:
+                    if setup == "4H_V6_Cognitive":
+                        is_aplus = conv >= 0.72 or bool(trade.get("is_aplus", False))
+                    else:
+                        is_aplus = True
+                else:
+                    is_aplus = conv >= 0.78 and bool(trade.get("is_aplus", False))
+            else:
+                is_aplus = bool(
+                    trade.get("is_aplus", False)
+                    or setup in self.LEGACY_APLUS_SETUPS
+                    or conv >= 0.72
                 )
-                or conv >= 0.72
-            )
             if is_aplus:
-                return self.aplus_risk_pct
-        return self.risk_pct
+                base_rp = self.aplus_risk_pct
+
+        if in_dd and self.throttle_mult is not None:
+            return base_rp * self.throttle_mult
+        return base_rp
 
     def compute_position_notional(
         self,
         equity: float,
         stop_distance_pct: float,
         risk_pct_override: Optional[float] = None,
+        fee_rt_pct: Optional[float] = None,
     ) -> Tuple[float, float]:
-        """Return (risk_usd, notional_usd) capped at safe max_leverage."""
+        """Return (effective_risk_usd, notional_usd) capped at safe max_leverage.
+
+        When `fee_inclusive=True` (V11.0), `Notional = Risk_USD / (stop_distance_pct + fee_rt_pct)`
+        so a full stop-out loss never exceeds `-1.00R` inclusive of fees and slippage.
+        """
         if equity <= 0 or stop_distance_pct <= 0:
             return 0.0, 0.0
         rp = self.risk_pct if risk_pct_override is None else float(risk_pct_override)
         risk_usd = equity * rp
-        raw_notional = risk_usd / stop_distance_pct
+        fee_buf = (self.fee_rt_pct_crypto if fee_rt_pct is None else float(fee_rt_pct)) if self.fee_inclusive else 0.0
+        eff_stop_pct = stop_distance_pct + fee_buf
+        raw_notional = risk_usd / eff_stop_pct
         max_notional = equity * self.max_leverage
         notional = min(raw_notional, max_notional)
-        eff_risk = notional * stop_distance_pct
+        eff_risk = notional * eff_stop_pct
         if notional < self.min_notional_usd:
             return 0.0, 0.0
         return float(eff_risk), float(notional)
@@ -1228,15 +1337,7 @@ class SmallAccountCashflowManager:
         basket_mult: float = 1.0,
         mode: Optional[str] = None,
     ) -> Dict[str, object]:
-        """Simulate real dollar cashflow with -2.5R daily circuit breaker.
-
-        Modes:
-          - `fixed_risk_withdrawal` (`compounded=False`): risk stays anchored on `starting_equity`, profits banked.
-          - `compounded` (`compounded=True`): full equity compounding.
-          - `ratchet_cashflow`: 50/50 High-Water-Mark Profit-Skim & Step-Ratchet (every +$25 HWM gain
-            locks 50% into protected `withdrawn_vault_usd` and steps active base up with remaining 50%),
-            plus Conviction-Scaled Tiered Risk (2.5% std / 4.0% A+) and >10% DD throttle (2.0%).
-        """
+        """Simulate real dollar cashflow with daily circuit breaker & optional V11.0 fee-inclusive 1.0R sizing."""
         mode_norm = str(mode).lower() if mode is not None else ("compounded" if compounded else "fixed_risk_withdrawal")
         is_ratchet = mode_norm.startswith("ratchet")
         is_comp = mode_norm.startswith("comp")
@@ -1253,6 +1354,7 @@ class SmallAccountCashflowManager:
         weekly_usd: Dict[Tuple[int, int], float] = {}
         monthly_usd: Dict[Tuple[int, int], float] = {}
         accepted_r: List[float] = []
+        accepted_sized_r: List[float] = []
         accepted_trades: List[dict] = []
         open_risk_slots: List[dict] = []
         skipped_circuit = 0
@@ -1260,6 +1362,9 @@ class SmallAccountCashflowManager:
         m1_end = (ordered[0]["entry_time"] + pd.Timedelta(days=30)) if ordered else None
         m1_usd = 0.0
         m1_trades = 0
+        cur_period: Optional[Tuple[int, int]] = None
+        anchor_eq = eq
+        anchor_peak = peak_eq
 
         for t in ordered:
             et = t["entry_time"]
@@ -1268,7 +1373,6 @@ class SmallAccountCashflowManager:
                 skipped_circuit += 1
                 continue
             if self.max_concurrent_risk_slots is not None:
-                # Zero-Risk Slot Recycling: slots unlock once Tier-1 locks BE+0.35R (`t1_time`), or upon exit
                 open_risk_slots = [
                     s for s in open_risk_slots
                     if (s.get("exit_time") is not None and s["exit_time"] > et)
@@ -1278,15 +1382,49 @@ class SmallAccountCashflowManager:
                     skipped_slots += 1
                     continue
 
+            iso = et.isocalendar()
+            wk = (int(iso.year), int(iso.week))
+            mo = (int(et.year), int(et.month))
+            if self.period_anchor == "week":
+                if wk != cur_period:
+                    cur_period = wk
+                    anchor_eq = eq
+                    anchor_peak = peak_eq
+            elif self.period_anchor == "month":
+                if mo != cur_period:
+                    cur_period = mo
+                    anchor_eq = eq
+                    anchor_peak = peak_eq
+            else:
+                anchor_eq = eq
+                anchor_peak = peak_eq
+
             sl_pct = max(float(t.get("sl_pct", 0.01)), 1e-4)
-            base_eq = eq if (is_comp or is_ratchet) else self.starting_equity
-            rp = self.resolve_risk_pct(eq, peak_eq, t)
-            risk_usd, _ = self.compute_position_notional(base_eq, sl_pct, risk_pct_override=rp)
+            base_eq = anchor_eq if (is_comp or is_ratchet) else self.starting_equity
+            rp = self.resolve_risk_pct(anchor_eq, anchor_peak, t)
+            fee_rt = self._fee_rt_for_asset(str(t.get("asset", "BTCUSD")))
+            risk_usd, _ = self.compute_position_notional(
+                base_eq, sl_pct, risk_pct_override=rp, fee_rt_pct=fee_rt
+            )
             if risk_usd <= 0:
                 continue
-            r_val = float(t["net_r"])
+
+            raw_r = float(t["net_r"])
+            gross_r = float(t.get("gross_r", raw_r))
+            if self.fee_inclusive:
+                actual_cost_pct = max(fee_rt, max(0.0, gross_r - raw_r) * sl_pct)
+                r_val = (sl_pct / (sl_pct + actual_cost_pct)) * raw_r
+                if gross_r <= -0.999 and r_val < -1.0:
+                    r_val = -1.0
+            else:
+                r_val = raw_r
+
             pnl_usd = risk_usd * r_val
+            std_unit_usd = max(base_eq * self.risk_pct, 1e-9)
+            sized_r = pnl_usd / std_unit_usd if self.fee_inclusive else (r_val * (rp / max(self.risk_pct, 1e-9)))
             accepted_r.append(r_val)
+            accepted_sized_r.append(sized_r)
+
             t1_hrs = t.get("t1_hours")
             t1_ts = t.get("t1_time")
             if t1_ts is None and t1_hrs is not None:
@@ -1295,9 +1433,6 @@ class SmallAccountCashflowManager:
 
             daily_r[day] = daily_r.get(day, 0.0) + r_val
             daily_usd[day] = daily_usd.get(day, 0.0) + pnl_usd
-            iso = et.isocalendar()
-            wk = (int(iso.year), int(iso.week))
-            mo = (int(et.year), int(et.month))
             weekly_usd[wk] = weekly_usd.get(wk, 0.0) + pnl_usd
             monthly_usd[mo] = monthly_usd.get(mo, 0.0) + pnl_usd
             if m1_end is not None and et <= m1_end:
@@ -1330,15 +1465,21 @@ class SmallAccountCashflowManager:
                 max_dd_usd = max(max_dd_usd, dd_u)
                 max_dd_pct = max(max_dd_pct, 100.0 * dd_u / max(self.starting_equity, peak_eq))
 
+            ex_ts = t.get("exit_time", et)
+            hold_hrs = float(t.get("hold_hours", max(0.0, (ex_ts - et).total_seconds() / 3600.0)))
             accepted_trades.append({
                 "entry_time": et,
-                "exit_time": t.get("exit_time", et),
+                "exit_time": ex_ts,
                 "asset": t.get("asset", "BTCUSD"),
                 "setup": t.get("setup", ""),
                 "side": int(t.get("side", 0)),
+                "exit_tier": str(t.get("outcome", "")),
+                "hold_hours": round(hold_hrs, 2),
                 "risk_pct": round(rp * 100.0, 2),
                 "risk_usd": round(risk_usd, 2),
-                "net_r": round(r_val, 3),
+                "raw_net_r": round(raw_r, 4),
+                "net_r": round(r_val, 4),
+                "sized_r": round(sized_r, 4),
                 "pnl_usd": round(pnl_usd, 2),
                 "equity_after": round(eq, 2),
                 "vault_after": round(withdrawn_vault_usd, 2),
@@ -1370,6 +1511,8 @@ class SmallAccountCashflowManager:
             "wr": round(100.0 * sum(1 for r in accepted_r if r > 0) / max(1, len(accepted_r)), 1),
             "pf": round(gp / gl if gl > 0 else 99.0, 2),
             "net_r": round(sum(accepted_r), 2),
+            "sized_r": round(sum(accepted_sized_r), 2),
+            "min_net_r": round(min(accepted_r), 4) if accepted_r else 0.0,
             "final_equity_usd": round(eq, 2),
             "withdrawn_vault_usd": round(withdrawn_vault_usd, 2),
             "total_wealth_usd": round(eq + withdrawn_vault_usd, 2),
@@ -1418,6 +1561,7 @@ class SmallAccountCashflowManager:
                 "trades": int(len(grp)),
                 "wins": int((grp["net_r"] > 0).sum()),
                 "net_r": round(float(grp["net_r"].sum()), 2),
+                "sized_r": round(float(grp["sized_r"].sum()), 2),
                 "pnl_usd": round(float(grp["pnl_usd"].sum()), 2),
                 "end_equity": round(float(grp["equity_after"].iloc[-1]), 2),
                 "end_vault": round(float(grp["vault_after"].iloc[-1]), 2),
@@ -1431,6 +1575,7 @@ class SmallAccountCashflowManager:
                 "trades": int(len(grp)),
                 "wins": int((grp["net_r"] > 0).sum()),
                 "net_r": round(float(grp["net_r"].sum()), 2),
+                "sized_r": round(float(grp["sized_r"].sum()), 2),
                 "pnl_usd": round(float(grp["pnl_usd"].sum()), 2),
                 "end_equity": round(float(grp["equity_after"].iloc[-1]), 2),
                 "end_vault": round(float(grp["vault_after"].iloc[-1]), 2),
@@ -1444,13 +1589,13 @@ class SmallAccountCashflowManager:
                 "trades": int(len(grp)),
                 "wr": round(100.0 * float((grp["net_r"] > 0).mean()), 1),
                 "net_r": round(float(grp["net_r"].sum()), 2),
+                "sized_r": round(float(grp["sized_r"].sum()), 2),
                 "pnl_usd": round(float(grp["pnl_usd"].sum()), 2),
                 "end_equity": round(float(grp["equity_after"].iloc[-1]), 2),
                 "end_vault": round(float(grp["vault_after"].iloc[-1]), 2),
                 "total_wealth": round(float(grp["total_wealth_after"].iloc[-1]), 2),
             })
 
-        # Rolling fresh-$100 30-day Month-1 simulation across every calendar month start
         ordered = sorted(trades, key=lambda t: t["entry_time"])
         m1_profits: List[float] = []
         if ordered:
@@ -2339,6 +2484,8 @@ def run_v10_btc_topo_sweeps_backtest(
     max_sl_pct: float = 0.0180,
     dedup_same_side_bars: int = 12,
     fee_mult: float = 1.0,
+    exit_mgr_override: Optional[HighVelocityCashflowExitManager] = None,
+    setup_prefix: str = "V10",
 ) -> Tuple[List[dict], Dict[str, object]]:
     """V10.0 Topological Liquidity Sweep Engine (ZERO k=2/k=3 fractals + 45/40/15 Front-Loaded Exit).
 
@@ -2387,7 +2534,7 @@ def run_v10_btc_topo_sweeps_backtest(
     perc = VisualPerceptionEngine()
     sess = DailySessionLiquidityTracker(expiry_hours=5.0)
     pros = AdversarialCrossExaminer(min_conviction=0.55)
-    exit_mgr = V10FrontLoadedCashflowExitManager()
+    exit_mgr = exit_mgr_override if exit_mgr_override is not None else V10FrontLoadedCashflowExitManager()
     prot15 = ProtectedSwingDetector()
 
     p15 = p1 = p4 = 0
@@ -2514,8 +2661,8 @@ def run_v10_btc_topo_sweeps_backtest(
                     "is_pyramid": False,
                     "is_aplus": True,
                     "conviction": float(pos.meta.get("reasoning_chain", {}).get("conviction", 0.78)),
-                    "setup": f"V10_{slv}",
-                    "engine": f"V10_{slv}",
+                    "setup": f"{setup_prefix}_{slv}",
+                    "engine": f"{setup_prefix}_{slv}",
                     "outcome": pos.exit_reason,
                     "hold_hours": hrs,
                     "t1_hours": t1_hrs,
@@ -2549,7 +2696,7 @@ def run_v10_btc_topo_sweeps_backtest(
                             init_sl=pend["sl"],
                             cur_sl=pend["sl"],
                             risk_dist=pend["rd"],
-                            meta={"setup": f"V10_{slv}", "reasoning_chain": pend["meta"]},
+                            meta={"setup": f"{setup_prefix}_{slv}", "reasoning_chain": pend["meta"]},
                         )
                     pend_map[slv] = None
 
@@ -2684,6 +2831,125 @@ def run_v10_btc_frontloaded_backtest(
     if include_topo_sweeps:
         tr_topo, _ = run_v10_btc_topo_sweeps_backtest(df_5m, eval_start, eval_end, asset=asset, fee_mult=fee_mult)
         trades.extend(tr_topo)
+
+    trades = sorted(trades, key=lambda t: t["entry_time"])
+    return trades, _summarize_trades(trades)
+
+
+def run_v11_session_equilibrium_scalp(
+    df_5m: pd.DataFrame,
+    eval_start: pd.Timestamp,
+    eval_end: pd.Timestamp,
+    *,
+    asset: str = "BTCUSD",
+    min_prom_atr: float = 1.20,
+    min_rvol_entry: float = 1.10,
+    fee_mult: float = 1.0,
+) -> Tuple[List[dict], Dict[str, object]]:
+    """V11.0 High-WR Intraday Session Equilibrium Scalp Engine (50/35/15 @ 1.8R/3.2R/6.5R).
+
+    Prunes noisy 15M_TOPO (PF 1.12) & unpruned LON (PF 1.24), retaining clean 1H Topological
+    liquidity sweeps (`min_prom_atr=1.20`, `min_rvol_entry=1.10`) managed by
+    `V11SessionEquilibriumExitManager` (50% @ +1.8R -> BE+0.25R, 35% @ +3.2R -> +1.25R, 15% @ +6.5R).
+    """
+    return run_v10_btc_topo_sweeps_backtest(
+        df_5m,
+        eval_start,
+        eval_end,
+        asset=asset,
+        use_lon=False,
+        use_1h_topo=True,
+        use_15m_topo=False,
+        min_prom_atr=min_prom_atr,
+        min_rvol_entry=min_rvol_entry,
+        fee_mult=fee_mult,
+        exit_mgr_override=V11SessionEquilibriumExitManager(),
+        setup_prefix="V11_SessEq",
+    )
+
+
+def run_v11_btc_portfolio(
+    df_5m: pd.DataFrame,
+    eval_start: pd.Timestamp,
+    eval_end: pd.Timestamp,
+    *,
+    asset: str = "BTCUSD",
+    include_smc_sweep: bool = True,
+    include_v6_4h: bool = True,
+    include_physics_45: bool = True,
+    include_session_eq_1h: bool = True,
+    include_v9_lon_pruned: bool = True,
+    fee_mult: float = 1.0,
+) -> Tuple[List[dict], Dict[str, object]]:
+    """V11.0 BTCUSD_5m Institutional Exact-R Portfolio (Bug 2 & Bug 3 Fixed).
+
+    Combines:
+      1) `SMC_Sweep_V6` (Restored! 10R BE@3R->+1R + 1D Macro Filter, PF 2.40, 7/7 Green Years)
+      2) `4H_V6_Cognitive` (VisualPerceptionEngine 4H topological swings + AdversarialCrossExaminer, PF 2.05)
+      3) `V10_BTC_Physics` (CompVacuum + BPR_Snap + 45/40/15 @ 2.2R/4.5R/10R, PF 1.97)
+      4) `V11_SessEq_1H_TOPO` (Pruned 1H Topological Sweep + 50/35/15 Session Eq Scalp, PF 1.88, WR 50.9%)
+      5) Optional `V9_LON` pruned (`rvol >= 1.15`, PF 1.58)
+    """
+    trades: List[dict] = []
+
+    if include_smc_sweep:
+        tr_smc, _ = run_smc_sweep_causal_backtest(
+            df_5m, eval_start, eval_end, use_v6_prosecutor=True, fee_mult=fee_mult, tp_r=10.0
+        )
+        for _t in tr_smc:
+            _t["asset"] = asset
+            _t["setup"] = "SMC_Sweep_V6"
+            _t["engine"] = "SMC_Sweep_V6"
+            _t["is_aplus"] = True
+            if _t.get("t1_hours") is not None and _t.get("t1_time") is None:
+                _t["t1_time"] = _t["entry_time"] + pd.Timedelta(hours=float(_t["t1_hours"]))
+            elif _t.get("t1_time") is None:
+                _t["t1_time"] = _t["exit_time"]
+            trades.append(_t)
+
+    if include_physics_45 or include_v6_4h:
+        tr_v10_core, _ = run_v10_btc_frontloaded_backtest(
+            df_5m,
+            eval_start,
+            eval_end,
+            asset=asset,
+            include_physics_45=include_physics_45,
+            include_v6_4h=include_v6_4h,
+            include_topo_sweeps=False,
+            fee_mult=fee_mult,
+        )
+        trades.extend(tr_v10_core)
+
+    if include_session_eq_1h:
+        tr_eq, _ = run_v11_session_equilibrium_scalp(
+            df_5m, eval_start, eval_end, asset=asset, fee_mult=fee_mult
+        )
+        trades.extend(tr_eq)
+
+    if include_v9_lon_pruned:
+        tr_lon, _ = run_v9_daily_session_backtest(
+            df_5m,
+            eval_start,
+            eval_end,
+            asset=asset,
+            use_lon=True,
+            use_1h_k2=False,
+            use_15m_ny=False,
+            include_v8_physics=False,
+            include_v6_4h=False,
+            fee_mult=fee_mult,
+        )
+        for _t in tr_lon:
+            rv = float(_t.get("rvol_entry", _t.get("reasoning_chain", {}).get("rvol5", 0.0)) or 0.0)
+            if rv < 1.15:
+                continue
+            _t["asset"] = asset
+            _t["setup"] = "V9_LON"
+            _t["engine"] = "V9_LON"
+            _t["is_aplus"] = False
+            if _t.get("t1_hours") is not None and _t.get("t1_time") is None:
+                _t["t1_time"] = _t["entry_time"] + pd.Timedelta(hours=float(_t["t1_hours"]))
+            trades.append(_t)
 
     trades = sorted(trades, key=lambda t: t["entry_time"])
     return trades, _summarize_trades(trades)

@@ -1,12 +1,13 @@
-# QUANTCONNECT.COM - Binance Futures Multi-Coin V10.0 Front-Loaded Cashflow + Topological Swings + 4H Cognitive
-# Audited with ZERO HTF lookahead on 823,154 BTC 5m bars (2020-2026, real Binance VIP0 fees+slip+funding):
-#   1) Sleeve 1 (use_v10_sweeps=true): V10 Topological Session Sweeps (ZERO k=2/k=3: ATR-ZigZag `prom>=1.40` +
-#      `LON` 07-12 UTC swept >=12 UTC + `1H_TOPO` + `15M_TOPO` + Prosecutor) -> 45/40/15 Front-Loaded Exit
+# QUANTCONNECT.COM - Binance Futures Multi-Coin V11.0 Institutional Exact-R Cashflow + Topological Swings + 4H Cognitive
+# Audited with ZERO HTF lookahead on 823,154 BTC 5m bars (2020-2026, fee-inclusive exact 1.0R sizing):
+#   1) Sleeve 1 (use_v10=true): V11_SessEq_1H_TOPO (pruned 15M_TOPO & unpruned LON; ATR-ZigZag prom>=1.20, rvol>=1.10)
+#      -> 50/35/15 Session Equilibrium Exit (50%@+1.8R->BE+0.25R, 35%@+3.2R->+1.25R, 15%@+6.5R) + pruned V9_LON (rvol>=1.15)
 #   2) Sleeve 2 (use_v8=true): V10_Intraday_Physics (5m CompVacuum + BPR/iFVG + Bayesian Prosecutor + 45/40/15 @ 2.2R/4.5R/10R)
 #   3) Sleeve 3 (use_4h_trend=true): 4H_V6_Cognitive (Topological 4H Swings + 2-Stage Pyramid + Climax Ratchet)
-#   - Account Profiles: `DAILY_HUNTER` (3.0%/4.5%, thr=2.0%, 4 risk slots, -2.0R/day CB, $25 50/50 vault skim)
-#     and `TURBO_SNIPER` (4.0%/5.5%, thr=2.5%, 4 risk slots, -2.5R/day CB, $20 50/50 vault skim)
-#   - Zero-Risk Slot Recycling: frees risk slot immediately once Tier-1 banks 45% @ +2.2R and locks BE+0.35R.
+#   4) Sleeve 4 (use_smc=true): SMC_Sweep_V6 (Restored! 10R BE@3R->+1R + 1D Macro Filter, PF 2.40)
+#   - Account Profiles: `DAILY_HUNTER` (3.0%/3.8% A+, 0.80x >15% DD, 4 risk slots, -2.0R/day CB, $25 50/50 vault skim)
+#     and `TURBO_SNIPER` (3.6%/4.2% A+, 0.80x >15% DD, 4 risk slots, -2.5R/day CB, $20 50/50 vault skim)
+#   - Fee-Inclusive Exact 1.0R Sizing: Notional = Risk_USD / (sl_pct + 0.0010 RT fee+slip buffer).
 
 from AlgorithmImports import *
 from collections import deque
@@ -501,8 +502,9 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         "DOGEUSDT", "ADAUSDT", "AVAXUSDT", "LINKUSDT", "SUIUSDT",
     )
     ENGINE_RISK = {
+        "V11_SessEq_1H_TOPO": 0.020,
         "V10_LON": 0.015,
-        "V10_1H_TOPO": 0.015,
+        "V10_1H_TOPO": 0.020,
         "V10_15M_TOPO": 0.015,
         "V10_CompVac": 0.015,
         "V10_BPR_Snap": 0.020,
@@ -539,14 +541,17 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         )
         self.v10_profile = str(self.get_parameter("v10_profile") or "DAILY_HUNTER").upper()
         if self.v10_profile == "TURBO_SNIPER":
-            def_std, def_ap, def_thr, def_skim, def_cb = 0.040, 0.055, 0.025, 20.0, -2.5
+            def_std, def_ap, def_thr, def_skim, def_cb = 0.036, 0.042, 0.0288, 20.0, -2.5
         else:
-            def_std, def_ap, def_thr, def_skim, def_cb = 0.030, 0.045, 0.020, 25.0, -2.0
+            def_std, def_ap, def_thr, def_skim, def_cb = 0.030, 0.038, 0.024, 25.0, -2.0
         self.skim_step_usd = float(self.get_parameter("skim_step_usd") or def_skim)
         self.skim_frac = float(self.get_parameter("skim_frac") or 0.50)
         self.small_risk_pct = float(self.get_parameter("small_risk_pct") or def_std)
         self.small_aplus_risk_pct = float(self.get_parameter("small_aplus_risk_pct") or def_ap)
         self.small_throttle_risk_pct = float(self.get_parameter("small_throttle_risk_pct") or def_thr)
+        self.throttle_dd_pct = float(self.get_parameter("throttle_dd_pct") or 0.15)
+        self.throttle_mult = float(self.get_parameter("throttle_mult") or 0.80)
+        self.fee_rt_pct = float(self.get_parameter("fee_rt_pct") or 0.0010)
         self.max_leverage = float(self.get_parameter("max_leverage") or (15.0 if self.small_account_mode else 10.0))
         self.daily_dd_cap_r = float(self.get_parameter("daily_dd_cap_r") or def_cb)
         self.daily_r_day = None
@@ -614,15 +619,12 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         active_eq = max(1.0, eq - self.withdrawn_vault_usd)
         dd = (self.hwm_equity - active_eq) / self.hwm_equity if self.hwm_equity > 0 else 0.0
         if self.small_account_mode:
-            if dd > 0.08:
-                base = self.small_throttle_risk_pct
-            elif is_aplus or engine in (
-                "SMC_Sweep_V6", "V10_BPR_Snap", "V10_CompVac", "V10_LON", "V10_1H_TOPO", "V10_15M_TOPO",
-                "V8_BPR_Snap", "V7_BPR_Snap", "V9_LON", "V9_1H_K2", "V9_15M_NY", "4H_V6_Cognitive",
-            ):
+            if is_aplus or engine in ("SMC_Sweep_V6", "V10_BPR_Snap", "V11_SessEq_1H_TOPO", "V10_1H_TOPO", "V8_BPR_Snap"):
                 base = self.small_aplus_risk_pct
             else:
                 base = self.small_risk_pct
+            if dd > self.throttle_dd_pct:
+                base *= self.throttle_mult
             return base * self.risk_scale * mult
         brake = 0.50 if dd >= 0.12 else (0.70 if dd >= 0.08 else 1.0)
         base = self.ENGINE_RISK.get(engine, 0.015)
@@ -732,7 +734,8 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
             return
         risk_base = max(1.0, float(self.portfolio.total_portfolio_value) - (self.withdrawn_vault_usd if self.small_account_mode else 0.0))
         risk_usd = risk_base * self._effective_risk_pct(engine, risk_mult)
-        qty = self._round_qty(st.symbol, self._clamp_qty(st, risk_usd / risk, cur_px), side == 1)
+        eff_risk = risk + cur_px * self.fee_rt_pct
+        qty = self._round_qty(st.symbol, self._clamp_qty(st, risk_usd / eff_risk, cur_px), side == 1)
         if qty == 0.0:
             return
         st.pending_meta = {
@@ -767,7 +770,8 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         tp_px = self._round_px(st.symbol, trig_px + side * tp_r * risk)
         risk_base = max(1.0, float(self.portfolio.total_portfolio_value) - (self.withdrawn_vault_usd if self.small_account_mode else 0.0))
         risk_usd = risk_base * self._effective_risk_pct(engine, risk_mult, is_aplus=is_aplus)
-        qty = self._round_qty(st.symbol, self._clamp_qty(st, risk_usd / risk, trig_px), side == 1)
+        eff_risk = risk + trig_px * self.fee_rt_pct
+        qty = self._round_qty(st.symbol, self._clamp_qty(st, risk_usd / eff_risk, trig_px), side == 1)
         if qty == 0.0:
             return
         st.pending_meta = {
@@ -944,10 +948,10 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         if self.use_v10:
             t1 = st.topo_1h
             for idx_s, p_lo, prom in list(t1.act_lo):
-                if (t1.bar_idx + 1 - idx_s) >= 3 and prom >= 1.40 and l < p_lo and c > p_lo:
+                if (t1.bar_idx + 1 - idx_s) >= 3 and prom >= 1.20 and l < p_lo and c > p_lo:
                     st.cands_1h_k2.append({"side": 1, "start_i": st.idx_5m, "sl_base": l})
             for idx_s, p_hi, prom in list(t1.act_hi):
-                if (t1.bar_idx + 1 - idx_s) >= 3 and prom >= 1.40 and h > p_hi and c < p_hi:
+                if (t1.bar_idx + 1 - idx_s) >= 3 and prom >= 1.20 and h > p_hi and c < p_hi:
                     st.cands_1h_k2.append({"side": -1, "start_i": st.idx_5m, "sl_base": h})
         else:
             k2 = st.sw_1h
@@ -1139,7 +1143,7 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
                                 origin_px=orig_v8, is_aplus=(eng_v8 == "V8_BPR_Snap" or conv8 >= 0.72),
                             )
 
-            # V10.0 / V9.0 Topological Daily Session & Multi-TF Liquidity Sweeps -> 45/40/15 Front-Loaded Cashflow
+            # V11.0 / V9.0 Pruned Topological 1H Liquidity Sweep (50/35/15 Session Eq) + pruned V9_LON (rvol >= 1.15)
             if self.use_v9 and a5 > 0 and st.last_ker_4h >= 0.15 and c2b >= (1.15 * a5 if self.use_v10 else a5) and self._can_enter(st):
                 vavg5 = (sum(st.vols_5m) / len(st.vols_5m)) if st.vols_5m else 1.0
                 rvol5 = (vol / vavg5) if vavg5 > 0 else 1.0
@@ -1147,12 +1151,15 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
                 htf4_tr = st.topo_4h.trend if self.use_v10 else st.sw_4h.trend
                 sw5_hi = st.topo_5m.last_hi if self.use_v10 else st.sw_5m.last_high
                 sw5_lo = st.topo_5m.last_lo if self.use_v10 else st.sw_5m.last_low
-                slv_names = ("V10_LON", "V10_1H_TOPO", "V10_15M_TOPO") if self.use_v10 else ("V9_LON", "V9_1H_K2", "V9_15M_NY")
-                for slv_tag, clist, ok_hr in (
-                    (slv_names[0], st.session_tracker.cands_lon, dt.hour >= 12),
-                    (slv_names[1], st.cands_1h_k2, dt.hour >= 9),
-                    (slv_names[2], st.cands_15m_ny, (12 <= dt.hour <= 21) and rvol5 >= 1.20),
-                ):
+                slv_specs = (
+                    ("V11_SessEq_1H_TOPO", st.cands_1h_k2, dt.hour >= 9 and rvol5 >= 1.10, True),
+                    ("V9_LON", st.session_tracker.cands_lon, dt.hour >= 12 and rvol5 >= 1.15, False),
+                ) if self.use_v10 else (
+                    ("V9_LON", st.session_tracker.cands_lon, dt.hour >= 12, False),
+                    ("V9_1H_K2", st.cands_1h_k2, dt.hour >= 9, False),
+                    ("V9_15M_NY", st.cands_15m_ny, (12 <= dt.hour <= 21) and rvol5 >= 1.20, False),
+                )
+                for slv_tag, clist, ok_hr, is_ap in slv_specs:
                     if not ok_hr:
                         continue
                     placed_v9 = False
@@ -1176,17 +1183,26 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
                                 ok_fvg = True
                         if ok_fvg:
                             st.last_v9_side_bar[sd] = st.idx_5m
-                            self._submit_limit(
-                                st, slv_tag, sd, ep_v9, slp_v9, 10.0, (), 8,
-                                0.0180, 0.0020, risk_mult=self.v9_risk_mult,
-                                bank_r=2.2 if self.use_v10 else 2.0,
-                                bank_frac=0.45 if self.use_v10 else 0.15,
-                                be_lock_r=0.35,
-                                bank2_r=4.5,
-                                bank2_frac=0.40 if self.use_v10 else 0.20,
-                                be2_lock_r=2.00,
-                                is_aplus=True,
-                            )
+                            if slv_tag == "V11_SessEq_1H_TOPO":
+                                self._submit_limit(
+                                    st, slv_tag, sd, ep_v9, slp_v9, 6.5, (), 8,
+                                    0.0180, 0.0020, risk_mult=self.v9_risk_mult,
+                                    bank_r=1.8, bank_frac=0.50, be_lock_r=0.25,
+                                    bank2_r=3.2, bank2_frac=0.35, be2_lock_r=1.25,
+                                    is_aplus=True,
+                                )
+                            else:
+                                self._submit_limit(
+                                    st, slv_tag, sd, ep_v9, slp_v9, 10.0, (), 8,
+                                    0.0180, 0.0020, risk_mult=self.v9_risk_mult,
+                                    bank_r=2.2 if self.use_v10 else 2.0,
+                                    bank_frac=0.45 if self.use_v10 else 0.15,
+                                    be_lock_r=0.35,
+                                    bank2_r=4.5,
+                                    bank2_frac=0.40 if self.use_v10 else 0.20,
+                                    be2_lock_r=2.00,
+                                    is_aplus=is_ap,
+                                )
                             placed_v9 = True
                             break
                     if placed_v9:

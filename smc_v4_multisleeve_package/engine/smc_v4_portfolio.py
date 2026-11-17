@@ -1951,3 +1951,191 @@ def run_v10_multiasset_portfolio(
     }
 
 
+def _normalize_v11_trade(t: dict, asset: str) -> dict:
+    """Ensure every trade across 1m/5m engines has UTC Timestamps, integer side, setup, sl_pct, and hold_hours."""
+    nt = dict(t)
+    et = pd.Timestamp(nt["entry_time"])
+    ex = pd.Timestamp(nt["exit_time"])
+    if et.tzinfo is None:
+        et = et.tz_localize("UTC")
+    else:
+        et = et.tz_convert("UTC")
+    if ex.tzinfo is None:
+        ex = ex.tz_localize("UTC")
+    else:
+        ex = ex.tz_convert("UTC")
+    nt["entry_time"] = et
+    nt["exit_time"] = ex
+    if nt.get("t1_time") is not None:
+        t1t = pd.Timestamp(nt["t1_time"])
+        nt["t1_time"] = t1t.tz_localize("UTC") if t1t.tzinfo is None else t1t.tz_convert("UTC")
+    elif nt.get("t1_hours") is not None:
+        nt["t1_time"] = et + pd.Timedelta(hours=float(nt["t1_hours"]))
+    else:
+        nt["t1_time"] = ex
+
+    sd = nt.get("side", 1)
+    if isinstance(sd, str):
+        nt["side"] = 1 if sd.upper() == "LONG" else -1
+    else:
+        nt["side"] = int(sd)
+
+    setup = str(nt.get("setup") or nt.get("engine") or "UNKNOWN")
+    nt["setup"] = setup
+    nt["engine"] = str(nt.get("engine") or setup)
+    nt["asset"] = asset
+    nt.setdefault("cluster_id", f"{asset}_{setup}_{nt.get('entry_idx', et.value)}")
+    nt.setdefault("is_pyramid", False)
+
+    if "sl_pct" not in nt or float(nt["sl_pct"]) <= 0:
+        ep = float(nt.get("entry_price", 0.0) or 0.0)
+        if ep > 0 and "sl_price" in nt:
+            nt["sl_pct"] = abs(ep - float(nt["sl_price"])) / ep
+        elif ep > 0 and "init_sl" in nt:
+            nt["sl_pct"] = abs(ep - float(nt["init_sl"])) / ep
+        elif ep > 0 and "risk_usd" in nt:
+            nt["sl_pct"] = float(nt["risk_usd"]) / ep
+        else:
+            nt["sl_pct"] = 0.01
+
+    nt["hold_hours"] = float(nt.get("hold_hours") or max(0.01, (ex - et).total_seconds() / 3600.0))
+    nt["is_aplus"] = setup in (
+        "SMC_Sweep_V6",
+        "V10_BPR_Snap",
+        "4H_V6_Cognitive",
+        "V10_1H_TOPO",
+        "V11_SessEq_1H_TOPO",
+        "V3_Pro",
+        "V3_Pro_Clean",
+        "VisB_Pro",
+    )
+    return nt
+
+
+def run_v11_multiasset_portfolio(
+    df_btc_5m: pd.DataFrame,
+    df_xau_1m: Optional[pd.DataFrame],
+    df_nsx_1m: Optional[pd.DataFrame],
+    eval_start: pd.Timestamp,
+    eval_end: pd.Timestamp,
+    *,
+    include_btc_v9_lon: bool = True,
+    btc_fee_mult: float = 1.0,
+    xau_cost: float = 0.25,
+    nsx_cost_pts: float = 2.0,
+    cfd_fee_mult: float = 0.5,
+) -> dict[str, Any]:
+    """Run V11.0 Institutional Exact-R Multi-Asset Portfolio across BTCUSD_5m, XAUUSD_1m, and NSXUSD_1m.
+
+    Sleeves:
+      - `BTCUSD_5m`: `SMC_Sweep_V6` (Restored, PF 2.40) + `4H_V6_Cognitive` (PF 2.05) + `V10_BTC_Physics`
+        (`45/40/15`, PF 1.97) + `V11_SessEq_1H_TOPO` (`50/35/15 @ 1.8R/3.2R/6.5R`, PF 1.88) + optional
+        pruned `V9_LON` (`rvol >= 1.15`).
+      - `XAUUSD_1m`: `V3_Pro_Clean` (13/14 UTC chop filtered, PF 2.29) + `VisB_Pro` (PF 2.06) [1-pos lock]
+        + `V10_XAU_VisB` (`45/40/15`, `min_sl_pct=0.0010`, PF 1.64).
+      - `NSXUSD_1m`: `NSX_AMD_1D` (1D BOS aligned, PF 1.51) + `NSX_1H1m_10R` (`min_hour_utc=9`, PF 1.54) [1-pos lock].
+    """
+    from .strategy_brain import _summarize_trades, run_v11_btc_portfolio
+
+    btc_raw, _ = run_v11_btc_portfolio(
+        df_btc_5m,
+        eval_start,
+        eval_end,
+        asset="BTCUSD",
+        include_smc_sweep=True,
+        include_v6_4h=True,
+        include_physics_45=True,
+        include_session_eq_1h=True,
+        include_v9_lon_pruned=include_btc_v9_lon,
+        fee_mult=btc_fee_mult,
+    )
+    btc_tr = [_normalize_v11_trade(t, "BTCUSD") for t in btc_raw]
+    all_tr = list(btc_tr)
+
+    xau_tr: List[dict] = []
+    if df_xau_1m is not None and len(df_xau_1m) > 500:
+        v6_xau = run_smc_v6_xau_portfolio(df_xau_1m, eval_start, eval_end, cost=xau_cost, single_position_lock=False)
+        v3_clean = []
+        for t in v6_xau["v3_pro"]:
+            if pd.Timestamp(t["entry_time"]).hour in (13, 14):
+                continue
+            nt = dict(t)
+            nt["engine"] = "V3_Pro_Clean"
+            nt["setup"] = "V3_Pro_Clean"
+            v3_clean.append(nt)
+        visb = []
+        for t in v6_xau["vis_b_pro"]:
+            nt = dict(t)
+            nt["engine"] = "VisB_Pro"
+            nt["setup"] = "VisB_Pro"
+            visb.append(nt)
+        xau_core_1p = lock_single_position(v3_clean + visb)
+        xau_v10, _ = run_v10_xau_topo_backtest(
+            df_xau_1m,
+            eval_start,
+            eval_end,
+            asset="XAUUSD",
+            min_sl_pct=0.0010,
+            fee_mult=cfd_fee_mult,
+            include_v6_4h=False,
+        )
+        xau_tr = sorted(
+            [_normalize_v11_trade(t, "XAUUSD") for t in (xau_core_1p + xau_v10)],
+            key=lambda t: t["entry_time"],
+        )
+        all_tr.extend(xau_tr)
+
+    nsx_tr: List[dict] = []
+    if df_nsx_1m is not None and len(df_nsx_1m) > 500:
+        df_nsx_scaled = df_nsx_1m.copy()
+        for col in ("Open", "High", "Low", "Close"):
+            df_nsx_scaled[col] = df_nsx_scaled[col] / 10.0
+        nsx_amd_raw = run_engine_amd_pro(df_nsx_scaled, eval_start, eval_end, cost=nsx_cost_pts / 10.0)
+        ed_n, td_n = build_causal_htf_structure(df_nsx_1m, "1D", 2)
+        nsx_amd_1d = []
+        for t in nsx_amd_raw:
+            p1d = int(ed_n.searchsorted(pd.Timestamp(t["setup_time"]), side="right")) - 1
+            d = 1 if t["side"] == "LONG" else -1
+            if p1d >= 0 and int(td_n[p1d]) == d:
+                nt = dict(t)
+                nt["engine"] = "NSX_AMD_1D"
+                nt["setup"] = "NSX_AMD_1D"
+                nt["asset"] = "NSXUSD"
+                nt["cost_usd"] = nsx_cost_pts / 10.0
+                nsx_amd_1d.append(nt)
+        nsx_1h_10r = run_engine_sniper_htf(
+            df_nsx_1m,
+            eval_start,
+            eval_end,
+            asset="NSXUSD",
+            sweep_tf="1h",
+            sweep_k=3,
+            min_age=4,
+            htf_mode="4h",
+            min_risk_abs=10.0,
+            min_risk_pct=0.0010,
+            fixed_rr=10.0,
+            trail_1h_after_r=None,
+            use_killzone=True,
+            min_hour_utc=9,
+            cost=nsx_cost_pts,
+            engine_label="NSX_1H1m_10R",
+        )
+        nsx_1p = lock_single_position(nsx_amd_1d + nsx_1h_10r)
+        nsx_tr = sorted([_normalize_v11_trade(t, "NSXUSD") for t in nsx_1p], key=lambda t: t["entry_time"])
+        all_tr.extend(nsx_tr)
+
+    all_tr = sorted(all_tr, key=lambda t: t["entry_time"])
+    return {
+        "btc_trades": btc_tr,
+        "btc_summary": _summarize_trades(btc_tr) if btc_tr else {},
+        "xau_trades": xau_tr,
+        "xau_summary": _summarize_trades(xau_tr) if xau_tr else {},
+        "nsx_trades": nsx_tr,
+        "nsx_summary": _summarize_trades(nsx_tr) if nsx_tr else {},
+        "real_multiasset_trades": all_tr,
+        "real_multiasset_summary": _summarize_trades(all_tr) if all_tr else {},
+    }
+
+
+

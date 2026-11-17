@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 """
-Binance USDT-M Futures Multi-Coin V10.0 Front-Loaded Cashflow + Topological Swings + 4H Cognitive
+Binance USDT-M Futures Multi-Coin V11.0 Institutional Exact-R Cashflow + Topological Swings + 4H Cognitive
 - Zero third-party dependencies (pure Python 3 stdlib).
-- 3-Sleeve Causal Portfolio across the 10-Coin High-Liquidity Basket (zero HTF lookahead, real Binance VIP0 fees+slip+funding):
-    1) V10 Topological Daily Session & Multi-TF Liquidity Sweeps (--no-v9 to disable): V10_LON + V10_1H_TOPO + V10_15M_TOPO
-       - Causal ATR-ZigZag Topological Swings (ZERO k=2/k=3 fractals, prominence >= 1.40 ATR) + London (07-12 UTC) H/L swept >=12 UTC
-       - 5m Topo BOS + 0.30*ATR5 FVG Retest + 45/40/15 Front-Loaded Exit (45%@+2.2R->BE+0.35R, 40%@+4.5R->+2.0R, 15%@+10R)
+- 4-Sleeve Causal Portfolio across the 10-Coin High-Liquidity Basket (zero HTF lookahead, fee-inclusive 1.0R sizing):
+    1) V11 Session Equilibrium Scalp (--no-v9 to disable): V11_SessEq_1H_TOPO (prom>=1.20, rvol>=1.10)
+       - Prunes noisy 15M_TOPO & unpruned V10_LON; executes 50/35/15 cascade (50%@+1.8R->BE+0.25R, 35%@+3.2R->+1.25R, 15%@+6.5R)
+       - Plus optional pruned V9_LON (rvol>=1.15) at standard 3.0% risk
     2) V10 Intraday Scene-Graph Physics (--no-v8 / --no-v7 to disable): V10_CompVac + V10_BPR_Snap/Retest (45/40/15)
-    3) Primary 4H Engine (--no-4h-trend to disable): 4H_V6_Cognitive (PF=2.12)
-- Small-Account Profiles (--profile DAILY_HUNTER | TURBO_SNIPER with --small-account):
-    * DAILY_HUNTER: 3.0% std / 4.5% A+, 2.0% DD throttle, 4 risk slots (Zero-Risk Recycled), -2.0R/day CB, $25 50/50 vault skim
-    * TURBO_SNIPER: 4.0% std / 5.5% A+, 2.5% DD throttle, 4 risk slots (Zero-Risk Recycled), -2.5R/day CB, $20 50/50 vault skim
+    3) Primary 4H Engine (--no-4h-trend to disable): 4H_V6_Cognitive (PF=2.05)
+    4) Restored Secondary 1H->5m Engine (--no-smc to disable): SMC_Sweep_V6 (PF=2.40, 10R BE@3R->+1R)
+- V11.0 Fee-Inclusive Exact-1.0R Small-Account Profiles (--profile DAILY_HUNTER | TURBO_SNIPER with --small-account):
+    * Notional = Risk_USD / (sl_pct + 0.0010 RT fee+slip buffer) -> stop-out loss never exceeds -1.00R
+    * DAILY_HUNTER: 3.0% std / 3.8% A+ (PF>2.0 sleeves), 0.80x smooth throttle at DD>15%, 4 risk slots (Zero-Risk Recycled), -2.0R/day CB, $25 50/50 vault skim
+    * TURBO_SNIPER: 3.6% std / 4.2% A+ (PF>2.0 sleeves), 0.80x smooth throttle at DD>15%, 4 risk slots (Zero-Risk Recycled), -2.5R/day CB, $20 50/50 vault skim
 """
 
 from __future__ import annotations
@@ -659,10 +661,10 @@ def detect_v10_topo_session_sweeps(
     ker_4h: float,
     rvol5: float,
     v9_risk_mult: float = 1.0,
-    min_prom_atr: float = 1.40,
+    min_prom_atr: float = 1.20,
 ) -> Optional[SignalCandidate]:
-    """V10.0 Topological Daily Session & Multi-TF Liquidity Sweeps (ZERO k=2/k=3) -> 45/40/15 Front-Loaded Exit."""
-    if atr_5 <= 0 or ker_4h < 0.15 or rvol5 < 1.20 or len(bars_5m) < 20 or len(bars_15m) < 20 or len(bars_1h) < 10 or len(bars_4h) < 10:
+    """V11.0 Pruned Topological 1H Liquidity Sweep -> 50/35/15 Session Equilibrium Exit (prunes 15M_TOPO & unpruned LON)."""
+    if atr_5 <= 0 or ker_4h < 0.15 or rvol5 < 1.10 or len(bars_5m) < 20 or len(bars_15m) < 20 or len(bars_1h) < 10 or len(bars_4h) < 10:
         return None
     ts_5m, o, h, l, c, _ = bars_5m[-1]
     _, o2, _, _, c2, _ = bars_5m[-2]
@@ -673,23 +675,25 @@ def detect_v10_topo_session_sweeps(
     cur_day = utc_dt.date()
     hr5 = utc_dt.hour
 
+    # Pruned V9_LON (requires rvol5 >= 1.15, standard risk tier)
     lon_hi = lon_lo = None
     lon_hi_sw = lon_lo_sw = False
     cands_lon: List[Tuple[int, int, float]] = []
-    for b_ts, _, bh, bl, bc, _ in bars_5m:
-        bdt = dt.datetime.fromtimestamp(b_ts / 1000.0, tz=dt.timezone.utc)
-        if bdt.date() != cur_day:
-            continue
-        if 7 <= bdt.hour < 12:
-            lon_hi = bh if lon_hi is None else max(lon_hi, bh)
-            lon_lo = bl if lon_lo is None else min(lon_lo, bl)
-        elif bdt.hour >= 12:
-            if lon_lo is not None and not lon_lo_sw and bl < lon_lo and bc > lon_lo:
-                lon_lo_sw = True
-                cands_lon.append((1, b_ts, bl))
-            if lon_hi is not None and not lon_hi_sw and bh > lon_hi and bc < lon_hi:
-                lon_hi_sw = True
-                cands_lon.append((-1, b_ts, bh))
+    if rvol5 >= 1.15:
+        for b_ts, _, bh, bl, bc, _ in bars_5m:
+            bdt = dt.datetime.fromtimestamp(b_ts / 1000.0, tz=dt.timezone.utc)
+            if bdt.date() != cur_day:
+                continue
+            if 7 <= bdt.hour < 12:
+                lon_hi = bh if lon_hi is None else max(lon_hi, bh)
+                lon_lo = bl if lon_lo is None else min(lon_lo, bl)
+            elif bdt.hour >= 12:
+                if lon_lo is not None and not lon_lo_sw and bl < lon_lo and bc > lon_lo:
+                    lon_lo_sw = True
+                    cands_lon.append((1, b_ts, bl))
+                if lon_hi is not None and not lon_hi_sw and bh > lon_hi and bc < lon_hi:
+                    lon_hi_sw = True
+                    cands_lon.append((-1, b_ts, bh))
 
     atr4_s = compute_wilder_atr_series(bars_4h, 14)
     t4 = CausalTopoSwingTracker(1.25)
@@ -710,29 +714,14 @@ def detect_v10_topo_session_sweeps(
                     cands_1h.append((-1, ts_1h, hh))
         t1.update(hh, hl, hc, atr1_s[idx_1h])
 
-    atr15_s = compute_wilder_atr_series(bars_15m, 14)
-    t15 = CausalTopoSwingTracker(1.15)
-    cands_15: List[Tuple[int, int, float]] = []
-    start_15 = max(0, len(bars_15m) - 12)
-    for idx_15, (ts_15, _, hh, hl, hc, _) in enumerate(bars_15m):
-        if idx_15 >= start_15:
-            for idx_s, p_lo, prom in list(t15.act_lo):
-                if (t15.bar_idx + 1 - idx_s) >= 4 and prom >= min_prom_atr and hl < p_lo and hc > p_lo:
-                    cands_15.append((1, ts_15, hl))
-            for idx_s, p_hi, prom in list(t15.act_hi):
-                if (t15.bar_idx + 1 - idx_s) >= 4 and prom >= min_prom_atr and hh > p_hi and hc < p_hi:
-                    cands_15.append((-1, ts_15, hh))
-        t15.update(hh, hl, hc, atr15_s[idx_15])
-
     atr5_s = compute_wilder_atr_series(bars_5m, 14)
     t5 = CausalTopoSwingTracker(0.50)
     for idx_5, (_, _, hh, hl, hc, _) in enumerate(bars_5m[:-1]):
         t5.update(hh, hl, hc, atr5_s[idx_5])
 
-    for slv_tag, clist, ok_hr, exp_ms in (
-        ("V10_LON", cands_lon, hr5 >= 12, 5 * 3600 * 1000),
-        ("V10_1H_TOPO", cands_1h, hr5 >= 9, 5 * 3600 * 1000),
-        ("V10_15M_TOPO", cands_15, (12 <= hr5 <= 21), 3 * 3600 * 1000),
+    for slv_tag, clist, ok_hr, exp_ms, is_ap in (
+        ("V11_SessEq_1H_TOPO", cands_1h, hr5 >= 9, 5 * 3600 * 1000, True),
+        ("V9_LON", cands_lon, hr5 >= 12 and rvol5 >= 1.15, 5 * 3600 * 1000, False),
     ):
         if not ok_hr:
             continue
@@ -754,12 +743,20 @@ def detect_v10_topo_session_sweeps(
             if ok:
                 rd = abs(ep - slp)
                 if 0.0020 <= (rd / max(ep, 1e-12)) <= 0.0180:
+                    if slv_tag == "V11_SessEq_1H_TOPO":
+                        return SignalCandidate(
+                            symbol, slv_tag, sd, ep, slp, ep + sd * 6.5 * rd,
+                            rd, (), 40 * 60, is_market=False, risk_mult=v9_risk_mult,
+                            bank_r=1.8, bank_frac=0.50, be_lock_r=0.25,
+                            bank2_r=3.2, bank2_frac=0.35, be2_lock_r=1.25,
+                            is_aplus=True,
+                        )
                     return SignalCandidate(
                         symbol, slv_tag, sd, ep, slp, ep + sd * 10.0 * rd,
                         rd, (), 40 * 60, is_market=False, risk_mult=v9_risk_mult,
                         bank_r=2.2, bank_frac=0.45, be_lock_r=0.35,
                         bank2_r=4.5, bank2_frac=0.40, be2_lock_r=2.00,
-                        is_aplus=True,
+                        is_aplus=is_ap,
                     )
     return None
 
@@ -888,7 +885,7 @@ def evaluate_symbol_bars(
     conf_threshold: Optional[float] = None,
     btc_regime_fn=None,
     use_smc: bool = True,
-    smc_risk_mult: float = 0.50,
+    smc_risk_mult: float = 1.0,
     sweep_tp_r: float = 12.0,
     enable_fast_scalp: bool = False,
     use_v8: Optional[bool] = None,
@@ -946,6 +943,7 @@ def evaluate_symbol_bars(
                     return SignalCandidate(
                         symbol, "4H_V6_Cognitive", side, c_now, slp, None, rd,
                         (), 300, is_market=True, trail_atr_mult=trail_atr_mult, risk_mult=1.0,
+                        is_aplus=True,
                     )
 
     c1 = [b[4] for b in bars_1h]
@@ -1047,7 +1045,7 @@ def evaluate_symbol_bars(
                         rd_v8, (), 40 * 60, is_market=False, risk_mult=v7_risk_mult,
                         bank_r=2.2, bank_frac=0.45, be_lock_r=0.35,
                         bank2_r=4.5, bank2_frac=0.40, be2_lock_r=2.00,
-                        origin_px=orig_v8, is_aplus=(eng_v8 == "V8_BPR_Snap" or conv8 >= 0.72),
+                        origin_px=orig_v8, is_aplus=(eng_v8 in ("V8_BPR_Snap", "V8_BPR_Retest")),
                     )
 
     # 2b) V10.0 Topological Daily Session & Multi-TF Liquidity Sweeps -> 45/40/15 Front-Loaded Cashflow
@@ -1255,11 +1253,14 @@ def compute_order_qty(
     filt: SymbolFilters,
     leverage: int = 10,
     max_slot_frac: float = 0.30,
+    fee_rt_pct: float = 0.0010,
 ) -> float:
+    """V11.0 Fee-Inclusive Exact 1.0R Sizing: Notional = Risk_USD / (sl_pct + fee_rt_pct)."""
     risk_dist = abs(entry_px - sl_px)
     if risk_dist <= 0 or entry_px <= 0 or equity_usdt <= 0:
         return 0.0
-    raw_qty = (equity_usdt * risk_pct) / risk_dist
+    eff_risk_dist = risk_dist + entry_px * max(0.0, fee_rt_pct)
+    raw_qty = (equity_usdt * risk_pct) / eff_risk_dist
     max_notional = equity_usdt * leverage * max_slot_frac
     qty = min(raw_qty, max_notional / entry_px)
     qty = round_step(qty, filt.step_size, floor_mode=True)
@@ -1298,7 +1299,7 @@ def run_bot(
     donch_lb: int = 20,
     trail_atr_mult: float = 3.5,
     use_smc: bool = True,
-    smc_risk_mult: float = 0.50,
+    smc_risk_mult: float = 1.0,
     sweep_tp_r: float = 10.0,
     enable_fast_scalp: bool = False,
     small_account: bool = False,
@@ -1316,17 +1317,17 @@ def run_bot(
 
     prof = profile.upper()
     if prof == "TURBO_SNIPER":
-        aplus_risk_pct, throttle_risk_pct, skim_step = 0.055, 0.025, 20.0
+        aplus_risk_pct, throttle_mult, skim_step = 0.042, 0.80, 20.0
     else:
-        aplus_risk_pct, throttle_risk_pct, skim_step = 0.045, 0.020, 25.0
+        aplus_risk_pct, throttle_mult, skim_step = 0.038, 0.80, 25.0
 
     client = BinanceFuturesClient(base_url, api_key, api_secret)
     filters = client.load_filters(symbols)
     slot_frac = 0.85 if small_account else 0.30
     print(
-        f"[INIT] V10.0 mode={mode} profile={prof} syms={len(filters)}/{len(symbols)} v10_topo={use_v9}({v9_risk_mult:.2f}x) "
+        f"[INIT] V11.0 mode={mode} profile={prof} syms={len(filters)}/{len(symbols)} v11_eq={use_v9}({v9_risk_mult:.2f}x) "
         f"v10_phys={use_v7}({v7_risk_mult:.2f}x) 4H={use_4h_trend}({v6_mode}) smc={use_smc}({smc_risk_mult:.2f}x) "
-        f"small_acct={small_account} risk={risk_pct*100:.2f}%/{aplus_risk_pct*100:.2f}% lev={leverage}x daily_cb={daily_dd_cap_r:.1f}R"
+        f"small_acct={small_account} risk={risk_pct*100:.2f}%/{aplus_risk_pct*100:.2f}% dd15_mult={throttle_mult:.2f}x lev={leverage}x daily_cb={daily_dd_cap_r:.1f}R"
     )
 
     if mode in ("testnet", "live"):
@@ -1359,7 +1360,7 @@ def run_bot(
             else:
                 hwm_equity = max(hwm_equity, active_eq)
             dd = (hwm_equity - active_eq) / hwm_equity if hwm_equity > 0 else 0.0
-            dd_brake = 0.50 if dd >= 0.12 else (0.70 if dd >= 0.08 else 1.0)
+            dd_brake = 0.80 if dd > 0.15 else 1.0
             open_pos = {} if mode == "paper" else client.get_positions()
 
             btc_4h_cache = client.get_klines("BTCUSDT", "4h", 120) if "BTCUSDT" in filters else []
@@ -1569,10 +1570,11 @@ def run_bot(
                 sl = round_step(sig.sl_px, filt.tick_size, False)
                 tp = round_step(sig.tp_px, filt.tick_size, False) if sig.tp_px is not None else None
                 if small_account:
-                    eff_rp = throttle_risk_pct if dd > 0.10 else (aplus_risk_pct if sig.is_aplus else risk_pct)
-                    qty = compute_order_qty(active_eq, eff_rp * sig.risk_mult, ep, sl, filt, leverage=leverage, max_slot_frac=slot_frac)
+                    base_rp = aplus_risk_pct if sig.is_aplus else risk_pct
+                    eff_rp = (base_rp * throttle_mult) if dd > 0.15 else base_rp
+                    qty = compute_order_qty(active_eq, eff_rp * sig.risk_mult, ep, sl, filt, leverage=leverage, max_slot_frac=slot_frac, fee_rt_pct=0.0010)
                 else:
-                    qty = compute_order_qty(equity, risk_pct * sig.risk_mult * dd_brake, ep, sl, filt, leverage=leverage, max_slot_frac=slot_frac)
+                    qty = compute_order_qty(equity, risk_pct * sig.risk_mult * dd_brake, ep, sl, filt, leverage=leverage, max_slot_frac=slot_frac, fee_rt_pct=0.0010)
                 if qty <= 0:
                     print(f"[SKIP] {sym} qty=0 (minNotional={filt.min_notional} equity={equity:.2f})")
                     continue
@@ -1622,18 +1624,18 @@ def main() -> None:
     ap.add_argument("--donch-lb", type=int, default=20)
     ap.add_argument("--trail-atr-mult", type=float, default=3.5)
     ap.add_argument("--no-smc", action="store_true", help="Disable secondary SMC_Sweep_V6 engine")
-    ap.add_argument("--smc-risk-mult", type=float, default=0.50, help="Risk multiplier for SMC_Sweep_V6")
+    ap.add_argument("--smc-risk-mult", type=float, default=1.0, help="Risk multiplier for restored SMC_Sweep_V6")
     ap.add_argument("--sweep-tp-r", type=float, default=10.0, help="TP multiple in R for V10 & SMC_Sweep")
     ap.add_argument("--enable-fast-scalp", action="store_true", help="Enable experimental fast scalp sleeves")
     ap.add_argument("--symbols", type=str, default=",".join(DEFAULT_SYMBOLS))
     args = ap.parse_args()
     syms = tuple(s.strip().upper() for s in args.symbols.split(",") if s.strip())
     lev = 15 if (args.small_account and args.leverage == 10) else args.leverage
-    def_risk = 0.040 if args.profile == "TURBO_SNIPER" else 0.030
+    def_risk = 0.036 if args.profile == "TURBO_SNIPER" else 0.030
     def_cb = -2.5 if args.profile == "TURBO_SNIPER" else -2.0
     risk_pct = args.risk_pct if args.risk_pct is not None else (def_risk if args.small_account else 0.015)
     daily_cb = args.daily_stop_r if args.daily_stop_r is not None else def_cb
-    smc_mult = 1.0 if (args.small_account and args.smc_risk_mult == 0.50) else args.smc_risk_mult
+    smc_mult = args.smc_risk_mult
     run_bot(
         args.mode, syms, lev, args.max_pos, args.paper_equity,
         use_v7=not args.no_v8, v7_risk_mult=args.v8_risk_mult,

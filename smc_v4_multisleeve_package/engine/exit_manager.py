@@ -501,4 +501,39 @@ class V10FrontLoadedCashflowExitManager(HighVelocityCashflowExitManager):
         )
 
 
+class V11SessionEquilibriumExitManager(HighVelocityCashflowExitManager):
+    """V11.0 Intraday Session Equilibrium 50/35/15 High-WR Cashflow Exit Manager.
+
+    - Tier 1: Bank 50% at +1.8R -> immediately move SL to BE + 0.25R (Zero-Risk Slot Recycling)
+    - Tier 2: Bank 35% at min(Session_Equilibrium / Origin_Anchor_R, +3.2R) -> lock +1.25R
+    - Tier 3: Trail remaining 15% runner via 15m Topological Protected Swings up to +6.5R
+    """
+
+    def __init__(
+        self,
+        bank_r: float = 1.8,
+        bank_frac: float = 0.50,
+        be_lock_r: float = 0.25,
+        bank2_r: float = 3.2,
+        bank2_frac: float = 0.35,
+        be2_lock_r: float = 1.25,
+        runner_tp_r: float = 6.5,
+        stagnation_bars: int = 0,
+        prot_trail_mfe_r: float = 4.0,
+        atr_ratchet_mult: float = 0.0,
+    ) -> None:
+        super().__init__(
+            bank_r=bank_r,
+            bank_frac=bank_frac,
+            be_lock_r=be_lock_r,
+            bank2_r=bank2_r,
+            bank2_frac=bank2_frac,
+            be2_lock_r=be2_lock_r,
+            runner_tp_r=runner_tp_r,
+            stagnation_bars=stagnation_bars,
+            prot_trail_mfe_r=prot_trail_mfe_r,
+            atr_ratchet_mult=atr_ratchet_mult,
+        )
+
+
 

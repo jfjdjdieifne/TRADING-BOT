@@ -19,6 +19,7 @@ from .exit_manager import (
     ProtectedSwingDetector,
     TradePositionState,
     V10FrontLoadedCashflowExitManager,
+    V11SessionEquilibriumExitManager,
 )
 from .liquidity_mapper import LiquidityPool, LiquidityPoolMapper
 from .perception_engine import (
@@ -57,6 +58,7 @@ from .smc_v4_portfolio import (
     run_v10_multiasset_portfolio,
     run_v10_nsx_topo_backtest,
     run_v10_xau_topo_backtest,
+    run_v11_multiasset_portfolio,
     simulate_compounded_account,
 )
 from .strategy_brain import (
@@ -75,6 +77,8 @@ from .strategy_brain import (
     run_v9_daily_session_backtest,
     run_v10_btc_frontloaded_backtest,
     run_v10_btc_topo_sweeps_backtest,
+    run_v11_btc_portfolio,
+    run_v11_session_equilibrium_scalp,
 )
 
 __all__ = [
@@ -105,6 +109,7 @@ __all__ = [
     "TopologicalSwing",
     "TradePositionState",
     "V10FrontLoadedCashflowExitManager",
+    "V11SessionEquilibriumExitManager",
     "VisualPerceptionEngine",
     "apply_cost_reprice",
     "build_causal_htf_structure",
@@ -144,6 +149,9 @@ __all__ = [
     "run_v10_multiasset_portfolio",
     "run_v10_nsx_topo_backtest",
     "run_v10_xau_topo_backtest",
+    "run_v11_btc_portfolio",
+    "run_v11_multiasset_portfolio",
+    "run_v11_session_equilibrium_scalp",
     "sigmoid",
     "simulate_compounded_account",
     "soft_and_log_odds",
