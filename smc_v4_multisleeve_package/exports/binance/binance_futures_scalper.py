@@ -1,20 +1,19 @@
 #!/usr/bin/env python3
 """
-Binance USDT-M Futures Multi-Coin V7.0 Intraday Cashflow Sniper + 4H Cognitive
+Binance USDT-M Futures Multi-Coin V8.0 Intraday Cashflow & Conviction-Ratchet + 4H Cognitive
 - Zero third-party dependencies (pure Python 3 stdlib).
 - 3-Sleeve Causal Portfolio across the 10-Coin High-Liquidity Basket (zero HTF lookahead, real Binance VIP0 fees+slip+funding):
-    1) V7 Intraday Scene-Graph Physics (--no-v7 to disable): V7_CompVacuum + V7_BPR_Snap/Retest
-       - 5m Compression-Vacuum Snap & Sweep+BPR/iFVG on 1H Liquidity Pools + 4H KER>=0.15
-       - Cashflow Exit: 35% Partial Bank @ +3.0R -> BE+0.50R Lock -> +10R Vacuum Runner
-       - N=183, WR=33.9%, Net=+80.1R, PF=1.58, DD=17.3R | IS=+64.1R(1.87) | OOS=+16.0R(1.25)
+    1) V8 Intraday Scene-Graph Physics (--no-v8 / --no-v7 to disable): V8_CompVacuum + V8_BPR_Snap/Retest
+       - 5m Compression-Vacuum & Sweep+BPR/iFVG + Bayesian Prosecutor (HTF Brick-Wall Clearance, RVOL>=0.9, 4H Ext<=2.5*ATR)
+       - 3-Tier Origin-Anchor Cashflow Exit: 40%@+2.8R->BE+0.50R, 40%@min(Origin_Anchor,+5.5R)->+2.50R, 20%@+12R
+       - N=81, WR=44.4%, Net=+61.0R, PF=2.21, DD=7.5R | IS=+37.5R(2.36) | OOS=+23.5R(2.03)
     2) Secondary 1H->5m Engine (--no-smc to disable): SMC_Sweep_V6
        - Bayesian Prosecutor: Temporal Sweep Decay + KER4>=0.15 + HTF Freight-Train Veto
        - N=87, WR=36.8%, Net=+88.9R, PF=2.40, DD=9.0R, 7/7 yrs green | OOS PF=3.10
     3) Primary 4H Engine (--no-4h-trend to disable): 4H_V6_Cognitive
        - Fractal 1H/4H Structural Stop Compression + 2-Stage Risk-Free Pyramiding + Climax Ratchet
        - N=240, WR=40.8%, Net=+109.1R, PF=2.05, DD=8.2R, 7/7 yrs green | OOS PF=1.94
-    Combined 3-Sleeve BTC Single-Asset: N=510, WR=37.6%, Net=+278.1R, PF=1.91, DD=18.7R, 7/7 yrs green
-- Small-Account Cashflow Engine (--small-account): $100+ equity, 2.5%-3.0% risk, <=15x leverage, -2.5R daily circuit breaker.
+- Small-Account Conviction-Ratchet Engine (--small-account): 2.5% std / 4.0% A+, 50/50 HWM profit skim (+$25), >10% DD throttle (2.0%), <=15x lev, -2.5R daily CB.
 """
 
 from __future__ import annotations
@@ -173,11 +172,27 @@ def detect_v7_bpr_signal(
     trend_1h: int,
 ) -> Optional[Tuple[str, int, float]]:
     """Stateless causal check at bars_5m[-1]: immediate high-velocity BPR snap OR 6-bar causal retest."""
+    sig = detect_v8_bpr_signal(bars_5m, atr5, barriers_hi, barriers_lo, trend_4h, trend_1h)
+    if sig is None:
+        return None
+    tag, sd, slp, _, _ = sig
+    return (tag.replace("V8_", "V7_"), sd, slp)
+
+
+def detect_v8_bpr_signal(
+    bars_5m: List[Bar],
+    atr5: float,
+    barriers_hi: List[float],
+    barriers_lo: List[float],
+    trend_4h: int,
+    trend_1h: int,
+) -> Optional[Tuple[str, int, float, float, float]]:
+    """Stateless causal V8 BPR check at bars_5m[-1], returning (tag, side, slp, vac, k_vel)."""
     n = len(bars_5m)
     bpr_now = _bpr_at_bar(bars_5m, n - 1, atr5, barriers_hi, barriers_lo, trend_4h, trend_1h)
     if bpr_now is not None and bpr_now["vac"] >= 0.55 and bpr_now["k"] >= 1.60:
         slp = (bpr_now["sweep"] - atr5) if bpr_now["side"] == 1 else (bpr_now["sweep"] + atr5)
-        return ("V7_BPR_Snap", bpr_now["side"], slp)
+        return ("V8_BPR_Snap", bpr_now["side"], slp, bpr_now["vac"], bpr_now["k"])
 
     _, o, h, l, c, _ = bars_5m[-1]
     for back in range(1, min(7, n - 16)):
@@ -190,12 +205,12 @@ def detect_v7_bpr_signal(
             if any(b[3] < bpr["sweep"] for b in intervening) or l < bpr["sweep"]:
                 continue
             if l <= bpr["high"] and c > o and c >= bpr["mid"]:
-                return ("V7_BPR_Retest", 1, bpr["sweep"] - atr5)
+                return ("V8_BPR_Retest", 1, bpr["sweep"] - atr5, bpr["vac"], bpr["k"])
         else:
             if any(b[2] > bpr["sweep"] for b in intervening) or h > bpr["sweep"]:
                 continue
             if h >= bpr["low"] and c < o and c <= bpr["mid"]:
-                return ("V7_BPR_Retest", -1, bpr["sweep"] + atr5)
+                return ("V8_BPR_Retest", -1, bpr["sweep"] + atr5, bpr["vac"], bpr["k"])
     return None
 
 
@@ -231,13 +246,26 @@ def prosecutor_cross_examine(
     rvol_entry: float,
     sweep_bars_accepted: int = 0,
     is_counter_trend_sweep: bool = False,
-    min_conviction: float = 0.35,
+    min_conviction: float = 0.55,
+    entry_px: float = 0.0,
+    risk_dist: float = 0.0,
+    opposing_htf_walls: Optional[List[float]] = None,
+    min_clearance_r: float = 0.0,
 ) -> Tuple[bool, float]:
-    """V6 Bayesian Prosecutor: Temporal Sweep Decay + HTF Freight-Train Veto + Volume Divergence."""
+    """V8.0 Bayesian Prosecutor: HTF Brick-Wall Clearance + Sweep Decay + HTF Freight-Train + RVOL Divergence."""
     if sweep_bars_accepted > 1:
         return False, 0.0
     if is_counter_trend_sweep and ker_4h > 0.45 and ((dir_4h_candle == -side and body_ratio_4h >= 0.55) or htf_trend_4h == -side):
         return False, 0.0
+    bw_pen = 0.0
+    if opposing_htf_walls and risk_dist > 0 and min_clearance_r > 0:
+        nearest_r = 99.0
+        for w in opposing_htf_walls:
+            clr_r = ((w - entry_px) * side) / risk_dist
+            if clr_r > 0.0 and clr_r < nearest_r:
+                nearest_r = clr_r
+        if nearest_r < min_clearance_r:
+            bw_pen = min(1.0, max(0.0, (min_clearance_r - nearest_r) / min_clearance_r))
     eps = 1e-4
     num = den = 0.0
     for k_w, w in thesis_weights.items():
@@ -249,7 +277,7 @@ def prosecutor_cross_examine(
     l_thesis = (num / den) if den > 0 else 0.0
     freight_pen = 0.65 if (is_counter_trend_sweep and htf_trend_4h == -side and ker_4h > 0.35) else 0.0
     vdiv_pen = 0.25 if rvol_entry < 0.85 else 0.0
-    p_contra = freight_pen + 0.55 * vdiv_pen
+    p_contra = 0.85 * bw_pen + freight_pen + 0.55 * vdiv_pen
     conv = sigmoid(2.4 * l_thesis - 2.6 * p_contra - 0.35, 0.0, 1.0)
     return (conv >= min_conviction), conv
 
@@ -543,6 +571,11 @@ class SignalCandidate:
     bank_r: float = 0.0
     bank_frac: float = 0.0
     be_lock_r: float = 0.50
+    bank2_r: float = 0.0
+    bank2_frac: float = 0.0
+    be2_lock_r: float = 2.50
+    origin_px: Optional[float] = None
+    is_aplus: bool = False
 
 
 def evaluate_symbol_bars(
@@ -562,12 +595,14 @@ def evaluate_symbol_bars(
     btc_regime_fn=None,
     use_smc: bool = True,
     smc_risk_mult: float = 0.50,
-    sweep_tp_r: float = 10.0,
+    sweep_tp_r: float = 12.0,
     enable_fast_scalp: bool = False,
+    use_v8: Optional[bool] = None,
 ) -> Optional[SignalCandidate]:
-    """Evaluate strictly CLOSED candles using 100% causal V7.0 Intraday Physics + V6.0 Cognitive + Prosecutor rules."""
+    """Evaluate strictly CLOSED candles using 100% causal V8.0 Intraday Physics + Bayesian Prosecutor + V6.0 Cognitive rules."""
     if len(bars_5m) < 80 or len(bars_15m) < 40 or len(bars_1h) < 60 or len(bars_4h) < max(60, donch_lb + 3):
         return None
+    v8_enabled = use_v7 if use_v8 is None else bool(use_v8)
 
     c4 = [b[4] for b in bars_4h]
     atr_ser4 = compute_wilder_atr_series(bars_4h, 14)
@@ -670,27 +705,54 @@ def evaluate_symbol_bars(
     _, _, h1, l1, _, _ = bars_5m[-3]
     utc_dt = dt.datetime.fromtimestamp(ts_5m / 1000.0, tz=dt.timezone.utc)
 
-    # 2) V7.0 Intraday Scene-Graph Physics (5m Compression-Vacuum Snap + Sweep BPR/iFVG)
-    if use_v7 and atr_5 > 0 and ker_4h >= 0.15:
+    # 2) V8.0 Intraday Scene-Graph Physics + Bayesian Prosecutor + 3-Tier Origin-Anchor Exit
+    if v8_enabled and atr_5 > 0 and ker_4h >= 0.15:
         b_hi = [x[1] for x in sw1.act_hi[-8:]]
         b_lo = [x[1] for x in sw1.act_lo[-8:]]
-        v7_sig: Optional[Tuple[str, int, float]] = None
+        v8_sig: Optional[Tuple[str, int, float, Optional[float], float, float]] = None
         ca = detect_v7_comp_vacuum(bars_5m, atr_5, b_hi, b_lo, sw4.trend)
         if ca is not None:
-            sd_v7, sw_ex, _ = ca
-            slp_v7 = (sw_ex - atr_5) if sd_v7 == 1 else (sw_ex + atr_5)
-            v7_sig = ("V7_CompVacuum", sd_v7, slp_v7)
-        if v7_sig is None:
-            v7_sig = detect_v7_bpr_signal(bars_5m, atr_5, b_hi, b_lo, sw4.trend, sw1.trend)
-        if v7_sig is not None:
-            eng_v7, sd_v7, slp_v7 = v7_sig
-            rd_v7 = abs(c - slp_v7)
-            if 0.0045 <= (rd_v7 / c) <= 0.0180:
-                return SignalCandidate(
-                    symbol, eng_v7, sd_v7, c, slp_v7, c + sd_v7 * sweep_tp_r * rd_v7,
-                    rd_v7, (), 40 * 60, is_market=False, risk_mult=v7_risk_mult,
-                    bank_r=3.0, bank_frac=0.35, be_lock_r=0.50,
+            sd_v8, sw_ex, orig_px = ca
+            slp_v8 = (sw_ex - atr_5) if sd_v8 == 1 else (sw_ex + atr_5)
+            disp_sc = sigmoid(abs(c - o) / max(atr_5, 1e-12), 1.2, 2.2)
+            v8_sig = ("V8_CompVacuum", sd_v8, slp_v8, orig_px, 0.72, disp_sc)
+        if v8_sig is None:
+            bpr_sig = detect_v8_bpr_signal(bars_5m, atr_5, b_hi, b_lo, sw4.trend, sw1.trend)
+            if bpr_sig is not None:
+                eng_b, sd_b, slp_b, vac_b, k_b = bpr_sig
+                v8_sig = (eng_b, sd_b, slp_b, None, vac_b, sigmoid(k_b, 1.25, 2.0))
+        if v8_sig is not None:
+            eng_v8, sd_v8, slp_v8, orig_v8, vac_v8, disp_v8 = v8_sig
+            rd_v8 = abs(c - slp_v8)
+            rvol5 = (v_last / vavg_20) if vavg_20 > 0 else 1.0
+            ext4 = ((c - e20_4h) * sd_v8) / max(atr_4h, 1e-12)
+            opp_w = [x[1] for x in (sw1.act_hi[-6:] if sd_v8 == 1 else sw1.act_lo[-6:])]
+            if 0.0045 <= (rd_v8 / c) <= 0.0180 and rvol5 >= 0.90 and ext4 <= 2.50:
+                ok_p8, conv8 = prosecutor_cross_examine(
+                    side=sd_v8,
+                    thesis_scores={"sweep": 0.72, "disp": disp_v8, "vac": vac_v8, "ker4": sigmoid(ker_4h, 0.25, 9.0), "rvol": sigmoid(rvol5, 1.3, 2.0)},
+                    thesis_weights={"sweep": 1.1, "disp": 1.2, "vac": 1.0, "ker4": 1.0, "rvol": 0.7},
+                    ker_4h=ker_4h,
+                    body_ratio_4h=br_4h,
+                    dir_4h_candle=dir_4h,
+                    htf_trend_1h=sw1.trend,
+                    htf_trend_4h=sw4.trend,
+                    rvol_entry=rvol5,
+                    is_counter_trend_sweep=(sd_v8 != sw4.trend),
+                    min_conviction=0.55,
+                    entry_px=c,
+                    risk_dist=rd_v8,
+                    opposing_htf_walls=opp_w,
+                    min_clearance_r=3.0,
                 )
+                if ok_p8:
+                    return SignalCandidate(
+                        symbol, eng_v8, sd_v8, c, slp_v8, c + sd_v8 * sweep_tp_r * rd_v8,
+                        rd_v8, (), 40 * 60, is_market=False, risk_mult=v7_risk_mult,
+                        bank_r=2.8, bank_frac=0.40, be_lock_r=0.50,
+                        bank2_r=5.5, bank2_frac=0.40, be2_lock_r=2.50,
+                        origin_px=orig_v8, is_aplus=(eng_v8 == "V8_BPR_Snap" or conv8 >= 0.72),
+                    )
 
     # 3) Secondary 1H->5m Engine: SMC_Sweep_V6 (PF=2.40, OOS PF=3.10, DD=9.0R, 7/7 yrs green)
     if use_smc and utc_dt.hour >= 9 and atr_5 > 0 and cands_k3 and ker_4h >= 0.15:
@@ -728,8 +790,8 @@ def evaluate_symbol_bars(
             )
             if ok_p:
                 return SignalCandidate(
-                    symbol, "SMC_Sweep_V6", side, c, slp, c + side * sweep_tp_r * rd,
-                    rd, ((3.0, 1.0),), 100 * 60, is_market=False, risk_mult=smc_risk_mult,
+                    symbol, "SMC_Sweep_V6", side, c, slp, c + side * 10.0 * rd,
+                    rd, ((3.0, 1.0),), 100 * 60, is_market=False, risk_mult=smc_risk_mult, is_aplus=True,
                 )
 
     if not enable_fast_scalp or utc_dt.weekday() >= 5:
@@ -953,6 +1015,10 @@ def run_bot(
                 print(f"[WARN] leverage failed for {sym}: {exc}")
 
     hwm_equity = paper_equity
+    skim_anchor = paper_equity
+    withdrawn_vault_usd = 0.0
+    aplus_risk_pct = 0.040
+    throttle_risk_pct = 0.020
     active_meta: Dict[str, dict] = {}
     daily_r_day = dt.datetime.now(dt.timezone.utc).date()
     daily_r_pnl = 0.0
@@ -963,8 +1029,16 @@ def run_bot(
                 daily_r_day = now_day
                 daily_r_pnl = 0.0
             equity = paper_equity if mode == "paper" else client.get_usdt_balance()
-            hwm_equity = max(hwm_equity, equity)
-            dd = (hwm_equity - equity) / hwm_equity if hwm_equity > 0 else 0.0
+            active_eq = max(1.0, equity - (withdrawn_vault_usd if small_account else 0.0))
+            if small_account and active_eq >= skim_anchor + 25.0:
+                skim = (active_eq - skim_anchor) * 0.50
+                withdrawn_vault_usd += skim
+                active_eq -= skim
+                skim_anchor = active_eq
+                hwm_equity = active_eq
+            else:
+                hwm_equity = max(hwm_equity, active_eq)
+            dd = (hwm_equity - active_eq) / hwm_equity if hwm_equity > 0 else 0.0
             dd_brake = 0.50 if dd >= 0.12 else (0.70 if dd >= 0.08 else 1.0)
             open_pos = {} if mode == "paper" else client.get_positions()
 
@@ -975,6 +1049,7 @@ def run_bot(
                     if sym in open_pos:
                         exit_side = "SELL" if meta["side"] == 1 else "BUY"
                         qty_abs = abs(open_pos[sym])
+                        meta["init_qty"] = qty_abs
                         client.place_stop_market(sym, exit_side, qty_abs, meta["sl"])
                         if meta["tp"] is not None:
                             client.place_tp_limit(sym, exit_side, qty_abs, meta["tp"])
@@ -990,10 +1065,10 @@ def run_bot(
                     b5_close = client.get_klines(sym, "5m", 2)
                     if b5_close and meta.get("risk", 0.0) > 0:
                         c_last = b5_close[-1][4]
-                        rem_f = (1.0 - meta.get("bank_frac", 0.0)) if meta.get("partial_taken") else 1.0
-                        daily_r_pnl += rem_f * (((c_last - meta["entry"]) * meta["side"]) / meta["risk"])
+                        rem_f = 1.0 - (meta.get("bank_frac", 0.0) if meta.get("partial_taken") else 0.0) - (meta.get("bank2_frac", 0.0) if meta.get("t2_taken") else 0.0)
+                        daily_r_pnl += max(0.0, rem_f) * (((c_last - meta["entry"]) * meta["side"]) / meta["risk"])
                     active_meta.pop(sym, None)
-                    print(f"[CLOSE] {sym} position closed -> open orders cleaned | daily_r={daily_r_pnl:+.2f}R")
+                    print(f"[CLOSE] {sym} position closed -> open orders cleaned | daily_r={daily_r_pnl:+.2f}R | vault=${withdrawn_vault_usd:.2f}")
                     continue
                 if meta["state"] == "OPEN" and sym in open_pos:
                     exit_side = "SELL" if meta["side"] == 1 else "BUY"
@@ -1084,8 +1159,9 @@ def run_bot(
                             _, _, h, l, c, _ = b5[-1]
                             meta["best_px"] = max(meta["best_px"], h) if meta["side"] == 1 else min(meta["best_px"], l)
                             mfe_r = ((meta["best_px"] - meta["entry"]) * meta["side"]) / max(meta["risk"], 1e-12)
-                            if meta.get("bank_frac", 0.0) > 0 and (not meta.get("partial_taken")) and mfe_r >= meta.get("bank_r", 3.0):
-                                part_qty = round_step(qty_abs * meta["bank_frac"], filters[sym].step_size, True)
+                            base_qty = meta.get("init_qty", qty_abs)
+                            if meta.get("bank_frac", 0.0) > 0 and (not meta.get("partial_taken")) and mfe_r >= meta.get("bank_r", 2.8):
+                                part_qty = round_step(base_qty * meta["bank_frac"], filters[sym].step_size, True)
                                 rem_qty = round_step(qty_abs - part_qty, filters[sym].step_size, True)
                                 if part_qty >= filters[sym].min_qty and rem_qty >= filters[sym].min_qty:
                                     client.cancel_all(sym)
@@ -1097,9 +1173,31 @@ def run_bot(
                                     if meta["tp"] is not None:
                                         client.place_tp_limit(sym, exit_side, rem_qty, meta["tp"])
                                     meta["partial_taken"] = True
-                                    daily_r_pnl += meta["bank_frac"] * meta.get("bank_r", 3.0)
+                                    daily_r_pnl += meta["bank_frac"] * meta.get("bank_r", 2.8)
                                     qty_abs = rem_qty
-                                    print(f"[V7 BANK35] {sym} banked {part_qty} @ >=+{meta.get('bank_r', 3.0):.1f}R, SL->{meta['sl']}")
+                                    print(f"[V8 BANK40_T1] {sym} banked {part_qty} @ >=+{meta.get('bank_r', 2.8):.1f}R, SL->{meta['sl']}")
+                            if meta.get("bank2_frac", 0.0) > 0 and meta.get("partial_taken") and (not meta.get("t2_taken")):
+                                t2_r = meta.get("bank2_r", 5.5)
+                                if meta.get("origin_px") is not None:
+                                    orig_r = ((meta["origin_px"] - meta["entry"]) * meta["side"]) / max(meta["risk"], 1e-12)
+                                    if orig_r >= 4.2:
+                                        t2_r = min(t2_r, orig_r)
+                                if mfe_r >= t2_r:
+                                    part2_qty = round_step(base_qty * meta["bank2_frac"], filters[sym].step_size, True)
+                                    rem2_qty = round_step(qty_abs - part2_qty, filters[sym].step_size, True)
+                                    if part2_qty >= filters[sym].min_qty and rem2_qty >= filters[sym].min_qty:
+                                        client.cancel_all(sym)
+                                        client.place_market(sym, exit_side, part2_qty, reduce_only=True)
+                                        lk2_sl = round_step(meta["entry"] + meta["side"] * meta.get("be2_lock_r", 2.50) * meta["risk"], filters[sym].tick_size, False)
+                                        if (meta["side"] == 1 and lk2_sl > meta["sl"] and lk2_sl < c) or (meta["side"] == -1 and lk2_sl < meta["sl"] and lk2_sl > c):
+                                            meta["sl"] = lk2_sl
+                                        client.place_stop_market(sym, exit_side, rem2_qty, meta["sl"])
+                                        if meta["tp"] is not None:
+                                            client.place_tp_limit(sym, exit_side, rem2_qty, meta["tp"])
+                                        meta["t2_taken"] = True
+                                        daily_r_pnl += meta["bank2_frac"] * t2_r
+                                        qty_abs = rem2_qty
+                                        print(f"[V8 BANK40_T2] {sym} banked {part2_qty} @ >=+{t2_r:.1f}R, SL->{meta['sl']}")
                             for act_r, lk_r in meta["step_locks"]:
                                 hit = (h >= meta["entry"] + act_r * meta["risk"]) if meta["side"] == 1 else (l <= meta["entry"] - act_r * meta["risk"])
                                 new_sl = round_step(meta["entry"] + meta["side"] * lk_r * meta["risk"], filters[sym].tick_size, False)
@@ -1138,7 +1236,11 @@ def run_bot(
                 ep = round_step(sig.entry_px, filt.tick_size, False)
                 sl = round_step(sig.sl_px, filt.tick_size, False)
                 tp = round_step(sig.tp_px, filt.tick_size, False) if sig.tp_px is not None else None
-                qty = compute_order_qty(equity, risk_pct * sig.risk_mult * dd_brake, ep, sl, filt, leverage=leverage, max_slot_frac=slot_frac)
+                if small_account:
+                    eff_rp = throttle_risk_pct if dd > 0.10 else (aplus_risk_pct if sig.is_aplus else risk_pct)
+                    qty = compute_order_qty(active_eq, eff_rp * sig.risk_mult, ep, sl, filt, leverage=leverage, max_slot_frac=slot_frac)
+                else:
+                    qty = compute_order_qty(equity, risk_pct * sig.risk_mult * dd_brake, ep, sl, filt, leverage=leverage, max_slot_frac=slot_frac)
                 if qty <= 0:
                     print(f"[SKIP] {sym} qty=0 (minNotional={filt.min_notional} equity={equity:.2f})")
                     continue
@@ -1155,7 +1257,9 @@ def run_bot(
                         "trail_mult": sig.trail_atr_mult, "last_4h_ts": b4h[-1][0] if b4h else 0,
                         "pyramid_armed": False, "pyr_stage": 0,
                         "bank_r": sig.bank_r, "bank_frac": sig.bank_frac, "be_lock_r": sig.be_lock_r,
-                        "partial_taken": False,
+                        "bank2_r": sig.bank2_r, "bank2_frac": sig.bank2_frac, "be2_lock_r": sig.be2_lock_r,
+                        "origin_px": sig.origin_px, "init_qty": qty,
+                        "partial_taken": False, "t2_taken": False,
                         "expires_at": time.time() + sig.expire_sec,
                     }
         except urllib.error.URLError as exc:
@@ -1166,16 +1270,16 @@ def run_bot(
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Binance Futures Multi-Coin V7.0 Intraday Cashflow + 4H Cognitive Bot")
+    ap = argparse.ArgumentParser(description="Binance Futures Multi-Coin V8.0 Intraday Cashflow & Conviction-Ratchet Bot")
     ap.add_argument("--mode", choices=("paper", "testnet", "live"), default="paper")
     ap.add_argument("--leverage", type=int, default=10)
     ap.add_argument("--max-pos", type=int, default=3)
     ap.add_argument("--paper-equity", type=float, default=500.0)
-    ap.add_argument("--small-account", action="store_true", help="Enable $100 small-account mode (3.0% risk, 15x lev, -2.5R daily CB)")
+    ap.add_argument("--small-account", action="store_true", help="Enable $100 Conviction-Ratchet mode (2.5% std / 4.0% A+, 50/50 HWM skim, 15x lev, -2.5R daily CB)")
     ap.add_argument("--risk-pct", type=float, default=None, help="Override base risk per trade (e.g. 0.025 or 0.03)")
     ap.add_argument("--daily-stop-r", type=float, default=-2.5, help="Daily realized R circuit breaker (default -2.5R)")
-    ap.add_argument("--no-v7", action="store_true", help="Disable V7.0 Intraday Scene-Graph Physics engine")
-    ap.add_argument("--v7-risk-mult", type=float, default=1.0, help="Risk multiplier for V7 Intraday Physics")
+    ap.add_argument("--no-v8", "--no-v7", dest="no_v8", action="store_true", help="Disable V8.0 Intraday Scene-Graph Physics engine")
+    ap.add_argument("--v8-risk-mult", "--v7-risk-mult", dest="v8_risk_mult", type=float, default=1.0, help="Risk multiplier for V8 Intraday Physics")
     ap.add_argument("--no-4h-trend", action="store_true", help="Disable primary 4H_V6_Cognitive engine")
     ap.add_argument("--v6-mode", "--v5-mode", dest="v6_mode", choices=("hybrid", "topological"), default="hybrid")
     ap.add_argument("--no-pyramid", action="store_true", help="Disable risk-free 2-stage pyramiding")
@@ -1184,17 +1288,17 @@ def main() -> None:
     ap.add_argument("--trail-atr-mult", type=float, default=3.5)
     ap.add_argument("--no-smc", action="store_true", help="Disable secondary SMC_Sweep_V6 engine")
     ap.add_argument("--smc-risk-mult", type=float, default=0.50, help="Risk multiplier for SMC_Sweep_V6 (0.50 -> DD<12R, 1.00 -> max R)")
-    ap.add_argument("--sweep-tp-r", type=float, default=10.0, help="TP multiple in R for V7 & SMC_Sweep")
+    ap.add_argument("--sweep-tp-r", type=float, default=12.0, help="TP multiple in R for V8 & SMC_Sweep")
     ap.add_argument("--enable-fast-scalp", action="store_true", help="Enable experimental fast scalp sleeves")
     ap.add_argument("--symbols", type=str, default=",".join(DEFAULT_SYMBOLS))
     args = ap.parse_args()
     syms = tuple(s.strip().upper() for s in args.symbols.split(",") if s.strip())
     lev = 15 if (args.small_account and args.leverage == 10) else args.leverage
-    risk_pct = args.risk_pct if args.risk_pct is not None else (0.03 if args.small_account else 0.015)
+    risk_pct = args.risk_pct if args.risk_pct is not None else (0.025 if args.small_account else 0.015)
     smc_mult = 1.0 if (args.small_account and args.smc_risk_mult == 0.50) else args.smc_risk_mult
     run_bot(
         args.mode, syms, lev, args.max_pos, args.paper_equity,
-        use_v7=not args.no_v7, v7_risk_mult=args.v7_risk_mult,
+        use_v7=not args.no_v8, v7_risk_mult=args.v8_risk_mult,
         use_4h_trend=not args.no_4h_trend, v6_mode=args.v6_mode, use_pyramid=not args.no_pyramid,
         use_stage2_pyramid=not args.no_stage2_pyramid, donch_lb=args.donch_lb,
         trail_atr_mult=args.trail_atr_mult, use_smc=not args.no_smc,

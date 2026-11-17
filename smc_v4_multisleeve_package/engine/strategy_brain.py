@@ -1091,27 +1091,66 @@ def run_smc_sweep_causal_backtest(
 
 
 class SmallAccountCashflowManager:
-    """V7.0 $100 Small-Account Cashflow Sizer, -2.5R Daily Circuit Breaker & Payout Ledger."""
+    """V8.0 $100 Conviction-Scaled Ratchet Sizer, 50/50 HWM Profit-Skim & -2.5R Daily Circuit Breaker."""
 
     def __init__(
         self,
         starting_equity: float = 100.0,
-        risk_pct: float = 0.03,
+        risk_pct: float = 0.025,
+        aplus_risk_pct: float = 0.040,
+        throttle_risk_pct: float = 0.020,
+        throttle_dd_pct: float = 0.10,
+        skim_step_usd: float = 25.0,
+        skim_frac: float = 0.50,
         max_leverage: float = 15.0,
         daily_dd_cap_r: float = -2.5,
         min_notional_usd: float = 5.0,
+        use_conviction_scaling: bool = True,
     ) -> None:
         self.starting_equity = float(starting_equity)
         self.risk_pct = float(risk_pct)
+        self.aplus_risk_pct = float(aplus_risk_pct)
+        self.throttle_risk_pct = float(throttle_risk_pct)
+        self.throttle_dd_pct = float(throttle_dd_pct)
+        self.skim_step_usd = float(skim_step_usd)
+        self.skim_frac = float(skim_frac)
         self.max_leverage = float(max_leverage)
         self.daily_dd_cap_r = float(daily_dd_cap_r)
         self.min_notional_usd = float(min_notional_usd)
+        self.use_conviction_scaling = bool(use_conviction_scaling)
 
-    def compute_position_notional(self, equity: float, stop_distance_pct: float) -> Tuple[float, float]:
+    def resolve_risk_pct(
+        self,
+        equity: float,
+        active_hwm: float,
+        trade: Optional[dict] = None,
+    ) -> float:
+        """Conviction-Based Tiered Risk + >10% Drawdown Throttle."""
+        if active_hwm > 0 and ((active_hwm - equity) / active_hwm) > self.throttle_dd_pct:
+            return self.throttle_risk_pct
+        if self.use_conviction_scaling and trade is not None:
+            setup = str(trade.get("setup", ""))
+            conv = float(trade.get("conviction", trade.get("reasoning_chain", {}).get("conviction", 0.0)) or 0.0)
+            is_aplus = bool(
+                trade.get("is_aplus", False)
+                or setup in ("SMC_Sweep_V6", "V7_BPR_Snap", "V8_BPR_Snap")
+                or conv >= 0.72
+            )
+            if is_aplus:
+                return self.aplus_risk_pct
+        return self.risk_pct
+
+    def compute_position_notional(
+        self,
+        equity: float,
+        stop_distance_pct: float,
+        risk_pct_override: Optional[float] = None,
+    ) -> Tuple[float, float]:
         """Return (risk_usd, notional_usd) capped at safe max_leverage."""
         if equity <= 0 or stop_distance_pct <= 0:
             return 0.0, 0.0
-        risk_usd = equity * self.risk_pct
+        rp = self.risk_pct if risk_pct_override is None else float(risk_pct_override)
+        risk_usd = equity * rp
         raw_notional = risk_usd / stop_distance_pct
         max_notional = equity * self.max_leverage
         notional = min(raw_notional, max_notional)
@@ -1129,16 +1168,22 @@ class SmallAccountCashflowManager:
     ) -> Dict[str, object]:
         """Simulate real dollar cashflow with -2.5R daily circuit breaker.
 
-        When `compounded=False` (Fixed-Risk Cash-Withdrawal mode), risk_usd stays locked at
-        `starting_equity * risk_pct` and net dollar profits are banked cleanly.
-        `basket_mult` scales simulated multi-coin trade stream conservatively when projecting
-        across a liquid N-coin basket.
+        Modes:
+          - `fixed_risk_withdrawal` (`compounded=False`): risk stays anchored on `starting_equity`, profits banked.
+          - `compounded` (`compounded=True`): full equity compounding.
+          - `ratchet_cashflow`: 50/50 High-Water-Mark Profit-Skim & Step-Ratchet (every +$25 HWM gain
+            locks 50% into protected `withdrawn_vault_usd` and steps active base up with remaining 50%),
+            plus Conviction-Scaled Tiered Risk (2.5% std / 4.0% A+) and >10% DD throttle (2.0%).
         """
-        if mode is not None:
-            compounded = str(mode).lower().startswith("comp")
+        mode_norm = str(mode).lower() if mode is not None else ("compounded" if compounded else "fixed_risk_withdrawal")
+        is_ratchet = mode_norm.startswith("ratchet")
+        is_comp = mode_norm.startswith("comp")
+
         ordered = sorted(trades, key=lambda t: t["entry_time"])
         eq = self.starting_equity
         peak_eq = eq
+        skim_anchor = eq
+        withdrawn_vault_usd = 0.0
         max_dd_usd = 0.0
         max_dd_pct = 0.0
         daily_r: Dict[object, float] = {}
@@ -1147,6 +1192,9 @@ class SmallAccountCashflowManager:
         monthly_usd: Dict[Tuple[int, int], float] = {}
         accepted_r: List[float] = []
         skipped_circuit = 0
+        m1_end = (ordered[0]["entry_time"] + pd.Timedelta(days=30)) if ordered else None
+        m1_usd = 0.0
+        m1_trades = 0
 
         for t in ordered:
             day = t["entry_time"].date()
@@ -1154,8 +1202,9 @@ class SmallAccountCashflowManager:
                 skipped_circuit += 1
                 continue
             sl_pct = max(float(t.get("sl_pct", 0.01)), 1e-4)
-            base_eq = eq if compounded else self.starting_equity
-            risk_usd, _ = self.compute_position_notional(base_eq, sl_pct)
+            base_eq = eq if (is_comp or is_ratchet) else self.starting_equity
+            rp = self.resolve_risk_pct(eq, peak_eq, t)
+            risk_usd, _ = self.compute_position_notional(base_eq, sl_pct, risk_pct_override=rp)
             if risk_usd <= 0:
                 continue
             r_val = float(t["net_r"])
@@ -1168,8 +1217,24 @@ class SmallAccountCashflowManager:
             mo = (int(t["entry_time"].year), int(t["entry_time"].month))
             weekly_usd[wk] = weekly_usd.get(wk, 0.0) + pnl_usd
             monthly_usd[mo] = monthly_usd.get(mo, 0.0) + pnl_usd
+            if m1_end is not None and t["entry_time"] <= m1_end:
+                m1_usd += pnl_usd
+                m1_trades += 1
 
-            if compounded:
+            if is_ratchet:
+                eq = max(1.0, eq + pnl_usd)
+                peak_eq = max(peak_eq, eq)
+                dd_u = peak_eq - eq
+                max_dd_usd = max(max_dd_usd, dd_u)
+                max_dd_pct = max(max_dd_pct, 100.0 * dd_u / peak_eq)
+                if eq >= skim_anchor + self.skim_step_usd:
+                    gain = eq - skim_anchor
+                    skim = gain * self.skim_frac
+                    withdrawn_vault_usd += skim
+                    eq -= skim
+                    skim_anchor = eq
+                    peak_eq = eq
+            elif is_comp:
                 eq = max(1.0, eq + pnl_usd)
                 peak_eq = max(peak_eq, eq)
                 dd_u = peak_eq - eq
@@ -1191,12 +1256,14 @@ class SmallAccountCashflowManager:
         tot_usd = sum(daily_usd.values())
         gp = sum(r for r in accepted_r if r > 0)
         gl = -sum(r for r in accepted_r if r < 0)
-        days_5_10 = sum(1 for v in daily_usd.values() if v >= 5.0)
+        days_ge_5 = sum(1 for v in daily_usd.values() if v >= 5.0)
         days_ge_10 = sum(1 for v in daily_usd.values() if v >= 10.0)
+        days_ge_25 = sum(1 for v in daily_usd.values() if v >= 25.0)
         wks_ge_25 = sum(1 for v in weekly_usd.values() if v >= 25.0)
+        mode_lbl = "RATCHET_CASHFLOW" if is_ratchet else ("COMPOUNDED" if is_comp else "FIXED_WITHDRAWAL")
 
         return {
-            "mode": "COMPOUNDED" if compounded else "FIXED_WITHDRAWAL",
+            "mode": mode_lbl,
             "n": len(accepted_r),
             "skipped_circuit": skipped_circuit,
             "trades_per_month": round((len(accepted_r) * basket_mult) / span_months, 2),
@@ -1205,15 +1272,21 @@ class SmallAccountCashflowManager:
             "pf": round(gp / gl if gl > 0 else 99.0, 2),
             "net_r": round(sum(accepted_r), 2),
             "final_equity_usd": round(eq, 2),
+            "withdrawn_vault_usd": round(withdrawn_vault_usd, 2),
+            "total_wealth_usd": round(eq + withdrawn_vault_usd, 2),
             "net_usd": round(tot_usd, 2),
+            "month1_usd_single": round(m1_usd, 2),
+            "month1_usd_basket": round(m1_usd * basket_mult, 2),
+            "month1_trades_basket": round(m1_trades * basket_mult, 1),
             "avg_daily_usd_single": round(tot_usd / span_days, 2),
             "avg_weekly_usd_single": round(tot_usd / span_weeks, 2),
             "avg_monthly_usd_single": round(tot_usd / span_months, 2),
             "avg_daily_usd_basket": round((tot_usd * basket_mult) / span_days, 2),
             "avg_weekly_usd_basket": round((tot_usd * basket_mult) / span_weeks, 2),
             "avg_monthly_usd_basket": round((tot_usd * basket_mult) / span_months, 2),
-            "days_ge_5usd": days_5_10,
+            "days_ge_5usd": days_ge_5,
             "days_ge_10usd": days_ge_10,
+            "days_ge_25usd": days_ge_25,
             "weeks_ge_25usd": wks_ge_25,
             "max_dd_usd": round(max_dd_usd, 2),
             "max_dd_pct": round(max_dd_pct, 1),
@@ -1221,19 +1294,23 @@ class SmallAccountCashflowManager:
 
 
 class IntradayCashflowSniperV7:
-    """V7.0 Intraday 5m/1H Scene-Graph Physics Coordinator."""
+    """V7.0/V8.0 Intraday 5m/1H Scene-Graph Physics Coordinator."""
 
     def __init__(
         self,
         use_setup_a: bool = True,
         use_setup_b: bool = True,
         use_killzones: bool = False,
-        bank_r: float = 3.0,
-        bank_frac: float = 0.35,
+        bank_r: float = 2.8,
+        bank_frac: float = 0.40,
         be_lock_r: float = 0.50,
-        runner_tp_r: float = 10.0,
+        bank2_r: float = 5.5,
+        bank2_frac: float = 0.40,
+        be2_lock_r: float = 2.50,
+        runner_tp_r: float = 12.0,
         stagnation_bars: int = 0,
-        min_conviction: float = 0.35,
+        min_conviction: float = 0.55,
+        atr_ratchet_mult: float = 0.0,
     ) -> None:
         self.perception = VisualPerceptionEngine()
         self.physics = SceneGraphPhysicsDetector(max_approach_ker=0.42, min_bpr_k=1.20, min_implied_r=3.0)
@@ -1244,8 +1321,12 @@ class IntradayCashflowSniperV7:
             bank_r=bank_r,
             bank_frac=bank_frac,
             be_lock_r=be_lock_r,
+            bank2_r=bank2_r,
+            bank2_frac=bank2_frac,
+            be2_lock_r=be2_lock_r,
             runner_tp_r=runner_tp_r,
             stagnation_bars=stagnation_bars,
+            atr_ratchet_mult=atr_ratchet_mult,
         )
         self.prot_exec = ProtectedSwingDetector()
         self.use_setup_a = bool(use_setup_a)
@@ -1257,6 +1338,9 @@ class IntradayCashflowSniperV7:
         """London Open (07:00-11:00), NY Open (12:30-17:00), Asian Close/Sweep (00:00-02:30)."""
         hm = utc_hour * 60 + utc_min
         return (0 <= hm <= 150) or (420 <= hm <= 660) or (750 <= hm <= 1020)
+
+
+IntradayCashflowSniperV8 = IntradayCashflowSniperV7
 
 
 def run_v7_intraday_backtest(
@@ -1279,6 +1363,125 @@ def run_v7_intraday_backtest(
     fee_mult: float = 1.0,
 ) -> Tuple[List[dict], Dict[str, object]]:
     """Strictly causal 5m/1H/4H V7.0 Intraday Cashflow Sniper backtest (Binance VIP0 fees + funding)."""
+    return _run_intraday_sniper_core(
+        df_5m=df_5m,
+        eval_start=eval_start,
+        eval_end=eval_end,
+        use_setup_a=use_setup_a,
+        use_setup_b=use_setup_b,
+        use_killzones=use_killzones,
+        bank_r=bank_r,
+        bank_frac=bank_frac,
+        be_lock_r=be_lock_r,
+        bank2_r=5.5,
+        bank2_frac=0.0,
+        be2_lock_r=2.50,
+        runner_tp_r=runner_tp_r,
+        stagnation_bars=stagnation_bars,
+        min_ker4=min_ker4,
+        min_sl_pct=min_sl_pct,
+        max_sl_pct=max_sl_pct,
+        use_htf_macro_align=use_htf_macro_align,
+        use_v8_prosecutor=False,
+        min_conviction=0.35,
+        min_clearance_r=0.0,
+        min_rvol_entry=0.0,
+        max_ext4_atr=99.0,
+        setup_prefix="V7",
+        include_smc_sweep=include_smc_sweep,
+        fee_mult=fee_mult,
+    )
+
+
+def run_v8_intraday_backtest(
+    df_5m: pd.DataFrame,
+    eval_start: pd.Timestamp,
+    eval_end: pd.Timestamp,
+    use_setup_a: bool = True,
+    use_setup_b: bool = True,
+    use_killzones: bool = False,
+    bank_r: float = 2.8,
+    bank_frac: float = 0.40,
+    be_lock_r: float = 0.50,
+    bank2_r: float = 5.5,
+    bank2_frac: float = 0.40,
+    be2_lock_r: float = 2.50,
+    runner_tp_r: float = 12.0,
+    stagnation_bars: int = 0,
+    atr_ratchet_mult: float = 0.0,
+    min_ker4: float = 0.15,
+    min_sl_pct: float = 0.0045,
+    max_sl_pct: float = 0.0180,
+    use_htf_macro_align: bool = True,
+    use_v8_prosecutor: bool = True,
+    min_conviction: float = 0.55,
+    min_clearance_r: float = 3.0,
+    min_rvol_entry: float = 0.90,
+    max_ext4_atr: float = 2.50,
+    include_smc_sweep: bool = False,
+    fee_mult: float = 1.0,
+) -> Tuple[List[dict], Dict[str, object]]:
+    """Strictly causal 5m/1H/4H V8.0 Intraday Cashflow & Conviction-Ratchet backtest."""
+    return _run_intraday_sniper_core(
+        df_5m=df_5m,
+        eval_start=eval_start,
+        eval_end=eval_end,
+        use_setup_a=use_setup_a,
+        use_setup_b=use_setup_b,
+        use_killzones=use_killzones,
+        bank_r=bank_r,
+        bank_frac=bank_frac,
+        be_lock_r=be_lock_r,
+        bank2_r=bank2_r,
+        bank2_frac=bank2_frac,
+        be2_lock_r=be2_lock_r,
+        runner_tp_r=runner_tp_r,
+        stagnation_bars=stagnation_bars,
+        atr_ratchet_mult=atr_ratchet_mult,
+        min_ker4=min_ker4,
+        min_sl_pct=min_sl_pct,
+        max_sl_pct=max_sl_pct,
+        use_htf_macro_align=use_htf_macro_align,
+        use_v8_prosecutor=use_v8_prosecutor,
+        min_conviction=min_conviction,
+        min_clearance_r=min_clearance_r,
+        min_rvol_entry=min_rvol_entry,
+        max_ext4_atr=max_ext4_atr,
+        setup_prefix="V8",
+        include_smc_sweep=include_smc_sweep,
+        fee_mult=fee_mult,
+    )
+
+
+def _run_intraday_sniper_core(
+    df_5m: pd.DataFrame,
+    eval_start: pd.Timestamp,
+    eval_end: pd.Timestamp,
+    use_setup_a: bool = True,
+    use_setup_b: bool = True,
+    use_killzones: bool = False,
+    bank_r: float = 2.8,
+    bank_frac: float = 0.40,
+    be_lock_r: float = 0.50,
+    bank2_r: float = 5.5,
+    bank2_frac: float = 0.40,
+    be2_lock_r: float = 2.50,
+    runner_tp_r: float = 12.0,
+    stagnation_bars: int = 0,
+    atr_ratchet_mult: float = 0.0,
+    min_ker4: float = 0.15,
+    min_sl_pct: float = 0.0045,
+    max_sl_pct: float = 0.0180,
+    use_htf_macro_align: bool = True,
+    use_v8_prosecutor: bool = True,
+    min_conviction: float = 0.55,
+    min_clearance_r: float = 3.0,
+    min_rvol_entry: float = 0.90,
+    max_ext4_atr: float = 2.50,
+    setup_prefix: str = "V8",
+    include_smc_sweep: bool = False,
+    fee_mult: float = 1.0,
+) -> Tuple[List[dict], Dict[str, object]]:
     agg = {"Open": "first", "High": "max", "Low": "min", "Close": "last", "Volume": "sum"}
     df15 = df_5m.resample("15min").agg(agg).dropna()
     df1h = df_5m.resample("1h").agg(agg).dropna()
@@ -1304,18 +1507,25 @@ def run_v7_intraday_backtest(
     ts4_ns = df4h.index.as_unit("ns").asi8
     close4_ns = ts4_ns + int(14400 * 1e9)
     atr4 = compute_atr_series(h4, l4, c4, 14)
+    e20_4h = pd.Series(c4).ewm(span=20, adjust=False).mean().to_numpy(float)
 
-    sniper = IntradayCashflowSniperV7(
+    sniper = IntradayCashflowSniperV8(
         use_setup_a=use_setup_a,
         use_setup_b=use_setup_b,
         use_killzones=use_killzones,
         bank_r=bank_r,
         bank_frac=bank_frac,
         be_lock_r=be_lock_r,
+        bank2_r=bank2_r,
+        bank2_frac=bank2_frac,
+        be2_lock_r=be2_lock_r,
         runner_tp_r=runner_tp_r,
         stagnation_bars=stagnation_bars,
+        min_conviction=min_conviction,
+        atr_ratchet_mult=atr_ratchet_mult,
     )
     reg_4 = sniper.regime.precompute_frame_features(df4h)
+    reg_5 = sniper.regime.precompute_frame_features(df_5m) if use_v8_prosecutor else None
 
     sw15 = sniper.perception.detect_causal_swings(ts15_ns, h15, l15, c15, atr15, max_swings=40000)
     sw15_by_conf: Dict[int, List[TopologicalSwing]] = {}
@@ -1391,9 +1601,14 @@ def run_v7_intraday_backtest(
             )
             if closed:
                 hrs = max(0.1, (i5 - pos.entry_bar) * (5.0 / 60.0))
+                t1_b = pos.meta.get("t1_bar")
+                t2_b = pos.meta.get("t2_bar")
+                t1_hrs = round((t1_b - pos.entry_bar) * (5.0 / 60.0), 2) if t1_b is not None else None
+                t2_hrs = round((t2_b - pos.entry_bar) * (5.0 / 60.0), 2) if t2_b is not None else None
                 fee_in = 0.0002
                 fee_out = 0.0002 if pos.exit_reason == "VACUUM_TP" else 0.0007
                 cost = fee_mult * ((fee_in + fee_out + 0.0001 * (hrs / 8.0)) / (pos.risk_dist / pos.entry_price)) * pos.risk_mult
+                rc = dict(pos.meta.get("reasoning_chain", {}))
                 closed_trades.append({
                     "cluster_id": pos.trade_id,
                     "entry_time": pos.entry_ts,
@@ -1405,10 +1620,14 @@ def run_v7_intraday_backtest(
                     "gross_r": gross_r,
                     "net_r": gross_r - cost,
                     "is_pyramid": pos.is_pyramid,
-                    "setup": pos.meta.get("setup", "V7"),
+                    "is_aplus": bool(pos.meta.get("is_aplus", False)),
+                    "conviction": float(rc.get("conviction", 0.60)),
+                    "setup": pos.meta.get("setup", setup_prefix),
                     "outcome": pos.exit_reason,
                     "hold_hours": hrs,
-                    "reasoning_chain": pos.meta.get("reasoning_chain", {}),
+                    "t1_hours": t1_hrs,
+                    "t2_hours": t2_hrs,
+                    "reasoning_chain": rc,
                 })
                 cool = i5 + 3
             else:
@@ -1444,7 +1663,7 @@ def run_v7_intraday_backtest(
             if p.side == -1 and p.status in ("UNTAPPED", "SWEPT_WITH_REJECTION")
         ] + [s.price for s in vis1[-8:] if s.side == -1]
 
-        entry_sig: Optional[Tuple[int, float, float, float, str, dict]] = None
+        entry_sig: Optional[Tuple[int, float, float, float, str, float, float, dict]] = None
 
         # Setup A: Compression Approach + Flat HTF Liquidity Sweep + 4H Trend Snap
         if sniper.use_setup_a:
@@ -1452,8 +1671,10 @@ def run_v7_intraday_backtest(
             if ca is not None and ((not use_htf_macro_align) or ca.side == tr4):
                 ep = float(c5[i5])
                 slp = (ca.sweep_extreme - 1.0 * a5) if ca.side == 1 else (ca.sweep_extreme + 1.0 * a5)
+                disp_sc = sniper.perception.displacement_score(o5[i5], h5[i5], l5[i5], c5[i5], a5)
                 entry_sig = (
-                    ca.side, ep, slp, ca.origin_anchor, "V7_CompVacuum",
+                    ca.side, ep, slp, ca.origin_anchor, f"{setup_prefix}_CompVacuum",
+                    float(ca.vacuum_score), float(disp_sc),
                     {"ker4": round(rs4.ker, 2), "vac": round(ca.vacuum_score, 2), "imp_r": round(ca.implied_r, 2)},
                 )
 
@@ -1470,8 +1691,10 @@ def run_v7_intraday_backtest(
                     if retest_ok and ((not use_htf_macro_align) or (pending_bpr.side == tr4 and pending_bpr.side == tr1)):
                         ep = float(c5[i5])
                         slp = (pending_bpr.sweep_extreme - 1.0 * a5) if pending_bpr.side == 1 else (pending_bpr.sweep_extreme + 1.0 * a5)
+                        disp_sc = float(sigmoid(pending_bpr.k_velocity, 1.25, 2.0))
                         entry_sig = (
-                            pending_bpr.side, ep, slp, ep + pending_bpr.side * runner_tp_r * abs(ep - slp), "V7_BPR_Retest",
+                            pending_bpr.side, ep, slp, ep + pending_bpr.side * runner_tp_r * abs(ep - slp), f"{setup_prefix}_BPR_Retest",
+                            float(pending_bpr.vacuum_score), disp_sc,
                             {"ker4": round(rs4.ker, 2), "k_vel": round(pending_bpr.k_velocity, 2), "vac": round(pending_bpr.vacuum_score, 2)},
                         )
                         pending_bpr = None
@@ -1483,8 +1706,10 @@ def run_v7_intraday_backtest(
                     if bpr.vacuum_score >= 0.55 and bpr.k_velocity >= 1.60:
                         ep = float(c5[i5])
                         slp = (bpr.sweep_extreme - 1.0 * a5) if bpr.side == 1 else (bpr.sweep_extreme + 1.0 * a5)
+                        disp_sc = float(sigmoid(bpr.k_velocity, 1.25, 2.0))
                         entry_sig = (
-                            bpr.side, ep, slp, ep + bpr.side * runner_tp_r * abs(ep - slp), "V7_BPR_Snap",
+                            bpr.side, ep, slp, ep + bpr.side * runner_tp_r * abs(ep - slp), f"{setup_prefix}_BPR_Snap",
+                            float(bpr.vacuum_score), disp_sc,
                             {"ker4": round(rs4.ker, 2), "k_vel": round(bpr.k_velocity, 2), "vac": round(bpr.vacuum_score, 2)},
                         )
                     else:
@@ -1493,11 +1718,51 @@ def run_v7_intraday_backtest(
         if entry_sig is None:
             continue
 
-        side, ep, slp, tgt_px, setup_tag, sc_meta = entry_sig
+        side, ep, slp, tgt_px, setup_tag, vac_sc, disp_sc, sc_meta = entry_sig
         rd = abs(ep - slp)
         sl_pct = rd / ep
         if rd <= 0 or not (min_sl_pct <= sl_pct <= max_sl_pct):
             continue
+
+        is_aplus = setup_tag.endswith("BPR_Snap")
+        if use_v8_prosecutor:
+            rs5 = sniper.regime.evaluate_bar(reg_5, i5)
+            if rs5.rvol < min_rvol_entry:
+                continue
+            ext4 = ((ep - e20_4h[p4 - 1]) * side) / max(float(atr4[p4 - 1]), 1e-12)
+            if ext4 > max_ext4_atr:
+                continue
+            opp_walls = [s.price for s in vis1[-6:] if s.side == side]
+            dir4 = 1 if c4[p4 - 1] > o4[p4 - 1] else -1
+            verdict = sniper.prosecutor.cross_examine(
+                side=side,
+                entry_px=ep,
+                risk_dist=rd,
+                thesis_scores={
+                    "sweep": 0.72,
+                    "disp": disp_sc,
+                    "vac": vac_sc,
+                    "ker4": float(sigmoid(rs4.ker, 0.25, 9.0)),
+                    "rvol": float(sigmoid(rs5.rvol, 1.3, 2.0)),
+                },
+                thesis_weights={"sweep": 1.1, "disp": 1.2, "vac": 1.0, "ker4": 1.0, "rvol": 0.7},
+                opposing_htf_walls=opp_walls,
+                ker_4h=rs4.ker,
+                body_ratio_4h=rs4.body_ratio,
+                dir_4h_candle=dir4,
+                htf_trend_1h=tr1,
+                htf_trend_4h=tr4,
+                rvol_entry=rs5.rvol,
+                rvol_opp=1.0,
+                is_counter_trend_sweep=(side != tr4),
+                min_clearance_r=min_clearance_r,
+            )
+            if not verdict.approved:
+                continue
+            sc_meta["conviction"] = round(verdict.conviction, 3)
+            sc_meta["rvol5"] = round(rs5.rvol, 2)
+            sc_meta["ext4"] = round(ext4, 2)
+            is_aplus = is_aplus or (verdict.conviction >= 0.72)
 
         cid += 1
         positions.append(
@@ -1505,12 +1770,14 @@ def run_v7_intraday_backtest(
                 trade_id=cid, side=side, entry_bar=i5,
                 entry_ts=pd.Timestamp(c_ns, tz="UTC"), entry_price=ep,
                 init_sl=slp, cur_sl=slp, risk_dist=rd,
-                meta={"setup": setup_tag, "target_px": tgt_px, "reasoning_chain": sc_meta},
+                meta={"setup": setup_tag, "target_px": tgt_px, "is_aplus": is_aplus, "reasoning_chain": sc_meta},
             )
         )
 
     if include_smc_sweep:
-        tr_smc, _ = run_smc_sweep_causal_backtest(df_5m, eval_start, eval_end, use_v6_prosecutor=True, fee_mult=fee_mult, tp_r=runner_tp_r)
+        tr_smc, _ = run_smc_sweep_causal_backtest(df_5m, eval_start, eval_end, use_v6_prosecutor=True, fee_mult=fee_mult, tp_r=10.0)
+        for _t in tr_smc:
+            _t["is_aplus"] = True
         closed_trades = sorted(closed_trades + tr_smc, key=lambda t: t["entry_time"])
 
     return closed_trades, _summarize_trades(closed_trades)

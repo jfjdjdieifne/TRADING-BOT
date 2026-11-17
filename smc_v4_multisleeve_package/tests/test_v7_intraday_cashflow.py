@@ -99,7 +99,7 @@ def test_v7_bpr_ifvg_detection():
 
 
 def test_v7_intraday_cashflow_exit_manager():
-    mgr = IntradayCashflowExitManager(bank_r=3.0, bank_frac=0.35, be_lock_r=0.50, runner_tp_r=10.0, stagnation_bars=0)
+    mgr = IntradayCashflowExitManager(bank_r=3.0, bank_frac=0.35, be_lock_r=0.50, bank2_frac=0.0, runner_tp_r=10.0, stagnation_bars=0)
     prot = ProtectedSwingDetector()
     pos = TradePositionState(
         trade_id=1, side=1, entry_bar=0,
@@ -109,7 +109,7 @@ def test_v7_intraday_cashflow_exit_manager():
     # Bar 1 reaches +3.2R -> banks 35% @ 3.0R (+1.05R), moves SL to +0.50R (100.5)
     closed, _, note = mgr.step_bar(pos, 1, bar_h=103.2, bar_l=100.1, bar_c=102.9, atr_exec=0.5, prot_swing=prot)
     assert not closed
-    assert note == "BANKED_PARTIAL"
+    assert note in ("BANKED_PARTIAL", "BANKED_T1")
     assert abs(pos.cur_sl - 100.5) < 1e-9
     assert abs(pos.qty_rem - 0.65) < 1e-9
 
@@ -179,7 +179,7 @@ def test_v7_exports_10_coin_basket_and_binance_parity():
         assert f'"{sym}"' in qc_src
     assert "_detect_v7_comp_vacuum" in qc_src
     assert "_detect_v7_bpr" in qc_src
-    assert "V7.0" in qc_src
+    assert "V8.0" in qc_src
 
     assert IntradayCashflowSniperV7.in_intraday_killzone(8, 0)
     assert not IntradayCashflowSniperV7.in_intraday_killzone(19, 0)

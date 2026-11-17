@@ -53,12 +53,14 @@ from .strategy_brain import (
     AdversarialCrossExaminer,
     InstitutionalStrategyBrain,
     IntradayCashflowSniperV7,
+    IntradayCashflowSniperV8,
     ProsecutorVerdict,
     SmallAccountCashflowManager,
     run_smc_sweep_causal_backtest,
     run_v5_causal_backtest,
     run_v6_cognitive_backtest,
     run_v7_intraday_backtest,
+    run_v8_intraday_backtest,
 )
 
 __all__ = [
@@ -69,6 +71,7 @@ __all__ = [
     "InstitutionalStrategyBrain",
     "IntradayCashflowExitManager",
     "IntradayCashflowSniperV7",
+    "IntradayCashflowSniperV8",
     "KinematicMonitor",
     "LiquidityPool",
     "LiquidityPoolMapper",
@@ -112,6 +115,7 @@ __all__ = [
     "run_v5_causal_backtest",
     "run_v6_cognitive_backtest",
     "run_v7_intraday_backtest",
+    "run_v8_intraday_backtest",
     "sigmoid",
     "simulate_compounded_account",
     "soft_and_log_odds",

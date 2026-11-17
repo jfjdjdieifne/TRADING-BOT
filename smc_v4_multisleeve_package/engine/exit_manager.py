@@ -287,23 +287,35 @@ class AdaptiveExitManager:
 
 
 class IntradayCashflowExitManager:
-    """V7.0 Intraday Cashflow Exit: 35% Bank @ +3.0R -> BE+0.50R -> Runner to +10R (Protected Swing trail after +6R)."""
+    """V8.0 3-Tier Origin-Anchor Vacuum Cashflow Exit:
+    Tier 1: Bank 40% @ +2.8R -> SL to BE+0.50R
+    Tier 2: Bank 40% @ min(Origin_Anchor_R, +5.5R) [clamped >= +4.2R] -> SL to +2.50R
+    Tier 3: Trail remaining 20% moonbag runner to +12.0R (or Protected Swing / ATR ratchet >= +6.0R).
+    """
 
     def __init__(
         self,
-        bank_r: float = 3.0,
-        bank_frac: float = 0.35,
+        bank_r: float = 2.8,
+        bank_frac: float = 0.40,
         be_lock_r: float = 0.50,
-        runner_tp_r: float = 10.0,
+        bank2_r: float = 5.5,
+        bank2_frac: float = 0.40,
+        be2_lock_r: float = 2.50,
+        runner_tp_r: float = 12.0,
         stagnation_bars: int = 0,
         prot_trail_mfe_r: float = 6.0,
+        atr_ratchet_mult: float = 0.0,
     ) -> None:
         self.bank_r = float(bank_r)
         self.bank_frac = float(bank_frac)
         self.be_lock_r = float(be_lock_r)
+        self.bank2_r = float(bank2_r)
+        self.bank2_frac = float(bank2_frac)
+        self.be2_lock_r = float(be2_lock_r)
         self.runner_tp_r = float(runner_tp_r)
         self.stagnation_bars = int(stagnation_bars)
         self.prot_trail_mfe_r = float(prot_trail_mfe_r)
+        self.atr_ratchet_mult = float(atr_ratchet_mult)
 
     def step_bar(
         self,
@@ -334,12 +346,13 @@ class IntradayCashflowExitManager:
         pos.peak_mfe_r = max(pos.peak_mfe_r, cur_mfe_r)
         cur_r = ((bar_c - pos.entry_price) * pos.side) / rd
 
-        # 2) Fast Daily Cashflow Bank (35% @ +3.0R -> BE + 0.50R)
         note = ""
+        # 2) Tier 1: Fast Daily Cashflow Bank (40% @ +2.8R -> BE + 0.50R)
         if (not pos.partial_taken) and self.bank_frac > 0.0 and cur_mfe_r >= self.bank_r and pos.qty_rem > self.bank_frac:
             pos.realized_r += self.bank_frac * self.bank_r
-            pos.qty_rem -= self.bank_frac
+            pos.qty_rem = max(0.0, pos.qty_rem - self.bank_frac)
             pos.partial_taken = True
+            pos.meta["t1_bar"] = bar_idx
             be_px = pos.entry_price + pos.side * self.be_lock_r * rd
             if (pos.side == 1 and be_px > pos.cur_sl and be_px < bar_c) or (
                 pos.side == -1 and be_px < pos.cur_sl and be_px > bar_c
@@ -347,35 +360,55 @@ class IntradayCashflowExitManager:
                 pos.cur_sl = be_px
                 pos.be_moved = True
             pos.pyramid_armed = True
-            note = "BANKED_PARTIAL"
+            note = "BANKED_T1"
 
-        # 3) Hard Runner Target (+10R vacuum cap or extended Origin_Anchor)
-        tp_cap = pos.entry_price + pos.side * self.runner_tp_r * rd
-        if target_px is None:
-            tp_px = tp_cap
-        else:
-            # Never truncate runner below runner_tp_r; extend only if structural Origin_Anchor is >= runner_tp_r
-            tp_px = tp_cap
+        # 3) Tier 2: Origin_Anchor Waterfall Payday (40% @ min(Origin_Anchor_R, +5.5R) -> Lock +2.50R)
+        t2_taken = bool(pos.meta.get("t2_taken", False))
+        if pos.partial_taken and (not t2_taken) and self.bank2_frac > 0.0 and pos.qty_rem > self.bank2_frac + 1e-9:
+            t2_r = self.bank2_r
+            if target_px is not None:
+                orig_r = ((float(target_px) - pos.entry_price) * pos.side) / rd
+                if orig_r >= 4.2:
+                    t2_r = min(self.bank2_r, orig_r)
+            if cur_mfe_r >= t2_r:
+                pos.realized_r += self.bank2_frac * t2_r
+                pos.qty_rem = max(0.0, pos.qty_rem - self.bank2_frac)
+                pos.meta["t2_taken"] = True
+                pos.meta["t2_bar"] = bar_idx
+                lk2_px = pos.entry_price + pos.side * self.be2_lock_r * rd
+                if (pos.side == 1 and lk2_px > pos.cur_sl and lk2_px < bar_c) or (
+                    pos.side == -1 and lk2_px < pos.cur_sl and lk2_px > bar_c
+                ):
+                    pos.cur_sl = lk2_px
+                note = "BANKED_T2_ORIGIN"
 
+        # 4) Tier 3: Hard Moonbag Runner Target (+12.0R)
+        tp_px = pos.entry_price + pos.side * self.runner_tp_r * rd
         if (pos.side == 1 and bar_h >= tp_px) or (pos.side == -1 and bar_l <= tp_px):
-            tp_r = ((tp_px - pos.entry_price) * pos.side) / rd
-            pos.realized_r += pos.qty_rem * tp_r
+            pos.realized_r += pos.qty_rem * self.runner_tp_r
             pos.qty_rem = 0.0
             pos.exit_reason = "VACUUM_TP"
             return True, pos.realized_r * pos.risk_mult, "VACUUM_TP"
 
-        # 4) Trail remaining runner behind Protected Swings only once runner is deep in profit (>= +6.0R)
-        if pos.partial_taken and cur_mfe_r >= self.prot_trail_mfe_r and prot_swing is not None:
-            ps = prot_swing.latest_floor_or_ceiling(pos.side)
-            if ps is not None and ps.bos_idx > pos.entry_bar:
-                buf = 0.25 * max(atr_exec, 0.0)
-                cand = (ps.price - buf) if pos.side == 1 else (ps.price + buf)
-                if (pos.side == 1 and cand > pos.cur_sl and cand < bar_c) or (
-                    pos.side == -1 and cand < pos.cur_sl and cand > bar_c
+        # 5) Trail remaining 20% moonbag behind Protected Swings / optional ATR ratchet once >= +6.0R
+        if pos.partial_taken and cur_mfe_r >= self.prot_trail_mfe_r:
+            if prot_swing is not None:
+                ps = prot_swing.latest_floor_or_ceiling(pos.side)
+                if ps is not None and ps.bos_idx > pos.entry_bar:
+                    buf = 0.25 * max(atr_exec, 0.0)
+                    cand = (ps.price - buf) if pos.side == 1 else (ps.price + buf)
+                    if (pos.side == 1 and cand > pos.cur_sl and cand < bar_c) or (
+                        pos.side == -1 and cand < pos.cur_sl and cand > bar_c
+                    ):
+                        pos.cur_sl = cand
+            if self.atr_ratchet_mult > 0.0 and atr_exec > 0.0:
+                rat = (pos.best_px - self.atr_ratchet_mult * atr_exec) if pos.side == 1 else (pos.best_px + self.atr_ratchet_mult * atr_exec)
+                if (pos.side == 1 and rat > pos.cur_sl and rat < bar_c) or (
+                    pos.side == -1 and rat < pos.cur_sl and rat > bar_c
                 ):
-                    pos.cur_sl = cand
+                    pos.cur_sl = rat
 
-        # 5) Optional Intraday Stagnation / Time-Stop Guard (disabled when stagnation_bars <= 0)
+        # 6) Optional Intraday Stagnation / Time-Stop Guard (disabled when stagnation_bars <= 0)
         bars_held = bar_idx - pos.entry_bar
         if self.stagnation_bars > 0 and (not pos.partial_taken) and bars_held >= self.stagnation_bars and (-0.30 <= cur_r <= 0.80):
             pos.realized_r += pos.qty_rem * cur_r
