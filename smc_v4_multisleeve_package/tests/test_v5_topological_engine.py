@@ -140,7 +140,7 @@ def test_binance_bot_and_qc_v5_parity():
     b15 = [(t0 + i * 900 * 1000, 100, 101, 99, 100.2, 100) for i in range(50)]
     b5 = [(t0 + i * 300 * 1000, 100, 101, 99, 100.2, 50) for i in range(90)]
     sig = bfs.evaluate_symbol_bars("BTCUSDT", b5, b15, b1h, b4h, b1d, use_4h_trend=True, use_smc=False)
-    assert sig is not None and sig.engine == "4H_V5_Trend" and sig.side == 1
+    assert sig is not None and sig.engine in ("4H_V5_Trend", "4H_V6_Cognitive") and sig.side == 1
 
     # Mock AlgorithmImports for QC V5
     mod = types.ModuleType("AlgorithmImports")
@@ -216,4 +216,4 @@ def test_binance_bot_and_qc_v5_parity():
         algo.on_4h(st, BarObj(100 + i * 0.2, 101 + i * 0.2, 99 + i * 0.2, 100.5 + i * 0.2))
     algo.securities[btc_sym].price = prev_hi + 2.5
     algo.on_4h(st, BarObj(prev_hi - 0.5, prev_hi + 3.0, prev_hi - 0.5, prev_hi + 2.5, 5e3))
-    assert any(o[0] == "MKT" and o[3] == "4H_V5_Trend" for o in algo.orders)
+    assert any(o[0] == "MKT" and o[3] in ("4H_V5_Trend", "4H_V6_Cognitive") for o in algo.orders)

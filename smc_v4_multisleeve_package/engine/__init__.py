@@ -14,6 +14,7 @@ from .causal_primitives import (
 from .exit_manager import AdaptiveExitManager, ProtectedSwing, ProtectedSwingDetector, TradePositionState
 from .liquidity_mapper import LiquidityPool, LiquidityPoolMapper
 from .perception_engine import (
+    KinematicMonitor,
     TopologicalSwing,
     VisualPerceptionEngine,
     compute_atr_series,
@@ -39,13 +40,23 @@ from .smc_v4_portfolio import (
     run_smc_v8_multiasset_portfolio,
     simulate_compounded_account,
 )
-from .strategy_brain import InstitutionalStrategyBrain, run_v5_causal_backtest
+from .strategy_brain import (
+    AdversarialCrossExaminer,
+    InstitutionalStrategyBrain,
+    ProsecutorVerdict,
+    run_smc_sweep_causal_backtest,
+    run_v5_causal_backtest,
+    run_v6_cognitive_backtest,
+)
 
 __all__ = [
     "AdaptiveExitManager",
+    "AdversarialCrossExaminer",
     "InstitutionalStrategyBrain",
+    "KinematicMonitor",
     "LiquidityPool",
     "LiquidityPoolMapper",
+    "ProsecutorVerdict",
     "ProtectedSwing",
     "ProtectedSwingDetector",
     "RegimeFilterEngine",
@@ -73,6 +84,7 @@ __all__ = [
     "run_engine_vis_a",
     "run_engine_vis_b",
     "run_engine_vis_b_pro",
+    "run_smc_sweep_causal_backtest",
     "run_smc_v3_backtest",
     "run_smc_v4_portfolio",
     "run_smc_v5_portfolio",
@@ -80,6 +92,7 @@ __all__ = [
     "run_smc_v7_multiasset_portfolio",
     "run_smc_v8_multiasset_portfolio",
     "run_v5_causal_backtest",
+    "run_v6_cognitive_backtest",
     "sigmoid",
     "simulate_compounded_account",
     "soft_and_log_odds",

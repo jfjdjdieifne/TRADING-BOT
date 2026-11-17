@@ -15,6 +15,7 @@ from .exit_manager import (
 )
 from .liquidity_mapper import LiquidityPoolMapper
 from .perception_engine import (
+    KinematicMonitor,
     TopologicalSwing,
     VisualPerceptionEngine,
     compute_atr_series,
@@ -22,6 +23,156 @@ from .perception_engine import (
     soft_and_log_odds,
 )
 from .regime_filter import RegimeFilterEngine
+
+
+@dataclass
+class ProsecutorVerdict:
+    conviction: float
+    thesis_logit: float
+    contradiction_penalty: float
+    brick_wall_penalty: float
+    freight_train_veto: bool
+    vol_divergence_penalty: float
+    acceptance_status: str
+    sweep_decay_score: float
+    approved: bool
+    reasoning_chain: Dict[str, object]
+
+
+class AdversarialCrossExaminer:
+    """V6 Pillar 3: Bayesian Prosecutor with Temporal Decay, Brick-Wall Clearance & Freight-Train Veto."""
+
+    def __init__(
+        self,
+        grace_bars: int = 2,
+        decay_lambda: float = 0.55,
+        alpha_thesis: float = 2.4,
+        beta_prosecutor: float = 2.6,
+        theta_bias: float = 0.35,
+        min_conviction: float = 0.52,
+    ) -> None:
+        self.grace_bars = int(grace_bars)
+        self.decay_lambda = float(decay_lambda)
+        self.alpha_thesis = float(alpha_thesis)
+        self.beta_prosecutor = float(beta_prosecutor)
+        self.theta_bias = float(theta_bias)
+        self.min_conviction = float(min_conviction)
+
+    def evaluate_temporal_sweep_decay(
+        self,
+        s0: float,
+        bars_beyond_level: int,
+    ) -> Tuple[float, str]:
+        """Exponential sweep rejection decay; lingered acceptance beyond level flips to PRICE_ACCEPTANCE."""
+        if bars_beyond_level <= 0:
+            return float(s0), "FRESH_REJECTION"
+        excess = max(0, bars_beyond_level - self.grace_bars)
+        decayed = float(s0 * np.exp(-self.decay_lambda * excess))
+        if bars_beyond_level > self.grace_bars:
+            return decayed, "PRICE_ACCEPTANCE"
+        return decayed, "GRACE_WINDOW"
+
+    def cross_examine(
+        self,
+        side: int,
+        entry_px: float,
+        risk_dist: float,
+        thesis_scores: Dict[str, float],
+        thesis_weights: Dict[str, float],
+        opposing_htf_walls: List[float],
+        ker_4h: float,
+        body_ratio_4h: float,
+        dir_4h_candle: int,
+        htf_trend_1h: int,
+        htf_trend_4h: int,
+        rvol_entry: float,
+        rvol_opp: float,
+        sweep_bars_accepted: int = 0,
+        is_counter_trend_sweep: bool = False,
+        require_1h_bos_against_freight: bool = True,
+        min_clearance_r: float = 2.5,
+    ) -> ProsecutorVerdict:
+        eps = 1e-4
+        # 1) Thesis Log-Odds L_Thesis
+        num = den = 0.0
+        for k, w in thesis_weights.items():
+            if w <= 0 or k not in thesis_scores:
+                continue
+            p = float(np.clip(thesis_scores[k], eps, 1.0 - eps))
+            num += float(w) * float(np.log(p / (1.0 - p)))
+            den += float(w)
+        l_thesis = (num / den) if den > 0 else 0.0
+
+        # 2) Temporal Sweep Acceptance vs Rejection Decay
+        s0 = float(thesis_scores.get("sweep", 0.75))
+        decayed_sw, acc_status = self.evaluate_temporal_sweep_decay(s0, sweep_bars_accepted)
+
+        # 3) Check A: HTF Brick Wall / Obstacle Clearance (< min_clearance_r ahead of entry)
+        bw_pen = 0.0
+        nearest_wall_r = 99.0
+        if risk_dist > 0 and opposing_htf_walls:
+            for wpx in opposing_htf_walls:
+                dist = (wpx - entry_px) * side
+                if dist > 0:
+                    r_room = dist / risk_dist
+                    if r_room < nearest_wall_r:
+                        nearest_wall_r = r_room
+            if nearest_wall_r < min_clearance_r:
+                bw_pen = float(np.clip((min_clearance_r - nearest_wall_r) / min_clearance_r, 0.0, 1.0))
+
+        # 4) Check B: HTF Expansion Freight-Train Veto
+        freight_veto = False
+        freight_pen = 0.0
+        opposing_4h_impulse = (dir_4h_candle == -side and body_ratio_4h >= 0.55)
+        opposing_macro = (htf_trend_4h == -side)
+        if is_counter_trend_sweep:
+            if ker_4h > 0.45 and (opposing_4h_impulse or opposing_macro):
+                if not require_1h_bos_against_freight or (htf_trend_1h != side):
+                    freight_veto = True
+                    freight_pen = 1.5
+            elif opposing_macro and ker_4h > 0.35:
+                freight_pen = 0.65
+
+        # 5) Check C: Volume-Price Divergence (weak breakout RVOL vs strong opposing RVOL)
+        vdiv_pen = 0.0
+        if rvol_entry < 0.85 and rvol_opp > 1.25:
+            vdiv_pen = float(np.clip((1.25 - rvol_entry) * 0.75, 0.0, 1.0))
+        elif rvol_entry < 0.85:
+            vdiv_pen = 0.25
+
+        acc_pen = 1.6 if acc_status == "PRICE_ACCEPTANCE" else 0.0
+        p_contradiction = float(0.85 * bw_pen + freight_pen + 0.55 * vdiv_pen + acc_pen)
+
+        logit = self.alpha_thesis * l_thesis - self.beta_prosecutor * p_contradiction - self.theta_bias
+        conviction = float(sigmoid(logit, 0.0, 1.0))
+        approved = (not freight_veto) and (acc_status != "PRICE_ACCEPTANCE") and (conviction >= self.min_conviction)
+
+        chain = {
+            "thesis_scores": dict(thesis_scores),
+            "l_thesis": round(l_thesis, 4),
+            "p_contradiction": round(p_contradiction, 4),
+            "nearest_wall_r": round(nearest_wall_r, 2),
+            "brick_wall_pen": round(bw_pen, 3),
+            "freight_train_veto": freight_veto,
+            "ker_4h": round(ker_4h, 3),
+            "vol_div_pen": round(vdiv_pen, 3),
+            "acceptance_status": acc_status,
+            "sweep_decay": round(decayed_sw, 3),
+            "conviction": round(conviction, 4),
+            "approved": approved,
+        }
+        return ProsecutorVerdict(
+            conviction=conviction,
+            thesis_logit=l_thesis,
+            contradiction_penalty=p_contradiction,
+            brick_wall_penalty=bw_pen,
+            freight_train_veto=freight_veto,
+            vol_divergence_penalty=vdiv_pen,
+            acceptance_status=acc_status,
+            sweep_decay_score=decayed_sw,
+            approved=approved,
+            reasoning_chain=chain,
+        )
 
 
 @dataclass
@@ -72,6 +223,8 @@ class InstitutionalStrategyBrain:
         trail_atr_mult: float = 3.5,
     ) -> None:
         self.perception = VisualPerceptionEngine()
+        self.kinematics = KinematicMonitor()
+        self.prosecutor = AdversarialCrossExaminer()
         self.liq_mapper = LiquidityPoolMapper(self.perception)
         self.regime = RegimeFilterEngine()
         self.exit_mgr = AdaptiveExitManager()
@@ -351,3 +504,584 @@ def run_v5_causal_backtest(
         "clusters_ge_10r": sum(1 for v in cl_vals if v >= 10.0),
     }
     return brain.closed_trades, summary
+
+
+def _summarize_trades(trades: List[dict]) -> Dict[str, object]:
+    all_r = [t["net_r"] for t in trades]
+    is_r = [t["net_r"] for t in trades if t["entry_time"].year <= 2023]
+    oos_r = [t["net_r"] for t in trades if t["entry_time"].year >= 2024]
+
+    def _st(arr: List[float]) -> Dict[str, float]:
+        if not arr:
+            return {"n": 0, "wr": 0.0, "net": 0.0, "pf": 0.0}
+        gp = sum(x for x in arr if x > 0)
+        gl = -sum(x for x in arr if x < 0)
+        return {
+            "n": len(arr),
+            "wr": 100.0 * sum(1 for x in arr if x > 0) / len(arr),
+            "net": sum(arr),
+            "pf": gp / gl if gl > 0 else 99.0,
+        }
+
+    cum = np.cumsum(all_r) if all_r else np.array([0.0])
+    pk = np.maximum.accumulate(np.insert(cum, 0, 0.0))[1:]
+    dd = float(np.max(pk - cum)) if all_r else 0.0
+
+    by_cl: Dict[int, float] = {}
+    yr_r: Dict[int, float] = {}
+    for t in trades:
+        by_cl[t["cluster_id"]] = by_cl.get(t["cluster_id"], 0.0) + t["net_r"]
+        yr = int(t["entry_time"].year)
+        yr_r[yr] = yr_r.get(yr, 0.0) + t["net_r"]
+    cl_vals = list(by_cl.values())
+    return {
+        "all": _st(all_r),
+        "is": _st(is_r),
+        "oos": _st(oos_r),
+        "max_dd_r": dd,
+        "cluster_max_r": max(cl_vals, default=0.0),
+        "clusters_ge_10r": sum(1 for v in cl_vals if v >= 10.0),
+        "yearly_r": {k: round(v, 1) for k, v in sorted(yr_r.items())},
+        "years_green": sum(1 for v in yr_r.values() if v > 0),
+        "years_total": len(yr_r),
+    }
+
+
+def run_v6_cognitive_backtest(
+    df_5m: pd.DataFrame,
+    eval_start: pd.Timestamp,
+    eval_end: pd.Timestamp,
+    rho_min: float = 1.50,
+    rho_max: float = 1.85,
+    min_rho_floor: float = 1.50,
+    max_rho_cap: float = 2.00,
+    use_stage2_pyramid: bool = True,
+    use_climax_ratchet: bool = True,
+    use_prosecutor: bool = True,
+    min_conviction: float = 0.35,
+    fee_mult: float = 1.0,
+) -> Tuple[List[dict], Dict[str, object]]:
+    """V6.0 Cognitive Fractal Engine: Fractal 1H/4H Stop Compression + Kinematics + Prosecutor + 2-Stage Pyramiding."""
+    df1h = df_5m.resample("1h").agg({"Open": "first", "High": "max", "Low": "min", "Close": "last", "Volume": "sum"}).dropna()
+    df4h = df_5m.resample("4h").agg({"Open": "first", "High": "max", "Low": "min", "Close": "last", "Volume": "sum"}).dropna()
+    df1d = df_5m.resample("1D").agg({"Open": "first", "High": "max", "Low": "min", "Close": "last", "Volume": "sum"}).dropna()
+
+    o1, h1, l1, c1, v1 = (df1h[col].to_numpy(float) for col in ("Open", "High", "Low", "Close", "Volume"))
+    ts1_ns = df1h.index.as_unit("ns").asi8
+    close1_ns = ts1_ns + int(3600 * 1e9)
+    atr1 = compute_atr_series(h1, l1, c1, 14)
+
+    o4, h4, l4, c4, v4 = (df4h[col].to_numpy(float) for col in ("Open", "High", "Low", "Close", "Volume"))
+    ts4_ns = df4h.index.as_unit("ns").asi8
+    ts4_sec = ts4_ns / 1e9
+    close4_ns = ts4_ns + int(14400 * 1e9)
+    atr4 = compute_atr_series(h4, l4, c4, 14)
+
+    c1d = df1d["Close"].to_numpy(float)
+    ts1d_ns = df1d.index.as_unit("ns").asi8
+    close1d_ns = ts1d_ns + int(86400 * 1e9)
+    e20_1d = pd.Series(c1d).ewm(span=20, adjust=False).mean().to_numpy(float)
+    e50_1d = pd.Series(c1d).ewm(span=50, adjust=False).mean().to_numpy(float)
+
+    brain = InstitutionalStrategyBrain(confluence_threshold=0.50)
+    brain.prosecutor.min_conviction = float(min_conviction)
+    reg_4 = brain.regime.precompute_frame_features(df4h)
+    adx4 = brain.compute_adx_series(h4, l4, atr4, 14)
+
+    sw4 = brain.perception.detect_causal_swings(ts4_ns, h4, l4, c4, atr4, max_swings=6000)
+    sw4_by_conf: Dict[int, List[TopologicalSwing]] = {}
+    for s in sw4:
+        sw4_by_conf.setdefault(s.confirm_idx, []).append(s)
+
+    sw1 = brain.perception.detect_causal_swings(ts1_ns, h1, l1, c1, atr1, max_swings=24000)
+    sw1_by_conf: Dict[int, List[TopologicalSwing]] = {}
+    for s in sw1:
+        sw1_by_conf.setdefault(s.confirm_idx, []).append(s)
+
+    hi20 = pd.Series(h4).rolling(20).max().shift(1).to_numpy(float)
+    lo20 = pd.Series(l4).rolling(20).min().shift(1).to_numpy(float)
+
+    p1h = 0
+    p1d = 0
+    vis4: List[TopologicalSwing] = []
+    vis1: List[TopologicalSwing] = []
+    cool = 0
+    cid = 0
+    eval0_ns = int(eval_start.as_unit("ns").value)
+    eval1_ns = int(eval_end.as_unit("ns").value)
+
+    for i4 in range(60, len(df4h)):
+        c_ns = int(close4_ns[i4])
+        if c_ns >= eval1_ns:
+            break
+        while p1d < len(df1d) and close1d_ns[p1d] <= c_ns:
+            p1d += 1
+        while p1h < len(df1h) and close1_ns[p1h] <= c_ns:
+            new_s1 = sw1_by_conf.get(p1h, [])
+            if new_s1:
+                vis1.extend(new_s1)
+                vis1 = vis1[-40:]
+            brain.prot_1h.update(p1h, float(c1[p1h]), new_s1)
+            p1h += 1
+
+        if i4 in sw4_by_conf:
+            vis4.extend(sw4_by_conf[i4])
+            vis4 = vis4[-40:]
+            brain.liq_mapper.ingest_structural_swings(vis4, l4[:i4 + 1], h4[:i4 + 1], float(atr4[i4]), "4H")
+        brain._update_4h_pois(i4, o4, h4, l4, c4, atr4)
+        brain.liq_mapper.step_bar(float(ts4_sec[i4]), float(o4[i4]), float(h4[i4]), float(l4[i4]), float(c4[i4]), float(atr4[i4]))
+
+        if p1d < 50 or p1h < 30 or c_ns < eval0_ns:
+            continue
+
+        # 1) Manage active positions with V6 Climax Elastic Ratchet & Protected Swings
+        still: List[TradePositionState] = []
+        cluster_open_r = sum(
+            (((float(c4[i4]) - p.entry_price) * p.side) / p.risk_dist) * p.risk_mult
+            for p in brain.positions
+        ) if brain.positions else 0.0
+        rs_now = brain.regime.evaluate_bar(reg_4, i4)
+
+        for pos in brain.positions:
+            if (pos.side == 1 and l4[i4] <= pos.cur_sl) or (pos.side == -1 and h4[i4] >= pos.cur_sl):
+                gr = (((pos.cur_sl - pos.entry_price) * pos.side) / pos.risk_dist) * pos.risk_mult
+                hrs = max(4.0, (i4 - pos.entry_bar) * 4.0)
+                cost = fee_mult * ((0.0005 + 0.0008 + 0.0001 * (hrs / 8.0)) / (pos.risk_dist / pos.entry_price)) * pos.risk_mult
+                brain.closed_trades.append({
+                    "cluster_id": pos.trade_id,
+                    "entry_time": pos.entry_ts,
+                    "exit_time": pd.Timestamp(c_ns, tz="UTC"),
+                    "side": pos.side,
+                    "entry_price": pos.entry_price,
+                    "init_sl": pos.init_sl,
+                    "sl_pct": pos.risk_dist / pos.entry_price,
+                    "gross_r": gr,
+                    "net_r": gr - cost,
+                    "is_pyramid": pos.is_pyramid,
+                    "pyramid_stage": pos.pyramid_stage,
+                    "outcome": "TRAIL_SL" if (pos.cur_sl - pos.entry_price) * pos.side > 0 else "SL",
+                    "reasoning_chain": pos.meta.get("reasoning_chain", {}),
+                })
+                cool = i4 + 1
+                continue
+
+            pos.best_px = max(pos.best_px, float(h4[i4])) if pos.side == 1 else min(pos.best_px, float(l4[i4]))
+            pos.peak_mfe_r = max(pos.peak_mfe_r, ((pos.best_px - pos.entry_price) * pos.side) / pos.risk_dist)
+
+            # Climax Elastic Ratchet when cluster >= 10R..14R or opposing HTF pool swept with climax volume
+            trail_mult = brain.trail_atr_mult
+            if use_climax_ratchet:
+                opp_htf = brain.liq_mapper.nearest_opposing_pool(float(c4[i4]), pos.side, min_tier=1)
+                opp_swept = bool(opp_htf is not None and (
+                    (pos.side == 1 and h4[i4] >= opp_htf.price and c4[i4] < opp_htf.price)
+                    or (pos.side == -1 and l4[i4] <= opp_htf.price and c4[i4] > opp_htf.price)
+                ))
+                climax_wick = brain.perception.rejection_wick_score(
+                    float(o4[i4]), float(h4[i4]), float(l4[i4]), float(c4[i4]), -pos.side, float(atr4[i4])
+                ) >= 0.55
+                trail_mult = brain.exit_mgr.climax_ratchet_4h_mult(
+                    cluster_open_r, rs_now.rvol, climax_wick, opp_swept, base_mult=brain.trail_atr_mult, ratchet_mult=2.0
+                )
+
+            trail_cand = (pos.best_px - trail_mult * float(atr4[i4])) if pos.side == 1 else (pos.best_px + trail_mult * float(atr4[i4]))
+            if (pos.side == 1 and trail_cand > pos.cur_sl and trail_cand < c4[i4]) or (
+                pos.side == -1 and trail_cand < pos.cur_sl and trail_cand > c4[i4]
+            ):
+                pos.cur_sl = trail_cand
+
+            # Stage 1 Pyramid Arming (+2.0R MFE -> lock BE+0.35R)
+            if (not pos.is_pyramid) and pos.pyramid_stage == 0 and pos.peak_mfe_r >= 2.0:
+                lk = pos.entry_price + pos.side * 0.35 * pos.risk_dist
+                if (pos.side == 1 and lk > pos.cur_sl and lk < c4[i4]) or (pos.side == -1 and lk < pos.cur_sl and lk > c4[i4]):
+                    pos.cur_sl = lk
+                pos.be_moved = True
+                pos.pyramid_armed = True
+            still.append(pos)
+        brain.positions = still
+
+        # 2) Risk-Free 2-Stage Pyramiding
+        if brain.positions:
+            p0 = brain.positions[0]
+            # Stage 1: add 0.5x on pullback continuation
+            if len(brain.positions) == 1 and p0.pyramid_armed and p0.pyramid_stage == 0:
+                pb = (
+                    (p0.side == 1 and l4[i4] <= c4[i4 - 1] and c4[i4] > o4[i4] and c4[i4] > p0.entry_price)
+                    or (p0.side == -1 and h4[i4] >= c4[i4 - 1] and c4[i4] < o4[i4] and c4[i4] < p0.entry_price)
+                )
+                if pb:
+                    sl_p1 = float(c4[i4]) - p0.side * 1.5 * float(atr4[i4])
+                    p0.pyramid_done = True
+                    p0.pyramid_stage = 1
+                    brain.positions.append(
+                        TradePositionState(
+                            trade_id=p0.trade_id, side=p0.side, entry_bar=i4,
+                            entry_ts=pd.Timestamp(c_ns, tz="UTC"), entry_price=float(c4[i4]),
+                            init_sl=sl_p1, cur_sl=sl_p1, risk_dist=abs(float(c4[i4]) - sl_p1),
+                            risk_mult=0.50, is_pyramid=True, pyramid_stage=1,
+                            meta={"reasoning_chain": p0.meta.get("reasoning_chain", {})},
+                        )
+                    )
+                    continue
+            # Stage 2: at +4.2R open cluster profit & strong KER_4H > 0.40, lock prior legs & add 0.35x
+            elif use_stage2_pyramid and len(brain.positions) == 2 and p0.pyramid_stage == 1 and cluster_open_r >= 4.2 and rs_now.ker > 0.40:
+                pb2 = (
+                    (p0.side == 1 and c4[i4] > o4[i4] and c4[i4] > max(c4[i4 - 1], o4[i4 - 1]))
+                    or (p0.side == -1 and c4[i4] < o4[i4] and c4[i4] < min(c4[i4 - 1], o4[i4 - 1]))
+                )
+                ps1 = brain.prot_1h.latest_floor_or_ceiling(p0.side)
+                if pb2 and ps1 is not None:
+                    lock_px = (ps1.price - 0.25 * float(atr1[p1h - 1])) if p0.side == 1 else (ps1.price + 0.25 * float(atr1[p1h - 1]))
+                    min_lock = p0.entry_price + p0.side * 2.0 * p0.risk_dist
+                    if p0.side == 1:
+                        lock_px = max(lock_px, min_lock)
+                    else:
+                        lock_px = min(lock_px, min_lock)
+                    if (p0.side == 1 and lock_px < c4[i4]) or (p0.side == -1 and lock_px > c4[i4]):
+                        for pos_k in brain.positions:
+                            if (pos_k.side == 1 and lock_px > pos_k.cur_sl) or (pos_k.side == -1 and lock_px < pos_k.cur_sl):
+                                pos_k.cur_sl = lock_px
+                        p0.pyramid_stage = 2
+                        sl_p2 = float(c4[i4]) - p0.side * 1.4 * float(atr4[i4])
+                        brain.positions.append(
+                            TradePositionState(
+                                trade_id=p0.trade_id, side=p0.side, entry_bar=i4,
+                                entry_ts=pd.Timestamp(c_ns, tz="UTC"), entry_price=float(c4[i4]),
+                                init_sl=sl_p2, cur_sl=sl_p2, risk_dist=abs(float(c4[i4]) - sl_p2),
+                                risk_mult=0.35, is_pyramid=True, pyramid_stage=2,
+                                meta={"reasoning_chain": p0.meta.get("reasoning_chain", {})},
+                            )
+                        )
+                        continue
+
+        if brain.positions or i4 < cool or np.isnan(hi20[i4]):
+            continue
+
+        # 3) Entry Thesis: 1D Trend + 4H Breakout + Kinematics + Scale-Free Fractal Compression + Prosecutor
+        d1_tr = 1 if e20_1d[p1d - 1] > e50_1d[p1d - 1] else -1
+        side = 0
+        if d1_tr == 1 and c4[i4] > hi20[i4] and c4[i4 - 1] <= hi20[i4 - 1] and adx4[i4] >= 20.0:
+            side = 1
+        elif d1_tr == -1 and c4[i4] < lo20[i4] and c4[i4 - 1] >= lo20[i4 - 1] and adx4[i4] >= 20.0:
+            side = -1
+        if side == 0:
+            continue
+
+        ep = float(c4[i4])
+        # Scale-free fractal 1H structural anchors (no fixed % clamp!)
+        recent_1h_anchors = [
+            float(s.price) for s in vis1[-10:]
+            if s.side == -side and ((side == 1 and s.price < ep) or (side == -1 and s.price > ep))
+        ]
+        if side == 1:
+            recent_1h_anchors.append(float(np.min(l1[max(0, p1h - 12):p1h])))
+        else:
+            recent_1h_anchors.append(float(np.max(h1[max(0, p1h - 12):p1h])))
+
+        slp, rho_comp, sl_src = brain.kinematics.fractal_stop_compression(
+            ep, side, float(atr4[i4]), float(atr1[p1h - 1]), recent_1h_anchors,
+            rho_min=rho_min, rho_max=rho_max, min_rho_floor=min_rho_floor, max_rho_cap=max_rho_cap, fallback_mult=2.0,
+        )
+        rd = abs(ep - slp)
+        if rd <= 0 or (rd / ep) > 0.085:
+            continue
+
+        # Kinematic Velocity Check on 4H leg
+        k_ratio, _, _ = brain.kinematics.compute_kinematic_ratio(o4, h4, l4, c4, atr4, max(0, i4 - 12), i4 - 3, i4)
+        disp_sc = brain.perception.displacement_score(float(o4[i4]), float(h4[i4]), float(l4[i4]), float(c4[i4]), float(atr4[i4]))
+        adx_sc = float(sigmoid(adx4[i4], x0=18.0, k=0.25))
+        kin_sc = float(sigmoid(k_ratio, x0=0.85, k=1.8))
+
+        thesis_scores = {
+            "ker": rs_now.ker_score,
+            "er": rs_now.effort_result_score,
+            "sq": rs_now.squeeze_score,
+            "disp": disp_sc,
+            "adx": adx_sc,
+            "kin": kin_sc,
+        }
+        thesis_weights = {"ker": 1.0, "er": 1.0, "sq": 0.6, "disp": 1.0, "adx": 1.2, "kin": 0.6}
+
+        opp_walls = [p.price for p in brain.liq_mapper.pools.values() if p.status == "UNTAPPED" and p.tier in (1, 3)]
+        dir_4h = 1 if c4[i4] > o4[i4] else -1
+        if use_prosecutor:
+            verdict = brain.prosecutor.cross_examine(
+                side=side,
+                entry_px=ep,
+                risk_dist=rd,
+                thesis_scores=thesis_scores,
+                thesis_weights=thesis_weights,
+                opposing_htf_walls=opp_walls,
+                ker_4h=rs_now.ker,
+                body_ratio_4h=rs_now.body_ratio,
+                dir_4h_candle=dir_4h,
+                htf_trend_1h=d1_tr,
+                htf_trend_4h=d1_tr,
+                rvol_entry=rs_now.rvol,
+                rvol_opp=1.0,
+                is_counter_trend_sweep=False,
+                min_clearance_r=0.0,
+            )
+            if not verdict.approved or rs_now.absorption_trap_score >= 0.78:
+                continue
+            chain = dict(verdict.reasoning_chain)
+        else:
+            conf = soft_and_log_odds(thesis_scores, thesis_weights, veto_floors={"ker": 0.12})
+            if conf < 0.50 or rs_now.absorption_trap_score >= 0.78:
+                continue
+            chain = {"thesis_scores": thesis_scores, "conviction": round(conf, 4), "approved": True}
+
+        chain.update({"rho_comp": round(rho_comp, 3), "sl_source": sl_src, "kinematic_k": round(k_ratio, 3)})
+        cid += 1
+        brain.positions.append(
+            TradePositionState(
+                trade_id=cid, side=side, entry_bar=i4,
+                entry_ts=pd.Timestamp(c_ns, tz="UTC"), entry_price=ep,
+                init_sl=slp, cur_sl=slp, risk_dist=rd,
+                meta={"reasoning_chain": chain},
+            )
+        )
+
+    return brain.closed_trades, _summarize_trades(brain.closed_trades)
+
+
+def run_smc_sweep_causal_backtest(
+    df_5m: pd.DataFrame,
+    eval_start: pd.Timestamp,
+    eval_end: pd.Timestamp,
+    use_v6_prosecutor: bool = True,
+    min_ker4: float = 0.15,
+    min_conviction: float = 0.35,
+    fee_mult: float = 1.0,
+    tp_r: float = 10.0,
+) -> Tuple[List[dict], Dict[str, object]]:
+    """Strictly causal 5m simulator for SMC_Sweep_10R (`use_v6_prosecutor=False`) vs SMC_Sweep_V6 (`True`)."""
+    agg = {"Open": "first", "High": "max", "Low": "min", "Close": "last", "Volume": "sum"}
+    df1h = df_5m.resample("1h").agg(agg).dropna()
+    df4h = df_5m.resample("4h").agg(agg).dropna()
+    df1d = df_5m.resample("1D").agg(agg).dropna()
+
+    o5, h5, l5, c5, v5 = (df_5m[col].to_numpy(float) for col in ("Open", "High", "Low", "Close", "Volume"))
+    ts5_ns = df_5m.index.as_unit("ns").asi8
+    close5_ns = ts5_ns + int(300 * 1e9)
+    atr5 = compute_atr_series(h5, l5, c5, 14)
+
+    o1, h1, l1, c1, v1 = (df1h[col].to_numpy(float) for col in ("Open", "High", "Low", "Close", "Volume"))
+    ts1_ns = df1h.index.as_unit("ns").asi8
+    close1_ns = ts1_ns + int(3600 * 1e9)
+    atr1 = compute_atr_series(h1, l1, c1, 14)
+
+    o4, h4, l4, c4, v4 = (df4h[col].to_numpy(float) for col in ("Open", "High", "Low", "Close", "Volume"))
+    ts4_ns = df4h.index.as_unit("ns").asi8
+    close4_ns = ts4_ns + int(14400 * 1e9)
+    atr4 = compute_atr_series(h4, l4, c4, 14)
+
+    c1d = df1d["Close"].to_numpy(float)
+    close1d_ns = df1d.index.as_unit("ns").asi8 + int(86400 * 1e9)
+    e20_1d = pd.Series(c1d).ewm(span=20, adjust=False).mean().to_numpy(float)
+    e50_1d = pd.Series(c1d).ewm(span=50, adjust=False).mean().to_numpy(float)
+
+    rf = RegimeFilterEngine()
+    reg_4 = rf.precompute_frame_features(df4h)
+    reg_5 = rf.precompute_frame_features(df_5m)
+    prosecutor = AdversarialCrossExaminer(grace_bars=1, decay_lambda=0.65, min_conviction=float(min_conviction))
+
+    def _step_swing(buf_h, buf_l, k, bar_i, act_hi, act_lo, last_hi, last_lo):
+        if len(buf_h) == 2 * k + 1:
+            m = k
+            ch, cl = buf_h[m], buf_l[m]
+            if all(ch >= buf_h[j] for j in range(len(buf_h)) if j != m) and any(ch > buf_h[j] for j in range(len(buf_h)) if j != m):
+                last_hi = ch
+                act_hi.append([bar_i - k, ch])
+                act_hi = act_hi[-25:]
+            if all(cl <= buf_l[j] for j in range(len(buf_l)) if j != m) and any(cl < buf_l[j] for j in range(len(buf_l)) if j != m):
+                last_lo = cl
+                act_lo.append([bar_i - k, cl])
+                act_lo = act_lo[-25:]
+        return act_hi, act_lo, last_hi, last_lo
+
+    from collections import deque
+    b4h, b4l = deque(maxlen=5), deque(maxlen=5)
+    act4_hi, act4_lo, l4_hi, l4_lo, tr4 = [], [], None, None, 0
+    b1h, b1l = deque(maxlen=5), deque(maxlen=5)
+    act1_hi, act1_lo, l1_hi, l1_lo, tr1 = [], [], None, None, 0
+    b1k3_h, b1k3_l = deque(maxlen=7), deque(maxlen=7)
+    k3_hi, k3_lo = [], []
+    b5h, b5l = deque(maxlen=5), deque(maxlen=5)
+    l5_hi, l5_lo = None, None
+
+    cands_k3 = []
+    p1 = p4 = p1d = cid = 0
+    eval0_ns = int(eval_start.as_unit("ns").value)
+    eval1_ns = int(eval_end.as_unit("ns").value)
+    pos = pend = None
+    trades: List[dict] = []
+
+    for i5 in range(80, len(df_5m)):
+        c5_ns = int(close5_ns[i5])
+        if c5_ns >= eval1_ns:
+            break
+        while p1d < len(df1d) and close1d_ns[p1d] <= c5_ns:
+            p1d += 1
+        while p4 < len(df4h) and close4_ns[p4] <= c5_ns:
+            b4h.append(h4[p4]); b4l.append(l4[p4])
+            act4_hi, act4_lo, l4_hi, l4_lo = _step_swing(b4h, b4l, 2, p4, act4_hi, act4_lo, l4_hi, l4_lo)
+            act4_hi = [x for x in act4_hi if h4[p4] <= x[1]]
+            act4_lo = [x for x in act4_lo if l4[p4] >= x[1]]
+            if l4_hi is not None and c4[p4] > l4_hi:
+                tr4 = 1
+            elif l4_lo is not None and c4[p4] < l4_lo:
+                tr4 = -1
+            p4 += 1
+
+        while p1 < len(df1h) and close1_ns[p1] <= c5_ns:
+            hh, hl, hc = float(h1[p1]), float(l1[p1]), float(c1[p1])
+            upd_cands = []
+            for sd, sw_ns, sl_b, b_acc, sw_sc in cands_k3:
+                if (c5_ns - sw_ns) <= 5 * 3600 * int(1e9):
+                    if (sd == 1 and hc < sl_b) or (sd == -1 and hc > sl_b):
+                        b_acc += 1
+                    upd_cands.append((sd, sw_ns, sl_b, b_acc, sw_sc))
+            cands_k3 = upd_cands[-10:]
+
+            for idx_s, p_lo in list(k3_lo):
+                if (p1 - idx_s) >= 4 and hl < p_lo and hc > p_lo:
+                    sw_sc = VisualPerceptionEngine.rejection_wick_score(float(o1[p1]), hh, hl, hc, 1, float(atr1[p1]))
+                    cands_k3.append((1, int(close1_ns[p1]), hl, 0, sw_sc))
+            for idx_s, p_hi in list(k3_hi):
+                if (p1 - idx_s) >= 4 and hh > p_hi and hc < p_hi:
+                    sw_sc = VisualPerceptionEngine.rejection_wick_score(float(o1[p1]), hh, hl, hc, -1, float(atr1[p1]))
+                    cands_k3.append((-1, int(close1_ns[p1]), hh, 0, sw_sc))
+
+            b1h.append(hh); b1l.append(hl)
+            act1_hi, act1_lo, l1_hi, l1_lo = _step_swing(b1h, b1l, 2, p1, act1_hi, act1_lo, l1_hi, l1_lo)
+            act1_hi = [x for x in act1_hi if hh <= x[1]]
+            act1_lo = [x for x in act1_lo if hl >= x[1]]
+            if l1_hi is not None and hc > l1_hi:
+                tr1 = 1
+            elif l1_lo is not None and hc < l1_lo:
+                tr1 = -1
+
+            b1k3_h.append(hh); b1k3_l.append(hl)
+            k3_hi, k3_lo, _, _ = _step_swing(b1k3_h, b1k3_l, 3, p1, k3_hi, k3_lo, None, None)
+            k3_hi = [x for x in k3_hi if hh <= x[1]]
+            k3_lo = [x for x in k3_lo if hl >= x[1]]
+            p1 += 1
+
+        b5h.append(h5[i5 - 1]); b5l.append(l5[i5 - 1])
+        _, _, l5_hi, l5_lo = _step_swing(b5h, b5l, 2, i5 - 1, [], [], l5_hi, l5_lo)
+
+        if c5_ns < eval0_ns or p4 < 30 or p1 < 30 or p1d < 50:
+            continue
+
+        if pos is not None:
+            sd = pos["side"]
+            if (sd == 1 and l5[i5] <= pos["cur_sl"]) or (sd == -1 and h5[i5] >= pos["cur_sl"]):
+                gr = ((pos["cur_sl"] - pos["ep"]) * sd) / pos["rd"]
+                hrs = max(0.1, (i5 - pos["bar"]) * (5.0 / 60.0))
+                cost = fee_mult * ((0.0002 + 0.0007 + 0.0001 * (hrs / 8.0)) / (pos["rd"] / pos["ep"]))
+                trades.append({
+                    "cluster_id": pos["id"], "entry_time": pos["ts"], "exit_time": pd.Timestamp(c5_ns, tz="UTC"),
+                    "side": sd, "entry_price": pos["ep"], "init_sl": pos["sl"], "sl_pct": pos["rd"] / pos["ep"],
+                    "gross_r": gr, "net_r": gr - cost, "is_pyramid": False,
+                    "outcome": "BE" if pos["be"] else "SL", "reasoning_chain": pos["chain"],
+                })
+                pos = None
+            elif (sd == 1 and h5[i5] >= pos["tp"]) or (sd == -1 and l5[i5] <= pos["tp"]):
+                gr = tp_r
+                hrs = max(0.1, (i5 - pos["bar"]) * (5.0 / 60.0))
+                cost = fee_mult * ((0.0002 + 0.0002 + 0.0001 * (hrs / 8.0)) / (pos["rd"] / pos["ep"]))
+                trades.append({
+                    "cluster_id": pos["id"], "entry_time": pos["ts"], "exit_time": pd.Timestamp(c5_ns, tz="UTC"),
+                    "side": sd, "entry_price": pos["ep"], "init_sl": pos["sl"], "sl_pct": pos["rd"] / pos["ep"],
+                    "gross_r": gr, "net_r": gr - cost, "is_pyramid": False,
+                    "outcome": "TP", "reasoning_chain": pos["chain"],
+                })
+                pos = None
+            else:
+                fav_r = (((h5[i5] if sd == 1 else l5[i5]) - pos["ep"]) * sd) / pos["rd"]
+                if not pos["be"] and fav_r >= 3.0:
+                    pos["cur_sl"] = pos["ep"] + sd * 1.0 * pos["rd"]
+                    pos["be"] = True
+            continue
+
+        if pend is not None:
+            if i5 > pend["exp"]:
+                pend = None
+            elif (pend["side"] == 1 and l5[i5] <= pend["ep"]) or (pend["side"] == -1 and h5[i5] >= pend["ep"]):
+                cid += 1
+                pos = {
+                    "id": cid, "side": pend["side"], "ep": pend["ep"], "sl": pend["sl"],
+                    "cur_sl": pend["sl"], "tp": pend["tp"], "rd": pend["rd"],
+                    "bar": i5, "ts": pd.Timestamp(c5_ns, tz="UTC"), "be": False, "chain": pend["chain"],
+                }
+                pend = None
+                continue
+
+        if pend is not None or not cands_k3:
+            continue
+
+        utc_hr = pd.Timestamp(ts5_ns[i5], tz="UTC").hour
+        a5 = float(atr5[i5])
+        if utc_hr < 9 or a5 <= 0:
+            continue
+
+        c2b = abs(c5[i5 - 1] - o5[i5 - 1])
+        rs4 = rf.evaluate_bar(reg_4, p4 - 1)
+        rs5 = rf.evaluate_bar(reg_5, i5)
+        if use_v6_prosecutor and rs4.ker < min_ker4:
+            continue
+        d1_tr = 1 if e20_1d[p1d - 1] > e50_1d[p1d - 1] else -1
+
+        for side, sw_ns, sl_base, b_acc, sw_sc in reversed(cands_k3):
+            if (c5_ns - sw_ns) > 5 * 3600 * int(1e9):
+                continue
+            ok = False
+            if side == 1 and l5[i5] >= sl_base and tr4 == 1 and tr1 == 1 and l5_hi is not None:
+                if c5[i5] > l5_hi and (l5[i5] - h5[i5 - 2]) >= 0.25 * a5 and c5[i5 - 1] > o5[i5 - 1] and c2b >= a5:
+                    slp = min(sl_base - a5, c5[i5] - max(1.5 * a5, c5[i5] * 0.0020))
+                    ok = True
+            elif side == -1 and h5[i5] <= sl_base and tr4 == -1 and tr1 == -1 and l5_lo is not None:
+                if c5[i5] < l5_lo and (l5[i5 - 2] - h5[i5]) >= 0.25 * a5 and c5[i5 - 1] < o5[i5 - 1] and c2b >= a5:
+                    slp = max(sl_base + a5, c5[i5] + max(1.5 * a5, c5[i5] * 0.0020))
+                    ok = True
+            if not ok:
+                continue
+
+            ep = float(c5[i5])
+            rd = abs(ep - slp)
+            if not (0.0020 <= (rd / ep) <= 0.0180):
+                continue
+
+            chain = {}
+            if use_v6_prosecutor:
+                disp_sc = VisualPerceptionEngine.displacement_score(float(o5[i5 - 1]), float(h5[i5 - 1]), float(l5[i5 - 1]), float(c5[i5 - 1]), a5)
+                verdict = prosecutor.cross_examine(
+                    side=side,
+                    entry_px=ep,
+                    risk_dist=rd,
+                    thesis_scores={"sweep": max(0.55, sw_sc), "disp": disp_sc, "ker4": rs4.ker_score, "rvol": rs5.rvol_score},
+                    thesis_weights={"sweep": 1.2, "disp": 1.3, "ker4": 1.1, "rvol": 0.6},
+                    opposing_htf_walls=[],
+                    ker_4h=rs4.ker,
+                    body_ratio_4h=rs4.body_ratio,
+                    dir_4h_candle=(1 if c4[p4 - 1] > o4[p4 - 1] else -1),
+                    htf_trend_1h=tr1,
+                    htf_trend_4h=d1_tr,
+                    rvol_entry=rs5.rvol,
+                    rvol_opp=1.0,
+                    sweep_bars_accepted=b_acc,
+                    is_counter_trend_sweep=(side != d1_tr),
+                    require_1h_bos_against_freight=False,
+                )
+                if not verdict.approved:
+                    continue
+                chain = dict(verdict.reasoning_chain)
+
+            pend = {
+                "side": side, "ep": ep, "sl": slp, "tp": ep + side * tp_r * rd,
+                "rd": rd, "exp": i5 + 20, "chain": chain,
+            }
+            break
+
+    return trades, _summarize_trades(trades)
+

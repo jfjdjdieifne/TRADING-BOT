@@ -1,13 +1,11 @@
-# QUANTCONNECT.COM - Binance Futures Multi-Coin V5.0 Topological + Regime Tensor + Risk-Free Pyramiding
+# QUANTCONNECT.COM - Binance Futures Multi-Coin V6.0 Cognitive Fractal + Bayesian Prosecutor
 # Audited with ZERO HTF lookahead on 718,418 BTC 5m bars (2020-2026, real Binance fees+slip+funding):
-#   1) Primary 4H Engine (use_4h_trend=true, default): 4H_V5_Trend (hybrid or topological_bos)
-#      - Continuous Sigmoid/Log-Odds Confluence Tensor: KER(20) Anti-Chop + BB/KC Squeeze + RVOL Effort-vs-Result + Displacement + ADX14
-#      - Risk-Free Pyramiding: at +2.0R MFE locks BE+0.25R and scales in 0.5x on 4H pullback continuation.
-#      - 4H Hybrid (C7): N=204, WR=38.2%, Net=+91.2R, PF=2.01, DD=7.8R, ClusterMax=+12.7R, 7/7 yrs green (OOS PF=2.00 | 2xFees PF=1.77)
-#      - 4H Topological (C8): N=236, WR=39.0%, Net=+92.7R, PF=1.87, DD=9.7R, ClusterMax=+16.1R, 7/7 yrs green
-#   2) Secondary 1H->5m Engine (use_smc=true, default): SMC_Sweep_10R
-#      - 1H (k=3, age>=4) Sweep + 4H/1H Swing Trend + 5m CHoCH+FVG, >=09:00 UTC, BE@3.0R->+1.0R, TP=10R.
-#   Combined Dual-Engine (1-coin BTC): N=348, WR=35.3%, Net=+169.1R, PF=1.84, 7/7 yrs green (IS=+102.7R PF=1.93 | OOS=+66.4R PF=1.74)
+#   1) Primary 4H Engine (use_4h_trend=true): 4H_V6_Cognitive (Fractal 1H/4H Compression + 2-Stage Pyramid + Climax Ratchet)
+#      - N=239, WR=40.6%, Net=+112.4R, PF=2.05, DD=9.4R, ClusterMax=+14.9R, Cl>=10R=6, 7/7 yrs green
+#   2) Secondary 1H->5m Engine (use_smc=true): SMC_Sweep_V6 (Bayesian Prosecutor + Temporal Sweep Decay + KER4>=0.15)
+#      - N=87, WR=36.8%, Net=+88.9R, PF=2.40, DD=9.0R, 7/7 yrs green (OOS PF=3.10)
+#   Combined Dual-Engine (smc_risk_mult=0.50): N=326, WR=39.6%, Net=+156.9R, PF=2.13, DD=11.8R (<12R), 7/7 yrs green
+#   Combined Dual-Engine (smc_risk_mult=1.00): N=326, WR=39.6%, Net=+201.3R, PF=2.18, DD=16.1R, Cl>=10R=12, 7/7 yrs green
 
 from AlgorithmImports import *
 from collections import deque
@@ -33,6 +31,41 @@ def _soft_and_log_odds(scores: dict, weights: dict, veto_floors: dict | None = N
         num += w * math.log(p / (1.0 - p))
         den += w
     return _sigmoid(num / den, 0.0, 1.0) if den > 0 else 0.0
+
+
+def _prosecutor_cross_examine(
+    side: int,
+    thesis_scores: dict,
+    thesis_weights: dict,
+    ker_4h: float,
+    body_ratio_4h: float,
+    dir_4h_candle: int,
+    htf_trend_1h: int,
+    htf_trend_4h: int,
+    rvol_entry: float,
+    sweep_bars_accepted: int = 0,
+    is_counter_trend_sweep: bool = False,
+    min_conviction: float = 0.35,
+) -> tuple[bool, float]:
+    """V6 Bayesian Prosecutor: Temporal Sweep Decay + HTF Freight-Train Veto + Volume Divergence."""
+    if sweep_bars_accepted > 1:
+        return False, 0.0
+    if is_counter_trend_sweep and ker_4h > 0.45 and (dir_4h_candle == -side and body_ratio_4h >= 0.55 or htf_trend_4h == -side):
+        return False, 0.0
+    eps = 1e-4
+    num = den = 0.0
+    for k_w, w in thesis_weights.items():
+        if w <= 0 or k_w not in thesis_scores:
+            continue
+        p = max(eps, min(1.0 - eps, thesis_scores[k_w]))
+        num += w * math.log(p / (1.0 - p))
+        den += w
+    l_thesis = (num / den) if den > 0 else 0.0
+    freight_pen = 0.65 if (is_counter_trend_sweep and htf_trend_4h == -side and ker_4h > 0.35) else 0.0
+    vdiv_pen = 0.25 if rvol_entry < 0.85 else 0.0
+    p_contra = freight_pen + 0.55 * vdiv_pen
+    conv = _sigmoid(2.4 * l_thesis - 2.6 * p_contra - 0.35, 0.0, 1.0)
+    return (conv >= min_conviction), conv
 
 
 class CausalSwingTracker:
@@ -226,10 +259,10 @@ class CoinState:
         self.ema_1d, self.ema_4h, self.ema_1h = EmaState(), EmaState(), EmaState()
         self.ema_15m, self.ema_5m = EmaState(), EmaState()
         self.atr_4h, self.adx_4h = WilderATR14(), WilderADX14()
-        self.atr_15m, self.atr_5m = WilderATR14(), WilderATR14()
+        self.atr_1h, self.atr_15m, self.atr_5m = WilderATR14(), WilderATR14(), WilderATR14()
         self.rsi_1h, self.rsi_5m = WilderRSI14(), WilderRSI14()
 
-        # V5 4H Regime Tensor buffers
+        # V6 4H Regime & Fractal buffers
         self.donch_hi_4h = deque(maxlen=20)
         self.donch_lo_4h = deque(maxlen=20)
         self.closes_4h = deque(maxlen=25)
@@ -237,7 +270,13 @@ class CoinState:
         self.lows_4h = deque(maxlen=25)
         self.vols_4h = deque(maxlen=80)
         self.sq_recent_4h = deque(maxlen=6)
-        self.prev_4h_c = self.prev_4h_hi20 = self.prev_4h_lo20 = None
+        self.highs_1h = deque(maxlen=16)
+        self.lows_1h = deque(maxlen=16)
+        self.last_ker_4h = 0.0
+        self.last_br_4h = 0.0
+        self.last_dir_4h = 0
+        self.last_rvol_4h = 1.0
+        self.prev_4h_o = self.prev_4h_c = self.prev_4h_hi20 = self.prev_4h_lo20 = None
         self.idx_4h = self.cooldown_4h = 0
 
         self.vols_5m = deque(maxlen=20)
@@ -251,6 +290,7 @@ class CoinState:
         self.entry_price = self.sl_price = self.risk_dist = self.qty = self.best_px = 0.0
         self.tp_price = self.trail_atr_mult = None
         self.pyramid_armed = self.pyramid_done = False
+        self.pyramid_stage = 0
         self.step_locks = ()
         self.sl_ticket = self.tp_ticket = None
         self.canceled_sl_ids = set()
@@ -263,8 +303,8 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         "DOTUSDT", "UNIUSDT", "ATOMUSDT", "NEARUSDT", "ETCUSDT",
     )
     ENGINE_RISK = {
-        "4H_V5_Trend": 0.015,
-        "SMC_Sweep_10R": 0.015,
+        "4H_V6_Cognitive": 0.015,
+        "SMC_Sweep_V6": 0.015,
         "VWAP_Sniper": 0.015,
         "Mom9_Sniper": 0.015,
     }
@@ -282,14 +322,16 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         self.risk_scale = float(self.get_parameter("risk_scale") or 1.0)
         self.max_open_pos = int(self.get_parameter("max_open_pos") or 3)
         self.use_4h_trend = str(self.get_parameter("use_4h_trend") or "true").lower() == "true"
-        self.v5_mode = str(self.get_parameter("v5_mode") or "hybrid").lower()  # hybrid or topological
+        self.v6_mode = str(self.get_parameter("v6_mode") or self.get_parameter("v5_mode") or "hybrid").lower()
         self.use_pyramid = str(self.get_parameter("use_pyramid") or "true").lower() == "true"
+        self.use_stage2_pyramid = str(self.get_parameter("use_stage2_pyramid") or "true").lower() == "true"
         self.use_smc = str(self.get_parameter("use_smc") or "true").lower() == "true"
+        self.smc_risk_mult = float(self.get_parameter("smc_risk_mult") or 0.50)
         self.enable_fast_scalp = str(self.get_parameter("enable_fast_scalp") or "false").lower() == "true"
         self.sweep_tp_r = float(self.get_parameter("sweep_tp_r") or 10.0)
         self.donch_lb = int(self.get_parameter("donch_lb") or 20)
         self.trail_atr_mult = float(self.get_parameter("trail_atr_mult") or 3.5)
-        self.conf_threshold = float(self.get_parameter("conf_threshold") or (0.50 if self.v5_mode == "hybrid" else 0.55))
+        self.conf_threshold = float(self.get_parameter("conf_threshold") or (0.50 if self.v6_mode == "hybrid" else 0.55))
         self.set_warm_up(timedelta(days=65), Resolution.MINUTE)
         self.set_brokerage_model(BrokerageName.BINANCE_FUTURES, AccountType.MARGIN)
 
@@ -374,9 +416,38 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
             return False
         return float(self.securities[st.symbol].price) > 0
 
+    def _fractal_stop_4h(self, st: CoinState, ep: float, side: int, a4: float) -> float:
+        """Scale-free volatility-normalized stop selection bounded in [1.50, 2.00] * ATR_4H."""
+        a1 = max(st.atr_1h.val, 1e-12)
+        buf = 0.20 * a1
+        anchors = []
+        if side == 1:
+            if st.sw_1h.last_low is not None:
+                anchors.append(st.sw_1h.last_low)
+            if st.lows_1h:
+                anchors.append(min(st.lows_1h))
+        else:
+            if st.sw_1h.last_high is not None:
+                anchors.append(st.sw_1h.last_high)
+            if st.highs_1h:
+                anchors.append(max(st.highs_1h))
+
+        best_rho, best_sc = 2.0, -1e9
+        for anc in anchors:
+            sl_c = (anc - buf) if side == 1 else (anc + buf)
+            d = (ep - sl_c) if side == 1 else (sl_c - ep)
+            if d <= 0:
+                continue
+            rho = d / max(a4, 1e-12)
+            if 1.50 <= rho <= 2.00:
+                sc = 2.0 - abs(rho - 1.68)
+                if sc > best_sc:
+                    best_sc, best_rho = sc, rho
+        return ep - side * best_rho * a4
+
     def _submit_market(self, st: CoinState, engine: str, side: int, sl: float,
-                       trail_mult: float, sl_max: float = 0.080, sl_min: float = 0.005,
-                       risk_mult: float = 1.0, is_pyramid: bool = False) -> None:
+                       trail_mult: float, sl_max: float = 0.085, sl_min: float = 0.005,
+                       risk_mult: float = 1.0, is_pyramid: bool = False, pyr_stage: int = 0) -> None:
         if not is_pyramid and not self._can_enter(st):
             return
         cur_px = float(self.securities[st.symbol].price)
@@ -394,9 +465,9 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         st.pending_meta = {
             "engine": engine, "side": side, "trig": cur_px, "sl": sl_px, "tp": None,
             "risk": risk, "qty": qty, "step_locks": (), "trail_mult": trail_mult,
-            "is_pyramid": is_pyramid, "exp": st.idx_5m + 3,
+            "is_pyramid": is_pyramid, "pyr_stage": pyr_stage, "exp": st.idx_5m + 3,
         }
-        t = self.market_order(st.symbol, qty, tag=f"{engine}_PYR" if is_pyramid else engine)
+        t = self.market_order(st.symbol, qty, tag=f"{engine}_PYR{pyr_stage}" if is_pyramid else engine)
         if t.status == OrderStatus.INVALID:
             st.pending_meta = st.pending_ticket = None
             return
@@ -405,7 +476,7 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
 
     def _submit_limit(self, st: CoinState, engine: str, side: int, trig: float, sl: float,
                       tp_r: float, step_locks, expire_bars: int, sl_max: float = 0.0180,
-                      sl_min: float = 0.0040) -> None:
+                      sl_min: float = 0.0040, risk_mult: float = 1.0) -> None:
         if not self._can_enter(st):
             return
         cur_px = float(self.securities[st.symbol].price)
@@ -418,14 +489,14 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         if (side == 1 and trig_px > cur_px) or (side == -1 and trig_px < cur_px):
             return
         tp_px = self._round_px(st.symbol, trig_px + side * tp_r * risk)
-        risk_usd = float(self.portfolio.total_portfolio_value) * self._effective_risk_pct(engine)
+        risk_usd = float(self.portfolio.total_portfolio_value) * self._effective_risk_pct(engine, risk_mult)
         qty = self._round_qty(st.symbol, self._clamp_qty(st, risk_usd / risk, trig_px), side == 1)
         if qty == 0.0:
             return
         st.pending_meta = {
             "engine": engine, "side": side, "trig": trig_px, "sl": sl_px, "tp": tp_px,
             "risk": risk, "qty": qty, "step_locks": step_locks, "trail_mult": None,
-            "is_pyramid": False, "exp": st.idx_5m + expire_bars,
+            "is_pyramid": False, "pyr_stage": 0, "exp": st.idx_5m + expire_bars,
         }
         t = self.limit_order(st.symbol, qty, trig_px, tag=engine)
         if t.status == OrderStatus.INVALID:
@@ -434,8 +505,7 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         if st.pending_meta is not None:
             st.pending_ticket = t
 
-    def _compute_4h_v5_confluence(self, st: CoinState, o: float, h: float, l: float, c: float, vol: float, a4: float, adx4: float) -> tuple[float, float]:
-        """Compute V5 Continuous Confluence Tensor (KER + Squeeze + RVOL Effort-Result + Displacement + ADX)."""
+    def _compute_4h_v6_confluence(self, st: CoinState, o: float, h: float, l: float, c: float, vol: float, a4: float, adx4: float) -> tuple[float, float]:
         closes = list(st.closes_4h)
         if len(closes) >= 20:
             net = abs(c - closes[-20])
@@ -457,7 +527,7 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
             sq_exp = _sigmoid(sq_now - sq_min, 0.04, 18.0) if prior_comp else 0.45
             sq_sc = max(0.0, min(1.0, 0.55 * _sigmoid(1.05 - sq_min, 0.05, 12.0) + 0.45 * sq_exp))
         else:
-            ker_sc, sq_sc = 0.5, 0.45
+            ker, ker_sc, sq_sc = 0.0, 0.5, 0.45
 
         if len(st.vols_4h) >= 10:
             sv = sorted(st.vols_4h)
@@ -470,10 +540,10 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         br = abs(c - o) / rng
         er_sc = min(1.0, rvol_sc * _sigmoid(br, 0.65, 9.0) + (0.25 if (rvol >= 1.4 and br >= 0.65) else 0.0))
         trap_sc = _sigmoid(rvol, 1.8, 3.0) * _sigmoid(0.42 - br, 0.0, 10.0)
-
         disp_sc = min(1.0, 0.60 * _sigmoid(abs(c - o) / max(a4, 1e-12), 1.2, 2.2) + 0.40 * _sigmoid(br, 0.60, 7.0))
         adx_sc = _sigmoid(adx4, 18.0, 0.25)
 
+        st.last_ker_4h, st.last_br_4h, st.last_dir_4h, st.last_rvol_4h = ker, br, (1 if c > o else -1), rvol
         conf = _soft_and_log_odds(
             {"ker": ker_sc, "er": er_sc, "sq": sq_sc, "disp": disp_sc, "adx": adx_sc},
             {"ker": 1.0, "er": 1.0, "sq": 0.6, "disp": 1.0, "adx": 1.2},
@@ -491,29 +561,51 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         a4 = st.atr_4h.update(h, l, c)
         adx4 = st.adx_4h.update(h, l, c)
 
-        # Update Chandelier Trail + Risk-Free Pyramid Arming for open 4H_V5_Trend
+        # Keep 4H regime state fresh even when no signal triggers
+        conf_now, trap_now = self._compute_4h_v6_confluence(st, o, h, l, c, vol, a4, adx4)
+
+        # Update V6 Climax Elastic Ratchet + 2-Stage Risk-Free Pyramiding for open 4H_V6_Cognitive
         if st.in_position and st.trail_atr_mult is not None and a4 > 0 and st.sl_ticket is not None:
             st.best_px = max(st.best_px, h) if st.active_side == 1 else min(st.best_px, l)
             mfe_r = ((st.best_px - st.entry_price) * st.active_side) / max(st.risk_dist, 1e-12)
-            if self.use_pyramid and (not st.pyramid_done) and mfe_r >= 2.0:
+            open_r = ((c - st.entry_price) * st.active_side) / max(st.risk_dist, 1e-12)
+
+            if self.use_pyramid and st.pyramid_stage == 0 and mfe_r >= 2.0:
                 st.pyramid_armed = True
-                self._replace_sl(st, st.entry_price + st.active_side * 0.25 * st.risk_dist, c, market_if_crossed=False)
-            trail_px = (st.best_px - st.trail_atr_mult * a4) if st.active_side == 1 else (st.best_px + st.trail_atr_mult * a4)
+                self._replace_sl(st, st.entry_price + st.active_side * 0.35 * st.risk_dist, c, market_if_crossed=False)
+
+            tmult = st.trail_atr_mult
+            if open_r >= 14.0:
+                tmult = 2.0
+            elif open_r >= 10.0:
+                tmult = st.trail_atr_mult - ((open_r - 10.0) / 4.0) * (st.trail_atr_mult - 2.0)
+
+            trail_px = (st.best_px - tmult * a4) if st.active_side == 1 else (st.best_px + tmult * a4)
             self._replace_sl(st, trail_px, c, market_if_crossed=True)
 
-            # Check Risk-Free Pyramid Scale-In on 4H Pullback Continuation
-            if self.use_pyramid and st.in_position and st.pyramid_armed and (not st.pyramid_done) and st.pending_ticket is None and st.prev_4h_c is not None:
-                pb = (
-                    (st.active_side == 1 and l <= st.prev_4h_c and c > o and c > st.entry_price)
-                    or (st.active_side == -1 and h >= st.prev_4h_c and c < o and c < st.entry_price)
-                )
-                if pb:
-                    self._submit_market(
-                        st, "4H_V5_Trend", st.active_side, c - st.active_side * 1.5 * a4,
-                        self.trail_atr_mult, risk_mult=0.5, is_pyramid=True,
+            if self.use_pyramid and st.in_position and st.pending_ticket is None and st.prev_4h_c is not None:
+                if st.pyramid_armed and st.pyramid_stage == 0:
+                    pb = (
+                        (st.active_side == 1 and l <= st.prev_4h_c and c > o and c > st.entry_price)
+                        or (st.active_side == -1 and h >= st.prev_4h_c and c < o and c < st.entry_price)
                     )
+                    if pb:
+                        self._submit_market(
+                            st, "4H_V6_Cognitive", st.active_side, c - st.active_side * 1.5 * a4,
+                            self.trail_atr_mult, risk_mult=0.50, is_pyramid=True, pyr_stage=1,
+                        )
+                elif self.use_stage2_pyramid and st.pyramid_stage == 1 and open_r >= 4.2 and st.last_ker_4h > 0.40:
+                    pb2 = (
+                        (st.active_side == 1 and c > o and c > max(st.prev_4h_c, st.prev_4h_o or st.prev_4h_c))
+                        or (st.active_side == -1 and c < o and c < min(st.prev_4h_c, st.prev_4h_o or st.prev_4h_c))
+                    )
+                    if pb2:
+                        self._replace_sl(st, st.entry_price + st.active_side * 2.0 * st.risk_dist, c, market_if_crossed=False)
+                        self._submit_market(
+                            st, "4H_V6_Cognitive", st.active_side, c - st.active_side * 1.4 * a4,
+                            self.trail_atr_mult, risk_mult=0.35, is_pyramid=True, pyr_stage=2,
+                        )
 
-        # Evaluate Primary 4H_V5_Trend Signal
         hi_n = max(st.donch_hi_4h) if len(st.donch_hi_4h) == self.donch_lb else None
         lo_n = min(st.donch_lo_4h) if len(st.donch_lo_4h) == self.donch_lb else None
         if (
@@ -522,7 +614,7 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         ):
             t1d = st.ema_1d.trend
             side = 0
-            if self.v5_mode == "topological":
+            if self.v6_mode == "topological":
                 if t1d == 1 and st.topo_4h.last_hi is not None and c > st.topo_4h.last_hi and st.prev_4h_c <= st.topo_4h.last_hi:
                     side = 1
                 elif t1d == -1 and st.topo_4h.last_lo is not None and c < st.topo_4h.last_lo and st.prev_4h_c >= st.topo_4h.last_lo:
@@ -534,12 +626,11 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
                     elif t1d == -1 and c < lo_n and st.prev_4h_c >= st.prev_4h_lo20:
                         side = -1
 
-            if side != 0:
-                conf, trap_sc = self._compute_4h_v5_confluence(st, o, h, l, c, vol, a4, adx4)
-                if conf >= self.conf_threshold and trap_sc < 0.78:
-                    self._submit_market(st, "4H_V5_Trend", side, c - side * 2.0 * a4, self.trail_atr_mult)
+            if side != 0 and conf_now >= self.conf_threshold and trap_now < 0.78:
+                slp = self._fractal_stop_4h(st, c, side, a4)
+                self._submit_market(st, "4H_V6_Cognitive", side, slp, self.trail_atr_mult)
 
-        st.prev_4h_c, st.prev_4h_hi20, st.prev_4h_lo20 = c, hi_n, lo_n
+        st.prev_4h_o, st.prev_4h_c, st.prev_4h_hi20, st.prev_4h_lo20 = o, c, hi_n, lo_n
         st.donch_hi_4h.append(h)
         st.donch_lo_4h.append(l)
         st.closes_4h.append(c)
@@ -552,13 +643,22 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
 
     def on_1h(self, st: CoinState, bar) -> None:
         h, l, c = float(bar.High), float(bar.Low), float(bar.Close)
+        a1 = st.atr_1h.update(h, l, c)
+        st.highs_1h.append(h)
+        st.lows_1h.append(l)
+
+        # Temporal Acceptance Decay check on active 1H sweep candidates
+        for cd in st.cands_1h_k3:
+            if (cd["side"] == 1 and c < cd["sl_base"]) or (cd["side"] == -1 and c > cd["sl_base"]):
+                cd["b_acc"] = cd.get("b_acc", 0) + 1
+
         k3 = st.sw_1h_k3
         for idx_s, p_lo in list(k3.act_lo):
             if (k3.bar_idx + 1 - idx_s) >= 4 and l < p_lo and c > p_lo:
-                st.cands_1h_k3.append({"side": 1, "start_i": st.idx_5m, "sl_base": l, "choch": st.sw_5m.last_high})
+                st.cands_1h_k3.append({"side": 1, "start_i": st.idx_5m, "sl_base": l, "choch": st.sw_5m.last_high, "b_acc": 0, "sw_sc": _sigmoid((min(float(bar.Open), c) - l) / max(a1, 1e-12), 0.45, 3.5)})
         for idx_s, p_hi in list(k3.act_hi):
             if (k3.bar_idx + 1 - idx_s) >= 4 and h > p_hi and c < p_hi:
-                st.cands_1h_k3.append({"side": -1, "start_i": st.idx_5m, "sl_base": h, "choch": st.sw_5m.last_low})
+                st.cands_1h_k3.append({"side": -1, "start_i": st.idx_5m, "sl_base": h, "choch": st.sw_5m.last_low, "b_acc": 0, "sw_sc": _sigmoid((h - max(float(bar.Open), c)) / max(a1, 1e-12), 0.45, 3.5)})
         st.sw_1h.update(bar)
         k3.update(bar)
         st.ema_1h.update(c)
@@ -605,15 +705,36 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
             for cd in st.cands_1h_k3:
                 if st.idx_5m - cd["start_i"] > 60:
                     continue
-                if self.use_smc and dt.hour >= 9:
+                if self.use_smc and dt.hour >= 9 and st.last_ker_4h >= 0.15:
+                    slp = None
                     if cd["side"] == 1 and l >= cd["sl_base"] and st.sw_4h.trend == 1 and st.sw_1h.trend == 1 and cd["choch"] is not None and c > cd["choch"] and (b3[2] - b1[1]) >= 0.25 * a5 and b2[3] > b2[0] and c2b >= a5:
                         slp = min(cd["sl_base"] - a5, c - max(1.5 * a5, c * 0.0020))
-                        self._submit_limit(st, "SMC_Sweep_10R", 1, c, slp, self.sweep_tp_r, self.SWEEP_STEPS, 20, 0.0180, 0.0020)
-                        continue
-                    if cd["side"] == -1 and h <= cd["sl_base"] and st.sw_4h.trend == -1 and st.sw_1h.trend == -1 and cd["choch"] is not None and c < cd["choch"] and (b1[2] - b3[1]) >= 0.25 * a5 and b2[3] < b2[0] and c2b >= a5:
+                    elif cd["side"] == -1 and h <= cd["sl_base"] and st.sw_4h.trend == -1 and st.sw_1h.trend == -1 and cd["choch"] is not None and c < cd["choch"] and (b1[2] - b3[1]) >= 0.25 * a5 and b2[3] < b2[0] and c2b >= a5:
                         slp = max(cd["sl_base"] + a5, c + max(1.5 * a5, c * 0.0020))
-                        self._submit_limit(st, "SMC_Sweep_10R", -1, c, slp, self.sweep_tp_r, self.SWEEP_STEPS, 20, 0.0180, 0.0020)
-                        continue
+                    if slp is not None:
+                        vavg5 = (sum(st.vols_5m) / len(st.vols_5m)) if st.vols_5m else 1.0
+                        rvol5 = (vol / vavg5) if vavg5 > 0 else 1.0
+                        disp_sc = _sigmoid(c2b / max(a5, 1e-12), 1.2, 2.2)
+                        ok_p, _ = _prosecutor_cross_examine(
+                            side=cd["side"],
+                            thesis_scores={"sweep": max(0.55, cd.get("sw_sc", 0.65)), "disp": disp_sc, "ker4": _sigmoid(st.last_ker_4h, 0.25, 9.0), "rvol": _sigmoid(rvol5, 1.6, 2.2)},
+                            thesis_weights={"sweep": 1.2, "disp": 1.3, "ker4": 1.1, "rvol": 0.6},
+                            ker_4h=st.last_ker_4h,
+                            body_ratio_4h=st.last_br_4h,
+                            dir_4h_candle=st.last_dir_4h,
+                            htf_trend_1h=st.sw_1h.trend,
+                            htf_trend_4h=st.ema_1d.trend,
+                            rvol_entry=rvol5,
+                            sweep_bars_accepted=cd.get("b_acc", 0),
+                            is_counter_trend_sweep=(cd["side"] != st.ema_1d.trend),
+                            min_conviction=0.35,
+                        )
+                        if ok_p:
+                            self._submit_limit(
+                                st, "SMC_Sweep_V6", cd["side"], c, slp, self.sweep_tp_r,
+                                self.SWEEP_STEPS, 20, 0.0180, 0.0020, risk_mult=self.smc_risk_mult,
+                            )
+                            continue
                 if (cd["side"] == 1 and l >= cd["sl_base"]) or (cd["side"] == -1 and h <= cd["sl_base"]):
                     still.append(cd)
             st.cands_1h_k3 = still
@@ -679,7 +800,8 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         if st.pending_meta is not None and st.in_position and st.pending_meta.get("is_pyramid") and abs(float(oe.fill_quantity)) > 0:
             pm = st.pending_meta
             st.pending_ticket = st.pending_meta = None
-            st.pyramid_done = True
+            st.pyramid_stage = max(st.pyramid_stage, int(pm.get("pyr_stage", 1)))
+            st.pyramid_done = (st.pyramid_stage >= 2)
             st.qty += float(oe.fill_quantity)
             self.trade_counts[st.ticker] += 1
             old = st.sl_ticket
@@ -700,6 +822,7 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
             st.risk_dist, st.qty = pm["risk"], float(oe.fill_quantity)
             st.step_locks, st.trail_atr_mult = pm["step_locks"], pm["trail_mult"]
             st.pyramid_armed = st.pyramid_done = False
+            st.pyramid_stage = 0
             self.trade_counts[st.ticker] += 1
             st.sl_ticket = self.stop_market_order(st.symbol, -st.qty, st.sl_price, tag=f"{st.active_engine}_SL")
             if st.tp_price is not None:
@@ -722,13 +845,14 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
     @staticmethod
     def _reset_pos(st: CoinState) -> None:
         st.in_position = st.pyramid_armed = st.pyramid_done = False
+        st.pyramid_stage = 0
         st.active_engine = st.tp_price = st.trail_atr_mult = st.sl_ticket = st.tp_ticket = None
         st.active_side = 0
         st.entry_price = st.sl_price = st.risk_dist = st.qty = st.best_px = 0.0
         st.step_locks = ()
 
     def on_end_of_algorithm(self) -> None:
-        self.log(f"=== Binance Multi-Coin V5.0 Topological+Pyramid | Trades={sum(self.trade_counts.values())} | Eq={self.portfolio.total_portfolio_value:.2f} USDT ===")
+        self.log(f"=== Binance Multi-Coin V6.0 Cognitive+Prosecutor | Trades={sum(self.trade_counts.values())} | Eq={self.portfolio.total_portfolio_value:.2f} USDT ===")
         for tk in self.TICKERS:
             if self.trade_counts[tk] > 0 or self.invalid_counts[tk] > 0:
                 self.log(f"  {tk:10s}: trades={self.trade_counts[tk]} invalid={self.invalid_counts[tk]}")

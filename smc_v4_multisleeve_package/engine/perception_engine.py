@@ -314,3 +314,124 @@ class VisualPerceptionEngine:
         if atr <= 0 or gap_size <= 0:
             return 0.0
         return float(sigmoid(gap_size / atr, x0=0.35, k=4.5))
+
+
+class KinematicMonitor:
+    """V6 Pillar 1 & 2: Pullback Velocity Ratio (K), Falling-Knife Veto, Causal Rejection & Fractal Compression."""
+
+    def __init__(self, min_k_ratio: float = 0.85) -> None:
+        self.min_k_ratio = float(min_k_ratio)
+
+    @staticmethod
+    def compute_kinematic_ratio(
+        o: np.ndarray,
+        h: np.ndarray,
+        l: np.ndarray,
+        c: np.ndarray,
+        atr: np.ndarray,
+        imp_start: int,
+        imp_end: int,
+        pb_end: int,
+    ) -> Tuple[float, float, float]:
+        """Compute K = V_impulse / max(V_pullback, eps), body-weighted per bar normalized by ATR.
+
+        Returns (k_ratio, v_impulse, v_pullback). Strictly causal up to `pb_end`.
+        """
+        n = len(c)
+        if imp_start < 0 or imp_end <= imp_start or pb_end <= imp_end or pb_end >= n:
+            return 1.0, 0.0, 0.0
+        a_imp = max(float(np.nanmean(atr[imp_start:imp_end + 1])), 1e-12)
+        n_imp = max(1, imp_end - imp_start)
+        rng_imp = np.maximum(h[imp_start:imp_end + 1] - l[imp_start:imp_end + 1], 1e-12)
+        br_imp = float(np.mean(np.abs(c[imp_start:imp_end + 1] - o[imp_start:imp_end + 1]) / rng_imp))
+        dp_imp = abs(float(c[imp_end]) - float(c[imp_start]))
+        v_imp = (dp_imp / (n_imp * a_imp)) * max(0.30, br_imp)
+
+        a_pb = max(float(np.nanmean(atr[imp_end:pb_end + 1])), 1e-12)
+        n_pb = max(1, pb_end - imp_end)
+        rng_pb = np.maximum(h[imp_end + 1:pb_end + 1] - l[imp_end + 1:pb_end + 1], 1e-12)
+        br_pb = float(np.mean(np.abs(c[imp_end + 1:pb_end + 1] - o[imp_end + 1:pb_end + 1]) / rng_pb)) if len(rng_pb) > 0 else 0.5
+        dp_pb = abs(float(c[pb_end]) - float(c[imp_end]))
+        v_pb = (dp_pb / (n_pb * a_pb)) * max(0.25, br_pb)
+
+        k_ratio = v_imp / max(v_pb, 1e-6)
+        return float(k_ratio), float(v_imp), float(v_pb)
+
+    def falling_knife_veto(self, k_ratio: float) -> bool:
+        """True when pullback velocity overwhelms creating impulse (K < min_k_ratio)."""
+        return k_ratio < self.min_k_ratio
+
+    @staticmethod
+    def causal_reaction_confirmed(
+        o: np.ndarray,
+        h: np.ndarray,
+        l: np.ndarray,
+        c: np.ndarray,
+        v: np.ndarray,
+        idx: int,
+        side: int,
+        atr_val: float,
+    ) -> Tuple[bool, float]:
+        """Causal turnaround / rejection confirmation on closed bar `idx`."""
+        if idx < 2 or atr_val <= 0:
+            return False, 0.0
+        rng = max(float(h[idx] - l[idx]), 1e-12)
+        wick = (min(float(o[idx]), float(c[idx])) - float(l[idx])) if side == 1 else (float(h[idx]) - max(float(o[idx]), float(c[idx])))
+        wick_ratio = wick / rng
+        close_in_dir = (c[idx] > o[idx]) if side == 1 else (c[idx] < o[idx])
+        momentum_shift = (c[idx] > h[idx - 1] * 0.5 + l[idx - 1] * 0.5) if side == 1 else (c[idx] < h[idx - 1] * 0.5 + l[idx - 1] * 0.5)
+        vol_declining_opp = (v[idx] <= v[idx - 1] * 1.15) if ((c[idx - 1] < o[idx - 1] and side == 1) or (c[idx - 1] > o[idx - 1] and side == -1)) else True
+
+        rej_sc = VisualPerceptionEngine.rejection_wick_score(float(o[idx]), float(h[idx]), float(l[idx]), float(c[idx]), side, atr_val)
+        confirmed = bool((close_in_dir and momentum_shift) or (wick_ratio >= 0.40 and rej_sc >= 0.45 and vol_declining_opp))
+        return confirmed, float(rej_sc)
+
+    @staticmethod
+    def fractal_stop_compression(
+        entry_px: float,
+        side: int,
+        atr_4h: float,
+        atr_1h: float,
+        candidate_anchors: List[float],
+        rho_min: float = 0.35,
+        rho_max: float = 0.70,
+        min_rho_floor: float = 0.25,
+        max_rho_cap: float = 2.40,
+        fallback_mult: float = 1.85,
+    ) -> Tuple[float, float, str]:
+        """Scale-free volatility-normalized stop selection relative to ATR_4H (no fixed % clamp).
+
+        Selects a confirmed structural swing anchor whose risk distance rho_comp = delta_SL / ATR_4H
+        lies cleanly inside or nearest to [rho_min, rho_max] while maintaining a 0.20 * ATR_1H
+        noise buffer behind the actual structural wick and honoring [min_rho_floor, max_rho_cap].
+        """
+        a4 = max(float(atr_4h), 1e-12)
+        a1 = max(float(atr_1h), 1e-12)
+        buf = 0.20 * a1
+        best_sl: Optional[float] = None
+        best_rho: float = fallback_mult
+        best_score = -1e9
+        src = "ATR4H_FALLBACK"
+
+        for anc in candidate_anchors:
+            sl_cand = (anc - buf) if side == 1 else (anc + buf)
+            delta = (entry_px - sl_cand) if side == 1 else (sl_cand - entry_px)
+            if delta <= 0:
+                continue
+            rho = delta / a4
+            if rho < min_rho_floor or rho > max_rho_cap:
+                continue
+            in_golden = rho_min <= rho <= rho_max
+            target_mid = 0.5 * (rho_min + rho_max)
+            score = (2.0 if in_golden else 0.5) - abs(rho - target_mid)
+            if score > best_score:
+                best_score = score
+                best_sl = sl_cand
+                best_rho = rho
+                src = "FRACTAL_GOLDEN" if in_golden else "FRACTAL_1H_STRUCT"
+
+        if best_sl is None:
+            best_rho = float(np.clip(fallback_mult, min_rho_floor, max_rho_cap))
+            best_sl = (entry_px - best_rho * a4) if side == 1 else (entry_px + best_rho * a4)
+        return float(best_sl), float(best_rho), src
+

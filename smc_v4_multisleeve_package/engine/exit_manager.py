@@ -105,6 +105,7 @@ class TradePositionState:
     entry_bos_count_1h: int = 0
     pyramid_armed: bool = False
     pyramid_done: bool = False
+    pyramid_stage: int = 0  # 0=base, 1=stage1_0.5x, 2=stage2_0.35x
     exit_reason: str = ""
     meta: Dict[str, object] = field(default_factory=dict)
 
@@ -114,7 +115,7 @@ class TradePositionState:
 
 
 class AdaptiveExitManager:
-    """3-Phase Hybrid Exit Manager: Partial at Opposing Liq + Protected 1H Trail + Elastic Ratchet."""
+    """3-Phase Hybrid Exit Manager + V6 2-Stage Pyramiding & Climax Elastic Ratchet."""
 
     def __init__(
         self,
@@ -123,6 +124,7 @@ class AdaptiveExitManager:
         partial_min_r: float = 4.0,
         partial_max_r: float = 6.0,
         ratchet_r: float = 8.0,
+        climax_ratchet_r: float = 10.0,
         htf_prox_atr4h: float = 0.50,
     ) -> None:
         self.be_trigger_r = float(be_trigger_r)
@@ -130,15 +132,33 @@ class AdaptiveExitManager:
         self.partial_min_r = float(partial_min_r)
         self.partial_max_r = float(partial_max_r)
         self.ratchet_r = float(ratchet_r)
+        self.climax_ratchet_r = float(climax_ratchet_r)
         self.htf_prox_atr4h = float(htf_prox_atr4h)
 
     @staticmethod
-    def elastic_atr_mult(rvol_1h: float, rsi_divergence: bool) -> float:
-        """Smoothly decay chandelier multiplier from 3.0 down to 1.2 as climax volume/divergence builds."""
+    def elastic_atr_mult(rvol_1h: float, rsi_divergence: bool, base_mult: float = 3.0, min_mult: float = 1.2) -> float:
+        """Smoothly decay chandelier multiplier from base_mult down to min_mult as climax volume/divergence builds."""
         climax = float(sigmoid(rvol_1h, x0=2.0, k=2.5))
         div_boost = 0.45 if rsi_divergence else 0.0
         exhaustion = float(np.clip(0.65 * climax + div_boost, 0.0, 1.0))
-        return float(3.0 - 1.8 * exhaustion)
+        return float(base_mult - (base_mult - min_mult) * exhaustion)
+
+    @staticmethod
+    def climax_ratchet_4h_mult(
+        cluster_open_r: float,
+        rvol_4h: float,
+        has_climax_wick: bool,
+        opposing_htf_swept: bool,
+        base_mult: float = 3.5,
+        ratchet_mult: float = 2.0,
+    ) -> float:
+        """Pillar 4 Climax Elastic Ratchet: tighten 4H Chandelier 3.5 -> 2.0*ATR at >=14R or climax pool sweep."""
+        if cluster_open_r >= 14.0 or (opposing_htf_swept and rvol_4h >= 2.5 and has_climax_wick):
+            return float(ratchet_mult)
+        if cluster_open_r >= 10.0:
+            t = (cluster_open_r - 10.0) / 4.0
+            return float(base_mult - t * (base_mult - ratchet_mult))
+        return float(base_mult)
 
     def step_position(
         self,
