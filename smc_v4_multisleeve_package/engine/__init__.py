@@ -11,6 +11,17 @@ from .causal_primitives import (
     load_xauusd_1m,
     resample_causal_tf,
 )
+from .exit_manager import AdaptiveExitManager, ProtectedSwing, ProtectedSwingDetector, TradePositionState
+from .liquidity_mapper import LiquidityPool, LiquidityPoolMapper
+from .perception_engine import (
+    TopologicalSwing,
+    VisualPerceptionEngine,
+    compute_atr_series,
+    gaussian_rbf,
+    sigmoid,
+    soft_and_log_odds,
+)
+from .regime_filter import RegimeFilterEngine, RegimeSnapshot
 from .smc_v3_trend_engine import SMCV3Config, run_smc_v3_backtest
 from .smc_v4_portfolio import (
     apply_cost_reprice,
@@ -28,15 +39,29 @@ from .smc_v4_portfolio import (
     run_smc_v8_multiasset_portfolio,
     simulate_compounded_account,
 )
+from .strategy_brain import InstitutionalStrategyBrain, run_v5_causal_backtest
 
 __all__ = [
+    "AdaptiveExitManager",
+    "InstitutionalStrategyBrain",
+    "LiquidityPool",
+    "LiquidityPoolMapper",
+    "ProtectedSwing",
+    "ProtectedSwingDetector",
+    "RegimeFilterEngine",
+    "RegimeSnapshot",
     "SMCV3Config",
     "SwingPoint",
+    "TopologicalSwing",
+    "TradePositionState",
+    "VisualPerceptionEngine",
     "apply_cost_reprice",
     "build_causal_htf_structure",
     "build_causal_swing_events",
     "causal_atr14",
+    "compute_atr_series",
     "detect_swings_causal",
+    "gaussian_rbf",
     "in_killzone_utc",
     "load_asset_ohlcv",
     "load_xauusd_1m",
@@ -54,5 +79,8 @@ __all__ = [
     "run_smc_v6_xau_portfolio",
     "run_smc_v7_multiasset_portfolio",
     "run_smc_v8_multiasset_portfolio",
+    "run_v5_causal_backtest",
+    "sigmoid",
     "simulate_compounded_account",
+    "soft_and_log_odds",
 ]

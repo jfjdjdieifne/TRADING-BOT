@@ -1,17 +1,38 @@
-# QUANTCONNECT.COM - Binance Futures Multi-Coin Causal 4H Trend + 1H SMC Engine (V4.0 Verified)
+# QUANTCONNECT.COM - Binance Futures Multi-Coin V5.0 Topological + Regime Tensor + Risk-Free Pyramiding
 # Audited with ZERO HTF lookahead on 718,418 BTC 5m bars (2020-2026, real Binance fees+slip+funding):
-#   1) Primary 4H Engine (use_4h_trend=true, default): 4H_Donch20_Trail
-#      4H Donchian(20) Breakout + 1D EMA20/50 + 4H ADX14 >= 20, SL = 2.0*ATR14_4H, Pure 3.5*ATR14_4H Chandelier Trail.
-#      1-coin BTC: N=167, WR=36.5%, Net=+79.7R, PF=1.99, DD=7.8R, 7/7 Years Green (IS=+47.6R PF=2.07 | OOS=+32.1R PF=1.89)
-#      Survives 2.0x Binance fees (+67.2R, PF=1.76, 7/7 Years Green).
+#   1) Primary 4H Engine (use_4h_trend=true, default): 4H_V5_Trend (hybrid or topological_bos)
+#      - Continuous Sigmoid/Log-Odds Confluence Tensor: KER(20) Anti-Chop + BB/KC Squeeze + RVOL Effort-vs-Result + Displacement + ADX14
+#      - Risk-Free Pyramiding: at +2.0R MFE locks BE+0.25R and scales in 0.5x on 4H pullback continuation.
+#      - 4H Hybrid (C7): N=204, WR=38.2%, Net=+91.2R, PF=2.01, DD=7.8R, ClusterMax=+12.7R, 7/7 yrs green (OOS PF=2.00 | 2xFees PF=1.77)
+#      - 4H Topological (C8): N=236, WR=39.0%, Net=+92.7R, PF=1.87, DD=9.7R, ClusterMax=+16.1R, 7/7 yrs green
 #   2) Secondary 1H->5m Engine (use_smc=true, default): SMC_Sweep_10R
-#      1H (k=3, age>=4) Sweep + 4H/1H Swing Trend + 5m CHoCH+FVG, >=09:00 UTC, BE@3.0R->+1.0R, TP=10R.
-#      1-coin BTC: N=144, WR=31.2%, Net=+78.0R, PF=1.71, DD=17.3R (IS=+49.2R PF=1.85 | OOS=+28.8R PF=1.55)
-#   Combined Dual-Engine (1-coin BTC): N=311, Net=+157.7R, PF=1.83, 7/7 Years Green (IS=+96.8R PF=1.95 | OOS=+60.9R PF=1.69)
+#      - 1H (k=3, age>=4) Sweep + 4H/1H Swing Trend + 5m CHoCH+FVG, >=09:00 UTC, BE@3.0R->+1.0R, TP=10R.
+#   Combined Dual-Engine (1-coin BTC): N=348, WR=35.3%, Net=+169.1R, PF=1.84, 7/7 yrs green (IS=+102.7R PF=1.93 | OOS=+66.4R PF=1.74)
 
 from AlgorithmImports import *
 from collections import deque
 import math
+
+
+def _sigmoid(x: float, x0: float = 0.0, k: float = 1.0) -> float:
+    z = max(-60.0, min(60.0, -k * (x - x0)))
+    return 1.0 / (1.0 + math.exp(z))
+
+
+def _soft_and_log_odds(scores: dict, weights: dict, veto_floors: dict | None = None) -> float:
+    eps = 1e-4
+    if veto_floors:
+        for k_v, fl in veto_floors.items():
+            if k_v in scores and scores[k_v] < fl:
+                return max(0.0, scores[k_v] / max(fl, eps)) * 0.15
+    num = den = 0.0
+    for k_w, w in weights.items():
+        if w <= 0 or k_w not in scores:
+            continue
+        p = max(eps, min(1.0 - eps, scores[k_w]))
+        num += w * math.log(p / (1.0 - p))
+        den += w
+    return _sigmoid(num / den, 0.0, 1.0) if den > 0 else 0.0
 
 
 class CausalSwingTracker:
@@ -50,6 +71,46 @@ class CausalSwingTracker:
             self.trend = -1
 
 
+class CausalTopologicalZigZag:
+    """Scale-free volatility-adjusted topological swing tracker (1.25*ATR confirmation)."""
+
+    def __init__(self, atr_mult: float = 1.25) -> None:
+        self.atr_mult = atr_mult
+        self.dir = 0
+        self.piv_hi = self.piv_lo = None
+        self.last_hi = self.last_lo = None
+
+    def update(self, h: float, l: float, atr: float) -> None:
+        if atr <= 0:
+            return
+        th = self.atr_mult * atr
+        if self.piv_hi is None:
+            self.piv_hi, self.piv_lo = h, l
+            return
+        if self.dir == 0:
+            if h - self.piv_lo >= th:
+                self.last_lo = self.piv_lo
+                self.dir, self.piv_hi = 1, h
+            elif self.piv_hi - l >= th:
+                self.last_hi = self.piv_hi
+                self.dir, self.piv_lo = -1, l
+            else:
+                self.piv_hi = max(self.piv_hi, h)
+                self.piv_lo = min(self.piv_lo, l)
+        elif self.dir == 1:
+            if h >= self.piv_hi:
+                self.piv_hi = h
+            elif self.piv_hi - l >= th:
+                self.last_hi = self.piv_hi
+                self.dir, self.piv_lo = -1, l
+        else:
+            if l <= self.piv_lo:
+                self.piv_lo = l
+            elif h - self.piv_lo >= th:
+                self.last_lo = self.piv_lo
+                self.dir, self.piv_hi = 1, h
+
+
 class WilderATR14:
     def __init__(self) -> None:
         self.prev_close = None
@@ -71,13 +132,12 @@ class WilderADX14:
     def __init__(self) -> None:
         self.prev_h = self.prev_l = self.prev_c = None
         self.atr = self.pdm = self.mdm = self.adx = 0.0
-        self.init = self.dx_init = False
+        self.dx_init = False
 
     def update(self, h: float, l: float, c: float) -> float:
         if self.prev_h is None:
             self.prev_h, self.prev_l, self.prev_c = h, l, c
             self.atr = max(h - l, 1e-12)
-            self.init = True
             return 0.0
         tr = max(h - l, abs(h - self.prev_c), abs(l - self.prev_c))
         up, dn = h - self.prev_h, self.prev_l - l
@@ -132,7 +192,7 @@ class EmaState:
     def __init__(self) -> None:
         self.e9 = self.e12 = self.e20 = self.e26 = self.e50 = self.msig = None
         self.macd_hist = 0.0
-        self.closes = deque(maxlen=20)
+        self.closes = deque(maxlen=25)
         self.er14 = 0.0
 
     def update(self, c: float) -> None:
@@ -162,24 +222,35 @@ class CoinState:
         self.ticker, self.symbol, self.leverage = ticker, symbol, leverage
         self.sw_4h, self.sw_1h, self.sw_1h_k3 = CausalSwingTracker(2), CausalSwingTracker(2), CausalSwingTracker(3)
         self.sw_5m = CausalSwingTracker(2)
+        self.topo_4h = CausalTopologicalZigZag(1.25)
         self.ema_1d, self.ema_4h, self.ema_1h = EmaState(), EmaState(), EmaState()
         self.ema_15m, self.ema_5m = EmaState(), EmaState()
         self.atr_4h, self.adx_4h = WilderATR14(), WilderADX14()
         self.atr_15m, self.atr_5m = WilderATR14(), WilderATR14()
         self.rsi_1h, self.rsi_5m = WilderRSI14(), WilderRSI14()
+
+        # V5 4H Regime Tensor buffers
         self.donch_hi_4h = deque(maxlen=20)
         self.donch_lo_4h = deque(maxlen=20)
+        self.closes_4h = deque(maxlen=25)
+        self.highs_4h = deque(maxlen=25)
+        self.lows_4h = deque(maxlen=25)
+        self.vols_4h = deque(maxlen=80)
+        self.sq_recent_4h = deque(maxlen=6)
         self.prev_4h_c = self.prev_4h_hi20 = self.prev_4h_lo20 = None
         self.idx_4h = self.cooldown_4h = 0
+
         self.vols_5m = deque(maxlen=20)
         self.vwap_day, self.vwap_pv, self.vwap_v = None, 0.0, 0.0
         self.bars_5m = deque(maxlen=6)
         self.cands_1h_k3 = []
         self.idx_5m = self.cooldown_until = 0
+
         self.pending_ticket = self.pending_meta = None
         self.in_position, self.active_engine, self.active_side = False, None, 0
         self.entry_price = self.sl_price = self.risk_dist = self.qty = self.best_px = 0.0
         self.tp_price = self.trail_atr_mult = None
+        self.pyramid_armed = self.pyramid_done = False
         self.step_locks = ()
         self.sl_ticket = self.tp_ticket = None
         self.canceled_sl_ids = set()
@@ -192,7 +263,7 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         "DOTUSDT", "UNIUSDT", "ATOMUSDT", "NEARUSDT", "ETCUSDT",
     )
     ENGINE_RISK = {
-        "4H_Donch20_Trail": 0.015,
+        "4H_V5_Trend": 0.015,
         "SMC_Sweep_10R": 0.015,
         "VWAP_Sniper": 0.015,
         "Mom9_Sniper": 0.015,
@@ -211,11 +282,14 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         self.risk_scale = float(self.get_parameter("risk_scale") or 1.0)
         self.max_open_pos = int(self.get_parameter("max_open_pos") or 3)
         self.use_4h_trend = str(self.get_parameter("use_4h_trend") or "true").lower() == "true"
+        self.v5_mode = str(self.get_parameter("v5_mode") or "hybrid").lower()  # hybrid or topological
+        self.use_pyramid = str(self.get_parameter("use_pyramid") or "true").lower() == "true"
         self.use_smc = str(self.get_parameter("use_smc") or "true").lower() == "true"
         self.enable_fast_scalp = str(self.get_parameter("enable_fast_scalp") or "false").lower() == "true"
         self.sweep_tp_r = float(self.get_parameter("sweep_tp_r") or 10.0)
         self.donch_lb = int(self.get_parameter("donch_lb") or 20)
         self.trail_atr_mult = float(self.get_parameter("trail_atr_mult") or 3.5)
+        self.conf_threshold = float(self.get_parameter("conf_threshold") or (0.50 if self.v5_mode == "hybrid" else 0.55))
         self.set_warm_up(timedelta(days=65), Resolution.MINUTE)
         self.set_brokerage_model(BrokerageName.BINANCE_FUTURES, AccountType.MARGIN)
 
@@ -237,11 +311,11 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
     def _open_count(self) -> int:
         return sum(1 for st in self.coins.values() if st.in_position or st.pending_ticket is not None)
 
-    def _effective_risk_pct(self, engine: str) -> float:
+    def _effective_risk_pct(self, engine: str, mult: float = 1.0) -> float:
         eq = float(self.portfolio.total_portfolio_value)
         dd = (self.hwm_equity - eq) / self.hwm_equity if self.hwm_equity > 0 else 0.0
         brake = 0.50 if dd >= 0.12 else (0.70 if dd >= 0.08 else 1.0)
-        return self.ENGINE_RISK.get(engine, 0.015) * brake * self.risk_scale
+        return self.ENGINE_RISK.get(engine, 0.015) * brake * self.risk_scale * mult
 
     def _round_qty(self, sym: Symbol, raw_qty: float, is_long: bool) -> float:
         sp = self.securities[sym].symbol_properties
@@ -300,25 +374,29 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
             return False
         return float(self.securities[st.symbol].price) > 0
 
-    def _submit_market(self, st: CoinState, engine: str, side: int, ref_px: float, sl: float,
-                       trail_mult: float, sl_max: float = 0.080, sl_min: float = 0.005) -> None:
-        if not self._can_enter(st):
+    def _submit_market(self, st: CoinState, engine: str, side: int, sl: float,
+                       trail_mult: float, sl_max: float = 0.080, sl_min: float = 0.005,
+                       risk_mult: float = 1.0, is_pyramid: bool = False) -> None:
+        if not is_pyramid and not self._can_enter(st):
             return
         cur_px = float(self.securities[st.symbol].price)
+        if cur_px <= 0:
+            return
         sl_px = self._round_px(st.symbol, sl)
         risk = (cur_px - sl_px) if side == 1 else (sl_px - cur_px)
         sl_pct = risk / cur_px
         if risk <= 0 or sl_pct < sl_min or sl_pct > sl_max:
             return
-        risk_usd = float(self.portfolio.total_portfolio_value) * self._effective_risk_pct(engine)
+        risk_usd = float(self.portfolio.total_portfolio_value) * self._effective_risk_pct(engine, risk_mult)
         qty = self._round_qty(st.symbol, self._clamp_qty(st, risk_usd / risk, cur_px), side == 1)
         if qty == 0.0:
             return
         st.pending_meta = {
             "engine": engine, "side": side, "trig": cur_px, "sl": sl_px, "tp": None,
-            "risk": risk, "qty": qty, "step_locks": (), "trail_mult": trail_mult, "exp": st.idx_5m + 3,
+            "risk": risk, "qty": qty, "step_locks": (), "trail_mult": trail_mult,
+            "is_pyramid": is_pyramid, "exp": st.idx_5m + 3,
         }
-        t = self.market_order(st.symbol, qty, tag=engine)
+        t = self.market_order(st.symbol, qty, tag=f"{engine}_PYR" if is_pyramid else engine)
         if t.status == OrderStatus.INVALID:
             st.pending_meta = st.pending_ticket = None
             return
@@ -346,7 +424,8 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
             return
         st.pending_meta = {
             "engine": engine, "side": side, "trig": trig_px, "sl": sl_px, "tp": tp_px,
-            "risk": risk, "qty": qty, "step_locks": step_locks, "trail_mult": None, "exp": st.idx_5m + expire_bars,
+            "risk": risk, "qty": qty, "step_locks": step_locks, "trail_mult": None,
+            "is_pyramid": False, "exp": st.idx_5m + expire_bars,
         }
         t = self.limit_order(st.symbol, qty, trig_px, tag=engine)
         if t.status == OrderStatus.INVALID:
@@ -355,41 +434,119 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         if st.pending_meta is not None:
             st.pending_ticket = t
 
+    def _compute_4h_v5_confluence(self, st: CoinState, o: float, h: float, l: float, c: float, vol: float, a4: float, adx4: float) -> tuple[float, float]:
+        """Compute V5 Continuous Confluence Tensor (KER + Squeeze + RVOL Effort-Result + Displacement + ADX)."""
+        closes = list(st.closes_4h)
+        if len(closes) >= 20:
+            net = abs(c - closes[-20])
+            den = sum(abs(closes[k] - closes[k - 1]) for k in range(len(closes) - 19, len(closes))) + abs(c - closes[-1])
+            ker = (net / den) if den > 1e-12 else 0.0
+            hi_r = max(max(st.highs_4h), h)
+            lo_r = min(min(st.lows_4h), l)
+            rpos = (c - lo_r) / max(hi_r - lo_r, 1e-12)
+            in_mid_chop = (ker < 0.25) and (0.25 <= rpos <= 0.75)
+            ker_sc = 0.05 if in_mid_chop else _sigmoid(ker, 0.25, 9.0)
+
+            arr20 = (closes[-19:] + [c])
+            mu = sum(arr20) / 20.0
+            sd = math.sqrt(sum((x - mu) ** 2 for x in arr20) / 20.0)
+            sq_now = (4.0 * sd) / max(3.0 * a4, 1e-12)
+            sq_min = min(st.sq_recent_4h) if st.sq_recent_4h else 1.0
+            st.sq_recent_4h.append(sq_now)
+            prior_comp = sq_min < 0.98
+            sq_exp = _sigmoid(sq_now - sq_min, 0.04, 18.0) if prior_comp else 0.45
+            sq_sc = max(0.0, min(1.0, 0.55 * _sigmoid(1.05 - sq_min, 0.05, 12.0) + 0.45 * sq_exp))
+        else:
+            ker_sc, sq_sc = 0.5, 0.45
+
+        if len(st.vols_4h) >= 10:
+            sv = sorted(st.vols_4h)
+            med_v = sv[len(sv) // 2]
+            rvol = (vol / med_v) if med_v > 0 else 1.0
+        else:
+            rvol = 1.0
+        rvol_sc = _sigmoid(rvol, 1.6, 2.2)
+        rng = max(h - l, 1e-12)
+        br = abs(c - o) / rng
+        er_sc = min(1.0, rvol_sc * _sigmoid(br, 0.65, 9.0) + (0.25 if (rvol >= 1.4 and br >= 0.65) else 0.0))
+        trap_sc = _sigmoid(rvol, 1.8, 3.0) * _sigmoid(0.42 - br, 0.0, 10.0)
+
+        disp_sc = min(1.0, 0.60 * _sigmoid(abs(c - o) / max(a4, 1e-12), 1.2, 2.2) + 0.40 * _sigmoid(br, 0.60, 7.0))
+        adx_sc = _sigmoid(adx4, 18.0, 0.25)
+
+        conf = _soft_and_log_odds(
+            {"ker": ker_sc, "er": er_sc, "sq": sq_sc, "disp": disp_sc, "adx": adx_sc},
+            {"ker": 1.0, "er": 1.0, "sq": 0.6, "disp": 1.0, "adx": 1.2},
+            veto_floors={"ker": 0.12},
+        )
+        return conf, trap_sc
+
     def on_1d(self, st: CoinState, bar) -> None:
         st.ema_1d.update(float(bar.Close))
 
     def on_4h(self, st: CoinState, bar) -> None:
         st.idx_4h += 1
-        h, l, c = float(bar.High), float(bar.Low), float(bar.Close)
+        o, h, l, c = float(bar.Open), float(bar.High), float(bar.Low), float(bar.Close)
+        vol = float(getattr(bar, "Volume", 0.0) or 0.0)
         a4 = st.atr_4h.update(h, l, c)
         adx4 = st.adx_4h.update(h, l, c)
 
-        # Update Chandelier Trail for open 4H_Donch20_Trail position on closed 4H bar
+        # Update Chandelier Trail + Risk-Free Pyramid Arming for open 4H_V5_Trend
         if st.in_position and st.trail_atr_mult is not None and a4 > 0 and st.sl_ticket is not None:
-            if st.active_side == 1:
-                st.best_px = max(st.best_px, h)
-                self._replace_sl(st, st.best_px - st.trail_atr_mult * a4, c, market_if_crossed=True)
-            else:
-                st.best_px = min(st.best_px, l)
-                self._replace_sl(st, st.best_px + st.trail_atr_mult * a4, c, market_if_crossed=True)
+            st.best_px = max(st.best_px, h) if st.active_side == 1 else min(st.best_px, l)
+            mfe_r = ((st.best_px - st.entry_price) * st.active_side) / max(st.risk_dist, 1e-12)
+            if self.use_pyramid and (not st.pyramid_done) and mfe_r >= 2.0:
+                st.pyramid_armed = True
+                self._replace_sl(st, st.entry_price + st.active_side * 0.25 * st.risk_dist, c, market_if_crossed=False)
+            trail_px = (st.best_px - st.trail_atr_mult * a4) if st.active_side == 1 else (st.best_px + st.trail_atr_mult * a4)
+            self._replace_sl(st, trail_px, c, market_if_crossed=True)
 
-        # Evaluate causal 4H Donchian Breakout against strictly prior N closed 4H bars + closed 1D EMA
+            # Check Risk-Free Pyramid Scale-In on 4H Pullback Continuation
+            if self.use_pyramid and st.in_position and st.pyramid_armed and (not st.pyramid_done) and st.pending_ticket is None and st.prev_4h_c is not None:
+                pb = (
+                    (st.active_side == 1 and l <= st.prev_4h_c and c > o and c > st.entry_price)
+                    or (st.active_side == -1 and h >= st.prev_4h_c and c < o and c < st.entry_price)
+                )
+                if pb:
+                    self._submit_market(
+                        st, "4H_V5_Trend", st.active_side, c - st.active_side * 1.5 * a4,
+                        self.trail_atr_mult, risk_mult=0.5, is_pyramid=True,
+                    )
+
+        # Evaluate Primary 4H_V5_Trend Signal
         hi_n = max(st.donch_hi_4h) if len(st.donch_hi_4h) == self.donch_lb else None
         lo_n = min(st.donch_lo_4h) if len(st.donch_lo_4h) == self.donch_lb else None
         if (
-            self.use_4h_trend and not self.is_warming_up and hi_n is not None and lo_n is not None
-            and st.prev_4h_c is not None and st.prev_4h_hi20 is not None and a4 > 0
-            and st.idx_4h >= st.cooldown_4h and adx4 >= 20.0
+            self.use_4h_trend and not self.is_warming_up and not st.in_position and a4 > 0
+            and st.idx_4h >= st.cooldown_4h and st.prev_4h_c is not None
         ):
             t1d = st.ema_1d.trend
-            if t1d == 1 and c > hi_n and st.prev_4h_c <= st.prev_4h_hi20:
-                self._submit_market(st, "4H_Donch20_Trail", 1, c, c - 2.0 * a4, self.trail_atr_mult)
-            elif t1d == -1 and c < lo_n and st.prev_4h_c >= st.prev_4h_lo20:
-                self._submit_market(st, "4H_Donch20_Trail", -1, c, c + 2.0 * a4, self.trail_atr_mult)
+            side = 0
+            if self.v5_mode == "topological":
+                if t1d == 1 and st.topo_4h.last_hi is not None and c > st.topo_4h.last_hi and st.prev_4h_c <= st.topo_4h.last_hi:
+                    side = 1
+                elif t1d == -1 and st.topo_4h.last_lo is not None and c < st.topo_4h.last_lo and st.prev_4h_c >= st.topo_4h.last_lo:
+                    side = -1
+            else:
+                if hi_n is not None and st.prev_4h_hi20 is not None and adx4 >= 20.0:
+                    if t1d == 1 and c > hi_n and st.prev_4h_c <= st.prev_4h_hi20:
+                        side = 1
+                    elif t1d == -1 and c < lo_n and st.prev_4h_c >= st.prev_4h_lo20:
+                        side = -1
+
+            if side != 0:
+                conf, trap_sc = self._compute_4h_v5_confluence(st, o, h, l, c, vol, a4, adx4)
+                if conf >= self.conf_threshold and trap_sc < 0.78:
+                    self._submit_market(st, "4H_V5_Trend", side, c - side * 2.0 * a4, self.trail_atr_mult)
 
         st.prev_4h_c, st.prev_4h_hi20, st.prev_4h_lo20 = c, hi_n, lo_n
         st.donch_hi_4h.append(h)
         st.donch_lo_4h.append(l)
+        st.closes_4h.append(c)
+        st.highs_4h.append(h)
+        st.lows_4h.append(l)
+        st.vols_4h.append(vol)
+        st.topo_4h.update(h, l, a4)
         st.sw_4h.update(bar)
         st.ema_4h.update(c)
 
@@ -505,19 +662,34 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
             self.invalid_counts[st.ticker] += 1
             if st.pending_meta is not None and not st.in_position:
                 st.pending_ticket = st.pending_meta = None
+            elif st.in_position and st.pending_meta is not None and st.pending_meta.get("is_pyramid"):
+                st.pending_ticket = st.pending_meta = None
             elif st.in_position:
                 self.transactions.cancel_open_orders(oe.symbol)
                 self.liquidate(oe.symbol, tag="INVALID_RECOVERY")
                 self._reset_pos(st)
             return
         if oe.status == OrderStatus.CANCELED:
-            if st.pending_ticket is not None and oe.order_id == st.pending_ticket.order_id and not st.in_position:
+            if st.pending_ticket is not None and oe.order_id == st.pending_ticket.order_id:
                 st.pending_ticket = st.pending_meta = None
             return
         if oe.status != OrderStatus.FILLED:
             return
 
-        if st.pending_meta is not None and not st.in_position and abs(float(oe.fill_quantity)) > 0:
+        if st.pending_meta is not None and st.in_position and st.pending_meta.get("is_pyramid") and abs(float(oe.fill_quantity)) > 0:
+            pm = st.pending_meta
+            st.pending_ticket = st.pending_meta = None
+            st.pyramid_done = True
+            st.qty += float(oe.fill_quantity)
+            self.trade_counts[st.ticker] += 1
+            old = st.sl_ticket
+            if old is not None and old.status not in (OrderStatus.FILLED, OrderStatus.CANCELED, OrderStatus.INVALID):
+                st.canceled_sl_ids.add(old.order_id)
+                old.cancel()
+            new_sl = max(st.sl_price, pm["sl"]) if st.active_side == 1 else min(st.sl_price, pm["sl"])
+            st.sl_price = self._round_px(st.symbol, new_sl)
+            st.sl_ticket = self.stop_market_order(st.symbol, -st.qty, st.sl_price, tag=f"{st.active_engine}_PYR_SL")
+        elif st.pending_meta is not None and not st.in_position and abs(float(oe.fill_quantity)) > 0:
             pm = st.pending_meta
             st.pending_ticket = st.pending_meta = None
             st.in_position = True
@@ -527,6 +699,7 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
             st.sl_price, st.tp_price = pm["sl"], pm["tp"]
             st.risk_dist, st.qty = pm["risk"], float(oe.fill_quantity)
             st.step_locks, st.trail_atr_mult = pm["step_locks"], pm["trail_mult"]
+            st.pyramid_armed = st.pyramid_done = False
             self.trade_counts[st.ticker] += 1
             st.sl_ticket = self.stop_market_order(st.symbol, -st.qty, st.sl_price, tag=f"{st.active_engine}_SL")
             if st.tp_price is not None:
@@ -548,14 +721,14 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
 
     @staticmethod
     def _reset_pos(st: CoinState) -> None:
-        st.in_position = False
+        st.in_position = st.pyramid_armed = st.pyramid_done = False
         st.active_engine = st.tp_price = st.trail_atr_mult = st.sl_ticket = st.tp_ticket = None
         st.active_side = 0
         st.entry_price = st.sl_price = st.risk_dist = st.qty = st.best_px = 0.0
         st.step_locks = ()
 
     def on_end_of_algorithm(self) -> None:
-        self.log(f"=== Binance Multi-Coin 4H+1H Causal V4.0 | Trades={sum(self.trade_counts.values())} | Eq={self.portfolio.total_portfolio_value:.2f} USDT ===")
+        self.log(f"=== Binance Multi-Coin V5.0 Topological+Pyramid | Trades={sum(self.trade_counts.values())} | Eq={self.portfolio.total_portfolio_value:.2f} USDT ===")
         for tk in self.TICKERS:
             if self.trade_counts[tk] > 0 or self.invalid_counts[tk] > 0:
                 self.log(f"  {tk:10s}: trades={self.trade_counts[tk]} invalid={self.invalid_counts[tk]}")

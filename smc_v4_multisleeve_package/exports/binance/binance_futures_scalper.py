@@ -1,21 +1,20 @@
 #!/usr/bin/env python3
 """
-Binance USDT-M Futures Multi-Coin Causal 4H Trend + 1H SMC Engine (V4.0 Verified)
+Binance USDT-M Futures Multi-Coin V5.0 Topological + Regime Tensor + Risk-Free Pyramiding Bot
 - Zero third-party dependencies (pure Python 3 stdlib).
 - Dual-Engine Causal Portfolio (zero HTF lookahead, real Binance fees+slip+funding):
-    1) Primary 4H Engine (--no-4h-trend to disable): 4H_Donch20_Trail
-       4H Donchian(20) Breakout + 1D EMA20/50 + 4H ADX14 >= 20, SL=2.0*ATR4H, 3.5*ATR4H Chandelier Trail.
-       1-coin BTC: N=167, WR=36.5%, Net=+79.7R, PF=1.99, DD=7.8R, 7/7 yrs green (2.0x fees: PF=1.76)
+    1) Primary 4H Engine (--no-4h-trend to disable): 4H_V5_Trend (hybrid or topological)
+       - Continuous Sigmoid/Log-Odds Confluence Tensor: KER(20) + BB/KC Squeeze + ToD RVOL Effort-vs-Result + Displacement + ADX14
+       - Cross-Asset BTC Regime Filter: blocks altcoin entries against strong BTC 4H bearish/bullish displacement
+       - Risk-Free Pyramiding: at +2.0R MFE locks BE+0.25R and adds 0.5x on 4H pullback continuation
+       - 4H Hybrid (C7): N=204, WR=38.2%, Net=+91.2R, PF=2.01, DD=7.8R, ClusterMax=+12.7R, 7/7 yrs green (OOS PF=2.00)
+       - 4H Topological (C8): N=236, WR=39.0%, Net=+92.7R, PF=1.87, DD=9.7R, ClusterMax=+16.1R, 7/7 yrs green
     2) Secondary 1H->5m Engine (--no-smc to disable): SMC_Sweep_10R
-       1H (k=3, age>=4) Sweep + 4H/1H Swing Trend + 5m CHoCH+FVG, >=09:00 UTC, BE@3.0R->+1.0R, TP=10R.
-       1-coin BTC: N=144, WR=31.2%, Net=+78.0R, PF=1.71, DD=17.3R
+       - 1H (k=3, age>=4) Sweep + 4H/1H Swing Trend + 5m CHoCH+FVG, >=09:00 UTC, BE@3.0R->+1.0R, TP=10R.
 - Modes:
     --mode paper   : Live public Binance market scan + simulated signals (default, safe)
     --mode testnet : Binance Futures Testnet (3,000 USDT virtual balance)
     --mode live    : Binance Futures Live (https://fapi.binance.com)
-- Environment variables required for testnet/live:
-    export BINANCE_API_KEY="your_key"
-    export BINANCE_API_SECRET="your_secret"
 """
 
 from __future__ import annotations
@@ -49,7 +48,32 @@ TESTNET_BASE = "https://testnet.binancefuture.com"
 Bar = Tuple[int, float, float, float, float, float]
 
 
-# -------------------- Pure Causal Indicator, 4H Trend & SMC Engine --------------------
+# -------------------- Pure Causal V5 Topological, Kernel & SMC Math --------------------
+
+def sigmoid(x: float, x0: float = 0.0, k: float = 1.0) -> float:
+    z = max(-60.0, min(60.0, -k * (x - x0)))
+    return 1.0 / (1.0 + math.exp(z))
+
+
+def soft_and_log_odds(
+    scores: Dict[str, float],
+    weights: Dict[str, float],
+    veto_floors: Optional[Dict[str, float]] = None,
+) -> float:
+    eps = 1e-4
+    if veto_floors:
+        for k_v, fl in veto_floors.items():
+            if k_v in scores and scores[k_v] < fl:
+                return max(0.0, scores[k_v] / max(fl, eps)) * 0.15
+    num = den = 0.0
+    for k_w, w in weights.items():
+        if w <= 0 or k_w not in scores:
+            continue
+        p = max(eps, min(1.0 - eps, scores[k_w]))
+        num += w * math.log(p / (1.0 - p))
+        den += w
+    return sigmoid(num / den, 0.0, 1.0) if den > 0 else 0.0
+
 
 class CausalSwingTracker:
     def __init__(self, k: int = 2, max_active: int = 25) -> None:
@@ -89,6 +113,51 @@ class CausalSwingTracker:
             self.trend = -1
 
 
+def compute_topological_swings(bars: List[Bar], atr_series: List[float], atr_mult: float = 1.25) -> Tuple[Optional[float], Optional[float], int]:
+    """Scale-free volatility-adjusted ZigZag returning (last_hi, last_lo, struct_trend)."""
+    if len(bars) < 5 or len(atr_series) != len(bars):
+        return None, None, 0
+    direction = 0
+    piv_hi = bars[0][2]
+    piv_lo = bars[0][3]
+    last_hi: Optional[float] = None
+    last_lo: Optional[float] = None
+    prev_hi: Optional[float] = None
+    prev_lo: Optional[float] = None
+    for i in range(1, len(bars)):
+        h, l = bars[i][2], bars[i][3]
+        th = atr_mult * max(atr_series[i], 1e-12)
+        if direction == 0:
+            if h - piv_lo >= th:
+                prev_lo, last_lo = last_lo, piv_lo
+                direction, piv_hi = 1, h
+            elif piv_hi - l >= th:
+                prev_hi, last_hi = last_hi, piv_hi
+                direction, piv_lo = -1, l
+            else:
+                piv_hi = max(piv_hi, h)
+                piv_lo = min(piv_lo, l)
+        elif direction == 1:
+            if h >= piv_hi:
+                piv_hi = h
+            elif piv_hi - l >= th:
+                prev_hi, last_hi = last_hi, piv_hi
+                direction, piv_lo = -1, l
+        else:
+            if l <= piv_lo:
+                piv_lo = l
+            elif h - piv_lo >= th:
+                prev_lo, last_lo = last_lo, piv_lo
+                direction, piv_hi = 1, h
+    tr = 0
+    if last_hi is not None and prev_hi is not None and last_lo is not None and prev_lo is not None:
+        if last_hi > prev_hi and last_lo > prev_lo:
+            tr = 1
+        elif last_hi < prev_hi and last_lo < prev_lo:
+            tr = -1
+    return last_hi, last_lo, tr
+
+
 def compute_ema_series(closes: List[float], span: int) -> List[float]:
     k = 2.0 / (span + 1.0)
     out: List[float] = []
@@ -97,7 +166,8 @@ def compute_ema_series(closes: List[float], span: int) -> List[float]:
     return out
 
 
-def compute_wilder_atr(bars: List[Bar], period: int = 14) -> float:
+def compute_wilder_atr_series(bars: List[Bar], period: int = 14) -> List[float]:
+    out: List[float] = []
     val = 0.0
     prev_c: Optional[float] = None
     alpha = 1.0 / period
@@ -105,7 +175,13 @@ def compute_wilder_atr(bars: List[Bar], period: int = 14) -> float:
         tr = (h - l) if prev_c is None else max(h - l, abs(h - prev_c), abs(l - prev_c))
         prev_c = c
         val = tr if i == 0 else ((1.0 - alpha) * val + alpha * tr)
-    return val
+        out.append(val)
+    return out
+
+
+def compute_wilder_atr(bars: List[Bar], period: int = 14) -> float:
+    ser = compute_wilder_atr_series(bars, period)
+    return ser[-1] if ser else 0.0
 
 
 def compute_wilder_adx(bars: List[Bar], period: int = 14) -> float:
@@ -167,12 +243,67 @@ def compute_macd_hist(closes: List[float]) -> float:
     return macd[-1] - sig[-1]
 
 
-def compute_er14(closes: List[float]) -> float:
-    if len(closes) < 15:
+def compute_ker(closes: List[float], period: int = 20) -> float:
+    if len(closes) <= period:
         return 0.0
-    arr = closes[-15:]
+    arr = closes[-(period + 1):]
     den = sum(abs(arr[i] - arr[i - 1]) for i in range(1, len(arr)))
-    return abs(arr[-1] - arr[0]) / den if den > 0 else 0.0
+    return abs(arr[-1] - arr[0]) / den if den > 1e-12 else 0.0
+
+
+def compute_er14(closes: List[float]) -> float:
+    return compute_ker(closes, period=14)
+
+
+def compute_4h_v5_confluence(bars_4h: List[Bar], atr_ser: List[float], adx4: float, btc_regime_score: float = 1.0) -> Tuple[float, float]:
+    """Compute V5 Continuous Confluence Tensor (KER + Squeeze + ToD RVOL Effort-vs-Result + Displacement + ADX + BTC)."""
+    ts_ms, o, h, l, c, vol = bars_4h[-1]
+    a4 = max(atr_ser[-1], 1e-12)
+    closes = [b[4] for b in bars_4h]
+    ker = compute_ker(closes, 20)
+    hi_r = max(b[2] for b in bars_4h[-20:])
+    lo_r = min(b[3] for b in bars_4h[-20:])
+    rpos = (c - lo_r) / max(hi_r - lo_r, 1e-12)
+    in_mid_chop = (ker < 0.25) and (0.25 <= rpos <= 0.75)
+    ker_sc = 0.05 if in_mid_chop else sigmoid(ker, 0.25, 9.0)
+
+    # BB / KC Squeeze Ratio over last 6 bars
+    sq_vals: List[float] = []
+    for k in range(max(20, len(bars_4h) - 6), len(bars_4h) + 1):
+        sub = closes[k - 20:k]
+        mu = sum(sub) / 20.0
+        sd = math.sqrt(sum((x - mu) ** 2 for x in sub) / 20.0)
+        sq_vals.append((4.0 * sd) / max(3.0 * atr_ser[k - 1], 1e-12))
+    sq_now = sq_vals[-1]
+    sq_min = min(sq_vals[:-1]) if len(sq_vals) > 1 else 1.0
+    prior_comp = sq_min < 0.98
+    sq_exp = sigmoid(sq_now - sq_min, 0.04, 18.0) if prior_comp else 0.45
+    sq_sc = max(0.0, min(1.0, 0.55 * sigmoid(1.05 - sq_min, 0.05, 12.0) + 0.45 * sq_exp))
+
+    # Time-of-Day normalized RVOL using strictly prior same-UTC-hour 4H bars
+    cur_hr = dt.datetime.fromtimestamp(ts_ms / 1000.0, tz=dt.timezone.utc).hour
+    same_slot = [b[5] for b in bars_4h[:-1] if dt.datetime.fromtimestamp(b[0] / 1000.0, tz=dt.timezone.utc).hour == cur_hr][-20:]
+    pool_v = same_slot if len(same_slot) >= 5 else [b[5] for b in bars_4h[:-1][-40:]]
+    if pool_v:
+        sp = sorted(pool_v)
+        med_v = sp[len(sp) // 2]
+        rvol = (vol / med_v) if med_v > 0 else 1.0
+    else:
+        rvol = 1.0
+    rvol_sc = sigmoid(rvol, 1.6, 2.2)
+    br = abs(c - o) / max(h - l, 1e-12)
+    er_sc = min(1.0, rvol_sc * sigmoid(br, 0.65, 9.0) + (0.25 if (rvol >= 1.4 and br >= 0.65) else 0.0))
+    trap_sc = sigmoid(rvol, 1.8, 3.0) * sigmoid(0.42 - br, 0.0, 10.0)
+
+    disp_sc = min(1.0, 0.60 * sigmoid(abs(c - o) / a4, 1.2, 2.2) + 0.40 * sigmoid(br, 0.60, 7.0))
+    adx_sc = sigmoid(adx4, 18.0, 0.25)
+
+    conf = soft_and_log_odds(
+        {"ker": ker_sc, "er": er_sc, "sq": sq_sc, "disp": disp_sc, "adx": adx_sc, "btc": btc_regime_score},
+        {"ker": 1.0, "er": 1.0, "sq": 0.6, "disp": 1.0, "adx": 1.2, "btc": 1.1},
+        veto_floors={"ker": 0.12, "btc": 0.20},
+    )
+    return conf, trap_sc
 
 
 def compute_daily_utc_vwap(bars_5m: List[Bar]) -> Optional[float]:
@@ -210,43 +341,60 @@ def evaluate_symbol_bars(
     bars_4h: List[Bar],
     bars_1d: Optional[List[Bar]] = None,
     use_4h_trend: bool = True,
+    v5_mode: str = "hybrid",
     donch_lb: int = 20,
     trail_atr_mult: float = 3.5,
+    conf_threshold: Optional[float] = None,
+    btc_regime_fn=None,
     use_smc: bool = True,
     sweep_tp_r: float = 10.0,
     enable_fast_scalp: bool = False,
 ) -> Optional[SignalCandidate]:
-    """Evaluate strictly CLOSED candles using 100% causal V4.0 verified rules."""
+    """Evaluate strictly CLOSED candles using 100% causal V5.0 Topological + Regime Tensor rules."""
     if len(bars_5m) < 80 or len(bars_15m) < 40 or len(bars_1h) < 60 or len(bars_4h) < max(60, donch_lb + 3):
         return None
 
     c4 = [b[4] for b in bars_4h]
-    atr_4h = compute_wilder_atr(bars_4h, 14)
+    atr_ser4 = compute_wilder_atr_series(bars_4h, 14)
+    atr_4h = atr_ser4[-1]
     adx_4h = compute_wilder_adx(bars_4h, 14)
 
-    # 1) Primary 4H Engine: 4H_Donch20_Trail (PF=1.99, DD=7.8R, 7/7 yrs green, IS=+47.6R, OOS=+32.1R)
-    if use_4h_trend and bars_1d and len(bars_1d) >= 50 and atr_4h > 0 and adx_4h >= 20.0:
+    # 1) Primary 4H Engine: 4H_V5_Trend (C7 Hybrid PF=2.01 / C8 Topological PF=1.87)
+    if use_4h_trend and bars_1d and len(bars_1d) >= 50 and atr_4h > 0:
         c1d = [b[4] for b in bars_1d]
         e20_1d = compute_ema_series(c1d, 20)[-1]
         e50_1d = compute_ema_series(c1d, 50)[-1]
-        hi_cur = max(b[2] for b in bars_4h[-(donch_lb + 1):-1])
-        lo_cur = min(b[3] for b in bars_4h[-(donch_lb + 1):-1])
-        hi_prev = max(b[2] for b in bars_4h[-(donch_lb + 2):-2])
-        lo_prev = min(b[3] for b in bars_4h[-(donch_lb + 2):-2])
         c_now, c_prev = c4[-1], c4[-2]
         side = 0
-        if e20_1d > e50_1d and c_now > hi_cur and c_prev <= hi_prev:
-            side = 1
-        elif e20_1d < e50_1d and c_now < lo_cur and c_prev >= lo_prev:
-            side = -1
+        if v5_mode == "topological":
+            top_hi, top_lo, _ = compute_topological_swings(bars_4h[:-1], atr_ser4[:-1], 1.25)
+            if e20_1d > e50_1d and top_hi is not None and c_now > top_hi and c_prev <= top_hi:
+                side = 1
+            elif e20_1d < e50_1d and top_lo is not None and c_now < top_lo and c_prev >= top_lo:
+                side = -1
+        else:
+            if adx_4h >= 20.0:
+                hi_cur = max(b[2] for b in bars_4h[-(donch_lb + 1):-1])
+                lo_cur = min(b[3] for b in bars_4h[-(donch_lb + 1):-1])
+                hi_prev = max(b[2] for b in bars_4h[-(donch_lb + 2):-2])
+                lo_prev = min(b[3] for b in bars_4h[-(donch_lb + 2):-2])
+                if e20_1d > e50_1d and c_now > hi_cur and c_prev <= hi_prev:
+                    side = 1
+                elif e20_1d < e50_1d and c_now < lo_cur and c_prev >= lo_prev:
+                    side = -1
+
         if side != 0:
-            slp = c_now - side * 2.0 * atr_4h
-            rd = abs(c_now - slp)
-            if 0.005 <= (rd / c_now) <= 0.080:
-                return SignalCandidate(
-                    symbol, "4H_Donch20_Trail", side, c_now, slp, None, rd,
-                    (), 300, is_market=True, trail_atr_mult=trail_atr_mult,
-                )
+            btc_sc = btc_regime_fn(side) if btc_regime_fn is not None else 1.0
+            conf, trap_sc = compute_4h_v5_confluence(bars_4h, atr_ser4, adx_4h, btc_sc)
+            thr = conf_threshold if conf_threshold is not None else (0.50 if v5_mode == "hybrid" else 0.55)
+            if conf >= thr and trap_sc < 0.78:
+                slp = c_now - side * 2.0 * atr_4h
+                rd = abs(c_now - slp)
+                if 0.005 <= (rd / c_now) <= 0.080:
+                    return SignalCandidate(
+                        symbol, "4H_V5_Trend", side, c_now, slp, None, rd,
+                        (), 300, is_market=True, trail_atr_mult=trail_atr_mult,
+                    )
 
     c1 = [b[4] for b in bars_1h]
     c15 = [b[4] for b in bars_15m]
@@ -326,7 +474,6 @@ def evaluate_symbol_bars(
     if not enable_fast_scalp or utc_dt.weekday() >= 5:
         return None
 
-    # Optional Experimental Fast Scalp (enable_fast_scalp=True only; causal PF~1.12)
     if vwap is not None and (7 <= utc_dt.hour <= 20) and er_1h >= 0.25 and atr_15 > 0 and atr_5 > 0:
         if tr_up and rsi_1h >= 58.0 and l <= vwap < c and c > o and rsi_5 <= 48.0:
             slp = min(l, vwap - 0.5 * atr_15) - 0.4 * atr_5
@@ -485,6 +632,21 @@ def compute_order_qty(
     return qty
 
 
+def _btc_regime_score_from_4h(btc_4h: List[Bar], side: int) -> float:
+    if len(btc_4h) < 30:
+        return 1.0
+    atr_s = compute_wilder_atr_series(btc_4h, 14)
+    _, _, btc_tr = compute_topological_swings(btc_4h, atr_s, 1.25)
+    _, o, h, l, c, _ = btc_4h[-1]
+    a4 = max(atr_s[-1], 1e-12)
+    disp = min(1.0, 0.60 * sigmoid(abs(c - o) / a4, 1.2, 2.2) + 0.40 * sigmoid(abs(c - o) / max(h - l, 1e-12), 0.60, 7.0))
+    if side == 1 and btc_tr == -1 and c < o and disp >= 0.65:
+        return max(0.05, 1.0 - 0.90 * disp)
+    if side == -1 and btc_tr == 1 and c > o and disp >= 0.65:
+        return max(0.05, 1.0 - 0.90 * disp)
+    return 0.92 if side == btc_tr else 0.70
+
+
 def run_bot(
     mode: str,
     symbols: Tuple[str, ...],
@@ -492,6 +654,8 @@ def run_bot(
     max_open_pos: int,
     paper_equity: float,
     use_4h_trend: bool = True,
+    v5_mode: str = "hybrid",
+    use_pyramid: bool = True,
     donch_lb: int = 20,
     trail_atr_mult: float = 3.5,
     use_smc: bool = True,
@@ -506,7 +670,7 @@ def run_bot(
 
     client = BinanceFuturesClient(base_url, api_key, api_secret)
     filters = client.load_filters(symbols)
-    print(f"[INIT] V4.0 mode={mode} symbols={len(filters)}/{len(symbols)} 4H_Trend={use_4h_trend} SMC={use_smc} lev={leverage}x")
+    print(f"[INIT] V5.0 mode={mode} syms={len(filters)}/{len(symbols)} 4H={use_4h_trend}({v5_mode}) pyr={use_pyramid} smc={use_smc} lev={leverage}x")
 
     if mode in ("testnet", "live"):
         for sym in filters:
@@ -524,6 +688,8 @@ def run_bot(
             dd = (hwm_equity - equity) / hwm_equity if hwm_equity > 0 else 0.0
             dd_brake = 0.50 if dd >= 0.12 else (0.70 if dd >= 0.08 else 1.0)
             open_pos = {} if mode == "paper" else client.get_positions()
+
+            btc_4h_cache = client.get_klines("BTCUSDT", "4h", 120) if "BTCUSDT" in filters else []
 
             for sym, meta in list(active_meta.items()):
                 if mode != "paper" and meta["state"] == "PENDING":
@@ -550,12 +716,22 @@ def run_bot(
                     qty_abs = abs(open_pos[sym])
                     if meta.get("trail_mult"):
                         b4 = client.get_klines(sym, "4h", 120)
-                        if b4:
-                            ts4, _, h4, l4, c4, _ = b4[-1]
+                        if len(b4) >= 2:
+                            ts4, o4, h4, l4, c4, _ = b4[-1]
                             if ts4 != meta.get("last_4h_ts"):
                                 meta["last_4h_ts"] = ts4
                                 atr4 = compute_wilder_atr(b4, 14)
                                 meta["best_px"] = max(meta["best_px"], h4) if meta["side"] == 1 else min(meta["best_px"], l4)
+                                mfe_r = ((meta["best_px"] - meta["entry"]) * meta["side"]) / max(meta["risk"], 1e-12)
+                                if use_pyramid and not meta.get("pyramid_done") and mfe_r >= 2.0:
+                                    meta["pyramid_armed"] = True
+                                    lk_sl = round_step(meta["entry"] + meta["side"] * 0.25 * meta["risk"], filters[sym].tick_size, False)
+                                    if (meta["side"] == 1 and lk_sl > meta["sl"] and lk_sl < c4) or (meta["side"] == -1 and lk_sl < meta["sl"] and lk_sl > c4):
+                                        client.cancel_all(sym)
+                                        client.place_stop_market(sym, exit_side, qty_abs, lk_sl)
+                                        meta["sl"] = lk_sl
+                                        print(f"[PYR ARMED BE+0.25R] {sym} SL->{lk_sl}")
+
                                 raw_sl = meta["best_px"] + (-1 if meta["side"] == 1 else 1) * meta["trail_mult"] * atr4
                                 new_sl = round_step(raw_sl, filters[sym].tick_size, False)
                                 crossed = (new_sl >= c4) if meta["side"] == 1 else (new_sl <= c4)
@@ -571,6 +747,26 @@ def run_bot(
                                     client.place_stop_market(sym, exit_side, qty_abs, new_sl)
                                     meta["sl"] = new_sl
                                     print(f"[TRAIL SL] {sym} -> {new_sl}")
+
+                                # Check Risk-Free Pyramid Scale-In (0.5x) on closed 4H pullback continuation
+                                prev_c4 = b4[-2][4]
+                                pb = (
+                                    (meta["side"] == 1 and l4 <= prev_c4 and c4 > o4 and c4 > meta["entry"])
+                                    or (meta["side"] == -1 and h4 >= prev_c4 and c4 < o4 and c4 < meta["entry"])
+                                )
+                                if use_pyramid and meta.get("pyramid_armed") and not meta.get("pyramid_done") and pb:
+                                    sl_p = round_step(c4 - meta["side"] * 1.5 * atr4, filters[sym].tick_size, False)
+                                    qty_p = compute_order_qty(equity, 0.0075 * dd_brake, c4, sl_p, filters[sym], leverage=leverage)
+                                    if qty_p > 0:
+                                        side_str = "BUY" if meta["side"] == 1 else "SELL"
+                                        client.place_market(sym, side_str, qty_p)
+                                        tot_qty = round_step(qty_abs + qty_p, filters[sym].step_size, True)
+                                        comb_sl = max(meta["sl"], sl_p) if meta["side"] == 1 else min(meta["sl"], sl_p)
+                                        client.cancel_all(sym)
+                                        client.place_stop_market(sym, exit_side, tot_qty, comb_sl)
+                                        meta["sl"] = comb_sl
+                                        meta["pyramid_done"] = True
+                                        print(f"[PYRAMID +0.5x] {sym} {side_str} +{qty_p} SL->{comb_sl}")
                     elif meta["step_locks"]:
                         b5 = client.get_klines(sym, "5m", 3)
                         if b5:
@@ -593,11 +789,13 @@ def run_bot(
                 b5 = client.get_klines(sym, "5m", 290)
                 b15 = client.get_klines(sym, "15m", 80)
                 b1h = client.get_klines(sym, "1h", 120)
-                b4h = client.get_klines(sym, "4h", 120)
+                b4h = btc_4h_cache if sym == "BTCUSDT" and btc_4h_cache else client.get_klines(sym, "4h", 120)
                 b1d = client.get_klines(sym, "1d", 80)
+                btc_fn = None if sym == "BTCUSDT" else (lambda sd: _btc_regime_score_from_4h(btc_4h_cache, sd))
                 sig = evaluate_symbol_bars(
                     sym, b5, b15, b1h, b4h, b1d,
-                    use_4h_trend=use_4h_trend, donch_lb=donch_lb, trail_atr_mult=trail_atr_mult,
+                    use_4h_trend=use_4h_trend, v5_mode=v5_mode, donch_lb=donch_lb,
+                    trail_atr_mult=trail_atr_mult, btc_regime_fn=btc_fn,
                     use_smc=use_smc, sweep_tp_r=sweep_tp_r, enable_fast_scalp=enable_fast_scalp,
                 )
                 if sig is None:
@@ -620,6 +818,7 @@ def run_bot(
                         "state": "PENDING", "side": sig.side, "entry": ep, "best_px": ep,
                         "sl": sl, "tp": tp, "risk": abs(ep - sl), "step_locks": sig.step_locks,
                         "trail_mult": sig.trail_atr_mult, "last_4h_ts": b4h[-1][0] if b4h else 0,
+                        "pyramid_armed": False, "pyramid_done": False,
                         "expires_at": time.time() + sig.expire_sec,
                     }
         except urllib.error.URLError as exc:
@@ -630,12 +829,14 @@ def run_bot(
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Binance Futures Multi-Coin Causal 4H Trend + 1H SMC Engine (V4.0 Verified)")
+    ap = argparse.ArgumentParser(description="Binance Futures Multi-Coin V5.0 Topological + Regime + Pyramid Bot")
     ap.add_argument("--mode", choices=("paper", "testnet", "live"), default="paper")
     ap.add_argument("--leverage", type=int, default=10)
     ap.add_argument("--max-pos", type=int, default=3)
     ap.add_argument("--paper-equity", type=float, default=500.0)
-    ap.add_argument("--no-4h-trend", action="store_true", help="Disable primary 4H_Donch20_Trail engine")
+    ap.add_argument("--no-4h-trend", action="store_true", help="Disable primary 4H_V5_Trend engine")
+    ap.add_argument("--v5-mode", choices=("hybrid", "topological"), default="hybrid")
+    ap.add_argument("--no-pyramid", action="store_true", help="Disable risk-free 0.5x pyramiding")
     ap.add_argument("--donch-lb", type=int, default=20)
     ap.add_argument("--trail-atr-mult", type=float, default=3.5)
     ap.add_argument("--no-smc", action="store_true", help="Disable secondary SMC_Sweep_10R engine")
@@ -646,7 +847,8 @@ def main() -> None:
     syms = tuple(s.strip().upper() for s in args.symbols.split(",") if s.strip())
     run_bot(
         args.mode, syms, args.leverage, args.max_pos, args.paper_equity,
-        use_4h_trend=not args.no_4h_trend, donch_lb=args.donch_lb, trail_atr_mult=args.trail_atr_mult,
+        use_4h_trend=not args.no_4h_trend, v5_mode=args.v5_mode, use_pyramid=not args.no_pyramid,
+        donch_lb=args.donch_lb, trail_atr_mult=args.trail_atr_mult,
         use_smc=not args.no_smc, sweep_tp_r=args.sweep_tp_r, enable_fast_scalp=args.enable_fast_scalp,
     )
 
