@@ -1,0 +1,1193 @@
+{
+  "experiment": "same causal sweep -> CHoCH/FVG with higher signal timeframe",
+  "evaluation_window": {
+    "start": "2020-02-01 00:00:00+00:00",
+    "end": "2026-11-01 00:00:00+00:00"
+  },
+  "variants_config": {
+    "LTF_control": {
+      "name": "LTF_control",
+      "label_ar": "\u062a\u062d\u0643\u0645 \u0645\u0646\u062e\u0641\u0636: 15m \u0644\u0644\u0630\u0647\u0628/\u0627\u0644\u0646\u0627\u0633\u062f\u0627\u0643 \u06485m \u0644\u0644\u0628\u062a\u0643\u0648\u064a\u0646\u060c Sweep 1H\u060c \u0633\u064a\u0627\u0642 4H",
+      "signal_tf": "15min",
+      "sweep_tf": "1h",
+      "context_tf": "4h",
+      "sweep_k": 3,
+      "signal_k": 2,
+      "min_age_bars": 4,
+      "max_wait_hours": 12.0,
+      "displacement_atr": 1.0,
+      "fvg_atr": 0.25,
+      "sl_buffer_atr": 1.0
+    },
+    "HTF_1H": {
+      "name": "HTF_1H",
+      "label_ar": "\u0646\u0633\u062e\u0629 \u0623\u0639\u0644\u0649 \u0645\u062a\u0648\u0633\u0637\u0629: \u062f\u062e\u0648\u0644 1H\u060c Sweep 4H\u060c \u0633\u064a\u0627\u0642 1D",
+      "signal_tf": "1h",
+      "sweep_tf": "4h",
+      "context_tf": "1d",
+      "sweep_k": 3,
+      "signal_k": 2,
+      "min_age_bars": 4,
+      "max_wait_hours": 24.0,
+      "displacement_atr": 1.0,
+      "fvg_atr": 0.25,
+      "sl_buffer_atr": 1.0
+    },
+    "HTF_4H": {
+      "name": "HTF_4H",
+      "label_ar": "\u0646\u0633\u062e\u0629 4H: \u0627\u0644\u062f\u062e\u0648\u0644 \u0648CHoCH/FVG \u0639\u0644\u0649 4H\u060c Sweep 4H\u060c \u0633\u064a\u0627\u0642 1D",
+      "signal_tf": "4h",
+      "sweep_tf": "4h",
+      "context_tf": "1d",
+      "sweep_k": 3,
+      "signal_k": 2,
+      "min_age_bars": 4,
+      "max_wait_hours": 48.0,
+      "displacement_atr": 1.0,
+      "fvg_atr": 0.25,
+      "sl_buffer_atr": 1.0
+    }
+  },
+  "official_v8_reference": {
+    "n": 1321,
+    "wr_pct": 34.22,
+    "net_r": 515.75,
+    "avg_r_per_month": 6.37,
+    "median_r_per_month": 5.2,
+    "p75_r_per_month": 13.18,
+    "p90_r_per_month": 20.69,
+    "best_month_r": 31.44,
+    "worst_month_r": -11.31,
+    "positive_months": 54,
+    "negative_months": 27,
+    "months_ge_10r": 27,
+    "months_ge_15r": 17,
+    "months_ge_20r": 10,
+    "pf": 1.57,
+    "max_dd_r": 26.06,
+    "t_stat": 5.22,
+    "positive_years": 7,
+    "total_years": 7,
+    "yearly_r": {
+      "2020": 169.62,
+      "2021": 38.98,
+      "2022": 28.8,
+      "2023": 52.87,
+      "2024": 63.03,
+      "2025": 84.82,
+      "2026": 77.64
+    },
+    "compound_100_1pct": {
+      "start_capital": 100.0,
+      "risk_pct": 1.0,
+      "compound": true,
+      "final_equity": 10851.63,
+      "total_return_pct": 10751.6,
+      "max_dd_pct": 23.32,
+      "yearly_equity": {
+        "2020": 400.8,
+        "2021": 593.1,
+        "2022": 890.32,
+        "2023": 1410.71,
+        "2024": 2366.88,
+        "2025": 5426.09,
+        "2026": 10851.63
+      }
+    },
+    "compound_100_1_5pct": {
+      "start_capital": 100.0,
+      "risk_pct": 1.5,
+      "compound": true,
+      "final_equity": 81566.07,
+      "total_return_pct": 81466.1,
+      "max_dd_pct": 33.34,
+      "yearly_equity": {
+        "2020": 749.17,
+        "2021": 1305.49,
+        "2022": 2316.1,
+        "2023": 4436.65,
+        "2024": 9201.02,
+        "2025": 30324.28,
+        "2026": 81566.07
+      }
+    },
+    "compound_100_2pct": {
+      "start_capital": 100.0,
+      "risk_pct": 2.0,
+      "compound": true,
+      "final_equity": 503286.3,
+      "total_return_pct": 503186.3,
+      "max_dd_pct": 42.57,
+      "yearly_equity": {
+        "2020": 1344.37,
+        "2021": 2704.25,
+        "2022": 5546.43,
+        "2023": 12532.42,
+        "2024": 31221.07,
+        "2025": 143351.3,
+        "2026": 503286.3
+      }
+    }
+  },
+  "variants": {
+    "LTF_control": {
+      "by_asset": {
+        "XAUUSD": {
+          "n": 76,
+          "wr_pct": 13.16,
+          "net_r": 32.56,
+          "pf": 1.484,
+          "max_dd_r": 33.78,
+          "t_stat": 1.0,
+          "avg_r": 0.4285,
+          "median_r": -1.0147,
+          "positive_years": 5,
+          "total_years": 7,
+          "yearly_r": {
+            "2020": -1.21,
+            "2021": -19.44,
+            "2022": 6.65,
+            "2023": 15.85,
+            "2024": 8.79,
+            "2025": 16.95,
+            "2026": 4.97
+          },
+          "max_consecutive_losses": 33,
+          "avg_hold_hours": 373.94,
+          "compound_100_1pct": {
+            "start_capital": 100.0,
+            "risk_pct": 1.0,
+            "compound": true,
+            "final_equity": 131.71,
+            "total_return_pct": 31.7,
+            "max_dd_pct": 28.79,
+            "yearly_equity": {
+              "2020": 99.29,
+              "2021": 80.83,
+              "2022": 77.76,
+              "2023": 99.27,
+              "2024": 107.33,
+              "2025": 125.95,
+              "2026": 131.71
+            }
+          }
+        },
+        "NSXUSD": {
+          "n": 92,
+          "wr_pct": 13.04,
+          "net_r": 36.31,
+          "pf": 1.446,
+          "max_dd_r": 21.42,
+          "t_stat": 1.03,
+          "avg_r": 0.3947,
+          "median_r": -1.0121,
+          "positive_years": 5,
+          "total_years": 7,
+          "yearly_r": {
+            "2020": 15.87,
+            "2021": 4.63,
+            "2022": -4.26,
+            "2023": 5.63,
+            "2024": -1.23,
+            "2025": 7.81,
+            "2026": 7.86
+          },
+          "max_consecutive_losses": 21,
+          "avg_hold_hours": 266.17,
+          "compound_100_1pct": {
+            "start_capital": 100.0,
+            "risk_pct": 1.0,
+            "compound": true,
+            "final_equity": 135.6,
+            "total_return_pct": 35.6,
+            "max_dd_pct": 19.37,
+            "yearly_equity": {
+              "2020": 105.55,
+              "2021": 120.36,
+              "2022": 114.72,
+              "2023": 109.24,
+              "2024": 119.25,
+              "2025": 127.66,
+              "2026": 135.6
+            }
+          }
+        },
+        "BTCUSD": {
+          "n": 181,
+          "wr_pct": 8.84,
+          "net_r": 64.03,
+          "pf": 1.366,
+          "max_dd_r": 43.59,
+          "t_stat": 1.05,
+          "avg_r": 0.3538,
+          "median_r": -1.0441,
+          "positive_years": 3,
+          "total_years": 7,
+          "yearly_r": {
+            "2020": 55.89,
+            "2021": -9.7,
+            "2022": 33.64,
+            "2023": 24.53,
+            "2024": -18.31,
+            "2025": -7.59,
+            "2026": -14.43
+          },
+          "max_consecutive_losses": 28,
+          "avg_hold_hours": 237.38,
+          "compound_100_1pct": {
+            "start_capital": 100.0,
+            "risk_pct": 1.0,
+            "compound": true,
+            "final_equity": 159.78,
+            "total_return_pct": 59.8,
+            "max_dd_pct": 38.23,
+            "yearly_equity": {
+              "2020": 144.45,
+              "2021": 150.49,
+              "2022": 202.03,
+              "2023": 250.34,
+              "2024": 203.75,
+              "2025": 188.66,
+              "2026": 159.78
+            }
+          }
+        }
+      },
+      "by_asset_2x_cost": {
+        "XAUUSD": {
+          "n": 76,
+          "wr_pct": 13.16,
+          "net_r": 31.13,
+          "pf": 1.454,
+          "max_dd_r": 34.56,
+          "t_stat": 0.95,
+          "avg_r": 0.4096,
+          "median_r": -1.0294,
+          "positive_years": 5,
+          "total_years": 7,
+          "yearly_r": {
+            "2020": -1.41,
+            "2021": -19.89,
+            "2022": 6.3,
+            "2023": 15.71,
+            "2024": 8.59,
+            "2025": 16.9,
+            "2026": 4.93
+          },
+          "max_consecutive_losses": 33,
+          "avg_hold_hours": 373.94,
+          "compound_100_1pct": {
+            "start_capital": 100.0,
+            "risk_pct": 1.0,
+            "compound": true,
+            "final_equity": 129.83,
+            "total_return_pct": 29.8,
+            "max_dd_pct": 29.35,
+            "yearly_equity": {
+              "2020": 99.09,
+              "2021": 80.31,
+              "2022": 76.99,
+              "2023": 98.14,
+              "2024": 105.88,
+              "2025": 124.19,
+              "2026": 129.83
+            }
+          }
+        },
+        "NSXUSD": {
+          "n": 92,
+          "wr_pct": 13.04,
+          "net_r": 34.67,
+          "pf": 1.418,
+          "max_dd_r": 21.84,
+          "t_stat": 0.98,
+          "avg_r": 0.3768,
+          "median_r": -1.0243,
+          "positive_years": 5,
+          "total_years": 7,
+          "yearly_r": {
+            "2020": 15.75,
+            "2021": 4.26,
+            "2022": -4.52,
+            "2023": 5.25,
+            "2024": -1.46,
+            "2025": 7.62,
+            "2026": 7.77
+          },
+          "max_consecutive_losses": 21,
+          "avg_hold_hours": 266.17,
+          "compound_100_1pct": {
+            "start_capital": 100.0,
+            "risk_pct": 1.0,
+            "compound": true,
+            "final_equity": 133.4,
+            "total_return_pct": 33.4,
+            "max_dd_pct": 19.72,
+            "yearly_equity": {
+              "2020": 105.43,
+              "2021": 119.76,
+              "2022": 113.85,
+              "2023": 108.04,
+              "2024": 117.65,
+              "2025": 125.71,
+              "2026": 133.4
+            }
+          }
+        },
+        "BTCUSD": {
+          "n": 181,
+          "wr_pct": 8.84,
+          "net_r": 52.3,
+          "pf": 1.282,
+          "max_dd_r": 51.94,
+          "t_stat": 0.85,
+          "avg_r": 0.289,
+          "median_r": -1.0882,
+          "positive_years": 3,
+          "total_years": 7,
+          "yearly_r": {
+            "2020": 54.78,
+            "2021": -10.4,
+            "2022": 32.29,
+            "2023": 24.06,
+            "2024": -21.61,
+            "2025": -9.18,
+            "2026": -17.63
+          },
+          "max_consecutive_losses": 28,
+          "avg_hold_hours": 237.38,
+          "compound_100_1pct": {
+            "start_capital": 100.0,
+            "risk_pct": 1.0,
+            "compound": true,
+            "final_equity": 142.13,
+            "total_return_pct": 42.1,
+            "max_dd_pct": 43.19,
+            "yearly_equity": {
+              "2020": 142.96,
+              "2021": 147.83,
+              "2022": 195.85,
+              "2023": 241.51,
+              "2024": 190.15,
+              "2025": 173.32,
+              "2026": 142.13
+            }
+          }
+        }
+      },
+      "portfolio_3asset_1pos_each": {
+        "n": 349,
+        "wr_pct": 10.89,
+        "net_r": 132.91,
+        "pf": 1.411,
+        "max_dd_r": 40.16,
+        "t_stat": 1.71,
+        "avg_r": 0.3808,
+        "median_r": -1.0222,
+        "positive_years": 4,
+        "total_years": 7,
+        "yearly_r": {
+          "2020": 70.56,
+          "2021": -24.51,
+          "2022": 36.03,
+          "2023": 46.01,
+          "2024": -10.74,
+          "2025": 17.17,
+          "2026": -1.6
+        },
+        "max_consecutive_losses": 26,
+        "avg_hold_hours": 274.71,
+        "compound_100_1pct": {
+          "start_capital": 100.0,
+          "risk_pct": 1.0,
+          "compound": true,
+          "final_equity": 285.37,
+          "total_return_pct": 185.4,
+          "max_dd_pct": 34.62,
+          "yearly_equity": {
+            "2020": 151.38,
+            "2021": 146.41,
+            "2022": 180.23,
+            "2023": 271.48,
+            "2024": 260.79,
+            "2025": 303.35,
+            "2026": 285.37
+          }
+        }
+      },
+      "portfolio_3asset_1pos_each_2x_cost": {
+        "n": 349,
+        "wr_pct": 10.89,
+        "net_r": 118.1,
+        "pf": 1.351,
+        "max_dd_r": 42.31,
+        "t_stat": 1.52,
+        "avg_r": 0.3384,
+        "median_r": -1.0444,
+        "positive_years": 4,
+        "total_years": 7,
+        "yearly_r": {
+          "2020": 69.12,
+          "2021": -26.03,
+          "2022": 34.06,
+          "2023": 45.02,
+          "2024": -14.49,
+          "2025": 15.34,
+          "2026": -4.92
+        },
+        "max_consecutive_losses": 26,
+        "avg_hold_hours": 274.71,
+        "compound_100_1pct": {
+          "start_capital": 100.0,
+          "risk_pct": 1.0,
+          "compound": true,
+          "final_equity": 246.17,
+          "total_return_pct": 146.2,
+          "max_dd_pct": 36.03,
+          "yearly_equity": {
+            "2020": 149.36,
+            "2021": 142.17,
+            "2022": 171.68,
+            "2023": 256.05,
+            "2024": 236.88,
+            "2025": 270.6,
+            "2026": 246.17
+          }
+        }
+      },
+      "portfolio_global_1pos": {
+        "n": 162,
+        "wr_pct": 10.49,
+        "net_r": 50.79,
+        "pf": 1.335,
+        "max_dd_r": 19.42,
+        "t_stat": 0.98,
+        "avg_r": 0.3135,
+        "median_r": -1.0243,
+        "positive_years": 6,
+        "total_years": 7,
+        "yearly_r": {
+          "2020": 15.18,
+          "2021": 3.52,
+          "2022": 1.85,
+          "2023": 24.53,
+          "2024": 1.33,
+          "2025": 11.66,
+          "2026": -7.28
+        },
+        "max_consecutive_losses": 17,
+        "avg_hold_hours": 279.09,
+        "compound_100_1pct": {
+          "start_capital": 100.0,
+          "risk_pct": 1.0,
+          "compound": true,
+          "final_equity": 146.76,
+          "total_return_pct": 46.8,
+          "max_dd_pct": 18.16,
+          "yearly_equity": {
+            "2020": 103.67,
+            "2021": 117.43,
+            "2022": 117.05,
+            "2023": 145.04,
+            "2024": 143.15,
+            "2025": 160.93,
+            "2026": 146.76
+          }
+        }
+      },
+      "trade_counts": {
+        "XAUUSD": 76,
+        "NSXUSD": 92,
+        "BTCUSD": 181
+      }
+    },
+    "HTF_1H": {
+      "by_asset": {
+        "XAUUSD": {
+          "n": 11,
+          "wr_pct": 18.18,
+          "net_r": 10.89,
+          "pf": 2.197,
+          "max_dd_r": 6.06,
+          "t_stat": 0.74,
+          "avg_r": 0.9897,
+          "median_r": -1.0063,
+          "positive_years": 2,
+          "total_years": 6,
+          "yearly_r": {
+            "2020": -1.02,
+            "2021": 8.98,
+            "2022": -1.02,
+            "2023": -3.02,
+            "2024": 7.96,
+            "2026": -1.0
+          },
+          "max_consecutive_losses": 6,
+          "avg_hold_hours": 1110.27,
+          "compound_100_1pct": {
+            "start_capital": 100.0,
+            "risk_pct": 1.0,
+            "compound": true,
+            "final_equity": 110.41,
+            "total_return_pct": 10.4,
+            "max_dd_pct": 5.91,
+            "yearly_equity": {
+              "2020": 98.98,
+              "2021": 97.98,
+              "2022": 106.67,
+              "2023": 103.49,
+              "2024": 111.53,
+              "2026": 110.41
+            }
+          }
+        },
+        "NSXUSD": {
+          "n": 9,
+          "wr_pct": 22.22,
+          "net_r": 12.93,
+          "pf": 2.833,
+          "max_dd_r": 6.04,
+          "t_stat": 0.89,
+          "avg_r": 1.4368,
+          "median_r": -1.0066,
+          "positive_years": 2,
+          "total_years": 4,
+          "yearly_r": {
+            "2021": 8.98,
+            "2023": -2.02,
+            "2024": -3.02,
+            "2025": 8.99
+          },
+          "max_consecutive_losses": 6,
+          "avg_hold_hours": 945.89,
+          "compound_100_1pct": {
+            "start_capital": 100.0,
+            "risk_pct": 1.0,
+            "compound": true,
+            "final_equity": 112.7,
+            "total_return_pct": 12.7,
+            "max_dd_pct": 5.89,
+            "yearly_equity": {
+              "2021": 108.88,
+              "2023": 106.69,
+              "2024": 103.5,
+              "2025": 112.7
+            }
+          }
+        },
+        "BTCUSD": {
+          "n": 41,
+          "wr_pct": 0.0,
+          "net_r": -42.26,
+          "pf": 0.0,
+          "max_dd_r": 42.26,
+          "t_stat": -321.04,
+          "avg_r": -1.0307,
+          "median_r": -1.0245,
+          "positive_years": 0,
+          "total_years": 7,
+          "yearly_r": {
+            "2020": -1.02,
+            "2021": -8.13,
+            "2022": -7.15,
+            "2023": -10.38,
+            "2024": -7.32,
+            "2025": -5.2,
+            "2026": -3.06
+          },
+          "max_consecutive_losses": 41,
+          "avg_hold_hours": 320.93,
+          "compound_100_1pct": {
+            "start_capital": 100.0,
+            "risk_pct": 1.0,
+            "compound": true,
+            "final_equity": 65.39,
+            "total_return_pct": -34.6,
+            "max_dd_pct": 34.61,
+            "yearly_equity": {
+              "2020": 98.98,
+              "2021": 91.21,
+              "2022": 85.78,
+              "2023": 77.27,
+              "2024": 71.05,
+              "2025": 67.43,
+              "2026": 65.39
+            }
+          }
+        }
+      },
+      "by_asset_2x_cost": {
+        "XAUUSD": {
+          "n": 11,
+          "wr_pct": 18.18,
+          "net_r": 10.77,
+          "pf": 2.173,
+          "max_dd_r": 6.13,
+          "t_stat": 0.73,
+          "avg_r": 0.9795,
+          "median_r": -1.0125,
+          "positive_years": 2,
+          "total_years": 6,
+          "yearly_r": {
+            "2020": -1.04,
+            "2021": 8.96,
+            "2022": -1.03,
+            "2023": -3.03,
+            "2024": 7.92,
+            "2026": -1.01
+          },
+          "max_consecutive_losses": 6,
+          "avg_hold_hours": 1110.27,
+          "compound_100_1pct": {
+            "start_capital": 100.0,
+            "risk_pct": 1.0,
+            "compound": true,
+            "final_equity": 110.29,
+            "total_return_pct": 10.3,
+            "max_dd_pct": 5.97,
+            "yearly_equity": {
+              "2020": 98.96,
+              "2021": 97.96,
+              "2022": 106.62,
+              "2023": 103.41,
+              "2024": 111.41,
+              "2026": 110.29
+            }
+          }
+        },
+        "NSXUSD": {
+          "n": 9,
+          "wr_pct": 22.22,
+          "net_r": 12.86,
+          "pf": 2.808,
+          "max_dd_r": 6.09,
+          "t_stat": 0.88,
+          "avg_r": 1.4291,
+          "median_r": -1.0132,
+          "positive_years": 2,
+          "total_years": 4,
+          "yearly_r": {
+            "2021": 8.96,
+            "2023": -2.03,
+            "2024": -3.04,
+            "2025": 8.98
+          },
+          "max_consecutive_losses": 6,
+          "avg_hold_hours": 945.89,
+          "compound_100_1pct": {
+            "start_capital": 100.0,
+            "risk_pct": 1.0,
+            "compound": true,
+            "final_equity": 112.63,
+            "total_return_pct": 12.6,
+            "max_dd_pct": 5.93,
+            "yearly_equity": {
+              "2021": 108.86,
+              "2023": 106.66,
+              "2024": 103.45,
+              "2025": 112.63
+            }
+          }
+        },
+        "BTCUSD": {
+          "n": 41,
+          "wr_pct": 0.0,
+          "net_r": -43.52,
+          "pf": 0.0,
+          "max_dd_r": 43.52,
+          "t_stat": -165.3,
+          "avg_r": -1.0615,
+          "median_r": -1.049,
+          "positive_years": 0,
+          "total_years": 7,
+          "yearly_r": {
+            "2020": -1.04,
+            "2021": -8.27,
+            "2022": -7.3,
+            "2023": -10.75,
+            "2024": -7.65,
+            "2025": -5.39,
+            "2026": -3.12
+          },
+          "max_consecutive_losses": 41,
+          "avg_hold_hours": 320.93,
+          "compound_100_1pct": {
+            "start_capital": 100.0,
+            "risk_pct": 1.0,
+            "compound": true,
+            "final_equity": 64.56,
+            "total_return_pct": -35.4,
+            "max_dd_pct": 35.44,
+            "yearly_equity": {
+              "2020": 98.96,
+              "2021": 91.07,
+              "2022": 85.55,
+              "2023": 76.77,
+              "2024": 70.33,
+              "2025": 66.62,
+              "2026": 64.56
+            }
+          }
+        }
+      },
+      "portfolio_3asset_1pos_each": {
+        "n": 61,
+        "wr_pct": 6.56,
+        "net_r": -18.44,
+        "pf": 0.684,
+        "max_dd_r": 33.84,
+        "t_stat": -0.86,
+        "avg_r": -0.3023,
+        "median_r": -1.0177,
+        "positive_years": 2,
+        "total_years": 7,
+        "yearly_r": {
+          "2020": -2.04,
+          "2021": 9.83,
+          "2022": -8.17,
+          "2023": -15.41,
+          "2024": -2.38,
+          "2025": 3.79,
+          "2026": -4.06
+        },
+        "max_consecutive_losses": 33,
+        "avg_hold_hours": 555.48,
+        "compound_100_1pct": {
+          "start_capital": 100.0,
+          "risk_pct": 1.0,
+          "compound": true,
+          "final_equity": 81.37,
+          "total_return_pct": -18.6,
+          "max_dd_pct": 28.83,
+          "yearly_equity": {
+            "2020": 97.97,
+            "2021": 97.31,
+            "2022": 99.63,
+            "2023": 85.32,
+            "2024": 82.02,
+            "2025": 84.76,
+            "2026": 81.37
+          }
+        }
+      },
+      "portfolio_3asset_1pos_each_2x_cost": {
+        "n": 61,
+        "wr_pct": 6.56,
+        "net_r": -19.88,
+        "pf": 0.668,
+        "max_dd_r": 34.68,
+        "t_stat": -0.92,
+        "avg_r": -0.326,
+        "median_r": -1.0354,
+        "positive_years": 2,
+        "total_years": 7,
+        "yearly_r": {
+          "2020": -2.08,
+          "2021": 9.65,
+          "2022": -8.34,
+          "2023": -15.82,
+          "2024": -2.76,
+          "2025": 3.58,
+          "2026": -4.12
+        },
+        "max_consecutive_losses": 33,
+        "avg_hold_hours": 555.48,
+        "compound_100_1pct": {
+          "start_capital": 100.0,
+          "risk_pct": 1.0,
+          "compound": true,
+          "final_equity": 80.2,
+          "total_return_pct": -19.8,
+          "max_dd_pct": 29.43,
+          "yearly_equity": {
+            "2020": 97.94,
+            "2021": 97.11,
+            "2022": 99.29,
+            "2023": 84.67,
+            "2024": 81.05,
+            "2025": 83.59,
+            "2026": 80.2
+          }
+        }
+      },
+      "portfolio_global_1pos": {
+        "n": 39,
+        "wr_pct": 5.13,
+        "net_r": -17.82,
+        "pf": 0.529,
+        "max_dd_r": 25.63,
+        "t_stat": -1.16,
+        "avg_r": -0.457,
+        "median_r": -1.0159,
+        "positive_years": 2,
+        "total_years": 7,
+        "yearly_r": {
+          "2020": -2.04,
+          "2021": 4.93,
+          "2022": -7.15,
+          "2023": -5.1,
+          "2024": -10.33,
+          "2025": 5.93,
+          "2026": -4.06
+        },
+        "max_consecutive_losses": 25,
+        "avg_hold_hours": 590.74,
+        "compound_100_1pct": {
+          "start_capital": 100.0,
+          "risk_pct": 1.0,
+          "compound": true,
+          "final_equity": 82.73,
+          "total_return_pct": -17.3,
+          "max_dd_pct": 22.71,
+          "yearly_equity": {
+            "2020": 97.97,
+            "2021": 102.42,
+            "2022": 96.31,
+            "2023": 91.49,
+            "2024": 81.62,
+            "2025": 86.18,
+            "2026": 82.73
+          }
+        }
+      },
+      "trade_counts": {
+        "XAUUSD": 11,
+        "NSXUSD": 9,
+        "BTCUSD": 41
+      }
+    },
+    "HTF_4H": {
+      "by_asset": {
+        "XAUUSD": {
+          "n": 7,
+          "wr_pct": 0.0,
+          "net_r": -7.03,
+          "pf": 0.0,
+          "max_dd_r": 7.03,
+          "t_stat": -1683.39,
+          "avg_r": -1.0048,
+          "median_r": -1.0051,
+          "positive_years": 0,
+          "total_years": 5,
+          "yearly_r": {
+            "2020": -1.01,
+            "2022": -1.01,
+            "2023": -3.02,
+            "2024": -1.01,
+            "2026": -1.0
+          },
+          "max_consecutive_losses": 7,
+          "avg_hold_hours": 1096.0,
+          "compound_100_1pct": {
+            "start_capital": 100.0,
+            "risk_pct": 1.0,
+            "compound": true,
+            "final_equity": 93.17,
+            "total_return_pct": -6.8,
+            "max_dd_pct": 6.83,
+            "yearly_equity": {
+              "2020": 98.99,
+              "2022": 98.0,
+              "2023": 95.07,
+              "2024": 94.12,
+              "2026": 93.17
+            }
+          }
+        },
+        "NSXUSD": {
+          "n": 3,
+          "wr_pct": 33.33,
+          "net_r": 7.98,
+          "pf": 4.963,
+          "max_dd_r": 2.01,
+          "t_stat": 0.73,
+          "avg_r": 2.6607,
+          "median_r": -1.0024,
+          "positive_years": 1,
+          "total_years": 3,
+          "yearly_r": {
+            "2020": 10.0,
+            "2021": -1.01,
+            "2025": -1.0
+          },
+          "max_consecutive_losses": 2,
+          "avg_hold_hours": 2264.0,
+          "compound_100_1pct": {
+            "start_capital": 100.0,
+            "risk_pct": 1.0,
+            "compound": true,
+            "final_equity": 107.79,
+            "total_return_pct": 7.8,
+            "max_dd_pct": 2.0,
+            "yearly_equity": {
+              "2021": 108.88,
+              "2025": 107.79
+            }
+          }
+        },
+        "BTCUSD": {
+          "n": 10,
+          "wr_pct": 30.0,
+          "net_r": 27.88,
+          "pf": 4.907,
+          "max_dd_r": 7.14,
+          "t_stat": 1.32,
+          "avg_r": 2.7876,
+          "median_r": -1.0098,
+          "positive_years": 2,
+          "total_years": 4,
+          "yearly_r": {
+            "2020": 29.96,
+            "2023": -3.08,
+            "2024": -2.02,
+            "2025": 3.02
+          },
+          "max_consecutive_losses": 7,
+          "avg_hold_hours": 1313.2,
+          "compound_100_1pct": {
+            "start_capital": 100.0,
+            "risk_pct": 1.0,
+            "compound": true,
+            "final_equity": 129.27,
+            "total_return_pct": 29.3,
+            "max_dd_pct": 6.92,
+            "yearly_equity": {
+              "2020": 132.2,
+              "2023": 128.17,
+              "2024": 125.6,
+              "2025": 123.05,
+              "2026": 129.27
+            }
+          }
+        }
+      },
+      "by_asset_2x_cost": {
+        "XAUUSD": {
+          "n": 7,
+          "wr_pct": 0.0,
+          "net_r": -7.07,
+          "pf": 0.0,
+          "max_dd_r": 7.07,
+          "t_stat": -845.73,
+          "avg_r": -1.0096,
+          "median_r": -1.0102,
+          "positive_years": 0,
+          "total_years": 5,
+          "yearly_r": {
+            "2020": -1.01,
+            "2022": -1.01,
+            "2023": -3.03,
+            "2024": -1.01,
+            "2026": -1.0
+          },
+          "max_consecutive_losses": 7,
+          "avg_hold_hours": 1096.0,
+          "compound_100_1pct": {
+            "start_capital": 100.0,
+            "risk_pct": 1.0,
+            "compound": true,
+            "final_equity": 93.14,
+            "total_return_pct": -6.9,
+            "max_dd_pct": 6.86,
+            "yearly_equity": {
+              "2020": 98.99,
+              "2022": 97.99,
+              "2023": 95.05,
+              "2024": 94.09,
+              "2026": 93.14
+            }
+          }
+        },
+        "NSXUSD": {
+          "n": 3,
+          "wr_pct": 33.33,
+          "net_r": 7.96,
+          "pf": 4.927,
+          "max_dd_r": 2.03,
+          "t_stat": 0.72,
+          "avg_r": 2.6547,
+          "median_r": -1.0049,
+          "positive_years": 1,
+          "total_years": 3,
+          "yearly_r": {
+            "2020": 9.99,
+            "2021": -1.02,
+            "2025": -1.0
+          },
+          "max_consecutive_losses": 2,
+          "avg_hold_hours": 2264.0,
+          "compound_100_1pct": {
+            "start_capital": 100.0,
+            "risk_pct": 1.0,
+            "compound": true,
+            "final_equity": 107.77,
+            "total_return_pct": 7.8,
+            "max_dd_pct": 2.02,
+            "yearly_equity": {
+              "2021": 108.87,
+              "2025": 107.77
+            }
+          }
+        },
+        "BTCUSD": {
+          "n": 10,
+          "wr_pct": 30.0,
+          "net_r": 27.68,
+          "pf": 4.807,
+          "max_dd_r": 7.27,
+          "t_stat": 1.31,
+          "avg_r": 2.7681,
+          "median_r": -1.0197,
+          "positive_years": 2,
+          "total_years": 4,
+          "yearly_r": {
+            "2020": 29.91,
+            "2023": -3.16,
+            "2024": -2.04,
+            "2025": 2.96
+          },
+          "max_consecutive_losses": 7,
+          "avg_hold_hours": 1313.2,
+          "compound_100_1pct": {
+            "start_capital": 100.0,
+            "risk_pct": 1.0,
+            "compound": true,
+            "final_equity": 129.03,
+            "total_return_pct": 29.0,
+            "max_dd_pct": 7.05,
+            "yearly_equity": {
+              "2020": 132.15,
+              "2023": 128.02,
+              "2024": 125.43,
+              "2025": 122.84,
+              "2026": 129.03
+            }
+          }
+        }
+      },
+      "portfolio_3asset_1pos_each": {
+        "n": 20,
+        "wr_pct": 20.0,
+        "net_r": 28.82,
+        "pf": 2.781,
+        "max_dd_r": 15.18,
+        "t_stat": 1.2,
+        "avg_r": 1.4412,
+        "median_r": -1.0058,
+        "positive_years": 2,
+        "total_years": 7,
+        "yearly_r": {
+          "2020": 38.95,
+          "2021": -1.01,
+          "2022": -1.01,
+          "2023": -6.1,
+          "2024": -3.02,
+          "2025": 2.01,
+          "2026": -1.0
+        },
+        "max_consecutive_losses": 15,
+        "avg_hold_hours": 1379.8,
+        "compound_100_1pct": {
+          "start_capital": 100.0,
+          "risk_pct": 1.0,
+          "compound": true,
+          "final_equity": 129.83,
+          "total_return_pct": 29.8,
+          "max_dd_pct": 14.15,
+          "yearly_equity": {
+            "2020": 130.87,
+            "2021": 142.5,
+            "2022": 141.06,
+            "2023": 132.68,
+            "2024": 128.71,
+            "2025": 124.84,
+            "2026": 129.83
+          }
+        }
+      },
+      "portfolio_3asset_1pos_each_2x_cost": {
+        "n": 20,
+        "wr_pct": 20.0,
+        "net_r": 28.58,
+        "pf": 2.746,
+        "max_dd_r": 15.36,
+        "t_stat": 1.19,
+        "avg_r": 1.4289,
+        "median_r": -1.0116,
+        "positive_years": 2,
+        "total_years": 7,
+        "yearly_r": {
+          "2020": 38.89,
+          "2021": -1.02,
+          "2022": -1.01,
+          "2023": -6.19,
+          "2024": -3.05,
+          "2025": 1.96,
+          "2026": -1.0
+        },
+        "max_consecutive_losses": 15,
+        "avg_hold_hours": 1379.8,
+        "compound_100_1pct": {
+          "start_capital": 100.0,
+          "risk_pct": 1.0,
+          "compound": true,
+          "final_equity": 129.52,
+          "total_return_pct": 29.5,
+          "max_dd_pct": 14.3,
+          "yearly_equity": {
+            "2020": 130.81,
+            "2021": 142.41,
+            "2022": 140.98,
+            "2023": 132.47,
+            "2024": 128.47,
+            "2025": 124.56,
+            "2026": 129.52
+          }
+        }
+      },
+      "portfolio_global_1pos": {
+        "n": 13,
+        "wr_pct": 15.38,
+        "net_r": 3.95,
+        "pf": 1.356,
+        "max_dd_r": 11.1,
+        "t_stat": 0.33,
+        "avg_r": 0.3041,
+        "median_r": -1.0059,
+        "positive_years": 2,
+        "total_years": 6,
+        "yearly_r": {
+          "2020": 10.0,
+          "2021": -1.01,
+          "2022": -1.01,
+          "2023": -3.02,
+          "2024": -3.02,
+          "2025": 2.01
+        },
+        "max_consecutive_losses": 11,
+        "avg_hold_hours": 1646.46,
+        "compound_100_1pct": {
+          "start_capital": 100.0,
+          "risk_pct": 1.0,
+          "compound": true,
+          "final_equity": 103.36,
+          "total_return_pct": 3.4,
+          "max_dd_pct": 10.55,
+          "yearly_equity": {
+            "2021": 108.88,
+            "2022": 107.79,
+            "2023": 104.57,
+            "2024": 101.44,
+            "2025": 98.39,
+            "2026": 103.36
+          }
+        }
+      },
+      "trade_counts": {
+        "XAUUSD": 7,
+        "NSXUSD": 3,
+        "BTCUSD": 10
+      }
+    }
+  }
+}
