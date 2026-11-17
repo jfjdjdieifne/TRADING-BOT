@@ -2024,16 +2024,15 @@ def run_v11_multiasset_portfolio(
     xau_cost: float = 0.25,
     nsx_cost_pts: float = 2.0,
     cfd_fee_mult: float = 0.5,
+    include_nsx_1h1m: bool = False,
 ) -> dict[str, Any]:
-    """Run V11.0 Institutional Exact-R Multi-Asset Portfolio across BTCUSD_5m, XAUUSD_1m, and NSXUSD_1m.
+    """Run V11.0/V12.0 Institutional Exact-R Multi-Asset Portfolio across BTCUSD_5m, XAUUSD_1m, and NSXUSD_1m.
 
     Sleeves:
-      - `BTCUSD_5m`: `SMC_Sweep_V6` (Restored, PF 2.40) + `4H_V6_Cognitive` (PF 2.05) + `V10_BTC_Physics`
-        (`45/40/15`, PF 1.97) + `V11_SessEq_1H_TOPO` (`50/35/15 @ 1.8R/3.2R/6.5R`, PF 1.88) + optional
-        pruned `V9_LON` (`rvol >= 1.15`).
-      - `XAUUSD_1m`: `V3_Pro_Clean` (13/14 UTC chop filtered, PF 2.29) + `VisB_Pro` (PF 2.06) [1-pos lock]
-        + `V10_XAU_VisB` (`45/40/15`, `min_sl_pct=0.0010`, PF 1.64).
-      - `NSXUSD_1m`: `NSX_AMD_1D` (1D BOS aligned, PF 1.51) + `NSX_1H1m_10R` (`min_hour_utc=9`, PF 1.54) [1-pos lock].
+      - `BTCUSD_5m`: `SMC_Sweep_V6` + `4H_V6_Cognitive` + `V10_BTC_Physics` (V12 Ref-Aligned Setup A)
+        + `V11_SessEq_1H_TOPO` + optional pruned `V9_LON`.
+      - `XAUUSD_1m`: `V3_Pro_Clean` + `VisB_Pro` [1-pos lock] + `V10_XAU_VisB`.
+      - `NSXUSD_1m`: `NSX_AMD_1D` (`1D BOS aligned`) [prunes `NSX_1H1m_10R` by default].
     """
     from .strategy_brain import _summarize_trades, run_v11_btc_portfolio
 
@@ -2103,23 +2102,27 @@ def run_v11_multiasset_portfolio(
                 nt["asset"] = "NSXUSD"
                 nt["cost_usd"] = nsx_cost_pts / 10.0
                 nsx_amd_1d.append(nt)
-        nsx_1h_10r = run_engine_sniper_htf(
-            df_nsx_1m,
-            eval_start,
-            eval_end,
-            asset="NSXUSD",
-            sweep_tf="1h",
-            sweep_k=3,
-            min_age=4,
-            htf_mode="4h",
-            min_risk_abs=10.0,
-            min_risk_pct=0.0010,
-            fixed_rr=10.0,
-            trail_1h_after_r=None,
-            use_killzone=True,
-            min_hour_utc=9,
-            cost=nsx_cost_pts,
-            engine_label="NSX_1H1m_10R",
+        nsx_1h_10r = (
+            run_engine_sniper_htf(
+                df_nsx_1m,
+                eval_start,
+                eval_end,
+                asset="NSXUSD",
+                sweep_tf="1h",
+                sweep_k=3,
+                min_age=4,
+                htf_mode="4h",
+                min_risk_abs=10.0,
+                min_risk_pct=0.0010,
+                fixed_rr=10.0,
+                trail_1h_after_r=None,
+                use_killzone=True,
+                min_hour_utc=9,
+                cost=nsx_cost_pts,
+                engine_label="NSX_1H1m_10R",
+            )
+            if include_nsx_1h1m
+            else []
         )
         nsx_1p = lock_single_position(nsx_amd_1d + nsx_1h_10r)
         nsx_tr = sorted([_normalize_v11_trade(t, "NSXUSD") for t in nsx_1p], key=lambda t: t["entry_time"])
@@ -2136,6 +2139,35 @@ def run_v11_multiasset_portfolio(
         "real_multiasset_trades": all_tr,
         "real_multiasset_summary": _summarize_trades(all_tr) if all_tr else {},
     }
+
+
+def run_v12_multiasset_portfolio(
+    df_btc_5m: pd.DataFrame,
+    df_xau_1m: Optional[pd.DataFrame],
+    df_nsx_1m: Optional[pd.DataFrame],
+    eval_start: pd.Timestamp,
+    eval_end: pd.Timestamp,
+    *,
+    include_btc_v9_lon: bool = True,
+    btc_fee_mult: float = 1.0,
+    xau_cost: float = 0.25,
+    nsx_cost_pts: float = 2.0,
+    cfd_fee_mult: float = 0.5,
+) -> dict[str, Any]:
+    """V12.0 Institutional Multi-Asset Portfolio (prunes 14.7% WR NSX_1H1m_10R, keeps NSX_AMD_1D + V12 BTC/XAU)."""
+    return run_v11_multiasset_portfolio(
+        df_btc_5m,
+        df_xau_1m,
+        df_nsx_1m,
+        eval_start,
+        eval_end,
+        include_btc_v9_lon=include_btc_v9_lon,
+        btc_fee_mult=btc_fee_mult,
+        xau_cost=xau_cost,
+        nsx_cost_pts=nsx_cost_pts,
+        cfd_fee_mult=cfd_fee_mult,
+        include_nsx_1h1m=False,
+    )
 
 
 

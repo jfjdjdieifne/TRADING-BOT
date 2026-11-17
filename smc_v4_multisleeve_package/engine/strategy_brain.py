@@ -102,6 +102,9 @@ class AdversarialCrossExaminer:
         is_counter_trend_sweep: bool = False,
         require_1h_bos_against_freight: bool = True,
         min_clearance_r: float = 2.5,
+        ref_snap=None,
+        min_tp1_clearance_r: float = 2.2,
+        hard_veto_ref_brick: bool = False,
     ) -> ProsecutorVerdict:
         eps = 1e-4
         # 1) Thesis Log-Odds L_Thesis
@@ -119,6 +122,7 @@ class AdversarialCrossExaminer:
         decayed_sw, acc_status = self.evaluate_temporal_sweep_decay(s0, sweep_bars_accepted)
 
         # 3) Check A: HTF Brick Wall / Obstacle Clearance (< min_clearance_r ahead of entry)
+        #    + V12.0 Unmitigated Reference Level Brick-Wall Veto (PDH/PDL touches <= 1, PWH/PWL blocking TP1 +2.2R)
         bw_pen = 0.0
         nearest_wall_r = 99.0
         if risk_dist > 0 and opposing_htf_walls:
@@ -130,6 +134,30 @@ class AdversarialCrossExaminer:
                         nearest_wall_r = r_room
             if nearest_wall_r < min_clearance_r:
                 bw_pen = float(np.clip((min_clearance_r - nearest_wall_r) / min_clearance_r, 0.0, 1.0))
+
+        ref_brick_veto = False
+        if risk_dist > 0 and ref_snap is not None:
+            ref_walls: List[float] = []
+            if side == 1:
+                if not np.isnan(ref_snap.pdh) and int(getattr(ref_snap, "pdh_touches", 0)) <= 1:
+                    ref_walls.append(float(ref_snap.pdh))
+                if not np.isnan(ref_snap.pwh):
+                    ref_walls.append(float(ref_snap.pwh))
+            else:
+                if not np.isnan(ref_snap.pdl) and int(getattr(ref_snap, "pdl_touches", 0)) <= 1:
+                    ref_walls.append(float(ref_snap.pdl))
+                if not np.isnan(ref_snap.pwl):
+                    ref_walls.append(float(ref_snap.pwl))
+            for rw in ref_walls:
+                dist_rw = (rw - entry_px) * side
+                if dist_rw > 0:
+                    r_rw = dist_rw / risk_dist
+                    if r_rw < nearest_wall_r:
+                        nearest_wall_r = r_rw
+                    if r_rw < min_tp1_clearance_r:
+                        bw_pen = max(bw_pen, float(np.clip((min_tp1_clearance_r - r_rw) / min_tp1_clearance_r, 0.0, 1.0)))
+                        if is_counter_trend_sweep or hard_veto_ref_brick:
+                            ref_brick_veto = True
 
         # 4) Check B: HTF Expansion Freight-Train Veto
         freight_veto = False
@@ -156,7 +184,7 @@ class AdversarialCrossExaminer:
 
         logit = self.alpha_thesis * l_thesis - self.beta_prosecutor * p_contradiction - self.theta_bias
         conviction = float(sigmoid(logit, 0.0, 1.0))
-        approved = (not freight_veto) and (acc_status != "PRICE_ACCEPTANCE") and (conviction >= self.min_conviction)
+        approved = (not freight_veto) and (not ref_brick_veto) and (acc_status != "PRICE_ACCEPTANCE") and (conviction >= self.min_conviction)
 
         chain = {
             "thesis_scores": dict(thesis_scores),
@@ -1159,6 +1187,8 @@ class SmallAccountCashflowManager:
         fee_rt_pct_crypto: float = 0.0010,
         fee_rt_pct_cfd: float = 0.0005,
         throttle_mult: Optional[float] = None,
+        throttle2_dd_pct: Optional[float] = None,
+        throttle2_mult: Optional[float] = None,
         strict_aplus_gate: bool = False,
         period_anchor: str = "trade",
     ) -> None:
@@ -1179,6 +1209,8 @@ class SmallAccountCashflowManager:
         self.fee_rt_pct_crypto = float(fee_rt_pct_crypto)
         self.fee_rt_pct_cfd = float(fee_rt_pct_cfd)
         self.throttle_mult = None if throttle_mult is None else float(throttle_mult)
+        self.throttle2_dd_pct = None if throttle2_dd_pct is None else float(throttle2_dd_pct)
+        self.throttle2_mult = None if throttle2_mult is None else float(throttle2_mult)
         self.strict_aplus_gate = bool(strict_aplus_gate)
         self.period_anchor = str(period_anchor).lower()
 
@@ -1262,6 +1294,56 @@ class SmallAccountCashflowManager:
             period_anchor="month",
         )
 
+    @classmethod
+    def v12_daily_hunter_100(cls) -> "SmallAccountCashflowManager":
+        """V12.0 DAILY_HUNTER_$100: Downward-safe weekly anchoring, 3.0% std / 3.4% A+, 0.75x >=12% DD & 0.60x >=20% DD."""
+        return cls(
+            starting_equity=100.0,
+            risk_pct=0.030,
+            aplus_risk_pct=0.034,
+            throttle_risk_pct=0.0225,
+            throttle_dd_pct=0.12,
+            skim_step_usd=25.0,
+            skim_frac=0.50,
+            max_leverage=10.0,
+            daily_dd_cap_r=-2.0,
+            max_concurrent_risk_slots=4,
+            slot_recycling=True,
+            fee_inclusive=True,
+            fee_rt_pct_crypto=0.0010,
+            fee_rt_pct_cfd=0.0005,
+            throttle_mult=0.75,
+            throttle2_dd_pct=0.20,
+            throttle2_mult=0.60,
+            strict_aplus_gate=True,
+            period_anchor="week_downward_safe",
+        )
+
+    @classmethod
+    def v12_turbo_sniper_100(cls) -> "SmallAccountCashflowManager":
+        """V12.0 TURBO_SNIPER_$100: Downward-safe weekly anchoring, 3.5% std / 4.0% A+, 0.75x >=12% DD & 0.60x >=20% DD."""
+        return cls(
+            starting_equity=100.0,
+            risk_pct=0.035,
+            aplus_risk_pct=0.040,
+            throttle_risk_pct=0.02625,
+            throttle_dd_pct=0.12,
+            skim_step_usd=20.0,
+            skim_frac=0.50,
+            max_leverage=10.0,
+            daily_dd_cap_r=-2.5,
+            max_concurrent_risk_slots=4,
+            slot_recycling=True,
+            fee_inclusive=True,
+            fee_rt_pct_crypto=0.0010,
+            fee_rt_pct_cfd=0.0005,
+            throttle_mult=0.75,
+            throttle2_dd_pct=0.20,
+            throttle2_mult=0.60,
+            strict_aplus_gate=True,
+            period_anchor="week_downward_safe",
+        )
+
     def _fee_rt_for_asset(self, asset: str) -> float:
         a = str(asset).upper()
         if any(k in a for k in ("XAU", "NSX", "NAS", "NDX", "US100", "EUR", "GBP", "SPX")):
@@ -1274,8 +1356,10 @@ class SmallAccountCashflowManager:
         active_hwm: float,
         trade: Optional[dict] = None,
     ) -> float:
-        """Conviction-Based Tiered Risk + Smooth Drawdown Throttle."""
-        in_dd = active_hwm > 0 and ((active_hwm - equity) / active_hwm) > self.throttle_dd_pct
+        """Conviction-Based Tiered Risk + Smooth Multi-Stage Drawdown Throttle."""
+        dd_frac = ((active_hwm - equity) / active_hwm) if active_hwm > 0 else 0.0
+        in_dd2 = (self.throttle2_dd_pct is not None and self.throttle2_mult is not None and dd_frac >= self.throttle2_dd_pct)
+        in_dd = (dd_frac >= self.throttle_dd_pct) if self.period_anchor == "week_downward_safe" else (dd_frac > self.throttle_dd_pct)
         if in_dd and self.throttle_mult is None:
             return self.throttle_risk_pct
 
@@ -1300,6 +1384,8 @@ class SmallAccountCashflowManager:
             if is_aplus:
                 base_rp = self.aplus_risk_pct
 
+        if in_dd2 and self.throttle2_mult is not None:
+            return base_rp * self.throttle2_mult
         if in_dd and self.throttle_mult is not None:
             return base_rp * self.throttle_mult
         return base_rp
@@ -1385,23 +1471,38 @@ class SmallAccountCashflowManager:
             iso = et.isocalendar()
             wk = (int(iso.year), int(iso.week))
             mo = (int(et.year), int(et.month))
-            if self.period_anchor == "week":
+            if self.period_anchor == "week_downward_safe":
+                if wk != cur_period:
+                    cur_period = wk
+                    anchor_eq = eq
+                # Downward-Safe Asymmetric Anchoring: cap at week_start, step down immediately on DD!
+                eff_anchor_eq = min(anchor_eq, eq)
+                eff_peak_eq = peak_eq
+                dd_eval_eq = eq
+            elif self.period_anchor == "week":
                 if wk != cur_period:
                     cur_period = wk
                     anchor_eq = eq
                     anchor_peak = peak_eq
+                eff_anchor_eq = anchor_eq
+                eff_peak_eq = anchor_peak
+                dd_eval_eq = anchor_eq
             elif self.period_anchor == "month":
                 if mo != cur_period:
                     cur_period = mo
                     anchor_eq = eq
                     anchor_peak = peak_eq
+                eff_anchor_eq = anchor_eq
+                eff_peak_eq = anchor_peak
+                dd_eval_eq = anchor_eq
             else:
-                anchor_eq = eq
-                anchor_peak = peak_eq
+                eff_anchor_eq = eq
+                eff_peak_eq = peak_eq
+                dd_eval_eq = eq
 
             sl_pct = max(float(t.get("sl_pct", 0.01)), 1e-4)
-            base_eq = anchor_eq if (is_comp or is_ratchet) else self.starting_equity
-            rp = self.resolve_risk_pct(anchor_eq, anchor_peak, t)
+            base_eq = eff_anchor_eq if (is_comp or is_ratchet) else self.starting_equity
+            rp = self.resolve_risk_pct(dd_eval_eq, eff_peak_eq, t)
             fee_rt = self._fee_rt_for_asset(str(t.get("asset", "BTCUSD")))
             risk_usd, _ = self.compute_position_notional(
                 base_eq, sl_pct, risk_pct_override=rp, fee_rt_pct=fee_rt
@@ -1618,12 +1719,37 @@ class SmallAccountCashflowManager:
             "pct_green": round(100.0 * sum(1 for x in m1_profits if x > 0) / max(1, len(m1_profits)), 1),
         }
 
+        # Compute strict sign inversions: Exact 1.0R Net R vs PnL ($) AND Sized R vs PnL ($)
+        wk_inv_exact = sum(
+            1 for w in weekly_rows
+            if (w["net_r"] > 0.01 and w["pnl_usd"] < -0.01) or (w["net_r"] < -0.01 and w["pnl_usd"] > 0.01)
+        )
+        mo_inv_exact = sum(
+            1 for m in monthly_rows
+            if (m["net_r"] > 0.01 and m["pnl_usd"] < -0.01) or (m["net_r"] < -0.01 and m["pnl_usd"] > 0.01)
+        )
+        wk_inv_sized = sum(
+            1 for w in weekly_rows
+            if (w["sized_r"] > 0.01 and w["pnl_usd"] < -0.01) or (w["sized_r"] < -0.01 and w["pnl_usd"] > 0.01)
+        )
+        mo_inv_sized = sum(
+            1 for m in monthly_rows
+            if (m["sized_r"] > 0.01 and m["pnl_usd"] < -0.01) or (m["sized_r"] < -0.01 and m["pnl_usd"] > 0.01)
+        )
+
         return {
             "summary": sim,
             "daily": daily_rows,
             "weekly_52": weekly_rows[-recent_weeks:] if recent_weeks > 0 else weekly_rows,
             "monthly": monthly_rows,
             "rolling_m1": rolling_m1,
+            "sign_inversions": {
+                "weekly_exact_r": wk_inv_exact,
+                "monthly_exact_r": mo_inv_exact,
+                "weekly_sized_r": wk_inv_sized,
+                "monthly_sized_r": mo_inv_sized,
+                "months_total": len(monthly_rows),
+            },
         }
 
 
@@ -1998,19 +2124,83 @@ def _run_intraday_sniper_core(
         ] + [s.price for s in vis1[-8:] if s.side == -1]
 
         entry_sig: Optional[Tuple[int, float, float, float, str, float, float, dict]] = None
+        ref_snap = None
 
-        # Setup A: Compression Approach + Flat HTF Liquidity Sweep + 4H Trend Snap
+        # Setup A: Compression Approach + Confirmed Pool (touches>=2 or Ref-Aligned) + Valid Sweep-Reclaim-BOS
         if sniper.use_setup_a:
-            ca = sniper.physics.detect_compression_vacuum(o5, h5, l5, c5, atr5, i5, barriers_hi, barriers_lo, lookback=30)
-            if ca is not None and ((not use_htf_macro_align) or ca.side == tr4):
-                ep = float(c5[i5])
-                slp = (ca.sweep_extreme - 1.0 * a5) if ca.side == 1 else (ca.sweep_extreme + 1.0 * a5)
-                disp_sc = sniper.perception.displacement_score(o5[i5], h5[i5], l5[i5], c5[i5], a5)
-                entry_sig = (
-                    ca.side, ep, slp, ca.origin_anchor, f"{setup_prefix}_CompVacuum",
-                    float(ca.vacuum_score), float(disp_sc),
-                    {"ker4": round(rs4.ker, 2), "vac": round(ca.vacuum_score, 2), "imp_r": round(ca.implied_r, 2)},
+            ca_raw = sniper.physics.detect_compression_vacuum(o5, h5, l5, c5, atr5, i5, barriers_hi, barriers_lo, lookback=30)
+            if ca_raw is not None and ((not use_htf_macro_align) or ca_raw.side == tr4):
+                ref_snap = InstitutionalReferenceAndSwingEngine.compute_causal_reference_levels(
+                    ts5_ns, h5, l5, c5, atr5, i5
                 )
+                ref_tol = 0.35 * a5
+                ref_hi_levels = [
+                    lv for lv, ok in (
+                        (ref_snap.pdh, ref_snap.pdh_touches <= 2),
+                        (ref_snap.pwh, True),
+                        (ref_snap.asia_high, True),
+                        (ref_snap.london_high, True),
+                    )
+                    if ok and not np.isnan(lv)
+                ]
+                ref_lo_levels = [
+                    lv for lv, ok in (
+                        (ref_snap.pdl, ref_snap.pdl_touches <= 2),
+                        (ref_snap.pwl, True),
+                        (ref_snap.asia_low, True),
+                        (ref_snap.london_low, True),
+                    )
+                    if ok and not np.isnan(lv)
+                ]
+                valid_hi: List[float] = [
+                    p.price for p in sniper.liq_mapper.pools.values()
+                    if p.side == 1 and p.status in ("UNTAPPED", "SWEPT_WITH_REJECTION") and p.kind == "EQH"
+                ]
+                valid_lo: List[float] = [
+                    p.price for p in sniper.liq_mapper.pools.values()
+                    if p.side == -1 and p.status in ("UNTAPPED", "SWEPT_WITH_REJECTION") and p.kind == "EQL"
+                ]
+                # Structural swings (`touches>=2` via EQH/EQL or peer within 0.35*ATR) + unexhausted Ref Levels (`PDH/PDL touches<=2, PWH/PWL, Session H/L`)
+                raw_hi_px = [
+                    p.price for p in sniper.liq_mapper.pools.values()
+                    if p.side == 1 and p.status in ("UNTAPPED", "SWEPT_WITH_REJECTION") and p.kind.startswith("SWING_")
+                ] + [s.price for s in vis1[-8:] if s.side == 1]
+                raw_lo_px = [
+                    p.price for p in sniper.liq_mapper.pools.values()
+                    if p.side == -1 and p.status in ("UNTAPPED", "SWEPT_WITH_REJECTION") and p.kind.startswith("SWING_")
+                ] + [s.price for s in vis1[-8:] if s.side == -1]
+                pool_hi_px = sorted({round(float(x), 8) for x in raw_hi_px})
+                pool_lo_px = sorted({round(float(x), 8) for x in raw_lo_px})
+                for idx_a, px_a in enumerate(pool_hi_px):
+                    has_peer = any(idx_a != idx_b and 1e-6 < abs(px_a - px_b) <= ref_tol for idx_b, px_b in enumerate(pool_hi_px))
+                    has_ref = any(abs(px_a - rlv) <= ref_tol for rlv in ref_hi_levels)
+                    if has_peer or has_ref:
+                        valid_hi.append(float(px_a))
+                for idx_a, px_a in enumerate(pool_lo_px):
+                    has_peer = any(idx_a != idx_b and 1e-6 < abs(px_a - px_b) <= ref_tol for idx_b, px_b in enumerate(pool_lo_px))
+                    has_ref = any(abs(px_a - rlv) <= ref_tol for rlv in ref_lo_levels)
+                    if has_peer or has_ref:
+                        valid_lo.append(float(px_a))
+                # Include unexhausted reference levels themselves when aligned with a confirmed swing OR fresh Tier-1/2 pool
+                for rlv in ref_hi_levels:
+                    valid_hi.append(float(rlv))
+                for rlv in ref_lo_levels:
+                    valid_lo.append(float(rlv))
+
+                ca = sniper.physics.detect_setup_a_waterfall(
+                    o5, h5, l5, c5, atr5, i5, barriers_hi, barriers_lo,
+                    lookback=30, valid_hi=valid_hi, valid_lo=valid_lo,
+                    reclaim_validator=InstitutionalReferenceAndSwingEngine.validate_sweep_and_reclaim,
+                )
+                if ca is not None and ((not use_htf_macro_align) or ca.side == tr4):
+                    ep = float(c5[i5])
+                    slp = (ca.sweep_extreme - 1.0 * a5) if ca.side == 1 else (ca.sweep_extreme + 1.0 * a5)
+                    disp_sc = sniper.perception.displacement_score(o5[i5], h5[i5], l5[i5], c5[i5], a5)
+                    entry_sig = (
+                        ca.side, ep, slp, ca.origin_anchor, f"{setup_prefix}_CompVacuum",
+                        float(ca.vacuum_score), float(disp_sc),
+                        {"ker4": round(rs4.ker, 2), "vac": round(ca.vacuum_score, 2), "imp_r": round(ca.implied_r, 2)},
+                    )
 
         # Setup B: Sweep + BPR / iFVG Polarity Inversion (1H & 4H Trend-Aligned Pullback/Snap)
         if entry_sig is None and sniper.use_setup_b:
@@ -2066,6 +2256,10 @@ def _run_intraday_sniper_core(
             ext4 = ((ep - e20_4h[p4 - 1]) * side) / max(float(atr4[p4 - 1]), 1e-12)
             if ext4 > max_ext4_atr:
                 continue
+            if ref_snap is None:
+                ref_snap = InstitutionalReferenceAndSwingEngine.compute_causal_reference_levels(
+                    ts5_ns, h5, l5, c5, atr5, i5
+                )
             opp_walls = [s.price for s in vis1[-6:] if s.side == side]
             dir4 = 1 if c4[p4 - 1] > o4[p4 - 1] else -1
             verdict = sniper.prosecutor.cross_examine(
@@ -2090,6 +2284,9 @@ def _run_intraday_sniper_core(
                 rvol_opp=1.0,
                 is_counter_trend_sweep=(side != tr4),
                 min_clearance_r=min_clearance_r,
+                ref_snap=ref_snap,
+                min_tp1_clearance_r=2.2,
+                hard_veto_ref_brick=setup_tag.endswith("CompVacuum"),
             )
             if not verdict.approved:
                 continue
@@ -2955,6 +3152,34 @@ def run_v11_btc_portfolio(
     return trades, _summarize_trades(trades)
 
 
+def run_v12_btc_portfolio(
+    df_5m: pd.DataFrame,
+    eval_start: pd.Timestamp,
+    eval_end: pd.Timestamp,
+    *,
+    asset: str = "BTCUSD",
+    include_smc_sweep: bool = True,
+    include_v6_4h: bool = True,
+    include_physics_45: bool = True,
+    include_session_eq_1h: bool = True,
+    include_v9_lon_pruned: bool = True,
+    fee_mult: float = 1.0,
+) -> Tuple[List[dict], Dict[str, object]]:
+    """V12.0 BTCUSD_5m Master Portfolio with InstitutionalReferenceAndSwingEngine wired into Setup A & Prosecutor."""
+    return run_v11_btc_portfolio(
+        df_5m,
+        eval_start,
+        eval_end,
+        asset=asset,
+        include_smc_sweep=include_smc_sweep,
+        include_v6_4h=include_v6_4h,
+        include_physics_45=include_physics_45,
+        include_session_eq_1h=include_session_eq_1h,
+        include_v9_lon_pruned=include_v9_lon_pruned,
+        fee_mult=fee_mult,
+    )
+
+
 # ============================================================================
 # SURGICAL MODULE 1: INSTITUTIONAL REFERENCE LEVELS & VALID SWEEP/RECLAIM ENGINE
 # Grounded in Empirical Draw-on-Liquidity Research & Valid/Invalid Liquidity Reads
@@ -3005,24 +3230,25 @@ class InstitutionalReferenceAndSwingEngine:
         if idx < 288:  # Need at least 1 full day of 5m bars (288 bars)
             return snap
 
-        sample_ts = int(ts_ns[idx])
-        if 10**14 <= sample_ts < 10**17:  # pandas >= 2.2 / 3.0 microsecond asi8
-            ts_ns = ts_ns * 1_000
-        elif 10**11 <= sample_ts < 10**14:  # millisecond timestamps
-            ts_ns = ts_ns * 1_000_000
-        elif sample_ts < 10**11:  # second timestamps
-            ts_ns = ts_ns * 1_000_000_000
-
-        sec = int(ts_ns[idx] // 1_000_000_000)
-        cur_day = sec // 86400
-        cur_day_start_ns = cur_day * 86400 * 1_000_000_000
-        prev_day_start_ns = (cur_day - 1) * 86400 * 1_000_000_000
-
-        # Scan backward causally (max 10 days = 2880 5m bars)
+        # Scan backward causally (max 10 days = 2880 5m bars) FIRST, then scale timestamps!
         start_scan = max(0, idx - 2880)
         ts_slice = ts_ns[start_scan : idx + 1]
         h_slice = highs[start_scan : idx + 1]
         l_slice = lows[start_scan : idx + 1]
+
+        sample_ts = int(ts_slice[-1])
+        if 10**14 <= sample_ts < 10**17:  # pandas >= 2.2 / 3.0 microsecond asi8
+            ts_slice = ts_slice * 1_000
+        elif 10**11 <= sample_ts < 10**14:  # millisecond timestamps
+            ts_slice = ts_slice * 1_000_000
+        elif sample_ts < 10**11:  # second timestamps
+            ts_slice = ts_slice * 1_000_000_000
+
+        cur_ts_ns = int(ts_slice[-1])
+        sec = int(cur_ts_ns // 1_000_000_000)
+        cur_day = sec // 86400
+        cur_day_start_ns = cur_day * 86400 * 1_000_000_000
+        prev_day_start_ns = (cur_day - 1) * 86400 * 1_000_000_000
 
         # 1. Fixed UTC Previous Day High / Low (PDH / PDL)
         pd_mask = (ts_slice >= prev_day_start_ns) & (ts_slice < cur_day_start_ns)
@@ -3047,13 +3273,13 @@ class InstitutionalReferenceAndSwingEngine:
         cur_Asia_end_ns = cur_day_start_ns + 7 * 3600 * 1_000_000_000
         cur_Lon_end_ns = cur_day_start_ns + int(12.5 * 3600) * 1_000_000_000
 
-        if ts_ns[idx] >= cur_Asia_end_ns:
+        if cur_ts_ns >= cur_Asia_end_ns:
             asia_mask = (ts_slice >= cur_day_start_ns) & (ts_slice < cur_Asia_end_ns)
             if np.any(asia_mask):
                 snap.asia_high = float(np.max(h_slice[asia_mask]))
                 snap.asia_low = float(np.min(l_slice[asia_mask]))
 
-        if ts_ns[idx] >= cur_Lon_end_ns:
+        if cur_ts_ns >= cur_Lon_end_ns:
             lon_mask = (ts_slice >= cur_Asia_end_ns) & (ts_slice < cur_Lon_end_ns)
             if np.any(lon_mask):
                 snap.london_high = float(np.max(h_slice[lon_mask]))

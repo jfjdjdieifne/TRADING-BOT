@@ -59,6 +59,7 @@ from .smc_v4_portfolio import (
     run_v10_nsx_topo_backtest,
     run_v10_xau_topo_backtest,
     run_v11_multiasset_portfolio,
+    run_v12_multiasset_portfolio,
     simulate_compounded_account,
 )
 from .strategy_brain import (
@@ -82,6 +83,7 @@ from .strategy_brain import (
     run_v10_btc_topo_sweeps_backtest,
     run_v11_btc_portfolio,
     run_v11_session_equilibrium_scalp,
+    run_v12_btc_portfolio,
 )
 
 __all__ = [
@@ -158,6 +160,8 @@ __all__ = [
     "run_v11_btc_portfolio",
     "run_v11_multiasset_portfolio",
     "run_v11_session_equilibrium_scalp",
+    "run_v12_btc_portfolio",
+    "run_v12_multiasset_portfolio",
     "sigmoid",
     "simulate_compounded_account",
     "soft_and_log_odds",

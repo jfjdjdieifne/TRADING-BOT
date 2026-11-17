@@ -62,7 +62,7 @@ def _detect_v7_comp_vacuum(
             sl_dist = abs(c0 - (sweep_low - atr5))
             if sl_dist > 0 and (origin_px - c0) / sl_dist >= min_implied_r:
                 for lv in barriers_lo:
-                    if sweep_low < lv and c0 > lv and (lv - sweep_low) <= 2.2 * atr5:
+                    if sweep_low < lv and c0 > lv and (lv - sweep_low) <= 2.2 * atr5 and _validate_sweep_reclaim_qc(bars, 1, lv, atr5):
                         return (1, sweep_low, origin_px)
 
     if trend_4h == -1 and c0 < o0 and barriers_hi:
@@ -79,7 +79,7 @@ def _detect_v7_comp_vacuum(
             sl_dist = abs((sweep_high + atr5) - c0)
             if sl_dist > 0 and (c0 - origin_px) / sl_dist >= min_implied_r:
                 for lv in barriers_hi:
-                    if sweep_high > lv and c0 < lv and (sweep_high - lv) <= 2.2 * atr5:
+                    if sweep_high > lv and c0 < lv and (sweep_high - lv) <= 2.2 * atr5 and _validate_sweep_reclaim_qc(bars, -1, lv, atr5):
                         return (-1, sweep_high, origin_px)
     return None
 
@@ -164,8 +164,11 @@ def _prosecutor_cross_examine(
     risk_dist: float = 0.0,
     opposing_htf_walls: list[float] | None = None,
     min_clearance_r: float = 0.0,
+    ref_snap: dict | None = None,
+    min_tp1_clearance_r: float = 2.2,
+    hard_veto_ref_brick: bool = False,
 ) -> tuple[bool, float]:
-    """V8.0 Bayesian Prosecutor: HTF Brick-Wall Clearance + Sweep Decay + HTF Freight-Train + RVOL Divergence."""
+    """V12.0 Bayesian Prosecutor: HTF Brick-Wall + Unmitigated PDH/PWH Clearance + Sweep Decay + Freight-Train."""
     if sweep_bars_accepted > 1:
         return False, 0.0
     if is_counter_trend_sweep and ker_4h > 0.45 and (dir_4h_candle == -side and body_ratio_4h >= 0.55 or htf_trend_4h == -side):
@@ -179,6 +182,24 @@ def _prosecutor_cross_examine(
                 nearest_r = clr_r
         if nearest_r < min_clearance_r:
             bw_pen = min(1.0, max(0.0, (min_clearance_r - nearest_r) / min_clearance_r))
+    if ref_snap and risk_dist > 0:
+        ref_walls = []
+        if side == 1:
+            if ref_snap.get("pdh") is not None and ref_snap.get("pdh_touches", 0) <= 1:
+                ref_walls.append(ref_snap["pdh"])
+            if ref_snap.get("pwh") is not None:
+                ref_walls.append(ref_snap["pwh"])
+        else:
+            if ref_snap.get("pdl") is not None and ref_snap.get("pdl_touches", 0) <= 1:
+                ref_walls.append(ref_snap["pdl"])
+            if ref_snap.get("pwl") is not None:
+                ref_walls.append(ref_snap["pwl"])
+        for rw in ref_walls:
+            r_rw = ((rw - entry_px) * side) / risk_dist
+            if 0.0 < r_rw < min_tp1_clearance_r:
+                bw_pen = max(bw_pen, min(1.0, (min_tp1_clearance_r - r_rw) / min_tp1_clearance_r))
+                if is_counter_trend_sweep or hard_veto_ref_brick:
+                    return False, 0.0
     eps = 1e-4
     num = den = 0.0
     for k_w, w in thesis_weights.items():
@@ -438,12 +459,164 @@ class DailySessionTracker:
             self.cands_lon.append({"side": -1, "start_i": idx_5m, "sl_base": h})
 
 
+class CausalTopoSwingTracker:
+    """V12.0 Scale-Free Topological Swing Tracker (replaces CausalSwingTracker(2) fractals)."""
+
+    def __init__(self, prom_mult: float = 0.80, min_sep: int = 3, max_active: int = 25) -> None:
+        self.prom_mult = float(prom_mult)
+        self.min_sep = int(min_sep)
+        self.max_active = int(max_active)
+        self.bar_idx = -1
+        self.prev_c = None
+        self.atr = 0.0
+        self.atr_init = False
+        self.dir = 0
+        self.piv_idx = 0
+        self.piv_hi = self.piv_lo = None
+        self.last_high = self.last_low = None
+        self.trend = 0
+        self.act_hi, self.act_lo = [], []
+
+    def update(self, bar) -> None:
+        h, l, c = float(bar.High), float(bar.Low), float(bar.Close)
+        self.bar_idx += 1
+        tr = (h - l) if self.prev_c is None else max(h - l, abs(h - self.prev_c), abs(l - self.prev_c))
+        self.prev_c = c
+        if not self.atr_init:
+            self.atr, self.atr_init = tr, True
+        else:
+            self.atr = (self.atr * 13.0 + tr) / 14.0
+        if self.piv_hi is None:
+            self.piv_hi, self.piv_lo, self.piv_idx = h, l, self.bar_idx
+        elif self.atr > 0:
+            th = self.prom_mult * self.atr
+            if self.dir == 0:
+                if h - self.piv_lo >= th and (self.bar_idx - self.piv_idx) >= self.min_sep:
+                    self.last_low = self.piv_lo
+                    self.act_lo.append((self.piv_idx, self.piv_lo))
+                    self.act_lo = self.act_lo[-self.max_active:]
+                    self.dir, self.piv_hi, self.piv_idx = 1, h, self.bar_idx
+                elif self.piv_hi - l >= th and (self.bar_idx - self.piv_idx) >= self.min_sep:
+                    self.last_high = self.piv_hi
+                    self.act_hi.append((self.piv_idx, self.piv_hi))
+                    self.act_hi = self.act_hi[-self.max_active:]
+                    self.dir, self.piv_lo, self.piv_idx = -1, l, self.bar_idx
+                else:
+                    if h > self.piv_hi:
+                        self.piv_hi, self.piv_idx = h, self.bar_idx
+                    if l < self.piv_lo:
+                        self.piv_lo, self.piv_idx = l, self.bar_idx
+            elif self.dir == 1:
+                if h >= self.piv_hi:
+                    self.piv_hi, self.piv_idx = h, self.bar_idx
+                elif self.piv_hi - l >= th and (self.bar_idx - self.piv_idx) >= self.min_sep:
+                    self.last_high = self.piv_hi
+                    self.act_hi.append((self.piv_idx, self.piv_hi))
+                    self.act_hi = self.act_hi[-self.max_active:]
+                    self.dir, self.piv_lo, self.piv_idx = -1, l, self.bar_idx
+            else:
+                if l <= self.piv_lo:
+                    self.piv_lo, self.piv_idx = l, self.bar_idx
+                elif h - self.piv_lo >= th and (self.bar_idx - self.piv_idx) >= self.min_sep:
+                    self.last_low = self.piv_lo
+                    self.act_lo.append((self.piv_idx, self.piv_lo))
+                    self.act_lo = self.act_lo[-self.max_active:]
+                    self.dir, self.piv_hi, self.piv_idx = 1, h, self.bar_idx
+        self.act_hi = [x for x in self.act_hi if h <= x[1]]
+        self.act_lo = [x for x in self.act_lo if l >= x[1]]
+        if self.last_high is not None and c > self.last_high:
+            self.trend = 1
+        elif self.last_low is not None and c < self.last_low:
+            self.trend = -1
+
+
+class CausalReferenceTracker:
+    """V12.0 Strictly Causal Reference Level Tracker (PDH/PDL + Touch Decay, PWH/PWL, Asia/London)."""
+
+    def __init__(self) -> None:
+        self.cur_day = self.cur_week = None
+        self.dy_hi = self.dy_lo = self.pdh = self.pdl = None
+        self.wk_hi = self.wk_lo = self.pwh = self.pwl = None
+        self.asia_hi = self.asia_lo = self.lon_hi = self.lon_lo = None
+        self.pdh_touches = self.pdl_touches = 0
+
+    def update(self, dt, h: float, l: float, c: float, atr: float) -> dict:
+        d = dt.date()
+        wk = dt.isocalendar()[:2]
+        hr_min = dt.hour + dt.minute / 60.0
+        if self.cur_week is None:
+            self.cur_week, self.wk_hi, self.wk_lo = wk, h, l
+        elif wk != self.cur_week:
+            self.pwh, self.pwl = self.wk_hi, self.wk_lo
+            self.cur_week, self.wk_hi, self.wk_lo = wk, h, l
+        else:
+            self.wk_hi = max(self.wk_hi, h)
+            self.wk_lo = min(self.wk_lo, l)
+
+        if self.cur_day is None:
+            self.cur_day, self.dy_hi, self.dy_lo = d, h, l
+        elif d != self.cur_day:
+            self.pdh, self.pdl = self.dy_hi, self.dy_lo
+            self.cur_day, self.dy_hi, self.dy_lo = d, h, l
+            self.asia_hi = self.asia_lo = self.lon_hi = self.lon_lo = None
+            self.pdh_touches = self.pdl_touches = 0
+        else:
+            self.dy_hi = max(self.dy_hi, h)
+            self.dy_lo = min(self.dy_lo, l)
+
+        if hr_min < 7.0:
+            self.asia_hi = h if self.asia_hi is None else max(self.asia_hi, h)
+            self.asia_lo = l if self.asia_lo is None else min(self.asia_lo, l)
+        elif hr_min < 12.5:
+            self.lon_hi = h if self.lon_hi is None else max(self.lon_hi, h)
+            self.lon_lo = l if self.lon_lo is None else min(self.lon_lo, l)
+
+        tol = 0.20 * max(atr, c * 0.001)
+        if self.pdh is not None and h >= self.pdh - tol:
+            self.pdh_touches += 1
+        if self.pdl is not None and l <= self.pdl + tol:
+            self.pdl_touches += 1
+
+        return {
+            "pdh": self.pdh, "pdl": self.pdl, "pwh": self.pwh, "pwl": self.pwl,
+            "asia_high": self.asia_hi if hr_min >= 7.0 else None,
+            "asia_low": self.asia_lo if hr_min >= 7.0 else None,
+            "london_high": self.lon_hi if hr_min >= 12.5 else None,
+            "london_low": self.lon_lo if hr_min >= 12.5 else None,
+            "pdh_touches": self.pdh_touches, "pdl_touches": self.pdl_touches,
+        }
+
+
+def _validate_sweep_reclaim_qc(bars: list[tuple[float, float, float, float]], side: int, pool_px: float, atr5: float) -> bool:
+    """Enforce wick sweep + body reclaim within 2 bars + BOS close (reject continuation acceptance)."""
+    if len(bars) < 5 or atr5 <= 0:
+        return False
+    c0 = bars[-1][3]
+    sw_i = -1 if ((bars[-1][2] < pool_px) if side == 1 else (bars[-1][1] > pool_px)) else -2
+    reclaimed = False
+    for k in range(sw_i, 0):
+        ck = bars[k][3]
+        if (side == 1 and ck > pool_px) or (side == -1 and ck < pool_px):
+            reclaimed = True
+            break
+    if not reclaimed:
+        return False
+    if side == 1:
+        bos_lv = max(b[1] for b in bars[-6:-1])
+        return c0 > bos_lv and c0 > pool_px
+    bos_lv = min(b[2] for b in bars[-6:-1])
+    return c0 < bos_lv and c0 < pool_px
+
+
 class CoinState:
     def __init__(self, ticker: str, symbol: Symbol, leverage: float) -> None:
         self.ticker, self.symbol, self.leverage = ticker, symbol, leverage
-        self.sw_4h, self.sw_1h, self.sw_1h_k3 = CausalSwingTracker(2), CausalSwingTracker(2), CausalSwingTracker(3)
+        self.sw_4h = CausalTopoSwingTracker(0.80, 3)
+        self.sw_1h = CausalTopoSwingTracker(0.80, 3)
+        self.sw_1h_k3 = CausalSwingTracker(3)
         self.sw_15m_k3 = CausalSwingTracker(3)
-        self.sw_5m = CausalSwingTracker(2)
+        self.sw_5m = CausalTopoSwingTracker(0.70, 3)
+        self.ref_tracker = CausalReferenceTracker()
         self.session_tracker = DailySessionTracker(expiry_bars_5m=60)
         self.topo_4h = CausalTopologicalZigZag(1.25)
         self.topo_1h = CausalTopologicalZigZag(1.15)
@@ -541,16 +714,20 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         )
         self.v10_profile = str(self.get_parameter("v10_profile") or "DAILY_HUNTER").upper()
         if self.v10_profile == "TURBO_SNIPER":
-            def_std, def_ap, def_thr, def_skim, def_cb = 0.036, 0.042, 0.0288, 20.0, -2.5
+            def_std, def_ap, def_thr, def_skim, def_cb = 0.035, 0.040, 0.02625, 20.0, -2.5
         else:
-            def_std, def_ap, def_thr, def_skim, def_cb = 0.030, 0.038, 0.024, 25.0, -2.0
+            def_std, def_ap, def_thr, def_skim, def_cb = 0.030, 0.034, 0.0225, 25.0, -2.0
         self.skim_step_usd = float(self.get_parameter("skim_step_usd") or def_skim)
         self.skim_frac = float(self.get_parameter("skim_frac") or 0.50)
         self.small_risk_pct = float(self.get_parameter("small_risk_pct") or def_std)
         self.small_aplus_risk_pct = float(self.get_parameter("small_aplus_risk_pct") or def_ap)
         self.small_throttle_risk_pct = float(self.get_parameter("small_throttle_risk_pct") or def_thr)
-        self.throttle_dd_pct = float(self.get_parameter("throttle_dd_pct") or 0.15)
-        self.throttle_mult = float(self.get_parameter("throttle_mult") or 0.80)
+        self.throttle_dd_pct = float(self.get_parameter("throttle_dd_pct") or 0.12)
+        self.throttle_mult = float(self.get_parameter("throttle_mult") or 0.75)
+        self.throttle2_dd_pct = float(self.get_parameter("throttle2_dd_pct") or 0.20)
+        self.throttle2_mult = float(self.get_parameter("throttle2_mult") or 0.60)
+        self.cur_week_key = None
+        self.week_start_equity = start_cash
         self.fee_rt_pct = float(self.get_parameter("fee_rt_pct") or 0.0010)
         self.max_leverage = float(self.get_parameter("max_leverage") or (15.0 if self.small_account_mode else 10.0))
         self.daily_dd_cap_r = float(self.get_parameter("daily_dd_cap_r") or def_cb)
@@ -614,6 +791,15 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
             self.daily_r_pnl = 0.0
         return self.daily_r_pnl > self.daily_dd_cap_r
 
+    def _active_anchor_equity(self) -> float:
+        eq = float(self.portfolio.total_portfolio_value)
+        active_eq = max(1.0, eq - (self.withdrawn_vault_usd if self.small_account_mode else 0.0))
+        wk = self.utc_time.isocalendar()[:2]
+        if self.cur_week_key != wk:
+            self.cur_week_key = wk
+            self.week_start_equity = active_eq
+        return min(self.week_start_equity, active_eq)
+
     def _effective_risk_pct(self, engine: str, mult: float = 1.0, is_aplus: bool = False) -> float:
         eq = float(self.portfolio.total_portfolio_value)
         active_eq = max(1.0, eq - self.withdrawn_vault_usd)
@@ -623,7 +809,9 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
                 base = self.small_aplus_risk_pct
             else:
                 base = self.small_risk_pct
-            if dd > self.throttle_dd_pct:
+            if dd >= self.throttle2_dd_pct:
+                base *= self.throttle2_mult
+            elif dd >= self.throttle_dd_pct:
                 base *= self.throttle_mult
             return base * self.risk_scale * mult
         brake = 0.50 if dd >= 0.12 else (0.70 if dd >= 0.08 else 1.0)
@@ -732,7 +920,7 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         sl_pct = risk / cur_px
         if risk <= 0 or sl_pct < sl_min or sl_pct > sl_max:
             return
-        risk_base = max(1.0, float(self.portfolio.total_portfolio_value) - (self.withdrawn_vault_usd if self.small_account_mode else 0.0))
+        risk_base = self._active_anchor_equity()
         risk_usd = risk_base * self._effective_risk_pct(engine, risk_mult)
         eff_risk = risk + cur_px * self.fee_rt_pct
         qty = self._round_qty(st.symbol, self._clamp_qty(st, risk_usd / eff_risk, cur_px), side == 1)
@@ -768,7 +956,7 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         if (side == 1 and trig_px > cur_px) or (side == -1 and trig_px < cur_px):
             return
         tp_px = self._round_px(st.symbol, trig_px + side * tp_r * risk)
-        risk_base = max(1.0, float(self.portfolio.total_portfolio_value) - (self.withdrawn_vault_usd if self.small_account_mode else 0.0))
+        risk_base = self._active_anchor_equity()
         risk_usd = risk_base * self._effective_risk_pct(engine, risk_mult, is_aplus=is_aplus)
         eff_risk = risk + trig_px * self.fee_rt_pct
         qty = self._round_qty(st.symbol, self._clamp_qty(st, risk_usd / eff_risk, trig_px), side == 1)
@@ -910,7 +1098,7 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
                     elif t1d == -1 and c < lo_n and st.prev_4h_c >= st.prev_4h_lo20:
                         side = -1
 
-            if side != 0 and conf_now >= self.conf_threshold and trap_now < 0.78:
+            if side != 0 and conf_now >= self.conf_threshold and trap_now < 0.78 and self._btc_regime_allows(st, side):
                 slp = self._fractal_stop_4h(st, c, side, a4)
                 self._submit_market(st, "4H_V6_Cognitive", side, slp, self.trail_atr_mult)
 
@@ -1137,6 +1325,17 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
                     if not self._replace_stop_loss_order(st, cand_sl, c, f"{eng}_STEP_LOCK"):
                         return
 
+    def _btc_regime_allows(self, st: CoinState, side: int) -> bool:
+        """V12.0 Cross-Asset BTCUSDT 4H Macro Regime Veto (ker4 > 0.68 opposing altcoin trade direction)."""
+        if st.ticker == "BTCUSDT" or side == 0:
+            return True
+        for cst in self.coins.values():
+            if cst.ticker == "BTCUSDT":
+                if cst.last_ker_4h > 0.68 and cst.last_dir_4h != 0 and cst.last_dir_4h != side:
+                    return False
+                break
+        return True
+
     def on_5m(self, st: CoinState, bar) -> None:
         st.idx_5m += 1
         dt = self.utc_time
@@ -1148,6 +1347,7 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         st.vols_5m.append(vol)
         st.bars_5m.append((o, h, l, c))
         st.session_tracker.step_5m(dt, st.idx_5m, h, l, c)
+        ref_snap = st.ref_tracker.update(dt, h, l, c, a5)
 
         if st.vwap_day != dt.date():
             st.vwap_day = dt.date()
@@ -1168,12 +1368,17 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
             b1, b2, b3 = st.bars_5m[-3], st.bars_5m[-2], st.bars_5m[-1]
             c2b = abs(b2[3] - b2[0])
 
-            # V8.0 Intraday Scene-Graph Physics + Bayesian Prosecutor + 3-Tier Origin-Anchor Exit
+            # V8.0/V12.0 Intraday Scene-Graph Physics + Reference Engine + Bayesian Prosecutor
             if self.use_v8 and a5 > 0 and st.last_ker_4h >= 0.15 and self._can_enter(st):
                 b_hi = [x[1] for x in st.sw_1h.act_hi[-8:]]
                 b_lo = [x[1] for x in st.sw_1h.act_lo[-8:]]
+                tol_ref = 0.35 * a5
+                ref_hi = [v for v, ok in ((ref_snap["pdh"], ref_snap["pdh_touches"] <= 2), (ref_snap["pwh"], True), (ref_snap["asia_high"], True), (ref_snap["london_high"], True)) if ok and v is not None]
+                ref_lo = [v for v, ok in ((ref_snap["pdl"], ref_snap["pdl_touches"] <= 2), (ref_snap["pwl"], True), (ref_snap["asia_low"], True), (ref_snap["london_low"], True)) if ok and v is not None]
+                v_hi = [p for i, p in enumerate(b_hi) if any(i != j and 1e-6 < abs(p - q) <= tol_ref for j, q in enumerate(b_hi)) or any(abs(p - r) <= tol_ref for r in ref_hi)] + ref_hi
+                v_lo = [p for i, p in enumerate(b_lo) if any(i != j and 1e-6 < abs(p - q) <= tol_ref for j, q in enumerate(b_lo)) or any(abs(p - r) <= tol_ref for r in ref_lo)] + ref_lo
                 v8_sig = None
-                ca = _detect_v7_comp_vacuum(list(st.bars_5m), a5, b_hi, b_lo, st.sw_4h.trend)
+                ca = _detect_v7_comp_vacuum(list(st.bars_5m), a5, v_hi, v_lo, st.sw_4h.trend)
                 if ca is not None:
                     sd, sw_ex, orig_px = ca
                     slp = (sw_ex - a5) if sd == 1 else (sw_ex + a5)
@@ -1206,7 +1411,7 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
                     a4_cur = max(st.atr_4h.val, 1e-12)
                     ext4 = ((c - st.ema_4h.e20) * sd_v8 / a4_cur) if (st.ema_4h.e20 is not None) else 0.0
                     opp_w = [x[1] for x in (st.sw_1h.act_hi[-6:] if sd_v8 == 1 else st.sw_1h.act_lo[-6:])]
-                    if rd_v8 > 0 and rvol5 >= 0.90 and ext4 <= 2.50:
+                    if rd_v8 > 0 and rvol5 >= 0.90 and ext4 <= 2.50 and self._btc_regime_allows(st, sd_v8):
                         ok_p8, conv8 = _prosecutor_cross_examine(
                             side=sd_v8,
                             thesis_scores={"sweep": 0.72, "disp": disp_v8, "vac": vac_v8, "ker4": _sigmoid(st.last_ker_4h, 0.25, 9.0), "rvol": _sigmoid(rvol5, 1.3, 2.0)},
@@ -1223,6 +1428,9 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
                             risk_dist=rd_v8,
                             opposing_htf_walls=opp_w,
                             min_clearance_r=3.0,
+                            ref_snap=ref_snap,
+                            min_tp1_clearance_r=2.2,
+                            hard_veto_ref_brick=(eng_v8 == "V8_CompVacuum"),
                         )
                         if ok_p8:
                             self._submit_limit(
@@ -1276,7 +1484,7 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
                                 slp_v9 = max(cd["sl_base"] + a5, c + max(1.5 * a5, c * 0.0020))
                                 ep_v9 = h
                                 ok_fvg = True
-                        if ok_fvg:
+                        if ok_fvg and self._btc_regime_allows(st, sd):
                             st.last_v9_side_bar[sd] = st.idx_5m
                             if slv_tag == "V11_SessEq_1H_TOPO":
                                 self._submit_limit(
@@ -1331,7 +1539,7 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
                             is_counter_trend_sweep=(cd["side"] != st.ema_1d.trend),
                             min_conviction=0.35,
                         )
-                        if ok_p:
+                        if ok_p and self._btc_regime_allows(st, cd["side"]):
                             self._submit_limit(
                                 st, "SMC_Sweep_V6", cd["side"], c, slp, 10.0,
                                 self.SWEEP_STEPS, 20, 0.0180, 0.0020, risk_mult=self.smc_risk_mult, is_aplus=True,

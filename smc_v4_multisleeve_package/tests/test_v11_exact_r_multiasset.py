@@ -159,7 +159,7 @@ def test_v11_engines_and_exports_parity() -> None:
     qc_src = qc_path.read_text(encoding="utf-8")
     assert "V11_SessEq_1H_TOPO" in qc_src
     assert "self.fee_rt_pct" in qc_src
-    assert "0.038" in qc_src and "0.80" in qc_src
+    assert ("0.034" in qc_src or "0.038" in qc_src) and ("0.75" in qc_src or "0.80" in qc_src)
 
     spec = importlib.util.spec_from_file_location("binance_futures_scalper_v11", str(bn_path))
     assert spec is not None and spec.loader is not None

@@ -493,10 +493,14 @@ class SceneGraphPhysicsDetector:
         barriers_hi: List[float],
         barriers_lo: List[float],
         lookback: int = 24,
+        valid_hi: Optional[List[float]] = None,
+        valid_lo: Optional[List[float]] = None,
     ) -> Optional[CompressionVacuumSetup]:
         """Setup Physics A: Flat Liquidity Barrier + Slow Overlapping Compression Approach + Vacuum Snap."""
         if bar_idx < lookback + 3 or atr[bar_idx] <= 0:
             return None
+        eff_hi = valid_hi if valid_hi is not None else barriers_hi
+        eff_lo = valid_lo if valid_lo is not None else barriers_lo
         a_now = max(float(atr[bar_idx]), 1e-12)
         win_o = o[bar_idx - lookback:bar_idx + 1]
         win_h = h[bar_idx - lookback:bar_idx + 1]
@@ -506,7 +510,7 @@ class SceneGraphPhysicsDetector:
         # Check bearish waterfall (ceiling barrier swept at bar_idx or bar_idx-1, snap down)
         if c[bar_idx] < o[bar_idx] and abs(c[bar_idx] - o[bar_idx]) >= 0.65 * a_now:
             sw_hi = max(float(h[bar_idx]), float(h[bar_idx - 1]))
-            hit_barriers = [b for b in barriers_hi if sw_hi > b and float(c[bar_idx]) < b]
+            hit_barriers = [b for b in eff_hi if sw_hi > b and float(c[bar_idx]) < b]
             if hit_barriers:
                 barrier = min(hit_barriers, key=lambda b: abs(b - sw_hi))
                 # Compression approach in prior 5..lookback-1 bars: rising lows & high overlap / low KER
@@ -538,7 +542,7 @@ class SceneGraphPhysicsDetector:
         # Check bullish waterfall (floor barrier swept at bar_idx or bar_idx-1, snap up)
         if c[bar_idx] > o[bar_idx] and abs(c[bar_idx] - o[bar_idx]) >= 0.65 * a_now:
             sw_lo = min(float(l[bar_idx]), float(l[bar_idx - 1]))
-            hit_barriers = [b for b in barriers_lo if sw_lo < b and float(c[bar_idx]) > b]
+            hit_barriers = [b for b in eff_lo if sw_lo < b and float(c[bar_idx]) > b]
             if hit_barriers:
                 barrier = min(hit_barriers, key=lambda b: abs(b - sw_lo))
                 app_c = win_c[:-2]
@@ -564,6 +568,46 @@ class SceneGraphPhysicsDetector:
                             implied_r=imp_r, trigger_idx=bar_idx,
                         )
         return None
+
+    def detect_setup_a_waterfall(
+        self,
+        o: np.ndarray,
+        h: np.ndarray,
+        l: np.ndarray,
+        c: np.ndarray,
+        atr: np.ndarray,
+        bar_idx: int,
+        barriers_hi: List[float],
+        barriers_lo: List[float],
+        lookback: int = 24,
+        valid_hi: Optional[List[float]] = None,
+        valid_lo: Optional[List[float]] = None,
+        reclaim_validator=None,
+    ) -> Optional[CompressionVacuumSetup]:
+        """V12.0 Setup A Waterfall: requires touches>=2 / reference-aligned barriers + sweep-reclaim-BOS."""
+        ca = self.detect_compression_vacuum(
+            o, h, l, c, atr, bar_idx, barriers_hi, barriers_lo,
+            lookback=lookback, valid_hi=valid_hi, valid_lo=valid_lo,
+        )
+        if ca is None or reclaim_validator is None:
+            return ca
+        if ca.side == 1:
+            sw_i = bar_idx if l[bar_idx] < ca.barrier_px else (bar_idx - 1)
+        else:
+            sw_i = bar_idx if h[bar_idx] > ca.barrier_px else (bar_idx - 1)
+        ok, _, _ = reclaim_validator(
+            side=ca.side,
+            pool_level=ca.barrier_px,
+            is_confirmed_pivot_or_ref=True,
+            highs=h,
+            lows=l,
+            closes=c,
+            atr=atr,
+            sweep_idx=sw_i,
+            current_idx=bar_idx,
+            internal_bos_level=ca.snap_level,
+        )
+        return ca if ok else None
 
     def detect_bpr_ifvg(
         self,
