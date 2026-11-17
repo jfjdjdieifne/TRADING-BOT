@@ -1478,53 +1478,105 @@ def run_bot(
                         b5 = client.get_klines(sym, "5m", 3)
                         if b5:
                             _, _, h, l, c, _ = b5[-1]
-                            meta["best_px"] = max(meta["best_px"], h) if meta["side"] == 1 else min(meta["best_px"], l)
-                            mfe_r = ((meta["best_px"] - meta["entry"]) * meta["side"]) / max(meta["risk"], 1e-12)
+                            d = meta["side"]
+                            ep_m = meta["entry"]
+                            r_dist = max(meta["risk"], 1e-12)
+                            eng_m = str(meta.get("engine", ""))
+                            fee_r = (ep_m * 0.0010) / r_dist
+                            # 1. Conservative Intrabar SL Check before TP
+                            if (d == 1 and l <= meta["sl"]) or (d == -1 and h >= meta["sl"]):
+                                client.cancel_all(sym)
+                                client.place_market(sym, exit_side, qty_abs, reduce_only=True)
+                                rem_f = max(0.0, 1.0 - (meta.get("bank_frac", 0.0) if meta.get("partial_taken") else 0.0) - (meta.get("bank2_frac", 0.0) if meta.get("t2_taken") else 0.0))
+                                daily_r_pnl += rem_f * ((((meta["sl"] - ep_m) * d) / r_dist) - fee_r)
+                                active_meta.pop(sym, None)
+                                print(f"[SL_EXIT] {sym} {eng_m} SL={meta['sl']}")
+                                continue
+                            meta["best_px"] = max(meta["best_px"], h) if d == 1 else min(meta["best_px"], l)
+                            mfe_r = ((meta["best_px"] - ep_m) * d) / r_dist
                             base_qty = meta.get("init_qty", qty_abs)
-                            if meta.get("bank_frac", 0.0) > 0 and (not meta.get("partial_taken")) and mfe_r >= meta.get("bank_r", 2.8):
-                                part_qty = round_step(base_qty * meta["bank_frac"], filters[sym].step_size, True)
-                                rem_qty = round_step(qty_abs - part_qty, filters[sym].step_size, True)
-                                if part_qty >= filters[sym].min_qty and rem_qty >= filters[sym].min_qty:
-                                    client.cancel_all(sym)
-                                    client.place_market(sym, exit_side, part_qty, reduce_only=True)
-                                    lk_sl = round_step(meta["entry"] + meta["side"] * meta.get("be_lock_r", 0.50) * meta["risk"], filters[sym].tick_size, False)
-                                    if (meta["side"] == 1 and lk_sl > meta["sl"] and lk_sl < c) or (meta["side"] == -1 and lk_sl < meta["sl"] and lk_sl > c):
-                                        meta["sl"] = lk_sl
-                                    client.place_stop_market(sym, exit_side, rem_qty, meta["sl"])
-                                    if meta["tp"] is not None:
-                                        client.place_tp_limit(sym, exit_side, rem_qty, meta["tp"])
-                                    meta["partial_taken"] = True
-                                    daily_r_pnl += meta["bank_frac"] * meta.get("bank_r", 2.8)
-                                    qty_abs = rem_qty
-                                    print(f"[V8 BANK40_T1] {sym} banked {part_qty} @ >=+{meta.get('bank_r', 2.8):.1f}R, SL->{meta['sl']}")
-                            if meta.get("bank2_frac", 0.0) > 0 and meta.get("partial_taken") and (not meta.get("t2_taken")):
-                                t2_r = meta.get("bank2_r", 5.5)
-                                if meta.get("origin_px") is not None:
-                                    orig_r = ((meta["origin_px"] - meta["entry"]) * meta["side"]) / max(meta["risk"], 1e-12)
-                                    if orig_r >= 4.2:
-                                        t2_r = min(t2_r, orig_r)
-                                if mfe_r >= t2_r:
-                                    part2_qty = round_step(base_qty * meta["bank2_frac"], filters[sym].step_size, True)
+                            if meta.get("bank_frac", 0.0) > 0:
+                                if "SessEq" in eng_m:
+                                    tp1_r, tp1_frac, be_lk_r = 1.8, 0.50, 0.25
+                                    tp2_r, tp2_frac, tp2_lk_r = 3.2, 0.35, 1.25
+                                else:
+                                    tp1_r, tp1_frac, be_lk_r = meta.get("bank_r", 2.2), meta["bank_frac"], meta.get("be_lock_r", 0.35)
+                                    tp2_r = meta.get("bank2_r", 4.5)
+                                    if meta.get("origin_px") is not None:
+                                        orig_r = ((meta["origin_px"] - ep_m) * d) / r_dist
+                                        if orig_r >= 4.2:
+                                            tp2_r = min(max(3.0, orig_r), tp2_r)
+                                    tp2_frac, tp2_lk_r = meta.get("bank2_frac", 0.40), meta.get("be2_lock_r", 2.00)
+                                # 2. Tier 1 Banking + Unconditional SL Ratchet
+                                if (not meta.get("partial_taken")) and mfe_r >= tp1_r:
+                                    part_qty = round_step(min(qty_abs, base_qty * tp1_frac), filters[sym].step_size, True)
+                                    rem_qty = round_step(qty_abs - part_qty, filters[sym].step_size, True)
+                                    if part_qty >= filters[sym].min_qty and rem_qty >= filters[sym].min_qty:
+                                        client.cancel_all(sym)
+                                        client.place_market(sym, exit_side, part_qty, reduce_only=True)
+                                        lk_sl = round_step(ep_m + d * be_lk_r * r_dist, filters[sym].tick_size, False)
+                                        if (d == 1 and lk_sl > meta["sl"]) or (d == -1 and lk_sl < meta["sl"]):
+                                            meta["sl"] = lk_sl
+                                        meta["partial_taken"] = True
+                                        daily_r_pnl += tp1_frac * (tp1_r - fee_r)
+                                        qty_abs = rem_qty
+                                        if (d == 1 and meta["sl"] >= c) or (d == -1 and meta["sl"] <= c):
+                                            client.place_market(sym, exit_side, rem_qty, reduce_only=True)
+                                            daily_r_pnl += max(0.0, 1.0 - tp1_frac) * ((((meta["sl"] - ep_m) * d) / r_dist) - fee_r)
+                                            active_meta.pop(sym, None)
+                                            continue
+                                        client.place_stop_market(sym, exit_side, rem_qty, meta["sl"])
+                                        if meta["tp"] is not None:
+                                            client.place_tp_limit(sym, exit_side, rem_qty, meta["tp"])
+                                        print(f"[V12 BANK40_T1] {sym} banked {part_qty} @ >=+{tp1_r:.1f}R, SL->{meta['sl']}")
+                                # 3. Tier 2 Banking + Guaranteed SL Ratchet
+                                if tp2_frac > 0 and meta.get("partial_taken") and (not meta.get("t2_taken")) and mfe_r >= tp2_r:
+                                    part2_qty = round_step(min(qty_abs, base_qty * tp2_frac), filters[sym].step_size, True)
                                     rem2_qty = round_step(qty_abs - part2_qty, filters[sym].step_size, True)
                                     if part2_qty >= filters[sym].min_qty and rem2_qty >= filters[sym].min_qty:
                                         client.cancel_all(sym)
                                         client.place_market(sym, exit_side, part2_qty, reduce_only=True)
-                                        lk2_sl = round_step(meta["entry"] + meta["side"] * meta.get("be2_lock_r", 2.50) * meta["risk"], filters[sym].tick_size, False)
-                                        if (meta["side"] == 1 and lk2_sl > meta["sl"] and lk2_sl < c) or (meta["side"] == -1 and lk2_sl < meta["sl"] and lk2_sl > c):
+                                        lk2_sl = round_step(ep_m + d * tp2_lk_r * r_dist, filters[sym].tick_size, False)
+                                        if (d == 1 and lk2_sl > meta["sl"]) or (d == -1 and lk2_sl < meta["sl"]):
                                             meta["sl"] = lk2_sl
+                                        meta["t2_taken"] = True
+                                        daily_r_pnl += tp2_frac * (tp2_r - fee_r)
+                                        qty_abs = rem2_qty
+                                        if (d == 1 and meta["sl"] >= c) or (d == -1 and meta["sl"] <= c):
+                                            client.place_market(sym, exit_side, rem2_qty, reduce_only=True)
+                                            daily_r_pnl += max(0.0, 1.0 - tp1_frac - tp2_frac) * ((((meta["sl"] - ep_m) * d) / r_dist) - fee_r)
+                                            active_meta.pop(sym, None)
+                                            continue
                                         client.place_stop_market(sym, exit_side, rem2_qty, meta["sl"])
                                         if meta["tp"] is not None:
                                             client.place_tp_limit(sym, exit_side, rem2_qty, meta["tp"])
-                                        meta["t2_taken"] = True
-                                        daily_r_pnl += meta["bank2_frac"] * t2_r
-                                        qty_abs = rem2_qty
-                                        print(f"[V8 BANK40_T2] {sym} banked {part2_qty} @ >=+{t2_r:.1f}R, SL->{meta['sl']}")
+                                        print(f"[V12 BANK40_T2] {sym} banked {part2_qty} @ >=+{tp2_r:.1f}R, SL->{meta['sl']}")
+                                # 4. Tier 3 Runner (15%): Trail behind confirmed 15m Topological Protected Swings
+                                if meta.get("t2_taken") and mfe_r >= 4.5:
+                                    b15_tr = client.get_klines(sym, "15m", 80)
+                                    if len(b15_tr) >= 10:
+                                        last_hi15, last_lo15, _ = compute_topological_swings(b15_tr, compute_wilder_atr_series(b15_tr, 14), 1.25)
+                                        raw_cand = last_lo15 if d == 1 else last_hi15
+                                        if raw_cand is not None:
+                                            cand_sl = round_step(raw_cand, filters[sym].tick_size, False)
+                                            better_15 = (cand_sl > meta["sl"] and cand_sl < l) if d == 1 else (cand_sl < meta["sl"] and cand_sl > h)
+                                            if better_15:
+                                                client.cancel_all(sym)
+                                                client.place_stop_market(sym, exit_side, qty_abs, cand_sl)
+                                                if meta["tp"] is not None:
+                                                    client.place_tp_limit(sym, exit_side, qty_abs, meta["tp"])
+                                                meta["sl"] = cand_sl
+                                                print(f"[V12 15M_TRAIL] {sym} SL->{cand_sl}")
                             for act_r, lk_r in meta["step_locks"]:
-                                hit = (h >= meta["entry"] + act_r * meta["risk"]) if meta["side"] == 1 else (l <= meta["entry"] - act_r * meta["risk"])
-                                new_sl = round_step(meta["entry"] + meta["side"] * lk_r * meta["risk"], filters[sym].tick_size, False)
-                                better = (new_sl > meta["sl"] and new_sl < c) if meta["side"] == 1 else (new_sl < meta["sl"] and new_sl > c)
+                                hit = (h >= ep_m + act_r * r_dist) if d == 1 else (l <= ep_m - act_r * r_dist)
+                                new_sl = round_step(ep_m + d * lk_r * r_dist, filters[sym].tick_size, False)
+                                better = (new_sl > meta["sl"]) if d == 1 else (new_sl < meta["sl"])
                                 if hit and better:
                                     client.cancel_all(sym)
+                                    if (d == 1 and new_sl >= c) or (d == -1 and new_sl <= c):
+                                        client.place_market(sym, exit_side, qty_abs, reduce_only=True)
+                                        active_meta.pop(sym, None)
+                                        break
                                     client.place_stop_market(sym, exit_side, qty_abs, new_sl)
                                     if meta["tp"] is not None:
                                         client.place_tp_limit(sym, exit_side, qty_abs, meta["tp"])
@@ -1586,7 +1638,7 @@ def run_bot(
                     else:
                         client.place_maker_limit(sym, side_str, qty, ep)
                     active_meta[sym] = {
-                        "state": "PENDING", "side": sig.side, "entry": ep, "best_px": ep,
+                        "state": "PENDING", "engine": sig.engine, "side": sig.side, "entry": ep, "best_px": ep,
                         "sl": sl, "tp": tp, "risk": abs(ep - sl), "step_locks": sig.step_locks,
                         "trail_mult": sig.trail_atr_mult, "last_4h_ts": b4h[-1][0] if b4h else 0,
                         "pyramid_armed": False, "pyr_stage": 0,

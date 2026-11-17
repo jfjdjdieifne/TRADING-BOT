@@ -992,6 +992,151 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         st.topo_15m.update(h, l, a15, c)
         st.sw_15m_k3.update(bar)
 
+    def _cleanup_coin_orders(self, st: CoinState) -> None:
+        for tk_obj in (st.sl_ticket, st.tp_ticket):
+            if tk_obj is not None and tk_obj.status not in (
+                OrderStatus.FILLED, OrderStatus.CANCELED, OrderStatus.INVALID
+            ):
+                st.canceled_sl_ids.add(tk_obj.order_id)
+                tk_obj.cancel()
+        st.sl_ticket = st.tp_ticket = None
+
+    def _replace_stop_loss_order(self, st: CoinState, new_sl: float, cur_c: float, tag: str) -> bool:
+        """Guaranteed SL ratchet; market-liquidates if price already closed past new_sl."""
+        d = st.active_side
+        if (d == 1 and new_sl >= cur_c) or (d == -1 and new_sl <= cur_c):
+            rem_frac = max(
+                0.0,
+                1.0
+                - (st.bank_frac if st.partial_taken else 0.0)
+                - (st.bank2_frac if st.t2_taken else 0.0),
+            )
+            locked_r = ((new_sl - st.entry_price) * d) / max(st.risk_dist, 1e-12)
+            fee_r = (st.entry_price * self.fee_rt_pct) / max(st.risk_dist, 1e-12)
+            self.daily_r_pnl += rem_frac * (locked_r - fee_r)
+            self._cleanup_coin_orders(st)
+            if self.portfolio[st.symbol].invested:
+                self.liquidate(st.symbol, tag=f"{tag}_CROSSED")
+            self._reset_pos(st)
+            return False
+        self._cleanup_coin_orders(st)
+        st.sl_price = new_sl
+        st.sl_ticket = self.stop_market_order(st.symbol, -st.qty, st.sl_price, tag=tag)
+        if st.tp_price is not None:
+            st.tp_ticket = self.limit_order(st.symbol, -st.qty, st.tp_price, tag=f"{st.active_engine}_TP")
+        return True
+
+    def _manage_active_positions_v12_surgical(self, st: CoinState, h: float, l: float, c: float) -> None:
+        """
+        V12 Surgical 3-Tier Resting Limit Exit & 15m Protected Swing Trail:
+        - Strict intrabar SL-before-TP conservative priority.
+        - 3-Tier Partial Banking (45/40/15 for Physics/SMC, 50/35/15 for SessEq_1H).
+        - Guaranteed SL Ratchet to BE+0.35R/+0.25R on TP1 and +2.0R/+1.25R on TP2 (never blocked by close c).
+        - Zero-Risk Slot Recycling as soon as TP1 locks SL above entry.
+        - 15m Topological Protected Swing Trailing for the 15% Runner.
+        """
+        if not st.in_position or st.risk_dist <= 1e-9 or st.sl_ticket is None:
+            return
+        if not self.portfolio[st.symbol].invested:
+            self._cleanup_coin_orders(st)
+            self._reset_pos(st)
+            return
+        if st.trail_atr_mult is not None:
+            return
+
+        d = int(st.active_side)
+        ep = float(st.entry_price)
+        sl = float(st.sl_price)
+        r_dist = float(st.risk_dist)
+        eng = str(st.active_engine or "")
+
+        # 1. Conservative Intrabar Check: Did price hit current Stop Loss first?
+        sl_hit = (d == 1 and l <= sl) or (d == -1 and h >= sl)
+        if sl_hit:
+            rem_frac = max(
+                0.0,
+                1.0
+                - (st.bank_frac if st.partial_taken else 0.0)
+                - (st.bank2_frac if st.t2_taken else 0.0),
+            )
+            locked_r = ((sl - ep) * d) / r_dist
+            fee_r = (ep * self.fee_rt_pct) / r_dist
+            self.daily_r_pnl += rem_frac * (locked_r - fee_r)
+            self._cleanup_coin_orders(st)
+            self.liquidate(st.symbol, tag=f"{eng}_SL_EXIT")
+            self._reset_pos(st)
+            return
+
+        st.best_px = max(st.best_px, h) if d == 1 else min(st.best_px, l)
+        mfe_r = ((st.best_px - ep) * d) / r_dist
+        fee_r = (ep * self.fee_rt_pct) / r_dist
+        base_qty = st.init_qty if st.init_qty > 0 else abs(st.qty)
+
+        if st.bank_frac > 0.0:
+            if "SessEq" in eng:
+                tp1_r, tp1_frac, be_lock_r = 1.8, 0.50, 0.25
+                tp2_r, tp2_frac, tp2_lock_r = 3.2, 0.35, 1.25
+            else:
+                tp1_r, tp1_frac, be_lock_r = st.bank_r, st.bank_frac, st.be_lock_r
+                tp2_r = st.bank2_r
+                if st.origin_px is not None:
+                    orig_r = ((st.origin_px - ep) * d) / r_dist
+                    if orig_r >= 4.2:
+                        tp2_r = min(max(3.0, orig_r), st.bank2_r)
+                tp2_frac, tp2_lock_r = st.bank2_frac, st.be2_lock_r
+
+            # 2. Tier 1 Banking (TP1): Unconditional SL ratchet to BE + offset
+            if (not st.partial_taken) and mfe_r >= tp1_r:
+                st.partial_taken = True
+                part_qty = self._round_qty(st.symbol, min(abs(st.qty), base_qty * tp1_frac), d == 1)
+                rem_qty = self._round_qty(st.symbol, abs(st.qty) - abs(part_qty), d == 1)
+                if abs(part_qty) > 0 and abs(rem_qty) > 0:
+                    st.partial_ticket = self.market_order(st.symbol, -part_qty, tag=f"{eng}_BANK40_T1_{tp1_r:.1f}R")
+                    st.qty = rem_qty
+                    self.daily_r_pnl += tp1_frac * (tp1_r - fee_r)
+                new_sl = self._round_px(st.symbol, ep + d * be_lock_r * r_dist)
+                if (d == 1 and new_sl > st.sl_price) or (d == -1 and new_sl < st.sl_price):
+                    if not self._replace_stop_loss_order(st, new_sl, c, f"{eng}_BE_LOCK"):
+                        return
+
+            # 3. Tier 2 Banking (TP2 @ Origin_Anchor / +4.5R): Guaranteed SL ratchet
+            if tp2_frac > 0.0 and st.partial_taken and (not st.t2_taken) and mfe_r >= tp2_r:
+                st.t2_taken = True
+                part2_qty = self._round_qty(st.symbol, min(abs(st.qty), base_qty * tp2_frac), d == 1)
+                rem2_qty = self._round_qty(st.symbol, abs(st.qty) - abs(part2_qty), d == 1)
+                if abs(part2_qty) > 0 and abs(rem2_qty) > 0:
+                    st.partial_ticket = self.market_order(st.symbol, -part2_qty, tag=f"{eng}_BANK40_T2_{tp2_r:.1f}R")
+                    st.qty = rem2_qty
+                    self.daily_r_pnl += tp2_frac * (tp2_r - fee_r)
+                new_sl = self._round_px(st.symbol, ep + d * tp2_lock_r * r_dist)
+                if (d == 1 and new_sl > st.sl_price) or (d == -1 and new_sl < st.sl_price):
+                    if not self._replace_stop_loss_order(st, new_sl, c, f"{eng}_TP2_LOCK"):
+                        return
+
+            # 4. Tier 3 Runner (15%): Trail behind confirmed 15m Topological Protected Swings
+            if st.t2_taken and mfe_r >= 4.5:
+                sw15 = st.topo_15m
+                if d == 1:
+                    raw_lo = sw15.act_lo[-1][1] if sw15.act_lo else sw15.last_lo
+                    if raw_lo is not None:
+                        cand_sl = self._round_px(st.symbol, float(raw_lo))
+                        if cand_sl > st.sl_price and cand_sl < l:
+                            self._replace_stop_loss_order(st, cand_sl, c, f"{eng}_15M_TRAIL")
+                else:
+                    raw_hi = sw15.act_hi[-1][1] if sw15.act_hi else sw15.last_hi
+                    if raw_hi is not None:
+                        cand_sl = self._round_px(st.symbol, float(raw_hi))
+                        if cand_sl < st.sl_price and cand_sl > h:
+                            self._replace_stop_loss_order(st, cand_sl, c, f"{eng}_15M_TRAIL")
+
+        for act_r, lk_r in st.step_locks:
+            hit = (h >= ep + act_r * r_dist) if d == 1 else (l <= ep - act_r * r_dist)
+            if hit:
+                cand_sl = self._round_px(st.symbol, ep + d * lk_r * r_dist)
+                if (d == 1 and cand_sl > st.sl_price) or (d == -1 and cand_sl < st.sl_price):
+                    if not self._replace_stop_loss_order(st, cand_sl, c, f"{eng}_STEP_LOCK"):
+                        return
+
     def on_5m(self, st: CoinState, bar) -> None:
         st.idx_5m += 1
         dt = self.utc_time
@@ -1012,57 +1157,7 @@ class BinanceFuturesMultiCoinScalper(QCAlgorithm):
         vwap = (st.vwap_pv / st.vwap_v) if st.vwap_v > 0 else None
 
         if st.in_position and st.risk_dist > 0 and st.sl_ticket is not None:
-            st.best_px = max(st.best_px, h) if st.active_side == 1 else min(st.best_px, l)
-            mfe_r = ((st.best_px - st.entry_price) * st.active_side) / max(st.risk_dist, 1e-12)
-            base_qty = st.init_qty if st.init_qty > 0 else abs(st.qty)
-            # V8.0 Tier 1: Fast Daily Cashflow Bank (40% @ +2.8R -> move SL to BE + 0.50R)
-            if st.bank_frac > 0.0 and (not st.partial_taken) and mfe_r >= st.bank_r:
-                st.partial_taken = True
-                part_qty = self._round_qty(st.symbol, base_qty * st.bank_frac, st.active_side == 1)
-                rem_qty = self._round_qty(st.symbol, abs(st.qty) - abs(part_qty), st.active_side == 1)
-                if abs(part_qty) > 0 and abs(rem_qty) > 0:
-                    st.partial_ticket = self.market_order(st.symbol, -part_qty, tag=f"{st.active_engine}_BANK40_T1")
-                    st.qty = rem_qty
-                    for tk_obj in (st.sl_ticket, st.tp_ticket):
-                        if tk_obj is not None and tk_obj.status not in (OrderStatus.FILLED, OrderStatus.CANCELED, OrderStatus.INVALID):
-                            st.canceled_sl_ids.add(tk_obj.order_id)
-                            tk_obj.cancel()
-                    lk_px = self._round_px(st.symbol, st.entry_price + st.active_side * st.be_lock_r * st.risk_dist)
-                    if (st.active_side == 1 and lk_px > st.sl_price and lk_px < c) or (st.active_side == -1 and lk_px < st.sl_price and lk_px > c):
-                        st.sl_price = lk_px
-                    st.sl_ticket = self.stop_market_order(st.symbol, -st.qty, st.sl_price, tag=f"{st.active_engine}_SL")
-                    if st.tp_price is not None:
-                        st.tp_ticket = self.limit_order(st.symbol, -st.qty, st.tp_price, tag=f"{st.active_engine}_TP")
-                    self.daily_r_pnl += st.bank_frac * st.bank_r
-            # V8.0 Tier 2: Origin-Anchor Waterfall Bank (40% @ min(Origin_Anchor_R, +5.5R) -> lock +2.50R)
-            if st.bank2_frac > 0.0 and st.partial_taken and (not st.t2_taken):
-                t2_r = st.bank2_r
-                if st.origin_px is not None:
-                    orig_r = ((st.origin_px - st.entry_price) * st.active_side) / max(st.risk_dist, 1e-12)
-                    if orig_r >= 4.2:
-                        t2_r = min(st.bank2_r, orig_r)
-                if mfe_r >= t2_r:
-                    st.t2_taken = True
-                    part2_qty = self._round_qty(st.symbol, base_qty * st.bank2_frac, st.active_side == 1)
-                    rem2_qty = self._round_qty(st.symbol, abs(st.qty) - abs(part2_qty), st.active_side == 1)
-                    if abs(part2_qty) > 0 and abs(rem2_qty) > 0:
-                        st.partial_ticket = self.market_order(st.symbol, -part2_qty, tag=f"{st.active_engine}_BANK40_T2")
-                        st.qty = rem2_qty
-                        for tk_obj in (st.sl_ticket, st.tp_ticket):
-                            if tk_obj is not None and tk_obj.status not in (OrderStatus.FILLED, OrderStatus.CANCELED, OrderStatus.INVALID):
-                                st.canceled_sl_ids.add(tk_obj.order_id)
-                                tk_obj.cancel()
-                        lk2_px = self._round_px(st.symbol, st.entry_price + st.active_side * st.be2_lock_r * st.risk_dist)
-                        if (st.active_side == 1 and lk2_px > st.sl_price and lk2_px < c) or (st.active_side == -1 and lk2_px < st.sl_price and lk2_px > c):
-                            st.sl_price = lk2_px
-                        st.sl_ticket = self.stop_market_order(st.symbol, -st.qty, st.sl_price, tag=f"{st.active_engine}_SL")
-                        if st.tp_price is not None:
-                            st.tp_ticket = self.limit_order(st.symbol, -st.qty, st.tp_price, tag=f"{st.active_engine}_TP")
-                        self.daily_r_pnl += st.bank2_frac * t2_r
-            for act_r, lk_r in st.step_locks:
-                hit = (h >= st.entry_price + act_r * st.risk_dist) if st.active_side == 1 else (l <= st.entry_price - act_r * st.risk_dist)
-                if hit:
-                    self._replace_sl(st, st.entry_price + st.active_side * lk_r * st.risk_dist, c)
+            self._manage_active_positions_v12_surgical(st, h, l, c)
 
         if st.pending_ticket is not None and st.pending_meta is not None:
             pm = st.pending_meta

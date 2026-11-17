@@ -15,7 +15,10 @@ if str(PKG) not in sys.path:
     sys.path.insert(0, str(PKG))
 
 from engine import (
+    DrawdownSafeExactRManager,
+    InstitutionalReferenceAndSwingEngine,
     ProtectedSwingDetector,
+    ReferenceLevelSnapshot,
     SmallAccountCashflowManager,
     TradePositionState,
     V11SessionEquilibriumExitManager,
@@ -175,3 +178,59 @@ def test_v11_engines_and_exports_parity() -> None:
     )
     # Notional = 3.0 / (0.004 + 0.001) = $600 -> 6.0 units (not $750 = 7.5 units)
     assert abs(qty - 6.0) < 1e-6
+
+
+def test_surgical_modules_reference_levels_dd_safe_and_v12_exits() -> None:
+    """Verify Surgical Modules 1, 2, and 3 (Reference Levels/Reclaim, Downward-Safe Exact-1R, QC/Binance V12 Exits)."""
+    # Module 1: Causal Reference Levels (PDH/PDL, PWH/PWL, Asia/London) + Sweep/Reclaim/BOS
+    df = _make_synthetic_ohlcv(2500, "5min", start="2025-01-01", seed=42)
+    ts_ns = df.index.asi8
+    highs = df["High"].to_numpy(dtype=float)
+    lows = df["Low"].to_numpy(dtype=float)
+    closes = df["Close"].to_numpy(dtype=float)
+    atr = np.full(len(df), 25.0, dtype=float)
+    snap = InstitutionalReferenceAndSwingEngine.compute_causal_reference_levels(
+        ts_ns, highs, lows, closes, atr, idx=2300
+    )
+    assert isinstance(snap, ReferenceLevelSnapshot)
+    assert not np.isnan(snap.pdh) and not np.isnan(snap.pdl)
+
+    # Valid bullish sweep below pool_level=100, reclaim above 100, BOS close above 103
+    h_arr = np.array([102.0, 101.0, 102.0, 105.0])
+    l_arr = np.array([100.5, 98.5, 100.2, 101.0])
+    c_arr = np.array([101.0, 100.4, 101.5, 104.0])
+    a_arr = np.array([3.0, 3.0, 3.0, 3.0])
+    ok, tag, q = InstitutionalReferenceAndSwingEngine.validate_sweep_and_reclaim(
+        side=1, pool_level=100.0, is_confirmed_pivot_or_ref=True,
+        highs=h_arr, lows=l_arr, closes=c_arr, atr=a_arr,
+        sweep_idx=1, current_idx=3, internal_bos_level=103.0,
+    )
+    assert ok and tag == "VALID_BULLISH_SWEEP_RECLAIM_BOS" and q >= 0.55
+
+    # Invalid Rule D: Price Acceptance below level (closes stay < 100.0)
+    c_acc = np.array([101.0, 99.0, 98.8, 99.2])
+    ok_bad, tag_bad, q_bad = InstitutionalReferenceAndSwingEngine.validate_sweep_and_reclaim(
+        side=1, pool_level=100.0, is_confirmed_pivot_or_ref=True,
+        highs=h_arr, lows=l_arr, closes=c_acc, atr=a_arr,
+        sweep_idx=1, current_idx=3, internal_bos_level=103.0,
+    )
+    assert (not ok_bad) and tag_bad == "REJECT_BEARISH_PRICE_ACCEPTANCE" and q_bad == 0.0
+
+    # Module 2: Downward-Safe Exact-1.0R Manager
+    mgr = DrawdownSafeExactRManager()
+    # Winning week: active=120, week_start=100 -> anchor=100 -> risk_usd=3.0 (3.0% of 100)
+    r_win, _ = mgr.resolve_risk_usd(active_equity=120.0, peak_active_equity=120.0, week_start_equity=100.0, is_aplus=False)
+    assert abs(r_win - 3.0) < 1e-6
+    # Losing week (15% DD >= 12%): active=85, peak=100, week_start=100 -> anchor=85 * 3.4% * 0.75 = 2.1675
+    r_dd, _ = mgr.resolve_risk_usd(active_equity=85.0, peak_active_equity=100.0, week_start_equity=100.0, is_aplus=True)
+    assert abs(r_dd - (85.0 * 0.034 * 0.75)) < 1e-6
+    notional, qty_1r = mgr.compute_exact_1r_notional(r_win, 100.0, 100.0, 99.6, fee_rt_pct=0.0010)
+    assert abs(notional - (3.0 / 0.0050)) < 1e-6 and abs(qty_1r - 6.0) < 1e-6
+
+    # Module 3: QC & Binance V12 surgical 3-tier + 15m protected trail presence & compile
+    qc_src = (PKG / "exports" / "quantconnect" / "BinanceFutures_MultiCoin_Scalper_QC.py").read_text(encoding="utf-8")
+    bn_src = (PKG / "exports" / "binance" / "binance_futures_scalper.py").read_text(encoding="utf-8")
+    assert "_manage_active_positions_v12_surgical" in qc_src
+    assert "_replace_stop_loss_order" in qc_src
+    assert "15M_TRAIL" in qc_src and "15M_TRAIL" in bn_src
+

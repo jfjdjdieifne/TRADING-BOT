@@ -2955,5 +2955,299 @@ def run_v11_btc_portfolio(
     return trades, _summarize_trades(trades)
 
 
+# ============================================================================
+# SURGICAL MODULE 1: INSTITUTIONAL REFERENCE LEVELS & VALID SWEEP/RECLAIM ENGINE
+# Grounded in Empirical Draw-on-Liquidity Research & Valid/Invalid Liquidity Reads
+# ============================================================================
 
+@dataclass
+class ReferenceLevelSnapshot:
+    pdh: float = np.nan
+    pdl: float = np.nan
+    pwh: float = np.nan
+    pwl: float = np.nan
+    asia_high: float = np.nan
+    asia_low: float = np.nan
+    london_high: float = np.nan
+    london_low: float = np.nan
+    pdh_touches: int = 0
+    pdl_touches: int = 0
+    pwh_touches: int = 0
+    pwl_touches: int = 0
+
+
+class InstitutionalReferenceAndSwingEngine:
+    """
+    Implements strict market physics from empirical research & schematic rules:
+    1. Reference Levels (PDH/PDL, PWH/PWL, Session H/L) are NEVER used as blind
+       standalone magnets. They act ONLY as:
+       (a) Confluence Boosters when aligned with confirmed External/Internal Swings.
+       (b) Brick-Wall Vetoes when an unmitigated (fresh, touches <= 2) level blocks
+           the path to TP1 (+2.2R).
+       (c) Touch Decay: Excessive touches (>= 3 without displacement) weaken a level.
+    2. Internal vs External Swings & Valid vs Invalid Liquidity Reads:
+       - Stepping candle wicks without a confirmed topological pivot != liquidity pool.
+       - Wick through + close beyond level = Price Acceptance (Continuation), NOT Reversal.
+       - Valid Reversal Read = Confirmed Swing/Pool + Wick Sweep + Body Reclaim back
+         inside the level (within max_reclaim_bars=2) + subsequent BOS close.
+    """
+
+    @staticmethod
+    def compute_causal_reference_levels(
+        ts_ns: np.ndarray,
+        highs: np.ndarray,
+        lows: np.ndarray,
+        closes: np.ndarray,
+        atr: np.ndarray,
+        idx: int,
+    ) -> ReferenceLevelSnapshot:
+        snap = ReferenceLevelSnapshot()
+        if idx < 288:  # Need at least 1 full day of 5m bars (288 bars)
+            return snap
+
+        sample_ts = int(ts_ns[idx])
+        if 10**14 <= sample_ts < 10**17:  # pandas >= 2.2 / 3.0 microsecond asi8
+            ts_ns = ts_ns * 1_000
+        elif 10**11 <= sample_ts < 10**14:  # millisecond timestamps
+            ts_ns = ts_ns * 1_000_000
+        elif sample_ts < 10**11:  # second timestamps
+            ts_ns = ts_ns * 1_000_000_000
+
+        sec = int(ts_ns[idx] // 1_000_000_000)
+        cur_day = sec // 86400
+        cur_day_start_ns = cur_day * 86400 * 1_000_000_000
+        prev_day_start_ns = (cur_day - 1) * 86400 * 1_000_000_000
+
+        # Scan backward causally (max 10 days = 2880 5m bars)
+        start_scan = max(0, idx - 2880)
+        ts_slice = ts_ns[start_scan : idx + 1]
+        h_slice = highs[start_scan : idx + 1]
+        l_slice = lows[start_scan : idx + 1]
+
+        # 1. Fixed UTC Previous Day High / Low (PDH / PDL)
+        pd_mask = (ts_slice >= prev_day_start_ns) & (ts_slice < cur_day_start_ns)
+        if np.any(pd_mask):
+            snap.pdh = float(np.max(h_slice[pd_mask]))
+            snap.pdl = float(np.min(l_slice[pd_mask]))
+
+        # 2. Fixed UTC Previous Week High / Low (PWH / PWL)
+        # Unix epoch 1970-01-01 was Thursday (day 4); align to Monday 00:00 UTC
+        cur_week = (cur_day + 3) // 7
+        cur_week_start_day = cur_week * 7 - 3
+        prev_week_start_day = (cur_week - 1) * 7 - 3
+        cur_week_start_ns = cur_week_start_day * 86400 * 1_000_000_000
+        prev_week_start_ns = prev_week_start_day * 86400 * 1_000_000_000
+
+        pw_mask = (ts_slice >= prev_week_start_ns) & (ts_slice < cur_week_start_ns)
+        if np.any(pw_mask):
+            snap.pwh = float(np.max(h_slice[pw_mask]))
+            snap.pwl = float(np.min(l_slice[pw_mask]))
+
+        # 3. Current Day Completed Session Ranges (Asia: 00:00-07:00 UTC, London: 07:00-12:30 UTC)
+        cur_Asia_end_ns = cur_day_start_ns + 7 * 3600 * 1_000_000_000
+        cur_Lon_end_ns = cur_day_start_ns + int(12.5 * 3600) * 1_000_000_000
+
+        if ts_ns[idx] >= cur_Asia_end_ns:
+            asia_mask = (ts_slice >= cur_day_start_ns) & (ts_slice < cur_Asia_end_ns)
+            if np.any(asia_mask):
+                snap.asia_high = float(np.max(h_slice[asia_mask]))
+                snap.asia_low = float(np.min(l_slice[asia_mask]))
+
+        if ts_ns[idx] >= cur_Lon_end_ns:
+            lon_mask = (ts_slice >= cur_Asia_end_ns) & (ts_slice < cur_Lon_end_ns)
+            if np.any(lon_mask):
+                snap.london_high = float(np.max(h_slice[lon_mask]))
+                snap.london_low = float(np.min(l_slice[lon_mask]))
+
+        # 4. Count today's touches on PDH/PDL to model level weakening (Touch Decay)
+        today_mask = ts_slice >= cur_day_start_ns
+        if np.any(today_mask):
+            cur_atr = max(float(atr[idx]), float(closes[idx]) * 0.001)
+            tol = 0.20 * cur_atr
+            th = h_slice[today_mask]
+            tl = l_slice[today_mask]
+            if not np.isnan(snap.pdh):
+                snap.pdh_touches = int(np.sum(th >= snap.pdh - tol))
+            if not np.isnan(snap.pdl):
+                snap.pdl_touches = int(np.sum(tl <= snap.pdl + tol))
+
+        return snap
+
+    @staticmethod
+    def validate_sweep_and_reclaim(
+        side: int,
+        pool_level: float,
+        is_confirmed_pivot_or_ref: bool,
+        highs: np.ndarray,
+        lows: np.ndarray,
+        closes: np.ndarray,
+        atr: np.ndarray,
+        sweep_idx: int,
+        current_idx: int,
+        internal_bos_level: float,
+    ) -> Tuple[bool, str, float]:
+        """
+        Enforces Schematic Image 2 ('INTERNAL LIQUIDITY: VALID vs INVALID READS'):
+        - Rule C (WRONG): Stepping candle wicks without a confirmed pivot != pool.
+        - Rule D (WRONG): Wick through + close outside level = Price Acceptance.
+        - Rules A & B (VALID): Confirmed Swing/Ref Pool -> Wick Sweep -> Reclaim Close
+          back inside pool_level (within 2 bars) -> Structure Break Close (BOS) beyond
+          internal_bos_level.
+        Returns: (is_valid, status_tag, quality_score)
+        """
+        if not is_confirmed_pivot_or_ref or np.isnan(pool_level) or np.isnan(internal_bos_level):
+            return False, "REJECT_NOT_CONFIRMED_POOL", 0.0
+
+        if current_idx < sweep_idx or (current_idx - sweep_idx) > 8:
+            return False, "REJECT_STALE_SWEEP", 0.0
+
+        cur_atr = max(float(atr[current_idx]), float(closes[current_idx]) * 0.001)
+
+        if side == 1:  # BULLISH: Sweep below SSL (pool_level), Reclaim > pool_level, BOS > internal_bos_level
+            sweep_low = float(lows[sweep_idx])
+            if sweep_low >= pool_level:
+                return False, "REJECT_NO_SSL_SWEEP", 0.0
+
+            # Check if sweep candle or next candle reclaimed above pool_level
+            reclaim_bar = -1
+            for k in range(sweep_idx, min(current_idx + 1, sweep_idx + 2)):
+                if float(closes[k]) > pool_level:
+                    reclaim_bar = k
+                    break
+
+            if reclaim_bar == -1:
+                # Rule D: Close below pool_level without immediate reclaim = Bearish Price Acceptance!
+                return False, "REJECT_BEARISH_PRICE_ACCEPTANCE", 0.0
+
+            # Ensure no subsequent bar closed back below sweep_low (invalidated sweep)
+            if np.any(closes[reclaim_bar : current_idx + 1] < pool_level):
+                return False, "REJECT_LOST_RECLAIM", 0.0
+
+            # Require BOS close above internal swing high
+            if float(closes[current_idx]) <= internal_bos_level:
+                return False, "AWAITING_BOS_CLOSE", 0.0
+
+            penetration_atr = (pool_level - sweep_low) / cur_atr
+            # Optimal spring penetration is 0.10 to 1.25 ATR
+            quality = float(np.exp(-0.5 * ((penetration_atr - 0.45) / 0.45) ** 2))
+            return True, "VALID_BULLISH_SWEEP_RECLAIM_BOS", max(0.55, quality)
+
+        else:  # BEARISH: Sweep above BSL (pool_level), Reclaim < pool_level, BOS < internal_bos_level
+            sweep_high = float(highs[sweep_idx])
+            if sweep_high <= pool_level:
+                return False, "REJECT_NO_BSL_SWEEP", 0.0
+
+            reclaim_bar = -1
+            for k in range(sweep_idx, min(current_idx + 1, sweep_idx + 2)):
+                if float(closes[k]) < pool_level:
+                    reclaim_bar = k
+                    break
+
+            if reclaim_bar == -1:
+                # Rule D: Close above pool_level without immediate reclaim = Bullish Price Acceptance!
+                return False, "REJECT_BULLISH_PRICE_ACCEPTANCE", 0.0
+
+            if np.any(closes[reclaim_bar : current_idx + 1] > pool_level):
+                return False, "REJECT_LOST_RECLAIM", 0.0
+
+            if float(closes[current_idx]) >= internal_bos_level:
+                return False, "AWAITING_BOS_CLOSE", 0.0
+
+            penetration_atr = (sweep_high - pool_level) / cur_atr
+            quality = float(np.exp(-0.5 * ((penetration_atr - 0.45) / 0.45) ** 2))
+            return True, "VALID_BEARISH_SWEEP_RECLAIM_BOS", max(0.55, quality)
+
+
+# ============================================================================
+# SURGICAL MODULE 2: DRAWDOWN-SAFE EXACT-1.0R SMALL ACCOUNT CASHFLOW MANAGER
+# Eliminates the 58% MaxDD 'period_anchor=month' trap via Downward-Safe Anchoring
+# ============================================================================
+
+class DrawdownSafeExactRManager:
+    """
+    1. Exact-1.0R Fee-Inclusive Sizing:
+       Notional = Risk_USD / (sl_pct + fee_rt_pct)
+       -> Worst-case full stop-out is strictly -1.000R (never -1.25R or -1.65R).
+    2. Minimum Structural Stop Clamp (min_sl_pct = 0.0040):
+       -> Prevents microscopic noise stops where exchange fees eat >20% of R.
+    3. Asymmetric Downward-Safe Equity Anchoring:
+       anchor_equity = min(week_start_equity, active_equity)
+       -> During a winning streak within a week, Risk_USD stays anchored to
+          week_start_equity so a sudden reversal never gives back more dollars
+          than earlier wins (+R = -$ paradox eliminated!).
+       -> During a losing streak, anchor_equity immediately steps down with
+          active_equity so percentage drawdown never snowballs (fixes V11's 58% DD!).
+    4. High-Water-Mark 50/50 Vault Skimming:
+       -> Skims 50% of net profits above HWM into an untouchable Vault.
+    """
+
+    def __init__(
+        self,
+        initial_equity: float = 100.0,
+        base_risk_pct: float = 0.030,        # 3.0% standard risk
+        aplus_risk_pct: float = 0.034,       # Tight 3.4% A+ risk (prevents size-skew inversions)
+        dd_throttle_threshold: float = 0.12, # Smooth throttle starts at 12% DD
+        dd_throttle_mult: float = 0.75,      # 0.75x risk when in >12% DD
+        skim_step_usd: float = 25.0,
+        skim_fraction: float = 0.50,
+        max_leverage: float = 10.0,
+        max_margin_fraction: float = 0.85,
+        daily_loss_limit_r: float = -2.0,
+    ):
+        self.initial_equity = float(initial_equity)
+        self.base_risk_pct = float(base_risk_pct)
+        self.aplus_risk_pct = float(aplus_risk_pct)
+        self.dd_throttle_threshold = float(dd_throttle_threshold)
+        self.dd_throttle_mult = float(dd_throttle_mult)
+        self.skim_step_usd = float(skim_step_usd)
+        self.skim_fraction = float(skim_fraction)
+        self.max_leverage = float(max_leverage)
+        self.max_margin_fraction = float(max_margin_fraction)
+        self.daily_loss_limit_r = float(daily_loss_limit_r)
+
+    def resolve_risk_usd(
+        self,
+        active_equity: float,
+        peak_active_equity: float,
+        week_start_equity: float,
+        is_aplus: bool = False,
+    ) -> Tuple[float, float]:
+        # Downward-safe anchor: never bet based on vanished equity!
+        anchor_eq = min(float(week_start_equity), float(active_equity))
+        pct = self.aplus_risk_pct if is_aplus else self.base_risk_pct
+
+        # Smooth drawdown protection relative to peak active equity
+        if peak_active_equity > 0:
+            dd = max(0.0, (peak_active_equity - active_equity) / peak_active_equity)
+            if dd >= self.dd_throttle_threshold:
+                pct *= self.dd_throttle_mult
+
+        risk_usd = anchor_eq * pct
+        eff_pct = risk_usd / max(active_equity, 1e-9)
+        return float(risk_usd), float(eff_pct)
+
+    def compute_exact_1r_notional(
+        self,
+        risk_usd: float,
+        active_equity: float,
+        entry_price: float,
+        stop_price: float,
+        fee_rt_pct: float = 0.0010,
+        free_margin_usd: Optional[float] = None,
+    ) -> Tuple[float, float]:
+        if entry_price <= 0:
+            return 0.0, 0.0
+        sl_pct = abs(entry_price - stop_price) / entry_price
+        if sl_pct <= 1e-6:
+            return 0.0, 0.0
+
+        # Fee-inclusive denominator guarantees full stop-out <= -1.000R
+        effective_stop_pct = sl_pct + max(0.0, float(fee_rt_pct))
+        desired_notional = risk_usd / effective_stop_pct
+
+        avail_margin = active_equity if free_margin_usd is None else min(active_equity, free_margin_usd)
+        max_notional = max(0.0, avail_margin * self.max_margin_fraction * self.max_leverage)
+        notional = min(desired_notional, max_notional)
+        qty = notional / entry_price
+        return float(notional), float(qty)
 
