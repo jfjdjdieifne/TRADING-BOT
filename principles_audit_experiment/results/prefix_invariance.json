@@ -1,0 +1,52 @@
+{
+  "boundary_patch": "runtime-only: EOD exit index moved to last known prefix bar",
+  "source_hashes": {
+    "V8_3Asset_1PosEach_QC.py": "ebeda99ca3707edae7c07b298e56af2d1d302858973fc7e8be51a506f5928256",
+    "smc_v4_portfolio.py": "bec70ed41027dfcc29e8766d2645d4ef734b998dd7347533e314a5eb658517f0",
+    "full_trade_artifact": "b39e4ec0202f1b7b61472d17cd318b5558eaad257551b1c661fe1bf430252123"
+  },
+  "cutoffs": {
+    "2022-01-01 00:00:00+00:00": {
+      "prefix_source_bars": {
+        "XAUUSD": 707677,
+        "NSXUSD": 682908,
+        "BTCUSD": 314850
+      },
+      "expected_completed_trades": 337,
+      "observed_completed_trades": 337,
+      "exact_match": true,
+      "missing_count": 0,
+      "unexpected_count": 0,
+      "missing_examples": [],
+      "unexpected_examples": []
+    },
+    "2023-01-01 00:00:00+00:00": {
+      "prefix_source_bars": {
+        "XAUUSD": 1062245,
+        "NSXUSD": 1025619,
+        "BTCUSD": 419970
+      },
+      "expected_completed_trades": 521,
+      "observed_completed_trades": 521,
+      "exact_match": true,
+      "missing_count": 0,
+      "unexpected_count": 0,
+      "missing_examples": [],
+      "unexpected_examples": []
+    },
+    "2025-01-01 00:00:00+00:00": {
+      "prefix_source_bars": {
+        "XAUUSD": 1726589,
+        "NSXUSD": 1665834,
+        "BTCUSD": 630482
+      },
+      "expected_completed_trades": 957,
+      "observed_completed_trades": 957,
+      "exact_match": true,
+      "missing_count": 0,
+      "unexpected_count": 0,
+      "missing_examples": [],
+      "unexpected_examples": []
+    }
+  }
+}
