@@ -427,8 +427,12 @@ class Engine:
         return True
 
     # ---------------- structure target (>= 3R floor) ---------------- #
-    def nearest_ceiling(self, c):
-        """Nearest liquidity box / swing ceiling above price [owner spec]."""
+    def nearest_ceiling(self, c, ir=0.0):
+        """Nearest VALID liquidity ceiling >= 3R above price [owner spec].
+
+        Picks the closest ceiling that actually pays >= 3x risk; a near
+        box at 2R no longer vetoes the trade when the next major level
+        sits at 6R (bull runs must be allowed to pay 5/10/20R)."""
         s = self.s
         cands = []
         if len(s.h4) >= 20:
@@ -440,7 +444,15 @@ class Engine:
             cands.append(sw)
         if s.e200_4 > 0 and s.e200_4 > c:
             cands.append(s.e200_4)
-        return min(cands) if cands else None
+        cands = sorted(set(cands))
+        if not cands:
+            return None
+        # strict: the NEAREST ceiling must itself pay >= 3R — skipping a
+        # near 2R box for a far 6R one failed (near resistance caps the
+        # ride first; measured negative)
+        if ir <= 0 or (cands[0] - c) >= 3.0 * ir:
+            return cands[0]
+        return None
 
     # ---------------- 5m brain ---------------- #
     def on_5m(self, bar):
@@ -493,7 +505,9 @@ class Engine:
             if s.b5 > p["exp_b5"]:
                 self._pending = None
                 self._cnt("pending_expired")
-            elif c < p["line"] - 1.0 * s.atr1:
+            elif c < p["line"] - 0.45 * s.atr1:
+                # tight knife-cancel: a retest that collapses through the
+                # line is not a retest (was 1.0*atr — too forgiving)
                 self._pending = None
                 self._cnt("pending_broke")
             elif l <= p["line"]:
@@ -556,13 +570,13 @@ class Engine:
             return
         regime = self.regime
         if regime == "SUPER_BULL":
-            risk_pct, slot = 0.030, 0.85
+            risk_pct, slot = 0.030, 0.95
         elif regime == "NORMAL_BULL":
-            risk_pct, slot = 0.026, 0.75
+            risk_pct, slot = 0.026, 0.90
         elif regime == "RANGE_SNIPER":
-            risk_pct, slot = 0.022, 0.65
+            risk_pct, slot = 0.022, 0.80
         else:
-            risk_pct, slot = 0.018, 0.55
+            risk_pct, slot = 0.018, 0.65
         if probe:
             risk_pct *= PROBE_RISK_MULT
         risk_usdt = eq * risk_pct
@@ -630,13 +644,13 @@ class Engine:
             return
         regime = self.regime
         if regime == "SUPER_BULL":
-            risk_pct, slot = 0.030, 0.85
+            risk_pct, slot = 0.030, 0.95
         elif regime == "NORMAL_BULL":
-            risk_pct, slot = 0.026, 0.75
+            risk_pct, slot = 0.026, 0.90
         elif regime == "RANGE_SNIPER":
-            risk_pct, slot = 0.022, 0.65
+            risk_pct, slot = 0.022, 0.80
         else:
-            risk_pct, slot = 0.018, 0.55
+            risk_pct, slot = 0.018, 0.65
         if probe:
             risk_pct *= PROBE_RISK_MULT
         risk_usdt = eq * risk_pct
@@ -708,8 +722,8 @@ class Engine:
         ir = max(min_ir, min(raw_ir, max_ir))
 
         # STRUCTURE TARGET (floor 3R, never clamped down)
-        res = self.nearest_ceiling(px)
-        if res is None or (res - px) < 3.0 * ir:
+        res = self.nearest_ceiling(px, ir)
+        if res is None:
             self._cnt("gate_target_below_3r")
             return 0.0, 0.0, "", 0.0
         tp_r = (res - px) / ir
@@ -735,6 +749,38 @@ class Engine:
                 if ago_ok and wash and hl and div and turn and pos_20 <= 0.38:
                     arm = "W_CAP_BOTTOM"
                     score = 92.0 + strength * 100.0
+
+        # ARM 1b: SWEEP_RECLAIM [any-market idea: liquidity sweep of prior
+        # 1h lows + DISPLACEMENT reclaim (absorption, not a drift).
+        # Measured v1 (weak): 47% WR — hardened: shallow sweep only,
+        # strong bull reclaim bar, volume confirmation, needs >=4R pay]
+        if (not arm and len(l1) >= 24 and len(s.c1) >= 24
+                and tp_r >= 3.2):
+            swept_zone = min(l1[-16:-4])
+            shallow = min(l1[-4:]) >= swept_zone - 1.00 * s.atr1
+            reclaim_bar = (c - s.o1[-1]) >= 0.25 * s.atr1
+            vol_ok = v >= 1.10 * s.vma1 if s.vma1 > 0 else False
+            if (min(l1[-4:]) < swept_zone <= c and shallow
+                    and reclaim_bar and vol_ok and c > s.e20_1
+                    and c > s.o1[-1] and 38.0 <= s.rsi1 <= 66.0
+                    and pos_20 <= 0.55):
+                arm = "SWEEP_RECLAIM"
+                score = 90.0 + strength * 100.0
+
+        # ARM 1c: E20_BOUNCE [any-market idea: TRUE uptrend pullback into
+        # the 1h EMA20 pocket (stack e20>e50, price above both 4h e20)
+        # measured v1 (weak): 46% WR — hardened: strict stack + floor]
+        if (not arm and len(l1) >= 10 and s.e20_1 > 0
+                and tp_r >= 3.5):
+            strong_stack = (s.e20_1 > s.e50_1
+                            and s.c4 and s.c4[-1] > s.e20_4)
+            above_floor = min(l1[-6:-1]) >= s.e50_1 * 0.995
+            touched = min(l1[-6:-1]) <= s.e20_1 * 1.004
+            reclaim = c > s.e20_1 and c > s.o1[-1]
+            if (strong_stack and above_floor and touched and reclaim
+                    and 38.0 <= s.rsi1 <= 62.0 and pos_20 <= 0.55):
+                arm = "E20_BOUNCE"
+                score = 85.0 + strength * 100.0
 
         # ARM 2: DEMAND_4H_SPRING — DISABLED [measured: 3 wins / 10 losses
         # (WR 23%) across the full window; the only arm dragging PF below 1]
@@ -787,6 +833,8 @@ class Engine:
         r_high = (s.mfe - s.ep) / ir
         r_close_1h = (s.c1[-1] - s.ep) / ir if s.c1 else r_now
         mfe_r = r_high
+        if self.cur_trade is not None and r_high > (self.cur_trade.get("mfe_r") or 0.0):
+            self.cur_trade["mfe_r"] = round(r_high, 2)
 
         if c <= s.ep - CATASTOPHE_R * ir:
             self._close(c, "CATASTROPHIC_GUARD")
@@ -806,6 +854,19 @@ class Engine:
                 s.sl = max(s.sl, s.ep + 0.35 * ir)
             if r_high >= 0.45:
                 s.sl = max(s.sl, s.ep + 0.25 * ir)
+            # MILK TRAIL [V18b]: from +0.45R the 1h EMA trails the ride —
+            # locks stay as the FLOOR, the EMA takes over on runs so
+            # winners stop harvesting at +0.18 and ride structure
+            # (measured: winners averaged 0.98R MFE, realized 0.42)
+            if r_high >= 0.45 and s.e20_1 > 0:
+                s.sl = max(s.sl, s.e20_1 - 0.35 * s.atr1)
+            # EARLY_ABORT [V18b]: retest fill that immediately breaks
+            # (first 30min, -0.40R) is a wrong knife, not noise — exit
+            # small instead of walking to -1.1R (losers averaged 0.18R
+            # MFE: they were wrong from bar one)
+            if (s.b5 - s.eb5) <= 6 and r_now <= -0.40:
+                self._close(c, "EARLY_ABORT")
+                return
             # STALL_TAKE [V18, WR lever]: confirmed +1.25R with dead
             # momentum exits as a WIN instead of round-tripping
             if r_high >= 1.45 and r_close_1h >= 1.25:
