@@ -1,0 +1,61 @@
+
+=== OFFLINE: trades_v27.csv · 297 trades · 827186 5m bars ===
+
+--- (1) the +3R lock, bounded by each trade's own life ---
+    WIN   n=  70   closed a 5m bar >= lock_line while ALIVE:   70
+    BE    n=  66   closed a 5m bar >= lock_line while ALIVE:    5
+    LOSS  n= 161   closed a 5m bar >= lock_line while ALIVE:    0
+    => lost winners = 5 of 75 locked (6.7%)   [the v28 brief claims 32.7%]
+    => WR CEILING of the whole claim-1 fix: 31.78%  (75W/61BE/161L)   [today 30.30%]
+       lost winner: 2021-09-28 20:00:00+00:00  frame=30min  locked at 5m bar #16 of 41 alive
+       lost winner: 2021-11-03 18:30:00+00:00  frame=30min  locked at 5m bar #6 of 161 alive
+       lost winner: 2023-01-22 12:00:00+00:00  frame=1h  locked at 5m bar #36 of 47 alive
+       lost winner: 2024-06-01 00:00:00+00:00  frame=1h  locked at 5m bar #461 of 515 alive
+       lost winner: 2026-02-04 02:45:00+00:00  frame=15min  locked at 5m bar #10 of 101 alive
+
+--- (2) management rules on the 5m tape (offline estimate) ---
+    rule                            n    W   BE    L     WR%  >=4R    maxR     totR
+    v27 booked (exec frame)       297   70   66  161   30.30    18   19.38    43.55
+    5m lock + 5m WICK defence     297   75   61  161   31.78     6   12.84   -19.77
+    5m lock + 5m CLOSE exit       297   44   91  162   21.36    12   12.86    -6.55
+    what the wick defence does to the runners >= 6R:
+       2021-07-30 12:15:00+00:00   19.38R ->   3.00R
+       2026-03-14 16:00:00+00:00   16.92R ->   3.00R
+       2022-05-28 02:00:00+00:00   15.82R ->   3.00R
+       2025-10-30 21:35:00+00:00   12.86R ->   3.00R
+       2021-10-11 00:00:00+00:00   12.84R ->  12.84R
+       2024-07-04 14:30:00+00:00   12.29R ->   3.00R
+       2021-02-16 01:00:00+00:00    8.72R ->   8.72R
+       2024-07-19 08:00:00+00:00    8.38R ->   8.38R
+       2026-01-12 08:45:00+00:00    6.52R ->   6.52R
+       2025-12-17 23:30:00+00:00    6.40R ->   3.00R
+       2021-01-04 11:15:00+00:00    6.30R ->   6.30R
+       2022-07-19 04:30:00+00:00    6.08R ->   3.00R
+
+--- (3) causal pre-entry gates (available at the entry tick) ---
+    POST-HOC features are excluded by construction: disp_mid and
+    disp_bos look spectacular (73.53% @108 / 62.50% @145) but they
+    are set inside _manage at L1763/L1767 - AFTER the fill - and
+    written to the trade row at exit (L1681/L1682). Filtering on
+    them is the same lookahead trap as v24's crossed_purple_mid.
+    gates scanned: 224   passing ASSERT5: 14
+    gate                                            n    W   BE    L     WR%  >=4R    maxR     totR ymin A3
+    nar_raid_high_4h=0                            233   59   48  126   31.89    15   16.92     46.1   13 Y
+    nar_range_pos_4h>0.0                          257   62   62  133   31.79    15   19.38     41.7   15 Y
+    nar_range_pos_4h>-0.25                        285   68   64  153   30.77    16   19.38     34.8   15 Y
+    nar_sky_r_4h<=15.0                            180   42   43   95   30.66    10   16.92     14.3   13 Y
+    nar_ifvg_r_4h>0.05                            292   69   65  158   30.40    18   19.38     45.9   16 Y
+    nar_ifvg_r_4h>0.1                             286   68   62  156   30.36    17   16.92     29.6   15 Y
+    nar_sky_r_1h>-1.0                             288   68   64  156   30.36    17   19.38     40.8   16 Y
+    nar_sky_r_1h>0.0                              281   67   60  154   30.32    17   19.38     41.0   16 Y
+    nar_ifvg_r_1h>0.03                            280   66   61  153   30.14    17   19.38     39.6   15 Y
+    nar_ifvg_r_1h>0.05                            267   63   57  147   30.00    16   19.38     25.9   15 Y
+    nar_unicorn_exec=0                            237   55   52  130   29.73    14   19.38     35.3   14 Y
+    be_at_entry=0                                 267   66   40  161   29.07    16   19.38     24.0   14 Y
+    => BEST causal A5-passing gate: nar_raid_high_4h=0  WR 31.89% @ n=233
+    NOTE: these are post-hoc readings of a frozen list. Claim 2 says
+    a LIVE gate can beat them, because rejecting a setup frees the
+    engine's single slot and exposes the setups queued behind it.
+    Only the `live` half can answer that - see below.
+
+    wrote results/lab_v28_offline.json

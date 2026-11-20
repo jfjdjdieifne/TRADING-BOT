@@ -134,7 +134,14 @@ TIER3_ENTRY_CHOKE = True   # the ONLY mechanism that makes "no 4th
                            # "structural reset, not a time freeze").
                            # A 4th consecutive loss then cannot exist:
                            # the 4th trade is only taken after a reset.
-CTX_MODE = "v28q"        # v28: live structural quality gate (see _ctx_gate)
+CTX_MODE = "or"            # or  = 4H demand OR no failed 4H BSL raid
+#  ^ v28 MEASURED: the live quality gates "v28q"/"v28raid" are OFF here on
+#    purpose. Post-hoc on the frozen v27 list they read 33.12% @ n=199 and
+#    31.89% @ n=233; driven LIVE inside the engine (results/run_v28_gate_log.txt)
+#    "v28q" produced 40 trades, 8W/25L = 24.24%, zero fills after 2022 and
+#    reject_ctx_gate_v28q = 438,989. The gate is evaluated on the candidate
+#    stream at every bar, so rejecting a candidate changes WHICH setup draws
+#    next - the post-hoc reading does not survive contact with the engine.
                            # and = both
                            # quarter = and + entry in the 4H bottom 25%
                            # sky10   = and + 4H open sky >= 10R
@@ -1322,6 +1329,12 @@ class ICTBoxEngine:
             rp = S4.range_pos(entry)
             ok = ok and rp is not None and rp > 0.0
             return ok, ("" if ok else "reject_ctx_gate_v28q")
+        if CTX_MODE == "v28raid":
+            # v28 live arm B: only the single best causal gate on its own
+            # (post-hoc 31.89% @ n=233). One condition instead of two, to
+            # separate "the gate is wrong" from "two conditions compounding
+            # on a per-bar candidate scan reshape the whole stream".
+            return (not raid), ("" if not raid else "reject_ctx_gate_v28raid")
         if CTX_MODE == "sky10":
             ok = dem and not raid
             w = S4.nearest_ceiling(entry)
