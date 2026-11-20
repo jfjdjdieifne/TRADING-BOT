@@ -1,0 +1,84 @@
+{
+  "gate_raid": {
+    "n": 262,
+    "W": 62,
+    "BE": 51,
+    "L": 149,
+    "wr": 29.38,
+    "totR": 15.1,
+    "maxR": 16.92,
+    "ge4R": 14,
+    "yearly": {
+      "2021": 75,
+      "2022": 56,
+      "2023": 24,
+      "2024": 51,
+      "2025": 32
+    },
+    "streak_be_resets": 3,
+    "streak_conservative": 0,
+    "asserts": {
+      "A1": {
+        "passed": false,
+        "observed": "WR >= 60% :: 29.38% (62W/149L)"
+      },
+      "A2": {
+        "passed": true,
+        "observed": "min_winner_R >= 3.00 :: 3.00R"
+      },
+      "A3": {
+        "passed": true,
+        "observed": "runners_4r_plus >= 5 AND max >= 6.0 :: >=4R:14 max:16.92R"
+      },
+      "A4": {
+        "passed": true,
+        "observed": "max_consecutive_losses <= 3 :: 3"
+      },
+      "A5": {
+        "passed": true,
+        "observed": "total >= 150 AND yearly >= 12 :: total:262 yearly:{2021: np.int64(75), 2022: np.int64(56), 2023: np.int64(24), 2024: np.int64(51), 2025: np.int64(32)}"
+      }
+    }
+  },
+  "shield5m": {
+    "n": 272,
+    "W": 62,
+    "BE": 62,
+    "L": 148,
+    "wr": 29.52,
+    "totR": -24.29,
+    "maxR": 12.84,
+    "ge4R": 6,
+    "yearly": {
+      "2021": 82,
+      "2022": 69,
+      "2023": 35,
+      "2024": 36,
+      "2025": 26
+    },
+    "streak_be_resets": 3,
+    "streak_conservative": 7,
+    "asserts": {
+      "A1": {
+        "passed": false,
+        "observed": "WR >= 60% :: 29.52% (62W/148L)"
+      },
+      "A2": {
+        "passed": true,
+        "observed": "min_winner_R >= 3.00 :: 3.00R"
+      },
+      "A3": {
+        "passed": true,
+        "observed": "runners_4r_plus >= 5 AND max >= 6.0 :: >=4R:6 max:12.84R"
+      },
+      "A4": {
+        "passed": true,
+        "observed": "max_consecutive_losses <= 3 :: 3"
+      },
+      "A5": {
+        "passed": true,
+        "observed": "total >= 150 AND yearly >= 12 :: total:272 yearly:{2021: np.int64(82), 2022: np.int64(69), 2023: np.int64(35), 2024: np.int64(36), 2025: np.int64(26)}"
+      }
+    }
+  }
+}

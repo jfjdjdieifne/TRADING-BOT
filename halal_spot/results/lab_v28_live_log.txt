@@ -1,0 +1,25 @@
+
+########## LIVE COMBO: gate_raid  {'MANAGE_5M': False, 'CTX_MODE': 'v28raid'} ##########
+[gate_raid] n=262 62W/51BE/149L WR=29.38% totR=15.10 maxR=16.92 >=4R=14
+[gate_raid] ASSERT1 FAILED :: WR >= 60% :: 29.38% (62W/149L)
+[gate_raid] ASSERT2 PASSED :: min_winner_R >= 3.00 :: 3.00R
+[gate_raid] ASSERT3 PASSED :: runners_4r_plus >= 5 AND max >= 6.0 :: >=4R:14 max:16.92R
+[gate_raid] ASSERT4 PASSED :: max_consecutive_losses <= 3 :: 3
+[gate_raid] ASSERT5 PASSED :: total >= 150 AND yearly >= 12 :: total:262 yearly:{2021: np.int64(75), 2022: np.int64(56), 2023: np.int64(24), 2024: np.int64(51), 2025: np.int64(32)}
+[gate_raid] streak: BE-resets=3 conservative=0
+
+########## LIVE COMBO: shield5m  {'MANAGE_5M': True, 'MANAGE_5M_WICK': True, 'MANAGE_5M_SHIELD': True, 'CTX_MODE': 'or'} ##########
+[shield5m] n=272 62W/62BE/148L WR=29.52% totR=-24.29 maxR=12.84 >=4R=6
+[shield5m] ASSERT1 FAILED :: WR >= 60% :: 29.52% (62W/148L)
+[shield5m] ASSERT2 PASSED :: min_winner_R >= 3.00 :: 3.00R
+[shield5m] ASSERT3 PASSED :: runners_4r_plus >= 5 AND max >= 6.0 :: >=4R:6 max:12.84R
+[shield5m] ASSERT4 PASSED :: max_consecutive_losses <= 3 :: 3
+[shield5m] ASSERT5 PASSED :: total >= 150 AND yearly >= 12 :: total:272 yearly:{2021: np.int64(82), 2022: np.int64(69), 2023: np.int64(35), 2024: np.int64(36), 2025: np.int64(26)}
+[shield5m] streak: BE-resets=3 conservative=7
+
+================ LIVE COMPARISON TABLE ================
+combo         n    W   BE    L     WR%     totR  >=4R    maxR  asserts
+gate_raid   262   62   51  149   29.38    15.10    14   16.92  FPPPP
+shield5m    272   62   62  148   29.52   -24.29     6   12.84  FPPPP
+========================================================
+LAB_DONE exit=0

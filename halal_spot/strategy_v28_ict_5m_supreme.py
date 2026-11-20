@@ -1,8 +1,8 @@
 """
 strategy_v28_ict_narrative.py — PURE ICT NARRATIVE / ORDER-FLOW ENGINE
 =====================================================================
-Built from the FORENSIC AUDIT of v24 (audit_v28_narrative.py,
-audit_v28_shield.py, audit_v28_search.py) which replayed the market
+Built from the FORENSIC AUDIT of v24 (audit_v24_narrative.py,
+audit_v24_shield.py, audit_v24_search.py) which replayed the market
 story around all 249 v24 trades (62 WIN / 43 BE / 144 LOSS) and then
 bar-walked 1,668 (context-gate x shield-rule) counterfactuals.
 
@@ -153,7 +153,7 @@ BE_CONSUMES_RANGE = False  # a scratch is NOT a loss, so it does not
                            # assert 5 while the strict gate lifts WR)
 BE_RELEASES_STREAK = True  # a scratch is not a loss -> gate released
 ENTRY_LEVEL = "seam"       # seam = GreenBox top | green_mid = 50% of OB
-                           # v27 MEASURED (lab_v28_exact.py, 5m tape,
+                           # v27 MEASURED (lab_v27_exact.py, 5m tape,
                            # 297 real setups, fixed 3000-bar horizon):
                            #  buying DEEPER inside the box is worse, not
                            #  better, and monotonically so -
@@ -212,7 +212,7 @@ MANAGE_5M_WICK   = True    # defend the +3R floor with the 5m WICK from the
                            # at the floor: maxR 19.38 -> 12.84, >=4R 18->6,
                            # totR +43.55 -> -19.77 (results/_m28c in the
                            # v28 report). A3 survives by ONE runner.
-MANAGE_5M_SHIELD = False   # MEASURED HARMFUL (lab_v28_exact.py): arming
+MANAGE_5M_SHIELD = False   # MEASURED HARMFUL (lab_v27_exact.py): arming
                            # the BE shield on 5m closes drops the winners
                            # from 76 to 58 and the decided WR from 26.03%
                            # to 24.89% - a 5m close above entry+fees is
@@ -1316,7 +1316,7 @@ class ICTBoxEngine:
         if CTX_MODE == "v28q":
             # ---- v28 LIVE STRUCTURAL QUALITY GATE ----------------------
             # Scanned every causal-at-entry feature of the 297-trade v27
-            # book (results/_gate_scan_v28 in REPORT_AR_v28.md): 14 gates
+            # book (results/lab_v28_offline.txt / REPORT_AR_v28.md S3): 14 gates
             # pass ASSERT5 (n>=150 and every year >=12) and the best is
             #     NOT 4H-raid-high-failed  AND  4H range_pos > 0
             #     post-hoc n=199  51W/45BE/103L  WR 33.12%  ymin 13
@@ -1563,7 +1563,7 @@ class ICTBoxEngine:
         # edit that breaks them stops the run instead of silently
         # degrading the win rate.
         # Verified on the shipped artefacts BEFORE adding them:
-        #   trades_v25.csv (206) and trades_v28.csv (297) contain ZERO
+        #   trades_v25.csv (206) and trades_v27.csv (297) contain ZERO
         #   fills above green.y_top; 272/297 fills sit exactly ON it.
         # ============================================================ #
         seam = min(s.green.y_top, s.yellow.y_bottom)
@@ -2394,7 +2394,7 @@ def main():
                   f, indent=2)
     if failed:
         raise AssertionError(
-            f"v25 DID NOT PASS asserts {failed} — see asserts_v28.json")
+            f"v28 DID NOT PASS asserts {failed} — see asserts_v28.json")
     print("[v28] ALL FIVE ASSERTS PASSED")
 
 
