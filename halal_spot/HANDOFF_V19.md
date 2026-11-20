@@ -77,3 +77,79 @@ reject_below_3r 8 (no ≥3R pool), wait_no_fvg 204, cancel_target_first 2, cance
 - Folder: https://github.com/jfjdjdieifne/TRADING-BOT/tree/arena/d2e74635-trading-bot/halal_spot
 - Wipes: deliverables must be committed same session; pip reinstall after each wipe;
   recover worktree via `git fetch && git reset --hard origin/<branch>` then restore files from commits.
+
+
+---
+
+# HANDOFF ADDENDUM — strategy_v21_boxes.py (Visual Box Engine, 2026-11-17)
+
+## What changed vs v19 (the five "crimes" fixed)
+1. OB (GreenBox) built at the WAVE BASE (last down candle(s) before the
+   launch), clipped + **asserted under the YellowBox** (v19 drew it above
+   the broken high). asserts at lines 184-185.
+2. FVG (YellowBox) = pure visible gap `c3.low > c1.high` — no avg/vol
+   displacement filter; stack checked on the breaking wave itself with
+   prompt-grace of 2 candles after the break (no20-bar wait counter).
+3. 3R gate = 4H wall distance vs OPEN SKY: if no unbroken bearish 4H box
+   sits at/above the entry line (ATH expansion), the trade passes without
+   an old-high requirement (fixes bull-run rejections).
+4. NO hard TP, NO stagnation timer: structural trail under Protected Blue
+   after each BOS; at >=3R lock under a box (>=3R); top-sell only on
+   ratchet + bearish CHoCH + bearish FVG (none fired; all exits
+   STOP_BLUE/lock — measured max_R 9.88).
+5. Portfolio-ready (slot = 50% equity, max 2 slots, cash compounding);
+   data folder holds ONLY BTCUSD_5m (8 yearly csv.gz) so single-coin run.
+   HTF order-flow filter: releases after2 losses require purple-box
+   higher-low (rising) — blocked12 releases in measured run.
+
+## Architecture
+- `Box(y_bottom, y_top, start_idx, kind, tf)` with height/mid/
+  quarter_bottom/contains/is_below/overlaps/broken_up/down/wick_swept.
+- `ChartCanvas` (per tf): 3-bar fractal blues/reds, pure-gap yellows
+  (bull+bear), green OB from wave base, purple dealing range
+  (latest swing low -> latest swing high), bos/sweep/chop events,
+  prune every96 bars.
+- `ICTBoxEngine`: WAIT_ANCHOR (blue sweep | box-tap in BOS-continuation
+  state) -> WAIT_BOS (fresh red break) -> WAIT_SETUP (stack born from the
+  anchor, wall gate, third-loss gate) -> WAIT_RETRACE (fill strictly
+  after gate_idx; board/premium/wall re-checked AT fill) -> IN_POS.
+- EXEC_TF = "1H" (prompt allows15m/1H;15m measured PF0.75/WR27 —
+  boxes smaller than noise), STRUCT_TF = "4h".
+- Third-loss gate: fresh 4H red break (time-compared) + entry in the
+  bottom quarter of purple + board GREEN + purple rising.
+
+## MEASURED (2021-01 -> 2026-10, $200, BTC only)
+**77 trades | WR36.4% | PF1.63 | net +10.09% (200 -> 220.19) |
+DD -4.8% | avg win +2.47R / avg loss -1.13R | max_R +9.88 |
+max_consecutive_losses = 11 (FAIL vs required <=3 — OPEN GAP) |
+fees 8.22 | years: 2021 +9.3 / 2022 +3.7 / 2023 +0.5 / 2024 +7.1 /
+2025 -2.1 / 2026 +1.7 | months 22+/26-/22zero.
+BULL 2021-01..05: 9 trades, max_R 4.08, runners >=10R: 0 (vs v19 = 0
+trades — fixed; big runners still absent).**
+
+## Measured dead ends in v21 (do not retry)
+- EXEC15m: PF0.57-0.75, streak15-27 (noise eats0.4% stops).
+- Direct green-yellow overlap as a release gate: freezes the engine
+  (31k blocked,5 trades total).
+- Order-flow gate at ANCHOR (all entries): net drops +10.09 -> +6.79.
+- Box-tap anchors in every board state: garbage entries (restricted to
+  BOS_CONTINUATION).
+- Board recovery with close > blue bottom only: board flips green in
+  waterfalls (needs close > blue TOP).
+- Purple update requiring red.start >= blue.start: purple freezes in
+  downtrends, order-flow filter goes blind.
+- Event-consumption before state machine / state stuck IN_POS after
+  first exit / 4H-index vs15m-index gate comparison — all fixed
+  (each froze the engine to0-1 trades).
+
+## Open gaps (next session)
+1. max_consecutive_losses11 >3: streaks cluster in release clusters
+   (2021-04, 2022-09). Candidate: require release stack yellow.bottom
+   <= quarter (full stack cheap, not just entry) or1H board mode at
+   release — measure, do not guess.
+2. Bull runners >=10R still 0: lock/exit path never lets go early but
+   nothing in the9 bull trades rode past4.08R — inspect whether trail
+   stops at protected blue are too close during expansion.
+3. Multi-coin: only BTCUSD_5m exists in data/ — portfolio code is
+   ready (discover_symbols + SLOT/MAX_SLOTS) when more data arrives.
+4. 2025 -2.1%: check board RED/recovery cadence in that year.
