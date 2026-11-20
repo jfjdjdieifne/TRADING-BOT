@@ -1,0 +1,4 @@
+label,n,W,BE,L,WR_pct,ge4R,maxR,minW,avg_R,avg_loss_R,total_R,R_PF
+no cut (reference),206,59,0,147,28.64,13,19.38,3.0,0.08,-1.546,16.5,1.072
+cut at close < green floor,206,54,0,152,26.21,12,19.38,3.0,0.041,-1.427,8.4,1.039
+cut + fresh bearish FVG,206,55,0,151,26.7,12,19.38,3.0,0.034,-1.465,7.1,1.032
