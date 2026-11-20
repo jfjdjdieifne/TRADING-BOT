@@ -182,7 +182,24 @@ ENTRY_LEVEL = "seam"       # seam = GreenBox top | green_mid = 50% of OB
 #                 lab_v27's alpha=0.5, which kept the stop put).
 # The SACRED LAW holds by construction in every arm: order_px < seam and
 # order_px < purple.mid, and the two hard asserts in _enter still run.
-ENTRY_ARM      = "A"       # "seam" = v27/v28 baseline | A | B | C | D
+# ---- MEASURED (lab_v29_stop_entry.py, LIVE engine, full 2021-2026) ----
+#   arm     n    W/ BE/  L     WR%    >=4R  maxR   net%    PF   5 asserts
+#   seam  297   70/ 66/161   30.30     18  19.38  +31.90  1.26   4/5  <== v27, reproduced bit-for-bit
+#   A     294   47/ 54/193   19.58      6   8.53  -39.16  0.66   4/5
+#   B      48    8/  9/ 31   20.51      2   4.62  -10.09  0.54   2/5
+#   C       5    0/  1/  4    0.00      0   0.00   -8.61  0.00   2/5
+#   D     386   65/ 77/244   21.04     11  15.49  -34.02  0.74   4/5
+#   A+strict box gate  140  36/16/88   29.03   6   8.53  -12.43  0.77  3/5
+# NOT ONE arm beats the baseline, and every arm loses money. The fee
+# cannot be blamed: arms A/D keep risk = H exactly (median risk 0.346%
+# vs the seam's 0.327%) and their round-trip fee is 0.578R vs 0.612R, so
+# the lab_v27 alpha-sweep artefact (shrinking 1R under a fixed stop) is
+# provably absent here. What kills the hypothesis is ADVERSE SELECTION:
+# the order at the hunted level fills precisely when the OrderBlock has
+# failed. Of the 161 v27 trades hunted through old_stop_px, arm A turns
+# 20 into winners - and destroys 34 of v27's 70 winners on the way.
+# So the shipped default is the measured champion:
+ENTRY_ARM      = "seam"    # "seam" = v27/v28 baseline | A | B | C | D
 ARM_B_DEPTH    = 1.5       # H-multiples: fallback stop depth for arm B
 ARM_B_MAX_REACH= 3.0       # H-multiples: how far below to look for a SSL
 ARM_C_WICK     = 0.5       # H-multiples: minimum stop distance for arm C

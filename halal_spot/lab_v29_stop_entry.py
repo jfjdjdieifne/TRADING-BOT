@@ -45,6 +45,7 @@ USAGE
 """
 from __future__ import annotations
 
+import ast
 import json
 import sys
 from pathlib import Path
@@ -57,6 +58,13 @@ RESULTS = HERE / "results"
 sys.path.insert(0, str(HERE))
 
 ARMS = ["seam", "A", "B", "C", "D"]
+
+
+def _d(v):
+    """Box columns are written as Python dict reprs, not JSON."""
+    if isinstance(v, dict):
+        return v
+    return ast.literal_eval(v)
 MIN_R = 3.0
 YEARS = [str(y) for y in range(2021, 2027)]
 
@@ -104,14 +112,15 @@ def metrics(arm, tr, summ, count=None):
           .reindex(YEARS).fillna(0).astype(int).to_dict()) if n else \
         {y: 0 for y in YEARS}
     # both streak readings, disclosed side by side as always
-    cur = best = cons = 0
+    cur = best = cons = cons_best = 0
     for c in (tr["class"] if n else []):
         if c == "LOSS":
-            cur += 1; best = max(best, cur); cons += 1
+            cur += 1; best = max(best, cur)
+            cons += 1; cons_best = max(cons_best, cons)
         elif c == "WIN":
             cur = 0; cons = 0
         else:
-            cur = 0
+            cur = 0          # a BE resets the BE-resets reading only
     net = float(tr.net_pnl.sum()) if n else 0.0
     def fnum(k, d=0.0):
         v = summ.get(k)
@@ -124,7 +133,7 @@ def metrics(arm, tr, summ, count=None):
         maxR=round(float(tr.R.max()), 2) if n else 0.0,
         totR=round(float(tr.R.sum()), 2) if n else 0.0,
         avg_R=round(float(tr.R.mean()), 3) if n else 0.0,
-        streak_be_resets=best, streak_conservative=cons,
+        streak_be_resets=best, streak_conservative=cons_best,
         yearly=yr, ymin=min(yr[y] for y in YEARS[:5]),
         net_pct=round(100 * net / 200.0, 2),
         net_usd=round(net, 2),
@@ -173,10 +182,8 @@ def setup_key(df, seam_col, stop_col):
     if seam_col in df.columns:
         seam = df[seam_col].astype(float).round(2)
     else:                                   # v27 file: rebuild the seam
-        gt = df.green.apply(lambda d: json.loads(d)["y_top"]
-                            if isinstance(d, str) else d["y_top"])
-        yb = df.yellow.apply(lambda d: json.loads(d)["y_bottom"]
-                             if isinstance(d, str) else d["y_bottom"])
+        gt = df.green.apply(lambda d: float(_d(d)["top"]))
+        yb = df.yellow.apply(lambda d: float(_d(d)["bottom"]))
         seam = pd.concat([gt, yb], axis=1).min(axis=1).round(2)
     stop = df[stop_col].astype(float).round(2)
     return list(zip(seam, stop, df.exec_tf))
@@ -235,6 +242,137 @@ def convert(arm):
 
 
 # ==================================================================== #
+
+
+# ==================================================================== #
+# OFFLINE CROSS-CHECK (not the measurement - the live engine is)
+# ==================================================================== #
+FEE = 0.001
+
+
+def predict(arm="A", cap_bars=4032):
+    """Independent, zero-lookahead cross-check of what an arm does to the
+    v27 population. It walks the 5m tape forward from each v27 FILL, waits
+    for price to trade down to the arm's order level (that is the fill),
+    then resolves the arm's own lock/stop geometry from there.
+
+    It is NOT a substitute for the live engine: it ignores slot contention,
+    the consumed-range book, streak state and the redraw of later setups.
+    Its only job is to answer the v29 brief's question - of the trades that
+    were hunted through old_stop_px in v27, how many become winners when the
+    order rests at the hunted level? - before the 30-minute live runs land.
+
+    cap_bars bounds the walk (4032 x 5m = 14 days); unresolved trades are
+    reported separately, never silently booked."""
+    from engine.causal_primitives import load_asset_ohlcv, resample_causal_tf
+    tf5 = resample_causal_tf(load_asset_ohlcv(
+        HERE / "data" / "BTCUSD_5m", include_stems=None), "5min")
+    idx = tf5.index
+    O = tf5.Open.values; H = tf5.High.values
+    L = tf5.Low.values; C = tf5.Close.values
+    v27 = pd.read_csv(RESULTS / "trades_v27.csv")
+    rows = []
+    for _, t in v27.iterrows():
+        g = _d(t.green)
+        y = _d(t.yellow)
+        seam = min(float(g["top"]), float(y["bottom"]))
+        ost = float(t.stop_price)
+        h = seam - ost
+        if h <= 0:
+            continue
+        if arm in ("A", "B", "C"):
+            lvl = ost
+        elif arm == "D":
+            lvl = ost + 0.5 * h
+        else:
+            lvl = seam
+        if arm == "A":
+            nstop = ost - h
+        elif arm == "B":
+            nstop = ost - 1.5 * h          # offline: the fallback depth
+        elif arm == "C":
+            nstop = None                   # measured at fill from the wick
+        elif arm == "D":
+            nstop = ost - 0.5 * h
+        else:
+            nstop = ost
+        i0 = idx.searchsorted(pd.Timestamp(t.entry_time), side="right")
+        i1 = min(len(tf5), i0 + cap_bars)
+        fill = np.nan; fr = np.nan; res = "NO_FILL"; rmax = np.nan
+        back_to_seam = False
+        j = i0
+        while j < i1:
+            if arm == "C":
+                if L[j] <= ost and ost < C[j] <= seam:
+                    fill = C[j]
+                    nstop = min(L[j], fill - 0.5 * h)
+                    fr = j
+                    break
+            elif L[j] <= lvl:
+                fill = lvl if O[j] >= lvl else O[j]
+                fr = j
+                break
+            j += 1
+        if not np.isnan(fill):
+            risk = fill - nstop
+            if risk <= 2 * FEE * fill:
+                res = "FEE_FLOOR"
+            else:
+                lock = (fill * (1 + FEE) + MIN_R * risk) / (1 - FEE)
+                rmax = 0.0
+                k = fr
+                while k < i1:
+                    if C[k] >= seam:
+                        back_to_seam = True
+                    r_now = ((C[k] - fill) - fill * FEE - C[k] * FEE) / risk
+                    rmax = max(rmax, r_now)
+                    # conservative intra-bar order: the stop is honoured
+                    # before the lock on the same bar
+                    if L[k] <= nstop:
+                        px = nstop if O[k] >= nstop else O[k]
+                        fr_ = ((px - fill) - fill * FEE - px * FEE) / risk
+                        res = "LOSS" if fr_ < -0.05 else "BE"
+                        break
+                    if C[k] >= lock:
+                        res = "WIN"
+                        break
+                    k += 1
+                else:
+                    res = "OPEN_AT_CAP"
+                fr = rmax
+        rows.append(dict(entry_time=t.entry_time, v27_class=t["class"],
+                         v27_R=round(float(t.R), 2), v27_exit=t.exit_reason,
+                         exec_tf=t.exec_tf, arm=arm, res=res,
+                         fill=fill, rmax_close=(None if np.isnan(fr)
+                                                else round(float(fr), 2)),
+                         back_to_seam=back_to_seam))
+    d = pd.DataFrame(rows)
+    d.to_csv(RESULTS / f"predict_v29_{arm}.csv", index=False)
+    print(f"\n=== OFFLINE CROSS-CHECK · arm {arm} · cap {cap_bars} 5m bars "
+          f"(14 days) ===")
+    print(f"    v27 trades analysed: {len(d)}")
+    print("    outcome of the arm on that population:")
+    print(d.res.value_counts().to_string())
+    for src in ("LOSS", "BE", "WIN"):
+        sub = d[d.v27_class == src]
+        if not len(sub):
+            continue
+        vc = sub.res.value_counts().to_dict()
+        print(f"    v27 {src:5s} n={len(sub):3d} -> "
+              + "  ".join(f"{k}:{v}" for k, v in sorted(vc.items())))
+    dec = d[d.res.isin(["WIN", "LOSS"])]
+    if len(dec):
+        print(f"    decided WR of the arm on the v27 population: "
+              f"{100 * (dec.res == 'WIN').mean():.2f}% "
+              f"({(dec.res == 'WIN').sum()}W/{(dec.res == 'LOSS').sum()}L)")
+    print(f"    back to the seam (= +1R from the deep fill): "
+          f"{int(d.back_to_seam.sum())} of {int((d.res != 'NO_FILL').sum())} "
+          f"filled")
+    print(f"    wrote results/predict_v29_{arm}.csv")
+    return d
+
+
+
 def table(ms):
     ref = []
     for tag, fn in (("v25", "summary_v25.json"), ("v27", "summary_v27.json")):
@@ -258,19 +396,23 @@ def table(ms):
            f"{'minW':>5} {'>=4R':>5} {'maxR':>7} {'net%':>8} {'PF':>6} "
            f"{'maxDD%':>7} {'strk':>5} {'ymin':>5} {'5as':>4}")
     print(hdr)
+    def nz(v, d=0.0):
+        return v if isinstance(v, (int, float)) else d
     for r in rows:
         pa = f"{r['passed']}/5" if r.get("passed") is not None else "-"
         ymin = r.get("ymin") if r.get("ymin") is not None else "-"
         mw = r.get("min_winner_R")
-        print(f"{r['arm']:>5} {r['n']:4d} {r['W']:4d}{r['BE']:5d}{r['L']:5d} "
-              f"{r['wr']:7.2f} {str(mw):>5} {r['ge4R']:5d} "
-              f"{(r['maxR'] or 0.0):7.2f} "
-              f"{(r['net_pct'] or 0.0):+8.2f} {(r['pf'] or 0.0):6.2f} "
-              f"{(r['max_dd_pct'] or 0.0):7.2f} "
+        print(f"{r['arm']:>5} {int(nz(r['n'])):4d} {int(nz(r['W'])):4d}"
+              f"{int(nz(r['BE'])):5d}{int(nz(r['L'])):5d} "
+              f"{nz(r['wr']):7.2f} {str(mw):>5} {int(nz(r['ge4R'])):5d} "
+              f"{nz(r['maxR']):7.2f} "
+              f"{nz(r['net_pct']):+8.2f} {nz(r['pf']):6.2f} "
+              f"{nz(r['max_dd_pct']):7.2f} "
               f"{str(r.get('streak_be_resets')):>5} {str(ymin):>5} {pa:>4}")
     print("=============================================================")
-    for r in rows[2:]:
-        print(f"  {r['arm']:>5} yearly: {r['yearly']}")
+    for r in rows:
+        if r.get("yearly"):
+            print(f"  {r['arm']:>5} yearly: {r['yearly']}")
 
 
 def main():
@@ -327,6 +469,9 @@ def main():
             show(m)
             out.append(m)
         table(out)
+    elif mode == "predict":
+        for arm in (sys.argv[2:] or ["A", "B", "C", "D"]):
+            predict(arm)
     elif mode == "convert":
         for arm in (sys.argv[2:] or ["A", "B", "C", "D"]):
             convert(arm)
