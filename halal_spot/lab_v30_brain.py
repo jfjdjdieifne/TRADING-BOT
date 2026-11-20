@@ -57,6 +57,7 @@ BASE = dict(BE_STREAK_MODE="reset", SHIELD_RULE_V30="MID+BOS",
             ENTRY_BRAIN="sniper", CISD_NEEDS_GREEN_BODY=True,
             RISK_FLOOR_PCT=0.10, SIZING="allcash", DOLLAR_R_PCT=0.3267,
             CISD_TIER3_EXEMPT=False, CISD_IGNORE_NOCHASE=False, ABSORB_MAX_BARS=6,
+            VIGILANCE_SCOPE="none",
             ENTRY_ARM="seam", MANAGE_5M=False)
 
 COMBOS = {
@@ -64,6 +65,15 @@ COMBOS = {
     # --- module 1a: persistent vigilance -----------------------------
     "M1a_hold":    dict(BE_STREAK_MODE="hold"),
     "M1a_decay":   dict(BE_STREAK_MODE="decay"),
+    # --- module 1a+: vigilance without the entry throttle ------------
+    "M1v_shield":     dict(BE_STREAK_MODE="decay", VIGILANCE_SCOPE="shield"),
+    "M1v_shieldbe":   dict(BE_STREAK_MODE="decay",
+                           VIGILANCE_SCOPE="shield+be"),
+    "M1v_shield_rst": dict(BE_STREAK_MODE="reset", VIGILANCE_SCOPE="shield"),
+    "M1v_shbe_rst":   dict(BE_STREAK_MODE="reset",
+                           VIGILANCE_SCOPE="shield+be"),
+    "M1v_or":         dict(BE_STREAK_MODE="decay", VIGILANCE_SCOPE="shield+be",
+                           SHIELD_RULE_V30="MID|BOS"),
     # --- module 1b: which structural proof arms the BE shield --------
     "M1b_or":      dict(SHIELD_RULE_V30="MID|BOS"),
     "M1b_mid":     dict(SHIELD_RULE_V30="MID"),

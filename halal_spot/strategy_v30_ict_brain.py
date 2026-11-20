@@ -220,6 +220,28 @@ ENTRY_ARM      = "seam"    # "seam" = v27/v28 baseline | A | B | C | D
 # watched for starvation (yearly counts, ASSERT5).
 BE_STREAK_MODE = "reset"
 #
+# --- MODULE 1a+: VIGILANCE / THROTTLE SPLIT --------------------------
+# MEASURED (live, full 2021-2026): holding the streak on a scratch
+# (BE_STREAK_MODE="hold") is the single best money lever found in this
+# project - PF 1.26 -> 2.43, net +31.90% -> +56.25%, maxDD -14.41% ->
+# -4.83%, WR 30.30% -> 42.86%, conservative streak 15 -> 3 - but it
+# STARVES the book: n 297 -> 174 and 2023/2024/2025 fall to 9/11/10
+# trades, so ASSERT5 fails. The counters show exactly why: the starvation
+# is not the shield (shield_armed 83 -> 33) but the tier-3 ENTRY THROTTLE
+# (tier3_fill_needs_proof 95 -> 289, tier3_be_armed_at_entry 30 -> 91,
+# tier3_skip_no_be_room 3 -> 19, reject_risk_below_one_fee bars 272k ->
+# 396k). This is v25's DEADLOCK returning in a new coat.
+# So the two jobs of the counter are separated:
+#   "none"       = v27..v29 (one counter does both jobs)
+#   "shield"     = a permanent VIGILANCE counter (cleared only by a real
+#                  WIN >= +3.00R, never by a scratch) chooses the shield
+#                  rule, while the entry throttle keeps reading the
+#                  decayed/reset counter, so entries never starve
+#   "shield+be"  = vigilance also keeps the tier-3 break-even-at-entry
+#                  arming (the mechanism that turned 117 v27 losses into
+#                  genuine scratches), still without throttling entries
+VIGILANCE_SCOPE = "none"
+#
 # --- MODULE 1b: STRUCTURAL PROOF SHIELD ------------------------------
 # IMPORTANT MEASUREMENT, read before touching this: the displacement
 # shield is ALREADY permanent in v25..v29. The block in _manage is not
@@ -885,6 +907,16 @@ class ICTBoxEngine:
     @consec_losses.setter
     def consec_losses(self, v):
         self.pool["consec"] = int(v)
+
+    # ---- v30: permanent vigilance. Cleared ONLY by a real WIN, never
+    # by a scratch, and read only where VIGILANCE_SCOPE says so.
+    @property
+    def vigil_losses(self):
+        return self.pool.get("vigil", 0)
+
+    @vigil_losses.setter
+    def vigil_losses(self, v):
+        self.pool["vigil"] = int(v)
 
     @property
     def locked_range(self):
@@ -2087,11 +2119,16 @@ class ICTBoxEngine:
         ceilings = [b.y_top for b in self.exec_canvas.reds
                     if b.state == "ACTIVE" and b.y_top > fill_px]
         self.entry_ceiling = min(ceilings) if ceilings else None
-        self.tier3_at_entry = self.consec_losses >= LOSS_STREAK_RESET + 1
+        _vig = self.vigil_losses if VIGILANCE_SCOPE == "shield+be" \
+            else self.consec_losses
+        self.tier3_at_entry = _vig >= LOSS_STREAK_RESET + 1
         self.qty0 = qty
         # L4 shield: trade opened with an active2-loss streak arms
         # breakeven early (exception to the no-move-before-3R law)
-        self.shield = self.consec_losses >= LOSS_STREAK_RESET
+        _vigs = self.vigil_losses if VIGILANCE_SCOPE in ("shield",
+                                                         "shield+be") \
+            else self.consec_losses
+        self.shield = _vigs >= LOSS_STREAK_RESET
         self.be_armed = False
         self._be_at_entry = False
         # v25: the entry-tick choke is gone for EVERY normal trade —
@@ -2139,6 +2176,8 @@ class ICTBoxEngine:
             "v30_brain": ENTRY_BRAIN,
             "v30_cisd_tier3_exempt": CISD_TIER3_EXEMPT,
             "v30_be_mode": BE_STREAK_MODE,
+            "v30_vigil_scope": VIGILANCE_SCOPE,
+            "v30_vigil_at_entry": self.vigil_losses,
             "v30_shield_rule": SHIELD_RULE_V30,
             "v30_sizing": SIZING,
             "v30_risk_floor_pct": RISK_FLOOR_PCT,
@@ -2232,6 +2271,7 @@ class ICTBoxEngine:
         rng = (purple.y_bottom, purple.y_top) if purple is not None else None
         if is_win:
             self.consec_losses = 0
+            self.vigil_losses = 0            # only a real WIN ends vigilance
             self.locked_range = None
             self.breaker_ready = False
             self.blocked_after_losses = False
@@ -2261,8 +2301,10 @@ class ICTBoxEngine:
                 self.cnt("v30_be_decays_streak")
             else:                                  # "hold"
                 self.cnt("shield_be_holds_streak")
+            self.cnt("v30_vigil_holds_on_be")
         else:
             self.consec_losses += 1
+            self.vigil_losses += 1
             self.last_loss_idx = idx
             self.last_loss_time = time
             if rng is not None:

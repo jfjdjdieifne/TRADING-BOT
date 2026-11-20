@@ -1,0 +1,39 @@
+
+########## LIVE ENGINE · combo=M2_dual · 2021-01-01..2026-10-31 ##########
+    config: BE_STREAK_MODE=reset  SHIELD_RULE_V30=MID+BOS  ENTRY_BRAIN=dual  CISD_NEEDS_GREEN_BODY=True  RISK_FLOOR_PCT=0.1  SIZING=allcash  DOLLAR_R_PCT=0.3267  CISD_TIER3_EXEMPT=False  CISD_IGNORE_NOCHASE=False  ABSORB_MAX_BARS=6
+[      M2_dual] n= 342   67W/ 83BE/192L  WR= 25.87%  minWin=3.0  >=4R= 17  maxR= 20.29  totR=    6.20
+                net=  +3.73% ($207.45)  PF=1.03  maxDD=-25.66%  streak=3/15  yearly={'2021': 108, '2022': 71, '2023': 47, '2024': 37, '2025': 41, '2026': 38}
+                medRisk%=0.3933  share(fee>=1R)=9.6%  CISD arm/reclaim/fill=376/235/127  calm=362  shield_armed=103  sacred(seam/cisd)=263/127
+                asserts A1..A5 = FPPPP  -> 4/5
+                ASSERT1 FAILED
+                ASSERT2 PASSED
+                ASSERT3 PASSED
+                ASSERT4 PASSED
+                ASSERT5 PASSED
+
+########## LIVE ENGINE · combo=M2_dual_nc · 2021-01-01..2026-10-31 ##########
+    config: BE_STREAK_MODE=reset  SHIELD_RULE_V30=MID+BOS  ENTRY_BRAIN=dual  CISD_NEEDS_GREEN_BODY=True  RISK_FLOOR_PCT=0.1  SIZING=allcash  DOLLAR_R_PCT=0.3267  CISD_TIER3_EXEMPT=False  CISD_IGNORE_NOCHASE=True  ABSORB_MAX_BARS=6
+[   M2_dual_nc] n= 343   66W/ 84BE/193L  WR= 25.48%  minWin=3.0  >=4R= 17  maxR= 20.29  totR=    2.59
+                net=  +6.19% ($212.38)  PF=1.05  maxDD=-23.61%  streak=3/15  yearly={'2021': 107, '2022': 71, '2023': 47, '2024': 37, '2025': 43, '2026': 38}
+                medRisk%=0.3932  share(fee>=1R)=9.3%  CISD arm/reclaim/fill=370/272/130  calm=352  shield_armed=103  sacred(seam/cisd)=259/130
+                asserts A1..A5 = FPPPP  -> 4/5
+                ASSERT1 FAILED
+                ASSERT2 PASSED
+                ASSERT3 PASSED
+                ASSERT4 PASSED
+                ASSERT5 PASSED
+
+########## LIVE ENGINE · combo=M2_dual_nc12 · 2021-01-01..2026-10-31 ##########
+    config: BE_STREAK_MODE=reset  SHIELD_RULE_V30=MID+BOS  ENTRY_BRAIN=dual  CISD_NEEDS_GREEN_BODY=True  RISK_FLOOR_PCT=0.1  SIZING=allcash  DOLLAR_R_PCT=0.3267  CISD_TIER3_EXEMPT=False  CISD_IGNORE_NOCHASE=True  ABSORB_MAX_BARS=12
+[ M2_dual_nc12] n= 431   82W/106BE/243L  WR= 25.23%  minWin=3.0  >=4R= 20  maxR= 20.29  totR=  -39.17
+                net= -15.02% ($169.95)  PF=0.9  maxDD=-31.45%  streak=3/16  yearly={'2021': 108, '2022': 72, '2023': 50, '2024': 86, '2025': 71, '2026': 44}
+                medRisk%=0.3758  share(fee>=1R)=11.4%  CISD arm/reclaim/fill=497/558/198  calm=474  shield_armed=123  sacred(seam/cisd)=304/198
+                asserts A1..A5 = FPPPP  -> 4/5
+                ASSERT1 FAILED
+                ASSERT2 PASSED
+                ASSERT3 PASSED
+                ASSERT4 PASSED
+                ASSERT5 PASSED
+
+########## LIVE ENGINE · combo=M2_dual_full · 2021-01-01..2026-10-31 ##########
+    config: BE_STREAK_MODE=reset  SHIELD_RULE_V30=MID+BOS  ENTRY_BRAIN=dual  CISD_NEEDS_GREEN_BODY=True  RISK_FLOOR_PCT=0.1  SIZING=allcash  DOLLAR_R_PCT=0.3267  CISD_TIER3_EXEMPT=True  CISD_IGNORE_NOCHASE=True  ABSORB_MAX_BARS=6

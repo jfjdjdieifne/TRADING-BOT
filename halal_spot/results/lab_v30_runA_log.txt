@@ -1,0 +1,39 @@
+
+########## LIVE ENGINE · combo=base · 2021-01-01..2026-10-31 ##########
+    config: BE_STREAK_MODE=reset  SHIELD_RULE_V30=MID+BOS  ENTRY_BRAIN=sniper  CISD_NEEDS_GREEN_BODY=True  RISK_FLOOR_PCT=0.1  SIZING=allcash  DOLLAR_R_PCT=0.3267  CISD_TIER3_EXEMPT=False  CISD_IGNORE_NOCHASE=False  ABSORB_MAX_BARS=6
+[         base] n= 297   70W/ 66BE/161L  WR= 30.30%  minWin=3.0  >=4R= 18  maxR= 19.38  totR=   43.55
+                net= +31.90% ($263.79)  PF=1.26  maxDD=-14.41%  streak=3/15  yearly={'2021': 82, '2022': 68, '2023': 16, '2024': 47, '2025': 47, '2026': 37}
+                medRisk%=0.3267  share(fee>=1R)=16.5%  CISD arm/reclaim/fill=0/0/0  calm=0  shield_armed=83  sacred(seam/cisd)=327/0
+                asserts A1..A5 = FPPPP  -> 4/5
+                ASSERT1 FAILED
+                ASSERT2 PASSED
+                ASSERT3 PASSED
+                ASSERT4 PASSED
+                ASSERT5 PASSED
+
+########## LIVE ENGINE · combo=M1a_hold · 2021-01-01..2026-10-31 ##########
+    config: BE_STREAK_MODE=hold  SHIELD_RULE_V30=MID+BOS  ENTRY_BRAIN=sniper  CISD_NEEDS_GREEN_BODY=True  RISK_FLOOR_PCT=0.1  SIZING=allcash  DOLLAR_R_PCT=0.3267  CISD_TIER3_EXEMPT=False  CISD_IGNORE_NOCHASE=False  ABSORB_MAX_BARS=6
+[     M1a_hold] n= 174   33W/ 97BE/ 44L  WR= 42.86%  minWin=3.0  >=4R= 11  maxR= 19.38  totR=   91.28
+                net= +56.25% ($312.49)  PF=2.43  maxDD=-4.83%  streak=3/3  yearly={'2021': 77, '2022': 48, '2023': 9, '2024': 11, '2025': 10, '2026': 19}
+                medRisk%=0.3878  share(fee>=1R)=4.6%  CISD arm/reclaim/fill=0/0/0  calm=0  shield_armed=33  sacred(seam/cisd)=206/0
+                asserts A1..A5 = FPPPF  -> 3/5
+                ASSERT1 FAILED
+                ASSERT2 PASSED
+                ASSERT3 PASSED
+                ASSERT4 PASSED
+                ASSERT5 FAILED
+
+########## LIVE ENGINE · combo=M1a_decay · 2021-01-01..2026-10-31 ##########
+    config: BE_STREAK_MODE=decay  SHIELD_RULE_V30=MID+BOS  ENTRY_BRAIN=sniper  CISD_NEEDS_GREEN_BODY=True  RISK_FLOOR_PCT=0.1  SIZING=allcash  DOLLAR_R_PCT=0.3267  CISD_TIER3_EXEMPT=False  CISD_IGNORE_NOCHASE=False  ABSORB_MAX_BARS=6
+[    M1a_decay] n= 208   48W/ 63BE/ 97L  WR= 33.10%  minWin=3.0  >=4R= 12  maxR= 19.38  totR=   46.43
+                net= +34.99% ($269.98)  PF=1.45  maxDD=-11.78%  streak=3/17  yearly={'2021': 78, '2022': 57, '2023': 15, '2024': 12, '2025': 13, '2026': 33}
+                medRisk%=0.3638  share(fee>=1R)=12.0%  CISD arm/reclaim/fill=0/0/0  calm=0  shield_armed=61  sacred(seam/cisd)=235/0
+                asserts A1..A5 = FPPPP  -> 4/5
+                ASSERT1 FAILED
+                ASSERT2 PASSED
+                ASSERT3 PASSED
+                ASSERT4 PASSED
+                ASSERT5 PASSED
+
+########## LIVE ENGINE · combo=M1b_or · 2021-01-01..2026-10-31 ##########
+    config: BE_STREAK_MODE=reset  SHIELD_RULE_V30=MID|BOS  ENTRY_BRAIN=sniper  CISD_NEEDS_GREEN_BODY=True  RISK_FLOOR_PCT=0.1  SIZING=allcash  DOLLAR_R_PCT=0.3267  CISD_TIER3_EXEMPT=False  CISD_IGNORE_NOCHASE=False  ABSORB_MAX_BARS=6
