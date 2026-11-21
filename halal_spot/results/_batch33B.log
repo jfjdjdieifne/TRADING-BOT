@@ -1,0 +1,4 @@
+    [guard] BASE == engine defaults for all 15 v33 knobs
+
+##### LIVE ENGINE combo=TEL_REARM W1 2023-10-01..2024-03-31 #####
+    cfg: ALLOC_MODE=slot  SLOTS=3  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)  TRAIL_LENS_PRE=struct4h  TRAIL_4H_ONLY_AFTER_3R=True  PURPLE_REARM=True

@@ -99,7 +99,30 @@ BASE = dict(
     REGIME_MODE="A", REGIME_B_NEEDS_HL=True, REGIME_B_NEEDS_BSL=True,
     KILLZONE_MODE="off", KILLZONE_HOURS=(), KILLZONE_DOW=(),
     EMERGENCY_WICK_STOP=True, CLOSE_BASED_SHIELD=False,
+    # ---- v33 knobs, EVERY one at its engine default -------------------
+    # drive() only setattr()s the keys a combo lists, so any knob missing
+    # from BASE keeps whatever the PREVIOUS arm left in the module. That
+    # bug was measured, not theorised: the arm printed as LEAD2 also
+    # carried TEL's trail lens, and REARM carried both - its counter
+    # v33_leader_veto=356 fired although its own config never set
+    # V33_ALPHA_LEADER. Those two runs were RELABELLED (TEL_LEAD2 and
+    # TEL_LEAD2_REARM), not deleted: the measurements are valid, only the
+    # names were wrong. BASE is now complete and guarded below.
+    SLOT_DEPLOY_PCT=1.0, TRAIL_LENS_PRE="exec", TRAIL_MIN_R_PRE=None,
+    TRAIL_4H_ONLY_AFTER_3R=False, PURPLE_REARM=False,
+    V33_ALPHA_LEADER=False, LEADER_K=2, LEADER_NEEDS_HTF=False,
+    LEADER_MIN_DISP=0.0, LEADER_SMT_REQUIRED=False,
+    LEADER_15M_ONLY_TOP1=False, BASKET_REGIME=False, REGIME_EXPAND_MIN=3,
+    RANGE_VETO_WEAPON_B=True, RANGE_HARVEST_4H=False,
 )
+
+# Every knob an arm may touch. Used by the anti-leak guard in drive().
+V33_KNOBS = ("SLOT_DEPLOY_PCT", "TRAIL_LENS_PRE", "TRAIL_MIN_R_PRE",
+             "TRAIL_4H_ONLY_AFTER_3R", "PURPLE_REARM", "V33_ALPHA_LEADER",
+             "LEADER_K", "LEADER_NEEDS_HTF", "LEADER_MIN_DISP",
+             "LEADER_SMT_REQUIRED", "LEADER_15M_ONLY_TOP1", "BASKET_REGIME",
+             "REGIME_EXPAND_MIN", "RANGE_VETO_WEAPON_B", "RANGE_HARVEST_4H")
+_DEFAULTS_CHECKED = []
 
 # 3 slots is the working basket default for the pillar arms: measured on the
 # 2-coin probe, slotting halves maxDD but scales the return down with it, so
@@ -129,6 +152,14 @@ COMBOS = {
     "NOTRAIL":   dict(V32FULL, TRAIL_LENS_PRE="off"),
     # ---- (b) dealing-range re-arm --------------------------------------
     "REARM":     dict(V32FULL, PURPLE_REARM=True),
+    # stacks on top of the telescope (TEL_LEAD2 and TEL_LEAD2_REARM were
+    # recovered from the mislabelled runs and are kept as evidence)
+    "TEL_REARM": dict(TEL, PURPLE_REARM=True),
+    "TEL_LEAD2": dict(TEL, V33_ALPHA_LEADER=True, LEADER_K=2,
+                      LEADER_NEEDS_HTF=True),
+    "TEL_LEAD2_REARM": dict(TEL, V33_ALPHA_LEADER=True, LEADER_K=2,
+                            LEADER_NEEDS_HTF=True, PURPLE_REARM=True),
+    "TEL_REG":   dict(TEL, BASKET_REGIME=True, RANGE_HARVEST_4H=True),
     # ---- (c) alpha-leader concentration --------------------------------
     "LEAD2":     dict(V32FULL, V33_ALPHA_LEADER=True, LEADER_K=2,
                       LEADER_NEEDS_HTF=True),
@@ -171,6 +202,21 @@ def drive(combo: str, win: str, save: bool = True):
         raise SystemExit(f"unknown combo {combo!r} (would silently run BASE)")
     cfg = dict(BASE)
     cfg.update(COMBOS[combo])
+    # ---- ANTI-LEAK GUARD (added after the mislabelled LEAD2/REARM runs) --
+    missing = [k for k in V33_KNOBS if k not in cfg]
+    if missing:
+        raise SystemExit(f"combo {combo}: BASE lacks v33 knobs {missing}; "
+                         "they would inherit the previous arm's values")
+    if not _DEFAULTS_CHECKED:
+        # first run in this process: BASE must equal the engine's shipped
+        # defaults, or a typo in BASE silently redefines every arm
+        bad = {k: (BASE[k], getattr(S, k)) for k in V33_KNOBS
+               if BASE[k] != getattr(S, k)}
+        if bad:
+            raise SystemExit(f"BASE disagrees with the engine defaults: {bad}")
+        _DEFAULTS_CHECKED.append(True)
+        print("    [guard] BASE == engine defaults for all "
+              f"{len(V33_KNOBS)} v33 knobs", flush=True)
     for k, v in cfg.items():
         if not hasattr(S, k):        # an undefined knob is a SILENT no-op
             raise SystemExit(f"combo {combo}: engine has no knob {k!r}")
