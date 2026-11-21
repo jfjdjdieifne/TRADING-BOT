@@ -257,7 +257,14 @@ BE_STREAK_MODE = "reset"
 #  * A1 (WR >= 60%) fails for EVERY arm measured in this project; the best
 #    live reading anywhere is 47.62% on a 71-trade book. Disclosed, not
 #    hidden - see REPORT_AR_v30.md.
-VIGILANCE_SCOPE = "shield+be"
+VIGILANCE_SCOPE = "none"      # v31 SHIPPED (ARM 4): the entry-tick
+#                             break-even is CANCELLED. Measured live:
+#                             tier3_be_armed_at_entry 177 -> 15, winners
+#                             per month 0.63 -> 1.41, max winless run
+#                             34 -> 8 trades, profitable months
+#                             25.7% -> 41.4%. Keeping the v30 scope with
+#                             the v31 exits (C_124_vig) loses half the
+#                             book: totR +49.34 vs +114.03.
 #
 # --- MODULE 1b: STRUCTURAL PROOF SHIELD ------------------------------
 # IMPORTANT MEASUREMENT, read before touching this: the displacement
@@ -276,7 +283,11 @@ VIGILANCE_SCOPE = "shield+be"
 # (but >=4R = 4, ASSERT3 fails by one), MID 31.72%, MID+BOS 30.06%; v26
 # MID 28.51%, A1 25.83%. v28 measured the same lever LIVE on the 5m tape:
 # arming earlier cost 10 winners to save 12 losses (WR 31.03 -> 29.52).
-SHIELD_RULE_V30 = "MID+BOS"
+SHIELD_RULE_V30 = "MID|BOS"   # v31 SHIPPED (ARM 4): either displacement
+#                             proof arms the shield (OR, not AND) - with
+#                             the entry-tick BE gone this is the only
+#                             remaining protection, so it must fire on
+#                             one witness instead of two.
 #
 # --- MODULE 2: REGIME-AWARE DUAL ENTRY BRAIN -------------------------
 #   "sniper" = v27..v29: a blind BUY LIMIT resting at the seam
@@ -408,7 +419,7 @@ COST = FEE + SLIPPAGE_BPS / 10000.0
 # exit books a STRUCTURAL WIN ("SWIN"), a new honest class: net > 0 but
 # R < 3.00. It is never counted as a WIN, so min_winner_R stays >= 3.00R
 # by construction and A2 remains sacred on the WIN class.
-STRUCT_TRAIL = False
+STRUCT_TRAIL = True           # v31 SHIPPED: C_124, measured live 2021-2026
 STRUCT_TRAIL_MIN_R = 1.0      # swept: 0.5 | 1.0 | 1.5 | 2.0 (gross R)
 STRUCT_TRAIL_SRC = "exec"     # exec | htf | both  (which lens draws the low)
 STRUCT_TRAIL_NEEDS_DISP = False   # require disp_mid|disp_bos first
@@ -439,7 +450,16 @@ SWIN_CLEARS_VIGIL = False     # does a structural win end the vigilance?
 # all-or-nothing v30 law. The two legs are booked as ONE trade: R is
 # normalised by qty0, so 50% at +3R and 50% at +9R books +6.0R.
 LOCK_ARM_R = 3.0
-LOCK_MODE = "floor"
+LOCK_MODE = "trail"           # v31 SHIPPED: the +3R floor stops selling the
+#                             ride; the trailed BlueBox_SSL stop defends it
+#                             instead (STOP_BLUE 153 exits). Measured live:
+#                             totR +66.39 -> +114.03, maxR 19.38 -> 34.50R,
+#                             maxDD -9.52% -> -10.95%. "trail" WITHOUT the
+#                             structural ratchet is money-dangerous
+#                             (A2_trail: maxDD -24.72%) - the two ship
+#                             together or not at all. "stop" (wick-defended
+#                             floor) was measured and REFUTED: it caps every
+#                             runner at 12.84R (C_124_st totR -27.72).
 HARVEST_PCT = 0.0
 #
 # ---- ARM 3: DYNAMIC IMPULSE-LEG PURPLEBOX ---------------------------
