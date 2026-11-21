@@ -1,0 +1,7 @@
+
+##### LIVE ENGINE combo=V32FULL W2 2024-05-01..2024-10-31 #####
+    cfg: ALLOC_MODE=slot  SLOTS=3  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)
+    n=284 totR=-30.5978 end=$105.5819 DD=-4.714% (331s)
+    coins: {"ADAUSDT_5m": [41, -5.464, -0.457], "AVAXUSDT_5m": [43, -2.875, 2.908], "BNBUSDT_5m": [27, -8.696, -1.242], "BTCUSDT_5m": [26, -2.808, 1.077], "ETHUSDT_5m": [25, 12.129, 1.835], "LINKUSDT_5m": [46, -13.279, -0.097], "SOLUSDT_5m": [47, -2.263, 1.893], "XRPUSDT_5m": [29, -7.343, -0.335]}
+    counters: {"v32_killzone_skip": 39, "v32_emergency_stop": 16, "shield_armed_disp": 132, "v31_struct_trail": 155, "trail_htf_blue": 19, "trail_4h_structural": 6}
+unknown combo 'W2' (would silently run BASE)
