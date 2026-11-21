@@ -1,0 +1,73 @@
+    [guard] BASE == engine defaults for all 26 v33+v34 knobs
+
+##### LIVE ENGINE combo=V33_TEL_3S_3R W1 2023-10-01..2024-03-31 #####
+    cfg: ALLOC_MODE=slot  SLOTS=3  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)
+    n=357 totR=128.4592 end=$130.8101 DD=-5.774% (625s)
+    coins: {"ADAUSDT_5m": [57, 84.384, 7.642], "AVAXUSDT_5m": [53, -26.175, -3.688], "BNBUSDT_5m": [49, 27.723, 14.052], "BTCUSDT_5m": [20, 27.836, 4.342], "ETHUSDT_5m": [33, -28.915, -2.51], "LINKUSDT_5m": [46, 48.18, 4.062], "SOLUSDT_5m": [49, 18.513, 10.558], "XRPUSDT_5m": [50, -23.086, -3.649]}
+    counters: {"v32_killzone_skip": 65, "v32_emergency_stop": 33, "shield_armed_disp": 168, "v31_struct_trail": 12, "trail_htf_blue": 1, "trail_4h_structural": 72, "slot_full_rejects": 24, "portfolio_slots_full": 24}
+
+##### LIVE ENGINE combo=V33_TEL_3S_3R W2 2024-05-01..2024-10-31 #####
+    cfg: ALLOC_MODE=slot  SLOTS=3  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)
+    n=265 totR=105.7958 end=$121.654 DD=-5.921% (382s)
+    coins: {"ADAUSDT_5m": [35, -1.591, -0.489], "AVAXUSDT_5m": [44, -20.042, -0.627], "BNBUSDT_5m": [22, -3.44, -0.529], "BTCUSDT_5m": [25, -3.543, 0.87], "ETHUSDT_5m": [25, 25.502, 4.816], "LINKUSDT_5m": [44, 20.335, 6.304], "SOLUSDT_5m": [41, 18.1, 2.323], "XRPUSDT_5m": [29, 70.474, 8.986]}
+    counters: {"v32_killzone_skip": 45, "v32_emergency_stop": 20, "shield_armed_disp": 127, "v31_struct_trail": 21, "trail_htf_blue": 3, "trail_4h_structural": 57, "slot_full_rejects": 17, "portfolio_slots_full": 17}
+
+##### LIVE ENGINE combo=S1_TEL_3R W1 2023-10-01..2024-03-31 #####
+    cfg: ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)  MAX_OPEN_POSITIONS=1  FULL_100_DEPLOY=True
+    n=227 totR=48.9224 end=$139.2627 DD=-14.393% (598s)
+    coins: {"ADAUSDT_5m": [35, 44.375, 21.488], "AVAXUSDT_5m": [38, 7.531, 1.327], "BNBUSDT_5m": [25, 25.584, 26.038], "BTCUSDT_5m": [12, -7.471, -3.853], "ETHUSDT_5m": [24, -18.18, -10.03], "LINKUSDT_5m": [32, 8.915, 0.203], "SOLUSDT_5m": [35, 7.929, 18.664], "XRPUSDT_5m": [26, -19.76, -14.574]}
+    counters: {"v32_killzone_skip": 62, "v32_emergency_stop": 23, "shield_armed_disp": 112, "v31_struct_trail": 6, "trail_htf_blue": 1, "trail_4h_structural": 33, "slot_full_rejects": 181, "portfolio_slots_full": 181, "v34_deploy_full_ok": 289}
+
+##### LIVE ENGINE combo=S1_TEL_3R W2 2024-05-01..2024-10-31 #####
+    cfg: ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)  MAX_OPEN_POSITIONS=1  FULL_100_DEPLOY=True
+    n=180 totR=83.0249 end=$154.8264 DD=-14.186% (381s)
+    coins: {"ADAUSDT_5m": [28, -28.662, -13.356], "AVAXUSDT_5m": [24, 1.408, 6.436], "BNBUSDT_5m": [18, -2.077, -1.904], "BTCUSDT_5m": [14, -0.8, 2.073], "ETHUSDT_5m": [19, 17.149, 12.388], "LINKUSDT_5m": [35, 25.317, 25.017], "SOLUSDT_5m": [29, 7.367, 6.022], "XRPUSDT_5m": [13, 63.322, 18.151]}
+    counters: {"v32_killzone_skip": 47, "v32_emergency_stop": 13, "shield_armed_disp": 84, "v31_struct_trail": 16, "trail_htf_blue": 1, "trail_4h_structural": 38, "slot_full_rejects": 145, "portfolio_slots_full": 145, "v34_deploy_full_ok": 227}
+
+##### LIVE ENGINE combo=S1_TEL_2R W1 2023-10-01..2024-03-31 #####
+    cfg: ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)  MAX_OPEN_POSITIONS=1  FULL_100_DEPLOY=True  MIN_RRR=2.0  LOCK_R=2.0
+    n=213 totR=21.8539 end=$112.5518 DD=-15.223% (527s)
+    coins: {"ADAUSDT_5m": [30, 24.031, 11.845], "AVAXUSDT_5m": [34, 3.162, -2.802], "BNBUSDT_5m": [25, 28.085, 21.854], "BTCUSDT_5m": [10, -4.098, -2.064], "ETHUSDT_5m": [22, -14.816, -7.663], "LINKUSDT_5m": [33, 3.507, -0.08], "SOLUSDT_5m": [36, -4.129, 1.786], "XRPUSDT_5m": [23, -13.887, -10.322]}
+    counters: {"v32_killzone_skip": 70, "v32_emergency_stop": 28, "shield_armed_disp": 101, "v31_struct_trail": 1, "trail_htf_blue": 5, "trail_4h_structural": 35, "slot_full_rejects": 201, "portfolio_slots_full": 201, "v34_deploy_full_ok": 283}
+
+##### LIVE ENGINE combo=S1_TEL_2R W2 2024-05-01..2024-10-31 #####
+    cfg: ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)  MAX_OPEN_POSITIONS=1  FULL_100_DEPLOY=True  MIN_RRR=2.0  LOCK_R=2.0
+    n=200 totR=57.8958 end=$134.572 DD=-17.119% (360s)
+    coins: {"ADAUSDT_5m": [26, -15.843, -6.214], "AVAXUSDT_5m": [24, -5.03, -0.514], "BNBUSDT_5m": [26, 18.25, 7.161], "BTCUSDT_5m": [22, -10.725, -1.324], "ETHUSDT_5m": [14, 11.411, 6.137], "LINKUSDT_5m": [38, 18.868, 21.729], "SOLUSDT_5m": [32, -14.852, -7.858], "XRPUSDT_5m": [18, 55.816, 15.454]}
+    counters: {"v32_killzone_skip": 46, "v32_emergency_stop": 26, "shield_armed_disp": 95, "v31_struct_trail": 7, "trail_htf_blue": 1, "trail_4h_structural": 45, "slot_full_rejects": 198, "portfolio_slots_full": 198, "v34_deploy_full_ok": 246}
+
+##### LIVE ENGINE combo=S1_TEL_2R_BRIDGE W1 2023-10-01..2024-03-31 #####
+    cfg: ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)  MAX_OPEN_POSITIONS=1  FULL_100_DEPLOY=True  MIN_RRR=2.0  LOCK_R=2.0  BRIDGE_1H_PRE_LOCK=True
+    n=214 totR=19.1892 end=$109.253 DD=-15.223% (528s)
+    coins: {"ADAUSDT_5m": [30, 24.543, 11.96], "AVAXUSDT_5m": [34, 3.162, -3.04], "BNBUSDT_5m": [25, 28.085, 21.431], "BTCUSDT_5m": [10, -6.41, -2.499], "ETHUSDT_5m": [23, -14.126, -6.622], "LINKUSDT_5m": [33, 3.507, 0.214], "SOLUSDT_5m": [36, -6.498, -2.893], "XRPUSDT_5m": [23, -13.075, -9.298]}
+    counters: {"v32_killzone_skip": 70, "v32_emergency_stop": 28, "shield_armed_disp": 102, "v31_struct_trail": 17, "trail_htf_blue": 5, "trail_4h_structural": 33, "slot_full_rejects": 200, "portfolio_slots_full": 200, "v34_bridge_1h_raise": 15, "v34_deploy_full_ok": 284}
+
+##### LIVE ENGINE combo=S1_TEL_2R_BRIDGE W2 2024-05-01..2024-10-31 #####
+    cfg: ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)  MAX_OPEN_POSITIONS=1  FULL_100_DEPLOY=True  MIN_RRR=2.0  LOCK_R=2.0  BRIDGE_1H_PRE_LOCK=True
+    n=205 totR=46.3917 end=$129.117 DD=-16.414% (344s)
+    coins: {"ADAUSDT_5m": [26, -15.843, -6.134], "AVAXUSDT_5m": [25, -6.469, -1.527], "BNBUSDT_5m": [26, 19.337, 7.672], "BTCUSDT_5m": [22, -10.725, -1.327], "ETHUSDT_5m": [15, 8.753, 3.624], "LINKUSDT_5m": [41, 8.528, 16.061], "SOLUSDT_5m": [32, -13.185, -4.537], "XRPUSDT_5m": [18, 55.995, 15.286]}
+    counters: {"v32_killzone_skip": 46, "v32_emergency_stop": 26, "shield_armed_disp": 97, "v31_struct_trail": 25, "trail_htf_blue": 1, "trail_4h_structural": 41, "slot_full_rejects": 190, "portfolio_slots_full": 190, "v34_bridge_1h_raise": 24, "v34_deploy_full_ok": 251}
+
+##### LIVE ENGINE combo=S1_TEL_2R_SWAP W1 2023-10-01..2024-03-31 #####
+    cfg: ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)  MAX_OPEN_POSITIONS=1  FULL_100_DEPLOY=True  MIN_RRR=2.0  LOCK_R=2.0  BRIDGE_1H_PRE_LOCK=True  OPPORTUNITY_SWAP=True
+    n=214 totR=19.1892 end=$109.253 DD=-15.223% (519s)
+    coins: {"ADAUSDT_5m": [30, 24.543, 11.96], "AVAXUSDT_5m": [34, 3.162, -3.04], "BNBUSDT_5m": [25, 28.085, 21.431], "BTCUSDT_5m": [10, -6.41, -2.499], "ETHUSDT_5m": [23, -14.126, -6.622], "LINKUSDT_5m": [33, 3.507, 0.214], "SOLUSDT_5m": [36, -6.498, -2.893], "XRPUSDT_5m": [23, -13.075, -9.298]}
+    counters: {"v32_killzone_skip": 70, "v32_emergency_stop": 28, "shield_armed_disp": 102, "v31_struct_trail": 17, "trail_htf_blue": 5, "trail_4h_structural": 33, "slot_full_rejects": 200, "portfolio_slots_full": 200, "v34_swap_checked_not_stale": 200, "v34_bridge_1h_raise": 15, "v34_deploy_full_ok": 284}
+
+##### LIVE ENGINE combo=S1_TEL_2R_SWAP W2 2024-05-01..2024-10-31 #####
+    cfg: ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)  MAX_OPEN_POSITIONS=1  FULL_100_DEPLOY=True  MIN_RRR=2.0  LOCK_R=2.0  BRIDGE_1H_PRE_LOCK=True  OPPORTUNITY_SWAP=True
+    n=205 totR=46.3917 end=$129.117 DD=-16.414% (343s)
+    coins: {"ADAUSDT_5m": [26, -15.843, -6.134], "AVAXUSDT_5m": [25, -6.469, -1.527], "BNBUSDT_5m": [26, 19.337, 7.672], "BTCUSDT_5m": [22, -10.725, -1.327], "ETHUSDT_5m": [15, 8.753, 3.624], "LINKUSDT_5m": [41, 8.528, 16.061], "SOLUSDT_5m": [32, -13.185, -4.537], "XRPUSDT_5m": [18, 55.995, 15.286]}
+    counters: {"v32_killzone_skip": 46, "v32_emergency_stop": 26, "shield_armed_disp": 97, "v31_struct_trail": 25, "trail_htf_blue": 1, "trail_4h_structural": 41, "slot_full_rejects": 190, "portfolio_slots_full": 190, "v34_swap_checked_not_stale": 190, "v34_bridge_1h_raise": 24, "v34_deploy_full_ok": 251}
+
+##### LIVE ENGINE combo=S1_FAST_2R_HARVEST W1 2023-10-01..2024-03-31 #####
+    cfg: ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)  MAX_OPEN_POSITIONS=1  FULL_100_DEPLOY=True  MIN_RRR=2.0  LOCK_R=2.0  FAST_HARVEST_2R=True
+    n=235 totR=-69.4301 end=$72.2059 DD=-33.114% (529s)
+    coins: {"ADAUSDT_5m": [39, -2.19, -1.392], "AVAXUSDT_5m": [36, -5.682, -6.349], "BNBUSDT_5m": [27, -10.92, -2.878], "BTCUSDT_5m": [12, -3.014, -0.755], "ETHUSDT_5m": [20, -11.787, -4.521], "LINKUSDT_5m": [35, -1.011, 2.005], "SOLUSDT_5m": [40, -13.971, -6.234], "XRPUSDT_5m": [26, -20.855, -7.67]}
+    counters: {"v32_killzone_skip": 66, "v32_emergency_stop": 31, "shield_armed_disp": 105, "v31_struct_trail": 2, "trail_htf_blue": 3, "trail_4h_structural": 15, "slot_full_rejects": 162, "portfolio_slots_full": 162, "v34_fast_harvest": 18, "v34_fast_harvest_trail_allowed": 47, "v34_deploy_full_ok": 301}
+
+##### LIVE ENGINE combo=S1_FAST_2R_HARVEST W2 2024-05-01..2024-10-31 #####
+    cfg: ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)  MAX_OPEN_POSITIONS=1  FULL_100_DEPLOY=True  MIN_RRR=2.0  LOCK_R=2.0  FAST_HARVEST_2R=True
+    n=213 totR=-51.2713 end=$107.2855 DD=-16.458% (324s)
+    coins: {"ADAUSDT_5m": [31, -22.032, -7.651], "AVAXUSDT_5m": [26, 2.088, 5.649], "BNBUSDT_5m": [27, -3.649, -1.933], "BTCUSDT_5m": [19, -9.592, -0.262], "ETHUSDT_5m": [16, 1.318, 0.974], "LINKUSDT_5m": [38, -17.058, 1.016], "SOLUSDT_5m": [33, 3.834, 10.079], "XRPUSDT_5m": [23, -6.18, -0.587]}
+    counters: {"v32_killzone_skip": 37, "v32_emergency_stop": 25, "shield_armed_disp": 103, "v31_struct_trail": 6, "trail_htf_blue": 1, "trail_4h_structural": 25, "slot_full_rejects": 200, "portfolio_slots_full": 200, "v34_fast_harvest": 14, "v34_fast_harvest_trail_allowed": 42, "v34_deploy_full_ok": 250}
