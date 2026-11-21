@@ -143,6 +143,16 @@ COMBOS = {
     "C_124_st_h":   dict(STRUCT_TRAIL=True, STRUCT_TRAIL_MIN_R=1.0,
                          LOCK_MODE="stop", HARVEST_PCT=0.5,
                          VIGILANCE_SCOPE="none", SHIELD_RULE_V30="MID|BOS"),
+    # ---- final refinements of the measured leader (close-based floor)
+    "C_124_t15":  dict(STRUCT_TRAIL=True, STRUCT_TRAIL_MIN_R=1.5,
+                       LOCK_MODE="trail",
+                       VIGILANCE_SCOPE="none", SHIELD_RULE_V30="MID|BOS"),
+    "C_124_a4":   dict(STRUCT_TRAIL=True, STRUCT_TRAIL_MIN_R=1.0,
+                       LOCK_MODE="trail", LOCK_ARM_R=4.0,
+                       VIGILANCE_SCOPE="none", SHIELD_RULE_V30="MID|BOS"),
+    "C_124_t20a4": dict(STRUCT_TRAIL=True, STRUCT_TRAIL_MIN_R=2.0,
+                        LOCK_MODE="trail", LOCK_ARM_R=4.0,
+                        VIGILANCE_SCOPE="none", SHIELD_RULE_V30="MID|BOS"),
     # ---- ARM 3: dynamic impulse-leg purple box ----------------------
     "A3_imp":     dict(IMPULSE_PURPLE=True),
     "A3_imp120":  dict(IMPULSE_PURPLE=True, IMPULSE_MAX_BARS=120),
