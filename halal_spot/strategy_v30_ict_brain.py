@@ -2545,6 +2545,14 @@ def _stems_for(d: Path, warm, s1) -> list[str]:
 
 def run_backtest(data_dir: Path, start: str, end: str,
                  warmup_days: int = 60, tag: str = ""):
+    # ---- v30: the execution-cost model is resolved PER RUN ------------
+    # COST/MIN_RISK_PCT are module constants derived from SLIPPAGE_BPS,
+    # and a lab that sets SLIPPAGE_BPS after import would otherwise be
+    # silently ignored (measured: the 5/10 bps stress arms came back
+    # byte-identical to 0 bps). Recomputing here makes the knob live.
+    global COST, MIN_RISK_PCT
+    COST = FEE + SLIPPAGE_BPS / 10000.0
+    MIN_RISK_PCT = 2 * COST
     from engine.causal_primitives import load_asset_ohlcv, resample_causal_tf
     s0 = pd.Timestamp(start).tz_localize("UTC")
     s1 = pd.Timestamp(end).tz_localize("UTC")

@@ -81,6 +81,9 @@ COMBOS = {
     "SLIP10_champ":  dict(BE_STREAK_MODE="reset",
                           VIGILANCE_SCOPE="shield+be", SLIPPAGE_BPS=10.0),
     "SLIP10_base":   dict(SLIPPAGE_BPS=10.0),
+    "SLIP10_f020":   dict(BE_STREAK_MODE="reset", VIGILANCE_SCOPE="shield+be",
+                          RISK_FLOOR_PCT=0.20, RISK_FLOOR_STAGE="fill",
+                          SLIPPAGE_BPS=10.0),
     # --- refinements of the measured champion (reset + shield+be) -----
     "M1v_rst_bos":    dict(BE_STREAK_MODE="reset",
                            VIGILANCE_SCOPE="shield+be",
