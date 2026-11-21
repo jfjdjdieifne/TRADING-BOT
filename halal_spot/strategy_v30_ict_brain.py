@@ -342,7 +342,25 @@ ARM_BOX_GATE   = False     # v29 MEASUREMENT SWITCH. True  = the setup dies
                            # the OrderBlock IS the entry event, so it cannot
                            # also be the cancellation event. Measured both
                            # ways; see REPORT_AR_v29.md S2.
-MIN_RISK_PCT   = 2 * FEE   # NOT invented: the engine's own breakeven-room
+# ============ v30 EXECUTION-COST STRESS TEST =========================
+# The measured champion arms the break-even stop AT ENTRY on 177 of its
+# 298 trades and scratches 109 of them after a median of ONE bar. Under
+# the project's cost model a scratch is exactly free: the BE line is
+# entry x (1 + 2 x FEE), so the gross gain equals both fees. That only
+# holds if the BE stop fills at its own price. This project has never
+# modelled slippage, so SLIPPAGE_BPS is a STRESS KNOB, not a calibrated
+# constant: 0 keeps the shipped convention (every v27/v29 number stays
+# bit-identical), 5 and 10 bps per side answer one question only - how
+# much of the champion's edge survives realistic execution?
+# COST replaces FEE wherever cash moves or a cost line is drawn (entry
+# fee, exit fee, partial release, the all-cash notional reserve, every BE
+# line, the +3R lock solve, the box floor), so the engine is allowed to
+# re-earn its scratch: with slippage the BE line moves out to
+# entry x (1 + 2 x COST), exactly as a real bot would.
+SLIPPAGE_BPS = 0.0
+COST = FEE + SLIPPAGE_BPS / 10000.0
+# =====================================================================
+MIN_RISK_PCT   = 2 * COST   # NOT invented: the engine's own breakeven-room
                            # law (TIER3_ENTRY_CHOKE, _enter L~1600) — a
                            # trade whose risk cannot carry the 0.2% round
                            # trip cannot be protected, so it is declined.
@@ -1388,7 +1406,7 @@ class ICTBoxEngine:
         _ltf_risk = entry - stop
         _need_htf = (STOP_SOURCE == "htf"
                      or (STOP_SOURCE == "hybrid"
-                         and _ltf_risk <= 2 * FEE * entry))
+                         and _ltf_risk <= 2 * COST * entry))
         if _need_htf:
             # FIX2 nesting: when the LTF sniper sits inside a valid HTF
             # demand box, the HTF floor is the real invalidation. In
@@ -1426,7 +1444,7 @@ class ICTBoxEngine:
         # setup; the round-trip requirement is enforced at the FILL,
         # where risk is final (see _enter).
         _floor = (RISK_FLOOR_PCT / 100.0 * entry
-                  if RISK_FLOOR_STAGE == "both" else FEE * entry)
+                  if RISK_FLOOR_STAGE == "both" else COST * entry)
         if risk <= _floor:
             self.cnt("reject_risk_below_one_fee")
             return
@@ -1644,7 +1662,7 @@ class ICTBoxEngine:
     def _red_ladder(self, entry_px: float, risk: float):
         """T1..T3 = HTF RedBox_BSL above entry whose first rung clears
         the net +3R line. Returns (ladder, gate_ok)."""
-        lock = ((entry_px * (1 + FEE) + MIN_R * risk) / (1 - FEE))
+        lock = ((entry_px * (1 + COST) + MIN_R * risk) / (1 - COST))
         seen = set()
         reds = []
         for r in (self.htf_canvas.active_reds()
@@ -1789,7 +1807,7 @@ class ICTBoxEngine:
                 self.cnt("fill_cancel_premium")
                 return
             risk = fill_px - s.stop
-            if risk <= max(FEE * fill_px,
+            if risk <= max(COST * fill_px,
                            RISK_FLOOR_PCT / 100.0 * fill_px):
                 self.cnt("reject_risk_below_one_fee")
                 return
@@ -1864,7 +1882,7 @@ class ICTBoxEngine:
                 self.setup = None; self.state = "WAIT_ANCHOR"
                 self.cnt("fill_cancel_premium"); return
             risk = fill_px - s.stop
-            if risk <= max(FEE * fill_px, RISK_FLOOR_PCT / 100.0 * fill_px):
+            if risk <= max(COST * fill_px, RISK_FLOOR_PCT / 100.0 * fill_px):
                 self.cnt("reject_risk_below_one_fee"); return
             ladder, ok = self._red_ladder(fill_px, risk)
             if not ok:
@@ -1875,7 +1893,7 @@ class ICTBoxEngine:
                 # it can never clear its own BE line. CISD_TIER3_EXEMPT
                 # decides whether the reclaim itself counts as the proof;
                 # both settings are measured, neither is assumed.
-                be_line = fill_px * (1 + 2 * FEE)
+                be_line = fill_px * (1 + 2 * COST)
                 if c < be_line and not (is_cisd and CISD_TIER3_EXEMPT):
                     self.cnt("tier3_fill_needs_proof"); return
             self.targets = ladder
@@ -1915,14 +1933,14 @@ class ICTBoxEngine:
         # FIX3 tier-3: after3 losses the reclaim must already be
         # above the breakeven line so the shield can never raw-lose
         if self.consec_losses >= LOSS_STREAK_RESET + 1:
-            if c < s.entry * (1 + 2 * FEE):
+            if c < s.entry * (1 + 2 * COST):
                 self.cnt("tier3_fill_needs_proof")
                 return
         # target ladder must clear net +3R from THIS close (entry =
         # the confirm close itself, per prompt: "ندخل عند إغلاق
         # الشمعة" — the stop distance then equals risk exactly)
         risk = c - s.stop
-        if risk <= FEE * c:
+        if risk <= COST * c:
             self.cnt("reject_risk_below_one_fee")
             return
         ladder, ok = self._red_ladder(c, risk)
@@ -2017,7 +2035,7 @@ class ICTBoxEngine:
         if not ok:
             self.cnt("fill_cancel_target_within_3r"); return
         if self.consec_losses >= LOSS_STREAK_RESET + 1:
-            if c < fill_px * (1 + 2 * FEE):
+            if c < fill_px * (1 + 2 * COST):
                 self.cnt("tier3_fill_needs_proof"); return
         self.targets = ladder
         self.cnt(f"fill_v29_{ENTRY_ARM}")
@@ -2084,7 +2102,7 @@ class ICTBoxEngine:
         # the streak is never gated on a condition the market cannot
         # satisfy (the 2023 coma above came from gating the SETUP).
         if TIER3_ENTRY_CHOKE and self.consec_losses >= LOSS_STREAK_RESET + 1 \
-                and risk <= 2 * FEE * fill_px:
+                and risk <= 2 * COST * fill_px:
             self.setup = None
             self.state = "WAIT_ANCHOR"
             self.cnt("tier3_skip_no_be_room")
@@ -2096,13 +2114,13 @@ class ICTBoxEngine:
         # is the share of notional lost on a stop-out. Sizing to a fixed
         # dollar-R keeps that share of EQUITY constant across boxes. The
         # all-cash cap is never breached: halal spot, no leverage.
-        notional = self.pool["cash"] / (1 + FEE)
+        notional = self.pool["cash"] / (1 + COST)
         if SIZING == "dollarR":
             risk_frac = risk / fill_px if fill_px > 0 else 0.0
             if risk_frac > 0:
                 eq = self.portfolio_equity(fill_px)
                 want = (DOLLAR_R_PCT / 100.0) * eq / risk_frac
-                notional = min(want, self.pool["cash"] / (1 + FEE))
+                notional = min(want, self.pool["cash"] / (1 + COST))
                 self.cnt("v30_dollarR_capped" if want > notional + 1e-9
                          else "v30_dollarR_sized")
         qty = notional / fill_px
@@ -2112,7 +2130,7 @@ class ICTBoxEngine:
             self.state = "WAIT_ANCHOR"
             self.cnt("fill_below_exchange_min")
             return
-        fee = notional * FEE
+        fee = notional * COST
         if fee + notional > self.pool["cash"] + 1e-9:
             self.setup = None
             self.state = "WAIT_ANCHOR"
@@ -2149,7 +2167,7 @@ class ICTBoxEngine:
         # mechanism that makes a 4th consecutive loss impossible.
         self._be_at_entry = False
         if TIER3_ENTRY_CHOKE and self.tier3_at_entry:
-            be = fill_px * (1 + 2 * FEE)
+            be = fill_px * (1 + 2 * COST)
             if be < fill_px + risk:      # keep the stop a real stop
                 self.stop_px = max(self.stop_px, be)
                 self.be_armed = True
@@ -2158,8 +2176,8 @@ class ICTBoxEngine:
         # exact solution of px - entry - FEE*entry - FEE*px >= 3*risk
         # (exit fee scales with the HIGHER exit price — v22 run-1 lost
         # 68 near-3R winners to a0.004R fee shortfall)
-        self.lock_line = ((fill_px * (1 + FEE) + MIN_R * risk)
-                          / (1 - FEE))
+        self.lock_line = ((fill_px * (1 + COST) + MIN_R * risk)
+                          / (1 - COST))
         self.protected_blue = s.wave_low
         self.pool["cash"] -= notional + fee
         self.fees += fee
@@ -2194,6 +2212,7 @@ class ICTBoxEngine:
             "v30_sizing": SIZING,
             "v30_risk_floor_pct": RISK_FLOOR_PCT,
             "v30_risk_floor_stage": RISK_FLOOR_STAGE,
+            "v30_slippage_bps": SLIPPAGE_BPS,
             "v29_seam_px": round(s.seam_px, 2),
             "v29_old_stop_px": round(s.old_stop_px, 2),
             "v29_H": round(s.H, 2),
@@ -2234,7 +2253,7 @@ class ICTBoxEngine:
         rel = t.get("notional", 0.0) / lock_px
         if rel <= 0 or rel >= self.qty:
             return
-        fee = rel * lock_px * FEE
+        fee = rel * lock_px * COST
         realized = (lock_px - self.entry_px) * rel - fee
         t["realized"] = t.get("realized", 0.0) + realized
         t["released_qty"] = t.get("released_qty", 0.0) + rel
@@ -2246,7 +2265,7 @@ class ICTBoxEngine:
     def _exit(self, px, reason, idx, time):
         t = self.trade
         gross = (px - self.entry_px) * self.qty
-        exit_fee = px * self.qty * FEE
+        exit_fee = px * self.qty * COST
         entry_fee = t.get("entry_fee", 0.0)
         net = gross - entry_fee - exit_fee + t.get("realized", 0.0)
         R = (net / (self.risk * t.get("qty0", self.qty))
@@ -2369,7 +2388,7 @@ class ICTBoxEngine:
         defend = (not floor_only) or (tf5 and MANAGE_5M_WICK and self.ratchet)
         if defend and l <= self.stop_px:
             px = self.stop_px if o >= self.stop_px else o
-            be_now = self.entry_px * (1 + 2 * FEE)
+            be_now = self.entry_px * (1 + 2 * COST)
             scratch = self.be_armed and self.stop_px <= be_now + 1e-9
             self._exit(px, "SHIELD_BE" if scratch
                        else ("FLOOR_5M" if (tf5 and floor_only)
@@ -2409,7 +2428,7 @@ class ICTBoxEngine:
                 fired = c >= self.entry_px + float(rule[1:]) * self.risk
             elif rule == "NONE":
                 fired = False
-            be = self.entry_px * (1 + 2 * FEE)       # entry + fees
+            be = self.entry_px * (1 + 2 * COST)       # entry + fees
             # a stop must sit BELOW the market; arming happens on this
             # bar's CLOSE so the BE stop only lives from the next bar
             if fired and c > be:

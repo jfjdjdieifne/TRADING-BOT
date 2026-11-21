@@ -1,0 +1,27 @@
+
+########## LIVE ENGINE · combo=M3a_fill020 · 2021-01-01..2026-10-31 ##########
+    config: BE_STREAK_MODE=reset  SHIELD_RULE_V30=MID+BOS  ENTRY_BRAIN=sniper  CISD_NEEDS_GREEN_BODY=True  RISK_FLOOR_PCT=0.2  SIZING=allcash  DOLLAR_R_PCT=0.3267  CISD_TIER3_EXEMPT=False  CISD_IGNORE_NOCHASE=False  ABSORB_MAX_BARS=6  VIGILANCE_SCOPE=none  RISK_FLOOR_STAGE=fill
+[  M3a_fill020] n= 199   46W/ 50BE/103L  WR= 30.87%  minWin=3.0  >=4R= 12  maxR= 19.38  totR=   64.49
+                net= +39.17% ($278.33)  PF=1.43  maxDD=-13.02%  streak=3/15  yearly={'2021': 79, '2022': 60, '2023': 12, '2024': 10, '2025': 11, '2026': 27}
+                medRisk%=0.3965  share(fee>=1R)=0.0%  CISD arm/reclaim/fill=0/0/0  calm=0  shield_armed=65  sacred(seam/cisd)=220/0
+                asserts A1..A5 = FPPPF  -> 3/5
+                ASSERT1 FAILED
+                ASSERT2 PASSED
+                ASSERT3 PASSED
+                ASSERT4 PASSED
+                ASSERT5 FAILED
+
+########## LIVE ENGINE · combo=M3a_fill030 · 2021-01-01..2026-10-31 ##########
+    config: BE_STREAK_MODE=reset  SHIELD_RULE_V30=MID+BOS  ENTRY_BRAIN=sniper  CISD_NEEDS_GREEN_BODY=True  RISK_FLOOR_PCT=0.3  SIZING=allcash  DOLLAR_R_PCT=0.3267  CISD_TIER3_EXEMPT=False  CISD_IGNORE_NOCHASE=False  ABSORB_MAX_BARS=6  VIGILANCE_SCOPE=none  RISK_FLOOR_STAGE=fill
+[  M3a_fill030] n= 150   29W/ 37BE/ 84L  WR= 25.66%  minWin=3.0  >=4R=  7  maxR= 19.38  totR=   10.51
+                net=  +6.31% ($212.63)  PF=1.08  maxDD=-13.86%  streak=3/14  yearly={'2021': 62, '2022': 40, '2023': 7, '2024': 8, '2025': 12, '2026': 21}
+                medRisk%=0.5133  share(fee>=1R)=0.0%  CISD arm/reclaim/fill=0/0/0  calm=0  shield_armed=46  sacred(seam/cisd)=163/0
+                asserts A1..A5 = FPPPF  -> 3/5
+                ASSERT1 FAILED
+                ASSERT2 PASSED
+                ASSERT3 PASSED
+                ASSERT4 PASSED
+                ASSERT5 FAILED
+
+########## LIVE ENGINE · combo=M1v_bos_dR · 2021-01-01..2026-10-31 ##########
+    config: BE_STREAK_MODE=decay  SHIELD_RULE_V30=BOS  ENTRY_BRAIN=sniper  CISD_NEEDS_GREEN_BODY=True  RISK_FLOOR_PCT=0.1  SIZING=dollarR  DOLLAR_R_PCT=0.3267  CISD_TIER3_EXEMPT=False  CISD_IGNORE_NOCHASE=False  ABSORB_MAX_BARS=6  VIGILANCE_SCOPE=shield+be  RISK_FLOOR_STAGE=both
