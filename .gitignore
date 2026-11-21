@@ -28,3 +28,6 @@ smoke/
 .closure_*.sha
 .tools_gate_*.txt
 .build_mutations.json
+
+# v30 per-combo equity curves (regenerable, ~27MB each) — keep only the official equity_v30.csv
+halal_spot/results/equity_v30_*.csv
