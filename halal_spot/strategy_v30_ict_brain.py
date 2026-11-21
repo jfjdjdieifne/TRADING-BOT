@@ -303,7 +303,17 @@ CISD_TIER3_EXEMPT = False      # tier-3 demands close >= fill*(1+2*FEE);
 # MEASURED WARNING: v22 put a 0.2% round-trip floor at SETUP stage and
 # starved 2023 to ZERO trades and 2024 to two (165,362 rejects). 0.30%
 # and 0.40% are stricter still - ASSERT5 is the risk, not ASSERT1.
+# MEASURED LIVE (2021-2026): a 0.30% floor at SETUP stage is a
+# starvation device, not a fix - n 297 -> 77 with 2023 and 2024 at ZERO
+# trades (0.40%: n -> 43). Per-trade quality is superb (PF 1.84 / 2.51,
+# maxDD -9.75% / -5.34%, net +33.44% / +34.55%) but ASSERT5 is destroyed
+# exactly as v22's 0.2% setup floor predicted. So the stage is a knob:
+#   "both" = the floor vetoes the setup draw AND the fill (v22 behaviour)
+#   "fill" = setups still draw (the state machine flow is untouched), and
+#            only the FILL of a dust box is skipped - the engine keeps
+#            waiting for a retrace that is worth the fee
 RISK_FLOOR_PCT = 0.10
+RISK_FLOOR_STAGE = "both"
 #
 # --- MODULE 3b: SPOT DOLLAR-R EQUALIZATION ---------------------------
 # Halal spot, no leverage: notional <= cash. v27..v29 put 100% of free
@@ -1415,7 +1425,9 @@ class ICTBoxEngine:
         # i.e. it re-created the v22 coma. The one-side floor stays at
         # setup; the round-trip requirement is enforced at the FILL,
         # where risk is final (see _enter).
-        if risk <= max(FEE * entry, RISK_FLOOR_PCT / 100.0 * entry):
+        _floor = (RISK_FLOOR_PCT / 100.0 * entry
+                  if RISK_FLOOR_STAGE == "both" else FEE * entry)
+        if risk <= _floor:
             self.cnt("reject_risk_below_one_fee")
             return
         # ---- 3R visual gate: 4H wall vs open sky ----------------
@@ -2181,6 +2193,7 @@ class ICTBoxEngine:
             "v30_shield_rule": SHIELD_RULE_V30,
             "v30_sizing": SIZING,
             "v30_risk_floor_pct": RISK_FLOOR_PCT,
+            "v30_risk_floor_stage": RISK_FLOOR_STAGE,
             "v29_seam_px": round(s.seam_px, 2),
             "v29_old_stop_px": round(s.old_stop_px, 2),
             "v29_H": round(s.H, 2),

@@ -57,7 +57,7 @@ BASE = dict(BE_STREAK_MODE="reset", SHIELD_RULE_V30="MID+BOS",
             ENTRY_BRAIN="sniper", CISD_NEEDS_GREEN_BODY=True,
             RISK_FLOOR_PCT=0.10, SIZING="allcash", DOLLAR_R_PCT=0.3267,
             CISD_TIER3_EXEMPT=False, CISD_IGNORE_NOCHASE=False, ABSORB_MAX_BARS=6,
-            VIGILANCE_SCOPE="none",
+            VIGILANCE_SCOPE="none", RISK_FLOOR_STAGE="both",
             ENTRY_ARM="seam", MANAGE_5M=False)
 
 COMBOS = {
@@ -74,6 +74,20 @@ COMBOS = {
                            VIGILANCE_SCOPE="shield+be"),
     "M1v_or":         dict(BE_STREAK_MODE="decay", VIGILANCE_SCOPE="shield+be",
                            SHIELD_RULE_V30="MID|BOS"),
+    "M1v_best":       dict(BE_STREAK_MODE="decay",
+                           VIGILANCE_SCOPE="shield+be",
+                           SHIELD_RULE_V30="MID|BOS", RISK_FLOOR_PCT=0.30,
+                           SIZING="dollarR"),
+    "M1v_best_rst":   dict(BE_STREAK_MODE="reset",
+                           VIGILANCE_SCOPE="shield+be",
+                           SHIELD_RULE_V30="MID|BOS", RISK_FLOOR_PCT=0.30,
+                           SIZING="dollarR"),
+    "M1v_or_030":     dict(BE_STREAK_MODE="decay",
+                           VIGILANCE_SCOPE="shield+be",
+                           SHIELD_RULE_V30="MID|BOS", RISK_FLOOR_PCT=0.30),
+    "M1v_or_dR":      dict(BE_STREAK_MODE="decay",
+                           VIGILANCE_SCOPE="shield+be",
+                           SHIELD_RULE_V30="MID|BOS", SIZING="dollarR"),
     # --- module 1b: which structural proof arms the BE shield --------
     "M1b_or":      dict(SHIELD_RULE_V30="MID|BOS"),
     "M1b_mid":     dict(SHIELD_RULE_V30="MID"),
@@ -93,9 +107,18 @@ COMBOS = {
                          ABSORB_MAX_BARS=12),
     "M2_dual_full": dict(ENTRY_BRAIN="dual", CISD_IGNORE_NOCHASE=True,
                          CISD_TIER3_EXEMPT=True),
+    "M1_ab_bos":   dict(BE_STREAK_MODE="hold", SHIELD_RULE_V30="BOS"),
+    "M1_hold_dR":  dict(BE_STREAK_MODE="hold", SIZING="dollarR"),
+    "M1_hold_bos_dR": dict(BE_STREAK_MODE="hold", SHIELD_RULE_V30="BOS",
+                           SIZING="dollarR"),
+    "M1v_bos_dR":  dict(BE_STREAK_MODE="decay", VIGILANCE_SCOPE="shield+be",
+                        SHIELD_RULE_V30="BOS", SIZING="dollarR"),
     # --- module 3a: the dust-box floor -------------------------------
     "M3a_030":     dict(RISK_FLOOR_PCT=0.30),
     "M3a_040":     dict(RISK_FLOOR_PCT=0.40),
+    "M3a_fill030": dict(RISK_FLOOR_PCT=0.30, RISK_FLOOR_STAGE="fill"),
+    "M3a_fill040": dict(RISK_FLOOR_PCT=0.40, RISK_FLOOR_STAGE="fill"),
+    "M3a_fill020": dict(RISK_FLOOR_PCT=0.20, RISK_FLOOR_STAGE="fill"),
     # --- module 3b: spot dollar-R equalization -----------------------
     "M3b_dollarR": dict(SIZING="dollarR"),
     # --- combinations -------------------------------------------------
