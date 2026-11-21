@@ -108,8 +108,11 @@ BASE = dict(
     # V33_ALPHA_LEADER. Those two runs were RELABELLED (TEL_LEAD2 and
     # TEL_LEAD2_REARM), not deleted: the measurements are valid, only the
     # names were wrong. BASE is now complete and guarded below.
-    SLOT_DEPLOY_PCT=1.0, TRAIL_LENS_PRE="exec", TRAIL_MIN_R_PRE=None,
-    TRAIL_4H_ONLY_AFTER_3R=False, PURPLE_REARM=False,
+    # BASE mirrors the ENGINE defaults (drive() raises if they disagree).
+    # v33 ships the telescope, so BASE carries it; V32FULL below switches it
+    # back off explicitly to reproduce the v32 book.
+    SLOT_DEPLOY_PCT=1.0, TRAIL_LENS_PRE="struct4h", TRAIL_MIN_R_PRE=None,
+    TRAIL_4H_ONLY_AFTER_3R=True, PURPLE_REARM=False,
     V33_ALPHA_LEADER=False, LEADER_K=2, LEADER_NEEDS_HTF=False,
     LEADER_MIN_DISP=0.0, LEADER_SMT_REQUIRED=False,
     LEADER_15M_ONLY_TOP1=False, BASKET_REGIME=False, REGIME_EXPAND_MIN=3,
@@ -135,14 +138,20 @@ S3 = dict(ALLOC_MODE="slot", SLOTS=3, SLOT_FILL="fixed")
 # $110.0813 | W2 n=284 totR -30.5978 $105.5819). If it does not, a v33
 # edit leaked into the default path and nothing below may be believed.
 V32FULL = dict(S3, SMT_BRAIN=True, SMT_GATE="prefer",
-               KILLZONE_MODE="exclude", KILLZONE_DOW=(6,))
+               KILLZONE_MODE="exclude", KILLZONE_DOW=(6,),
+               TRAIL_LENS_PRE="exec", TRAIL_4H_ONLY_AFTER_3R=False)
 # (b) the telescope: the pre-lock trail reads the 4H BlueBox_SSL, and after
 # the +3R lock only the 4H lens may raise the stop.
 TEL = dict(V32FULL, TRAIL_LENS_PRE="struct4h", TRAIL_4H_ONLY_AFTER_3R=True)
+# the shipped v33 default, spelled out (== TEL, kept as an independent check
+# that BASE and the engine defaults really are the champion)
+SHIP33 = dict(S3, SMT_BRAIN=True, SMT_GATE="prefer",
+              KILLZONE_MODE="exclude", KILLZONE_DOW=(6,))
 
 COMBOS = {
     # ---- identity / regression -----------------------------------------
     "V32FULL":   dict(V32FULL),
+    "SHIP33":    dict(SHIP33),
     "BTC_C124":  dict(SYMBOL_WHITELIST=("BTCUSDT",)),
     # ---- (b) telescope trail -------------------------------------------
     "TEL":       dict(TEL),

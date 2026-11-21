@@ -638,7 +638,15 @@ CLOSE_BASED_SHIELD = False   # True makes the pre-ratchet be_line exit read
 #    is already full deployment.                                          #
 # ==================================================================== #
 SLOT_DEPLOY_PCT  = 1.0      # (أ) fraction of the slot budget a fill takes
-TRAIL_LENS_PRE   = "exec"   # (ب) pre-+3R trail lens:
+# SHIPPED v33 DEFAULT = the measured champion (lab combo TEL). Chained over
+# both dev windows on the same $100 book: +59.14% vs +16.23% for the v32
+# law, max exit price move 10.99% -> 23.70%, winners above +15% 0 -> 2,
+# winners' median price move 0.81% -> 3.26%, the choking STRUCT_PROFIT exit
+# 78 -> 4, and the fee share of gross wins 25.9% -> 16.2%. Cost, disclosed:
+# WR 29.0% -> 13.2%, BREAKEVEN exits 96 -> 126, EMERGENCY_STOP 18 -> 33 and
+# maxDD -4.38% -> -5.77%. Set TRAIL_LENS_PRE="exec" and
+# TRAIL_4H_ONLY_AFTER_3R=False to get the v32 book back bar for bar.
+TRAIL_LENS_PRE   = "struct4h"   # (ب) pre-+3R trail lens:
                             #     "v32"     = honour STRUCT_TRAIL_SRC
                             #     "exec"    = execution frame only
                             #     "htf"     = 1h + 4h
@@ -646,7 +654,7 @@ TRAIL_LENS_PRE   = "exec"   # (ب) pre-+3R trail lens:
                             #     "off"     = no pre-lock structural trail
 TRAIL_MIN_R_PRE  = None     # (ب) None = STRUCT_TRAIL_MIN_R (1.0); a number
                             #     delays the trail until that gross R
-TRAIL_4H_ONLY_AFTER_3R = False   # (ب) after the +3R lock follow 4H SSL only
+TRAIL_4H_ONLY_AFTER_3R = True    # (ب) after the +3R lock follow 4H SSL only
 PURPLE_REARM     = False    # (ب) re-anchor the dealing range on each new
                             #     qualified wave, so a coin above the OLD
                             #     frozen PurpleBox mid stays buyable. Gated
