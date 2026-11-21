@@ -424,8 +424,16 @@ SWIN_CLEARS_VIGIL = False     # does a structural win end the vigilance?
 #   "htf"   = only a COMPLETED 4H/1H structural close below the floor
 #             ends the ride (the HTF canvases are fed completed bars
 #             only, so this is causal); exec-frame dips are ignored
-#   "trail" = the floor never sells; the ride ends on the trailed
-#             ascending BlueBox_SSL stop or the red-target rejection
+#   "stop"  = the floor becomes a LIVE STOP ORDER on the execution frame
+#             (wick-defended): the +3.00R is guaranteed, and the ride
+#             continues above it until the trailed BlueBox_SSL stop or the
+#             red-target rejection ends it. This is the honest reading of
+#             "leave the wave running" - the first variant tried here
+#             ("trail", floor enforced by NOTHING) let a ratcheted position
+#             ride back down indefinitely and turned +3R excursions into
+#             losses: measured live, totR +101.46 but maxDD -22.42%.
+#   "trail" = the floor never sells and is not defended (kept only as the
+#             measured reference for that give-back risk)
 # HARVEST_PCT: sell that fraction of the ORIGINAL qty at the first floor
 # close (weekly cash) and let the rest ride under LOCK_MODE. 0 = the
 # all-or-nothing v30 law. The two legs are booked as ONE trade: R is
@@ -2623,14 +2631,18 @@ class ICTBoxEngine:
         # wick defends it (the stop was raised at the previous 5m CLOSE, so
         # this bar's own low is a genuine later breach - no lookahead). On
         # the execution frame the floor stays a CLOSE rule as in v27.
-        defend = (not floor_only) or (tf5 and MANAGE_5M_WICK and self.ratchet)
+        defend = ((not floor_only) or LOCK_MODE == "stop"
+                  or (tf5 and MANAGE_5M_WICK and self.ratchet))
         if defend and l <= self.stop_px:
             px = self.stop_px if o >= self.stop_px else o
             be_now = self.entry_px * (1 + 2 * COST)
             scratch = self.be_armed and self.stop_px <= be_now + 1e-9
-            self._exit(px, "SHIELD_BE" if scratch
-                       else ("FLOOR_5M" if (tf5 and floor_only)
-                             else "STOP_BLUE"),
+            at_floor = (self.ratchet and LOCK_MODE == "stop"
+                        and self.stop_px >= floor_line - 1e-9)
+            self._exit(px, "LOCK_FLOOR_STOP" if at_floor
+                       else ("SHIELD_BE" if scratch
+                             else ("FLOOR_5M" if (tf5 and floor_only)
+                                   else "STOP_BLUE")),
                        idx, time)
             return
         # ---- v25: DISPLACEMENT DETECTION — the story proving itself.
