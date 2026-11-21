@@ -1,3 +1,84 @@
 
 ########## LIVE ENGINE · combo=SLIP5_champ · 2021-01-01..2026-10-31 ##########
     config: BE_STREAK_MODE=reset  SHIELD_RULE_V30=MID+BOS  ENTRY_BRAIN=sniper  CISD_NEEDS_GREEN_BODY=True  RISK_FLOOR_PCT=0.1  SIZING=allcash  DOLLAR_R_PCT=0.3267  CISD_TIER3_EXEMPT=False  CISD_IGNORE_NOCHASE=False  ABSORB_MAX_BARS=6  VIGILANCE_SCOPE=shield+be  RISK_FLOOR_STAGE=both  SLIPPAGE_BPS=5.0
+[  SLIP5_champ] n= 216   29W/ 72BE/115L  WR= 20.14%  minWin=3.0  >=4R= 10  maxR= 19.13  totR=   15.34
+                net= +28.72% ($257.45)  PF=1.46  maxDD=-12.1%  streak=3/26  yearly={'2021': 80, '2022': 54, '2023': 27, '2024': 20, '2025': 17, '2026': 18}
+                medRisk%=0.469  share(fee>=1R)=7.9%  CISD arm/reclaim/fill=0/0/0  calm=0  shield_armed=46  sacred(seam/cisd)=242/0
+                asserts A1..A5 = FPPPP  -> 4/5
+                ASSERT1 FAILED
+                ASSERT2 PASSED
+                ASSERT3 PASSED
+                ASSERT4 PASSED
+                ASSERT5 PASSED
+
+########## LIVE ENGINE · combo=SLIP10_champ · 2021-01-01..2026-10-31 ##########
+    config: BE_STREAK_MODE=reset  SHIELD_RULE_V30=MID+BOS  ENTRY_BRAIN=sniper  CISD_NEEDS_GREEN_BODY=True  RISK_FLOOR_PCT=0.1  SIZING=allcash  DOLLAR_R_PCT=0.3267  CISD_TIER3_EXEMPT=False  CISD_IGNORE_NOCHASE=False  ABSORB_MAX_BARS=6  VIGILANCE_SCOPE=shield+be  RISK_FLOOR_STAGE=both  SLIPPAGE_BPS=10.0
+[ SLIP10_champ] n= 132   29W/ 37BE/ 66L  WR= 30.53%  minWin=3.0  >=4R=  6  maxR=  6.25  totR=   13.36
+                net= +26.60% ($253.19)  PF=1.53  maxDD=-14.99%  streak=3/22  yearly={'2021': 70, '2022': 30, '2023': 4, '2024': 4, '2025': 10, '2026': 14}
+                medRisk%=0.5486  share(fee>=1R)=0.0%  CISD arm/reclaim/fill=0/0/0  calm=0  shield_armed=39  sacred(seam/cisd)=148/0
+                asserts A1..A5 = FPPPF  -> 3/5
+                ASSERT1 FAILED
+                ASSERT2 PASSED
+                ASSERT3 PASSED
+                ASSERT4 PASSED
+                ASSERT5 FAILED
+
+########## LIVE ENGINE · combo=SLIP10_f020 · 2021-01-01..2026-10-31 ##########
+    config: BE_STREAK_MODE=reset  SHIELD_RULE_V30=MID+BOS  ENTRY_BRAIN=sniper  CISD_NEEDS_GREEN_BODY=True  RISK_FLOOR_PCT=0.2  SIZING=allcash  DOLLAR_R_PCT=0.3267  CISD_TIER3_EXEMPT=False  CISD_IGNORE_NOCHASE=False  ABSORB_MAX_BARS=6  VIGILANCE_SCOPE=shield+be  RISK_FLOOR_STAGE=fill  SLIPPAGE_BPS=10.0
+[  SLIP10_f020] n= 104   16W/ 31BE/ 57L  WR= 21.92%  minWin=3.0  >=4R=  3  maxR=  5.89  totR=  -13.18
+                net=  +7.61% ($215.21)  PF=1.18  maxDD=-14.94%  streak=3/22  yearly={'2021': 67, '2022': 30, '2023': 0, '2024': 0, '2025': 2, '2026': 5}
+                medRisk%=0.5947  share(fee>=1R)=0.0%  CISD arm/reclaim/fill=0/0/0  calm=0  shield_armed=22  sacred(seam/cisd)=118/0
+                asserts A1..A5 = FPFPF  -> 2/5
+                ASSERT1 FAILED
+                ASSERT2 PASSED
+                ASSERT3 FAILED
+                ASSERT4 PASSED
+                ASSERT5 FAILED
+
+=============== v30 LIVE COMPARISON TABLE ===============
+        combo    n    W   BE    L     WR%  minW  >=4R    maxR     totR     net%     PF  maxDD%  strk  ymin  5as
+          v25  206   51   48    0   32.30   3.0    13   19.38     0.00   +42.14   1.43  -17.43     3     -    -
+          v27  297   70   66    0   30.30   3.0    18   19.38     0.00   +31.90   1.26  -14.41     3     -    -
+  SLIP5_champ  216   29   72  115   20.14   3.0    10   19.13    15.34   +28.72   1.46  -12.10     3    17  4/5
+ SLIP10_champ  132   29   37   66   30.53   3.0     6    6.25    13.36   +26.60   1.53  -14.99     3     4  3/5
+  SLIP10_f020  104   16   31   57   21.92   3.0     3    5.89   -13.18    +7.61   1.18  -14.94     3     0  2/5
+=========================================================
+    SLIP5_champ yearly: {'2021': 80, '2022': 54, '2023': 27, '2024': 20, '2025': 17, '2026': 18}
+   SLIP10_champ yearly: {'2021': 70, '2022': 30, '2023': 4, '2024': 4, '2025': 10, '2026': 14}
+    SLIP10_f020 yearly: {'2021': 67, '2022': 30, '2023': 0, '2024': 0, '2025': 2, '2026': 5}
+
+=== DIAG SLIP5_champ: matched 121 of v27's 297 trades on entry_time (v30 book has 216) ===
+class_30  BE  LOSS  WIN
+class_27               
+BE        19    10    0
+LOSS      15    42    2
+WIN        8     3   22
+    v27 LOSS  n= 59 -> BE:15  LOSS:42  WIN:2
+    v27 BE    n= 29 -> BE:19  LOSS:10
+    v27 WIN   n= 33 -> BE:8  LOSS:3  WIN:22
+    totR matched: v27 77.93 -> v30 74.08
+    net$ matched: v27 109.82 -> v30 93.07
+
+=== DIAG SLIP10_champ: matched 88 of v27's 297 trades on entry_time (v30 book has 132) ===
+class_30  BE  LOSS  WIN
+class_27               
+BE        12     6    0
+LOSS       8    34    0
+WIN        6     1   21
+    v27 LOSS  n= 42 -> BE:8  LOSS:34
+    v27 BE    n= 18 -> BE:12  LOSS:6
+    v27 WIN   n= 28 -> BE:6  LOSS:1  WIN:21
+    totR matched: v27 72.61 -> v30 21.40
+    net$ matched: v27 93.95 -> v30 45.81
+
+=== DIAG SLIP10_f020: matched 65 of v27's 297 trades on entry_time (v30 book has 104) ===
+class_30  BE  LOSS  WIN
+class_27               
+BE         4     6    0
+LOSS      10    27    0
+WIN        4     2   12
+    v27 LOSS  n= 37 -> BE:10  LOSS:27
+    v27 BE    n= 10 -> BE:4  LOSS:6
+    v27 WIN   n= 18 -> BE:4  LOSS:2  WIN:12
+    totR matched: v27 36.84 -> v30 5.72
+    net$ matched: v27 61.50 -> v30 23.60

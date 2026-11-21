@@ -1,0 +1,4 @@
+[v30-narrative] symbols discovered: ['BTCUSD_5m']
+/home/user/TRADING-BOT/halal_spot/strategy_v30_ict_brain.py:2593: Pandas4Warning: The inplace keyword in DataFrame.drop is deprecated and will be removed in a future version (PDEP-8).
+See https://pandas.pydata.org/docs/dev/whatsnew/v3.1.0.html#deprecation-inplace for more details.
+  tf.drop(index=tf[tf.index > s1].index, inplace=True)

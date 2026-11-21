@@ -240,7 +240,24 @@ BE_STREAK_MODE = "reset"
 #   "shield+be"  = vigilance also keeps the tier-3 break-even-at-entry
 #                  arming (the mechanism that turned 117 v27 losses into
 #                  genuine scratches), still without throttling entries
-VIGILANCE_SCOPE = "none"
+# SHIPPED v30 CONFIG = "vigil_floor-free vigilance" (lab combo
+# M1v_shbe_rst), chosen from 30 live arms on the full 2021-2026 book:
+#   n=298  44W/109BE/145L  WR 23.28%  totR +66.39  net +71.75% ($343.50)
+#   PF 2.14  maxDD -9.52%  >=4R 10  maxR 19.38  ymin 25  asserts 4/5
+# versus the shipped v27/v29 base (n=297, WR 30.30%, net +31.90%, PF 1.26,
+# maxDD -14.41%) and v25 (net +42.14%, PF 1.43, maxDD -17.43%).
+# Why this arm and not the richer-looking ones:
+#  * BE_STREAK_MODE="hold" is better still on paper (net +56.25%, PF 2.43,
+#    maxDD -4.83%, WR 42.86%) but STARVES the book (n=174, 2023/24/25 =
+#    9/11/10 trades) and therefore fails ASSERT5 - v25's DEADLOCK.
+#  * adding the 0.20% fill-stage floor (combo M1v_rst_f020) gives the best
+#    totR (+86.18) and the lowest DD (-7.65%) at 0 bps, but under the
+#    execution-cost stress it is the first to die (10 bps: n=104, 2023 and
+#    2024 at ZERO trades, net +7.61%), so the extra filter is not shipped.
+#  * A1 (WR >= 60%) fails for EVERY arm measured in this project; the best
+#    live reading anywhere is 47.62% on a 71-trade book. Disclosed, not
+#    hidden - see REPORT_AR_v30.md.
+VIGILANCE_SCOPE = "shield+be"
 #
 # --- MODULE 1b: STRUCTURAL PROOF SHIELD ------------------------------
 # IMPORTANT MEASUREMENT, read before touching this: the displacement

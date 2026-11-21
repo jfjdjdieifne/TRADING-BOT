@@ -1,152 +1,152 @@
 {
-  "trades": 297,
-  "wins": 70,
-  "breakevens": 66,
-  "win_rate_pct": 30.3,
-  "profit_factor": 1.26,
-  "net_pnl": 63.79,
-  "net_pct": 31.9,
-  "end_equity": 263.79,
-  "max_drawdown_pct": -14.41,
+  "trades": 138,
+  "wins": 35,
+  "breakevens": 35,
+  "win_rate_pct": 34.0,
+  "profit_factor": 1.32,
+  "net_pnl": 48.33,
+  "net_pct": 24.17,
+  "end_equity": 248.33,
+  "max_drawdown_pct": -26.47,
   "max_consecutive_losses": 3,
-  "avg_R": 0.15,
+  "avg_R": 0.17,
   "min_winner_R": 3.0,
-  "runners_ge_5R": 14,
-  "runners_ge_10R": 6,
+  "runners_ge_5R": 7,
+  "runners_ge_10R": 2,
   "runners_ge_20R": 0,
-  "runners_4r_plus": 18,
-  "max_winner_R": 19.38,
-  "max_R": 19.38,
-  "fees": 71.56,
+  "runners_4r_plus": 11,
+  "max_winner_R": 12.02,
+  "max_R": 12.02,
+  "fees": 59.22,
   "exit_reasons": {
-    "STOP_BLUE": 179,
-    "LOCK_FLOOR_CLOSE": 50,
-    "BREAKEVEN": 66,
-    "TARGET_REJECTION": 2
+    "STOP_BLUE": 81,
+    "LOCK_FLOOR_CLOSE": 21,
+    "BREAKEVEN": 35,
+    "TARGET_REJECTION": 1
   },
   "s1_kinds": {
-    "BOX_STACK": 297
+    "BOX_STACK": 138
   },
   "monthly": [
     [
       "2021-01",
-      14.33
+      12.26
     ],
     [
       "2021-02",
-      0.57
+      -0.72
     ],
     [
       "2021-03",
-      5.45
+      6.81
     ],
     [
       "2021-04",
-      -1.7
+      -2.57
     ],
     [
       "2021-05",
-      -7.95
+      -8.15
     ],
     [
       "2021-06",
-      -1.74
+      -2.13
     ],
     [
       "2021-07",
-      8.22
+      -1.98
     ],
     [
       "2021-08",
-      -2.28
+      -2.86
     ],
     [
       "2021-09",
-      -1.24
+      2.3
     ],
     [
       "2021-10",
-      3.4
+      0.28
     ],
     [
       "2021-11",
-      -1.01
+      -3.58
     ],
     [
       "2021-12",
-      -1.72
-    ],
-    [
-      "2022-01",
-      -3.17
-    ],
-    [
-      "2022-02",
-      -0.81
-    ],
-    [
-      "2022-03",
-      -1.27
-    ],
-    [
-      "2022-04",
-      -0.4
-    ],
-    [
-      "2022-05",
-      8.27
-    ],
-    [
-      "2022-06",
-      -1.02
-    ],
-    [
-      "2022-07",
-      10.89
-    ],
-    [
-      "2022-08",
-      -2.61
-    ],
-    [
-      "2022-09",
-      2.88
-    ],
-    [
-      "2022-10",
-      -1.15
-    ],
-    [
-      "2022-11",
-      -1.35
-    ],
-    [
-      "2022-12",
-      -1.13
-    ],
-    [
-      "2023-01",
-      -0.0
-    ],
-    [
-      "2023-02",
-      -0.25
-    ],
-    [
-      "2023-03",
-      1.07
-    ],
-    [
-      "2023-04",
       0.0
     ],
     [
+      "2022-01",
+      -0.0
+    ],
+    [
+      "2022-02",
+      -2.23
+    ],
+    [
+      "2022-03",
+      -1.09
+    ],
+    [
+      "2022-04",
+      -2.23
+    ],
+    [
+      "2022-05",
+      4.38
+    ],
+    [
+      "2022-06",
+      4.46
+    ],
+    [
+      "2022-07",
+      7.61
+    ],
+    [
+      "2022-08",
+      -2.78
+    ],
+    [
+      "2022-09",
+      4.19
+    ],
+    [
+      "2022-10",
+      -1.98
+    ],
+    [
+      "2022-11",
+      0.0
+    ],
+    [
+      "2022-12",
+      0.0
+    ],
+    [
+      "2023-01",
+      0.0
+    ],
+    [
+      "2023-02",
+      0.0
+    ],
+    [
+      "2023-03",
+      -0.0
+    ],
+    [
+      "2023-04",
+      -1.13
+    ],
+    [
       "2023-05",
-      -2.58
+      -1.57
     ],
     [
       "2023-06",
-      -0.44
+      0.0
     ],
     [
       "2023-07",
@@ -154,7 +154,7 @@
     ],
     [
       "2023-08",
-      -0.42
+      0.0
     ],
     [
       "2023-09",
@@ -166,7 +166,7 @@
     ],
     [
       "2023-11",
-      -0.84
+      0.0
     ],
     [
       "2023-12",
@@ -178,43 +178,43 @@
     ],
     [
       "2024-02",
-      -0.58
+      0.0
     ],
     [
       "2024-03",
-      -1.69
+      2.22
     ],
     [
       "2024-04",
-      -1.76
+      0.0
     ],
     [
       "2024-05",
-      0.31
+      0.0
     ],
     [
       "2024-06",
-      -0.91
+      -0.0
     ],
     [
       "2024-07",
-      13.71
+      0.0
     ],
     [
       "2024-08",
-      1.1
+      0.0
     ],
     [
       "2024-09",
-      0.85
+      0.0
     ],
     [
       "2024-10",
-      -2.38
+      0.0
     ],
     [
       "2024-11",
-      1.59
+      2.43
     ],
     [
       "2024-12",
@@ -222,31 +222,31 @@
     ],
     [
       "2025-01",
-      -2.2
+      -2.01
     ],
     [
       "2025-02",
-      -0.87
+      0.0
     ],
     [
       "2025-03",
-      -1.51
+      1.29
     ],
     [
       "2025-04",
-      0.2
+      1.48
     ],
     [
       "2025-05",
-      0.71
+      0.0
     ],
     [
       "2025-06",
-      -0.6
+      0.0
     ],
     [
       "2025-07",
-      -0.99
+      -0.89
     ],
     [
       "2025-08",
@@ -258,51 +258,51 @@
     ],
     [
       "2025-10",
-      1.0
+      0.0
     ],
     [
       "2025-11",
-      0.18
+      1.6
     ],
     [
       "2025-12",
-      2.04
+      0.0
     ],
     [
       "2026-01",
-      4.51
+      4.75
     ],
     [
       "2026-02",
-      -1.52
+      0.91
     ],
     [
       "2026-03",
-      3.06
+      6.48
     ],
     [
       "2026-04",
-      -0.42
+      -0.56
     ],
     [
       "2026-05",
-      -1.67
+      -0.38
     ],
     [
       "2026-06",
-      2.28
+      1.96
     ],
     [
       "2026-07",
-      -1.71
+      -2.27
     ],
     [
       "2026-08",
-      -0.0
+      0.0
     ],
     [
       "2026-09",
-      -0.83
+      0.0
     ],
     [
       "2026-10",
@@ -316,132 +316,128 @@
     "board_red_breakdown": 12960,
     "board_recover_sweep": 9328,
     "board_recover_box": 3488,
-    "anchor_premium_skip": 315735,
+    "anchor_premium_skip": 202146,
     "bos_noise_ignored": 32588,
-    "anchor_box_tap": 4378,
-    "anchor_invalid": 7332,
-    "bos_red_break": 5260,
-    "setup_wave_refresh": 43144,
-    "stop_kept_ltf": 43288,
-    "setup_drawn": 3625,
-    "setup_missed_run": 2399,
-    "anchor_blue_sweep": 8215,
-    "reject_ctx_gate": 19804,
-    "setup_wait_stack": 122096,
-    "setup_anchor_died": 1632,
-    "setup_box_died": 886,
-    "sacred_law_seam_ok": 327,
-    "fill": 297,
-    "ratchet_3r_close": 70,
-    "trail_htf_blue": 37,
-    "exit_STOP_BLUE": 179,
-    "disp_bos": 145,
-    "disp_mid_cross": 108,
-    "shield_armed_disp": 83,
-    "target_consumed": 83,
-    "exit_LOCK_FLOOR_CLOSE": 50,
-    "blocked_consumed_range": 26124,
-    "stop_widened_to_htf": 144878,
-    "structural_gate_armed": 79,
-    "streak_needs_htf_wave": 48964,
-    "streak_entry_not_fresh": 78047,
-    "anchor_refresh_sweep": 524,
-    "reject_premium_ob": 26527,
-    "anchor_tap_needs_bos_state": 32207,
-    "reject_wall_within_3r": 36416,
-    "anchor_board_red": 20525,
-    "reject_risk_below_one_fee": 272575,
-    "fill_below_exchange_min": 27,
-    "exit_BREAKEVEN": 66,
-    "shield_be_releases_streak": 66,
-    "v30_vigil_holds_on_be": 66,
+    "anchor_box_tap": 2706,
+    "anchor_invalid": 4679,
+    "bos_red_break": 3355,
+    "setup_wave_refresh": 20499,
+    "stop_kept_ltf": 12435,
+    "setup_drawn": 2295,
+    "setup_missed_run": 1550,
+    "anchor_blue_sweep": 5329,
+    "reject_ctx_gate": 10260,
+    "setup_wait_stack": 451245,
+    "setup_anchor_died": 1057,
+    "stop_widened_to_htf": 71857,
+    "setup_box_died": 579,
+    "sacred_law_seam_ok": 158,
+    "fill": 138,
+    "ratchet_3r_close": 35,
+    "trail_htf_blue": 28,
+    "exit_STOP_BLUE": 81,
+    "disp_bos": 77,
+    "disp_mid_cross": 70,
+    "shield_armed_disp": 53,
+    "exit_LOCK_FLOOR_CLOSE": 21,
+    "blocked_consumed_range": 13222,
+    "structural_gate_armed": 34,
+    "streak_needs_htf_wave": 35576,
+    "streak_entry_not_fresh": 191617,
+    "anchor_refresh_sweep": 319,
+    "reject_premium_ob": 13757,
+    "anchor_tap_needs_bos_state": 20108,
+    "reject_wall_within_3r": 25343,
+    "anchor_board_red": 12512,
+    "reject_risk_below_one_fee": 156172,
+    "fill_below_exchange_min": 14,
+    "exit_BREAKEVEN": 35,
+    "shield_be_releases_streak": 35,
+    "v30_vigil_holds_on_be": 35,
+    "target_consumed": 52,
     "fill_cancel_board_red": 2,
-    "tier3_fill_needs_proof": 95,
-    "tier3_be_armed_at_entry": 30,
-    "target_rejection_exit": 2,
-    "exit_TARGET_REJECTION": 2,
-    "tier3_skip_no_be_room": 3,
-    "fill_cancel_premium": 11,
-    "fill_cancel_target_within_3r": 10,
-    "y2021_anchor_invalid": 1777,
-    "y2021_stop_kept_ltf": 15488,
-    "y2021_setup_drawn": 826,
-    "y2021_reject_ctx_gate": 5244,
-    "y2021_sacred_law_seam_ok": 90,
-    "y2021_fill": 82,
-    "y2021_shield_armed_disp": 28,
-    "y2021_target_consumed": 25,
-    "y2021_streak_entry_not_fresh": 5199,
-    "y2021_reject_premium_ob": 5524,
-    "y2021_reject_wall_within_3r": 6257,
+    "tier3_fill_needs_proof": 117,
+    "tier3_be_armed_at_entry": 13,
+    "tier3_skip_no_be_room": 6,
+    "fill_cancel_target_within_3r": 8,
+    "fill_cancel_premium": 6,
+    "y2021_anchor_invalid": 1822,
+    "y2021_stop_kept_ltf": 5852,
+    "y2021_setup_drawn": 848,
+    "y2021_reject_ctx_gate": 5324,
+    "y2021_sacred_law_seam_ok": 81,
+    "y2021_fill": 70,
+    "y2021_shield_armed_disp": 25,
+    "y2021_streak_entry_not_fresh": 4716,
+    "y2021_reject_premium_ob": 5079,
+    "y2021_reject_wall_within_3r": 10392,
+    "y2021_target_consumed": 17,
     "y2021_fill_cancel_board_red": 1,
-    "y2022_stop_kept_ltf": 11195,
-    "y2022_setup_drawn": 820,
-    "y2022_reject_premium_ob": 4820,
-    "y2022_streak_entry_not_fresh": 5544,
-    "y2022_anchor_invalid": 1626,
-    "y2022_reject_wall_within_3r": 5018,
-    "y2022_sacred_law_seam_ok": 80,
-    "y2022_fill": 68,
-    "y2022_reject_ctx_gate": 3333,
-    "y2022_shield_armed_disp": 16,
-    "y2022_target_consumed": 13,
-    "y2022_target_rejection_exit": 1,
-    "y2022_tier3_skip_no_be_room": 1,
-    "y2023_streak_entry_not_fresh": 47848,
-    "y2024_reject_ctx_gate": 3850,
-    "y2024_setup_drawn": 591,
-    "y2024_anchor_invalid": 1088,
-    "y2024_stop_kept_ltf": 4656,
-    "y2024_sacred_law_seam_ok": 49,
-    "y2024_fill": 47,
-    "y2024_reject_premium_ob": 3466,
-    "y2024_streak_entry_not_fresh": 11570,
-    "y2024_reject_wall_within_3r": 7213,
-    "y2024_shield_armed_disp": 12,
-    "y2024_fill_cancel_premium": 1,
-    "y2024_target_consumed": 12,
-    "y2025_streak_entry_not_fresh": 5558,
-    "y2025_setup_drawn": 644,
-    "y2025_stop_kept_ltf": 5417,
-    "y2025_anchor_invalid": 1447,
-    "y2025_reject_premium_ob": 5894,
-    "y2025_reject_wall_within_3r": 9405,
-    "y2025_sacred_law_seam_ok": 51,
-    "y2025_fill": 47,
-    "y2025_reject_ctx_gate": 3133,
-    "y2025_shield_armed_disp": 15,
-    "y2025_target_consumed": 15,
-    "y2025_fill_cancel_target_within_3r": 1,
-    "y2026_reject_premium_ob": 5521,
-    "y2026_stop_kept_ltf": 3954,
-    "y2026_setup_drawn": 536,
-    "y2026_reject_ctx_gate": 3505,
-    "y2026_anchor_invalid": 1122,
-    "y2026_sacred_law_seam_ok": 41,
-    "y2026_fill": 37,
-    "y2026_streak_entry_not_fresh": 2328,
-    "y2026_reject_wall_within_3r": 6850,
-    "y2026_fill_cancel_premium": 2,
-    "y2026_shield_armed_disp": 7,
-    "y2026_target_consumed": 18,
-    "y2021_fill_cancel_premium": 1,
-    "y2021_fill_cancel_target_within_3r": 9,
+    "y2021_tier3_skip_no_be_room": 1,
+    "y2021_fill_cancel_target_within_3r": 7,
+    "y2022_reject_premium_ob": 5198,
+    "y2022_streak_entry_not_fresh": 7013,
+    "y2022_anchor_invalid": 1616,
+    "y2022_setup_drawn": 799,
+    "y2022_reject_wall_within_3r": 7575,
+    "y2022_stop_kept_ltf": 3135,
+    "y2022_reject_ctx_gate": 2969,
+    "y2022_sacred_law_seam_ok": 43,
+    "y2022_fill": 36,
+    "y2022_shield_armed_disp": 10,
+    "y2022_target_consumed": 16,
     "y2022_fill_cancel_premium": 3,
-    "y2023_anchor_invalid": 272,
-    "y2023_reject_premium_ob": 1302,
-    "y2021_target_rejection_exit": 1,
-    "y2023_setup_drawn": 208,
-    "y2023_stop_kept_ltf": 2578,
-    "y2023_reject_wall_within_3r": 1673,
-    "y2023_reject_ctx_gate": 739,
-    "y2023_sacred_law_seam_ok": 16,
-    "y2023_fill": 16,
-    "y2023_shield_armed_disp": 5,
+    "y2023_streak_entry_not_fresh": 95387,
+    "y2024_streak_entry_not_fresh": 31782,
+    "y2025_streak_entry_not_fresh": 18951,
+    "y2026_streak_entry_not_fresh": 33768,
+    "target_rejection_exit": 1,
+    "exit_TARGET_REJECTION": 1,
+    "y2021_fill_cancel_premium": 1,
+    "y2022_tier3_skip_no_be_room": 3,
+    "y2023_anchor_invalid": 205,
+    "y2023_reject_premium_ob": 1201,
+    "y2025_setup_drawn": 184,
+    "y2025_anchor_invalid": 407,
+    "y2025_reject_ctx_gate": 493,
+    "y2025_reject_wall_within_3r": 1817,
+    "y2025_stop_kept_ltf": 778,
+    "y2025_sacred_law_seam_ok": 10,
+    "y2025_fill": 10,
+    "y2025_shield_armed_disp": 7,
+    "y2025_reject_premium_ob": 902,
+    "y2025_target_consumed": 5,
+    "y2026_reject_wall_within_3r": 2902,
+    "y2026_setup_drawn": 223,
+    "y2026_anchor_invalid": 467,
+    "y2026_reject_premium_ob": 1221,
+    "y2026_stop_kept_ltf": 902,
+    "y2026_sacred_law_seam_ok": 15,
+    "y2026_fill": 14,
+    "y2026_shield_armed_disp": 8,
+    "y2026_target_consumed": 13,
+    "y2026_reject_ctx_gate": 867,
+    "y2026_target_rejection_exit": 1,
+    "y2023_setup_drawn": 158,
+    "y2023_reject_wall_within_3r": 1897,
+    "y2023_stop_kept_ltf": 1235,
+    "y2023_reject_ctx_gate": 460,
+    "y2023_sacred_law_seam_ok": 5,
+    "y2023_fill": 4,
     "y2023_fill_cancel_premium": 2,
-    "y2025_tier3_skip_no_be_room": 1,
-    "y2025_fill_cancel_premium": 2,
-    "trail_4h_structural": 11,
+    "trail_4h_structural": 3,
+    "y2023_tier3_skip_no_be_room": 1,
+    "y2023_fill_cancel_target_within_3r": 1,
+    "y2024_anchor_invalid": 162,
+    "y2024_stop_kept_ltf": 533,
+    "y2024_setup_drawn": 83,
+    "y2024_reject_premium_ob": 156,
+    "y2024_reject_wall_within_3r": 760,
+    "y2024_reject_ctx_gate": 147,
+    "y2024_sacred_law_seam_ok": 4,
+    "y2024_fill": 4,
+    "y2024_shield_armed_disp": 3,
+    "y2024_target_consumed": 1,
     "y2026_fill_cancel_board_red": 1,
     "y2026_tier3_skip_no_be_room": 1
   },
@@ -449,11 +445,11 @@
     "BTCUSD_5m"
   ],
   "yearly": {
-    "2021": 82,
-    "2022": 68,
-    "2023": 16,
-    "2024": 47,
-    "2025": 47,
-    "2026": 37
+    "2021": 70,
+    "2022": 36,
+    "2023": 4,
+    "2024": 4,
+    "2025": 10,
+    "2026": 14
   }
 }

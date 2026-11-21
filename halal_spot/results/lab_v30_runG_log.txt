@@ -1,3 +1,58 @@
 
 ########## LIVE ENGINE · combo=SLIP5_base · 2021-01-01..2026-10-31 ##########
     config: BE_STREAK_MODE=reset  SHIELD_RULE_V30=MID+BOS  ENTRY_BRAIN=sniper  CISD_NEEDS_GREEN_BODY=True  RISK_FLOOR_PCT=0.1  SIZING=allcash  DOLLAR_R_PCT=0.3267  CISD_TIER3_EXEMPT=False  CISD_IGNORE_NOCHASE=False  ABSORB_MAX_BARS=6  VIGILANCE_SCOPE=none  RISK_FLOOR_STAGE=both  SLIPPAGE_BPS=5.0
+[   SLIP5_base] n= 177   44W/ 42BE/ 91L  WR= 32.59%  minWin=3.0  >=4R= 13  maxR= 19.13  totR=   49.50
+                net= +46.08% ($292.16)  PF=1.52  maxDD=-15.74%  streak=3/15  yearly={'2021': 75, '2022': 41, '2023': 13, '2024': 13, '2025': 15, '2026': 20}
+                medRisk%=0.433  share(fee>=1R)=5.1%  CISD arm/reclaim/fill=0/0/0  calm=0  shield_armed=60  sacred(seam/cisd)=202/0
+                asserts A1..A5 = FPPPP  -> 4/5
+                ASSERT1 FAILED
+                ASSERT2 PASSED
+                ASSERT3 PASSED
+                ASSERT4 PASSED
+                ASSERT5 PASSED
+
+########## LIVE ENGINE · combo=SLIP10_base · 2021-01-01..2026-10-31 ##########
+    config: BE_STREAK_MODE=reset  SHIELD_RULE_V30=MID+BOS  ENTRY_BRAIN=sniper  CISD_NEEDS_GREEN_BODY=True  RISK_FLOOR_PCT=0.1  SIZING=allcash  DOLLAR_R_PCT=0.3267  CISD_TIER3_EXEMPT=False  CISD_IGNORE_NOCHASE=False  ABSORB_MAX_BARS=6  VIGILANCE_SCOPE=none  RISK_FLOOR_STAGE=both  SLIPPAGE_BPS=10.0
+[  SLIP10_base] n= 138   35W/ 35BE/ 68L  WR= 33.98%  minWin=3.0  >=4R= 11  maxR= 12.02  totR=   23.02
+                net= +24.17% ($248.33)  PF=1.32  maxDD=-26.47%  streak=3/19  yearly={'2021': 70, '2022': 36, '2023': 4, '2024': 4, '2025': 10, '2026': 14}
+                medRisk%=0.5401  share(fee>=1R)=0.0%  CISD arm/reclaim/fill=0/0/0  calm=0  shield_armed=53  sacred(seam/cisd)=158/0
+                asserts A1..A5 = FPPPF  -> 3/5
+                ASSERT1 FAILED
+                ASSERT2 PASSED
+                ASSERT3 PASSED
+                ASSERT4 PASSED
+                ASSERT5 FAILED
+
+=============== v30 LIVE COMPARISON TABLE ===============
+        combo    n    W   BE    L     WR%  minW  >=4R    maxR     totR     net%     PF  maxDD%  strk  ymin  5as
+          v25  206   51   48    0   32.30   3.0    13   19.38     0.00   +42.14   1.43  -17.43     3     -    -
+          v27  297   70   66    0   30.30   3.0    18   19.38     0.00   +31.90   1.26  -14.41     3     -    -
+   SLIP5_base  177   44   42   91   32.59   3.0    13   19.13    49.50   +46.08   1.52  -15.74     3    13  4/5
+  SLIP10_base  138   35   35   68   33.98   3.0    11   12.02    23.02   +24.17   1.32  -26.47     3     4  3/5
+=========================================================
+     SLIP5_base yearly: {'2021': 75, '2022': 41, '2023': 13, '2024': 13, '2025': 15, '2026': 20}
+    SLIP10_base yearly: {'2021': 70, '2022': 36, '2023': 4, '2024': 4, '2025': 10, '2026': 14}
+
+=== DIAG SLIP5_base: matched 139 of v27's 297 trades on entry_time (v30 book has 177) ===
+class_30  BE  LOSS  WIN
+class_27               
+BE        25     1    1
+LOSS       2    67    2
+WIN        4     2   35
+    v27 LOSS  n= 71 -> BE:2  LOSS:67  WIN:2
+    v27 BE    n= 27 -> BE:25  LOSS:1  WIN:1
+    v27 WIN   n= 41 -> BE:4  LOSS:2  WIN:35
+    totR matched: v27 97.24 -> v30 73.37
+    net$ matched: v27 123.24 -> v30 99.29
+
+=== DIAG SLIP10_base: matched 109 of v27's 297 trades on entry_time (v30 book has 138) ===
+class_30  BE  LOSS  WIN
+class_27               
+BE        21     2    0
+LOSS       3    49    2
+WIN        5     2   25
+    v27 LOSS  n= 54 -> BE:3  LOSS:49  WIN:2
+    v27 BE    n= 23 -> BE:21  LOSS:2
+    v27 WIN   n= 32 -> BE:5  LOSS:2  WIN:25
+    totR matched: v27 88.20 -> v30 14.55
+    net$ matched: v27 111.24 -> v30 32.24
