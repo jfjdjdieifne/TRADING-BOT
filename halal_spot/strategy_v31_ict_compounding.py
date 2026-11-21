@@ -51,6 +51,7 @@ $10 min notional, $200 capital, 2 consecutive losses. 100% causal.
 """
 from __future__ import annotations
 
+import itertools
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -576,6 +577,9 @@ MANAGE_5M_SHIELD = False   # MEASURED HARMFUL (lab_v27_exact.py): arming
 # ==================================================================== #
 # The Box — pure spatial geometry
 # ==================================================================== #
+_BOX_UID = itertools.count(1)   # v31 FIX: GC-immune unique box ids
+
+
 @dataclass
 class Box:
     y_bottom: float
@@ -587,6 +591,19 @@ class Box:
     structural: bool = False  # launched a wave that left a gap AND
                               # broke a red box (True Structural Swing)
     time: object = None       # bar completion time (fresh-wave check)
+
+    # ---- v31 FIX: a unique id that survives garbage collection --------
+    # Box is a @dataclass, so it is UNHASHABLE (value __eq__, __hash__ =
+    # None) - which is why the narrative sets below keyed on id(box).
+    # id() is only unique while the object is alive, and _prune() drops
+    # DEAD boxes, so CPython reused those addresses for NEW boxes and the
+    # new box read as "already logged": its break / chop / IFVG event was
+    # silently dropped. Measured symptom: the SAME config produced three
+    # different books on three identical launches (n=330, n=328, n=326).
+    # __post_init__ (not a dataclass field) keeps __eq__/__repr__ exactly
+    # as they were, so nothing else in the engine changes behaviour.
+    def __post_init__(self):
+        self.uid = next(_BOX_UID)
 
     @property
     def height(self) -> float:
@@ -832,21 +849,20 @@ class ChartCanvas:
         # books on different runs (measured: the stop-mode arm came back
         # n=330, then n=328, then n=326 on three identical launches,
         # while the shipped C_124 happened to repeat exactly 3x).
-        # Holding the OBJECT keeps it alive, and Box defines no __eq__ /
-        # __hash__, so `x not in set` is still a pure O(1) identity test -
-        # the aliasing becomes impossible at no speed cost. Memory: one small object per box that
+        # Keying on box.uid (a counter, never an address) makes the
+        # aliasing impossible: O(1), unhashable-Box-safe, GC-proof. Memory: one small object per box that
         # ever died, bounded by the run length.
         for r in self.reds:
-            if r.state == "BROKEN" and r not in self._seen_br:
-                self._seen_br.add(r)
+            if r.state == "BROKEN" and r.uid not in self._seen_br:
+                self._seen_br.add(r.uid)
                 self.last_red_break_idx = idx
         for b in self.blues:
-            if b.state == "DEAD" and b not in self._seen_ch:
-                self._seen_ch.add(b)
+            if b.state == "DEAD" and b.uid not in self._seen_ch:
+                self._seen_ch.add(b.uid)
                 self.last_blue_chop_idx = idx
         for y in self.yellows_s:
-            if y.state == "DEAD" and y not in self._seen_if:
-                self._seen_if.add(y)
+            if y.state == "DEAD" and y.uid not in self._seen_if:
+                self._seen_if.add(y.uid)
                 self.ifvgs.append({"idx": idx, "time": time,
                                    "bottom": y.y_bottom, "top": y.y_top,
                                    "by_close": bool(c > y.y_top)})
@@ -1904,8 +1920,8 @@ class ICTBoxEngine:
         reds = []
         for r in (self.htf_canvas.active_reds()
                   + self.struct_canvas.active_reds()):
-            if r.y_bottom > entry_px and id(r) not in seen:
-                seen.add(id(r))
+            if r.y_bottom > entry_px and r.uid not in seen:
+                seen.add(r.uid)
                 reds.append(r)
         reds.sort(key=lambda r: r.y_bottom)
         # FIX4: T1 is the FIRST red box that already clears the net
