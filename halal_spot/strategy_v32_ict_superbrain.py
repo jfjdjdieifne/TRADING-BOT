@@ -559,7 +559,18 @@ RECYCLE_CASH = True          # released capital returns to pool["cash"]
 SMT_BRAIN = False            # master switch
 SMT_REFS = ("BTCUSDT", "ETHUSDT")   # the two reference legs
 SMT_GATE = "off"             # off | prefer (tie-break) | require (veto)
-SMT_MAX_AGE = 12             # exec bars: how fresh a leg's low must be
+SMT_MAX_AGE = 12             # union-timeline stamps (5m exec bars on this
+#                            # basket grid) since the completed 1H bar that
+#                            # made the leg - a stale divergence is not a
+#                            # divergence. 12 stamps = the last hour.
+# Consumed by SMTBrain below: the legs are read off each coin's SHARED 1H
+# narrative canvas (fed only completed bars), never off a partial bar.
+# SMT_GATE="prefer"  -> the coin order at every stamp is strongest-first,
+#                       so when two coins are ready on the same candle the
+#                       SMT_BULL one gets the shared cash (the brief's
+#                       tie-break: SMT first, then displacement ratio, then
+#                       4H structure).
+# SMT_GATE="require" -> a fill without SMT_BULL is vetoed at fill time.
 #
 # ---- PILLAR 3: multi-regime weapon selection ------------------------
 REGIME_MODE = "A"            # A = sweep reversal (C_124) | B = higher-low
@@ -598,8 +609,12 @@ EMERGENCY_WICK_STOP = True   # wick-defend ONLY the original structural
 #                            # >= +3.00R and still finished as losses
 #                            # (give-back 56.56R): this is the answer to
 #                            # the tail of that risk, not to its body.
-CLOSE_BASED_SHIELD = True    # be_line exits read the CLOSE, as LOCK_MODE
-#                            # "trail" already does for the floor
+CLOSE_BASED_SHIELD = False   # True makes the pre-ratchet be_line exit read
+#                            # the CLOSE instead of the wick (the floor and
+#                            # STRUCT_TRAIL already do). Default OFF so the
+#                            # v32 book stays identical to v31 C_124, which
+#                            # wick-defended the be_line (85 BREAKEVEN
+#                            # exits); both states are measured in the lab.
 # ===================================================================== #
 MIN_RISK_PCT   = 2 * COST   # NOT invented: the engine's own breakeven-room
                            # law (TIER3_ENTRY_CHOKE, _enter L~1600) — a
@@ -1449,9 +1464,47 @@ class ICTBoxEngine:
                 break
 
     # ---------------- State 1: anchor (sweep or box tap) ------------- #
+    def _impulse_on(self) -> bool:
+        """Is the impulse-leg dealing range armed?
+
+        v31 called this IMPULSE_PURPLE (Arm 3: +142.08R on the full book
+        but it starved 2023-25 down to $8/$5/$13 net, DD -17.49%, so it
+        was REJECTED ungated). v32 PILLAR 3 re-arms the same mechanism as
+        Weapon B under REGIME_MODE "B"/"AB", where the 4H regime gate
+        below decides when it may anchor - the point of the gate is that
+        Weapon B must not cannibalise the periods Weapon A feeds.
+        """
+        return IMPULSE_PURPLE or REGIME_MODE in ("B", "AB")
+
+    def _regime_b_ok(self) -> bool:
+        """Is the 4H board in the uptrend Weapon B requires?
+
+        Both tests read only completed 4H bars (the shared narrative
+        canvas is fed causally by the runner):
+          * REGIME_B_NEEDS_BSL - the last structural break is UPWARD: the
+            newest RedBox_BSL break is more recent than the newest
+            BlueBox_SSL chop.
+          * REGIME_B_NEEDS_HL  - the last BlueBox_SSL is a Higher Low: its
+            bottom sits above the previous BlueBox_SSL bottom.
+        """
+        n4 = self.nar4
+        if n4 is None or len(n4.bars) < 3:
+            return False
+        if REGIME_B_NEEDS_BSL:
+            b = n4.bos_events[-1]["idx"] if n4.bos_events else -1
+            c = n4.chop_events[-1]["idx"] if n4.chop_events else -1
+            if b <= c:
+                return False
+        if REGIME_B_NEEDS_HL:
+            bl = _last_blues(n4, 2)
+            if len(bl) < 2 or bl[-1].y_bottom <= bl[-2].y_bottom:
+                return False
+        return True
+
     def _purple_ok(self) -> bool:
         p = self.struct_canvas.purple
-        return p is not None or (IMPULSE_PURPLE and self.impulse is not None)
+        return p is not None or (self._impulse_on()
+                                 and self.impulse is not None)
 
     # ---- v31 ARM 3: DYNAMIC IMPULSE-LEG DEALING RANGE ---------------
     def _impulse_update(self, o, h, l, c, idx, time, fresh):
@@ -1459,7 +1512,7 @@ class ICTBoxEngine:
         RedBox_BSL break qualified, at the last confirmed swing low that
         launched it, and it stays alive while price holds that low, up to
         IMPULSE_MAX_BARS. Everything it reads is already closed."""
-        if not IMPULSE_PURPLE:
+        if not self._impulse_on():
             return
         imp = self.impulse
         if imp is not None:
@@ -1470,6 +1523,9 @@ class ICTBoxEngine:
                 self.cnt("v31_impulse_expired")
                 imp = None
         if imp is None and fresh:
+            if REGIME_MODE == "B" and not self._regime_b_ok():
+                self.cnt("v32_regime_b_no_anchor")
+                return
             low = None
             for b in reversed(self.exec_canvas.active_blues()):
                 if b.start_idx <= idx and b.y_bottom < c:
@@ -1488,7 +1544,7 @@ class ICTBoxEngine:
         sits HIGHER - the impulse mid. Returns (mid, needed_impulse)."""
         p = self.struct_canvas.purple
         pmid = p.mid if p is not None else None
-        if not IMPULSE_PURPLE or self.impulse is None:
+        if not self._impulse_on() or self.impulse is None:
             return pmid, False
         imid = (self.impulse["low"] + self.impulse["high"]) / 2.0
         if pmid is None or imid > pmid:
@@ -2510,6 +2566,25 @@ class ICTBoxEngine:
                 self.state = "WAIT_ANCHOR"
                 self.cnt("v32_killzone_skip")
                 return
+        # ---- v32 PILLAR 2: SMT veto (SMT_GATE="require") --------------
+        # "prefer" needs nothing here: it is consumed by the basket ORDER
+        # (the strongest coin reaches the shared cash first at a stamp
+        # where several are ready). "require" drops the fill instead.
+        if SMT_BRAIN and SMT_GATE == "require" and \
+                not self.pool.get("smt", {}).get(self.symbol, False):
+            self.setup = None
+            self.state = "WAIT_ANCHOR"
+            self.cnt("v32_smt_veto")
+            return
+        # ---- v32 PILLAR 3: regime-B veto ------------------------------
+        # Weapon B trades WITH the trend only: at fill time the 4H board
+        # must show the last structural break upward (RedBox_BSL) and the
+        # last BlueBox_SSL as a Higher Low. Weapon A ("A") is untouched.
+        if REGIME_MODE == "B" and not self._regime_b_ok():
+            self.setup = None
+            self.state = "WAIT_ANCHOR"
+            self.cnt("v32_regime_b_veto")
+            return
         qty = notional / fill_px
         notional = qty * fill_px
         if qty <= 0 or notional < EXCHANGE_MIN_NOTIONAL:
@@ -2833,8 +2908,22 @@ class ICTBoxEngine:
             px = self.orig_stop_px if o >= self.orig_stop_px else o
             self._exit(px, "EMERGENCY_STOP", idx, time)
             return
-        if defend and l <= self.stop_px:
-            px = self.stop_px if o >= self.stop_px else o
+        # ---- v32 PILLAR 4b: CLOSE_BASED_SHIELD ------------------------
+        # Pre-ratchet, the armed break-even line can be made a CLOSE rule
+        # (the same causal discipline the LOCK_MODE="trail" floor and the
+        # STRUCT_TRAIL raises already use: the stop moves on a completed
+        # bar's close and the exit needs a completed bar's close too), so
+        # a wick through the be_line no longer scratches the trade. The
+        # ORIGINAL structural stop keeps its wick defence either way via
+        # EMERGENCY_WICK_STOP above, so no loss can exceed -1R.
+        shield_close_only = (CLOSE_BASED_SHIELD and self.be_armed
+                             and not self.ratchet
+                             and self.stop_px
+                             <= self.entry_px * (1 + 2 * COST) + 1e-9)
+        hit = c <= self.stop_px if shield_close_only else l <= self.stop_px
+        if defend and hit:
+            px = (c if shield_close_only
+                  else (self.stop_px if o >= self.stop_px else o))
             be_now = self.entry_px * (1 + 2 * COST)
             scratch = self.be_armed and self.stop_px <= be_now + 1e-9
             at_floor = (self.ratchet and LOCK_MODE == "stop"
@@ -3085,6 +3174,110 @@ def _stems_for(d: Path, warm, s1) -> list[str]:
             for m in range(1, 13)]
 
 
+# ===================================================================== #
+# v32 PILLAR 2 — ICT BULLISH SMT DIVERGENCE + RELATIVE STRENGTH          #
+# ===================================================================== #
+def _last_blues(canvas, k: int = 2) -> list:
+    """The last `k` confirmed BlueBox_SSL boxes, chronological."""
+    out = []
+    for b in reversed(getattr(canvas, "blues", None) or []):
+        out.append(b)
+        if len(out) >= k:
+            break
+    out.reverse()
+    return out
+
+
+class SMTBrain:
+    """Cross-coin SMT divergence + relative-strength score, zero lookahead.
+
+    Everything it reads is already closed: the per-coin SHARED 1H narrative
+    canvas (the runner feeds it completed 1H bars only) and the 4H narrative
+    canvas. At every union-timeline stamp `t` it applies the two bullish SMT
+    patterns of the brief, per coin C with reference legs R = {BTCUSDT,
+    ETHUSDT} \\ {C}:
+
+      (A) some R sweeps its last BlueBox_SSL - its completed 1H bar low
+          trades through the SSL bottom, i.e. a Lower Low into liquidity -
+          while C REFUSES (C's low stays above C's own last SSL) -> BULL.
+      (B) C sweeps its own BlueBox_SSL while every R HOLDS (no sweep) ->
+          BULL: the correlated legs refuse to follow it down.
+
+    A leg counts only while fresh: `SMT_MAX_AGE` stamps since the completed
+    1H bar that made it (an SSL drawn BY the current bar is not a sweep of
+    a prior pool, so it is ignored).
+
+    Strength key (the brief's tie-break order, all descending except the
+    last): SMT_BULL, displacement ratio = last YellowBox_FVG height / last
+    GreenBox_OB height on the 1H canvas, 4H structure = +1 when the last
+    structural event is an upward RedBox_BSL break, -1 when it is a
+    BlueBox_SSL chop, 0 when neither exists; then the symbol name, so the
+    order never depends on dict/set iteration order.
+    """
+
+    def __init__(self, refs=SMT_REFS):
+        self.refs = tuple(refs)
+        self.flags: dict = {}
+        self.keys: dict = {}
+        self.bull_stamps = 0
+
+    @staticmethod
+    def _leg(nar1, age: int):
+        """('swept'|'held'|None, ssl_bottom) for one coin's 1H canvas."""
+        if nar1 is None or not nar1.bars:
+            return None, None
+        blues = _last_blues(nar1, 1)
+        if not blues:
+            return None, None
+        ssl = blues[-1]
+        # the SSL must predate the current bar, else the "sweep" is the bar
+        # that drew the box (self-referential, not a divergence)
+        if ssl.start_idx >= len(nar1.bars) - 1:
+            return None, ssl.y_bottom
+        if age > SMT_MAX_AGE:
+            return None, ssl.y_bottom          # stale: not a live leg
+        low = float(nar1.bars[-1][2])
+        return ("swept" if low <= ssl.y_bottom else "held"), ssl.y_bottom
+
+    def observe(self, t, stamp_no: int, narratives: dict,
+                last1h_no: dict, symbols: list) -> None:
+        legs = {}
+        for sym in symbols:
+            age = stamp_no - last1h_no.get(sym, -10 ** 9)
+            legs[sym] = self._leg(narratives[sym][1], age)
+        ref_all = [s for s in symbols if s.startswith(self.refs)]
+        flags, keys = {}, {}
+        for sym in symbols:
+            state, _ = legs[sym]
+            refs_c = [s for s in ref_all if s != sym]
+            any_swept = any(legs[s][0] == "swept" for s in refs_c)
+            all_held = all(legs[s][0] != "swept" for s in refs_c)
+            bull = bool(state == "held" and any_swept) or \
+                bool(state == "swept" and bool(refs_c) and all_held)
+            flags[sym] = bull
+            nar1, nar4 = narratives[sym][1], narratives[sym][0]
+            yb = getattr(nar1, "yellows_b", None) or []
+            gr = getattr(nar1, "greens", None) or []
+            disp = (yb[-1].height / gr[-1].height
+                    if yb and gr and gr[-1].height > 0 else 0.0)
+            htf = 0
+            if nar4 is not None:
+                b = nar4.bos_events[-1]["idx"] if nar4.bos_events else -1
+                c = nar4.chop_events[-1]["idx"] if nar4.chop_events else -1
+                htf = 1 if b > c else (-1 if c > b else 0)
+            keys[sym] = (1 if bull else 0, disp, htf, sym)
+        self.flags, self.keys = flags, keys
+        self.bull_stamps += sum(flags.values())
+
+    def order(self, symbols: list) -> list:
+        """Strongest coin first (deterministic: symbol name breaks ties)."""
+        if not self.keys:
+            return list(symbols)
+        return sorted(symbols, key=lambda s: (-self.keys[s][0],
+                                              -self.keys[s][1],
+                                              -self.keys[s][2], s))
+
+
 def run_backtest(data_dir: Path, start: str, end: str,
                  warmup_days: int = 60, tag: str = ""):
     # ---- v30: the execution-cost model is resolved PER RUN ------------
@@ -3144,13 +3337,26 @@ def run_backtest(data_dir: Path, start: str, end: str,
     # pointers per (sym, stream) —4H and1H need backfill
     ptr = {(sym, s): 0 for sym in symbols for s in ("4h", "60")}
     eq_rows = []
+    # ---- v32 PILLAR 2 state: stamp counter + per-coin 1H freshness ----
+    smt = SMTBrain() if SMT_BRAIN else None
+    pool["smt"] = {}
+    pool["smt_brain"] = smt
+    stamp_no = 0
+    last1h_no = {sym: -10 ** 9 for sym in symbols}
     # global timeline = union of all exec frames (finest first)
     stamps = sorted(set().union(*[
         set(series[s][0].index) | set(series[s][1].index)
         | set(series[s][2].index)
         for s in symbols]))
     for t in stamps:
-        for sym in symbols:
+        stamp_no += 1
+        if smt is not None:
+            smt.observe(t, stamp_no, narratives, last1h_no, symbols)
+            pool["smt"] = smt.flags
+            order = smt.order(symbols)
+        else:
+            order = symbols
+        for sym in order:
             tf_5, tf_15, tf_30, tf_60, tf_4h = series[sym]
             # feed completed 4H bars up to t (causal: <= t)
             while (ptr[(sym, "4h")] < len(tf_4h)
@@ -3182,6 +3388,7 @@ def run_backtest(data_dir: Path, start: str, end: str,
                     n1.on_bar(float(r.Open), float(r.High),
                               float(r.Low), float(r.Close), vol,
                               len(n1.bars), tf_60.index[j])
+                    last1h_no[sym] = stamp_no
                     for e in engines_by_sym[sym]:
                         e.on_htf(float(r.Open), float(r.High),
                                  float(r.Low), float(r.Close),

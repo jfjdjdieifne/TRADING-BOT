@@ -118,17 +118,67 @@ def zip_to_csv_gz(raw: bytes, dest: Path) -> tuple[int, str]:
     dest.parent.mkdir(parents=True, exist_ok=True)
     with gzip.open(dest, "wt", newline="") as g:
         w = csv.writer(g)
-        w.writerow(["timestamp", "Open", "High", "Low", "Close", "Volume"])
+        w.writerow(["Datetime", "Open", "High", "Low", "Close", "Volume"])
         for line in csv.reader(io.StringIO(text)):
             if not line or len(line) < 6:
                 continue
+            # column 0 is the bar OPEN time in epoch ms. The project's
+            # loader (engine.causal_primitives.load_asset_ohlcv) wants a
+            # `Datetime` column of naive-UTC bar OPEN times and then
+            # resample_causal_tf re-indexes every frame to bar END time
+            # (label=left, closed=left, index += delta). Verified against
+            # the data already in this repo: data/BTCUSD_5m/2024.csv.gz
+            # row 1 = 2024-01-01 00:00:00,42283.58,42397.23,42261.02,
+            # 42397.23,155.26 - the very same Binance spot kline.
             ms = int(line[0])
-            ts = time.strftime("%Y-%m-%d %H:%M:%S+00:00",
-                               time.gmtime(ms / 1000.0))
+            ts = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(ms / 1000.0))
             w.writerow([ts, line[1], line[2], line[3], line[4], line[5]])
             rows += 1
     sha = hashlib.sha256(dest.read_bytes()).hexdigest()
     return rows, sha
+
+
+def convert_local_zips(zip_dir: Path, symbols: list[str],
+                       months: list[str]) -> dict:
+    """Same normalisation as pull(), but from ZIPs already on disk.
+
+    Used when the archives were obtained by another route (a mirror, a
+    colleague's download, a repo tarball) - ONE code path for both, so a
+    converted file and a freshly downloaded file are identical."""
+    OUT.mkdir(parents=True, exist_ok=True)
+    manifest, gaps, n_conv = [], {}, 0
+    for sym in symbols:
+        d = OUT / f"{sym}_5m"
+        for m in months:
+            dest = d / f"{m}.csv.gz"
+            src = None
+            for cand in (zip_dir / f"{sym}-5m-{m}.zip",
+                         zip_dir / sym / f"{sym}-5m-{m}.zip"):
+                if cand.exists():
+                    src = cand
+                    break
+            if src is None:
+                found = list(zip_dir.rglob(f"{sym}-5m-{m}.zip"))
+                src = found[0] if found else None
+            if src is None:
+                gaps.setdefault(sym, []).append({"month": m,
+                                                 "problem": "zip not found"})
+                continue
+            rows, sha = zip_to_csv_gz(src.read_bytes(), dest)
+            n_conv += 1
+            print(f"  + {sym} {m} {rows} rows <- {src.name}")
+            if rows < MIN_ROWS:
+                gaps.setdefault(sym, []).append({"month": m, "rows": rows,
+                                                 "problem": "short month"})
+            manifest.append({"symbol": sym, "month": m, "rows": rows,
+                             "sha256": sha, "source": str(src),
+                             "path": str(dest.relative_to(OUT.parent.parent))})
+    (OUT / "MANIFEST.sha256").write_text(
+        "".join(f"{r['sha256']}  {r['path']}  rows={r['rows']}\n"
+                for r in manifest))
+    (OUT / "GAPS.json").write_text(json.dumps(gaps, indent=1))
+    return {"files": len(manifest), "converted": n_conv,
+            "rows": sum(r["rows"] for r in manifest), "gaps": gaps}
 
 
 def pull(symbols: list[str], months: list[str]) -> dict:
@@ -176,13 +226,17 @@ def main() -> int:
     ap.add_argument("--months", nargs="*", default=None)
     ap.add_argument("--with-fallbacks", action="store_true",
                     help="also pull DOTUSDT/NEARUSDT")
+    ap.add_argument("--from-zips", metavar="DIR", default=None,
+                    help="convert Binance monthly ZIPs already on disk "
+                         "instead of downloading (same normalisation)")
     args = ap.parse_args()
     syms = args.symbols or (SYMBOLS + (FALLBACKS if args.with_fallbacks else []))
     months = month_list(args.months)
     print(f"v32 fetcher: {len(syms)} symbols x {len(months)} months "
           f"({months[0]}..{months[-1]}) -> {OUT}")
     t0 = time.time()
-    res = pull(syms, months)
+    res = (convert_local_zips(Path(args.from_zips), syms, months)
+           if args.from_zips else pull(syms, months))
     dt = time.time() - t0
     print(f"\ndone in {dt:.1f}s: {res['files']} files, {res['rows']} rows")
     if res["gaps"]:
