@@ -153,6 +153,13 @@ COMBOS = {
     "C_124_t20a4": dict(STRUCT_TRAIL=True, STRUCT_TRAIL_MIN_R=2.0,
                         LOCK_MODE="trail", LOCK_ARM_R=4.0,
                         VIGILANCE_SCOPE="none", SHIELD_RULE_V30="MID|BOS"),
+    # ---- execution-cost stress on the SHIPPED config (as in v30) -----
+    "SHIP_sl5":   dict(STRUCT_TRAIL=True, STRUCT_TRAIL_MIN_R=1.0,
+                       LOCK_MODE="trail", VIGILANCE_SCOPE="none",
+                       SHIELD_RULE_V30="MID|BOS", SLIPPAGE_BPS=5.0),
+    "SHIP_sl10":  dict(STRUCT_TRAIL=True, STRUCT_TRAIL_MIN_R=1.0,
+                       LOCK_MODE="trail", VIGILANCE_SCOPE="none",
+                       SHIELD_RULE_V30="MID|BOS", SLIPPAGE_BPS=10.0),
     # ---- ARM 3: dynamic impulse-leg purple box ----------------------
     "A3_imp":     dict(IMPULSE_PURPLE=True),
     "A3_imp120":  dict(IMPULSE_PURPLE=True, IMPULSE_MAX_BARS=120),

@@ -1,0 +1,3 @@
+
+########## LIVE ENGINE · combo=C_124s · 2021-01-01..2026-10-31 ##########
+    config: VIGILANCE_SCOPE=none  SHIELD_RULE_V30=MID|BOS  STRUCT_TRAIL=True  LOCK_MODE=stop
