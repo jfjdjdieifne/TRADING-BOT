@@ -1,22 +1,22 @@
 {
-  "trades": 269,
-  "wins": 30,
-  "breakevens": 72,
-  "struct_wins": 60,
-  "win_rate_pct": 21.9,
-  "win_rate_incl_swin_pct": 45.7,
-  "totR": 0.05,
-  "swin_totR": 56.19,
+  "trades": 326,
+  "wins": 32,
+  "breakevens": 90,
+  "struct_wins": 74,
+  "win_rate_pct": 19.8,
+  "win_rate_incl_swin_pct": 44.9,
+  "totR": -27.9,
+  "swin_totR": 66.26,
   "min_swin_R": 0.07,
   "max_swin_R": 2.24,
   "min_entry_target_R": 3.16,
-  "profit_factor": 1.19,
-  "net_pnl": 28.9,
-  "net_pct": 14.45,
-  "end_equity": 228.9,
-  "max_drawdown_pct": -12.4,
+  "profit_factor": 1.09,
+  "net_pnl": 16.02,
+  "net_pct": 8.01,
+  "end_equity": 216.02,
+  "max_drawdown_pct": -14.81,
   "max_consecutive_losses": 3,
-  "avg_R": 0.0,
+  "avg_R": -0.09,
   "min_winner_R": 3.0,
   "runners_ge_5R": 7,
   "runners_ge_10R": 1,
@@ -24,16 +24,16 @@
   "runners_4r_plus": 7,
   "max_winner_R": 12.84,
   "max_R": 12.84,
-  "fees": 56.37,
+  "fees": 67.46,
   "exit_reasons": {
-    "LOCK_FLOOR_STOP": 28,
-    "STOP_BLUE": 107,
-    "STRUCT_PROFIT": 60,
-    "BREAKEVEN": 72,
+    "LOCK_FLOOR_STOP": 30,
+    "STOP_BLUE": 130,
+    "STRUCT_PROFIT": 74,
+    "BREAKEVEN": 90,
     "TARGET_REJECTION": 2
   },
   "s1_kinds": {
-    "BOX_STACK": 269
+    "BOX_STACK": 326
   },
   "monthly": [
     [
@@ -174,7 +174,7 @@
     ],
     [
       "2023-11",
-      -0.84
+      -0.82
     ],
     [
       "2023-12",
@@ -186,39 +186,39 @@
     ],
     [
       "2024-02",
-      0.0
+      -0.58
     ],
     [
       "2024-03",
-      -1.03
+      -1.69
     ],
     [
       "2024-04",
-      0.0
+      -1.76
     ],
     [
       "2024-05",
-      0.0
+      -0.59
     ],
     [
       "2024-06",
-      -0.41
+      -0.25
     ],
     [
       "2024-07",
-      2.12
+      2.37
     ],
     [
       "2024-08",
-      0.0
+      1.19
     ],
     [
       "2024-09",
-      3.02
+      1.69
     ],
     [
       "2024-10",
-      -0.53
+      -0.22
     ],
     [
       "2024-11",
@@ -282,31 +282,31 @@
     ],
     [
       "2026-02",
-      2.63
+      2.52
     ],
     [
       "2026-03",
-      1.51
+      0.67
     ],
     [
       "2026-04",
-      -0.41
+      -1.39
     ],
     [
       "2026-05",
-      -1.11
+      -1.48
     ],
     [
       "2026-06",
-      0.53
+      0.5
     ],
     [
       "2026-07",
-      1.73
+      1.58
     ],
     [
       "2026-08",
-      0.78
+      0.47
     ],
     [
       "2026-09",
@@ -318,15 +318,15 @@
     ]
   ],
   "calendar_months": 70,
-  "profitable_months": 25,
-  "profitable_months_pct": 35.7,
+  "profitable_months": 26,
+  "profitable_months_pct": 37.1,
   "monthly_net_pct_med": 0.0,
-  "monthly_net_pct_mean": 0.21,
-  "compounded_monthly_pct": 0.19,
+  "monthly_net_pct_mean": 0.12,
+  "compounded_monthly_pct": 0.11,
   "best_month_pct": 4.42,
   "worst_month_pct": -3.77,
-  "wins_per_month": 1.29,
-  "trades_per_month": 3.84,
+  "wins_per_month": 1.51,
+  "trades_per_month": 4.66,
   "count": {
     "htf_1h_displacement": 21498,
     "board_green_bos": 5836,
@@ -334,52 +334,53 @@
     "board_red_breakdown": 12960,
     "board_recover_sweep": 9328,
     "board_recover_box": 3488,
-    "anchor_premium_skip": 226566,
+    "anchor_premium_skip": 281681,
     "bos_noise_ignored": 32588,
-    "anchor_box_tap": 3317,
-    "anchor_invalid": 5718,
-    "bos_red_break": 4062,
-    "setup_wave_refresh": 22702,
-    "stop_kept_ltf": 38747,
-    "setup_drawn": 2966,
-    "setup_missed_run": 1934,
-    "anchor_blue_sweep": 6464,
-    "reject_ctx_gate": 12446,
-    "setup_wait_stack": 386224,
-    "setup_anchor_died": 1093,
-    "setup_box_died": 726,
-    "sacred_law_seam_ok": 295,
-    "fill": 269,
-    "ratchet_3r_close": 30,
+    "anchor_box_tap": 4027,
+    "anchor_invalid": 6804,
+    "bos_red_break": 4903,
+    "setup_wave_refresh": 33664,
+    "stop_kept_ltf": 41959,
+    "setup_drawn": 3523,
+    "setup_missed_run": 2290,
+    "anchor_blue_sweep": 7681,
+    "reject_ctx_gate": 16822,
+    "setup_wait_stack": 84488,
+    "setup_anchor_died": 1377,
+    "setup_box_died": 866,
+    "sacred_law_seam_ok": 355,
+    "fill": 326,
+    "ratchet_3r_close": 32,
     "trail_htf_blue": 10,
-    "exit_LOCK_FLOOR_STOP": 28,
-    "disp_bos": 106,
-    "shield_armed_disp": 135,
-    "disp_mid_cross": 90,
-    "v31_struct_trail": 174,
+    "exit_LOCK_FLOOR_STOP": 30,
+    "disp_bos": 138,
+    "shield_armed_disp": 163,
+    "disp_mid_cross": 94,
+    "v31_struct_trail": 203,
     "target_consumed": 41,
-    "exit_STOP_BLUE": 107,
-    "blocked_consumed_range": 21902,
-    "stop_widened_to_htf": 104586,
-    "exit_STRUCT_PROFIT": 60,
-    "v31_swin_clears_throttle": 60,
-    "fill_below_exchange_min": 21,
-    "streak_needs_htf_wave": 25840,
-    "streak_entry_not_fresh": 123722,
-    "anchor_refresh_sweep": 379,
-    "anchor_tap_needs_bos_state": 23576,
-    "reject_wall_within_3r": 22238,
-    "anchor_board_red": 14072,
-    "exit_BREAKEVEN": 72,
-    "shield_be_releases_streak": 72,
-    "v30_vigil_holds_on_be": 72,
-    "reject_risk_below_one_fee": 171211,
-    "reject_premium_ob": 16494,
-    "structural_gate_armed": 36,
+    "exit_STOP_BLUE": 130,
+    "blocked_consumed_range": 24070,
+    "stop_widened_to_htf": 267606,
+    "exit_STRUCT_PROFIT": 74,
+    "v31_swin_clears_throttle": 74,
+    "fill_below_exchange_min": 24,
+    "streak_needs_htf_wave": 28387,
+    "streak_entry_not_fresh": 52122,
+    "anchor_refresh_sweep": 483,
+    "anchor_tap_needs_bos_state": 29977,
+    "reject_wall_within_3r": 32227,
+    "anchor_board_red": 17908,
+    "exit_BREAKEVEN": 90,
+    "shield_be_releases_streak": 90,
+    "v30_vigil_holds_on_be": 90,
+    "reject_risk_below_one_fee": 371740,
+    "reject_premium_ob": 22651,
+    "structural_gate_armed": 43,
     "fill_cancel_board_red": 3,
     "tier3_fill_needs_proof": 47,
-    "tier3_be_armed_at_entry": 13,
+    "tier3_be_armed_at_entry": 15,
     "tier3_skip_no_be_room": 5,
+    "fill_cancel_premium": 9,
     "y2021_anchor_invalid": 1966,
     "y2021_stop_kept_ltf": 15035,
     "y2021_setup_drawn": 990,
@@ -404,16 +405,34 @@
     "y2022_reject_ctx_gate": 3272,
     "y2022_tier3_skip_no_be_room": 4,
     "y2022_target_consumed": 6,
-    "y2023_streak_entry_not_fresh": 36616,
-    "y2024_streak_entry_not_fresh": 58882,
+    "y2023_streak_entry_not_fresh": 19318,
+    "y2024_reject_ctx_gate": 3266,
+    "y2024_setup_drawn": 571,
+    "y2024_anchor_invalid": 1059,
+    "y2024_stop_kept_ltf": 4667,
+    "y2024_sacred_law_seam_ok": 49,
+    "y2024_fill": 48,
+    "y2024_reject_premium_ob": 3645,
+    "y2024_streak_entry_not_fresh": 8257,
+    "y2024_reject_wall_within_3r": 7245,
+    "y2024_shield_armed_disp": 25,
+    "y2024_fill_cancel_premium": 1,
     "y2025_streak_entry_not_fresh": 16986,
-    "y2026_streak_entry_not_fresh": 4457,
+    "y2026_anchor_invalid": 1113,
+    "y2026_stop_kept_ltf": 3924,
+    "y2026_reject_wall_within_3r": 7491,
+    "y2026_setup_drawn": 550,
+    "y2026_reject_premium_ob": 4605,
+    "y2026_reject_ctx_gate": 3402,
+    "y2026_sacred_law_seam_ok": 51,
+    "y2026_fill": 48,
+    "y2026_shield_armed_disp": 26,
+    "y2026_streak_entry_not_fresh": 780,
     "fill_cancel_target_within_3r": 4,
-    "fill_cancel_premium": 8,
     "y2021_fill_cancel_target_within_3r": 4,
     "y2022_fill_cancel_premium": 3,
     "y2023_anchor_invalid": 272,
-    "y2023_reject_premium_ob": 1345,
+    "y2023_reject_premium_ob": 1340,
     "y2025_setup_drawn": 321,
     "y2025_anchor_invalid": 715,
     "y2025_stop_kept_ltf": 2306,
@@ -423,35 +442,17 @@
     "y2025_fill": 19,
     "y2025_shield_armed_disp": 10,
     "y2025_reject_premium_ob": 1625,
-    "y2026_stop_kept_ltf": 2824,
-    "y2026_reject_wall_within_3r": 3192,
-    "y2026_setup_drawn": 324,
-    "y2026_anchor_invalid": 670,
-    "y2026_reject_premium_ob": 1359,
-    "y2026_sacred_law_seam_ok": 27,
-    "y2026_fill": 26,
-    "y2026_shield_armed_disp": 15,
-    "y2026_reject_ctx_gate": 1247,
     "target_rejection_exit": 2,
     "exit_TARGET_REJECTION": 2,
     "y2021_target_rejection_exit": 2,
-    "y2023_setup_drawn": 209,
-    "y2023_stop_kept_ltf": 2663,
+    "y2023_setup_drawn": 210,
+    "y2023_stop_kept_ltf": 2653,
     "y2023_reject_wall_within_3r": 1791,
-    "y2023_reject_ctx_gate": 750,
-    "y2023_sacred_law_seam_ok": 18,
-    "y2023_fill": 18,
+    "y2023_reject_ctx_gate": 739,
+    "y2023_sacred_law_seam_ok": 19,
+    "y2023_fill": 19,
     "y2023_shield_armed_disp": 9,
     "y2023_fill_cancel_premium": 2,
-    "y2024_reject_premium_ob": 729,
-    "y2024_stop_kept_ltf": 2545,
-    "y2024_setup_drawn": 241,
-    "y2024_anchor_invalid": 416,
-    "y2024_reject_wall_within_3r": 1555,
-    "y2024_reject_ctx_gate": 1034,
-    "y2024_sacred_law_seam_ok": 14,
-    "y2024_fill": 14,
-    "y2024_shield_armed_disp": 8,
     "y2024_target_consumed": 4,
     "y2025_tier3_skip_no_be_room": 1,
     "y2025_fill_cancel_board_red": 1,
@@ -468,9 +469,9 @@
   "yearly": {
     "2021": 109,
     "2022": 83,
-    "2023": 18,
-    "2024": 14,
+    "2023": 19,
+    "2024": 48,
     "2025": 19,
-    "2026": 26
+    "2026": 48
   }
 }

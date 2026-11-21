@@ -131,9 +131,6 @@ COMBOS = {
     "C_124_st":     dict(STRUCT_TRAIL=True, STRUCT_TRAIL_MIN_R=1.0,
                          LOCK_MODE="stop",
                          VIGILANCE_SCOPE="none", SHIELD_RULE_V30="MID|BOS"),
-    "C_124_htf_st": dict(STRUCT_TRAIL=True, STRUCT_TRAIL_MIN_R=1.0,
-                         LOCK_MODE="stop", LOCK_FLOOR_HTF=True,
-                         VIGILANCE_SCOPE="none", SHIELD_RULE_V30="MID|BOS"),
     "C_124_t20_st": dict(STRUCT_TRAIL=True, STRUCT_TRAIL_MIN_R=2.0,
                          LOCK_MODE="stop",
                          VIGILANCE_SCOPE="none", SHIELD_RULE_V30="MID|BOS"),
@@ -195,6 +192,12 @@ def drive(combo, window=FULL, save=True):
     cfg = dict(BASE)
     cfg.update(COMBOS.get(combo, {}))
     for k, v in cfg.items():
+        # a knob that the engine does not define is a SILENT NO-OP: it would
+        # make two different combo names produce the same run (measured:
+        # C_124_htf_st set LOCK_FLOOR_HTF, which exists only as an exit-reason
+        # string, so it duplicated C_124_st). Fail loudly instead.
+        if not hasattr(S, k):
+            raise SystemExit(f"combo {combo}: engine has no knob {k!r}")
         setattr(S, k, v)
     print(f"\n########## LIVE ENGINE · combo={combo} · "
           f"{window[0]}..{window[1]} ##########", flush=True)

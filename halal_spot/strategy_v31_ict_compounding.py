@@ -823,17 +823,30 @@ class ChartCanvas:
 
     # ---------- the story this frame is telling --------------------- #
     def _read_narrative(self, i, o, h, l, c, idx, time):
+        # ---- v31 FIX: the "already logged" sets held id(box). -------
+        # _prune drops DEAD boxes from self.reds/blues/yellows_s, so the
+        # object is garbage-collected and CPython can hand its address to
+        # a NEW box - which then reads as "already seen" and its break /
+        # chop / IFVG event is silently dropped. The dropped events shift
+        # a handful of entries, so the SAME config produced different
+        # books on different runs (measured: the stop-mode arm came back
+        # n=330, then n=328, then n=326 on three identical launches,
+        # while the shipped C_124 happened to repeat exactly 3x).
+        # Holding the OBJECT keeps it alive, and Box defines no __eq__ /
+        # __hash__, so `x not in set` is still a pure O(1) identity test -
+        # the aliasing becomes impossible at no speed cost. Memory: one small object per box that
+        # ever died, bounded by the run length.
         for r in self.reds:
-            if r.state == "BROKEN" and id(r) not in self._seen_br:
-                self._seen_br.add(id(r))
+            if r.state == "BROKEN" and r not in self._seen_br:
+                self._seen_br.add(r)
                 self.last_red_break_idx = idx
         for b in self.blues:
-            if b.state == "DEAD" and id(b) not in self._seen_ch:
-                self._seen_ch.add(id(b))
+            if b.state == "DEAD" and b not in self._seen_ch:
+                self._seen_ch.add(b)
                 self.last_blue_chop_idx = idx
         for y in self.yellows_s:
-            if y.state == "DEAD" and id(y) not in self._seen_if:
-                self._seen_if.add(id(y))
+            if y.state == "DEAD" and y not in self._seen_if:
+                self._seen_if.add(y)
                 self.ifvgs.append({"idx": idx, "time": time,
                                    "bottom": y.y_bottom, "top": y.y_top,
                                    "by_close": bool(c > y.y_top)})
