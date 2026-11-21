@@ -2938,7 +2938,7 @@ def main():
                   f, indent=2)
     if failed:
         raise AssertionError(
-            f"v28 DID NOT PASS asserts {failed} — see asserts_v28.json")
+            f"v30 DID NOT PASS asserts {failed} — see asserts_v30.json")
     print("[v30] ALL FIVE ASSERTS PASSED")
 
 

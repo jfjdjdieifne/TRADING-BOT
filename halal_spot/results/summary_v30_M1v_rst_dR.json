@@ -1,0 +1,468 @@
+{
+  "trades": 313,
+  "wins": 50,
+  "breakevens": 116,
+  "win_rate_pct": 25.4,
+  "profit_factor": 1.97,
+  "net_pnl": 78.32,
+  "net_pct": 39.16,
+  "end_equity": 278.32,
+  "max_drawdown_pct": -7.65,
+  "max_consecutive_losses": 3,
+  "avg_R": 0.3,
+  "min_winner_R": 3.0,
+  "runners_ge_5R": 11,
+  "runners_ge_10R": 3,
+  "runners_ge_20R": 0,
+  "runners_4r_plus": 12,
+  "max_winner_R": 19.38,
+  "max_R": 19.38,
+  "fees": 57.55,
+  "exit_reasons": {
+    "STOP_BLUE": 73,
+    "LOCK_FLOOR_CLOSE": 37,
+    "BREAKEVEN": 116,
+    "TARGET_REJECTION": 1,
+    "SHIELD_BE": 86
+  },
+  "s1_kinds": {
+    "BOX_STACK": 313
+  },
+  "monthly": [
+    [
+      "2021-01",
+      5.82
+    ],
+    [
+      "2021-02",
+      2.67
+    ],
+    [
+      "2021-03",
+      3.34
+    ],
+    [
+      "2021-04",
+      -0.67
+    ],
+    [
+      "2021-05",
+      -0.43
+    ],
+    [
+      "2021-06",
+      -0.21
+    ],
+    [
+      "2021-07",
+      6.07
+    ],
+    [
+      "2021-08",
+      -1.42
+    ],
+    [
+      "2021-09",
+      -1.05
+    ],
+    [
+      "2021-10",
+      -0.48
+    ],
+    [
+      "2021-11",
+      -0.3
+    ],
+    [
+      "2021-12",
+      -0.09
+    ],
+    [
+      "2022-01",
+      -0.63
+    ],
+    [
+      "2022-02",
+      -0.15
+    ],
+    [
+      "2022-03",
+      -0.41
+    ],
+    [
+      "2022-04",
+      -0.33
+    ],
+    [
+      "2022-05",
+      4.92
+    ],
+    [
+      "2022-06",
+      -0.49
+    ],
+    [
+      "2022-07",
+      8.04
+    ],
+    [
+      "2022-08",
+      -1.16
+    ],
+    [
+      "2022-09",
+      -0.71
+    ],
+    [
+      "2022-10",
+      -0.37
+    ],
+    [
+      "2022-11",
+      -0.56
+    ],
+    [
+      "2022-12",
+      -0.09
+    ],
+    [
+      "2023-01",
+      -0.0
+    ],
+    [
+      "2023-02",
+      -0.25
+    ],
+    [
+      "2023-03",
+      -0.02
+    ],
+    [
+      "2023-04",
+      -0.13
+    ],
+    [
+      "2023-05",
+      -0.58
+    ],
+    [
+      "2023-06",
+      -0.09
+    ],
+    [
+      "2023-07",
+      -0.29
+    ],
+    [
+      "2023-08",
+      -0.18
+    ],
+    [
+      "2023-09",
+      -0.23
+    ],
+    [
+      "2023-10",
+      -0.12
+    ],
+    [
+      "2023-11",
+      0.77
+    ],
+    [
+      "2023-12",
+      -1.2
+    ],
+    [
+      "2024-01",
+      0.0
+    ],
+    [
+      "2024-02",
+      0.0
+    ],
+    [
+      "2024-03",
+      0.47
+    ],
+    [
+      "2024-04",
+      -1.03
+    ],
+    [
+      "2024-05",
+      -0.16
+    ],
+    [
+      "2024-06",
+      -0.16
+    ],
+    [
+      "2024-07",
+      4.41
+    ],
+    [
+      "2024-08",
+      0.0
+    ],
+    [
+      "2024-09",
+      1.82
+    ],
+    [
+      "2024-10",
+      -0.92
+    ],
+    [
+      "2024-11",
+      2.93
+    ],
+    [
+      "2024-12",
+      0.22
+    ],
+    [
+      "2025-01",
+      -1.39
+    ],
+    [
+      "2025-02",
+      0.0
+    ],
+    [
+      "2025-03",
+      1.43
+    ],
+    [
+      "2025-04",
+      -0.4
+    ],
+    [
+      "2025-05",
+      -0.42
+    ],
+    [
+      "2025-06",
+      -0.06
+    ],
+    [
+      "2025-07",
+      -0.05
+    ],
+    [
+      "2025-08",
+      0.0
+    ],
+    [
+      "2025-09",
+      0.0
+    ],
+    [
+      "2025-10",
+      -0.04
+    ],
+    [
+      "2025-11",
+      0.61
+    ],
+    [
+      "2025-12",
+      2.09
+    ],
+    [
+      "2026-01",
+      2.13
+    ],
+    [
+      "2026-02",
+      0.73
+    ],
+    [
+      "2026-03",
+      5.64
+    ],
+    [
+      "2026-04",
+      -0.41
+    ],
+    [
+      "2026-05",
+      -1.11
+    ],
+    [
+      "2026-06",
+      -0.22
+    ],
+    [
+      "2026-07",
+      -0.34
+    ],
+    [
+      "2026-08",
+      -0.37
+    ],
+    [
+      "2026-09",
+      -0.08
+    ],
+    [
+      "2026-10",
+      0.0
+    ]
+  ],
+  "count": {
+    "htf_1h_displacement": 21498,
+    "board_green_bos": 5836,
+    "htf_bos_noise_ignored": 1348,
+    "board_red_breakdown": 12960,
+    "board_recover_sweep": 9328,
+    "board_recover_box": 3488,
+    "anchor_premium_skip": 268379,
+    "bos_noise_ignored": 32588,
+    "anchor_box_tap": 3868,
+    "anchor_invalid": 6543,
+    "bos_red_break": 4740,
+    "setup_wave_refresh": 26265,
+    "stop_kept_ltf": 41493,
+    "setup_drawn": 3348,
+    "setup_missed_run": 2214,
+    "anchor_blue_sweep": 7416,
+    "reject_ctx_gate": 15017,
+    "setup_wait_stack": 400021,
+    "setup_anchor_died": 1389,
+    "setup_box_died": 794,
+    "sacred_law_seam_ok": 326,
+    "v30_dollarR_sized": 165,
+    "fill": 313,
+    "ratchet_3r_close": 50,
+    "trail_htf_blue": 22,
+    "exit_STOP_BLUE": 73,
+    "disp_bos": 77,
+    "disp_mid_cross": 75,
+    "shield_armed_disp": 58,
+    "target_consumed": 73,
+    "exit_LOCK_FLOOR_CLOSE": 37,
+    "blocked_consumed_range": 21683,
+    "stop_widened_to_htf": 81695,
+    "structural_gate_armed": 68,
+    "streak_needs_htf_wave": 53624,
+    "streak_entry_not_fresh": 175798,
+    "anchor_refresh_sweep": 449,
+    "reject_premium_ob": 19551,
+    "anchor_tap_needs_bos_state": 26283,
+    "reject_wall_within_3r": 27522,
+    "anchor_board_red": 16014,
+    "v30_dollarR_capped": 157,
+    "reject_risk_below_one_fee": 88253,
+    "exit_BREAKEVEN": 116,
+    "shield_be_releases_streak": 116,
+    "v30_vigil_holds_on_be": 116,
+    "fill_cancel_board_red": 3,
+    "tier3_be_armed_at_entry": 184,
+    "exit_SHIELD_BE": 86,
+    "tier3_fill_needs_proof": 61,
+    "fill_cancel_target_within_3r": 10,
+    "fill_below_exchange_min": 9,
+    "tier3_skip_no_be_room": 4,
+    "y2021_anchor_invalid": 1910,
+    "y2021_stop_kept_ltf": 13616,
+    "y2021_setup_drawn": 935,
+    "y2021_reject_ctx_gate": 5387,
+    "y2021_sacred_law_seam_ok": 107,
+    "y2021_fill": 106,
+    "y2021_shield_armed_disp": 20,
+    "y2021_target_consumed": 21,
+    "y2021_streak_entry_not_fresh": 4355,
+    "y2021_reject_premium_ob": 5974,
+    "y2021_reject_wall_within_3r": 7104,
+    "y2021_fill_cancel_board_red": 1,
+    "y2021_exit_SHIELD_BE": 24,
+    "y2021_fill_cancel_target_within_3r": 10,
+    "y2022_stop_kept_ltf": 12191,
+    "y2022_reject_wall_within_3r": 6258,
+    "y2022_streak_entry_not_fresh": 4607,
+    "y2022_anchor_invalid": 1677,
+    "y2022_reject_premium_ob": 4775,
+    "y2022_setup_drawn": 838,
+    "y2022_sacred_law_seam_ok": 92,
+    "y2022_fill": 87,
+    "y2022_shield_armed_disp": 16,
+    "y2022_exit_SHIELD_BE": 29,
+    "y2022_reject_ctx_gate": 3232,
+    "y2022_target_consumed": 15,
+    "y2022_tier3_skip_no_be_room": 2,
+    "y2023_streak_entry_not_fresh": 57330,
+    "y2024_streak_entry_not_fresh": 59177,
+    "y2025_streak_entry_not_fresh": 38933,
+    "y2026_streak_entry_not_fresh": 11396,
+    "fill_cancel_premium": 11,
+    "y2021_fill_cancel_premium": 1,
+    "y2023_anchor_invalid": 581,
+    "y2023_reject_premium_ob": 3246,
+    "y2023_stop_kept_ltf": 4115,
+    "y2023_reject_ctx_gate": 1297,
+    "y2023_setup_drawn": 377,
+    "y2023_reject_wall_within_3r": 3395,
+    "y2023_fill_cancel_premium": 6,
+    "y2023_sacred_law_seam_ok": 36,
+    "y2023_fill": 34,
+    "y2023_exit_SHIELD_BE": 17,
+    "y2023_shield_armed_disp": 3,
+    "y2023_tier3_skip_no_be_room": 1,
+    "y2024_setup_drawn": 462,
+    "y2024_stop_kept_ltf": 5532,
+    "y2024_anchor_invalid": 813,
+    "y2024_reject_wall_within_3r": 4010,
+    "y2024_reject_premium_ob": 1621,
+    "y2024_reject_ctx_gate": 2682,
+    "y2024_sacred_law_seam_ok": 39,
+    "y2024_fill": 36,
+    "y2024_exit_SHIELD_BE": 6,
+    "y2024_shield_armed_disp": 8,
+    "y2024_target_consumed": 16,
+    "y2025_reject_wall_within_3r": 3480,
+    "y2025_setup_drawn": 421,
+    "y2025_anchor_invalid": 897,
+    "y2025_stop_kept_ltf": 3231,
+    "y2025_sacred_law_seam_ok": 27,
+    "y2025_fill": 26,
+    "y2025_target_consumed": 10,
+    "y2025_shield_armed_disp": 7,
+    "y2025_reject_ctx_gate": 1172,
+    "y2025_reject_premium_ob": 2387,
+    "y2025_exit_SHIELD_BE": 4,
+    "y2026_stop_kept_ltf": 2808,
+    "y2026_reject_wall_within_3r": 3275,
+    "y2026_setup_drawn": 315,
+    "y2026_anchor_invalid": 665,
+    "y2026_reject_premium_ob": 1548,
+    "y2026_sacred_law_seam_ok": 25,
+    "y2026_fill": 24,
+    "y2026_shield_armed_disp": 4,
+    "y2026_target_consumed": 9,
+    "y2026_reject_ctx_gate": 1247,
+    "y2026_exit_SHIELD_BE": 6,
+    "target_rejection_exit": 1,
+    "exit_TARGET_REJECTION": 1,
+    "y2021_target_rejection_exit": 1,
+    "y2022_fill_cancel_premium": 1,
+    "y2025_tier3_skip_no_be_room": 1,
+    "y2025_fill_cancel_board_red": 1,
+    "y2025_fill_cancel_premium": 2,
+    "y2026_fill_cancel_premium": 1,
+    "trail_4h_structural": 14,
+    "y2023_target_consumed": 2,
+    "y2026_fill_cancel_board_red": 1
+  },
+  "symbols": [
+    "BTCUSD_5m"
+  ],
+  "yearly": {
+    "2021": 106,
+    "2022": 87,
+    "2023": 34,
+    "2024": 36,
+    "2025": 26,
+    "2026": 24
+  }
+}
