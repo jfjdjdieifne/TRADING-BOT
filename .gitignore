@@ -31,3 +31,7 @@ smoke/
 
 # v30 per-combo equity curves (regenerable, ~27MB each) — keep only the official equity_v30.csv
 halal_spot/results/equity_v30_*.csv
+
+# v32 price archives — fetched by halal_spot/fetch_binance_5m.py on the owner PC.
+# Code only is pushed; never the kline archives (~35 MB per coin-month set).
+halal_spot/data/binance_5m/
