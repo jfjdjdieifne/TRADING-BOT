@@ -35,3 +35,7 @@ halal_spot/results/equity_v30_*.csv
 # v32 price archives — fetched by halal_spot/fetch_binance_5m.py on the owner PC.
 # Code only is pushed; never the kline archives (~35 MB per coin-month set).
 halal_spot/data/binance_5m/
+
+# v36 OOS price archives (2023-01..2026-11, ~44MB) — rebuilt by _fetch_oos.sh
+# + _build_oos.py on the owner PC. Code only is pushed.
+halal_spot/data/binance_5m_oos/

@@ -1,0 +1,630 @@
+{
+ "combo": "EXIT_SLIP_2BPS",
+ "window": "W1",
+ "capital": 100.0,
+ "final_equity": 123.4171,
+ "maxDD_pct": -15.44,
+ "monthly": [
+  {
+   "bucket": "2023-10",
+   "n": 24,
+   "W": 0,
+   "L": 16,
+   "BE": 8,
+   "WR%": 0.0,
+   "totR": -21.28,
+   "net$": -7.62,
+   "PF": 0.0,
+   "by_coin$": {
+    "ADAUSDT_5m": -0.62,
+    "AVAXUSDT_5m": -3.41,
+    "BNBUSDT_5m": -0.79,
+    "BTCUSDT_5m": -0.02,
+    "ETHUSDT_5m": -0.83,
+    "LINKUSDT_5m": -0.06,
+    "SOLUSDT_5m": -1.22,
+    "XRPUSDT_5m": -0.66
+   },
+   "end_balance$": 92.38,
+   "maxDD%_cum": -7.58
+  },
+  {
+   "bucket": "2023-11",
+   "n": 37,
+   "W": 4,
+   "L": 25,
+   "BE": 8,
+   "WR%": 10.8,
+   "totR": 14.6,
+   "net$": 16.39,
+   "PF": 2.44,
+   "by_coin$": {
+    "ADAUSDT_5m": -0.05,
+    "AVAXUSDT_5m": -1.97,
+    "BNBUSDT_5m": -0.03,
+    "BTCUSDT_5m": -0.56,
+    "ETHUSDT_5m": -0.59,
+    "LINKUSDT_5m": 2.88,
+    "SOLUSDT_5m": 18.48,
+    "XRPUSDT_5m": -1.75
+   },
+   "end_balance$": 108.77,
+   "maxDD%_cum": -3.71
+  },
+  {
+   "bucket": "2023-12",
+   "n": 27,
+   "W": 2,
+   "L": 16,
+   "BE": 9,
+   "WR%": 7.4,
+   "totR": -16.7,
+   "net$": -6.88,
+   "PF": 0.3,
+   "by_coin$": {
+    "ADAUSDT_5m": 1.0,
+    "AVAXUSDT_5m": -1.65,
+    "BNBUSDT_5m": -0.53,
+    "BTCUSDT_5m": -0.76,
+    "ETHUSDT_5m": -0.46,
+    "LINKUSDT_5m": -1.45,
+    "SOLUSDT_5m": -2.22,
+    "XRPUSDT_5m": -0.81
+   },
+   "end_balance$": 101.89,
+   "maxDD%_cum": -9.84
+  },
+  {
+   "bucket": "2024-01",
+   "n": 29,
+   "W": 5,
+   "L": 19,
+   "BE": 5,
+   "WR%": 17.2,
+   "totR": 45.31,
+   "net$": 8.9,
+   "PF": 1.71,
+   "by_coin$": {
+    "ADAUSDT_5m": -2.5,
+    "AVAXUSDT_5m": 7.56,
+    "BNBUSDT_5m": 2.23,
+    "BTCUSDT_5m": -1.43,
+    "ETHUSDT_5m": -0.76,
+    "LINKUSDT_5m": 8.87,
+    "SOLUSDT_5m": -3.41,
+    "XRPUSDT_5m": -1.66
+   },
+   "end_balance$": 110.79,
+   "maxDD%_cum": -4.81
+  },
+  {
+   "bucket": "2024-02",
+   "n": 17,
+   "W": 2,
+   "L": 13,
+   "BE": 2,
+   "WR%": 11.8,
+   "totR": 37.15,
+   "net$": 11.98,
+   "PF": 3.24,
+   "by_coin$": {
+    "ADAUSDT_5m": 7.83,
+    "AVAXUSDT_5m": 8.27,
+    "BNBUSDT_5m": -0.62,
+    "ETHUSDT_5m": -1.45,
+    "SOLUSDT_5m": -1.23,
+    "XRPUSDT_5m": -0.82
+   },
+   "end_balance$": 122.77,
+   "maxDD%_cum": -0.0
+  },
+  {
+   "bucket": "2024-03",
+   "n": 29,
+   "W": 1,
+   "L": 19,
+   "BE": 9,
+   "WR%": 3.4,
+   "totR": -6.86,
+   "net$": 0.65,
+   "PF": 1.04,
+   "by_coin$": {
+    "ADAUSDT_5m": -0.07,
+    "AVAXUSDT_5m": -1.83,
+    "BNBUSDT_5m": 15.29,
+    "BTCUSDT_5m": -1.85,
+    "ETHUSDT_5m": -2.7,
+    "LINKUSDT_5m": -2.46,
+    "SOLUSDT_5m": -2.26,
+    "XRPUSDT_5m": -3.46
+   },
+   "end_balance$": 123.42,
+   "maxDD%_cum": -9.26
+  }
+ ],
+ "weekly": [
+  {
+   "bucket": "W01 2023-10-01",
+   "n": 5,
+   "W": 0,
+   "L": 4,
+   "BE": 1,
+   "WR%": 0.0,
+   "totR": -4.62,
+   "net$": -2.51,
+   "PF": 0.0,
+   "by_coin$": {
+    "AVAXUSDT_5m": -1.26,
+    "BNBUSDT_5m": -0.02,
+    "BTCUSDT_5m": -0.02,
+    "SOLUSDT_5m": -1.2
+   },
+   "end_balance$": 97.49
+  },
+  {
+   "bucket": "W02 2023-10-08",
+   "n": 3,
+   "W": 0,
+   "L": 3,
+   "BE": 0,
+   "WR%": 0.0,
+   "totR": -3.23,
+   "net$": -1.21,
+   "PF": 0.0,
+   "by_coin$": {
+    "AVAXUSDT_5m": -0.52,
+    "ETHUSDT_5m": -0.02,
+    "XRPUSDT_5m": -0.66
+   },
+   "end_balance$": 96.29
+  },
+  {
+   "bucket": "W03 2023-10-15",
+   "n": 4,
+   "W": 0,
+   "L": 3,
+   "BE": 1,
+   "WR%": 0.0,
+   "totR": -3.86,
+   "net$": -0.95,
+   "PF": 0.0,
+   "by_coin$": {
+    "AVAXUSDT_5m": -0.43,
+    "ETHUSDT_5m": -0.48,
+    "LINKUSDT_5m": -0.04
+   },
+   "end_balance$": 95.34
+  },
+  {
+   "bucket": "W04 2023-10-22",
+   "n": 8,
+   "W": 0,
+   "L": 4,
+   "BE": 4,
+   "WR%": 0.0,
+   "totR": -6.46,
+   "net$": -2.59,
+   "PF": 0.0,
+   "by_coin$": {
+    "ADAUSDT_5m": -0.62,
+    "AVAXUSDT_5m": -1.2,
+    "BNBUSDT_5m": -0.75,
+    "SOLUSDT_5m": -0.02
+   },
+   "end_balance$": 92.75
+  },
+  {
+   "bucket": "W05 2023-10-29",
+   "n": 12,
+   "W": 1,
+   "L": 7,
+   "BE": 4,
+   "WR%": 8.3,
+   "totR": 1.01,
+   "net$": 2.72,
+   "PF": 3.12,
+   "by_coin$": {
+    "ADAUSDT_5m": -0.41,
+    "BNBUSDT_5m": -0.02,
+    "BTCUSDT_5m": -0.02,
+    "ETHUSDT_5m": -0.35,
+    "LINKUSDT_5m": 3.53,
+    "SOLUSDT_5m": -0.02
+   },
+   "end_balance$": 95.47
+  },
+  {
+   "bucket": "W06 2023-11-05",
+   "n": 7,
+   "W": 0,
+   "L": 5,
+   "BE": 2,
+   "WR%": 0.0,
+   "totR": -7.57,
+   "net$": -1.94,
+   "PF": 0.0,
+   "by_coin$": {
+    "AVAXUSDT_5m": -0.51,
+    "BNBUSDT_5m": -0.38,
+    "BTCUSDT_5m": -0.55,
+    "SOLUSDT_5m": -0.49,
+    "XRPUSDT_5m": -0.02
+   },
+   "end_balance$": 93.53
+  },
+  {
+   "bucket": "W07 2023-11-12",
+   "n": 16,
+   "W": 2,
+   "L": 10,
+   "BE": 4,
+   "WR%": 12.5,
+   "totR": 17.06,
+   "net$": 16.66,
+   "PF": 3.95,
+   "by_coin$": {
+    "ADAUSDT_5m": -0.02,
+    "AVAXUSDT_5m": -0.42,
+    "BNBUSDT_5m": 0.37,
+    "ETHUSDT_5m": -0.55,
+    "LINKUSDT_5m": -0.68,
+    "SOLUSDT_5m": 18.99,
+    "XRPUSDT_5m": -1.02
+   },
+   "end_balance$": 110.19
+  },
+  {
+   "bucket": "W08 2023-11-19",
+   "n": 1,
+   "W": 0,
+   "L": 1,
+   "BE": 0,
+   "WR%": 0.0,
+   "totR": -1.3,
+   "net$": -1.05,
+   "PF": 0.0,
+   "by_coin$": {
+    "AVAXUSDT_5m": -1.05
+   },
+   "end_balance$": 109.14
+  },
+  {
+   "bucket": "W09 2023-11-26",
+   "n": 6,
+   "W": 1,
+   "L": 5,
+   "BE": 0,
+   "WR%": 16.7,
+   "totR": 2.21,
+   "net$": -0.39,
+   "PF": 0.79,
+   "by_coin$": {
+    "ADAUSDT_5m": 0.38,
+    "BNBUSDT_5m": -0.04,
+    "ETHUSDT_5m": -0.02,
+    "XRPUSDT_5m": -0.71
+   },
+   "end_balance$": 108.75
+  },
+  {
+   "bucket": "W10 2023-12-03",
+   "n": 4,
+   "W": 0,
+   "L": 3,
+   "BE": 1,
+   "WR%": 0.0,
+   "totR": -4.88,
+   "net$": -2.08,
+   "PF": 0.0,
+   "by_coin$": {
+    "BNBUSDT_5m": -0.47,
+    "LINKUSDT_5m": -0.02,
+    "SOLUSDT_5m": -1.59
+   },
+   "end_balance$": 106.67
+  },
+  {
+   "bucket": "W11 2023-12-10",
+   "n": 6,
+   "W": 0,
+   "L": 4,
+   "BE": 2,
+   "WR%": 0.0,
+   "totR": -6.88,
+   "net$": -2.61,
+   "PF": 0.0,
+   "by_coin$": {
+    "BNBUSDT_5m": -0.02,
+    "BTCUSDT_5m": -0.76,
+    "LINKUSDT_5m": -0.41,
+    "SOLUSDT_5m": -0.59,
+    "XRPUSDT_5m": -0.83
+   },
+   "end_balance$": 104.07
+  },
+  {
+   "bucket": "W12 2023-12-17",
+   "n": 4,
+   "W": 0,
+   "L": 3,
+   "BE": 1,
+   "WR%": 0.0,
+   "totR": -6.36,
+   "net$": -1.69,
+   "PF": 0.0,
+   "by_coin$": {
+    "AVAXUSDT_5m": -0.9,
+    "ETHUSDT_5m": -0.46,
+    "LINKUSDT_5m": -0.34
+   },
+   "end_balance$": 102.37
+  },
+  {
+   "bucket": "W13 2023-12-24",
+   "n": 12,
+   "W": 2,
+   "L": 5,
+   "BE": 5,
+   "WR%": 16.7,
+   "totR": 1.49,
+   "net$": -0.48,
+   "PF": 0.86,
+   "by_coin$": {
+    "ADAUSDT_5m": 1.0,
+    "AVAXUSDT_5m": -0.75,
+    "BNBUSDT_5m": -0.02,
+    "LINKUSDT_5m": -0.68,
+    "SOLUSDT_5m": -0.04,
+    "XRPUSDT_5m": 0.01
+   },
+   "end_balance$": 101.89
+  },
+  {
+   "bucket": "W14 2023-12-31",
+   "n": 6,
+   "W": 2,
+   "L": 3,
+   "BE": 1,
+   "WR%": 33.3,
+   "totR": 47.76,
+   "net$": 10.24,
+   "PF": 9.03,
+   "by_coin$": {
+    "ADAUSDT_5m": -0.55,
+    "AVAXUSDT_5m": 8.21,
+    "BNBUSDT_5m": 2.58
+   },
+   "end_balance$": 112.13
+  },
+  {
+   "bucket": "W15 2024-01-07",
+   "n": 10,
+   "W": 1,
+   "L": 7,
+   "BE": 2,
+   "WR%": 10.0,
+   "totR": 5.64,
+   "net$": 3.24,
+   "PF": 1.57,
+   "by_coin$": {
+    "AVAXUSDT_5m": -0.02,
+    "BNBUSDT_5m": -0.35,
+    "BTCUSDT_5m": -1.43,
+    "ETHUSDT_5m": -0.76,
+    "LINKUSDT_5m": 8.92,
+    "SOLUSDT_5m": -1.63,
+    "XRPUSDT_5m": -1.49
+   },
+   "end_balance$": 115.37
+  },
+  {
+   "bucket": "W16 2024-01-14",
+   "n": 8,
+   "W": 2,
+   "L": 5,
+   "BE": 1,
+   "WR%": 25.0,
+   "totR": -2.07,
+   "net$": -0.78,
+   "PF": 0.54,
+   "by_coin$": {
+    "ADAUSDT_5m": -0.59,
+    "AVAXUSDT_5m": 0.03,
+    "LINKUSDT_5m": -0.05,
+    "XRPUSDT_5m": -0.18
+   },
+   "end_balance$": 114.58
+  },
+  {
+   "bucket": "W17 2024-01-21",
+   "n": 1,
+   "W": 0,
+   "L": 1,
+   "BE": 0,
+   "WR%": 0.0,
+   "totR": -1.16,
+   "net$": -1.77,
+   "PF": 0.0,
+   "by_coin$": {
+    "SOLUSDT_5m": -1.77
+   },
+   "end_balance$": 112.81
+  },
+  {
+   "bucket": "W18 2024-01-28",
+   "n": 7,
+   "W": 1,
+   "L": 5,
+   "BE": 1,
+   "WR%": 14.3,
+   "totR": 18.58,
+   "net$": 6.39,
+   "PF": 3.08,
+   "by_coin$": {
+    "ADAUSDT_5m": -1.36,
+    "AVAXUSDT_5m": 8.8,
+    "ETHUSDT_5m": -0.39,
+    "SOLUSDT_5m": -0.65
+   },
+   "end_balance$": 119.2
+  },
+  {
+   "bucket": "W19 2024-02-04",
+   "n": 1,
+   "W": 0,
+   "L": 1,
+   "BE": 0,
+   "WR%": 0.0,
+   "totR": -1.73,
+   "net$": -0.62,
+   "PF": 0.0,
+   "by_coin$": {
+    "BNBUSDT_5m": -0.62
+   },
+   "end_balance$": 118.58
+  },
+  {
+   "bucket": "W20 2024-02-11",
+   "n": 6,
+   "W": 0,
+   "L": 5,
+   "BE": 1,
+   "WR%": 0.0,
+   "totR": -5.93,
+   "net$": -1.76,
+   "PF": 0.0,
+   "by_coin$": {
+    "ADAUSDT_5m": -0.02,
+    "AVAXUSDT_5m": -1.17,
+    "SOLUSDT_5m": -0.55,
+    "XRPUSDT_5m": -0.02
+   },
+   "end_balance$": 116.82
+  },
+  {
+   "bucket": "W21 2024-02-18",
+   "n": 5,
+   "W": 0,
+   "L": 4,
+   "BE": 1,
+   "WR%": 0.0,
+   "totR": -1.69,
+   "net$": -0.89,
+   "PF": 0.0,
+   "by_coin$": {
+    "ADAUSDT_5m": -0.02,
+    "AVAXUSDT_5m": -0.02,
+    "ETHUSDT_5m": -0.02,
+    "SOLUSDT_5m": -0.02,
+    "XRPUSDT_5m": -0.8
+   },
+   "end_balance$": 115.93
+  },
+  {
+   "bucket": "W22 2024-02-25",
+   "n": 4,
+   "W": 1,
+   "L": 3,
+   "BE": 0,
+   "WR%": 25.0,
+   "totR": 19.67,
+   "net$": 5.54,
+   "PF": 3.37,
+   "by_coin$": {
+    "ADAUSDT_5m": 7.88,
+    "BNBUSDT_5m": -0.66,
+    "ETHUSDT_5m": -1.04,
+    "XRPUSDT_5m": -0.64
+   },
+   "end_balance$": 121.47
+  },
+  {
+   "bucket": "W23 2024-03-03",
+   "n": 4,
+   "W": 0,
+   "L": 2,
+   "BE": 2,
+   "WR%": 0.0,
+   "totR": -3.19,
+   "net$": -1.54,
+   "PF": 0.0,
+   "by_coin$": {
+    "ADAUSDT_5m": -0.05,
+    "LINKUSDT_5m": -1.49
+   },
+   "end_balance$": 119.93
+  },
+  {
+   "bucket": "W24 2024-03-10",
+   "n": 9,
+   "W": 1,
+   "L": 6,
+   "BE": 2,
+   "WR%": 11.1,
+   "totR": 14.35,
+   "net$": 9.4,
+   "PF": 2.21,
+   "by_coin$": {
+    "AVAXUSDT_5m": -1.08,
+    "BNBUSDT_5m": 16.53,
+    "BTCUSDT_5m": -0.05,
+    "ETHUSDT_5m": -1.13,
+    "LINKUSDT_5m": -0.95,
+    "SOLUSDT_5m": -2.23,
+    "XRPUSDT_5m": -1.68
+   },
+   "end_balance$": 129.33
+  },
+  {
+   "bucket": "W25 2024-03-17",
+   "n": 7,
+   "W": 0,
+   "L": 4,
+   "BE": 3,
+   "WR%": 0.0,
+   "totR": -6.41,
+   "net$": -3.53,
+   "PF": 0.0,
+   "by_coin$": {
+    "AVAXUSDT_5m": -0.03,
+    "BTCUSDT_5m": -1.8,
+    "ETHUSDT_5m": -0.54,
+    "SOLUSDT_5m": -0.03,
+    "XRPUSDT_5m": -1.14
+   },
+   "end_balance$": 125.8
+  },
+  {
+   "bucket": "W26 2024-03-24",
+   "n": 7,
+   "W": 0,
+   "L": 5,
+   "BE": 2,
+   "WR%": 0.0,
+   "totR": -8.21,
+   "net$": -2.39,
+   "PF": 0.0,
+   "by_coin$": {
+    "ADAUSDT_5m": -0.03,
+    "AVAXUSDT_5m": -0.72,
+    "BNBUSDT_5m": -0.58,
+    "ETHUSDT_5m": -1.04,
+    "LINKUSDT_5m": -0.03
+   },
+   "end_balance$": 123.42
+  },
+  {
+   "bucket": "W27 2024-03-31",
+   "n": 0,
+   "W": 0,
+   "L": 0,
+   "BE": 0,
+   "WR%": null,
+   "totR": 0.0,
+   "net$": 0.0,
+   "PF": null,
+   "by_coin$": {},
+   "end_balance$": 123.42
+  }
+ ]
+}

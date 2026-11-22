@@ -155,6 +155,10 @@ COMBOS = {
     #     LIMIT fills at its own price (0 bps on the entry); the stop-market
     #     SELLS pay 3 / 5 / 8 bps.
     "SLIP_0":                dict(**S1, **SMTKZ, **NO_WIDE_CAP),
+    "EXIT_SLIP_1BPS":        dict(**S1, **SMTKZ, **NO_WIDE_CAP,
+                                  EXIT_SLIPPAGE_BPS=1.0),
+    "EXIT_SLIP_2BPS":        dict(**S1, **SMTKZ, **NO_WIDE_CAP,
+                                  EXIT_SLIPPAGE_BPS=2.0),
     "EXIT_SLIP_3BPS":        dict(**S1, **SMTKZ, **NO_WIDE_CAP,
                                   EXIT_SLIPPAGE_BPS=3.0),
     "EXIT_SLIP_5BPS":        dict(**S1, **SMTKZ, **NO_WIDE_CAP,
@@ -166,8 +170,8 @@ COMBOS = {
                                   SLIPPAGE_BPS=5.0),
 }
 ORDER = ["S1_COIN_GUARD_BOS", "S1_BOS_PLUS_FLASH", "SLIP_0",
-         "EXIT_SLIP_3BPS", "EXIT_SLIP_5BPS", "EXIT_SLIP_8BPS",
-         "BOTH_SLIP_5BPS"]
+         "EXIT_SLIP_1BPS", "EXIT_SLIP_2BPS", "EXIT_SLIP_3BPS",
+         "EXIT_SLIP_5BPS", "EXIT_SLIP_8BPS", "BOTH_SLIP_5BPS"]
 
 WATCH = ("v36_exit_slip_charged",
          "v35_dust_box_veto", "v35_flash_seller_veto", "v35_fall_close_veto",

@@ -1,0 +1,120 @@
+{
+ "combo": "S1_COIN_GUARD_BOS",
+ "window": "W1",
+ "start": "2023-10-01",
+ "end": "2024-03-31",
+ "seconds": 539.2,
+ "symbols": [
+  "ADAUSDT_5m",
+  "AVAXUSDT_5m",
+  "BNBUSDT_5m",
+  "BTCUSDT_5m",
+  "ETHUSDT_5m",
+  "LINKUSDT_5m",
+  "SOLUSDT_5m",
+  "XRPUSDT_5m"
+ ],
+ "capital": 100.0,
+ "n": 181,
+ "totR": 227.8481,
+ "wins": 18,
+ "swin": 0,
+ "be": 66,
+ "losses": 97,
+ "wr": 9.94,
+ "wr_strict": 9.94,
+ "net": 58.024,
+ "end_equity": 158.024,
+ "pool_cash_end": 158.024,
+ "maxR": 64.453,
+ "fees": 22.8112,
+ "by_coin": {
+  "ADAUSDT_5m": [
+   29,
+   18.537,
+   2.887
+  ],
+  "AVAXUSDT_5m": [
+   24,
+   51.437,
+   10.369
+  ],
+  "BNBUSDT_5m": [
+   27,
+   91.093,
+   41.406
+  ],
+  "BTCUSDT_5m": [
+   11,
+   -7.79,
+   -4.433
+  ],
+  "ETHUSDT_5m": [
+   18,
+   -12.874,
+   -7.182
+  ],
+  "LINKUSDT_5m": [
+   28,
+   30.982,
+   5.871
+  ],
+  "SOLUSDT_5m": [
+   23,
+   9.666,
+   13.757
+  ],
+  "XRPUSDT_5m": [
+   21,
+   46.799,
+   -4.651
+  ]
+ },
+ "exits": {
+  "STOP_BLUE": 99,
+  "BREAKEVEN": 66,
+  "EMERGENCY_STOP": 14,
+  "TARGET_REJECTION": 2
+ },
+ "pf": 1.706,
+ "maxDD_pct": -14.064,
+ "eq_end": 158.024,
+ "eq_min": 94.8017,
+ "counters": {
+  "v36_exit_slip_charged": 0,
+  "v35_dust_box_veto": 0,
+  "v35_flash_seller_veto": 0,
+  "v35_fall_close_veto": 0,
+  "v35_cooldown_armed": 78,
+  "v35_cooldown_skip": 107,
+  "v35_cooldown_expired": 6,
+  "v35_cooldown_lifted_by_bos": 66,
+  "slot_full_rejects": 142,
+  "portfolio_slots_full": 142,
+  "v31_struct_trail": 1,
+  "trail_4h_structural": 40,
+  "fill_below_exchange_min": 0,
+  "v34_deploy_full_ok": 237,
+  "v33_stamp_expand": 0,
+  "v33_stamp_range": 0
+ },
+ "v33_stamps_expand": 0,
+ "v33_stamps_range": 0,
+ "v33_leader_stamps": {},
+ "price_move_pct": {
+  "median_all": -0.124,
+  "median_winners": 7.404,
+  "max": 23.703,
+  "wins_over_5pct": 10,
+  "wins_over_15pct": 1
+ },
+ "stop_width_pct": {
+  "median": 0.4189,
+  "min": 0.1002,
+  "max": 1.5253
+ },
+ "bars_held_median": 5.0,
+ "fee_share_of_gross_wins_pct": 16.26,
+ "smt_bull_stamps": 142092,
+ "smt_stamps": 69697
+}
