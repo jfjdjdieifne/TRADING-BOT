@@ -1,0 +1,363 @@
+MICROSCOPIC TRADE TAPE AUDIT - v34 halal spot
+books: /home/user/TRADING-BOT/halal_spot/results
+champion under the microscope: S1_TEL_3R   reference: V33_TEL_3S_3R
+
+================================================================================================================================
+TABLE 1 - THE LEDGER: the twelve single months of S1_TEL_3R, then the ten biggest single weeks
+================================================================================================================================
+
+  W1  (2023-10-01 .. 2024-03-31)   start capital $100.00   final equity $139.26   window maxDD -14.39%
+  month      start$      end$        $       %    n     W/BE/L     PF   mDD%  best trade
+  2023-10    100.00     91.63    -8.37   -8.37   42   2/20/20    0.22  -9.32  ADAUSDT 2023-10-30 07:30 +4.17R $+1.55
+  2023-11     91.63    109.99   +18.36  +20.04   36   5/14/17    2.91  -4.75  SOLUSDT 2023-11-14 11:30 +23.97R $+21.13
+  2023-12    109.99    108.97    -1.02   -0.93   40   4/16/20    0.93  -5.73  BNBUSDT 2023-12-11 03:00 +17.52R $+8.02
+  2024-01    108.97    122.67   +13.69  +12.56   41   7/12/22    1.79  -5.72  LINKUSDT 2024-01-10 13:00 +17.80R $+9.30
+  2024-02    122.67    138.73   +16.06  +13.09   29   5/ 8/16    2.15  -5.49  AVAXUSDT 2024-02-01 16:40 +28.21R $+10.50
+  2024-03    138.73    139.26    +0.53   +0.38   39   4/11/24    1.02  -9.41  BNBUSDT 2024-03-12 20:00 +22.81R $+19.34
+  TOTAL      100.00    139.26   +39.26  +39.26  227  27/81/119    1.43 -14.39
+  check vs the engine's own summary: end_equity $139.26 | totR +48.9224 | n 227 | book sum $+39.2627 / +48.9224R -> IDENTICAL
+
+  W2  (2024-05-01 .. 2024-10-31)   start capital $100.00   final equity $154.83   window maxDD -14.19%
+  month      start$      end$        $       %    n     W/BE/L     PF   mDD%  best trade
+  2024-05    100.00    103.77    +3.77   +3.77   24   3/ 9/12    1.55  -5.79  ETHUSDT 2024-05-02 02:00 +8.04R $+7.54
+  2024-06    103.77     97.42    -6.35   -6.12   43   7/14/22    0.57  -7.98  AVAXUSDT 2024-06-18 19:50 +7.48R $+4.54
+  2024-07     97.42    133.25   +35.83  +36.78   30   7/13/10    5.08  -3.20  XRPUSDT 2024-07-11 16:00 +68.24R $+18.90
+  2024-08    133.25    154.20   +20.96  +15.73   32   6/ 9/17    2.57  -2.93  LINKUSDT 2024-08-20 15:55 +36.56R $+24.15
+  2024-09    154.20    145.25    -8.96   -5.81   27   3/ 8/16    0.41  -7.29  ETHUSDT 2024-09-23 00:30 +6.81R $+4.69
+  2024-10    145.25    154.83    +9.58   +6.60   24   6/ 6/12    1.97  -3.10  AVAXUSDT 2024-10-28 06:00 +7.60R $+8.07
+  TOTAL      100.00    154.83   +54.83  +54.83  180  32/59/89    1.80 -14.19
+  check vs the engine's own summary: end_equity $154.83 | totR +83.0249 | n 180 | book sum $+54.8264 / +83.0249R -> IDENTICAL
+
+  BEST 10 SINGLE WEEKS of S1_TEL_3R across both windows (week = 7 days from the window start, engine's own bucketing)
+   # win week start week end       net$       %    n     W/BE/L     PF  paying coins (net$)
+   1 W2  2024-07-10 2024-07-16   +22.12  +22.54    5   2/ 2/ 1   24.96  XRPUSD+18.90  BTCUSD+4.14  AVAXUSD-0.92
+   2 W2  2024-08-21 2024-08-27   +22.06  +16.51    8   2/ 2/ 4    7.87  LINKUSD+22.74  AVAXUSD+0.38  ETHUSD-1.06
+   3 W1  2023-11-12 2023-11-18   +17.51  +18.98    8   1/ 2/ 5    5.83  SOLUSD+21.13  AVAXUSD-0.43  BTCUSD-0.43  XRPUSD-0.97  LINKUSD-1.79
+   4 W1  2024-03-10 2024-03-16   +10.84   +8.04    9   1/ 2/ 6    2.27  BNBUSD+18.66  LINKUSD-1.04  AVAXUSD-1.19  ETHUSD-1.24  XRPUSD-1.86  SOLUSD-2.49
+   5 W2  2024-07-17 2024-07-23    +9.95   +8.27    9   3/ 3/ 3    3.79  SOLUSD+8.11  ETHUSD+4.80  ADAUSD-2.96
+   6 W1  2023-12-10 2023-12-16    +8.36   +7.89    6   2/ 1/ 3    4.08  BNBUSD+8.02  SOLUSD+2.25  XRPUSD-1.91
+   7 W2  2024-05-01 2024-05-07    +8.27   +8.27    8   2/ 3/ 3    4.65  ETHUSD+7.54  SOLUSD+3.00  BTCUSD-0.39  ADAUSD-1.87
+   8 W1  2024-01-28 2024-02-03    +8.08   +6.52    5   1/ 0/ 4    4.33  AVAXUSD+10.50  XRPUSD-0.51  ADAUSD-0.83  ETHUSD-1.08
+   9 W2  2024-10-09 2024-10-15    +7.84   +5.52    7   2/ 3/ 2    6.80  LINKUSD+7.26  ADAUSD+1.93  SOLUSD-1.35
+  10 W2  2024-10-23 2024-10-29    +7.59   +5.11    2   1/ 0/ 1   16.64  AVAXUSD+8.07  SOLUSD-0.49
+
+  WHO PAID, in total, across both windows (S1_TEL_3R):
+   W1: BNBUSDT n=25 +26.04$  ADAUSDT n=35 +21.49$  SOLUSDT n=35 +18.66$  AVAXUSDT n=38 +1.33$  LINKUSDT n=32 +0.20$  BTCUSDT n=12 -3.85$  ETHUSDT n=24 -10.03$  XRPUSDT n=26 -14.57$
+   W2: LINKUSDT n=35 +25.02$  XRPUSDT n=13 +18.15$  ETHUSDT n=19 +12.39$  AVAXUSDT n=24 +6.44$  SOLUSDT n=29 +6.02$  BTCUSDT n=14 +2.07$  BNBUSDT n=18 -1.90$  ADAUSDT n=28 -13.36$
+
+================================================================================================================================
+TABLE 2 - ALL BIG WINNERS TAPE: every fill with R >= +3.0 in S1_TEL_3R
+================================================================================================================================
+
+  W1: 24 fills >= +3.0R   (sum +243.83R / $+127.39)
+    # coin  entry            exit               hold   fill_px      seam   stop_px   exit_px   MFE%   gave    net$       R  rule         disc
+    1 AVAXUSDT 2024-02-01 16:40 2024-02-03 08:25   39.8   32.9300   32.9300   32.8300   35.8200  13.91   17.6  +10.50  +28.21  trail (4H/5m) OK
+    2 ADAUSDT 2024-02-26 11:10 2024-02-27 08:00   20.8    0.5748    0.5700    0.5732    0.6152   9.39    9.2   +8.92  +24.51  trail (4H/5m) seam!
+    3 SOLUSDT 2023-11-14 11:30 2023-11-16 09:10   45.7   52.0600   52.0600   51.5500   64.4000  30.58    7.3  +21.13  +23.97  trail (4H/5m) OK
+    4 BNBUSDT 2024-03-12 20:00 2024-03-14 12:00   40.0  527.7500  528.1000  524.4000  605.3000  19.47    7.9  +19.34  +22.81  trail (4H/5m) OK
+    5 LINKUSDT 2024-01-10 13:00 2024-01-11 16:15   27.2   13.6320   13.6300   13.5690   14.7820  14.29   13.1   +9.30  +17.80  trail (4H/5m) seam!
+    6 BNBUSDT 2023-12-11 03:00 2023-12-13 03:00   48.0  231.4000  231.4000  230.4000  249.4000  10.37    6.5   +8.02  +17.52  trail (4H/5m) OK
+    7 ADAUSDT 2024-02-13 15:00 2024-02-15 06:00   39.0    0.5364    0.5400    0.5338    0.5728   8.57    4.1   +8.54  +13.57  trail (4H/5m) OK
+    8 ADAUSDT 2024-02-05 07:10 2024-02-05 13:50    6.7    0.4974    0.5000    0.4969    0.5042   1.53    3.6   +1.54  +11.60  struct. ceiling OK
+    9 ADAUSDT 2024-01-01 03:45 2024-01-02 13:00   33.2    0.5924    0.5900    0.5895    0.6216   6.96    4.6   +5.12   +9.65  trail (4H/5m) seam!
+   10 LINKUSDT 2023-11-03 05:00 2023-11-04 08:15   27.2   10.6940   10.6900   10.6380   11.1860   7.99    6.9   +3.98   +8.39  trail (4H/5m) seam!
+   11 AVAXUSDT 2024-01-20 11:00 2024-01-21 16:00   29.0   32.1300   32.1300   32.0300   32.9600   4.11    5.6   +2.97   +7.65  trail (4H/5m) OK
+   12 BNBUSDT 2024-01-03 14:20 2024-01-05 13:50   47.5  306.9000  306.9000  305.5000  316.9000   6.45    7.4   +3.45   +6.70  trail (4H/5m) OK
+   13 SOLUSDT 2023-12-16 00:45 2023-12-16 21:00   20.2   71.6500   71.6500   71.3100   73.7700   7.68   10.4   +3.06   +5.81  trail (4H/5m) OK
+   14 ADAUSDT 2023-11-25 00:05 2023-11-26 12:00   35.9    0.3845    0.3800    0.3835    0.3906   2.91    5.9   +1.52   +5.32  trail (4H/5m) seam!
+   15 ETHUSDT 2023-10-12 19:05 2023-10-13 01:10    6.1 1529.2600 1529.2600 1526.9800 1544.3900   1.08    2.0   +0.75   +5.29  struct. ceiling OK
+   16 BTCUSDT 2024-03-23 04:00 2024-03-24 00:00   20.0 63022.0000 63022.0000 62804.2200 64278.1500   4.21    7.0   +2.51   +5.18  trail (4H/5m) OK
+   17 XRPUSDT 2023-12-23 04:10 2023-12-24 05:40   25.5    0.6112    0.6100    0.6103    0.6167   1.85    7.8   +0.78   +4.75  trail (4H/5m) seam!
+   18 ADAUSDT 2023-10-30 07:30 2023-10-31 05:30   22.0    0.2932    0.2900    0.2920    0.2988   3.86    5.2   +1.55   +4.17  trail (4H/5m) seam!
+   19 SOLUSDT 2024-01-13 01:15 2024-01-14 20:00   42.8   89.6700   89.6700   87.9200   96.5900  13.64    3.1   +9.06   +3.85  trail (4H/5m) OK
+   20 SOLUSDT 2024-03-22 14:45 2024-03-22 16:00    1.2  168.3900  168.3900  167.6100  171.6200   2.48    1.7   +2.39   +3.71  trail (4H/5m) OK
+   21 AVAXUSDT 2024-01-15 04:50 2024-01-15 05:10    0.3   36.0300   36.0300   35.9700   36.3200   0.92    1.9   +0.78   +3.63  struct. ceiling OK
+   22 LINKUSDT 2024-03-30 04:10 2024-03-30 04:55    0.8   18.7990   18.8000   18.7520   19.0060   1.13    0.9   +1.25   +3.60  struct. ceiling OK
+   23 ADAUSDT 2023-11-30 11:05 2023-11-30 12:05    1.0    0.3744    0.3700    0.3740    0.3764   0.67    3.1   +0.37   +3.12  trail (4H/5m) seam!
+   24 SOLUSDT 2024-02-06 12:50 2024-02-06 13:05    0.2   93.5300   93.5300   93.4000   94.1100   0.76    2.4   +0.56   +3.02  trail (4H/5m) OK
+  CHECK fill_px <= seam + 1e-9        : FAIL  (16/24 comply)
+        breach ADAUSDT 2024-02-26 11:10 fill 0.574800 vs seam 0.570000 (+0.842%)  R +24.51
+        breach LINKUSDT 2024-01-10 13:00 fill 13.632000 vs seam 13.630000 (+0.015%)  R +17.80
+        breach ADAUSDT 2024-01-01 03:45 fill 0.592400 vs seam 0.590000 (+0.407%)  R +9.65
+        breach LINKUSDT 2023-11-03 05:00 fill 10.694000 vs seam 10.690000 (+0.037%)  R +8.39
+        breach ADAUSDT 2023-11-25 00:05 fill 0.384500 vs seam 0.380000 (+1.184%)  R +5.32
+        breach XRPUSDT 2023-12-23 04:10 fill 0.611200 vs seam 0.610000 (+0.197%)  R +4.75
+        breach ADAUSDT 2023-10-30 07:30 fill 0.293200 vs seam 0.290000 (+1.103%)  R +4.17
+        breach ADAUSDT 2023-11-30 11:05 fill 0.374400 vs seam 0.370000 (+1.189%)  R +3.12
+  CHECK fill_px <= purple_mid + 1e-9  : FAIL  (23/24 comply)
+        breach ADAUSDT 2023-10-30 07:30 fill 0.293200 vs purple_mid 0.290000 (+1.103%)  R +4.17
+  on the WHOLE book W1 (n=227): seam 185/227  purple_mid 216/227
+  the 8 seam breaches are 'above the seam' fills (price never came back to the seam): median +0.624% above it, median R +6.86, wins 8/8
+
+  W2: 20 fills >= +3.0R   (sum +226.55R / $+116.24)
+    # coin  entry            exit               hold   fill_px      seam   stop_px   exit_px   MFE%   gave    net$       R  rule         disc
+    1 XRPUSDT 2024-07-11 16:00 2024-07-15 00:00   80.0    0.4386    0.4400    0.4374    0.5215  27.87   33.6  +18.90  +68.24  trail (4H/5m) OK
+    2 LINKUSDT 2024-08-20 15:55 2024-08-24 08:00   88.1   10.1000   10.1000   10.0500   11.9500  20.59    5.0  +24.15  +36.56  trail (4H/5m) OK
+    3 BNBUSDT 2024-07-25 03:25 2024-07-27 20:15   64.8  555.2000  555.2000  553.1000  582.4000   6.70    5.3   +6.07  +12.41  trail (4H/5m) OK
+    4 SOLUSDT 2024-07-19 01:30 2024-07-20 09:30   32.0  156.9800  156.9800  156.0600  168.2600   8.88    3.3   +8.72  +11.91  trail (4H/5m) OK
+    5 ETHUSDT 2024-07-16 09:05 2024-07-17 11:40   26.6 3366.6500 3366.6500 3360.0000 3441.8600   4.43   12.2   +2.44  +10.29  trail (4H/5m) OK
+    6 LINKUSDT 2024-10-10 20:15 2024-10-13 00:00   51.8   10.4300   10.4300   10.3700   10.9900   6.90    3.0   +7.26   +8.98  trail (4H/5m) OK
+    7 ETHUSDT 2024-05-02 02:00 2024-05-05 00:00   70.0 2895.2000 2895.2000 2868.7200 3114.0800   9.33    2.2   +7.54   +8.04  trail (4H/5m) OK
+    8 AVAXUSDT 2024-10-28 06:00 2024-10-29 16:00   34.0   25.0800   25.0800   24.9000   26.5000   7.02    2.2   +8.07   +7.60  trail (4H/5m) OK
+    9 AVAXUSDT 2024-06-18 19:50 2024-06-19 19:25   23.6   25.7400   25.7400   25.5800   26.9900   7.07    3.9   +4.54   +7.48  trail (4H/5m) OK
+   10 BTCUSDT 2024-07-08 03:30 2024-07-10 01:10   45.7 54927.7300 54927.7300 54588.0000 57362.0800   5.83    2.6   +4.14   +6.84  trail (4H/5m) OK
+   11 ETHUSDT 2024-09-23 00:30 2024-09-24 00:45   24.2 2545.1000 2545.1000 2532.8200 2633.9100   5.54    4.7   +4.69   +6.81  trail (4H/5m) OK
+   12 ETHUSDT 2024-07-18 03:00 2024-07-18 14:00   11.0 3395.1800 3395.1800 3385.5000 3467.3900   2.28    1.2   +2.36   +6.75  struct. ceiling OK
+   13 SOLUSDT 2024-05-01 09:30 2024-05-01 16:45    7.2  120.1300  120.1300  119.5000  124.0000   4.25    2.3   +3.00   +5.76  struct. ceiling OK
+   14 SOLUSDT 2024-06-07 02:45 2024-06-07 04:45    2.0  169.0750  169.1300  168.6650  171.3300   1.58    1.9   +1.18   +4.67  struct. ceiling purp!
+   15 SOLUSDT 2024-08-12 00:45 2024-08-12 19:00   18.2  141.5700  141.5700  141.2000  143.5800   6.13   18.8   +1.58   +4.66  trail (4H/5m) OK
+   16 XRPUSDT 2024-06-03 01:00 2024-06-04 06:00   29.0    0.5128    0.5100    0.5115    0.5196   1.81    2.7   +1.18   +4.44  trail (4H/5m) seam!
+   17 LINKUSDT 2024-08-13 11:00 2024-08-14 12:00   25.0   10.1000   10.1000   10.0000   10.5500   5.64    1.4   +5.59   +4.29  trail (4H/5m) OK
+   18 AVAXUSDT 2024-07-08 02:20 2024-07-08 02:35    0.2   24.9100   24.9100   24.7800   25.4700   2.41    0.7   +1.97   +3.92  trail (4H/5m) OK
+   19 ADAUSDT 2024-10-15 06:50 2024-10-15 10:35    3.8    0.3579    0.3600    0.3567    0.3633   1.54    0.7   +1.93   +3.90  struct. ceiling OK
+   20 BTCUSDT 2024-05-31 16:45 2024-06-01 17:50   25.1 66881.6600 66881.6600 66684.0000 67611.6100   1.56    2.3   +0.92   +3.01  trail (4H/5m) OK
+  CHECK fill_px <= seam + 1e-9        : FAIL  (19/20 comply)
+        breach XRPUSDT 2024-06-03 01:00 fill 0.512800 vs seam 0.510000 (+0.549%)  R +4.44
+  CHECK fill_px <= purple_mid + 1e-9  : FAIL  (19/20 comply)
+        breach SOLUSDT 2024-06-07 02:45 fill 169.075000 vs purple_mid 169.070000 (+0.003%)  R +4.67
+  on the WHOLE book W2 (n=180): seam 157/180  purple_mid 173/180
+  the 1 seam breaches are 'above the seam' fills (price never came back to the seam): median +0.549% above it, median R +4.44, wins 1/1
+
+  grand total: 44 fills >= +3.0R in S1_TEL_3R
+
+================================================================================================================================
+TABLE 3 - THE FATAL COLLISIONS: every winner the single seat could not take, and who was sitting in it
+================================================================================================================================
+
+  W1: V33_TEL_3S_3R made 357 fills, S1_TEL_3R made 227. S1_TEL_3R's counter slot_full_rejects = 181 (V33_TEL_3S_3R's own = 24).
+  That counter counts every BLOCKED ENTRY ATTEMPT, not missed winners. The collisions below are the
+  subset of it that can be proved from the two books: a fill the reference actually took, on a stamp where
+  the single seat was already holding another trade and the winner's own book does not contain that fill.
+  reconciliation of the 47 PROFITABLE V33_TEL_3S_3R fills: 26 were also taken by S1_TEL_3R, 6 found the seat FREE, 15 are true collisions.
+  -> the 181 blocked attempts are mostly signals the reference itself never turned into a profitable fill.
+  collapsed 2 duplicate stamps (the same signal filled on two execution frames)
+
+  THE 13 FATAL COLLISIONS, biggest first (would-be $ = R x the seat's cash at that instant)
+   # missed signal    coin  would-be $       R | coin in the seat sitting since      held   seat $       R  exit reason     swap gain
+   1 2024-03-23 03:45 BTCUSDT     +13.97  +20.98 | XRPUSDT  2024-03-22 22:00    5.8    -0.00   -0.00  BREAKEVEN          +13.97
+   2 2024-01-13 02:05 LINKUSDT     +10.47  +35.64 | SOLUSDT  2024-01-13 01:15    0.8    +9.06   +3.85  STOP_BLUE           +1.42
+   3 2024-01-10 20:30 SOLUSDT      +6.88   +3.82 | LINKUSDT 2024-01-10 13:00    7.5    +9.30  +17.80  STOP_BLUE           -2.43
+   4 2024-02-01 16:45 ADAUSDT      +6.01  +24.00 | AVAXUSDT 2024-02-01 16:40    0.1   +10.50  +28.21  STOP_BLUE           -4.49
+   5 2024-02-05 21:05 ETHUSDT      +4.47   +3.07 | SOLUSDT  2024-02-05 16:00    5.1    -0.93   -1.40  STOP_BLUE           +5.40
+   6 2023-11-02 17:00 XRPUSDT      +3.92   +3.48 | LINKUSDT 2023-11-02 16:55    0.1    -0.00   -0.00  BREAKEVEN           +3.92
+   7 2023-12-25 03:00 ADAUSDT      +3.64   +3.01 | BNBUSDT  2023-12-25 02:45    0.2    -0.00   -0.00  BREAKEVEN           +3.64
+   8 2023-12-16 01:00 SOLUSDT      +3.07   +3.13 | SOLUSDT  2023-12-16 00:45    0.2    +3.06   +5.81  STOP_BLUE           +0.00
+   9 2023-11-14 12:35 ADAUSDT      +2.22   +4.88 | SOLUSDT  2023-11-14 11:30    1.1   +21.13  +23.97  STOP_BLUE          -18.92
+  10 2024-01-03 19:00 BNBUSDT      +1.70   +0.73 | BNBUSDT  2024-01-03 14:20    4.7    +3.45   +6.70  STOP_BLUE           -1.76
+  11 2024-01-05 18:25 XRPUSDT      +0.94   +3.80 | ETHUSDT  2024-01-05 17:30    0.9    -0.77   -1.44  EMERGENCY_STOP      +1.71
+  12 2023-11-30 03:15 BNBUSDT      +0.84   +4.36 | BNBUSDT  2023-11-29 18:20    8.9    -0.00   -0.00  BREAKEVEN           +0.84
+  13 2023-11-17 05:30 BTCUSDT      +0.61   +2.27 | BTCUSDT  2023-11-17 00:00    5.5    -0.43   -2.04  EMERGENCY_STOP      +1.04
+
+  COUNTERFACTUAL W1 -- hand the seat to the exploding trade at its signal, drop the trade that occupied it:
+    the real book            : $100.00 -> $139.26  (+39.26 = +39.26%)   n=227
+    the 13 biggest swaps      : $100.00 -> $143.61  (+4.35 = +4.35% of capital)
+    honesty: 4 of the 13 swaps would have made LESS than the trade they evicted (the seat was earning its keep)
+    (first-order: the swap keeps every OTHER trade of the book untouched, so no re-compounding is claimed)
+
+  W2: V33_TEL_3S_3R made 265 fills, S1_TEL_3R made 180. S1_TEL_3R's counter slot_full_rejects = 145 (V33_TEL_3S_3R's own = 17).
+  That counter counts every BLOCKED ENTRY ATTEMPT, not missed winners. The collisions below are the
+  subset of it that can be proved from the two books: a fill the reference actually took, on a stamp where
+  the single seat was already holding another trade and the winner's own book does not contain that fill.
+  reconciliation of the 46 PROFITABLE V33_TEL_3S_3R fills: 30 were also taken by S1_TEL_3R, 1 found the seat FREE, 15 are true collisions.
+  -> the 145 blocked attempts are mostly signals the reference itself never turned into a profitable fill.
+  collapsed 3 duplicate stamps (the same signal filled on two execution frames)
+
+  THE 12 FATAL COLLISIONS, biggest first (would-be $ = R x the seat's cash at that instant)
+   # missed signal    coin  would-be $       R | coin in the seat sitting since      held   seat $       R  exit reason     swap gain
+   1 2024-05-01 16:00 SOLUSDT     +12.53  +11.32 | SOLUSDT  2024-05-01 09:30    6.5    +3.00   +5.76  TARGET_REJECTIO     +9.53
+   2 2024-07-29 16:00 XRPUSDT     +10.55  +10.08 | AVAXUSDT 2024-07-29 16:00    0.0    -1.11   -1.32  STOP_BLUE          +11.66
+   3 2024-07-08 02:20 ADAUSDT     +10.35  +22.62 | AVAXUSDT 2024-07-08 02:20    0.0    +1.97   +3.92  STOP_BLUE           +8.39
+   4 2024-09-23 00:30 SOLUSDT      +6.71   +9.29 | ETHUSDT  2024-09-23 00:30    0.0    +4.69   +6.81  STOP_BLUE           +2.02
+   5 2024-07-08 15:00 BTCUSDT      +4.09   +4.39 | BTCUSDT  2024-07-08 03:30   11.5    +4.14   +6.84  STOP_BLUE           -0.05
+   6 2024-08-13 14:45 LINKUSDT      +3.38   +5.87 | LINKUSDT 2024-08-13 11:00    3.8    +5.59   +4.29  STOP_BLUE           -2.20
+   7 2024-08-22 03:00 XRPUSDT      +3.13   +6.62 | LINKUSDT 2024-08-20 15:55   35.1   +24.15  +36.56  STOP_BLUE          -21.02
+   8 2024-07-12 20:30 AVAXUSDT      +2.63   +3.44 | XRPUSDT  2024-07-11 16:00   28.5   +18.90  +68.24  STOP_BLUE          -16.27
+   9 2024-06-04 01:00 ETHUSDT      +1.38   +5.62 | XRPUSDT  2024-06-03 01:00   24.0    +1.18   +4.44  STOP_BLUE           +0.20
+  10 2024-08-09 18:30 AVAXUSDT      +0.59   +1.62 | AVAXUSDT 2024-08-09 15:40    2.8    -0.00   -0.00  BREAKEVEN           +0.59
+  11 2024-06-18 15:30 BNBUSDT      +0.42   +0.76 | BNBUSDT  2024-06-18 15:15    0.2    +0.33   +0.84  STRUCT_PROFIT       +0.09
+  12 2024-06-01 00:00 BTCUSDT      +0.09   +0.25 | BTCUSDT  2024-05-31 16:45    7.2    +0.92   +3.01  STOP_BLUE           -0.83
+
+  COUNTERFACTUAL W2 -- hand the seat to the exploding trade at its signal, drop the trade that occupied it:
+    the real book            : $100.00 -> $154.83  (+54.83 = +54.83%)   n=180
+    the 12 biggest swaps      : $100.00 -> $146.94  (-7.89 = -7.89% of capital)
+    honesty: 5 of the 12 swaps would have made LESS than the trade they evicted (the seat was earning its keep)
+    (first-order: the swap keeps every OTHER trade of the book untouched, so no re-compounding is claimed)
+
+--------------------------------------------------------------------------------------------------------------------------------
+  COMBINED, chained the way the lab reports it ($100 -> W1 -> W2)
+--------------------------------------------------------------------------------------------------------------------------------
+   the real winner book        : +115.62%   (W1 $139.26 -> W2 $215.62)
+   the 25 swapped fills       : +111.02%   (W1 $143.61 -> W2 $211.02)
+   NOTE: this is a bounds check, not a promise. It keeps every other trade of the book untouched and
+   re-prices only the swapped fills at the seat's full-cash risk, so it measures the CEILING of the
+   slot's opportunity cost, which the measured v34 book already beat by itself on the other 380 fills.
+
+================================================================================================================================
+TABLE 4 - BLEEDING-COIN AUTOPSY: what exactly killed XRP, ETH and BTC
+================================================================================================================================
+
+  W1: per-coin result of S1_TEL_3R
+    XRPUSD n= 26  W  2 L 16  totR   -19.76  net $  -14.57
+    ETHUSD n= 24  W  1 L 14  totR   -18.18  net $  -10.03
+    BTCUSD n= 12  W  1 L  8  totR    -7.47  net $   -3.85
+    LINKUSD n= 32  W  3 L 14  totR    +8.91  net $   +0.20
+    AVAXUSD n= 38  W  4 L 20  totR    +7.53  net $   +1.33
+    SOLUSD n= 35  W  5 L 21  totR    +7.93  net $  +18.66
+    ADAUSD n= 35  W  8 L 16  totR   +44.37  net $  +21.49
+    BNBUSD n= 25  W  3 L 10  totR   +25.58  net $  +26.04
+
+   ALL LOSERS on XRPUSDT in W1: 16 fills, the coin netted $-14.57 for the window
+    # entry            exit               hold    fill_px    stop_px    exit_px moved-away%  exit reason            R     net$
+    1 2023-10-10 10:00 2023-10-10 10:45    0.8     0.4967     0.4958     0.4958       0.181%  STOP_BLUE          -2.10    -0.37
+    2 2023-11-11 03:10 2023-11-11 03:15    0.1     0.6528     0.6502     0.6502       0.398%  STOP_BLUE          -1.50    -0.55
+    3 2023-11-13 10:00 2023-11-13 12:00    2.0     0.6538     0.6482     0.6482       0.857%  STOP_BLUE          -1.23    -0.97
+    4 2023-11-20 23:25 2023-11-20 23:45    0.3     0.6133     0.6119     0.6119       0.228%  STOP_BLUE          -1.88    -0.47
+    5 2023-11-27 06:25 2023-11-27 07:25    1.0     0.6085     0.6059     0.6059       0.427%  STOP_BLUE          -1.47    -0.69
+    6 2023-12-13 03:20 2023-12-13 04:05    0.8     0.6087     0.6040     0.6040       0.772%  STOP_BLUE          -1.26    -1.11
+    7 2023-12-13 05:35 2023-12-13 06:45    1.2     0.6062     0.6031     0.6031       0.511%  STOP_BLUE          -1.39    -0.80
+    8 2023-12-29 20:40 2023-12-29 22:00    1.3     0.6206     0.6180     0.6180       0.419%  STOP_BLUE          -1.48    -0.68
+    9 2024-01-08 03:00 2024-01-08 04:00    1.0     0.5515     0.5454     0.5454       1.106%  STOP_BLUE          -1.18    -1.50
+   10 2024-01-18 10:45 2024-01-18 10:55    0.2     0.5638     0.5631     0.5631       0.124%  STOP_BLUE          -2.61    -0.41
+   11 2024-01-30 23:25 2024-01-30 23:30    0.1     0.5101     0.5090     0.5090       0.216%  STOP_BLUE          -1.93    -0.51
+   12 2024-02-22 02:00 2024-02-23 03:30   25.5     0.5388     0.5363     0.5363       0.464%  EMERGENCY_STOP     -1.43    -0.87
+   13 2024-03-01 02:10 2024-03-01 02:20    0.2     0.5907     0.5889     0.5889       0.305%  STOP_BLUE          -1.66    -0.70
+   14 2024-03-16 20:30 2024-03-16 21:30    1.0     0.6036     0.5973     0.5973       1.044%  STOP_BLUE          -1.19    -1.86
+   15 2024-03-19 06:00 2024-03-19 08:00    2.0     0.6003     0.5869     0.5869       2.232%  STOP_BLUE          -1.09    -3.51
+   16 2024-03-19 22:00 2024-03-19 22:10    0.2     0.5996     0.5982     0.5982       0.233%  STOP_BLUE          -1.86    -0.61
+     death certificates: original stop (STOP_BLUE) 15 | back to BE after a rally (BREAKEVEN) 0 | EMERGENCY_STOP 1 | other 0
+
+   ALL LOSERS on ETHUSDT in W1: 14 fills, the coin netted $-10.03 for the window
+    # entry            exit               hold    fill_px    stop_px    exit_px moved-away%  exit reason            R     net$
+    1 2023-10-09 09:25 2023-10-09 09:40    0.2  1616.2100  1613.0800  1613.0800       0.194%  STOP_BLUE          -2.03    -0.38
+    2 2023-10-17 15:50 2023-10-17 18:55    3.1  1576.4800  1563.5500  1563.5500       0.820%  STOP_BLUE          -1.24    -0.97
+    3 2023-10-18 17:00 2023-10-18 20:00    3.0  1568.2300  1563.6600  1563.6600       0.291%  STOP_BLUE          -1.69    -0.46
+    4 2023-12-18 10:00 2023-12-18 10:10    0.2  2157.8800  2153.1700  2153.1700       0.218%  STOP_BLUE          -1.92    -0.47
+    5 2024-01-05 17:30 2024-01-07 23:30   54.0  2217.5500  2207.4000  2207.4000       0.458%  EMERGENCY_STOP     -1.44    -0.77
+    6 2024-02-03 10:45 2024-02-03 11:30    0.8  2310.8000  2308.3000  2308.3000       0.108%  STOP_BLUE          -2.85    -0.41
+    7 2024-02-03 13:15 2024-02-03 15:05    1.8  2303.3900  2296.3300  2296.3300       0.307%  STOP_BLUE          -1.65    -0.67
+    8 2024-02-16 16:55 2024-02-16 17:30    0.6  2780.7800  2772.6000  2772.6000       0.294%  STOP_BLUE          -1.68    -0.68
+    9 2024-02-21 09:15 2024-02-21 09:30    0.2  2916.5100  2908.8000  2908.8000       0.264%  STOP_BLUE          -1.76    -0.62
+   10 2024-02-21 11:00 2024-02-21 12:10    1.2  2914.2400  2885.4700  2885.4700       0.987%  STOP_BLUE          -1.20    -1.58
+   11 2024-02-29 22:05 2024-02-29 22:30    0.4  3340.7300  3320.0800  3320.0800       0.618%  STOP_BLUE          -1.32    -1.14
+   12 2024-03-15 02:35 2024-03-15 02:45    0.2  3803.4100  3779.8100  3779.8100       0.620%  STOP_BLUE          -1.32    -1.24
+   13 2024-03-28 13:10 2024-03-28 13:20    0.2  3565.4200  3555.9600  3555.9600       0.265%  STOP_BLUE          -1.75    -0.65
+   14 2024-03-29 17:40 2024-03-29 17:55    0.2  3486.4600  3475.2000  3475.2000       0.323%  STOP_BLUE          -1.62    -0.73
+     death certificates: original stop (STOP_BLUE) 13 | back to BE after a rally (BREAKEVEN) 0 | EMERGENCY_STOP 1 | other 0
+
+   ALL LOSERS on BTCUSDT in W1: 8 fills, the coin netted $-3.85 for the window
+    # entry            exit               hold    fill_px    stop_px    exit_px moved-away%  exit reason            R     net$
+    1 2023-11-09 20:05 2023-11-09 20:30    0.4 36298.7700 36168.5200 36168.5200       0.359%  STOP_BLUE          -1.56    -0.52
+    2 2023-11-17 00:00 2023-11-17 14:50   14.8 36153.1800 36083.8300 36083.8300       0.192%  EMERGENCY_STOP     -2.04    -0.43
+    3 2024-01-12 18:05 2024-01-12 19:20    1.2 43516.0100 43278.0000 43278.0000       0.547%  STOP_BLUE          -1.36    -0.91
+    4 2024-03-18 17:00 2024-03-18 17:15    0.2 67032.1500 66628.6800 66628.6800       0.602%  STOP_BLUE          -1.33    -1.17
+    5 2024-03-19 08:05 2024-03-19 08:20    0.2 64396.5900 64136.0000 64136.0000       0.405%  STOP_BLUE          -1.49    -0.85
+    6 2024-03-22 16:05 2024-03-22 16:35    0.5 63429.1900 63133.6000 63133.6000       0.466%  STOP_BLUE          -1.43    -0.94
+    7 2024-03-22 17:00 2024-03-22 21:45    4.8 62917.6200 62601.1100 62601.1100       0.503%  STOP_BLUE          -1.40    -0.99
+    8 2024-03-29 21:00 2024-03-29 21:30    0.5 69554.0000 69420.6000 69420.6000       0.192%  STOP_BLUE          -2.04    -0.54
+     death certificates: original stop (STOP_BLUE) 7 | back to BE after a rally (BREAKEVEN) 0 | EMERGENCY_STOP 1 | other 0
+
+   MEDIAN STOP DISTANCE (% of price) by coin, W1 (all fills):
+     ETHUSDT 0.293%  BNBUSDT 0.317%  ADAUSDT 0.350%  AVAXUSDT 0.356%  XRPUSDT 0.411%  LINKUSDT 0.419%  BTCUSDT 0.435%  SOLUSDT 0.513%
+     XRP/ETH median 0.352%  vs  BNB/SOL/ADA median 0.350%  -> ratio 1.005x
+
+   4H STRUCTURE AT ENTRY (causal, engine primitives, swing_k=2):
+   coin  fills in 4H bearish  in lower highs  their net$ while bearish
+   XRP      26       18/26           15/26                    -8.92
+   ETH      24       12/24            9/24                    -4.58
+   BTC      12        9/12            8/12                    -2.90
+   BNB      25       11/25           16/25                    -1.80
+   SOL      35       19/35           17/35                   +20.46
+   ADA      35       16/35           12/35                    +2.44
+   LINK     32        9/32           12/32                    -3.11
+   AVAX     38       22/38           20/38                    +8.50
+   (the 4H state is read on the last COMPLETED 4H bar before the 12-5m fill; -1 = bearish BOS/CHoCH, 0 = neutral, +1 = bullish)
+
+  W2: per-coin result of S1_TEL_3R
+    ADAUSD n= 28  W  2 L 18  totR   -28.66  net $  -13.36
+    BNBUSD n= 18  W  3 L 11  totR    -2.08  net $   -1.90
+    BTCUSD n= 14  W  3 L  6  totR    -0.80  net $   +2.07
+    SOLUSD n= 29  W  7 L 13  totR    +7.37  net $   +6.02
+    AVAXUSD n= 24  W  5 L 12  totR    +1.41  net $   +6.44
+    ETHUSD n= 19  W  5 L  9  totR   +17.15  net $  +12.39
+    XRPUSD n= 13  W  3 L  5  totR   +63.32  net $  +18.15
+    LINKUSD n= 35  W  4 L 15  totR   +25.32  net $  +25.02
+
+   ALL LOSERS on XRPUSDT in W2: 5 fills, the coin netted $+18.15 for the window
+    # entry            exit               hold    fill_px    stop_px    exit_px moved-away%  exit reason            R     net$
+    1 2024-05-23 19:55 2024-05-23 20:05    0.2     0.5196     0.5187     0.5187       0.173%  STOP_BLUE          -2.15    -0.40
+    2 2024-06-06 07:25 2024-06-06 07:35    0.2     0.5229     0.5222     0.5222       0.134%  STOP_BLUE          -2.49    -0.35
+    3 2024-06-24 15:30 2024-06-24 16:00    0.5     0.4776     0.4763     0.4763       0.272%  STOP_BLUE          -1.73    -0.46
+    4 2024-08-01 00:15 2024-08-01 01:40    1.4     0.6239     0.6223     0.6223       0.256%  STOP_BLUE          -1.78    -0.61
+    5 2024-09-05 19:30 2024-09-05 19:45    0.2     0.5440     0.5428     0.5428       0.221%  STOP_BLUE          -1.91    -0.63
+     death certificates: original stop (STOP_BLUE) 5 | back to BE after a rally (BREAKEVEN) 0 | EMERGENCY_STOP 0 | other 0
+
+   ALL LOSERS on ETHUSDT in W2: 9 fills, the coin netted $+12.39 for the window
+    # entry            exit               hold    fill_px    stop_px    exit_px moved-away%  exit reason            R     net$
+    1 2024-05-16 15:45 2024-05-16 16:25    0.7  2951.8400  2946.0000  2946.0000       0.198%  STOP_BLUE          -2.01    -0.42
+    2 2024-05-28 03:10 2024-05-28 03:40    0.5  3846.7600  3834.7400  3834.7400       0.312%  STOP_BLUE          -1.64    -0.54
+    3 2024-07-29 18:45 2024-07-30 00:30    5.8  3305.5900  3294.8800  3294.8800       0.324%  EMERGENCY_STOP     -1.62    -0.70
+    4 2024-07-31 04:20 2024-07-31 04:55    0.6  3274.6600  3268.6000  3268.6000       0.185%  STOP_BLUE          -2.08    -0.51
+    5 2024-08-19 06:00 2024-08-19 08:30    2.5  2620.8700  2610.8000  2610.8000       0.384%  STOP_BLUE          -1.52    -0.79
+    6 2024-08-26 19:35 2024-08-26 20:10    0.6  2688.2000  2675.5200  2675.5200       0.472%  STOP_BLUE          -1.42    -1.06
+    7 2024-09-05 19:15 2024-09-05 19:30    0.2  2382.9900  2376.2000  2376.2000       0.285%  STOP_BLUE          -1.70    -0.73
+    8 2024-09-16 12:45 2024-09-16 13:45    1.0  2295.7600  2289.4000  2289.4000       0.277%  STOP_BLUE          -1.72    -0.70
+    9 2024-10-21 18:50 2024-10-22 00:30    5.7  2662.7600  2659.0000  2659.0000       0.141%  EMERGENCY_STOP     -2.42    -0.51
+     death certificates: original stop (STOP_BLUE) 7 | back to BE after a rally (BREAKEVEN) 0 | EMERGENCY_STOP 2 | other 0
+
+   ALL LOSERS on BTCUSDT in W2: 6 fills, the coin netted $+2.07 for the window
+    # entry            exit               hold    fill_px    stop_px    exit_px moved-away%  exit reason            R     net$
+    1 2024-05-01 02:05 2024-05-01 02:10    0.1 59966.7600 59850.0600 59850.0600       0.195%  STOP_BLUE          -2.03    -0.39
+    2 2024-05-23 16:25 2024-05-23 18:00    1.6 67836.6200 67690.9200 67690.9200       0.215%  STOP_BLUE          -1.93    -0.44
+    3 2024-05-27 09:00 2024-05-27 12:00    3.0 68540.0000 68341.8400 68341.8400       0.289%  STOP_BLUE          -1.69    -0.51
+    4 2024-06-11 03:50 2024-06-11 04:10    0.3 68328.3800 68170.0000 68170.0000       0.232%  STOP_BLUE          -1.86    -0.44
+    5 2024-06-13 02:45 2024-06-13 03:30    0.8 67791.3600 67413.5100 67413.5100       0.557%  STOP_BLUE          -1.36    -0.76
+    6 2024-09-25 22:30 2024-09-25 23:00    0.5 63292.0100 63176.0000 63176.0000       0.183%  STOP_BLUE          -2.09    -0.57
+     death certificates: original stop (STOP_BLUE) 6 | back to BE after a rally (BREAKEVEN) 0 | EMERGENCY_STOP 0 | other 0
+
+   MEDIAN STOP DISTANCE (% of price) by coin, W2 (all fills):
+     BTCUSDT 0.270%  XRPUSDT 0.272%  ETHUSDT 0.312%  ADAUSDT 0.344%  LINKUSDT 0.455%  BNBUSDT 0.511%  SOLUSDT 0.524%  AVAXUSDT 0.565%
+     XRP/ETH median 0.292%  vs  BNB/SOL/ADA median 0.511%  -> ratio 0.572x
+
+   4H STRUCTURE AT ENTRY (causal, engine primitives, swing_k=2):
+   coin  fills in 4H bearish  in lower highs  their net$ while bearish
+   XRP      13        7/13            7/13                    +0.60
+   ETH      19        6/19            8/19                    +6.37
+   BTC      14        9/14            3/14                    +2.96
+   BNB      18       14/18           11/18                    -1.42
+   SOL      29       17/29           19/29                    -1.61
+   ADA      28       11/28            8/28                    -5.90
+   LINK     35       26/35           23/35                    +2.68
+   AVAX     24       13/24           12/24                    +0.75
+   (the 4H state is read on the last COMPLETED 4H bar before the 12-5m fill; -1 = bearish BOS/CHoCH, 0 = neutral, +1 = bullish)
+
+================================================================================================================================
+TABLE 5 - COUNTERFACTUAL: re-simulate S1_TEL_3R on the best coins only (BNB, SOL, ADA, LINK, AVAX)
+================================================================================================================================
+
+--------------------------------------------------------------------------------------------------------------------------------
+  W1: S1_TEL_3R on 8 coins  vs  restricted to the best 5
+--------------------------------------------------------------------------------------------------------------------------------
+  book                                     start$      end$         $        %    n     W/BE/L     PF  maxDD%
+  8 coins (the real winner)                100.00    139.26    +39.26   +39.26  227  27/81/119    1.43  -14.39
+  best 5: BNB/SOL/ADA/LINK/AVAX            100.00    168.67    +68.67   +68.67  190  24/66/100    1.91  -12.64
+  best month  8-coin : 2023-11 +18.36$ (+20.04%)   |  best 5: 2024-03 $35.91
+  best week   8-coin : W07 2023-11-12 +17.51$   |  best 5: $22.21 (week of 2024-03-03)
+
+--------------------------------------------------------------------------------------------------------------------------------
+  W2: S1_TEL_3R on 8 coins  vs  restricted to the best 5
+--------------------------------------------------------------------------------------------------------------------------------
+  book                                     start$      end$         $        %    n     W/BE/L     PF  maxDD%
+  8 coins (the real winner)                100.00    154.83    +54.83   +54.83  180  32/59/89    1.80  -14.19
+  best 5: BNB/SOL/ADA/LINK/AVAX            100.00    122.96    +22.96   +22.96  145  21/48/76    1.45  -12.41
+  best month  8-coin : 2024-07 +35.83$ (+36.78%)   |  best 5: 2024-08 $16.25
+  best week   8-coin : W11 2024-07-10 +22.12$   |  best 5: $16.99 (week of 2024-08-21)
+
+--------------------------------------------------------------------------------------------------------------------------------
+  COMBINED (chained the way the lab reports it)
+--------------------------------------------------------------------------------------------------------------------------------
+  8 coins    : +115.62%   (W1 $139.26 -> W2 $215.62)
+  best 5     : +107.40%   (W1 $168.67 -> W2 $207.40)
+
+================================================================================================================================
+END OF TAPE
+================================================================================================================================
