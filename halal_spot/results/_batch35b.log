@@ -1,0 +1,37 @@
+=== S1_WIDE_CAP W1 18:18:00 ===
+    [guard] BASE == engine defaults for all 26 v33+v34 knobs
+
+##### LIVE ENGINE combo=S1_WIDE_CAP W1 2023-10-01..2024-03-31 #####
+    cfg: ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)  MAX_OPEN_POSITIONS=1  FULL_100_DEPLOY=True  MIN_STOP_PCT=0.25
+    n=182 totR=65.3237 end=$134.9209 DD=-16.071% (1259s)
+    coins: {"ADAUSDT_5m": [32, 35.077, 15.472], "AVAXUSDT_5m": [33, 9.096, -0.839], "BNBUSDT_5m": [18, 34.584, 21.988], "BTCUSDT_5m": [5, -4.137, -2.741], "ETHUSDT_5m": [12, -14.756, -5.914], "LINKUSDT_5m": [26, 12.12, 4.94], "SOLUSDT_5m": [36, 8.93, 15.194], "XRPUSDT_5m": [20, -15.589, -13.179]}
+    counters: {"v35_dust_box_veto": 131, "slot_full_rejects": 113, "portfolio_slots_full": 113, "v31_struct_trail": 5, "trail_4h_structural": 26, "v34_deploy_full_ok": 226}
+=== S1_WIDE_CAP W2 18:39:02 ===
+    [guard] BASE == engine defaults for all 26 v33+v34 knobs
+
+##### LIVE ENGINE combo=S1_WIDE_CAP W2 2024-05-01..2024-10-31 #####
+    cfg: ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)  MAX_OPEN_POSITIONS=1  FULL_100_DEPLOY=True  MIN_STOP_PCT=0.25
+    n=157 totR=132.1222 end=$152.782 DD=-16.022% (907s)
+    coins: {"ADAUSDT_5m": [26, -17.22, -16.299], "AVAXUSDT_5m": [26, 5.635, 1.25], "BNBUSDT_5m": [13, 24.725, 11.218], "BTCUSDT_5m": [11, 8.398, 5.105], "ETHUSDT_5m": [14, 6.559, 6.67], "LINKUSDT_5m": [32, 26.552, 22.528], "SOLUSDT_5m": [25, 8.773, 3.83], "XRPUSDT_5m": [10, 68.7, 18.479]}
+    counters: {"v35_dust_box_veto": 118, "slot_full_rejects": 122, "portfolio_slots_full": 122, "v31_struct_trail": 12, "trail_4h_structural": 44, "v34_deploy_full_ok": 187}
+=== S1_SURGICAL_COMBO W1 18:54:11 ===
+    [guard] BASE == engine defaults for all 26 v33+v34 knobs
+
+##### LIVE ENGINE combo=S1_SURGICAL_COMBO W1 2023-10-01..2024-03-31 #####
+    cfg: ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)  MAX_OPEN_POSITIONS=1  FULL_100_DEPLOY=True  MIN_STOP_PCT=0.25  PER_COIN_COOLDOWN=2  COOLDOWN_DAYS=14.0  COOLDOWN_NEEDS_BOS=True
+    n=148 totR=48.3705 end=$124.8934 DD=-13.112% (946s)
+    coins: {"ADAUSDT_5m": [25, 28.363, 9.815], "AVAXUSDT_5m": [24, 5.033, -3.627], "BNBUSDT_5m": [21, 39.824, 24.21], "BTCUSDT_5m": [8, -5.747, -3.129], "ETHUSDT_5m": [11, -13.044, -5.116], "LINKUSDT_5m": [14, 0.038, -0.507], "SOLUSDT_5m": [23, 5.582, 9.41], "XRPUSDT_5m": [22, -11.678, -6.163]}
+    counters: {"v35_dust_box_veto": 127, "v35_cooldown_armed": 64, "v35_cooldown_skip": 80, "v35_cooldown_expired": 8, "v35_cooldown_lifted_by_bos": 53, "slot_full_rejects": 83, "portfolio_slots_full": 83, "v31_struct_trail": 3, "trail_4h_structural": 22, "v34_deploy_full_ok": 177}
+=== S1_SURGICAL_COMBO W2 19:09:58 ===
+    [guard] BASE == engine defaults for all 26 v33+v34 knobs
+
+##### LIVE ENGINE combo=S1_SURGICAL_COMBO W2 2024-05-01..2024-10-31 #####
+    cfg: ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)  MAX_OPEN_POSITIONS=1  FULL_100_DEPLOY=True  MIN_STOP_PCT=0.25  PER_COIN_COOLDOWN=2  COOLDOWN_DAYS=14.0  COOLDOWN_NEEDS_BOS=True
+    n=129 totR=116.865 end=$150.711 DD=-11.577% (361s)
+    coins: {"ADAUSDT_5m": [21, 18.444, 8.349], "AVAXUSDT_5m": [16, 2.507, 3.055], "BNBUSDT_5m": [12, 24.12, 10.242], "BTCUSDT_5m": [8, 3.23, 1.338], "ETHUSDT_5m": [12, 9.779, 8.298], "LINKUSDT_5m": [26, -20.252, -10.171], "SOLUSDT_5m": [22, 12.413, 10.191], "XRPUSDT_5m": [12, 66.625, 19.409]}
+    counters: {"v35_dust_box_veto": 120, "v35_cooldown_armed": 50, "v35_cooldown_skip": 73, "v35_cooldown_expired": 10, "v35_cooldown_lifted_by_bos": 38, "slot_full_rejects": 89, "portfolio_slots_full": 89, "v31_struct_trail": 12, "trail_4h_structural": 40, "v34_deploy_full_ok": 154}
+=== S1_TOUCH_GUARD W1 19:16:01 ===
+    [guard] BASE == engine defaults for all 26 v33+v34 knobs
+
+##### LIVE ENGINE combo=S1_TOUCH_GUARD W1 2023-10-01..2024-03-31 #####
+    cfg: ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)  MAX_OPEN_POSITIONS=1  FULL_100_DEPLOY=True  NO_FALL_CLOSE=True

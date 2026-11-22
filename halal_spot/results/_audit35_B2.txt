@@ -1,0 +1,36 @@
+V35 BLEED MECHANICS -- measured on the saved S1_TEL_3R books
+books: /home/user/TRADING-BOT/halal_spot/results
+
+==================================================================================================================================
+B. INSTANT DEATH -- the hold <= 0.5h autopsies, bar by bar
+==================================================================================================================================
+
+  W1: n=227  losers+BE=200  fills that died within 0.5h: 81  (their net $-35.77)
+   losers whose OWN fill bar already traded through stop_px : 12/200  (6.0%)
+   losers whose own fill bar POKED BELOW the seam (mitigation intrabar)      : 83/200
+   losers whose own fill bar never broke the seam (clean)        : 117/200
+   of those same-bar deaths: net -5.91$  R -25.37  by coin AVAXUSDT:4 BNBUSDT:3 XRPUSDT:2 LINKUSDT:2 SOLUSDT:1
+   BIG WINNERS (>=3R): 7/24 POKED below the seam on their fill bar, 17 filled clean
+     ...and those poked winners made +25.83$ of the window's +127.39$ big-winner money (20.3%)
+   GATE(rounded seam) 'bar closes below seam'      : drops 60 fills (-19.32$) -> $158.58
+   GATE(honest)       'bar closes below the FILL'  : drops 43 fills (-22.20$) -> $161.46  <-- this is what FLASH_SELLER_VETO does
+   GATE 'fill bar may not trade through the stop': drops 12 fills (-5.91$) -> $145.18 (+45.18%)
+   (both gates are first-order: the cancelled fill frees the seat but no substitute trade
+    is invented, so a positive delta here is a LOWER BOUND.)
+
+  W2: n=180  losers+BE=148  fills that died within 0.5h: 65  (their net $-27.14)
+   losers whose OWN fill bar already traded through stop_px : 12/148  (8.1%)
+   losers whose own fill bar POKED BELOW the seam (mitigation intrabar)      : 58/148
+   losers whose own fill bar never broke the seam (clean)        : 90/148
+   of those same-bar deaths: net -6.79$  R -24.50  by coin ADAUSDT:5 LINKUSDT:4 BTCUSDT:1 AVAXUSDT:1 ETHUSDT:1
+   BIG WINNERS (>=3R): 3/20 POKED below the seam on their fill bar, 17 filled clean
+     ...and those poked winners made +28.10$ of the window's +116.24$ big-winner money (24.2%)
+   GATE(rounded seam) 'bar closes below seam'      : drops 37 fills (-17.06$) -> $171.89
+   GATE(honest)       'bar closes below the FILL'  : drops 30 fills (-14.95$) -> $169.78  <-- this is what FLASH_SELLER_VETO does
+   GATE 'fill bar may not trade through the stop': drops 12 fills (-6.79$) -> $161.62 (+61.62%)
+   (both gates are first-order: the cancelled fill frees the seat but no substitute trade
+    is invented, so a positive delta here is a LOWER BOUND.)
+
+==================================================================================================================================
+END OF BLEED AUDIT
+==================================================================================================================================

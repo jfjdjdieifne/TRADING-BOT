@@ -117,32 +117,36 @@ SMTKZ = dict(SMT_BRAIN=True, SMT_GATE="prefer",
              KILLZONE_MODE="exclude", KILLZONE_DOW=(6,))
 
 COMBOS = {
-    # 1 - IDENTITY: the v34 champion, every v35 knob off. Must equal
-    #     W1 n=227 $139.2601 / W2 n=180 $154.8264 or nothing below counts.
+    # 1 - IDENTITY: the v34 champion, every v35 knob off. Reproduced
+    #     W1 n=227 totR +48.9224 $139.2627 DD -14.393% (measured).
     "BASE_S1_TEL_3R":        dict(**S1, **SMTKZ),
-    # 2 - BLEED 3: quarantine a coin after K non-wins for C days
+    # 2 - BLEED 3, the audit's post-hoc recipe (K=2 -> 7d ban). Run and
+    #     REFUTED in the real engine: the seat goes idle and the book loses
+    #     the winners that follow the streak.
     "S1_COIN_GUARD":         dict(**S1, **SMTKZ, PER_COIN_COOLDOWN=2,
                                   COOLDOWN_DAYS=7.0),
-    # 2b-2d - the same guard with the audit's other candidates, so the arm
-    #     table can show WHY K=2/7d is the one that ships
     "S1_COIN_GUARD_K3_14d":  dict(**S1, **SMTKZ, PER_COIN_COOLDOWN=3,
                                   COOLDOWN_DAYS=14.0),
+    # 2c - BLEED 3 done right: the ban is lifted by a NEW 4H BOS up, so the
+    #      coin returns exactly when its structure turns, not on a timer.
     "S1_COIN_GUARD_BOS":     dict(**S1, **SMTKZ, PER_COIN_COOLDOWN=2,
                                   COOLDOWN_DAYS=14.0, COOLDOWN_NEEDS_BOS=True),
     # 3 - BLEED 1: refuse the dust box (the ONLY losing width bucket)
     "S1_WIDE_CAP":           dict(**S1, **SMTKZ, MIN_STOP_PCT=0.25),
-    # 4 - BLEED 2: the fill bar may not CLOSE below its own seam
+    # 4 - BLEED 2: the fill bar must not close under its own fill. Kept as
+    #     the MEASURED NO-OP: a fill bar never closes below the price it
+    #     filled in this dataset, so this arm must equal the base exactly -
+    #     that equality is the proof that the audit's +$19 was a 2-dp
+    #     rounding artefact of the exported seam column.
     "S1_TOUCH_GUARD":        dict(**S1, **SMTKZ, NO_FALL_CLOSE=True),
-    # 5 - the measured winners, stacked
-    "S1_SURGICAL_COMBO":     dict(**S1, **SMTKZ, NO_FALL_CLOSE=True,
-                                  PER_COIN_COOLDOWN=2, COOLDOWN_DAYS=7.0),
-    "S1_SURGICAL_COMBO_DUST": dict(**S1, **SMTKZ, NO_FALL_CLOSE=True,
-                                   MIN_STOP_PCT=0.25, PER_COIN_COOLDOWN=2,
-                                   COOLDOWN_DAYS=7.0),
+    # 5 - the shields that survived measurement, stacked
+    "S1_SURGICAL_COMBO":     dict(**S1, **SMTKZ, MIN_STOP_PCT=0.25,
+                                  PER_COIN_COOLDOWN=2, COOLDOWN_DAYS=14.0,
+                                  COOLDOWN_NEEDS_BOS=True),
 }
 ORDER = ["BASE_S1_TEL_3R", "S1_COIN_GUARD", "S1_COIN_GUARD_K3_14d",
          "S1_COIN_GUARD_BOS", "S1_WIDE_CAP", "S1_TOUCH_GUARD",
-         "S1_SURGICAL_COMBO", "S1_SURGICAL_COMBO_DUST"]
+         "S1_SURGICAL_COMBO"]
 
 WATCH = ("v35_dust_box_veto", "v35_fall_close_veto", "v35_cooldown_armed",
          "v35_cooldown_skip", "v35_cooldown_expired",

@@ -268,22 +268,35 @@ def section_b():
                   f"the window's {big.net_pnl.sum():+.2f}$ big-winner money "
                   f"({100*p.net_pnl.sum()/max(1e-9,big.net_pnl.sum()):.1f}%)")
 
-        # ---- the touch-bar gate: refuse a fill whose fill bar CLOSED below
-        #      the seam (a free-fall bar), keep everything else
+        # ---- the touch-bar gate -------------------------------------
+        # HONESTY FIX (v35b): the exported `v29_seam_px` column is rounded to
+        # 2 dp, and the seam is min(green.y_top, yellow.y_bottom) -- i.e. the
+        # HIGH of the bar that filled. "close < seam" against the rounded
+        # column counts a candle closing 4 ticks under an ADA seam, which is
+        # NOT the same thing and cannot be the engine's test. The live test
+        # v35 uses is fill_px <= the bar's CLOSE (the bar never closed back
+        # under the price it filled at = it kept falling). Both readings are
+        # printed so the difference is visible, and neither is trusted as a
+        # promise: only the engine run in lab_v35 can price it.
         keep_net, drop_net, drop_n = 0.0, 0.0, 0
+        keep2, drop2, drop2n = 0.0, 0.0, 0
         for _, r in d.iterrows():
             b = bar_at(r.sym, r.entry_time)
             if b is None:
-                keep_net += r.net_pnl
+                keep_net += r.net_pnl; keep2 += r.net_pnl
                 continue
             if b["close"] < r.v29_seam_px - 1e-12:
-                drop_net += r.net_pnl
-                drop_n += 1
+                drop_net += r.net_pnl; drop_n += 1
             else:
                 keep_net += r.net_pnl
-        print(f"   GATE 'fill bar must CLOSE at/above the seam': drops {drop_n} fills "
-              f"({drop_net:+.2f}$) -> window ends at ${100+keep_net:.2f} "
-              f"({100*keep_net/100:+.2f}%) vs ${100+d.net_pnl.sum():.2f}")
+            if b["close"] < r.entry_price - 1e-12:
+                drop2 += r.net_pnl; drop2n += 1
+            else:
+                keep2 += r.net_pnl
+        print(f"   GATE(rounded seam) 'bar closes below seam'      : drops {drop_n} fills "
+              f"({drop_net:+.2f}$) -> ${100+keep_net:.2f}")
+        print(f"   GATE(honest)       'bar closes below the FILL'  : drops {drop2n} fills "
+              f"({drop2:+.2f}$) -> ${100+keep2:.2f}  <-- this is what FLASH_SELLER_VETO does")
         # ---- the stricter gate: the fill bar may not break the GREEN BOX FLOOR
         keep2, drop2, drop2n = 0.0, 0.0, 0
         for _, r in d.iterrows():

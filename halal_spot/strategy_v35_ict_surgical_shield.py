@@ -750,7 +750,11 @@ MIN_STOP_PCT = 0.0            # 0.0 = off. 0.25 refuses the dust bucket.
 # just filled broke the GreenBox instead of defending it. 60 fills in W1
 # and 37 in W2 did exactly that (net -$19.32 / -$17.06); only 2 of the 44
 # big winners would be lost (-$0.63).
-NO_FALL_CLOSE = False
+NO_FALL_CLOSE = False         # _seek_fill's `c` is the EXEC-FRAME close
+                              # (15m/1h), not the 5m close, so this knob alone
+                              # measures nothing. Kept for the record.
+FLASH_SELLER_VETO = False     # THE REAL GATE: the last COMPLETED 5m bar at
+                              # the fill must not have closed under the fill.
 # BLEED 3: per-coin quarantine. K consecutive non-wins freeze the coin for
 # C days. Measured (first-order) the only rule that improves BOTH windows
 # is K=2 / 7d: W1 $139.26 -> $150.41, W2 $154.83 -> $165.91, DD nearly
@@ -1361,6 +1365,7 @@ class ICTBoxEngine:
         self.price = 0.0
         self.now = None
         # 4H board bookkeeping
+        self.v35_swings = {}
         self._htf_protected: Box | None = None
         self._htf_bos_seen: set = set()
 
@@ -2535,22 +2540,47 @@ class ICTBoxEngine:
             if self.board != "GREEN":
                 self.setup = None; self.state = "WAIT_ANCHOR"
                 self.cnt("fill_cancel_board_red"); return
-            # ---- v35 BLEED 2: NO FREEFALL CLOSE -------------------- #
-            # The bar that filled the resting limit CLOSED below the seam:
-            # that is not a defence of the GreenBox, it is price walking
-            # through it. Measured on the v34 book: 60 such fills in W1 and
-            # 37 in W2, net -$19.32 / -$17.06, while only 2 of the 44 big
-            # winners would have been lost (-$0.63). Zero lookahead: the
-            # close of the fill bar is known when the fill decision is taken
-            # (the sniper fill itself reads only o and the level).
-            if NO_FALL_CLOSE and not is_cisd and c < s.entry - 1e-12:
-                self.setup = None; self.state = "WAIT_ANCHOR"
-                self.cnt("v35_fall_close_veto"); return
             eff_mid, _ = self._eff_mid()          # v31 ARM 3
             if eff_mid is not None and fill_px > eff_mid:
                 self.setup = None; self.state = "WAIT_ANCHOR"
                 self.cnt("fill_cancel_premium"); return
             risk = fill_px - s.stop
+            # ============ v35 SURGICAL GUARDS -- THE LIVE FILL PATH ======== #
+            # This is the branch that actually fills (proved with a stack
+            # trace: every _enter of a full window arrives from HERE, and the
+            # v29 arm path below is never reached at ENTRY_ARM="seam").
+            #
+            # BLEED 2 -- NO FREEFALL CLOSE. The bar that filled the order
+            # also CLOSED BELOW THE FILL PRICE: it never came back up, so the
+            # "defence of the GreenBox" did not happen on the bar that took
+            # the order. NOTE the honest form of this test: `seam_px`
+            # (= min(green.y_top, yellow.y_bottom)) is the HIGH/LOW of the
+            # touching bar, not a close price, so "close < seam" is not a
+            # meaningful candle test - it was an artefact of the 2-dp rounded
+            # export column (the same trap the owner flagged for fill vs seam).
+            # Comparing the close to the FILL is exact and verifiable.
+            if FLASH_SELLER_VETO and not is_cisd:
+                l5 = self.pool.get("v35_last5", {}).get(self.symbol)
+                if l5 is not None and l5[0] < time and l5[1] < fill_px - 1e-12:
+                    self.setup = None
+                    self.state = "WAIT_ANCHOR"
+                    self.cnt("v35_flash_seller_veto")
+                    return
+            if NO_FALL_CLOSE and not is_cisd and c < fill_px - 1e-12:
+                self.setup = None
+                self.state = "WAIT_ANCHOR"
+                self.cnt("v35_fall_close_veto")
+                return
+            # BLEED 1 -- REFUSE THE DUST BOX. A stop narrower than
+            # MIN_STOP_PCT of price sits inside one 5m bar's noise. Section A
+            # measured <0.25% as the ONLY losing bucket in BOTH windows
+            # (-$11.58 W1 / -$9.80 W2) while every wide bucket made money, so
+            # v35 refuses the dust and never caps the wide box.
+            if MIN_STOP_PCT > 0 and 100.0 * risk / fill_px < MIN_STOP_PCT:
+                self.setup = None
+                self.state = "WAIT_ANCHOR"
+                self.cnt("v35_dust_box_veto")
+                return
             if risk <= max(COST * fill_px, RISK_FLOOR_PCT / 100.0 * fill_px):
                 self.cnt("reject_risk_below_one_fee"); return
             ladder, ok = self._red_ladder(fill_px, risk)
@@ -2683,12 +2713,6 @@ class ICTBoxEngine:
                 self.cnt("await_order_retrace"); return
             fill_px = lvl if o >= lvl else o   # gap-through fills at open
             risk = fill_px - s.order_stop
-        # ---- v35 BLEED 1: refuse the dust box ----------------------- #
-        # A stop narrower than MIN_STOP_PCT of price is inside the noise of a
-        # single 5m bar. Measured: the <0.25% bucket is the ONLY losing
-        # bucket in both windows (-$11.58 W1 / -$9.80 W2).
-        if MIN_STOP_PCT > 0 and 100.0 * risk / fill_px < MIN_STOP_PCT:
-            self.cnt("v35_dust_box_veto"); return
         if risk <= MIN_RISK_PCT * fill_px:
             self.cnt("reject_risk_below_one_fee"); return
         # ---- the live gates, identical in spirit to v27's fill -------
@@ -3904,6 +3928,17 @@ def run_backtest(data_dir: Path, start: str, end: str,
         for s in symbols]))
     for t in stamps:
         stamp_no += 1
+        if FLASH_SELLER_VETO:
+            # the last COMPLETED 5m bar per coin at this stamp (causal)
+            _l5 = pool.setdefault("v35_last5", {})
+            for sym in symbols:
+                b5 = series[sym][0]
+                # STRICTLY completed: on a 5m stamp the bar ending exactly at
+                # `t` is the one being formed by this very call, so its close
+                # is NOT history yet. This is the zero-lookahead line.
+                j = b5.index.searchsorted(t, side="left") - 1
+                if j >= 0:
+                    _l5[sym] = (b5.index[j], float(b5["Close"].iloc[j]))
         if smt is not None:
             smt.observe(t, stamp_no, narratives, last1h_no, symbols)
             pool["smt"] = smt.flags
