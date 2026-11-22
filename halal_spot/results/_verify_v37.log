@@ -1,0 +1,5 @@
+=== W2 23:52:49 ===
+    [guard] BASE == engine defaults for all 26 v33+v34 knobs
+
+##### LIVE ENGINE combo=S1_COIN_GUARD_BOS W2 2024-05-01..2024-10-31 #####
+    cfg: ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)
