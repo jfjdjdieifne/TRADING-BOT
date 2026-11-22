@@ -1,0 +1,8 @@
+    [guard] BASE == engine defaults for all 26 v33+v34 knobs
+
+##### LIVE ENGINE combo=BASE_S1_TEL_3R W1 2023-10-01..2024-03-31 #####
+    cfg: ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)  MAX_OPEN_POSITIONS=1  FULL_100_DEPLOY=True
+    n=227 totR=48.9224 end=$139.2627 DD=-14.393% (1343s)
+    coins: {"ADAUSDT_5m": [35, 44.375, 21.488], "AVAXUSDT_5m": [38, 7.531, 1.327], "BNBUSDT_5m": [25, 25.584, 26.038], "BTCUSDT_5m": [12, -7.471, -3.853], "ETHUSDT_5m": [24, -18.18, -10.03], "LINKUSDT_5m": [32, 8.915, 0.203], "SOLUSDT_5m": [35, 7.929, 18.664], "XRPUSDT_5m": [26, -19.76, -14.574]}
+    counters: {"slot_full_rejects": 181, "portfolio_slots_full": 181, "v31_struct_trail": 6, "trail_4h_structural": 33, "v34_deploy_full_ok": 289}
+unknown combo 'W1' (would silently run BASE)

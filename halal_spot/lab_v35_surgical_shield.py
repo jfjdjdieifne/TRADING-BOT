@@ -86,7 +86,7 @@ BASE = dict(
     # ---- v35 knobs at their engine defaults -------------------------- #
     MIN_STOP_PCT=0.0, NO_FALL_CLOSE=False, PER_COIN_COOLDOWN=0,
     COOLDOWN_DAYS=7.0, COOLDOWN_NEEDS_BOS=False,
-    COOLDOWN_NEEDS_BOS_TIME=False,
+    COOLDOWN_NEEDS_BOS_TIME=False, FLASH_SELLER_VETO=False,
     V33_ALPHA_LEADER=False, LEADER_K=2, LEADER_NEEDS_HTF=False,
     LEADER_MIN_DISP=0.0, LEADER_SMT_REQUIRED=False,
     LEADER_15M_ONLY_TOP1=False, BASKET_REGIME=False, REGIME_EXPAND_MIN=3,
@@ -109,7 +109,8 @@ _DEFAULTS_CHECKED = []
 
 # The v35 knobs, every one at its engine default (guard in drive()).
 V35_KNOBS = ("MIN_STOP_PCT", "NO_FALL_CLOSE", "PER_COIN_COOLDOWN",
-             "COOLDOWN_DAYS", "COOLDOWN_NEEDS_BOS", "COOLDOWN_NEEDS_BOS_TIME")
+             "COOLDOWN_DAYS", "COOLDOWN_NEEDS_BOS", "COOLDOWN_NEEDS_BOS_TIME",
+             "FLASH_SELLER_VETO")
 
 S1 = dict(ALLOC_MODE="slot", SLOTS=1, SLOT_FILL="fixed",
           MAX_OPEN_POSITIONS=1, FULL_100_DEPLOY=True)   # one seat, all cash
@@ -139,6 +140,10 @@ COMBOS = {
     #     that equality is the proof that the audit's +$19 was a 2-dp
     #     rounding artefact of the exported seam column.
     "S1_TOUCH_GUARD":        dict(**S1, **SMTKZ, NO_FALL_CLOSE=True),
+    # 4b - BLEED 2 done honestly: the last COMPLETED 5m bar at the fill may
+    #      not have closed under the fill price (a causal 5m read, unlike
+    #      NO_FALL_CLOSE whose `c` is the exec frame's close).
+    "S1_FLASH_SELLER":       dict(**S1, **SMTKZ, FLASH_SELLER_VETO=True),
     # 5 - the shields that survived measurement, stacked
     "S1_SURGICAL_COMBO":     dict(**S1, **SMTKZ, MIN_STOP_PCT=0.25,
                                   PER_COIN_COOLDOWN=2, COOLDOWN_DAYS=14.0,
@@ -146,9 +151,9 @@ COMBOS = {
 }
 ORDER = ["BASE_S1_TEL_3R", "S1_COIN_GUARD", "S1_COIN_GUARD_K3_14d",
          "S1_COIN_GUARD_BOS", "S1_WIDE_CAP", "S1_TOUCH_GUARD",
-         "S1_SURGICAL_COMBO"]
+         "S1_FLASH_SELLER", "S1_SURGICAL_COMBO"]
 
-WATCH = ("v35_dust_box_veto", "v35_fall_close_veto", "v35_cooldown_armed",
+WATCH = ("v35_dust_box_veto", "v35_flash_seller_veto", "v35_fall_close_veto", "v35_cooldown_armed",
          "v35_cooldown_skip", "v35_cooldown_expired",
          "v35_cooldown_lifted_by_bos", "slot_full_rejects",
          "portfolio_slots_full", "v31_struct_trail", "trail_4h_structural",
@@ -414,9 +419,9 @@ def report() -> int:
                 f"{r['combo'][:14]}={int(r['j1'].get('counters',{}).get(k,0))}/"
                 f"{int(r['j2'].get('counters',{}).get(k,0))}" for r in rows))
         # the monthly + weekly ledgers of the best arm
-        for combo in ORDER:
-            f = RESULTS / f"statement_v35_{combo}_W1.json"
-            if not f.exists():
+        for combo in ("BASE_S1_TEL_3R", "S1_COIN_GUARD_BOS",
+                      "S1_FLASH_SELLER", "S1_WIDE_CAP"):
+            if not (RESULTS / f"statement_v35_{combo}_W1.json").exists():
                 continue
             sub_ledger(combo, "W1"); sub_ledger(combo, "W2")
     return 0

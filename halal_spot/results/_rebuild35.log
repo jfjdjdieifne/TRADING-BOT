@@ -1,0 +1,27 @@
+[0] tarball
+-rw-r--r-- 1 user user 133151915 Nov 22 12:18 /home/user/vf.tgz
+[1] extract official BTC/ETH 5m ZIPs
+2
+[2] fetcher
+done in 11.7s: 30 files, 263808 rows
+no gaps — every coin-month present.
+[3] official conversions become the validation references
+[4] sparse-clone the eight 1m repositories
+   BTCUSDT: 15 csv
+   ETHUSDT: 15 csv
+   SOLUSDT: 15 csv
+   BNBUSDT: 15 csv
+   XRPUSDT: 15 csv
+   AVAXUSDT: 15 csv
+   LINKUSDT: 15 csv
+   ADAUSDT: 15 csv
+[5] rebuild 1m -> 5m validated against the official refs
+  Open   max|diff| = 0.0000000000   exact bars = 263808/263808
+  High   max|diff| = 0.0000000000   exact bars = 263808/263808
+  Low    max|diff| = 0.0000000000   exact bars = 263808/263808
+  Close  max|diff| = 0.0000000000   exact bars = 263808/263808
+  Volume max|diff| = 0.0000000000 (float summation order)
+  OHLC bit-exact in every month
+[6] inventory
+120
+DONE_REBUILD

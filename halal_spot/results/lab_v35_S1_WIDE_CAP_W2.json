@@ -1,0 +1,119 @@
+{
+ "combo": "S1_WIDE_CAP",
+ "window": "W2",
+ "start": "2024-05-01",
+ "end": "2024-10-31",
+ "seconds": 907.4,
+ "symbols": [
+  "ADAUSDT_5m",
+  "AVAXUSDT_5m",
+  "BNBUSDT_5m",
+  "BTCUSDT_5m",
+  "ETHUSDT_5m",
+  "LINKUSDT_5m",
+  "SOLUSDT_5m",
+  "XRPUSDT_5m"
+ ],
+ "capital": 100.0,
+ "n": 157,
+ "totR": 132.1222,
+ "wins": 28,
+ "swin": 9,
+ "be": 56,
+ "losses": 73,
+ "wr": 17.83,
+ "wr_strict": 12.1,
+ "net": 52.782,
+ "end_equity": 152.782,
+ "pool_cash_end": 152.782,
+ "maxR": 68.242,
+ "fees": 20.8978,
+ "by_coin": {
+  "ADAUSDT_5m": [
+   26,
+   -17.22,
+   -16.299
+  ],
+  "AVAXUSDT_5m": [
+   26,
+   5.635,
+   1.25
+  ],
+  "BNBUSDT_5m": [
+   13,
+   24.725,
+   11.218
+  ],
+  "BTCUSDT_5m": [
+   11,
+   8.398,
+   5.105
+  ],
+  "ETHUSDT_5m": [
+   14,
+   6.559,
+   6.67
+  ],
+  "LINKUSDT_5m": [
+   32,
+   26.552,
+   22.528
+  ],
+  "SOLUSDT_5m": [
+   25,
+   8.773,
+   3.83
+  ],
+  "XRPUSDT_5m": [
+   10,
+   68.7,
+   18.479
+  ]
+ },
+ "exits": {
+  "STOP_BLUE": 79,
+  "BREAKEVEN": 56,
+  "EMERGENCY_STOP": 10,
+  "STRUCT_PROFIT": 9,
+  "TARGET_REJECTION": 3
+ },
+ "pf": 1.687,
+ "maxDD_pct": -16.022,
+ "eq_end": 152.782,
+ "eq_min": 100.0,
+ "counters": {
+  "v35_dust_box_veto": 118,
+  "v35_fall_close_veto": 0,
+  "v35_cooldown_armed": 0,
+  "v35_cooldown_skip": 0,
+  "v35_cooldown_expired": 0,
+  "v35_cooldown_lifted_by_bos": 0,
+  "slot_full_rejects": 122,
+  "portfolio_slots_full": 122,
+  "v31_struct_trail": 12,
+  "trail_4h_structural": 44,
+  "fill_below_exchange_min": 0,
+  "v34_deploy_full_ok": 187,
+  "v33_stamp_expand": 0,
+  "v33_stamp_range": 0
+ },
+ "v33_stamps_expand": 0,
+ "v33_stamps_range": 0,
+ "v33_leader_stamps": {},
+ "price_move_pct": {
+  "median_all": 0.2,
+  "median_winners": 1.818,
+  "max": 18.887,
+  "wins_over_5pct": 7,
+  "wins_over_15pct": 2
+ },
+ "stop_width_pct": {
+  "median": 0.4748,
+  "min": 0.2507,
+  "max": 2.5166
+ },
+ "bars_held_median": 9.0,
+ "fee_share_of_gross_wins_pct": 16.13,
+ "smt_bull_stamps": 133116,
+ "smt_stamps": 69985
+}
