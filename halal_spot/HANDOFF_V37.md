@@ -12,9 +12,23 @@ branch's base commit `9aeb82d`. The session memory described v36 as local, but
 Recovery was `git reset --hard origin/arena/d2e74635-trading-bot`.
 
 **The price archives were NOT recoverable.** `halal_spot/data/binance_5m/` and
-`binance_5m_oos/` are in `.gitignore` by owner order ("code only is pushed"), so
-they lived only in the old sandbox's filesystem. `/home/user/k1m` was gone too.
-They were **rebuilt from scratch** in v37 (see §2) and now reproduce v36 exactly.
+`binance_5m_oos/` were in `.gitignore` by an old owner order ("code only is
+pushed"), so they lived only in the old sandbox's filesystem. `/home/user/k1m`
+was gone too. They were **rebuilt from scratch** in v37 (see §2).
+
+**THAT ORDER IS NOW REVERSED (2026-11-23).** The owner's instruction is that
+everything must live in GitHub so nothing is ever lost again to an ephemeral
+sandbox — and, critically, so that `git clone` + run works with no fetch step.
+The archives are now **committed**: 8 coins x 47 months, 376 files, 51 MB,
+largest file 190 KB. `.gitignore` carries a comment explaining why.
+
+Two separate histories were also merged in (`main` had 184 Huddleston research
+files but ZERO `halal_spot` files; the v37 branch had the opposite). Neither
+branch alone could be cloned and run. See `RUN_FROM_GITHUB.md` at the repo root.
+
+**Verified after all of it:** a plain `git clone` of `main`, empty state, no
+fetch step → `python lab_v37_anti_fragile.py run B0 --window W1` →
+`n=181 end=$158.024 PF=1.706 DD=-14.064% mo+=5/6`.
 
 ## 2. The data rebuild — and the bar-label bug that broke it the first time
 
