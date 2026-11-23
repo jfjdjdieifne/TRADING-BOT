@@ -1,0 +1,17 @@
+=== S1_FLASH_SELLER W1 19:32:19 ===
+    [guard] BASE == engine defaults for all 26 v33+v34 knobs
+
+##### LIVE ENGINE combo=S1_FLASH_SELLER W1 2023-10-01..2024-03-31 #####
+    cfg: ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)  MAX_OPEN_POSITIONS=1  FULL_100_DEPLOY=True  FLASH_SELLER_VETO=True
+    n=228 totR=47.3352 end=$147.401 DD=-12.239% (599s)
+    coins: {"ADAUSDT_5m": [34, 47.73, 26.282], "AVAXUSDT_5m": [39, 3.571, 0.428], "BNBUSDT_5m": [26, 23.077, 25.1], "BTCUSDT_5m": [13, -7.972, -3.512], "ETHUSDT_5m": [25, -19.771, -11.164], "LINKUSDT_5m": [30, 7.823, 1.943], "SOLUSDT_5m": [37, 8.194, 18.32], "XRPUSDT_5m": [24, -15.316, -9.996]}
+    counters: {"v35_flash_seller_veto": 25, "slot_full_rejects": 182, "portfolio_slots_full": 182, "v31_struct_trail": 6, "trail_4h_structural": 33, "v34_deploy_full_ok": 286}
+=== S1_FLASH_SELLER W2 19:42:19 ===
+    [guard] BASE == engine defaults for all 26 v33+v34 knobs
+
+##### LIVE ENGINE combo=S1_FLASH_SELLER W2 2024-05-01..2024-10-31 #####
+    cfg: ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)  MAX_OPEN_POSITIONS=1  FULL_100_DEPLOY=True  FLASH_SELLER_VETO=True
+    n=171 totR=89.4493 end=$162.2106 DD=-11.742% (394s)
+    coins: {"ADAUSDT_5m": [27, -25.893, -13.003], "AVAXUSDT_5m": [24, 2.807, 7.718], "BNBUSDT_5m": [15, 9.957, 4.731], "BTCUSDT_5m": [14, -1.207, 2.324], "ETHUSDT_5m": [20, 14.662, 12.255], "LINKUSDT_5m": [34, 21.629, 23.487], "SOLUSDT_5m": [25, 5.715, 6.556], "XRPUSDT_5m": [12, 61.778, 18.143]}
+    counters: {"v35_flash_seller_veto": 23, "slot_full_rejects": 129, "portfolio_slots_full": 129, "v31_struct_trail": 15, "trail_4h_structural": 41, "v34_deploy_full_ok": 218}
+ALL_DONE

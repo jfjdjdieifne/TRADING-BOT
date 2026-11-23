@@ -1,0 +1,64 @@
+
+########## LIVE ENGINE RUN · arm=seam · 2021-01-01..2026-10-31 ##########
+[seam] n= 297   70W/ 66BE/161L  WR= 30.30%  minWin=3.0  >=4R= 18  maxR= 19.38  totR=   43.55
+       net= +31.90% ($263.79)  PF=1.26  maxDD=-14.41%  streak=3/7  yearly={'2021': 82, '2022': 68, '2023': 16, '2024': 47, '2025': 47, '2026': 37}
+       asserts A1..A5 = FPPPP  -> 4/5
+       ASSERT1 FAILED
+       ASSERT2 PASSED
+       ASSERT3 PASSED
+       ASSERT4 PASSED
+       ASSERT5 PASSED
+
+########## LIVE ENGINE RUN · arm=A · 2021-01-01..2026-10-31 ##########
+[   A] n= 294   47W/ 54BE/193L  WR= 19.58%  minWin=3.0  >=4R=  6  maxR=  8.53  totR= -189.85
+       net= -39.16% ($121.68)  PF=0.66  maxDD=-46.16%  streak=3/4  yearly={'2021': 112, '2022': 65, '2023': 37, '2024': 54, '2025': 16, '2026': 10}
+       asserts A1..A5 = FPPPP  -> 4/5
+       ASSERT1 FAILED
+       ASSERT2 PASSED
+       ASSERT3 PASSED
+       ASSERT4 PASSED
+       ASSERT5 PASSED
+
+########## LIVE ENGINE RUN · arm=B · 2021-01-01..2026-10-31 ##########
+[   B] n=  48    8W/  9BE/ 31L  WR= 20.51%  minWin=3.0  >=4R=  2  maxR=  4.62  totR=  -43.62
+       net= -10.09% ($179.82)  PF=0.54  maxDD=-14.68%  streak=3/9  yearly={'2021': 27, '2022': 5, '2023': 2, '2024': 12, '2025': 2, '2026': 0}
+       asserts A1..A5 = FPFPF  -> 2/5
+       ASSERT1 FAILED
+       ASSERT2 PASSED
+       ASSERT3 FAILED
+       ASSERT4 PASSED
+       ASSERT5 FAILED
+
+########## LIVE ENGINE RUN · arm=C · 2021-01-01..2026-10-31 ##########
+[   C] n=   5    0W/  1BE/  4L  WR=  0.00%  minWin=None  >=4R=  0  maxR= -0.00  totR=   -5.09
+       net=  -8.61% ($182.78)  PF=0.0  maxDD=-10.22%  streak=3/4  yearly={'2021': 5, '2022': 0, '2023': 0, '2024': 0, '2025': 0, '2026': 0}
+       asserts A1..A5 = FPFPF  -> 2/5
+       ASSERT1 FAILED
+       ASSERT2 PASSED
+       ASSERT3 FAILED
+       ASSERT4 PASSED
+       ASSERT5 FAILED
+
+########## LIVE ENGINE RUN · arm=D · 2021-01-01..2026-10-31 ##########
+[   D] n= 386   65W/ 77BE/244L  WR= 21.04%  minWin=3.0  >=4R= 11  maxR= 15.49  totR= -168.06
+       net= -34.02% ($131.97)  PF=0.74  maxDD=-37.92%  streak=3/0  yearly={'2021': 110, '2022': 65, '2023': 41, '2024': 75, '2025': 70, '2026': 25}
+       asserts A1..A5 = FPPPP  -> 4/5
+       ASSERT1 FAILED
+       ASSERT2 PASSED
+       ASSERT3 PASSED
+       ASSERT4 PASSED
+       ASSERT5 PASSED
+
+================= v29 LIVE COMPARISON TABLE =================
+  arm    n    W   BE    L     WR%  minW  >=4R    maxR     net%     PF  maxDD%  strk  ymin  5as
+Traceback (most recent call last):
+  File "/home/user/TRADING-BOT/halal_spot/lab_v29_stop_entry.py", line 338, in <module>
+    k += 1
+  File "/home/user/TRADING-BOT/halal_spot/lab_v29_stop_entry.py", line 312, in main
+    fr = j
+^^^^^^
+  File "/home/user/TRADING-BOT/halal_spot/lab_v29_stop_entry.py", line 265, in table
+    reported separately, never silently booked."""
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: unsupported format string passed to NoneType.__format__
+V29_RUNS_DONE exit=1

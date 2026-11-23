@@ -1,0 +1,114 @@
+{
+ "arm": "CD_1H",
+ "window": "OLD7",
+ "start": "2023-01-01",
+ "end": "2023-07-31",
+ "seconds": 326.1,
+ "n": 229,
+ "capital": 100.0,
+ "totR": -32.8871,
+ "net": 1.2562,
+ "end_equity": 101.2562,
+ "pf": 1.02,
+ "wr": 10.48,
+ "wins": 24,
+ "be": 85,
+ "losses": 120,
+ "fees": 22.053,
+ "by_coin": {
+  "ADAUSDT_5m": [
+   34,
+   -2.04
+  ],
+  "AVAXUSDT_5m": [
+   38,
+   5.075
+  ],
+  "BNBUSDT_5m": [
+   26,
+   -1.636
+  ],
+  "BTCUSDT_5m": [
+   16,
+   -4.174
+  ],
+  "ETHUSDT_5m": [
+   30,
+   3.513
+  ],
+  "LINKUSDT_5m": [
+   24,
+   9.983
+  ],
+  "SOLUSDT_5m": [
+   26,
+   -2.964
+  ],
+  "XRPUSDT_5m": [
+   35,
+   -6.5
+  ]
+ },
+ "exits": {
+  "STOP_BLUE": 113,
+  "BREAKEVEN": 85,
+  "EMERGENCY_STOP": 18,
+  "STRUCT_PROFIT": 7,
+  "TARGET_REJECTION": 5,
+  "SHIELD_BE": 1
+ },
+ "monthly": {
+  "2023-01": {
+   "net$": -5.48,
+   "end$": 94.52,
+   "n": 26,
+   "PF": 0.28
+  },
+  "2023-02": {
+   "net$": -8.26,
+   "end$": 86.27,
+   "n": 46,
+   "PF": 0.23
+  },
+  "2023-03": {
+   "net$": 13.36,
+   "end$": 99.63,
+   "n": 37,
+   "PF": 2.51
+  },
+  "2023-04": {
+   "net$": 3.93,
+   "end$": 103.55,
+   "n": 31,
+   "PF": 1.51
+  },
+  "2023-05": {
+   "net$": -7.1,
+   "end$": 96.45,
+   "n": 35,
+   "PF": 0.43
+  },
+  "2023-06": {
+   "net$": -5.24,
+   "end$": 91.21,
+   "n": 27,
+   "PF": 0.36
+  },
+  "2023-07": {
+   "net$": 10.05,
+   "end$": 101.26,
+   "n": 27,
+   "PF": 2.43
+  }
+ },
+ "months_pos": 3,
+ "months_n": 7,
+ "maxDD_pct": -22.868,
+ "eq_end": 101.2562,
+ "counters": {
+  "v35_cooldown_lifted_by_bos": 92,
+  "v35_cooldown_armed": 100,
+  "v35_cooldown_skip": 59,
+  "v35_cooldown_expired": 7
+ }
+}

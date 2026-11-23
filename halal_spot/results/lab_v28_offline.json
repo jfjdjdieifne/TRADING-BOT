@@ -1,0 +1,10 @@
+{
+  "trades_csv": "trades_v27.csv",
+  "n_trades": 297,
+  "locked_while_alive": 75,
+  "lost_winners": 5,
+  "wr_ceiling_pct": 31.78,
+  "best_causal_gate": "nar_raid_high_4h=0",
+  "best_causal_gate_wr": 31.89,
+  "best_causal_gate_n": 233
+}

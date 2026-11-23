@@ -1,0 +1,195 @@
+{
+  "config": {
+    "window": "2025-07-01 .. 2026-07-01",
+    "capital_usdt": 100.0,
+    "symbol": "BTCUSDT",
+    "instrument": "Binance USDT-M futures (set_leverage 10, shorts allowed)",
+    "not_tested_pairs": [
+      "ETHUSDT",
+      "SOLUSDT",
+      "BNBUSDT",
+      "XRPUSDT",
+      "DOGEUSDT",
+      "ADAUSDT",
+      "AVAXUSDT",
+      "LINKUSDT",
+      "SUIUSDT"
+    ],
+    "not_tested_reason": "no candle data for these pairs in the project (BTC only)",
+    "fee_rate": 0.001,
+    "qc_fee_constant": 0.002,
+    "rbudget": 0.1,
+    "max_pos": 5,
+    "warmup_days": 35,
+    "cut_for_lookahead_test": "2026-03-31 14:30"
+  },
+  "continuous_12m": {
+    "trades": 48,
+    "wins": 6,
+    "losses": 42,
+    "win_rate_pct": 12.5,
+    "gross_profit": 21.55,
+    "gross_loss": -54.69,
+    "profit_factor": 0.39,
+    "net_pnl": -33.13,
+    "net_pct": -33.13,
+    "start_equity": 100.0,
+    "end_equity": 66.87,
+    "max_drawdown_pct": -41.36,
+    "max_drawdown_usd": 47.16,
+    "avg_r": -0.6,
+    "best_r": 4.04,
+    "worst_r": -1.45,
+    "avg_hold_hours": 31.8,
+    "exposure_pct": 17.4,
+    "exit_tags": {
+      "SL_ARM2_1H": 31,
+      "SL_ARM3_IGN": 10,
+      "SL_ARM4_SWP": 7
+    },
+    "setups": {
+      "ARM2_1H": 31,
+      "ARM3_IGN": 10,
+      "ARM4_SWP": 7
+    }
+  },
+  "continuous_h2_2025": {
+    "trades": 27,
+    "wins": 3,
+    "losses": 24,
+    "win_rate_pct": 11.1,
+    "gross_profit": 14.99,
+    "gross_loss": -38.84,
+    "profit_factor": 0.39,
+    "net_pnl": -23.85,
+    "net_pct": -23.85,
+    "start_equity": 100.0,
+    "end_equity": 76.15,
+    "max_drawdown_pct": -33.22,
+    "max_drawdown_usd": 37.88,
+    "avg_r": -0.67,
+    "best_r": 4.04,
+    "worst_r": -1.45,
+    "avg_hold_hours": 40.2,
+    "exposure_pct": 24.6,
+    "exit_tags": {
+      "SL_ARM2_1H": 16,
+      "SL_ARM3_IGN": 7,
+      "SL_ARM4_SWP": 4
+    },
+    "setups": {
+      "ARM2_1H": 16,
+      "ARM3_IGN": 7,
+      "ARM4_SWP": 4
+    }
+  },
+  "continuous_h1_2026": {
+    "trades": 21,
+    "wins": 3,
+    "losses": 18,
+    "win_rate_pct": 14.3,
+    "gross_profit": 6.57,
+    "gross_loss": -15.85,
+    "profit_factor": 0.41,
+    "net_pnl": -9.28,
+    "net_pct": -9.28,
+    "start_equity": 100.0,
+    "end_equity": 66.87,
+    "max_drawdown_pct": -14.09,
+    "max_drawdown_usd": 10.96,
+    "avg_r": -0.52,
+    "best_r": 4.03,
+    "worst_r": -1.38,
+    "avg_hold_hours": 21.1,
+    "exposure_pct": 10.2,
+    "exit_tags": {
+      "SL_ARM2_1H": 15,
+      "SL_ARM3_IGN": 3,
+      "SL_ARM4_SWP": 3
+    },
+    "setups": {
+      "ARM2_1H": 15,
+      "ARM3_IGN": 3,
+      "ARM4_SWP": 3
+    }
+  },
+  "standalone_h2_2025": {
+    "trades": 27,
+    "wins": 3,
+    "losses": 24,
+    "win_rate_pct": 11.1,
+    "gross_profit": 14.99,
+    "gross_loss": -38.84,
+    "profit_factor": 0.39,
+    "net_pnl": -23.85,
+    "net_pct": -23.85,
+    "start_equity": 100.0,
+    "end_equity": 76.15,
+    "max_drawdown_pct": -33.22,
+    "max_drawdown_usd": 37.88,
+    "avg_r": -0.67,
+    "best_r": 4.04,
+    "worst_r": -1.45,
+    "avg_hold_hours": 40.2,
+    "exposure_pct": 24.6,
+    "exit_tags": {
+      "SL_ARM2_1H": 16,
+      "SL_ARM3_IGN": 7,
+      "SL_ARM4_SWP": 4
+    },
+    "setups": {
+      "ARM2_1H": 16,
+      "ARM3_IGN": 7,
+      "ARM4_SWP": 4
+    }
+  },
+  "standalone_h1_2026": {
+    "trades": 22,
+    "wins": 7,
+    "losses": 15,
+    "win_rate_pct": 31.8,
+    "gross_profit": 77.0,
+    "gross_loss": -40.76,
+    "profit_factor": 1.89,
+    "net_pnl": 36.24,
+    "net_pct": 36.24,
+    "start_equity": 100.0,
+    "end_equity": 136.3,
+    "max_drawdown_pct": -19.48,
+    "max_drawdown_usd": 32.42,
+    "avg_r": 0.11,
+    "best_r": 3.28,
+    "worst_r": -1.38,
+    "avg_hold_hours": 151.4,
+    "exposure_pct": 76.7,
+    "exit_tags": {
+      "SL_ARM2_1H": 15,
+      "SL_ARM1_4H": 3,
+      "SL_ARM3_IGN": 2,
+      "SL_ARM4_SWP": 1,
+      "EOD": 1
+    },
+    "setups": {
+      "ARM2_1H": 16,
+      "ARM1_4H": 3,
+      "ARM3_IGN": 2,
+      "ARM4_SWP": 1
+    }
+  },
+  "signal_funnel": {
+    "WALL_UNDER_3R_NET": 1035,
+    "SWP_NO_CONFIRM": 83,
+    "entries_placed": 48,
+    "COOLDOWN": 23,
+    "SAME_WAVE": 187,
+    "LOT_SIZE": 317,
+    "STOP_TOO_WIDE": 82,
+    "STOP_INSIDE_NOISE": 17,
+    "COUNTER_REGIME": 9,
+    "BAD_STOP": 1
+  },
+  "final_margin_reserved": 0.0,
+  "final_usdt": 66.86649365999999,
+  "fees_total": 9.8619,
+  "zero_lookahead_tests": "9/9 passed (tests/test_zero_lookahead.py)"
+}

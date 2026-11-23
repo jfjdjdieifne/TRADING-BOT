@@ -1,0 +1,181 @@
+{
+  "config": {
+    "window": "2025-07-01 .. 2026-07-01",
+    "capital_usdt": 100.0,
+    "symbol": "BTCUSDT",
+    "not_tested_pairs": [
+      "ETHUSDT",
+      "SOLUSDT",
+      "BNBUSDT",
+      "AVAXUSDT"
+    ],
+    "not_tested_reason": "no candle data for these pairs in the project (BTC only)",
+    "fee_rate": 0.001,
+    "warmup_days": 14,
+    "cut_for_lookahead_test": "2026-03-31 14:30"
+  },
+  "continuous_12m": {
+    "trades": 47,
+    "wins": 19,
+    "losses": 28,
+    "win_rate_pct": 40.4,
+    "gross_profit": 21.25,
+    "gross_loss": -19.48,
+    "profit_factor": 1.09,
+    "net_pnl": 1.77,
+    "net_pct": 1.77,
+    "start_equity": 100.0,
+    "end_equity": 101.8,
+    "max_drawdown_pct": -5.38,
+    "max_drawdown_usd": 5.73,
+    "avg_r": -0.12,
+    "best_r": 4.13,
+    "worst_r": -1.86,
+    "avg_hold_hours": 10.5,
+    "exposure_pct": 5.6,
+    "exit_tags": {
+      "SL": 27,
+      "BE_SHIELD": 15,
+      "TRAIL_WIN": 5
+    },
+    "setups": {
+      "IMMEDIATE": 32,
+      "STALK": 15
+    }
+  },
+  "continuous_h2_2025": {
+    "trades": 20,
+    "wins": 9,
+    "losses": 11,
+    "win_rate_pct": 45.0,
+    "gross_profit": 12.01,
+    "gross_loss": -7.65,
+    "profit_factor": 1.57,
+    "net_pnl": 4.36,
+    "net_pct": 4.36,
+    "start_equity": 100.0,
+    "end_equity": 104.39,
+    "max_drawdown_pct": -4.31,
+    "max_drawdown_usd": 4.41,
+    "avg_r": 0.05,
+    "best_r": 4.13,
+    "worst_r": -1.86,
+    "avg_hold_hours": 15.0,
+    "exposure_pct": 6.8,
+    "exit_tags": {
+      "SL": 11,
+      "BE_SHIELD": 6,
+      "TRAIL_WIN": 3
+    },
+    "setups": {
+      "IMMEDIATE": 13,
+      "STALK": 7
+    }
+  },
+  "continuous_h1_2026": {
+    "trades": 27,
+    "wins": 10,
+    "losses": 17,
+    "win_rate_pct": 37.0,
+    "gross_profit": 9.24,
+    "gross_loss": -11.83,
+    "profit_factor": 0.78,
+    "net_pnl": -2.59,
+    "net_pct": -2.59,
+    "start_equity": 100.0,
+    "end_equity": 101.8,
+    "max_drawdown_pct": -5.38,
+    "max_drawdown_usd": 5.73,
+    "avg_r": -0.25,
+    "best_r": 3.84,
+    "worst_r": -1.83,
+    "avg_hold_hours": 7.2,
+    "exposure_pct": 4.5,
+    "exit_tags": {
+      "SL": 16,
+      "BE_SHIELD": 9,
+      "TRAIL_WIN": 2
+    },
+    "setups": {
+      "IMMEDIATE": 19,
+      "STALK": 8
+    }
+  },
+  "standalone_h2_2025": {
+    "trades": 20,
+    "wins": 9,
+    "losses": 11,
+    "win_rate_pct": 45.0,
+    "gross_profit": 12.01,
+    "gross_loss": -7.65,
+    "profit_factor": 1.57,
+    "net_pnl": 4.36,
+    "net_pct": 4.36,
+    "start_equity": 100.0,
+    "end_equity": 104.39,
+    "max_drawdown_pct": -4.31,
+    "max_drawdown_usd": 4.41,
+    "avg_r": 0.05,
+    "best_r": 4.13,
+    "worst_r": -1.86,
+    "avg_hold_hours": 15.0,
+    "exposure_pct": 6.8,
+    "exit_tags": {
+      "SL": 11,
+      "BE_SHIELD": 6,
+      "TRAIL_WIN": 3
+    },
+    "setups": {
+      "IMMEDIATE": 13,
+      "STALK": 7
+    }
+  },
+  "standalone_h1_2026": {
+    "trades": 27,
+    "wins": 10,
+    "losses": 17,
+    "win_rate_pct": 37.0,
+    "gross_profit": 8.87,
+    "gross_loss": -11.35,
+    "profit_factor": 0.78,
+    "net_pnl": -2.48,
+    "net_pct": -2.48,
+    "start_equity": 100.0,
+    "end_equity": 97.5,
+    "max_drawdown_pct": -5.39,
+    "max_drawdown_usd": 5.5,
+    "avg_r": -0.24,
+    "best_r": 3.85,
+    "worst_r": -1.84,
+    "avg_hold_hours": 7.2,
+    "exposure_pct": 4.5,
+    "exit_tags": {
+      "SL": 16,
+      "BE_SHIELD": 9,
+      "TRAIL_WIN": 2
+    },
+    "setups": {
+      "IMMEDIATE": 19,
+      "STALK": 8
+    }
+  },
+  "signal_funnel": {
+    "sweep_15m_eye": 109,
+    "bos_confirmed": 315,
+    "fail_pmax": 152,
+    "sweep_1h": 85,
+    "thesis_stale": 234,
+    "sweep_15m_pool": 366,
+    "stalk_started": 131,
+    "stalk_expired": 45,
+    "train_left": 37,
+    "immediate_entry": 32,
+    "entries_placed": 47,
+    "climax_abort": 10,
+    "pullback_entry": 15,
+    "sweep_1h_stalk_upgrade": 2
+  },
+  "wallet_btc_dust": 0.0,
+  "final_usdt": 101.80159639649995,
+  "zero_lookahead_tests": "9/9 passed (tests/test_zero_lookahead.py)"
+}

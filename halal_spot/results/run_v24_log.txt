@@ -1,0 +1,387 @@
+/home/user/TRADING-BOT/halal_spot/strategy_v24_boxes.py:1471: Pandas4Warning: The inplace keyword in DataFrame.drop is deprecated and will be removed in a future version (PDEP-8).
+See https://pandas.pydata.org/docs/dev/whatsnew/v3.1.0.html#deprecation-inplace for more details.
+  tf.drop(index=tf[tf.index > s1].index, inplace=True)
+[v24-boxes] symbols discovered: ['BTCUSD_5m']
+yearly fills: {
+  "2021": 69,
+  "2022": 66,
+  "2023": 34,
+  "2024": 33,
+  "2025": 25,
+  "2026": 22
+}
+funnel: {
+  "htf_1h_displacement": 21498,
+  "board_green_bos": 5836,
+  "htf_bos_noise_ignored": 1348,
+  "board_red_breakdown": 12960,
+  "board_recover_sweep": 9328,
+  "board_recover_box": 3488,
+  "anchor_premium_skip": 269718,
+  "bos_noise_ignored": 32588,
+  "anchor_box_tap": 3825,
+  "anchor_invalid": 6346,
+  "bos_red_break": 4563,
+  "setup_wave_refresh": 26101,
+  "setup_drawn": 3170,
+  "setup_missed_run": 2156,
+  "anchor_blue_sweep": 7085,
+  "stop_widened_to_htf": 123778,
+  "setup_box_died": 714,
+  "blocked_consumed_range": 16331,
+  "setup_anchor_died": 1390,
+  "fill": 249,
+  "ratchet_3r_close": 62,
+  "trail_htf_blue": 35,
+  "exit_STOP_BLUE": 160,
+  "target_consumed": 105,
+  "exit_LOCK_FLOOR_CLOSE": 43,
+  "anchor_refresh_sweep": 451,
+  "setup_wait_stack": 384525,
+  "reject_premium_ob": 19518,
+  "streak_needs_htf_wave": 59186,
+  "streak_entry_not_fresh": 184436,
+  "anchor_tap_needs_bos_state": 23838,
+  "reject_wall_within_3r": 41523,
+  "anchor_board_red": 15606,
+  "reject_risk_below_one_fee": 108846,
+  "fill_below_exchange_min": 37,
+  "fill_cancel_premium": 11,
+  "structural_gate_armed": 73,
+  "shield_be_armed": 30,
+  "exit_BREAKEVEN": 43,
+  "shield_be_releases_streak": 43,
+  "tier3_fill_needs_proof": 50,
+  "tier3_be_armed_at_entry": 20,
+  "fill_cancel_target_within_3r": 11,
+  "target_rejection_exit": 3,
+  "exit_TARGET_REJECTION": 3,
+  "y2021_anchor_invalid": 1798,
+  "y2021_setup_drawn": 818,
+  "y2021_fill": 69,
+  "y2021_target_consumed": 29,
+  "y2021_reject_premium_ob": 5174,
+  "y2021_streak_entry_not_fresh": 4969,
+  "y2021_reject_wall_within_3r": 12055,
+  "y2021_fill_cancel_premium": 2,
+  "y2021_fill_cancel_target_within_3r": 11,
+  "y2022_reject_premium_ob": 5288,
+  "y2022_streak_entry_not_fresh": 5580,
+  "y2022_anchor_invalid": 1652,
+  "y2022_setup_drawn": 814,
+  "y2022_reject_wall_within_3r": 10431,
+  "y2022_fill": 66,
+  "y2022_target_consumed": 22,
+  "y2022_target_rejection_exit": 2,
+  "y2022_fill_cancel_premium": 2,
+  "y2023_streak_entry_not_fresh": 36020,
+  "y2024_streak_entry_not_fresh": 61587,
+  "y2025_streak_entry_not_fresh": 57561,
+  "y2026_streak_entry_not_fresh": 18719,
+  "y2021_target_rejection_exit": 1,
+  "y2023_anchor_invalid": 544,
+  "y2023_reject_premium_ob": 2930,
+  "y2023_reject_wall_within_3r": 4665,
+  "y2023_setup_drawn": 361,
+  "y2023_fill": 34,
+  "y2023_target_consumed": 15,
+  "y2023_fill_cancel_premium": 5,
+  "y2024_setup_drawn": 442,
+  "y2024_anchor_invalid": 804,
+  "y2024_reject_wall_within_3r": 5779,
+  "y2024_reject_premium_ob": 1719,
+  "y2024_fill": 33,
+  "y2024_target_consumed": 15,
+  "y2025_reject_wall_within_3r": 4564,
+  "y2025_setup_drawn": 429,
+  "y2025_anchor_invalid": 914,
+  "y2025_fill": 25,
+  "y2025_target_consumed": 11,
+  "y2025_reject_premium_ob": 2851,
+  "y2026_reject_wall_within_3r": 4029,
+  "y2026_setup_drawn": 306,
+  "y2026_anchor_invalid": 634,
+  "y2026_reject_premium_ob": 1556,
+  "y2026_fill": 22,
+  "y2026_target_consumed": 13,
+  "fill_cancel_board_red": 3,
+  "y2022_fill_cancel_board_red": 1,
+  "y2025_fill_cancel_board_red": 1,
+  "y2025_fill_cancel_premium": 2,
+  "trail_4h_structural": 8,
+  "y2026_fill_cancel_board_red": 1
+}
+{
+  "trades": 249,
+  "wins": 62,
+  "breakevens": 43,
+  "win_rate_pct": 30.1,
+  "profit_factor": 1.24,
+  "net_pnl": 60.87,
+  "net_pct": 30.43,
+  "end_equity": 260.87,
+  "max_drawdown_pct": -19.09,
+  "max_consecutive_losses": 3,
+  "avg_R": 0.16,
+  "min_winner_R": 3.0,
+  "runners_ge_5R": 10,
+  "runners_ge_10R": 4,
+  "runners_ge_20R": 0,
+  "runners_4r_plus": 13,
+  "max_winner_R": 19.38,
+  "max_R": 19.38,
+  "fees": 55.41,
+  "exit_reasons": {
+    "STOP_BLUE": 160,
+    "LOCK_FLOOR_CLOSE": 43,
+    "BREAKEVEN": 43,
+    "TARGET_REJECTION": 3
+  },
+  "s1_kinds": {
+    "BOX_STACK": 249
+  },
+  "symbols": [
+    "BTCUSD_5m"
+  ],
+  "yearly": {
+    "2021": 69,
+    "2022": 66,
+    "2023": 34,
+    "2024": 33,
+    "2025": 25,
+    "2026": 22
+  }
+}
+funnel: {
+  "htf_1h_displacement": 21498,
+  "board_green_bos": 5836,
+  "htf_bos_noise_ignored": 1348,
+  "board_red_breakdown": 12960,
+  "board_recover_sweep": 9328,
+  "board_recover_box": 3488,
+  "anchor_premium_skip": 269718,
+  "bos_noise_ignored": 32588,
+  "anchor_box_tap": 3825,
+  "anchor_invalid": 6346,
+  "bos_red_break": 4563,
+  "setup_wave_refresh": 26101,
+  "setup_drawn": 3170,
+  "setup_missed_run": 2156,
+  "anchor_blue_sweep": 7085,
+  "stop_widened_to_htf": 123778,
+  "setup_box_died": 714,
+  "blocked_consumed_range": 16331,
+  "setup_anchor_died": 1390,
+  "fill": 249,
+  "ratchet_3r_close": 62,
+  "trail_htf_blue": 35,
+  "exit_STOP_BLUE": 160,
+  "target_consumed": 105,
+  "exit_LOCK_FLOOR_CLOSE": 43,
+  "anchor_refresh_sweep": 451,
+  "setup_wait_stack": 384525,
+  "reject_premium_ob": 19518,
+  "streak_needs_htf_wave": 59186,
+  "streak_entry_not_fresh": 184436,
+  "anchor_tap_needs_bos_state": 23838,
+  "reject_wall_within_3r": 41523,
+  "anchor_board_red": 15606,
+  "reject_risk_below_one_fee": 108846,
+  "fill_below_exchange_min": 37,
+  "fill_cancel_premium": 11,
+  "structural_gate_armed": 73,
+  "shield_be_armed": 30,
+  "exit_BREAKEVEN": 43,
+  "shield_be_releases_streak": 43,
+  "tier3_fill_needs_proof": 50,
+  "tier3_be_armed_at_entry": 20,
+  "fill_cancel_target_within_3r": 11,
+  "target_rejection_exit": 3,
+  "exit_TARGET_REJECTION": 3,
+  "y2021_anchor_invalid": 1798,
+  "y2021_setup_drawn": 818,
+  "y2021_fill": 69,
+  "y2021_target_consumed": 29,
+  "y2021_reject_premium_ob": 5174,
+  "y2021_streak_entry_not_fresh": 4969,
+  "y2021_reject_wall_within_3r": 12055,
+  "y2021_fill_cancel_premium": 2,
+  "y2021_fill_cancel_target_within_3r": 11,
+  "y2022_reject_premium_ob": 5288,
+  "y2022_streak_entry_not_fresh": 5580,
+  "y2022_anchor_invalid": 1652,
+  "y2022_setup_drawn": 814,
+  "y2022_reject_wall_within_3r": 10431,
+  "y2022_fill": 66,
+  "y2022_target_consumed": 22,
+  "y2022_target_rejection_exit": 2,
+  "y2022_fill_cancel_premium": 2,
+  "y2023_streak_entry_not_fresh": 36020,
+  "y2024_streak_entry_not_fresh": 61587,
+  "y2025_streak_entry_not_fresh": 57561,
+  "y2026_streak_entry_not_fresh": 18719,
+  "y2021_target_rejection_exit": 1,
+  "y2023_anchor_invalid": 544,
+  "y2023_reject_premium_ob": 2930,
+  "y2023_reject_wall_within_3r": 4665,
+  "y2023_setup_drawn": 361,
+  "y2023_fill": 34,
+  "y2023_target_consumed": 15,
+  "y2023_fill_cancel_premium": 5,
+  "y2024_setup_drawn": 442,
+  "y2024_anchor_invalid": 804,
+  "y2024_reject_wall_within_3r": 5779,
+  "y2024_reject_premium_ob": 1719,
+  "y2024_fill": 33,
+  "y2024_target_consumed": 15,
+  "y2025_reject_wall_within_3r": 4564,
+  "y2025_setup_drawn": 429,
+  "y2025_anchor_invalid": 914,
+  "y2025_fill": 25,
+  "y2025_target_consumed": 11,
+  "y2025_reject_premium_ob": 2851,
+  "y2026_reject_wall_within_3r": 4029,
+  "y2026_setup_drawn": 306,
+  "y2026_anchor_invalid": 634,
+  "y2026_reject_premium_ob": 1556,
+  "y2026_fill": 22,
+  "y2026_target_consumed": 13,
+  "fill_cancel_board_red": 3,
+  "y2022_fill_cancel_board_red": 1,
+  "y2025_fill_cancel_board_red": 1,
+  "y2025_fill_cancel_premium": 2,
+  "trail_4h_structural": 8,
+  "y2026_fill_cancel_board_red": 1
+}
+yearly fills: {
+  "2021": 69,
+  "2022": 66,
+  "2023": 34,
+  "2024": 33,
+  "2025": 25,
+  "2026": 22
+}
+
+=== SECTION 2: ANATOMY (first 10) ===
+{'entry_time': '2021-01-04 00:00:00+00:00', 'purple_mid': 33281.5, 'broken_red': {'kind': 'RED', 'bottom': 32769.79, 'top': 32930.0, 'tf': '30min'}, 'yellow': {'kind': 'YELLOW_B', 'bottom': 32800.52, 'top': 33443.38, 'tf': '30min'}, 'green': {'kind': 'GREEN', 'bottom': 32455.71, 'top': 32772.21, 'tf': '30min'}, 'stop_blue': {'kind': 'BLUE', 'bottom': 32500.0, 'top': 32521.79, 'tf': '30min'}, 'entry': 32772.21, 'stop': 32450.0, 'wall': None, 'exit_reason': 'STOP_BLUE', 'R': -1.2}
+/home/user/TRADING-BOT/halal_spot/strategy_v24_boxes.py:1471: Pandas4Warning: The inplace keyword in DataFrame.drop is deprecated and will be removed in a future version (PDEP-8).
+See https://pandas.pydata.org/docs/dev/whatsnew/v3.1.0.html#deprecation-inplace for more details.
+  tf.drop(index=tf[tf.index > s1].index, inplace=True)
+{'entry_time': '2021-01-04 11:15:00+00:00', 'purple_mid': 32912.46, 'broken_red': {'kind': 'RED', 'bottom': 29358.67, 'top': 29800.0, 'tf': '5min'}, 'yellow': {'kind': 'YELLOW_B', 'bottom': 29687.55, 'top': 29723.72, 'tf': '5min'}, 'green': {'kind': 'GREEN', 'bottom': 29289.23, 'top': 29412.53, 'tf': '5min'}, 'stop_blue': {'kind': 'BLUE', 'bottom': 28130.0, 'top': 29104.98, 'tf': '5min'}, 'entry': 29412.53, 'stop': 29289.23, 'wall': None, 'exit_reason': 'STOP_BLUE', 'R': 6.3}
+{'entry_time': '2021-01-04 13:45:00+00:00', 'purple_mid': 31410.0, 'broken_red': {'kind': 'RED', 'bottom': 30986.45, 'top': 30991.85, 'tf': '5min'}, 'yellow': {'kind': 'YELLOW_B', 'bottom': 30976.5, 'top': 30992.78, 'tf': '5min'}, 'green': {'kind': 'GREEN', 'bottom': 30600.0, 'top': 30930.61, 'tf': '5min'}, 'stop_blue': {'kind': 'BLUE', 'bottom': 30600.0, 'top': 30667.07, 'tf': '5min'}, 'entry': 30930.61, 'stop': 30600.0, 'wall': None, 'exit_reason': 'LOCK_FLOOR_CLOSE', 'R': 3.0}
+{'entry_time': '2021-01-04 17:20:00+00:00', 'purple_mid': 31410.0, 'broken_red': {'kind': 'RED', 'bottom': 31083.5, 'top': 31120.71, 'tf': '5min'}, 'yellow': {'kind': 'YELLOW_B', 'bottom': 30949.26, 'top': 31050.0, 'tf': '5min'}, 'green': {'kind': 'GREEN', 'bottom': 30723.0, 'top': 30937.75, 'tf': '5min'}, 'stop_blue': {'kind': 'BLUE', 'bottom': 30818.8, 'top': 30988.19, 'tf': '5min'}, 'entry': 30937.75, 'stop': 30600.0, 'wall': None, 'exit_reason': 'LOCK_FLOOR_CLOSE', 'R': 3.0}
+{'entry_time': '2021-01-10 18:35:00+00:00', 'purple_mid': 39311.96, 'broken_red': {'kind': 'RED', 'bottom': 38166.74, 'top': 38176.46, 'tf': '5min'}, 'yellow': {'kind': 'YELLOW_B', 'bottom': 37973.07, 'top': 38129.78, 'tf': '5min'}, 'green': {'kind': 'GREEN', 'bottom': 37301.56, 'top': 37752.22, 'tf': '5min'}, 'stop_blue': {'kind': 'BLUE', 'bottom': 37200.0, 'top': 37322.4, 'tf': '5min'}, 'entry': 37752.22, 'stop': 37038.97, 'wall': None, 'exit_reason': 'STOP_BLUE', 'R': -1.1}
+{'entry_time': '2021-01-11 10:30:00+00:00', 'purple_mid': 36318.83, 'broken_red': {'kind': 'RED', 'bottom': 35837.77, 'top': 35999.95, 'tf': '15min'}, 'yellow': {'kind': 'YELLOW_B', 'bottom': 35563.57, 'top': 35606.96, 'tf': '15min'}, 'green': {'kind': 'GREEN', 'bottom': 35083.77, 'top': 35551.48, 'tf': '15min'}, 'stop_blue': {'kind': 'BLUE', 'bottom': 35088.83, 'top': 35183.75, 'tf': '15min'}, 'entry': 35551.48, 'stop': 35083.77, 'wall': None, 'exit_reason': 'STOP_BLUE', 'R': -1.15}
+{'entry_time': '2021-01-11 12:30:00+00:00', 'purple_mid': 36318.83, 'broken_red': {'kind': 'RED', 'bottom': 35636.35, 'top': 35733.0, 'tf': '30min'}, 'yellow': {'kind': 'YELLOW_B', 'bottom': 33850.0, 'top': 34249.0, 'tf': '30min'}, 'green': {'kind': 'GREEN', 'bottom': 32538.0, 'top': 33731.02, 'tf': '30min'}, 'stop_blue': {'kind': 'BLUE', 'bottom': 32550.0, 'top': 32872.63, 'tf': '30min'}, 'entry': 33731.02, 'stop': 32538.0, 'wall': None, 'exit_reason': 'STOP_BLUE', 'R': -1.06}
+{'entry_time': '2021-01-15 08:00:00+00:00', 'purple_mid': 38318.17, 'broken_red': {'kind': 'RED', 'bottom': 37999.96, 'top': 38098.0, 'tf': '15min'}, 'yellow': {'kind': 'YELLOW_B', 'bottom': 38296.28, 'top': 38317.32, 'tf': '15min'}, 'green': {'kind': 'GREEN', 'bottom': 37704.8, 'top': 38289.32, 'tf': '15min'}, 'stop_blue': {'kind': 'BLUE', 'bottom': 37808.0, 'top': 37808.9, 'tf': '15min'}, 'entry': 38289.32, 'stop': 37704.8, 'wall': None, 'exit_reason': 'BREAKEVEN', 'R': -0.0}
+{'entry_time': '2021-01-16 23:00:00+00:00', 'purple_mid': 35843.0, 'broken_red': {'kind': 'RED', 'bottom': 37159.51, 'top': 37669.0, 'tf': '1h'}, 'yellow': {'kind': 'YELLOW_B', 'bottom': 35746.24, 'top': 35950.63, 'tf': '1h'}, 'green': {'kind': 'GREEN', 'bottom': 34801.15, 'top': 35605.7, 'tf': '1h'}, 'stop_blue': {'kind': 'BLUE', 'bottom': 34720.0, 'top': 34821.47, 'tf': '1h'}, 'entry': 35605.7, 'stop': 34801.15, 'wall': None, 'exit_reason': 'STOP_BLUE', 'R': -1.09}
+{'entry_time': '2021-01-20 05:05:00+00:00', 'purple_mid': 35850.0, 'broken_red': {'kind': 'RED', 'bottom': 35225.69, 'top': 35259.97, 'tf': '5min'}, 'yellow': {'kind': 'YELLOW_B', 'bottom': 35225.93, 'top': 35288.71, 'tf': '5min'}, 'green': {'kind': 'GREEN', 'bottom': 35132.05, 'top': 35225.69, 'tf': '5min'}, 'stop_blue': {'kind': 'BLUE', 'bottom': 34843.5, 'top': 34896.21, 'tf': '5min'}, 'entry': 35225.69, 'stop': 35132.05, 'wall': None, 'exit_reason': 'LOCK_FLOOR_CLOSE', 'R': 3.0}
+
+=== ASCII DIAGRAMS (first 3) ===
+  ENTRY 2021-01-04 00:00:00+00:00  R=-1.20 (STOP_BLUE)
+  [ open sky ] no bearish wall above entry (ATH expansion)
+  [ 3R line ] Target = entry + 3 x Risk          Price:  33738.84
+  [RED   ] broken RedBox_BSL (BOS)            Top:  32930.00 | Bottom:  32769.79 <-- broken by body close
+  [ PURPLE ] Dealing-range mid (50%)           Price:  33281.50   (above=Premium, below=Discount)
+  [YELLOW_B] YellowBox_BullFVG (entry line=Top) Top:  33443.38 | Bottom:  32800.52 
+  [GREEN ] GreenBox_BullOB (under yellow)     Top:  32772.21 | Bottom:  32455.71 
+  [BLUE  ] BlueBox wave low / Stop line       Top:  32521.79 | Bottom:  32500.00 <-- Stop:32450.00
+
+  ENTRY 2021-01-04 11:15:00+00:00  R=+6.30 (STOP_BLUE)
+  [ open sky ] no bearish wall above entry (ATH expansion)
+  [ 3R line ] Target = entry + 3 x Risk          Price:  29782.43
+  [RED   ] broken RedBox_BSL (BOS)            Top:  29800.00 | Bottom:  29358.67 <-- broken by body close
+  [ PURPLE ] Dealing-range mid (50%)           Price:  32912.46   (above=Premium, below=Discount)
+  [YELLOW_B] YellowBox_BullFVG (entry line=Top) Top:  29723.72 | Bottom:  29687.55 
+  [GREEN ] GreenBox_BullOB (under yellow)     Top:  29412.53 | Bottom:  29289.23 
+  [BLUE  ] BlueBox wave low / Stop line       Top:  29104.98 | Bottom:  28130.00 <-- Stop:29289.23
+
+  ENTRY 2021-01-04 13:45:00+00:00  R=+3.00 (LOCK_FLOOR_CLOSE)
+  [ open sky ] no bearish wall above entry (ATH expansion)
+  [ 3R line ] Target = entry + 3 x Risk          Price:  31922.44
+  [RED   ] broken RedBox_BSL (BOS)            Top:  30991.85 | Bottom:  30986.45 <-- broken by body close
+  [ PURPLE ] Dealing-range mid (50%)           Price:  31410.00   (above=Premium, below=Discount)
+  [YELLOW_B] YellowBox_BullFVG (entry line=Top) Top:  30992.78 | Bottom:  30976.50 
+  [GREEN ] GreenBox_BullOB (under yellow)     Top:  30930.61 | Bottom:  30600.00 
+  [BLUE  ] BlueBox wave low / Stop line       Top:  30667.07 | Bottom:  30600.00 <-- Stop:30600.00
+
+
+[v24-boxes] BULL RUN 2021-01-01 .. 2021-05-31
+{
+  "trades": 42,
+  "wins_ge_3R": 15,
+  "runners_ge_5R": 1,
+  "runners_ge_10R": 0,
+  "runners_ge_20R": 0,
+  "max_R": 6.3,
+  "count": {
+    "bull_htf_1h_displacement": 2178,
+    "bull_board_green_bos": 636,
+    "bull_htf_bos_noise_ignored": 116,
+    "bull_board_red_breakdown": 944,
+    "bull_board_recover_sweep": 700,
+    "bull_board_recover_box": 220,
+    "bull_anchor_premium_skip": 36687,
+    "bull_bos_noise_ignored": 2798,
+    "bull_anchor_box_tap": 510,
+    "bull_anchor_invalid": 823,
+    "bull_bos_red_break": 548,
+    "bull_setup_wave_refresh": 2369,
+    "bull_setup_drawn": 388,
+    "bull_setup_missed_run": 259,
+    "bull_anchor_blue_sweep": 861,
+    "bull_stop_widened_to_htf": 4924,
+    "bull_setup_box_died": 77,
+    "bull_blocked_consumed_range": 2947,
+    "bull_setup_anchor_died": 160,
+    "bull_fill": 42,
+    "bull_ratchet_3r_close": 15,
+    "bull_trail_htf_blue": 7,
+    "bull_exit_STOP_BLUE": 25,
+    "bull_target_consumed": 23,
+    "bull_exit_LOCK_FLOOR_CLOSE": 10,
+    "bull_anchor_refresh_sweep": 51,
+    "bull_setup_wait_stack": 6025,
+    "bull_reject_premium_ob": 1587,
+    "bull_streak_needs_htf_wave": 4402,
+    "bull_streak_entry_not_fresh": 1581,
+    "bull_anchor_tap_needs_bos_state": 2766,
+    "bull_reject_wall_within_3r": 3615,
+    "bull_anchor_board_red": 2387,
+    "bull_reject_risk_below_one_fee": 108,
+    "bull_fill_below_exchange_min": 8,
+    "bull_fill_cancel_premium": 2,
+    "bull_structural_gate_armed": 9,
+    "bull_shield_be_armed": 4,
+    "bull_exit_BREAKEVEN": 6,
+    "bull_shield_be_releases_streak": 6,
+    "bull_tier3_fill_needs_proof": 1,
+    "y2021_anchor_invalid": 823,
+    "y2021_setup_drawn": 388,
+    "y2021_fill": 42,
+    "y2021_target_consumed": 23,
+    "y2021_reject_premium_ob": 1587,
+    "y2021_streak_entry_not_fresh": 1581,
+    "y2021_reject_wall_within_3r": 3615,
+    "y2021_fill_cancel_premium": 2,
+    "bull_fill_cancel_target_within_3r": 9,
+    "bull_tier3_be_armed_at_entry": 2,
+    "bull_target_rejection_exit": 1,
+    "bull_exit_TARGET_REJECTION": 1,
+    "y2021_fill_cancel_target_within_3r": 9,
+    "y2021_target_rejection_exit": 1
+  }
+}
+
+============ THE FIVE MANDATORY ASSERTS ============
+[v24] ASSERT1 FAILED :: WR >= 60% :: 30.10% (62W/144L)
+[v24] ASSERT2 PASSED :: min_winner_R >= 3.00 :: 3.00R
+[v24] ASSERT3 PASSED :: runners_4r_plus >= 5 AND max_winner_R >= 6.0 :: >=4R:13 max:19.38R
+[v24] ASSERT4 PASSED :: max_consecutive_losses <= 3 :: 3
+[v24] ASSERT5 PASSED :: total >= 180 AND yearly[y] >= 15 for 2021..2025 :: total:249 yearly:{'2021': 69, '2022': 66, '2023': 34, '2024': 33, '2025': 25, '2026': 22}
+Traceback (most recent call last):
+  File "/home/user/TRADING-BOT/halal_spot/strategy_v24_boxes.py", line 1814, in <module>
+    main()
+  File "/home/user/TRADING-BOT/halal_spot/strategy_v24_boxes.py", line 1808, in main
+    raise AssertionError(
+AssertionError: v24 DID NOT PASS asserts [1] — see asserts_v24.json

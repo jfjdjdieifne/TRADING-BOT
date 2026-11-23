@@ -1,0 +1,136 @@
+{
+ "combo": "V33_TEL_3S_3R",
+ "window": "W2",
+ "start": "2024-05-01",
+ "end": "2024-10-31",
+ "seconds": 412.3,
+ "symbols": [
+  "ADAUSDT_5m",
+  "AVAXUSDT_5m",
+  "BNBUSDT_5m",
+  "BTCUSDT_5m",
+  "ETHUSDT_5m",
+  "LINKUSDT_5m",
+  "SOLUSDT_5m",
+  "XRPUSDT_5m"
+ ],
+ "capital": 100.0,
+ "n": 265,
+ "totR": 105.7958,
+ "wins": 46,
+ "swin": 15,
+ "be": 93,
+ "losses": 126,
+ "wr": 17.36,
+ "wr_strict": 11.7,
+ "net": 21.654,
+ "end_equity": 121.654,
+ "pool_cash_end": 121.654,
+ "maxR": 68.242,
+ "fees": 8.1531,
+ "by_coin": {
+  "ADAUSDT_5m": [
+   35,
+   -1.591,
+   -0.489
+  ],
+  "AVAXUSDT_5m": [
+   44,
+   -20.042,
+   -0.627
+  ],
+  "BNBUSDT_5m": [
+   22,
+   -3.44,
+   -0.529
+  ],
+  "BTCUSDT_5m": [
+   25,
+   -3.543,
+   0.87
+  ],
+  "ETHUSDT_5m": [
+   25,
+   25.502,
+   4.816
+  ],
+  "LINKUSDT_5m": [
+   44,
+   20.335,
+   6.304
+  ],
+  "SOLUSDT_5m": [
+   41,
+   18.1,
+   2.323
+  ],
+  "XRPUSDT_5m": [
+   29,
+   70.474,
+   8.986
+  ]
+ },
+ "exits": {
+  "STOP_BLUE": 131,
+  "BREAKEVEN": 93,
+  "EMERGENCY_STOP": 20,
+  "STRUCT_PROFIT": 13,
+  "TARGET_REJECTION": 8
+ },
+ "pf": 1.92,
+ "maxDD_pct": -5.921,
+ "eq_end": 121.654,
+ "eq_min": 99.5886,
+ "counters": {
+  "v32_smt_veto": 0,
+  "v32_regime_b_veto": 0,
+  "v32_regime_b_no_anchor": 0,
+  "v32_killzone_skip": 45,
+  "v32_emergency_stop": 20,
+  "v31_impulse_anchored": 0,
+  "fill_below_exchange_min": 0,
+  "shield_armed_disp": 127,
+  "v33_leader_veto": 0,
+  "v33_range_b_veto": 0,
+  "v33_range_harvest": 0,
+  "v31_struct_trail": 21,
+  "trail_htf_blue": 3,
+  "trail_4h_structural": 57,
+  "v33_stamp_expand": 0,
+  "v33_stamp_range": 0,
+  "slot_full_rejects": 17,
+  "portfolio_slots_full": 17,
+  "v34_stale_swap_exit": 0,
+  "v34_swap_checked_not_stale": 0,
+  "v34_extra_2r_opportunities": 0,
+  "v34_bridge_1h_raise": 0,
+  "v34_fast_harvest": 0,
+  "v34_fast_harvest_trail_allowed": 0,
+  "v34_deploy_full_ok": 0,
+  "v34_deploy_topped_up": 0,
+  "v34_deploy_over_budget": 0,
+  "v34_swap_kept_locked": 0,
+  "v34_swap_kept_profit_ok": 0,
+  "v34_swap_kept_young": 0,
+  "v34_swap_kept_no_state": 0
+ },
+ "v33_stamps_expand": 0,
+ "v33_stamps_range": 0,
+ "v33_leader_stamps": {},
+ "price_move_pct": {
+  "median_all": 0.2,
+  "median_winners": 2.223,
+  "max": 18.887,
+  "wins_over_5pct": 8,
+  "wins_over_15pct": 2
+ },
+ "stop_width_pct": {
+  "median": 0.3954,
+  "min": 0.1035,
+  "max": 2.2101
+ },
+ "bars_held_median": 6.0,
+ "fee_share_of_gross_wins_pct": 18.04,
+ "smt_bull_stamps": 133116,
+ "smt_stamps": 69985
+}

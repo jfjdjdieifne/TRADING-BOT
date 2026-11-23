@@ -1,0 +1,89 @@
+=== S1_COIN_GUARD_BOS W2 20:25:40 ===
+    [guard] BASE == engine defaults for all 26 v33+v34 knobs
+
+##### LIVE ENGINE combo=S1_COIN_GUARD_BOS W2 2024-05-01..2024-10-31 #####
+    cfg: ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)
+    n=145 totR=150.7259 end=$194.3751 DD=-12.21% (350s)
+    coins: {"ADAUSDT_5m": [22, 10.34, 8.336], "AVAXUSDT_5m": [14, -0.99, 7.213], "BNBUSDT_5m": [12, 22.336, 13.105], "BTCUSDT_5m": [14, 6.637, 2.85], "ETHUSDT_5m": [17, 20.636, 14.586], "LINKUSDT_5m": [25, 21.816, 20.572], "SOLUSDT_5m": [26, 11.176, 9.64], "XRPUSDT_5m": [15, 58.776, 18.073]}
+    counters: {"v35_cooldown_armed": 55, "v35_cooldown_skip": 85, "v35_cooldown_expired": 13, "v35_cooldown_lifted_by_bos": 40, "slot_full_rejects": 115, "portfolio_slots_full": 115, "v31_struct_trail": 13, "trail_4h_structural": 52, "v34_deploy_full_ok": 183}
+=== S1_BOS_PLUS_FLASH W1 20:31:32 ===
+    [guard] BASE == engine defaults for all 26 v33+v34 knobs
+
+##### LIVE ENGINE combo=S1_BOS_PLUS_FLASH W1 2023-10-01..2024-03-31 #####
+    cfg: ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)  FLASH_SELLER_VETO=True
+    n=172 totR=33.0704 end=$138.6993 DD=-12.713% (592s)
+    coins: {"ADAUSDT_5m": [26, 25.955, 12.489], "AVAXUSDT_5m": [26, 17.567, 7.397], "BNBUSDT_5m": [26, 19.218, 22.075], "BTCUSDT_5m": [11, -16.222, -7.953], "ETHUSDT_5m": [16, -19.949, -6.671], "LINKUSDT_5m": [23, 9.701, 6.168], "SOLUSDT_5m": [22, 10.362, 14.09], "XRPUSDT_5m": [22, -13.562, -8.894]}
+    counters: {"v35_flash_seller_veto": 23, "v35_cooldown_armed": 71, "v35_cooldown_skip": 90, "v35_cooldown_expired": 11, "v35_cooldown_lifted_by_bos": 56, "slot_full_rejects": 122, "portfolio_slots_full": 122, "v31_struct_trail": 3, "trail_4h_structural": 27, "v34_deploy_full_ok": 216}
+=== S1_BOS_PLUS_FLASH W2 20:41:25 ===
+    [guard] BASE == engine defaults for all 26 v33+v34 knobs
+
+##### LIVE ENGINE combo=S1_BOS_PLUS_FLASH W2 2024-05-01..2024-10-31 #####
+    cfg: ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)  FLASH_SELLER_VETO=True
+    n=140 totR=131.4332 end=$182.6332 DD=-12.744% (419s)
+    coins: {"ADAUSDT_5m": [24, 8.668, 7.668], "AVAXUSDT_5m": [14, -0.99, 6.607], "BNBUSDT_5m": [10, 9.926, 6.004], "BTCUSDT_5m": [16, 4.711, 1.979], "ETHUSDT_5m": [17, 17.687, 14.021], "LINKUSDT_5m": [23, 26.575, 21.649], "SOLUSDT_5m": [23, -1.154, 4.829], "XRPUSDT_5m": [13, 66.011, 19.877]}
+    counters: {"v35_flash_seller_veto": 24, "v35_cooldown_armed": 56, "v35_cooldown_skip": 96, "v35_cooldown_expired": 13, "v35_cooldown_lifted_by_bos": 39, "slot_full_rejects": 91, "portfolio_slots_full": 91, "v31_struct_trail": 12, "trail_4h_structural": 47, "v34_deploy_full_ok": 178}
+=== EXIT_SLIP_3BPS W1 20:48:25 ===
+    [guard] BASE == engine defaults for all 26 v33+v34 knobs
+
+##### LIVE ENGINE combo=EXIT_SLIP_3BPS W1 2023-10-01..2024-03-31 #####
+    cfg: ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)  EXIT_SLIPPAGE_BPS=3.0
+    n=130 totR=41.8246 end=$134.367 DD=-10.338% (662s)
+    coins: {"ADAUSDT_5m": [17, 18.936, 4.091], "AVAXUSDT_5m": [20, 20.674, 5.81], "BNBUSDT_5m": [15, 7.009, 15.187], "BTCUSDT_5m": [6, -1.939, -0.757], "ETHUSDT_5m": [14, -14.332, -4.975], "LINKUSDT_5m": [18, 15.822, 9.365], "SOLUSDT_5m": [23, 12.049, 14.236], "XRPUSDT_5m": [17, -16.394, -8.588]}
+    counters: {"v36_exit_slip_charged": 129, "v35_cooldown_armed": 56, "v35_cooldown_skip": 43, "v35_cooldown_expired": 9, "v35_cooldown_lifted_by_bos": 42, "slot_full_rejects": 93, "portfolio_slots_full": 93, "v31_struct_trail": 3, "trail_4h_structural": 18, "v34_deploy_full_ok": 161}
+=== EXIT_SLIP_3BPS W2 20:59:28 ===
+    [guard] BASE == engine defaults for all 26 v33+v34 knobs
+
+##### LIVE ENGINE combo=EXIT_SLIP_3BPS W2 2024-05-01..2024-10-31 #####
+    cfg: ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)  EXIT_SLIPPAGE_BPS=3.0
+    n=122 totR=167.0621 end=$183.9427 DD=-8.094% (378s)
+    coins: {"ADAUSDT_5m": [18, 8.605, 4.273], "AVAXUSDT_5m": [15, 14.217, 10.569], "BNBUSDT_5m": [15, 0.017, -0.902], "BTCUSDT_5m": [14, 5.436, 3.366], "ETHUSDT_5m": [14, 28.842, 13.828], "LINKUSDT_5m": [18, 27.43, 22.811], "SOLUSDT_5m": [19, 5.272, 5.399], "XRPUSDT_5m": [9, 77.244, 24.599]}
+    counters: {"v36_exit_slip_charged": 119, "v35_cooldown_armed": 48, "v35_cooldown_skip": 58, "v35_cooldown_expired": 14, "v35_cooldown_lifted_by_bos": 32, "slot_full_rejects": 86, "portfolio_slots_full": 86, "v31_struct_trail": 6, "trail_4h_structural": 42, "v34_deploy_full_ok": 149}
+=== EXIT_SLIP_5BPS W1 21:05:48 ===
+    [guard] BASE == engine defaults for all 26 v33+v34 knobs
+
+##### LIVE ENGINE combo=EXIT_SLIP_5BPS W1 2023-10-01..2024-03-31 #####
+    cfg: ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)  EXIT_SLIPPAGE_BPS=5.0
+    n=118 totR=33.6698 end=$118.8232 DD=-11.018% (545s)
+    coins: {"ADAUSDT_5m": [15, 20.539, 3.653], "AVAXUSDT_5m": [17, 22.862, 4.077], "BNBUSDT_5m": [16, 13.741, 13.846], "BTCUSDT_5m": [8, -5.22, -2.605], "ETHUSDT_5m": [10, -11.294, -3.34], "LINKUSDT_5m": [15, 6.824, 4.052], "SOLUSDT_5m": [24, -8.379, 0.795], "XRPUSDT_5m": [13, -5.402, -1.655]}
+    counters: {"v36_exit_slip_charged": 116, "v35_cooldown_armed": 52, "v35_cooldown_skip": 37, "v35_cooldown_expired": 11, "v35_cooldown_lifted_by_bos": 36, "slot_full_rejects": 76, "portfolio_slots_full": 76, "v31_struct_trail": 1, "trail_4h_structural": 13, "v34_deploy_full_ok": 154}
+=== EXIT_SLIP_5BPS W2 21:14:54 ===
+    [guard] BASE == engine defaults for all 26 v33+v34 knobs
+
+##### LIVE ENGINE combo=EXIT_SLIP_5BPS W2 2024-05-01..2024-10-31 #####
+    cfg: ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)  EXIT_SLIPPAGE_BPS=5.0
+    n=107 totR=162.8323 end=$190.2274 DD=-8.094% (330s)
+    coins: {"ADAUSDT_5m": [16, 9.792, 4.45], "AVAXUSDT_5m": [14, 6.693, 11.509], "BNBUSDT_5m": [10, -7.168, -6.472], "BTCUSDT_5m": [13, 6.215, 4.028], "ETHUSDT_5m": [13, 28.018, 13.559], "LINKUSDT_5m": [15, 33.002, 30.687], "SOLUSDT_5m": [17, 11.275, 8.262], "XRPUSDT_5m": [9, 75.004, 24.204]}
+    counters: {"v36_exit_slip_charged": 104, "v35_cooldown_armed": 42, "v35_cooldown_skip": 43, "v35_cooldown_expired": 12, "v35_cooldown_lifted_by_bos": 25, "slot_full_rejects": 72, "portfolio_slots_full": 72, "v31_struct_trail": 7, "trail_4h_structural": 39, "v34_deploy_full_ok": 134}
+=== EXIT_SLIP_8BPS W1 21:20:25 ===
+    [guard] BASE == engine defaults for all 26 v33+v34 knobs
+
+##### LIVE ENGINE combo=EXIT_SLIP_8BPS W1 2023-10-01..2024-03-31 #####
+    cfg: ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)  EXIT_SLIPPAGE_BPS=8.0
+    n=105 totR=27.9919 end=$125.3128 DD=-10.008% (533s)
+    coins: {"ADAUSDT_5m": [16, -1.023, -0.626], "AVAXUSDT_5m": [17, 21.741, 4.287], "BNBUSDT_5m": [15, 15.925, 15.0], "BTCUSDT_5m": [4, -0.723, -0.334], "ETHUSDT_5m": [9, -13.919, -3.201], "LINKUSDT_5m": [13, 8.835, 5.641], "SOLUSDT_5m": [19, 0.183, 4.97], "XRPUSDT_5m": [12, -3.027, -0.426]}
+    counters: {"v36_exit_slip_charged": 103, "v35_cooldown_armed": 44, "v35_cooldown_skip": 23, "v35_cooldown_expired": 14, "v35_cooldown_lifted_by_bos": 28, "slot_full_rejects": 62, "portfolio_slots_full": 62, "v31_struct_trail": 2, "trail_4h_structural": 12, "v34_deploy_full_ok": 138}
+=== EXIT_SLIP_8BPS W2 21:29:20 ===
+    [guard] BASE == engine defaults for all 26 v33+v34 knobs
+
+##### LIVE ENGINE combo=EXIT_SLIP_8BPS W2 2024-05-01..2024-10-31 #####
+    cfg: ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)  EXIT_SLIPPAGE_BPS=8.0
+    n=97 totR=174.2466 end=$199.7283 DD=-8.094% (367s)
+    coins: {"ADAUSDT_5m": [14, 13.846, 5.173], "AVAXUSDT_5m": [13, 0.383, 6.847], "BNBUSDT_5m": [8, 17.188, 11.485], "BTCUSDT_5m": [10, 9.073, 4.692], "ETHUSDT_5m": [10, 30.607, 15.536], "LINKUSDT_5m": [15, 31.561, 28.435], "SOLUSDT_5m": [17, 11.998, 8.007], "XRPUSDT_5m": [10, 59.592, 19.554]}
+    counters: {"v36_exit_slip_charged": 95, "v35_cooldown_armed": 38, "v35_cooldown_skip": 28, "v35_cooldown_expired": 10, "v35_cooldown_lifted_by_bos": 24, "slot_full_rejects": 67, "portfolio_slots_full": 67, "v31_struct_trail": 6, "trail_4h_structural": 44, "v34_deploy_full_ok": 123}
+=== BOTH_SLIP_5BPS W1 21:35:28 ===
+    [guard] BASE == engine defaults for all 26 v33+v34 knobs
+
+##### LIVE ENGINE combo=BOTH_SLIP_5BPS W1 2023-10-01..2024-03-31 #####
+    cfg: SLIPPAGE_BPS=5.0  ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)
+    n=183 totR=-22.5175 end=$85.304 DD=-23.695% (571s)
+    coins: {"ADAUSDT_5m": [28, 1.064, 0.205], "AVAXUSDT_5m": [30, 19.648, 0.032], "BNBUSDT_5m": [24, 17.442, 10.71], "BTCUSDT_5m": [7, -10.801, -4.208], "ETHUSDT_5m": [14, -15.942, -4.509], "LINKUSDT_5m": [23, 6.431, 0.969], "SOLUSDT_5m": [31, -8.703, -6.145], "XRPUSDT_5m": [26, -31.656, -11.75]}
+    counters: {"v35_cooldown_armed": 83, "v35_cooldown_skip": 99, "v35_cooldown_expired": 8, "v35_cooldown_lifted_by_bos": 70, "slot_full_rejects": 99, "portfolio_slots_full": 99, "v31_struct_trail": 7, "trail_4h_structural": 18, "v34_deploy_full_ok": 230}
+=== BOTH_SLIP_5BPS W2 21:45:00 ===
+    [guard] BASE == engine defaults for all 26 v33+v34 knobs
+
+##### LIVE ENGINE combo=BOTH_SLIP_5BPS W2 2024-05-01..2024-10-31 #####
+    cfg: SLIPPAGE_BPS=5.0  ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)
+    n=146 totR=42.02 end=$110.0798 DD=-17.995% (374s)
+    coins: {"ADAUSDT_5m": [18, -10.421, -5.374], "AVAXUSDT_5m": [19, 1.623, 1.349], "BNBUSDT_5m": [15, -4.738, -5.799], "BTCUSDT_5m": [15, -10.943, -3.733], "ETHUSDT_5m": [16, 7.555, 9.119], "LINKUSDT_5m": [22, -13.418, -4.379], "SOLUSDT_5m": [28, -0.71, -0.263], "XRPUSDT_5m": [13, 73.073, 19.159]}
+    counters: {"v35_cooldown_armed": 61, "v35_cooldown_skip": 97, "v35_cooldown_expired": 12, "v35_cooldown_lifted_by_bos": 46, "slot_full_rejects": 109, "portfolio_slots_full": 109, "v31_struct_trail": 9, "trail_4h_structural": 26, "v34_deploy_full_ok": 172}
+TASK12_DONE

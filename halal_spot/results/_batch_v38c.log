@@ -1,0 +1,29 @@
+=== ADAPT_4H W2 12:04:59 ===
+
+##### v38 combo=ADAPT_4H W2 2024-05-01..2024-10-31 #####
+    overrides: {"ADAPT_4H_RATCHET": true}
+    n=133 end=$178.5450 PF=2.182 DD=-12.524% mo+=5/6 (369.5s)
+=== ADAPT_4H MOD_Y1 12:11:10 ===
+
+##### v38 combo=ADAPT_4H MOD_Y1 2024-11-01..2025-10-31 #####
+    overrides: {"ADAPT_4H_RATCHET": true}
+    n=279 end=$242.0060 PF=1.675 DD=-17.785% mo+=8/12 (884.5s)
+=== ADAPT_4H MOD_Y2 12:25:56 ===
+
+##### v38 combo=ADAPT_4H MOD_Y2 2025-11-01..2026-10-31 #####
+    overrides: {"ADAPT_4H_RATCHET": true}
+    n=268 end=$107.0098 PF=1.076 DD=-15.991% mo+=6/12 (6336.9s)
+=== ANTI_BE_12 W2 14:11:35 ===
+
+##### v38 combo=ANTI_BE_12 W2 2024-05-01..2024-10-31 #####
+    overrides: {"ANTI_SHAKEOUT_BE": true, "MIN_BE_DISPLACEMENT_PCT": 1.2}
+Terminated
+=== ANTI_BE_12 MOD_Y1 14:16:08 ===
+
+##### v38 combo=ANTI_BE_12 MOD_Y1 2024-11-01..2025-10-31 #####
+    overrides: {"ANTI_SHAKEOUT_BE": true, "MIN_BE_DISPLACEMENT_PCT": 1.2}
+_batch_v38c.sh: line 5:  3679 Killed                  $PY -u lab_v38_dol_harvester.py run $a --window $w
+=== ANTI_BE_12 MOD_Y2 14:16:12 ===
+
+##### v38 combo=ANTI_BE_12 MOD_Y2 2025-11-01..2026-10-31 #####
+    overrides: {"ANTI_SHAKEOUT_BE": true, "MIN_BE_DISPLACEMENT_PCT": 1.2}

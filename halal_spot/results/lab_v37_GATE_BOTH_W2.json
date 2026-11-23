@@ -1,0 +1,77 @@
+{
+ "arm": "GATE_BOTH",
+ "window": "W2",
+ "start": "2024-05-01",
+ "end": "2024-10-31",
+ "seconds": 252.3,
+ "n": 7,
+ "capital": 100.0,
+ "totR": -0.4041,
+ "net": 0.7763,
+ "end_equity": 100.7763,
+ "pf": 1.598,
+ "wr": 28.57,
+ "wins": 2,
+ "be": 2,
+ "losses": 3,
+ "fees": 0.6963,
+ "by_coin": {
+  "ADAUSDT_5m": [
+   2,
+   0.641
+  ],
+  "AVAXUSDT_5m": [
+   1,
+   -0.417
+  ],
+  "BTCUSDT_5m": [
+   2,
+   1.095
+  ],
+  "LINKUSDT_5m": [
+   2,
+   -0.544
+  ]
+ },
+ "exits": {
+  "STOP_BLUE": 3,
+  "BREAKEVEN": 2,
+  "EMERGENCY_STOP": 1,
+  "STRUCT_PROFIT": 1
+ },
+ "monthly": {
+  "2024-06": {
+   "net$": -0.42,
+   "end$": 99.58,
+   "n": 3,
+   "PF": 0.0
+  },
+  "2024-07": {
+   "net$": -0.54,
+   "end$": 99.04,
+   "n": 1,
+   "PF": 0.0
+  },
+  "2024-08": {
+   "net$": -0.34,
+   "end$": 98.7,
+   "n": 1,
+   "PF": 0.0
+  },
+  "2024-09": {
+   "net$": 2.07,
+   "end$": 100.78,
+   "n": 2,
+   "PF": null
+  }
+ },
+ "months_pos": 1,
+ "months_n": 4,
+ "maxDD_pct": -2.911,
+ "eq_end": 100.7763,
+ "counters": {
+  "v37_htf_gate_veto": 460,
+  "v35_cooldown_lifted_by_bos": 2,
+  "v35_cooldown_armed": 2
+ }
+}

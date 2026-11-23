@@ -1,0 +1,154 @@
+V35 BLEED MECHANICS -- measured on the saved S1_TEL_3R books
+books: /home/user/TRADING-BOT/halal_spot/results
+
+==================================================================================================================================
+A. STOP-WIDTH ANATOMY -- every S1_TEL_3R fill bucketed by stop_dist_pct
+==================================================================================================================================
+
+  W1: n=227  net $+39.26  median stop width 0.405%
+  bucket         n     W/BE/L    WR%      totR      net$    avg$             worst single $
+  < 0.25%       54   6/11/37    11.1    -49.37    -11.58   -0.21 BNBUSDT 2024-03-14 12:15  0.25%   -0.68
+  0.25-0.50%    96  15/32/49    15.6    +77.57    +35.84   +0.37 LINKUSDT 2024-03-14 16:00  0.48%   -1.04
+  0.50-0.75%    37   2/19/16     5.4     +9.53     +8.46   +0.23 ETHUSDT 2024-03-15 02:35  0.62%   -1.24
+  0.75-1.00%    20   3/10/ 7    15.0    +18.98    +16.13   +0.81 ETHUSDT 2024-02-21 11:00  0.99%   -1.58
+  > 1.00%       20   1/ 9/10     5.0     -7.78     -9.58   -0.48 XRPUSDT 2024-03-19 06:00  2.23%   -3.51
+  wide (>=0.60%): n= 60 WR   8.3% totR   +26.12 net +19.28  |  narrow (<0.60%): n=167 WR  13.2% totR   +22.80 net +19.98
+  the five worst single fills of the window:
+    XRPUSDT 2024-03-19 06:00 width 2.232% STOP_BLUE         -1.09R    -3.51$
+    SOLUSDT 2024-03-16 23:00 width 1.481% STOP_BLUE         -1.13R    -2.49$
+    LINKUSDT 2024-01-16 12:00 width 1.509% STOP_BLUE         -1.13R    -2.19$
+    XRPUSDT 2024-03-16 20:30 width 1.044% STOP_BLUE         -1.19R    -1.86$
+    LINKUSDT 2024-02-08 23:15 width 1.069% STOP_BLUE         -1.19R    -1.68$
+
+  W2: n=180  net $+54.83  median stop width 0.382%
+  bucket         n     W/BE/L    WR%      totR      net$    avg$             worst single $
+  < 0.25%       39   2/10/27     5.1    -43.26     -9.80   -0.25 LINKUSDT 2024-08-26 21:00  0.25%   -0.71
+  0.25-0.50%    70  12/22/36    17.1    +90.02    +38.88   +0.56 ETHUSDT 2024-08-26 19:35  0.47%   -1.06
+  0.50-0.75%    40  11/12/17    27.5    +31.89    +21.59   +0.54 ADAUSDT 2024-09-02 14:30  0.73%   -1.42
+  0.75-1.00%    15   4/ 6/ 5    26.7     +7.44     +8.51   +0.57 BNBUSDT 2024-10-03 10:30  0.89%   -1.56
+  > 1.00%       16   3/ 9/ 4    18.8     -3.08     -4.34   -0.27 ADAUSDT 2024-07-23 03:05  1.55%   -2.32
+  wide (>=0.60%): n= 52 WR  25.0% totR   +15.13 net +10.86  |  narrow (<0.60%): n=128 WR  14.8% totR   +67.90 net +43.96
+  the five worst single fills of the window:
+    ADAUSDT 2024-07-23 03:05 width 1.545% STOP_BLUE         -1.13R    -2.32$
+    ADAUSDT 2024-09-20 16:20 width 1.325% STOP_BLUE         -1.15R    -2.22$
+    BNBUSDT 2024-10-03 10:30 width 0.888% STOP_BLUE         -1.22R    -1.56$
+    LINKUSDT 2024-09-05 11:00 width 0.789% STOP_BLUE         -1.25R    -1.51$
+    BNBUSDT 2024-06-18 01:00 width 1.269% STOP_BLUE         -1.16R    -1.47$
+
+----------------------------------------------------------------------------------------------------------------------------------
+A2. RISK CAP counterfactual -- what if a wide box could only lose RISK_CAP_PCT of equity?
+----------------------------------------------------------------------------------------------------------------------------------
+  (first-order: the same fills, the same exits, only the cash at risk is scaled down when the box is wide)
+  cap rule                                       W1 net$    W1 %   W2 net$    W2 %   chained
+  no cap (the real book)                          +39.26  +39.26    +54.83  +54.83  +115.62%
+  width>0.50%  risk capped at 0.50% equity        +34.40  +34.40    +47.20  +47.20   +97.84%
+  width>0.50%  risk capped at 0.60% equity        +36.04  +36.04    +50.40  +50.40  +104.61%
+  width>0.50%  risk capped at 0.75% equity        +39.67  +39.67    +53.26  +53.26  +114.06%
+  width>0.60%  risk capped at 0.60% equity        +35.65  +35.65    +53.04  +53.04  +107.60%
+  width>0.60%  risk capped at 0.75% equity        +39.67  +39.67    +53.50  +53.50  +114.39%
+  width>0.75%  risk capped at 0.75% equity        +41.11  +41.11    +53.94  +53.94  +117.23%
+  REFUSE wide boxes outright (width>0.60%)        +19.98  +19.98    +43.96  +43.96   +72.73%
+
+  NOTE: capping the cash also shrinks the WINNERS that come out of wide boxes (the engine sizes
+  every fill with all the cash), so a cap only pays if wide boxes are net-negative -- check A1's
+  wide-vs-narrow line above before believing any cap row.
+
+==================================================================================================================================
+B. INSTANT DEATH -- the hold <= 0.5h autopsies, bar by bar
+==================================================================================================================================
+
+  W1: n=227  losers+BE=200  fills that died within 0.5h: 81  (their net $-35.77)
+   losers whose OWN fill bar already traded through stop_px : 12/200  (6.0%)
+   losers whose own fill bar POKED BELOW the seam (mitigation intrabar)      : 83/200
+   losers whose own fill bar never broke the seam (clean)        : 117/200
+   of those same-bar deaths: net -5.91$  R -25.37  by coin AVAXUSDT:4 BNBUSDT:3 XRPUSDT:2 LINKUSDT:2 SOLUSDT:1
+   BIG WINNERS (>=3R): 7/24 POKED below the seam on their fill bar, 17 filled clean
+     ...and those poked winners made +25.83$ of the window's +127.39$ big-winner money (20.3%)
+   GATE 'fill bar must CLOSE at/above the seam': drops 60 fills (-19.32$) -> window ends at $158.58 (+58.58%) vs $139.26
+   GATE 'fill bar may not trade through the stop': drops 12 fills (-5.91$) -> $145.18 (+45.18%)
+   (both gates are first-order: the cancelled fill frees the seat but no substitute trade
+    is invented, so a positive delta here is a LOWER BOUND.)
+
+  W2: n=180  losers+BE=148  fills that died within 0.5h: 65  (their net $-27.14)
+   losers whose OWN fill bar already traded through stop_px : 12/148  (8.1%)
+   losers whose own fill bar POKED BELOW the seam (mitigation intrabar)      : 58/148
+   losers whose own fill bar never broke the seam (clean)        : 90/148
+   of those same-bar deaths: net -6.79$  R -24.50  by coin ADAUSDT:5 LINKUSDT:4 BTCUSDT:1 AVAXUSDT:1 ETHUSDT:1
+   BIG WINNERS (>=3R): 3/20 POKED below the seam on their fill bar, 17 filled clean
+     ...and those poked winners made +28.10$ of the window's +116.24$ big-winner money (24.2%)
+   GATE 'fill bar must CLOSE at/above the seam': drops 37 fills (-17.06$) -> window ends at $171.89 (+71.89%) vs $154.83
+   GATE 'fill bar may not trade through the stop': drops 12 fills (-6.79$) -> $161.62 (+61.62%)
+   (both gates are first-order: the cancelled fill frees the seat but no substitute trade
+    is invented, so a positive delta here is a LOWER BOUND.)
+
+==================================================================================================================================
+C. PER-COIN COLD STREAKS -- and what a dynamic quarantine would do
+==================================================================================================================================
+
+  W1: the worst streaks per coin (non-win runs, BE included)
+    ADAUSDT fills= 35  W 8 longest non-win run= 7  from 2023-10-12 07:00 -> 2023-10-28 18:00  net -2.02$  (W0/BE2/L5)
+    AVAXUSDT fills= 38  W 4 longest non-win run=13  from 2023-10-09 02:55 -> 2023-11-18 01:55  net -3.84$  (W0/BE5/L8)
+    BNBUSDT fills= 25  W 3 longest non-win run=13  from 2023-10-14 11:50 -> 2023-12-07 01:50  net -1.80$  (W0/BE8/L5)
+    BTCUSDT fills= 12  W 1 longest non-win run=10  from 2023-11-03 01:55 -> 2024-03-22 21:45  net -5.81$  (W0/BE3/L7)
+    ETHUSDT fills= 24  W 1 longest non-win run=21  from 2023-10-17 12:40 -> 2024-03-29 20:30  net -10.39$  (W0/BE8/L13)
+    LINKUSDT fills= 32  W 3 longest non-win run=14  from 2024-01-15 20:00 -> 2024-03-29 16:30  net -10.09$  (W0/BE5/L9)
+    SOLUSDT fills= 35  W 5 longest non-win run= 8  from 2023-10-03 01:15 -> 2023-11-06 16:30  net -3.51$  (W0/BE3/L5)
+    XRPUSDT fills= 26  W 2 longest non-win run=10  from 2023-10-10 10:00 -> 2023-12-13 06:45  net -4.97$  (W0/BE3/L7)
+
+  QUARANTINE GRID W1 (first-order: banned fills removed, no substitute trade invented)
+  rule                                            dropped  net$ dropped      end$        %     PF  maxDD%
+  no quarantine (the real book)                         0         +0.00    139.26   +39.26   1.43   -9.90
+  K=2 non-wins -> 7d ban                               89        -11.14    150.41   +50.41   2.00   -7.83
+  K=2 non-wins -> 14d ban                             108        +19.37    119.90   +19.90   1.48   -8.41
+  K=2 non-wins -> 21d ban                             133        +40.60     98.66    -1.34   0.96  -14.18
+  K=3 non-wins -> 7d ban                               59        -18.36    157.62   +57.62   1.96   -6.74
+  K=3 non-wins -> 14d ban                              84        +35.58    103.68    +3.68   1.06  -15.69
+  K=3 non-wins -> 21d ban                              97        +35.50    103.76    +3.76   1.07  -15.75
+  the real book ends at $139.26
+
+  W2: the worst streaks per coin (non-win runs, BE included)
+    ADAUSDT fills= 28  W 2 longest non-win run=24  from 2024-05-06 19:30 -> 2024-09-20 18:10  net -13.92$  (W0/BE8/L16)
+    AVAXUSDT fills= 24  W 5 longest non-win run= 7  from 2024-08-26 13:45 -> 2024-10-15 20:20  net -2.65$  (W0/BE4/L3)
+    BNBUSDT fills= 18  W 3 longest non-win run= 5  from 2024-05-20 01:15 -> 2024-06-18 01:30  net -3.24$  (W0/BE1/L4)
+    BTCUSDT fills= 14  W 3 longest non-win run= 4  from 2024-05-01 02:05 -> 2024-05-27 12:00  net -1.35$  (W0/BE1/L3)
+    ETHUSDT fills= 19  W 5 longest non-win run= 6  from 2024-07-29 18:45 -> 2024-08-26 20:10  net -3.07$  (W0/BE2/L4)
+    LINKUSDT fills= 35  W 4 longest non-win run=13  from 2024-08-26 14:30 -> 2024-10-10 17:45  net -6.65$  (W0/BE6/L7)
+    SOLUSDT fills= 29  W 7 longest non-win run= 9  from 2024-06-07 20:05 -> 2024-06-28 18:35  net -4.74$  (W0/BE3/L6)
+    XRPUSDT fills= 13  W 3 longest non-win run= 4  from 2024-06-06 07:25 -> 2024-06-24 16:00  net -0.82$  (W0/BE2/L2)
+
+  QUARANTINE GRID W2 (first-order: banned fills removed, no substitute trade invented)
+  rule                                            dropped  net$ dropped      end$        %     PF  maxDD%
+  no quarantine (the real book)                         0         +0.00    154.83   +54.83   1.80  -12.69
+  K=2 non-wins -> 7d ban                               49        -11.08    165.91   +65.91   2.51   -6.74
+  K=2 non-wins -> 14d ban                              75        +14.23    140.59   +40.59   2.18   -7.40
+  K=2 non-wins -> 21d ban                              93        -14.99    169.82   +69.82   3.58   -5.01
+  K=3 non-wins -> 7d ban                               31         +3.18    151.65   +51.65   1.98   -9.13
+  K=3 non-wins -> 14d ban                              60         -0.20    155.03   +55.03   2.38   -7.13
+  K=3 non-wins -> 21d ban                              73        +20.63    134.19   +34.19   1.98   -7.31
+  the real book ends at $154.83
+
+==================================================================================================================================
+D. THE CASE THE BRIEF NAMES -- the month that made $25.49 then closed at +$0.53
+==================================================================================================================================
+
+  W1 2024-03: 39 fills, net +0.53$  W4/BE11/L24
+   the fills that PAID:
+     BNBUSDT 2024-03-12 20:00 STOP_BLUE        +22.81R   +19.34$
+     BTCUSDT 2024-03-23 04:00 STOP_BLUE         +5.18R    +2.51$
+     SOLUSDT 2024-03-22 14:45 STOP_BLUE         +3.71R    +2.39$
+     LINKUSDT 2024-03-30 04:10 TARGET_REJECTION   +3.60R    +1.25$
+   everything else (35 fills): -24.95$
+   who ate it: XRPUSDT(n6=-6.68)  BTCUSDT(n7=-4.50)  LINKUSDT(n4=-2.66)  BNBUSDT(n4=-2.63)  ETHUSDT(n4=-2.62)
+
+  W2 2024-09: 27 fills, net -8.96$  W3/BE8/L16
+   the fills that PAID:
+     ETHUSDT 2024-09-23 00:30 STOP_BLUE         +6.81R    +4.69$
+     ETHUSDT 2024-09-05 07:00 STRUCT_PROFIT     +1.39R    +1.33$
+     BTCUSDT 2024-09-24 03:45 STRUCT_PROFIT     +0.31R    +0.13$
+     AVAXUSDT 2024-09-21 21:15 BREAKEVEN         -0.00R    -0.00$
+   everything else (23 fills): -15.11$
+   who ate it: ADAUSDT(n7=-4.60)  LINKUSDT(n5=-4.55)  BNBUSDT(n2=-1.97)  ETHUSDT(n2=-1.43)  SOLUSDT(n2=-0.76)
+
+==================================================================================================================================
+END OF BLEED AUDIT
+==================================================================================================================================

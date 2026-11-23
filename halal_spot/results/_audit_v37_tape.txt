@@ -1,0 +1,308 @@
+####################################################################################################
+Q1  THE GIVE-BACK TRAP -- every window
+####################################################################################################
+====================================================================================================
+Q1  PROFIT GIVE-BACK  [W1]  n=181
+====================================================================================================
+  NOTE the engine has no LOCK_3R_BE reason; the $0.00 round-trip
+  exit is classified BREAKEVEN. So this is measured there.
+
+  a) BREAKEVEN exits: 66  (36.5% of all trades)  net -0.02$
+     of these, reached +3R MFE: 12   +2R: 28   +1R: 49
+     peak MFE_R: median 1.69 p90 3.38 max 5.10
+
+  b) distribution of the PEAK reached before giving it all back
+     MFE bucket      n peak MFE_R peak MFE_$ gave back $
+     [3..4)          9       31.0      15.17        0.00
+     [4..5)          2        8.2       4.55        0.00
+     [5..7)          1        5.1       1.83        0.00
+     [7..10)         0        0.0       0.00       -0.00
+     >=10            0        0.0       0.00       -0.00
+
+  c) TOTAL peak unrealised on those trades: $79.47   realised: $-0.02
+     -> given back: $79.48
+
+  d) WHAT IF the post-trigger stop banked a floor instead of 0.00R?
+     (arithmetic what-if: max(realised R, floor) in R, at the trade's
+      own $/R -> a trade that never came back keeps its own outcome)
+     candidate                                   $ on those trades     vs now
+     A: +1.5R @3R, +2.5R @4R, +4.0R @6R                      10.47     +10.48
+     B: +2.0R @3R, +3.0R @4.5R, +4.5R @6R                    12.36     +12.38
+     1H bridge: +1.5R @3R (no 4H wait)                        9.00      +9.02
+     simple +2.0R @3R                                        12.01     +12.02
+     aggressive +1.0R @2R (pre-3R too)                       17.62     +17.64
+     (current: they exit at BREAKEVEN ≈ 0)                   -0.02
+====================================================================================================
+Q1  PROFIT GIVE-BACK  [W2]  n=145
+====================================================================================================
+  NOTE the engine has no LOCK_3R_BE reason; the $0.00 round-trip
+  exit is classified BREAKEVEN. So this is measured there.
+
+  a) BREAKEVEN exits: 47  (32.4% of all trades)  net -0.02$
+     of these, reached +3R MFE: 2   +2R: 22   +1R: 43
+     peak MFE_R: median 1.98 p90 2.68 max 3.60
+
+  b) distribution of the PEAK reached before giving it all back
+     MFE bucket      n peak MFE_R peak MFE_$ gave back $
+     [3..4)          2        7.2       4.73        0.00
+     [4..5)          0        0.0       0.00       -0.00
+     [5..7)          0        0.0       0.00       -0.00
+     [7..10)         0        0.0       0.00       -0.00
+     >=10            0        0.0       0.00       -0.00
+
+  c) TOTAL peak unrealised on those trades: $51.46   realised: $-0.02
+     -> given back: $51.48
+
+  d) WHAT IF the post-trigger stop banked a floor instead of 0.00R?
+     (arithmetic what-if: max(realised R, floor) in R, at the trade's
+      own $/R -> a trade that never came back keeps its own outcome)
+     candidate                                   $ on those trades     vs now
+     A: +1.5R @3R, +2.5R @4R, +4.0R @6R                       1.99      +2.01
+     B: +2.0R @3R, +3.0R @4.5R, +4.5R @6R                     2.65      +2.67
+     1H bridge: +1.5R @3R (no 4H wait)                        1.99      +2.01
+     simple +2.0R @3R                                         2.65      +2.67
+     aggressive +1.0R @2R (pre-3R too)                       10.40     +10.43
+     (current: they exit at BREAKEVEN ≈ 0)                   -0.02
+====================================================================================================
+Q1  PROFIT GIVE-BACK  [FULL15]  n=412
+====================================================================================================
+  NOTE the engine has no LOCK_3R_BE reason; the $0.00 round-trip
+  exit is classified BREAKEVEN. So this is measured there.
+
+  a) BREAKEVEN exits: 156  (37.9% of all trades)  net -0.04$
+     of these, reached +3R MFE: 15   +2R: 64   +1R: 128
+     peak MFE_R: median 1.73 p90 2.89 max 5.10
+
+  b) distribution of the PEAK reached before giving it all back
+     MFE bucket      n peak MFE_R peak MFE_$ gave back $
+     [3..4)         10       33.6      15.09        0.00
+     [4..5)          4       16.5       5.61        0.00
+     [5..7)          1        5.1       1.37        0.00
+     [7..10)         0        0.0       0.00       -0.00
+     >=10            0        0.0       0.00       -0.00
+
+  c) TOTAL peak unrealised on those trades: $159.48   realised: $-0.04
+     -> given back: $159.52
+
+  d) WHAT IF the post-trigger stop banked a floor instead of 0.00R?
+     (arithmetic what-if: max(realised R, floor) in R, at the trade's
+      own $/R -> a trade that never came back keeps its own outcome)
+     candidate                                   $ on those trades     vs now
+     A: +1.5R @3R, +2.5R @4R, +4.0R @6R                      10.86     +10.90
+     B: +2.0R @3R, +3.0R @4.5R, +4.5R @6R                    12.58     +12.62
+     1H bridge: +1.5R @3R (no 4H wait)                        9.24      +9.28
+     simple +2.0R @3R                                        12.31     +12.35
+     aggressive +1.0R @2R (pre-3R too)                       33.68     +33.72
+     (current: they exit at BREAKEVEN ≈ 0)                   -0.04
+
+  [MOD_Y1] no tape on the branch yet
+
+  [MOD_Y2] no tape on the branch yet
+====================================================================================================
+Q1  PROFIT GIVE-BACK  [MODERN]  n=627
+====================================================================================================
+  NOTE the engine has no LOCK_3R_BE reason; the $0.00 round-trip
+  exit is classified BREAKEVEN. So this is measured there.
+
+  a) BREAKEVEN exits: 238  (38.0% of all trades)  net -0.08$
+     of these, reached +3R MFE: 52   +2R: 108   +1R: 195
+     peak MFE_R: median 1.80 p90 3.52 max 9.90
+
+  b) distribution of the PEAK reached before giving it all back
+     MFE bucket      n peak MFE_R peak MFE_$ gave back $
+     [3..4)         40      136.4      97.56        0.02
+     [4..5)          9       37.9      18.86        0.00
+     [5..7)          2       10.8       2.27        0.00
+     [7..10)         1        9.9       2.83        0.00
+     >=10            0        0.0       0.00       -0.00
+
+  c) TOTAL peak unrealised on those trades: $404.51   realised: $-0.08
+     -> given back: $404.59
+
+  d) WHAT IF the post-trigger stop banked a floor instead of 0.00R?
+     (arithmetic what-if: max(realised R, floor) in R, at the trade's
+      own $/R -> a trade that never came back keeps its own outcome)
+     candidate                                   $ on those trades     vs now
+     A: +1.5R @3R, +2.5R @4R, +4.0R @6R                      56.48     +56.56
+     B: +2.0R @3R, +3.0R @4.5R, +4.5R @6R                    69.81     +69.89
+     1H bridge: +1.5R @3R (no 4H wait)                       50.93     +51.01
+     simple +2.0R @3R                                        67.90     +67.98
+     aggressive +1.0R @2R (pre-3R too)                       75.97     +76.05
+     (current: they exit at BREAKEVEN ≈ 0)                   -0.08
+====================================================================================================
+Q2  BLEED AUTOPSY  [W1]  n=181  net +58.02$
+====================================================================================================
+  (i) is STOP_BLUE an INITIAL stop or a 4H trail?
+      STOP_BLUE exits: 99  net +65.58$
+      v31_struct_trailed True in the whole window: 1/181
+      of the STOP_BLUE exits, trailed: 1 -> INITIAL stops: 98
+      STOP_BLUE net on trailed: +22.29$
+      STOP_BLUE median peak MFE 1.20R (p90 18.28R) -> 44 of 99 never reached +1R
+
+  (ii) every trade split four ways
+
+      (a) WEAPON -- from the fill path (+ = impulse/Weapon B)
+      bucket                     n     net $  $/trade    WR%     PF  medMFE
+      BEAR                     146    +49.00    +0.34   11.0   1.75    1.54
+      BULL                      35     +9.03    +0.26    5.7   1.53    1.56
+
+      (b) SETUP TIMEFRAME
+      bucket                     n     net $  $/trade    WR%     PF  medMFE
+      15min                     34     -5.05    -0.15    8.8   0.74    2.50
+      1h                        17    +16.91    +0.99   11.8   2.23    1.67
+      30min                     24     -6.20    -0.26    0.0   0.00    1.42
+      5min                     106    +52.36    +0.49   12.3   2.22    1.27
+
+      (c) STRUCTURAL STOP WIDTH (stop_dist_pct)
+      bucket                     n     net $  $/trade    WR%     PF  medMFE
+      <0.20%                    26    +28.18    +1.08   26.9   5.27    2.21
+      0.20-0.30%                37    +12.12    +0.33   10.8   2.01    1.79
+      0.30-0.45%                37     +2.11    +0.06    5.4   1.12    1.22
+      0.45-0.75%                47    +17.53    +0.37    8.5   1.80    2.00
+      >=0.75%                   34     -1.92    -0.06    2.9   0.92    0.93
+
+      (d) HIGHER-TIMEFRAME CONTEXT AT ENTRY
+
+      latest 4H structural break (BOS):
+        BEAR       n=  146 net    +49.00 (+0.336/trade)  PF 1.75
+        BULL       n=   35 net     +9.03 (+0.258/trade)  PF 1.53
+
+      latest 1H structural break (BOS):
+        BEAR       n=  140 net     -4.81 (-0.034/trade)  PF 0.93
+        BULL       n=   41 net    +62.83 (+1.533/trade)  PF 4.68
+
+      price vs 4H PurpleBox mid (range_pos: <0.5 = discount):
+        <0 (below box)     n=   14 net    +16.16 (+1.154/trade)
+        0..0.25            n=   48 net    +11.07 (+0.231/trade)
+        0.25..0.5          n=  101 net    +16.60 (+0.164/trade)
+        >=0.5 (premium)    n=   18 net    +14.20 (+0.789/trade)
+
+        in 4H demand=False  n=   57 net    +29.33 (+0.515/trade)
+        in 4H demand=True   n=  124 net    +28.69 (+0.231/trade)
+====================================================================================================
+Q2  BLEED AUTOPSY  [W2]  n=145  net +94.38$
+====================================================================================================
+  (i) is STOP_BLUE an INITIAL stop or a 4H trail?
+      STOP_BLUE exits: 72  net +89.43$
+      v31_struct_trailed True in the whole window: 10/145
+      of the STOP_BLUE exits, trailed: 1 -> INITIAL stops: 71
+      STOP_BLUE net on trailed: +10.13$
+      STOP_BLUE median peak MFE 1.03R (p90 17.79R) -> 33 of 72 never reached +1R
+
+  (ii) every trade split four ways
+
+      (a) WEAPON -- from the fill path (+ = impulse/Weapon B)
+      bucket                     n     net $  $/trade    WR%     PF  medMFE
+      BEAR                     103    +32.41    +0.31   20.4   1.76    1.78
+      BULL                      42    +61.97    +1.48   19.0   5.30    2.03
+
+      (b) SETUP TIMEFRAME
+      bucket                     n     net $  $/trade    WR%     PF  medMFE
+      15min                     30    +31.74    +1.06   33.3   3.54    2.63
+      1h                        12    +12.38    +1.03   41.7   6.01    2.42
+      30min                     24    +18.60    +0.77   20.8   2.48    1.78
+      5min                      79    +31.66    +0.40   11.4   2.07    1.67
+
+      (c) STRUCTURAL STOP WIDTH (stop_dist_pct)
+      bucket                     n     net $  $/trade    WR%     PF  medMFE
+      <0.20%                    19     -4.38    -0.23    5.3   0.37    2.50
+      0.20-0.30%                45    +16.88    +0.38   17.8   2.09    1.77
+      0.30-0.45%                24    +13.45    +0.56   12.5   2.63    2.08
+      0.45-0.75%                39    +65.53    +1.68   30.8   4.63    1.99
+      >=0.75%                   18     +2.90    +0.16   27.8   1.35    1.18
+
+      (d) HIGHER-TIMEFRAME CONTEXT AT ENTRY
+
+      latest 4H structural break (BOS):
+        BEAR       n=  103 net    +32.41 (+0.315/trade)  PF 1.76
+        BULL       n=   42 net    +61.97 (+1.475/trade)  PF 5.30
+
+      latest 1H structural break (BOS):
+        BEAR       n=  107 net    +41.04 (+0.384/trade)  PF 1.89
+        BULL       n=   38 net    +53.33 (+1.403/trade)  PF 5.80
+
+      price vs 4H PurpleBox mid (range_pos: <0.5 = discount):
+        <0 (below box)     n=   17 net    +15.56 (+0.916/trade)
+        0..0.25            n=   49 net    +12.32 (+0.251/trade)
+        0.25..0.5          n=   71 net    +48.22 (+0.679/trade)
+        >=0.5 (premium)    n=    8 net    +18.27 (+2.284/trade)
+
+        in 4H demand=False  n=   39 net     +3.44 (+0.088/trade)
+        in 4H demand=True   n=  106 net    +90.93 (+0.858/trade)
+====================================================================================================
+Q2  BLEED AUTOPSY  [MODERN]  n=627  net +32.80$
+====================================================================================================
+  (i) is STOP_BLUE an INITIAL stop or a 4H trail?
+      STOP_BLUE exits: 312  net +13.21$
+      v31_struct_trailed True in the whole window: 17/627
+      of the STOP_BLUE exits, trailed: 1 -> INITIAL stops: 311
+      STOP_BLUE net on trailed: +10.23$
+      STOP_BLUE median peak MFE 1.03R (p90 4.99R) -> 136 of 312 never reached +1R
+
+  (ii) every trade split four ways
+
+      (a) WEAPON -- from the fill path (+ = impulse/Weapon B)
+      bucket                     n     net $  $/trade    WR%     PF  medMFE
+      BEAR                     466    -32.03    -0.07    8.6   0.89    1.66
+      BULL                     161    +64.82    +0.40   12.4   1.66    1.57
+
+      (b) SETUP TIMEFRAME
+      bucket                     n     net $  $/trade    WR%     PF  medMFE
+      15min                    147     -8.21    -0.06   13.6   0.92    1.91
+      1h                        43     -9.18    -0.21   11.6   0.72    1.45
+      30min                     97    +18.99    +0.20   15.5   1.31    1.97
+      5min                     340    +31.20    +0.09    5.9   1.16    1.50
+
+      (c) STRUCTURAL STOP WIDTH (stop_dist_pct)
+      bucket                     n     net $  $/trade    WR%     PF  medMFE
+      <0.20%                    93    -10.76    -0.12    4.3   0.74    2.16
+      0.20-0.30%               153    -30.38    -0.20    5.9   0.61    1.70
+      0.30-0.45%               149    +43.75    +0.29   10.1   1.52    1.78
+      0.45-0.75%               138    +37.25    +0.27   14.5   1.37    1.44
+      >=0.75%                   94     -7.05    -0.08   12.8   0.92    0.85
+
+      (d) HIGHER-TIMEFRAME CONTEXT AT ENTRY
+
+      latest 4H structural break (BOS):
+        BEAR       n=  466 net    -32.03 (-0.069/trade)  PF 0.89
+        BULL       n=  161 net    +64.82 (+0.403/trade)  PF 1.66
+
+      latest 1H structural break (BOS):
+        BEAR       n=  478 net    +94.56 (+0.198/trade)  PF 1.32
+        BULL       n=  149 net    -61.76 (-0.415/trade)  PF 0.33
+
+      price vs 4H PurpleBox mid (range_pos: <0.5 = discount):
+        <0 (below box)     n=   55 net     -2.34 (-0.042/trade)
+        0..0.25            n=  183 net    -78.70 (-0.430/trade)
+        0.25..0.5          n=  362 net   +126.85 (+0.350/trade)
+        >=0.5 (premium)    n=   27 net    -13.02 (-0.482/trade)
+
+        in 4H demand=False  n=  134 net    -40.12 (-0.299/trade)
+        in 4H demand=True   n=  493 net    +72.92 (+0.148/trade)
+####################################################################################################
+Q4  EXIT SLIPPAGE vs SCRATCH LOSSES (the Part-4 claim)
+####################################################################################################
+
+  The claim: with EXIT_SLIPPAGE_BPS>0 a trade that reached +3R exits at a few
+  cents negative, `net < 0` increments consec_losses and the coin is banned.
+
+  Verdict from the code: CANNOT FIRE, and the belt-and-braces fix is already
+  in _exit:
+      is_be = ((not is_win) and (not is_swin)
+               and (self.shield or self.be_armed or net > 0) and R >= -0.05)
+      if is_be: reason = "BREAKEVEN"
+  A +3R trade that nets -$0.01 has R >= -0.05, so it is reclassified
+  BREAKEVEN before the streak reads it.  The streak keys on classification,
+  not on net.
+
+  measured on the committed v36 tapes: a BREAKEVEN exit is the only
+  exit that lands within +/-5 cents. Scratch-exit census:
+    W1      BREAKEVEN   66 | |net|<5c:   66 | of those negative:  66 | worst -2.8659$
+    W2      BREAKEVEN   47 | |net|<5c:   47 | of those negative:  47 | worst -2.6536$
+    MODERN  BREAKEVEN  238 | |net|<5c:  238 | of those negative: 237 | worst -4.0729$
+
+  The real cost of EXIT_SLIPPAGE_BPS is not the streak, it is the trade mix
+  (v36 measured: 1 bps moved W2 from $194.38 to $146.33 by reshuffling which
+  single slot each day's winner occupied).  That is a POSITION-SIZING /
+  path-dependence effect, not an accounting bug.
+

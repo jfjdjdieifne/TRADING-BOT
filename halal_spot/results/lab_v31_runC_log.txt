@@ -1,0 +1,67 @@
+
+########## LIVE ENGINE · combo=C_124s · 2021-01-01..2026-10-31 ##########
+    config: VIGILANCE_SCOPE=none  SHIELD_RULE_V30=MID|BOS  STRUCT_TRAIL=True  LOCK_MODE=stop
+[      C_124s] n= 330   34W/ 76SW/ 90BE/130L  WR= 20.73% (incl  45.83%)  minWin=3.0  SWIN[0.07..2.24]  >=4R=  7  maxR= 12.84  totR=  -22.18
+               net= +11.60% ($223.19)  PF=1.13  maxDD=-12.22%  fees=$69.7  streak=3/8  yearly={'2021': 109, '2022': 87, '2023': 19, '2024': 48, '2025': 19, '2026': 48}
+               CADENCE: profitable months=38.6%  compounded=0.16%/mo  median month=0.0%  wins/mo=1.57  trades/mo=4.71
+               MECH: struct_trail=210 harvests=0 impulse=0 sacred_impulse=0 floor_htf=0 be_at_entry=14 minTargetR=3.16
+               asserts A1..A5 = FPPPP -> 4/5 (A2 entry-gate P)  exits={"LOCK_FLOOR_STOP": 31, "STOP_BLUE": 130, "STRUCT_PROFIT": 76, "BREAKEVEN": 90, "TARGET_REJECTION": 3}
+
+########## LIVE ENGINE · combo=C_124_h · 2021-01-01..2026-10-31 ##########
+    config: VIGILANCE_SCOPE=none  SHIELD_RULE_V30=MID|BOS  STRUCT_TRAIL=True  LOCK_MODE=trail  HARVEST_PCT=0.5
+[     C_124_h] n= 321   30W/ 73SW/ 90BE/128L  WR= 18.99% (incl  44.59%)  minWin=3.3  SWIN[0.07..2.93]  >=4R= 27  maxR= 18.97  totR=   45.29
+               net= +40.95% ($281.91)  PF=1.42  maxDD=-9.69%  fees=$78.65  streak=3/8  yearly={'2021': 107, '2022': 83, '2023': 19, '2024': 45, '2025': 19, '2026': 48}
+               CADENCE: profitable months=41.4%  compounded=0.49%/mo  median month=0.0%  wins/mo=1.47  trades/mo=4.59
+               MECH: struct_trail=195 harvests=31 impulse=0 sacred_impulse=0 floor_htf=0 be_at_entry=15 minTargetR=3.16
+               asserts A1..A5 = FPPPP -> 4/5 (A2 entry-gate P)  exits={"STOP_BLUE": 155, "STRUCT_PROFIT": 73, "BREAKEVEN": 90, "TARGET_REJECTION": 3}
+
+########## LIVE ENGINE · combo=C_124_imp · 2021-01-01..2026-10-31 ##########
+    config: VIGILANCE_SCOPE=none  SHIELD_RULE_V30=MID|BOS  STRUCT_TRAIL=True  LOCK_MODE=trail  IMPULSE_PURPLE=True
+[   C_124_imp] n= 227   25W/ 49SW/ 61BE/ 92L  WR= 21.37% (incl  44.58%)  minWin=3.18  SWIN[0.15..2.8]  >=4R= 22  maxR= 34.50  totR=  142.08
+               net= +98.44% ($396.88)  PF=2.16  maxDD=-17.49%  fees=$60.25  streak=3/8  yearly={'2021': 88, '2022': 93, '2023': 8, '2024': 5, '2025': 13, '2026': 20}
+               CADENCE: profitable months=34.3%  compounded=0.98%/mo  median month=0.0%  wins/mo=1.06  trades/mo=3.24
+               MECH: struct_trail=142 harvests=0 impulse=10242 sacred_impulse=2 floor_htf=0 be_at_entry=10 minTargetR=3.11
+               asserts A1..A5 = FPPPF -> 3/5 (A2 entry-gate P)  exits={"STOP_BLUE": 114, "STRUCT_PROFIT": 49, "BREAKEVEN": 61, "TARGET_REJECTION": 3}
+
+########## LIVE ENGINE · combo=C_124_t20 · 2021-01-01..2026-10-31 ##########
+    config: VIGILANCE_SCOPE=none  SHIELD_RULE_V30=MID|BOS  STRUCT_TRAIL=True  STRUCT_TRAIL_MIN_R=2.0  LOCK_MODE=trail
+[   C_124_t20] n= 305   32W/ 43SW/102BE/128L  WR= 20.00% (incl  36.95%)  minWin=3.05  SWIN[0.18..2.8]  >=4R= 28  maxR= 34.50  totR=  121.55
+               net= +81.10% ($362.21)  PF=1.75  maxDD=-11.8%  fees=$81.45  streak=3/9  yearly={'2021': 98, '2022': 80, '2023': 17, '2024': 43, '2025': 19, '2026': 48}
+               CADENCE: profitable months=42.9%  compounded=0.85%/mo  median month=0.0%  wins/mo=1.07  trades/mo=4.36
+               MECH: struct_trail=129 harvests=0 impulse=0 sacred_impulse=0 floor_htf=0 be_at_entry=16 minTargetR=3.16
+               asserts A1..A5 = FPPPP -> 4/5 (A2 entry-gate P)  exits={"STOP_BLUE": 157, "BREAKEVEN": 102, "STRUCT_PROFIT": 43, "TARGET_REJECTION": 3}
+
+########## LIVE ENGINE · combo=C_124_t05 · 2021-01-01..2026-10-31 ##########
+    config: VIGILANCE_SCOPE=none  SHIELD_RULE_V30=MID|BOS  STRUCT_TRAIL=True  STRUCT_TRAIL_MIN_R=0.5  LOCK_MODE=trail
+[   C_124_t05] n= 319   28W/ 82SW/ 81BE/128L  WR= 17.95% (incl  46.22%)  minWin=3.18  SWIN[0.06..2.8]  >=4R= 27  maxR= 34.50  totR=  111.98
+               net= +72.52% ($345.04)  PF=1.68  maxDD=-9.87%  fees=$85.04  streak=3/8  yearly={'2021': 100, '2022': 91, '2023': 17, '2024': 44, '2025': 19, '2026': 48}
+               CADENCE: profitable months=41.4%  compounded=0.78%/mo  median month=0.0%  wins/mo=1.57  trades/mo=4.56
+               MECH: struct_trail=197 harvests=0 impulse=0 sacred_impulse=0 floor_htf=0 be_at_entry=14 minTargetR=3.16
+               asserts A1..A5 = FPPPP -> 4/5 (A2 entry-gate P)  exits={"STOP_BLUE": 152, "STRUCT_PROFIT": 82, "BREAKEVEN": 81, "TARGET_REJECTION": 4}
+
+########## LIVE ENGINE · combo=C_124_htf · 2021-01-01..2026-10-31 ##########
+    config: VIGILANCE_SCOPE=none  SHIELD_RULE_V30=MID|BOS  STRUCT_TRAIL=True  LOCK_MODE=htf
+[   C_124_htf] n= 288   27W/ 65SW/ 80BE/116L  WR= 18.88% (incl  44.23%)  minWin=3.0  SWIN[0.06..2.97]  >=4R=  6  maxR= 12.84  totR=  -15.09
+               net=  +7.21% ($214.43)  PF=1.09  maxDD=-14.03%  fees=$58.9  streak=3/8  yearly={'2021': 109, '2022': 83, '2023': 32, '2024': 23, '2025': 22, '2026': 19}
+               CADENCE: profitable months=38.6%  compounded=0.1%/mo  median month=0.0%  wins/mo=1.31  trades/mo=4.11
+               MECH: struct_trail=170 harvests=0 impulse=0 sacred_impulse=0 floor_htf=25 be_at_entry=14 minTargetR=3.16
+               asserts A1..A5 = FPPPP -> 4/5 (A2 entry-gate P)  exits={"STOP_BLUE": 121, "STRUCT_PROFIT": 64, "BREAKEVEN": 80, "LOCK_FLOOR_HTF": 21, "TARGET_REJECTION": 2}
+
+================= v31 LIVE COMPARISON TABLE =================
+       combo    n    W  SW   BE    L    WR%   WRi%  minW  >=4R   maxR     totR     net%    PF  maxDD%  mo+%  c%/mo  w/mo  strk  5as
+         v25  206   51   0   48  107  32.30   0.00   3.0    13  19.38     0.00   +42.14  1.43  -17.43   0.0   0.00  0.00     3    -
+         v27  297   70   0   66  161  30.30   0.00   3.0    18  19.38     0.00   +31.90  1.26  -14.41   0.0   0.00  0.00     3    -
+         v30  298   44   0  109  145  23.30   0.00   3.0    10  19.38     0.00   +71.75  2.14   -9.52   0.0   0.00  0.00     3    -
+      C_124s  330   34  76   90  130  20.73  45.83   3.0     7  12.84   -22.18   +11.60  1.13  -12.22  38.6   0.16  1.57     3  4/5
+     C_124_h  321   30  73   90  128  18.99  44.59   3.3    27  18.97    45.29   +40.95  1.42   -9.69  41.4   0.49  1.47     3  4/5
+   C_124_imp  227   25  49   61   92  21.37  44.58  3.18    22  34.50   142.08   +98.44  2.16  -17.49  34.3   0.98  1.06     3  3/5
+   C_124_t20  305   32  43  102  128  20.00  36.95  3.05    28  34.50   121.55   +81.10  1.75  -11.80  42.9   0.85  1.07     3  4/5
+   C_124_t05  319   28  82   81  128  17.95  46.22  3.18    27  34.50   111.98   +72.52  1.68   -9.87  41.4   0.78  1.57     3  4/5
+   C_124_htf  288   27  65   80  116  18.88  44.23   3.0     6  12.84   -15.09    +7.21  1.09  -14.03  38.6   0.10  1.31     3  4/5
+=============================================================
+        C_124s yearly: {'2021': 109, '2022': 87, '2023': 19, '2024': 48, '2025': 19, '2026': 48}
+       C_124_h yearly: {'2021': 107, '2022': 83, '2023': 19, '2024': 45, '2025': 19, '2026': 48}
+     C_124_imp yearly: {'2021': 88, '2022': 93, '2023': 8, '2024': 5, '2025': 13, '2026': 20}
+     C_124_t20 yearly: {'2021': 98, '2022': 80, '2023': 17, '2024': 43, '2025': 19, '2026': 48}
+     C_124_t05 yearly: {'2021': 100, '2022': 91, '2023': 17, '2024': 44, '2025': 19, '2026': 48}
+     C_124_htf yearly: {'2021': 109, '2022': 83, '2023': 32, '2024': 23, '2025': 22, '2026': 19}

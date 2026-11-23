@@ -1,0 +1,367 @@
+[
+  {
+    "entry_time": "2021-01-04 00:00:00+00:00",
+    "purple_mid": 33281.5,
+    "broken_red": {
+      "kind": "RED",
+      "bottom": 32769.79,
+      "top": 32930.0,
+      "tf": "30min"
+    },
+    "yellow": {
+      "kind": "YELLOW_B",
+      "bottom": 32800.52,
+      "top": 33443.38,
+      "tf": "30min"
+    },
+    "green": {
+      "kind": "GREEN",
+      "bottom": 32455.71,
+      "top": 32772.21,
+      "tf": "30min"
+    },
+    "stop_blue": {
+      "kind": "BLUE",
+      "bottom": 32500.0,
+      "top": 32521.79,
+      "tf": "30min"
+    },
+    "entry": 32772.21,
+    "stop": 32455.71,
+    "wall": null,
+    "exit_reason": "STOP_BLUE",
+    "R": -1.21
+  },
+  {
+    "entry_time": "2021-01-08 22:00:00+00:00",
+    "purple_mid": 39756.96,
+    "broken_red": {
+      "kind": "RED",
+      "bottom": 39159.94,
+      "top": 39695.77,
+      "tf": "15min"
+    },
+    "yellow": {
+      "kind": "YELLOW_B",
+      "bottom": 39542.26,
+      "top": 39608.52,
+      "tf": "15min"
+    },
+    "green": {
+      "kind": "GREEN",
+      "bottom": 38652.0,
+      "top": 39540.08,
+      "tf": "15min"
+    },
+    "stop_blue": {
+      "kind": "BLUE",
+      "bottom": 38222.0,
+      "top": 38272.8,
+      "tf": "15min"
+    },
+    "entry": 39540.08,
+    "stop": 38652.0,
+    "wall": null,
+    "exit_reason": "STOP_BLUE",
+    "R": -1.09
+  },
+  {
+    "entry_time": "2021-01-22 08:00:00+00:00",
+    "purple_mid": 31485.0,
+    "broken_red": {
+      "kind": "RED",
+      "bottom": 30975.7,
+      "top": 31500.0,
+      "tf": "30min"
+    },
+    "yellow": {
+      "kind": "YELLOW_B",
+      "bottom": 30789.0,
+      "top": 30837.37,
+      "tf": "30min"
+    },
+    "green": {
+      "kind": "GREEN",
+      "bottom": 30282.97,
+      "top": 30710.92,
+      "tf": "30min"
+    },
+    "stop_blue": {
+      "kind": "BLUE",
+      "bottom": 28850.0,
+      "top": 29501.42,
+      "tf": "30min"
+    },
+    "entry": 30710.92,
+    "stop": 30282.97,
+    "wall": {
+      "kind": "YELLOW_S",
+      "bottom": 32784.31,
+      "top": 33971.41,
+      "tf": "4h"
+    },
+    "exit_reason": "BREAKEVEN",
+    "R": -0.0
+  },
+  {
+    "entry_time": "2021-01-28 00:00:00+00:00",
+    "purple_mid": 31228.65,
+    "broken_red": {
+      "kind": "RED",
+      "bottom": 30918.0,
+      "top": 30948.0,
+      "tf": "30min"
+    },
+    "yellow": {
+      "kind": "YELLOW_B",
+      "bottom": 30175.09,
+      "top": 30378.55,
+      "tf": "30min"
+    },
+    "green": {
+      "kind": "GREEN",
+      "bottom": 29500.0,
+      "top": 30088.39,
+      "tf": "30min"
+    },
+    "stop_blue": {
+      "kind": "BLUE",
+      "bottom": 29500.0,
+      "top": 29709.79,
+      "tf": "30min"
+    },
+    "entry": 30088.39,
+    "stop": 29500.0,
+    "wall": {
+      "kind": "YELLOW_S",
+      "bottom": 32827.33,
+      "top": 33373.92,
+      "tf": "4h"
+    },
+    "exit_reason": "BREAKEVEN",
+    "R": -0.0
+  },
+  {
+    "entry_time": "2021-02-07 18:00:00+00:00",
+    "purple_mid": 38592.97,
+    "broken_red": {
+      "kind": "RED",
+      "bottom": 37921.12,
+      "top": 38104.0,
+      "tf": "15min"
+    },
+    "yellow": {
+      "kind": "YELLOW_B",
+      "bottom": 37832.05,
+      "top": 37851.61,
+      "tf": "15min"
+    },
+    "green": {
+      "kind": "GREEN",
+      "bottom": 37351.0,
+      "top": 37742.84,
+      "tf": "15min"
+    },
+    "stop_blue": {
+      "kind": "BLUE",
+      "bottom": 37550.0,
+      "top": 37559.99,
+      "tf": "15min"
+    },
+    "entry": 37742.84,
+    "stop": 37351.0,
+    "wall": {
+      "kind": "YELLOW_S",
+      "bottom": 39611.04,
+      "top": 39940.44,
+      "tf": "4h"
+    },
+    "exit_reason": "BREAKEVEN",
+    "R": -0.0
+  },
+  {
+    "entry_time": "2021-02-16 01:00:00+00:00",
+    "purple_mid": 47832.25,
+    "broken_red": {
+      "kind": "RED",
+      "bottom": 48460.0,
+      "top": 48570.75,
+      "tf": "30min"
+    },
+    "yellow": {
+      "kind": "YELLOW_B",
+      "bottom": 47140.0,
+      "top": 47181.74,
+      "tf": "30min"
+    },
+    "green": {
+      "kind": "GREEN",
+      "bottom": 46867.86,
+      "top": 47020.0,
+      "tf": "30min"
+    },
+    "stop_blue": {
+      "kind": "BLUE",
+      "bottom": 46831.61,
+      "top": 46887.36,
+      "tf": "30min"
+    },
+    "entry": 47020.0,
+    "stop": 46867.86,
+    "wall": null,
+    "exit_reason": "STOP_BLUE",
+    "R": 3.25
+  },
+  {
+    "entry_time": "2021-02-28 10:15:00+00:00",
+    "purple_mid": 45977.38,
+    "broken_red": {
+      "kind": "RED",
+      "bottom": 45079.87,
+      "top": 45273.68,
+      "tf": "15min"
+    },
+    "yellow": {
+      "kind": "YELLOW_B",
+      "bottom": 44942.0,
+      "top": 45074.97,
+      "tf": "15min"
+    },
+    "green": {
+      "kind": "GREEN",
+      "bottom": 44766.92,
+      "top": 44942.0,
+      "tf": "15min"
+    },
+    "stop_blue": {
+      "kind": "BLUE",
+      "bottom": 43738.65,
+      "top": 43905.71,
+      "tf": "15min"
+    },
+    "entry": 44942.0,
+    "stop": 44766.92,
+    "wall": {
+      "kind": "YELLOW_S",
+      "bottom": 47800.0,
+      "top": 49226.09,
+      "tf": "4h"
+    },
+    "exit_reason": "STOP_BLUE",
+    "R": -1.51
+  },
+  {
+    "entry_time": "2021-03-04 06:30:00+00:00",
+    "purple_mid": 49843.8,
+    "broken_red": {
+      "kind": "RED",
+      "bottom": 49321.35,
+      "top": 49383.29,
+      "tf": "15min"
+    },
+    "yellow": {
+      "kind": "YELLOW_B",
+      "bottom": 49358.33,
+      "top": 49473.13,
+      "tf": "15min"
+    },
+    "green": {
+      "kind": "GREEN",
+      "bottom": 49080.0,
+      "top": 49314.03,
+      "tf": "15min"
+    },
+    "stop_blue": {
+      "kind": "BLUE",
+      "bottom": 49010.1,
+      "top": 49065.33,
+      "tf": "15min"
+    },
+    "entry": 49314.03,
+    "stop": 49080.0,
+    "wall": {
+      "kind": "YELLOW_S",
+      "bottom": 52311.71,
+      "top": 53279.02,
+      "tf": "4h"
+    },
+    "exit_reason": "LOCK_FLOOR_CLOSE",
+    "R": 3.0
+  },
+  {
+    "entry_time": "2021-03-05 12:30:00+00:00",
+    "purple_mid": 47711.9,
+    "broken_red": {
+      "kind": "RED",
+      "bottom": 47094.38,
+      "top": 47229.79,
+      "tf": "30min"
+    },
+    "yellow": {
+      "kind": "YELLOW_B",
+      "bottom": 47190.0,
+      "top": 47260.96,
+      "tf": "30min"
+    },
+    "green": {
+      "kind": "GREEN",
+      "bottom": 46780.01,
+      "top": 47094.38,
+      "tf": "30min"
+    },
+    "stop_blue": {
+      "kind": "BLUE",
+      "bottom": 45837.28,
+      "top": 45857.3,
+      "tf": "30min"
+    },
+    "entry": 47094.38,
+    "stop": 46780.01,
+    "wall": {
+      "kind": "YELLOW_S",
+      "bottom": 48710.94,
+      "top": 48721.43,
+      "tf": "4h"
+    },
+    "exit_reason": "LOCK_FLOOR_CLOSE",
+    "R": 3.0
+  },
+  {
+    "entry_time": "2021-03-06 16:45:00+00:00",
+    "purple_mid": 48073.8,
+    "broken_red": {
+      "kind": "RED",
+      "bottom": 47650.0,
+      "top": 47712.69,
+      "tf": "15min"
+    },
+    "yellow": {
+      "kind": "YELLOW_B",
+      "bottom": 47670.0,
+      "top": 47719.01,
+      "tf": "15min"
+    },
+    "green": {
+      "kind": "GREEN",
+      "bottom": 47238.32,
+      "top": 47650.01,
+      "tf": "15min"
+    },
+    "stop_blue": {
+      "kind": "BLUE",
+      "bottom": 47070.0,
+      "top": 47195.06,
+      "tf": "15min"
+    },
+    "entry": 47650.01,
+    "stop": 47238.32,
+    "wall": {
+      "kind": "YELLOW_S",
+      "bottom": 52311.71,
+      "top": 53279.02,
+      "tf": "4h"
+    },
+    "exit_reason": "LOCK_FLOOR_CLOSE",
+    "R": 3.0
+  }
+]

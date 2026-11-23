@@ -1,0 +1,36 @@
+=== B0 W1 (identity re-check after wiring) 10:52:03 ===
+
+##### v38 combo=B0 W1 2023-10-01..2024-03-31 #####
+    overrides: {}
+    n=181 end=$158.0240 PF=1.706 DD=-14.064% mo+=5/6 (550.6s)
+=== TRAIL_1H W1 11:01:15 ===
+
+##### v38 combo=TRAIL_1H W1 2023-10-01..2024-03-31 #####
+    overrides: {"TRAIL_TF_AFTER_3R": "1h"}
+    n=179 end=$128.8009 PF=1.413 DD=-12.814% mo+=4/6 (571.8s)
+=== DOL_LOCK W1 11:10:48 ===
+
+##### v38 combo=DOL_LOCK W1 2023-10-01..2024-03-31 #####
+    overrides: {"DOL_TARGET_LOCK": true}
+    n=195 end=$125.8158 PF=1.347 DD=-12.063% mo+=5/6 (551.3s)
+=== ANTI_BE_12 W1 11:20:01 ===
+
+##### v38 combo=ANTI_BE_12 W1 2023-10-01..2024-03-31 #####
+    overrides: {"ANTI_SHAKEOUT_BE": true, "MIN_BE_DISPLACEMENT_PCT": 1.2}
+    n=170 end=$140.3953 PF=1.574 DD=-10.45% mo+=6/6 (533.3s)
+=== ANTI_BE_15 W1 11:28:55 ===
+
+##### v38 combo=ANTI_BE_15 W1 2023-10-01..2024-03-31 #####
+    overrides: {"ANTI_SHAKEOUT_BE": true, "MIN_BE_DISPLACEMENT_PCT": 1.5}
+    n=175 end=$136.8748 PF=1.51 DD=-11.02% mo+=5/6 (528.3s)
+=== MIN_ROOM_1 W1 11:37:45 ===
+
+##### v38 combo=MIN_ROOM_1 W1 2023-10-01..2024-03-31 #####
+    overrides: {"MIN_DOL_ROOM_PCT": 1.0}
+    n=118 end=$138.0539 PF=1.661 DD=-14.264% mo+=4/6 (514.8s)
+=== ADAPT_4H W1 11:46:21 ===
+
+##### v38 combo=ADAPT_4H W1 2023-10-01..2024-03-31 #####
+    overrides: {"ADAPT_4H_RATCHET": true}
+    n=181 end=$158.0240 PF=1.706 DD=-14.064% mo+=5/6 (580.6s)
+PHASE1_DONE

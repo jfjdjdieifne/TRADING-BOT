@@ -1,0 +1,4 @@
+
+##### v38 combo=ADAPT_4H W1 2023-10-01..2024-03-31 #####
+    overrides: {"ADAPT_4H_RATCHET": true}
+    n=156 end=$166.7876 PF=1.835 DD=-15.189% mo+=4/6 (516.3s)

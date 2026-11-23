@@ -1,0 +1,32 @@
+[
+  {
+    "assert": 1,
+    "rule": "WR >= 60%",
+    "passed": false,
+    "observed": "30.10% (62W/144L)"
+  },
+  {
+    "assert": 2,
+    "rule": "min_winner_R >= 3.00",
+    "passed": true,
+    "observed": "3.00R"
+  },
+  {
+    "assert": 3,
+    "rule": "runners_4r_plus >= 5 AND max_winner_R >= 6.0",
+    "passed": true,
+    "observed": ">=4R:13 max:19.38R"
+  },
+  {
+    "assert": 4,
+    "rule": "max_consecutive_losses <= 3",
+    "passed": true,
+    "observed": "3"
+  },
+  {
+    "assert": 5,
+    "rule": "total >= 180 AND yearly[y] >= 15 for 2021..2025",
+    "passed": true,
+    "observed": "total:249 yearly:{'2021': 69, '2022': 66, '2023': 34, '2024': 33, '2025': 25, '2026': 22}"
+  }
+]

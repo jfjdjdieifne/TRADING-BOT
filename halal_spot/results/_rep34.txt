@@ -1,0 +1,308 @@
+
+=== TABLE 1 - the six arms, both windows ======================
+arm                  |w  |   n|   W   BE    L|   WR%|     totR|     net$|     end$|   PF|     DD%|   maxR| extra2R| slotFull| SWAP| <$10|    s
+----------------------------------------------------------------------------------------------------------------------------------------------
+V33_TEL_3S_3R        |W1 | 357|  47  126  184| 13.17|   128.46|    30.81|   130.81| 1.86|  -5.774|  35.64|       0|       24|    0|    0|  607
+V33_TEL_3S_3R        |W2 | 265|  46   93  126| 17.36|   105.80|    21.65|   121.65| 1.92|  -5.921|  68.24|       0|       17|    0|    0|  412
+S1_TEL_3R            |W1 | 227|  27   81  119| 11.89|    48.92|    39.26|   139.26| 1.43| -14.393|  28.21|       0|      181|    0|    0|  698
+S1_TEL_3R            |W2 | 180|  32   59   89| 17.78|    83.02|    54.83|   154.83| 1.80| -14.186|  68.24|       0|      145|    0|    0|  456
+S1_TEL_2R            |W1 | 213|  28   68  117| 13.15|    21.85|    12.55|   112.55| 1.15| -15.223|  28.21|      51|      201|    0|    0|  650
+S1_TEL_2R            |W2 | 200|  27   67  106| 13.50|    57.90|    34.57|   134.57| 1.42| -17.119|  68.24|      57|      198|    0|    0|  401
+S1_TEL_2R_BRIDGE     |W1 | 214|  32   65  117| 14.95|    19.19|     9.25|   109.25| 1.11| -15.223|  28.21|      51|      200|    0|    0|  638
+S1_TEL_2R_BRIDGE     |W2 | 205|  32   66  107| 15.61|    46.39|    29.12|   129.12| 1.37| -16.414|  68.24|      58|      190|    0|    0|  386
+S1_TEL_2R_SWAP       |W1 | 214|  32   65  117| 14.95|    19.19|     9.25|   109.25| 1.11| -15.223|  28.21|      51|      200|    0|    0|  526
+S1_TEL_2R_SWAP       |W2 | 205|  32   66  107| 15.61|    46.39|    29.12|   129.12| 1.37| -16.414|  68.24|      58|      190|    0|    0|  356
+S1_FAST_2R_HARVEST   |W1 | 235|  34   72  129| 14.47|   -69.43|   -27.79|    72.21| 0.65| -33.114|  28.21|      57|      162|    0|    0|  566
+S1_FAST_2R_HARVEST   |W2 | 213|  35   70  108| 16.43|   -51.27|     7.29|   107.29| 1.09| -16.458|  12.41|      59|      200|    0|    0|  352
+
+chained return = (W1end/100)*(W2end/100)-1
+  V33_TEL_3S_3R         $  130.81 -> $  121.65     +59.14%
+  S1_TEL_3R             $  139.26 -> $  154.83    +115.62%
+  S1_TEL_2R             $  112.55 -> $  134.57     +51.46%
+  S1_TEL_2R_BRIDGE      $  109.25 -> $  129.12     +41.06%
+  S1_TEL_2R_SWAP        $  109.25 -> $  129.12     +41.06%
+  S1_FAST_2R_HARVEST    $   72.21 -> $  107.29     -22.53%
+
+identity test (arm 1 must equal the shipped v33 TEL book):
+  W1: got (357, 128.4592, 130.8101, -5.774)  expected (357, 128.4592, 130.8101, -5.774)  -> MATCH
+  W2: got (265, 105.7958, 121.654, -5.921)  expected (265, 105.7958, 121.654, -5.921)  -> MATCH
+
+=== TABLE 2 - month 1..6 in $ and %, EVERY arm, both windows ===
+
+  -- V33_TEL_3S_3R W1 (W1), final $130.8101, maxDD -5.774%
+       m bucket      n      W/BE/L    WR%     totR     net$   month%      end$    PF
+     M1  2023-10    62     2/27/33    3.2   -51.80    -3.90    -3.90     96.10  0.17
+     M2  2023-11    58    10/21/27   17.2    15.27     6.80     7.08    102.90  2.50
+     M3  2023-12    53     6/16/31   11.3   -14.46    -0.22    -0.21    102.68  0.96
+     M4  2024-01    79    15/30/34   19.0    65.04     9.57     9.33    112.26  2.47
+     M5  2024-02    46     7/13/26   15.2    80.39     6.38     5.67    118.63  2.17
+     M6  2024-03    59     7/19/33   11.9    34.01    12.18    10.27    130.81  2.48
+
+  -- V33_TEL_3S_3R W2 (W2), final $121.654, maxDD -5.921%
+       m bucket      n      W/BE/L    WR%     totR     net$   month%      end$    PF
+     M1  2024-05    35     4/13/18   11.4    -1.48     2.70     2.70    102.70  1.96
+     M2  2024-06    51    10/19/22   19.6   -11.99    -2.56    -2.49    100.14  0.43
+     M3  2024-07    54    11/21/22   20.4   116.55    14.51    14.49    114.65  4.67
+     M4  2024-08    53     9/14/30   17.0    17.70     4.47     3.90    119.12  1.76
+     M5  2024-09    33     6/10/17   18.2    -5.20     0.09     0.07    119.20  1.02
+     M6  2024-10    39     6/16/17   15.4    -9.79     2.45     2.06    121.65  1.85
+
+  -- S1_TEL_3R W1 (W1), final $139.2627, maxDD -14.393%
+       m bucket      n      W/BE/L    WR%     totR     net$   month%      end$    PF
+     M1  2023-10    42     2/20/20    4.8   -26.47    -8.37    -8.37     91.63  0.22
+     M2  2023-11    36     5/14/17   13.9    11.28    18.36    20.04    109.99  2.91
+     M3  2023-12    40     4/16/20   10.0    -1.51    -1.02    -0.93    108.97  0.93
+     M4  2024-01    41     7/12/22   17.1    12.51    13.69    12.57    122.67  1.79
+     M5  2024-02    29      5/8/16   17.2    54.90    16.06    13.09    138.73  2.15
+     M6  2024-03    39     4/11/24   10.3    -1.79     0.53     0.38    139.26  1.02
+
+  -- S1_TEL_3R W2 (W2), final $154.8264, maxDD -14.186%
+       m bucket      n      W/BE/L    WR%     totR     net$   month%      end$    PF
+     M1  2024-05    24      3/9/12   12.5    -7.93     3.77     3.77    103.77  1.55
+     M2  2024-06    43     7/14/22   16.3   -13.71    -6.35    -6.12     97.42  0.57
+     M3  2024-07    30     7/13/10   23.3   104.93    35.83    36.78    133.25  5.08
+     M4  2024-08    32      6/9/17   18.8    19.14    20.96    15.72    154.20  2.57
+     M5  2024-09    27      3/8/16   11.1   -19.52    -8.96    -5.80    145.25  0.41
+     M6  2024-10    24      6/6/12   25.0     0.12     9.58     6.60    154.83  1.97
+
+  -- S1_TEL_2R W1 (W1), final $112.5518, maxDD -15.223%
+       m bucket      n      W/BE/L    WR%     totR     net$   month%      end$    PF
+     M1  2023-10    42     3/19/20    7.1   -24.84    -7.59    -7.59     92.41  0.27
+     M2  2023-11    37     6/10/21   16.2    -2.73    -0.41    -0.44     92.00  0.97
+     M3  2023-12    32     5/11/16   15.6    10.68     6.00     6.52     98.00  1.59
+     M4  2024-01    35      5/8/22   14.3     4.09     9.54     9.74    107.55  1.62
+     M5  2024-02    30      5/9/16   16.7    33.73     6.89     6.40    114.43  1.55
+     M6  2024-03    37     4/11/22   10.8     0.92    -1.88    -1.64    112.55  0.92
+
+  -- S1_TEL_2R W2 (W2), final $134.572, maxDD -17.119%
+       m bucket      n      W/BE/L    WR%     totR     net$   month%      end$    PF
+     M1  2024-05    34     3/12/19    8.8   -20.72    -3.88    -3.88     96.12  0.62
+     M2  2024-06    41     5/15/21   12.2   -17.63    -1.34    -1.39     94.78  0.90
+     M3  2024-07    35     7/13/15   20.0    93.22    30.30    31.98    125.09  3.61
+     M4  2024-08    35     2/12/21    5.7     6.30     3.73     2.97    128.81  1.21
+     M5  2024-09    30     5/10/15   16.7     5.29     5.17     4.01    133.98  1.37
+     M6  2024-10    25      5/5/15   20.0    -8.57     0.59     0.44    134.57  1.04
+
+  -- S1_TEL_2R_BRIDGE W1 (W1), final $109.253, maxDD -15.223%
+       m bucket      n      W/BE/L    WR%     totR     net$   month%      end$    PF
+     M1  2023-10    42     4/18/20    9.5   -24.44    -7.32    -7.32     92.68  0.30
+     M2  2023-11    37     6/10/21   16.2    -2.73    -0.41    -0.44     92.27  0.97
+     M3  2023-12    32     5/11/16   15.6    10.68     6.02     6.52     98.29  1.59
+     M4  2024-01    36      6/8/22   16.7     2.41     5.72     5.82    104.01  1.38
+     M5  2024-02    30      5/9/16   16.7    33.73     6.66     6.41    110.68  1.55
+     M6  2024-03    37      6/9/22   16.2    -0.46    -1.42    -1.29    109.25  0.93
+
+  -- S1_TEL_2R_BRIDGE W2 (W2), final $129.117, maxDD -16.414%
+       m bucket      n      W/BE/L    WR%     totR     net$   month%      end$    PF
+     M1  2024-05    34     4/11/19   11.8   -22.83    -5.65    -5.65     94.35  0.43
+     M2  2024-06    41     6/14/21   14.6   -16.91    -1.17    -1.25     93.17  0.91
+     M3  2024-07    35     7/13/15   20.0    93.22    29.79    31.97    122.96  3.61
+     M4  2024-08    36     4/12/20   11.1     8.17     5.16     4.20    128.12  1.32
+     M5  2024-09    30     5/10/15   16.7     5.29     5.14     4.01    133.26  1.37
+     M6  2024-10    29      6/6/17   20.7   -20.55    -4.15    -3.11    129.12  0.71
+
+  -- S1_TEL_2R_SWAP W1 (W1), final $109.253, maxDD -15.223%
+       m bucket      n      W/BE/L    WR%     totR     net$   month%      end$    PF
+     M1  2023-10    42     4/18/20    9.5   -24.44    -7.32    -7.32     92.68  0.30
+     M2  2023-11    37     6/10/21   16.2    -2.73    -0.41    -0.44     92.27  0.97
+     M3  2023-12    32     5/11/16   15.6    10.68     6.02     6.52     98.29  1.59
+     M4  2024-01    36      6/8/22   16.7     2.41     5.72     5.82    104.01  1.38
+     M5  2024-02    30      5/9/16   16.7    33.73     6.66     6.41    110.68  1.55
+     M6  2024-03    37      6/9/22   16.2    -0.46    -1.42    -1.29    109.25  0.93
+
+  -- S1_TEL_2R_SWAP W2 (W2), final $129.117, maxDD -16.414%
+       m bucket      n      W/BE/L    WR%     totR     net$   month%      end$    PF
+     M1  2024-05    34     4/11/19   11.8   -22.83    -5.65    -5.65     94.35  0.43
+     M2  2024-06    41     6/14/21   14.6   -16.91    -1.17    -1.25     93.17  0.91
+     M3  2024-07    35     7/13/15   20.0    93.22    29.79    31.97    122.96  3.61
+     M4  2024-08    36     4/12/20   11.1     8.17     5.16     4.20    128.12  1.32
+     M5  2024-09    30     5/10/15   16.7     5.29     5.14     4.01    133.26  1.37
+     M6  2024-10    29      6/6/17   20.7   -20.55    -4.15    -3.11    129.12  0.71
+
+  -- S1_FAST_2R_HARVEST W1 (W1), final $72.2059, maxDD -33.114%
+       m bucket      n      W/BE/L    WR%     totR     net$   month%      end$    PF
+     M1  2023-10    47     5/21/21   10.6   -21.77    -6.04    -6.04     93.96  0.47
+     M2  2023-11    34     5/10/19   14.7    -1.50    -0.95    -1.01     93.01  0.93
+     M3  2023-12    40     7/10/23   17.5   -24.15    -6.47    -6.96     86.54  0.52
+     M4  2024-01    39     5/11/23   12.8   -18.53    -3.60    -4.16     82.94  0.73
+     M5  2024-02    32     5/10/17   15.6    20.44     0.27     0.33     83.21  1.03
+     M6  2024-03    43     7/10/26   16.3   -23.93   -11.00   -13.22     72.21  0.33
+
+  -- S1_FAST_2R_HARVEST W2 (W2), final $107.2855, maxDD -16.458%
+       m bucket      n      W/BE/L    WR%     totR     net$   month%      end$    PF
+     M1  2024-05    33     4/12/17   12.1   -13.10     5.14     5.14    105.14  1.53
+     M2  2024-06    41     5/15/21   12.2   -17.63    -1.46    -1.39    103.68  0.90
+     M3  2024-07    41     9/16/16   22.0    28.35    15.15    14.61    118.83  2.29
+     M4  2024-08    41     5/12/24   12.2   -28.94   -12.76   -10.74    106.07  0.31
+     M5  2024-09    32     7/10/15   21.9   -11.38     0.74     0.71    106.82  1.07
+     M6  2024-10    25      5/5/15   20.0    -8.57     0.47     0.44    107.29  1.04
+
+ranking by chained return: ['S1_TEL_3R', 'V33_TEL_3S_3R', 'S1_TEL_2R', 'S1_TEL_2R_BRIDGE', 'S1_TEL_2R_SWAP', 'S1_FAST_2R_HARVEST']
+
+=== TABLE 3 - week 1..26 for the winning arm S1_TEL_3R ==========
+
+  -- S1_TEL_3R W1: 27 weeks, final $139.2627, maxDD -14.393%
+       wk start          n      W/BE/L    WR%     totR     net$    week%      end$
+     W1  2023-10-01     3       0/0/3    0.0    -4.36    -2.36    -2.36     97.64  
+     W2  2023-10-08    14       1/7/6    7.1    -5.11    -2.25    -2.30     95.39  
+     W3  2023-10-15    10       0/4/6    0.0   -13.06    -2.70    -2.83     92.69  
+     W4  2023-10-22     9       0/5/4    0.0    -6.65    -2.01    -2.17     90.68  
+     W5  2023-10-29    15       2/9/4   13.3     4.54     3.91     4.31     94.59 *
+     W6  2023-11-05     8       0/3/5    0.0    -8.65    -2.35    -2.48     92.24  
+     W7  2023-11-12     8       1/2/5   12.5    15.89    17.51    18.98    109.75 *
+     W8  2023-11-19     3       1/0/2   33.3    -3.50     0.14     0.13    109.89 *
+     W9  2023-11-26    11       2/5/4   18.2     0.65    -0.63    -0.57    109.26  
+     W10 2023-12-03    11       0/7/4    0.0    -6.02    -3.25    -2.98    106.00  
+     W11 2023-12-10     6       2/1/3   33.3    19.30     8.36     7.89    114.36 *
+     W12 2023-12-17     5       0/1/4    0.0    -7.47    -2.49    -2.17    111.88  
+     W13 2023-12-24    14       2/6/6   14.3    -0.67    -2.30    -2.06    109.58  
+     W14 2023-12-31     8       2/3/3   25.0    11.10     6.99     6.38    116.57 *
+     W15 2024-01-07     9       1/2/6   11.1     8.02     4.14     3.54    120.70 *
+     W16 2024-01-14    14       3/4/7   21.4    -4.58     4.32     3.58    125.02 *
+     W17 2024-01-21     9       1/3/5   11.1    -0.25    -1.02    -0.81    124.01  
+     W18 2024-01-28     5       1/0/4   20.0    20.36     8.08     6.52    132.09 *
+     W19 2024-02-04     8       2/3/3   25.0    10.41    -1.21    -0.92    130.88  
+     W20 2024-02-11     8       1/2/5   12.5     4.88     5.19     3.96    136.06 *
+     W21 2024-02-18     8       0/3/5    0.0    -7.29    -5.11    -3.76    130.95  
+     W22 2024-02-25     4       1/0/3   25.0    19.91     6.36     4.86    137.31 *
+     W23 2024-03-03     6       0/3/3    0.0    -4.52    -2.43    -1.76    134.89  
+     W24 2024-03-10     9       1/2/6   11.1    14.65    10.84     8.03    145.72 *
+     W25 2024-03-17    10       1/3/6   10.0    -4.89    -5.68    -3.89    140.05  
+     W26 2024-03-24    12       2/3/7   16.7    -3.75    -0.79    -0.56    139.26  
+     W27 2024-03-31     0       0/0/0    nan     0.00     0.00     0.00    139.26  
+
+  -- S1_TEL_3R W2: 27 weeks, final $154.8264, maxDD -14.186%
+       wk start          n      W/BE/L    WR%     totR     net$    week%      end$
+     W1  2024-05-01     8       2/3/3   25.0     9.03     8.27     8.27    108.27 *
+     W2  2024-05-08     2       0/1/1    0.0    -1.33    -0.88    -0.81    107.39  
+     W3  2024-05-15     4       0/2/2    0.0    -3.87    -0.89    -0.83    106.50  
+     W4  2024-05-22     7       0/2/5    0.0   -10.28    -2.21    -2.08    104.29  
+     W5  2024-05-29     7       4/1/2   57.1     4.29     1.23     1.19    105.53 *
+     W6  2024-06-05    20      1/9/10    5.0   -12.25    -4.73    -4.48    100.80  
+     W7  2024-06-12     5       1/1/3   20.0    -2.89    -3.03    -3.01     97.77  
+     W8  2024-06-19    10       1/3/6   10.0    -1.43     0.39     0.40     98.16 *
+     W9  2024-06-26     5       1/1/3   20.0    -4.49    -1.28    -1.30     96.88  
+     W10 2024-07-03     2       1/0/1   50.0     2.54     1.26     1.30     98.14 *
+     W11 2024-07-10     5       2/2/1   40.0    73.79    22.12    22.54    120.26 *
+     W12 2024-07-17     9       3/3/3   33.3    24.34     9.95     8.28    130.22 *
+     W13 2024-07-24    10       1/6/3   10.0     7.89     3.55     2.72    133.76 *
+     W14 2024-07-31     6       0/2/4    0.0    -6.67    -2.96    -2.21    130.81  
+     W15 2024-08-07     7       2/3/2   28.6     1.43     0.71     0.54    131.52 *
+     W16 2024-08-14     7       1/1/5   14.3    -4.06     2.07     1.57    133.58 *
+     W17 2024-08-21     8       2/2/4   25.0    30.44    22.06    16.51    155.64 *
+     W18 2024-08-28    11       1/4/6    9.1    -9.69    -4.11    -2.64    151.53  
+     W19 2024-09-04     6       1/1/4   16.7    -4.80    -2.74    -1.81    148.79  
+     W20 2024-09-11     6       0/3/3    0.0    -5.79    -2.44    -1.64    146.35  
+     W21 2024-09-18     6       2/1/3   33.3     2.01     1.43     0.98    147.78 *
+     W22 2024-09-25     5       0/2/3    0.0    -5.32    -2.53    -1.71    145.25  
+     W23 2024-10-02     7       1/2/4   14.3    -7.13    -3.14    -2.17    142.10  
+     W24 2024-10-09     7       2/3/2   28.6     9.39     7.84     5.52    149.94 *
+     W25 2024-10-16     7       2/1/4   28.6    -5.86    -1.37    -0.91    148.57  
+     W26 2024-10-23     2       1/0/1   50.0     5.03     7.59     5.11    156.16 *
+     W27 2024-10-30     1       0/0/1    0.0    -1.30    -1.33    -0.85    154.83  
+
+  best 5 single months ($ , %):
+     W2 M3 2024-07             +35.83$    +36.78%
+     W2 M4 2024-08             +20.96$    +15.72%
+     W1 M2 2023-11             +18.36$    +20.04%
+     W1 M5 2024-02             +16.06$    +13.09%
+     W1 M4 2024-01             +13.69$    +12.57%
+  worst 3 single months:
+     W2 M5 2024-09              -8.96$     -5.80%
+     W1 M1 2023-10              -8.37$     -8.37%
+     W2 M2 2024-06              -6.35$     -6.12%
+
+  best 10 single weeks ($ , %):
+     W2 W11 2024-07-10         +22.12$    +22.54%
+     W2 W17 2024-08-21         +22.06$    +16.51%
+     W1 W07 2023-11-12         +17.51$    +18.98%
+     W1 W24 2024-03-10         +10.84$     +8.03%
+     W2 W12 2024-07-17          +9.95$     +8.28%
+     W1 W11 2023-12-10          +8.36$     +7.89%
+     W2 W01 2024-05-01          +8.27$     +8.27%
+     W1 W18 2024-01-28          +8.08$     +6.52%
+     W2 W24 2024-10-09          +7.84$     +5.52%
+     W2 W26 2024-10-23          +7.59$     +5.11%
+  worst 5 single weeks:
+     W1 W25 2024-03-17          -5.68$     -3.89%
+     W1 W21 2024-02-18          -5.11$     -3.76%
+     W2 W06 2024-06-05          -4.73$     -4.48%
+     W2 W18 2024-08-28          -4.11$     -2.64%
+     W1 W10 2023-12-03          -3.25$     -2.98%
+
+=== AUDIT 1 - 100% cash deployment, no dust, no leverage ======
+  V33_TEL_3S_3R        W1 n= 357 min=$  14.19 median=$   32.45 max=$   43.97 fills<$10=0 (counter=0) deploy_ok=0 topped_up=0 over=0
+  V33_TEL_3S_3R        W2 n= 265 min=$  14.78 median=$   33.56 max=$   40.63 fills<$10=0 (counter=0) deploy_ok=0 topped_up=0 over=0
+  S1_TEL_3R            W1 n= 227 min=$  90.01 median=$  112.70 max=$  152.89 fills<$10=0 (counter=0) deploy_ok=289 topped_up=0 over=0
+  S1_TEL_3R            W2 n= 180 min=$  96.08 median=$  131.38 max=$  158.69 fills<$10=0 (counter=0) deploy_ok=227 topped_up=0 over=0
+  S1_TEL_2R            W1 n= 213 min=$  89.77 median=$   99.80 max=$  126.11 fills<$10=0 (counter=0) deploy_ok=283 topped_up=0 over=0
+  S1_TEL_2R            W2 n= 200 min=$  88.48 median=$  117.34 max=$  138.18 fills<$10=0 (counter=0) deploy_ok=246 topped_up=0 over=0
+  S1_TEL_2R_BRIDGE     W1 n= 214 min=$  90.03 median=$  100.00 max=$  122.04 fills<$10=0 (counter=0) deploy_ok=284 topped_up=0 over=0
+  S1_TEL_2R_BRIDGE     W2 n= 205 min=$  86.85 median=$  116.44 max=$  136.18 fills<$10=0 (counter=0) deploy_ok=251 topped_up=0 over=0
+  S1_TEL_2R_SWAP       W1 n= 214 min=$  90.03 median=$  100.00 max=$  122.04 fills<$10=0 (counter=0) deploy_ok=284 topped_up=0 over=0
+  S1_TEL_2R_SWAP       W2 n= 205 min=$  86.85 median=$  116.44 max=$  136.18 fills<$10=0 (counter=0) deploy_ok=251 topped_up=0 over=0
+  S1_FAST_2R_HARVEST   W1 n= 235 min=$  71.77 median=$   90.01 max=$  102.89 fills<$10=0 (counter=0) deploy_ok=301 topped_up=0 over=0
+  S1_FAST_2R_HARVEST   W2 n= 213 min=$  96.79 median=$  107.23 max=$  120.77 fills<$10=0 (counter=0) deploy_ok=250 topped_up=0 over=0
+
+=== AUDIT 2 - what the 2:1 gate actually admitted ===============
+  V33_TEL_3S_3R        W1 target_R min= 3.13 median= 5.00 | rounded band [2,3)R=  0 | v34_extra_2r flag=  0 counter=  0 EXACT (band diff 0)
+  V33_TEL_3S_3R        W2 target_R min= 3.19 median= 4.81 | rounded band [2,3)R=  0 | v34_extra_2r flag=  0 counter=  0 EXACT (band diff 0)
+  S1_TEL_3R            W1 target_R min= 3.13 median= 5.02 | rounded band [2,3)R=  0 | v34_extra_2r flag=  0 counter=  0 EXACT (band diff 0)
+  S1_TEL_3R            W2 target_R min= 3.19 median= 4.67 | rounded band [2,3)R=  0 | v34_extra_2r flag=  0 counter=  0 EXACT (band diff 0)
+  S1_TEL_2R            W1 target_R min= 2.28 median= 4.00 | rounded band [2,3)R= 50 | v34_extra_2r flag= 51 counter= 51 EXACT (band diff 1)
+  S1_TEL_2R            W2 target_R min= 2.10 median= 4.00 | rounded band [2,3)R= 57 | v34_extra_2r flag= 57 counter= 57 EXACT (band diff 0)
+  S1_TEL_2R_BRIDGE     W1 target_R min= 2.28 median= 4.00 | rounded band [2,3)R= 50 | v34_extra_2r flag= 51 counter= 51 EXACT (band diff 1)
+  S1_TEL_2R_BRIDGE     W2 target_R min= 2.10 median= 4.04 | rounded band [2,3)R= 58 | v34_extra_2r flag= 58 counter= 58 EXACT (band diff 0)
+  S1_TEL_2R_SWAP       W1 target_R min= 2.28 median= 4.00 | rounded band [2,3)R= 50 | v34_extra_2r flag= 51 counter= 51 EXACT (band diff 1)
+  S1_TEL_2R_SWAP       W2 target_R min= 2.10 median= 4.04 | rounded band [2,3)R= 58 | v34_extra_2r flag= 58 counter= 58 EXACT (band diff 0)
+  S1_FAST_2R_HARVEST   W1 target_R min= 2.19 median= 4.00 | rounded band [2,3)R= 56 | v34_extra_2r flag= 57 counter= 57 EXACT (band diff 1)
+  S1_FAST_2R_HARVEST   W2 target_R min= 2.10 median= 4.04 | rounded band [2,3)R= 59 | v34_extra_2r flag= 59 counter= 59 EXACT (band diff 0)
+
+=== AUDIT 3 - the single seat: rejects and stale swaps =========
+    _v34_stale_reason() tests in this order: locked (>= +LOCK_R, never evicted) -> young (< STALE_HOURS) -> profit_ok (>= +STALE_MAX_R) -> STALE. So 'kept=locked' does not imply age >= 12h.
+  V33_TEL_3S_3R        W1 slot_full_rejects=  24 swaps_checked=   0 EVICTIONS=  0 kept={'locked': 0, 'profit_ok': 0, 'young': 0, 'no_state': 0} | hold_h median= 1.00 max=  83.0 >=12h= 50 >=12h&R<0.8= 18
+  V33_TEL_3S_3R        W2 slot_full_rejects=  17 swaps_checked=   0 EVICTIONS=  0 kept={'locked': 0, 'profit_ok': 0, 'young': 0, 'no_state': 0} | hold_h median= 1.17 max=  88.1 >=12h= 40 >=12h&R<0.8= 13
+  S1_TEL_3R            W1 slot_full_rejects= 181 swaps_checked=   0 EVICTIONS=  0 kept={'locked': 0, 'profit_ok': 0, 'young': 0, 'no_state': 0} | hold_h median= 1.00 max=  54.0 >=12h= 27 >=12h&R<0.8= 10
+  S1_TEL_3R            W2 slot_full_rejects= 145 swaps_checked=   0 EVICTIONS=  0 kept={'locked': 0, 'profit_ok': 0, 'young': 0, 'no_state': 0} | hold_h median= 1.08 max=  88.1 >=12h= 21 >=12h&R<0.8=  5
+  S1_TEL_2R            W1 slot_full_rejects= 201 swaps_checked=   0 EVICTIONS=  0 kept={'locked': 0, 'profit_ok': 0, 'young': 0, 'no_state': 0} | hold_h median= 1.00 max=  59.5 >=12h= 26 >=12h&R<0.8=  9
+  S1_TEL_2R            W2 slot_full_rejects= 198 swaps_checked=   0 EVICTIONS=  0 kept={'locked': 0, 'profit_ok': 0, 'young': 0, 'no_state': 0} | hold_h median= 1.12 max=  88.1 >=12h= 24 >=12h&R<0.8=  9
+  S1_TEL_2R_BRIDGE     W1 slot_full_rejects= 200 swaps_checked=   0 EVICTIONS=  0 kept={'locked': 0, 'profit_ok': 0, 'young': 0, 'no_state': 0} | hold_h median= 1.00 max=  59.5 >=12h= 26 >=12h&R<0.8= 10
+  S1_TEL_2R_BRIDGE     W2 slot_full_rejects= 190 swaps_checked=   0 EVICTIONS=  0 kept={'locked': 0, 'profit_ok': 0, 'young': 0, 'no_state': 0} | hold_h median= 1.17 max=  88.1 >=12h= 21 >=12h&R<0.8=  8
+  S1_TEL_2R_SWAP       W1 slot_full_rejects= 200 swaps_checked= 200 EVICTIONS=  0 kept={'locked': 97, 'profit_ok': 0, 'young': 103, 'no_state': 0} | hold_h median= 1.00 max=  59.5 >=12h= 26 >=12h&R<0.8= 10
+  S1_TEL_2R_SWAP       W2 slot_full_rejects= 190 swaps_checked= 190 EVICTIONS=  0 kept={'locked': 99, 'profit_ok': 0, 'young': 91, 'no_state': 0} | hold_h median= 1.17 max=  88.1 >=12h= 21 >=12h&R<0.8=  8
+  S1_FAST_2R_HARVEST   W1 slot_full_rejects= 162 swaps_checked=   0 EVICTIONS=  0 kept={'locked': 0, 'profit_ok': 0, 'young': 0, 'no_state': 0} | hold_h median= 0.92 max=  59.5 >=12h= 17 >=12h&R<0.8= 10
+  S1_FAST_2R_HARVEST   W2 slot_full_rejects= 200 swaps_checked=   0 EVICTIONS=  0 kept={'locked': 0, 'profit_ok': 0, 'young': 0, 'no_state': 0} | hold_h median= 1.00 max=  75.5 >=12h= 22 >=12h&R<0.8= 11
+
+=== AUDIT 4 - the lock moved to +2.00R and wins are wins =========
+  V33_TEL_3S_3R        W1 LOCK_R=3.0 entry_lock_R min=3.09 max=4.99 | closes in [3.0,3)R=  0 classified WIN=  0 OK | exits={'STOP_BLUE': np.int64(183), 'BREAKEVEN': np.int64(126), 'EMERGENCY_STOP': np.int64(33), 'TARGET_REJECTION': np.int64(11), 'STRUCT_PROFIT': np.int64(4)}
+  V33_TEL_3S_3R        W2 LOCK_R=3.0 entry_lock_R min=3.09 max=4.94 | closes in [3.0,3)R=  0 classified WIN=  0 OK | exits={'STOP_BLUE': np.int64(131), 'BREAKEVEN': np.int64(93), 'EMERGENCY_STOP': np.int64(20), 'STRUCT_PROFIT': np.int64(13), 'TARGET_REJECTION': np.int64(8)}
+  S1_TEL_3R            W1 LOCK_R=3.0 entry_lock_R min=3.09 max=5.00 | closes in [3.0,3)R=  0 classified WIN=  0 OK | exits={'STOP_BLUE': np.int64(116), 'BREAKEVEN': np.int64(81), 'EMERGENCY_STOP': np.int64(23), 'TARGET_REJECTION': np.int64(4), 'STRUCT_PROFIT': np.int64(3)}
+  S1_TEL_3R            W2 LOCK_R=3.0 entry_lock_R min=3.10 max=4.87 | closes in [3.0,3)R=  0 classified WIN=  0 OK | exits={'STOP_BLUE': np.int64(92), 'BREAKEVEN': np.int64(59), 'EMERGENCY_STOP': np.int64(13), 'STRUCT_PROFIT': np.int64(12), 'TARGET_REJECTION': np.int64(4)}
+  S1_TEL_2R            W1 LOCK_R=2.0 entry_lock_R min=2.08 max=4.00 | closes in [2.0,3)R=  6 classified WIN=  6 OK | exits={'STOP_BLUE': np.int64(111), 'BREAKEVEN': np.int64(68), 'EMERGENCY_STOP': np.int64(28), 'TARGET_REJECTION': np.int64(5), 'END_OF_DATA': np.int64(1)}
+  S1_TEL_2R            W2 LOCK_R=2.0 entry_lock_R min=2.07 max=3.90 | closes in [2.0,3)R=  4 classified WIN=  4 OK | exits={'STOP_BLUE': np.int64(95), 'BREAKEVEN': np.int64(67), 'EMERGENCY_STOP': np.int64(26), 'TARGET_REJECTION': np.int64(7), 'STRUCT_PROFIT': np.int64(5)}
+  S1_TEL_2R_BRIDGE     W1 LOCK_R=2.0 entry_lock_R min=2.08 max=4.00 | closes in [2.0,3)R=  7 classified WIN=  7 OK | exits={'STOP_BLUE': np.int64(110), 'BREAKEVEN': np.int64(65), 'EMERGENCY_STOP': np.int64(28), 'TARGET_REJECTION': np.int64(5), 'STRUCT_PROFIT': np.int64(5), 'END_OF_DATA': np.int64(1)}
+  S1_TEL_2R_BRIDGE     W2 LOCK_R=2.0 entry_lock_R min=2.07 max=3.90 | closes in [2.0,3)R=  3 classified WIN=  3 OK | exits={'STOP_BLUE': np.int64(94), 'BREAKEVEN': np.int64(66), 'EMERGENCY_STOP': np.int64(26), 'STRUCT_PROFIT': np.int64(13), 'TARGET_REJECTION': np.int64(6)}
+  S1_TEL_2R_SWAP       W1 LOCK_R=2.0 entry_lock_R min=2.08 max=4.00 | closes in [2.0,3)R=  7 classified WIN=  7 OK | exits={'STOP_BLUE': np.int64(110), 'BREAKEVEN': np.int64(65), 'EMERGENCY_STOP': np.int64(28), 'TARGET_REJECTION': np.int64(5), 'STRUCT_PROFIT': np.int64(5), 'END_OF_DATA': np.int64(1)}
+  S1_TEL_2R_SWAP       W2 LOCK_R=2.0 entry_lock_R min=2.07 max=3.90 | closes in [2.0,3)R=  3 classified WIN=  3 OK | exits={'STOP_BLUE': np.int64(94), 'BREAKEVEN': np.int64(66), 'EMERGENCY_STOP': np.int64(26), 'STRUCT_PROFIT': np.int64(13), 'TARGET_REJECTION': np.int64(6)}
+  S1_FAST_2R_HARVEST   W1 LOCK_R=2.0 entry_lock_R min=2.08 max=3.99 | closes in [2.0,3)R= 23 classified WIN= 23 OK | exits={'STOP_BLUE': np.int64(108), 'BREAKEVEN': np.int64(72), 'EMERGENCY_STOP': np.int64(31), 'FAST_HARVEST_2R': np.int64(18), 'TARGET_REJECTION': np.int64(5), 'END_OF_DATA': np.int64(1)}
+  S1_FAST_2R_HARVEST   W2 LOCK_R=2.0 entry_lock_R min=2.07 max=3.94 | closes in [2.0,3)R= 18 classified WIN= 18 OK | exits={'STOP_BLUE': np.int64(94), 'BREAKEVEN': np.int64(70), 'EMERGENCY_STOP': np.int64(25), 'FAST_HARVEST_2R': np.int64(14), 'TARGET_REJECTION': np.int64(6), 'STRUCT_PROFIT': np.int64(4)}
+
+=== AUDIT 5 - the pass2 counter patch is telemetry-only ==========
+  V33_TEL_3S_3R        W1 pass2 (357, 128.4592, 130.8101, -5.774) vs pass1 (357, 128.4592, 130.8101, -5.774) -> IDENTICAL
+  V33_TEL_3S_3R        W2 pass2 (265, 105.7958, 121.654, -5.921) vs pass1 (265, 105.7958, 121.654, -5.921) -> IDENTICAL
+  S1_TEL_3R            W1 pass2 (227, 48.9224, 139.2627, -14.393) vs pass1 (227, 48.9224, 139.2627, -14.393) -> IDENTICAL
+  S1_TEL_3R            W2 pass2 (180, 83.0249, 154.8264, -14.186) vs pass1 (180, 83.0249, 154.8264, -14.186) -> IDENTICAL
+  S1_TEL_2R            W1 pass2 (213, 21.8539, 112.5518, -15.223) vs pass1 (213, 21.8539, 112.5518, -15.223) -> IDENTICAL
+  S1_TEL_2R            W2 pass2 (200, 57.8958, 134.572, -17.119) vs pass1 (200, 57.8958, 134.572, -17.119) -> IDENTICAL
+  S1_TEL_2R_BRIDGE     W1 pass2 (214, 19.1892, 109.253, -15.223) vs pass1 (214, 19.1892, 109.253, -15.223) -> IDENTICAL
+  S1_TEL_2R_BRIDGE     W2 pass2 (205, 46.3917, 129.117, -16.414) vs pass1 (205, 46.3917, 129.117, -16.414) -> IDENTICAL
+  S1_TEL_2R_SWAP       W1 pass2 (214, 19.1892, 109.253, -15.223) vs pass1 (214, 19.1892, 109.253, -15.223) -> IDENTICAL
+  S1_TEL_2R_SWAP       W2 pass2 (205, 46.3917, 129.117, -16.414) vs pass1 (205, 46.3917, 129.117, -16.414) -> IDENTICAL
+  S1_FAST_2R_HARVEST   W1 pass2 (235, -69.4301, 72.2059, -33.114) vs pass1 (235, -69.4301, 72.2059, -33.114) -> IDENTICAL
+  S1_FAST_2R_HARVEST   W2 pass2 (213, -51.2713, 107.2855, -16.458) vs pass1 (213, -51.2713, 107.2855, -16.458) -> IDENTICAL
+  book diff S1_TEL_2R            W1 n=213/213 net=   12.5518/   12.5518 identical_on_83_cols=True new_cols=['v34_extra_2r']
+  book diff S1_TEL_2R            W2 n=200/200 net=   34.5720/   34.5720 identical_on_83_cols=True new_cols=['v34_extra_2r']
+  book diff S1_TEL_2R_BRIDGE     W1 n=214/214 net=    9.2530/    9.2530 identical_on_83_cols=True new_cols=['v34_extra_2r']
+  book diff S1_TEL_2R_BRIDGE     W2 n=205/205 net=   29.1170/   29.1170 identical_on_83_cols=True new_cols=['v34_extra_2r']
+  book diff S1_TEL_2R_SWAP       W1 n=214/214 net=    9.2530/    9.2530 identical_on_83_cols=True new_cols=['v34_extra_2r']
+  book diff S1_TEL_2R_SWAP       W2 n=205/205 net=   29.1170/   29.1170 identical_on_83_cols=True new_cols=['v34_extra_2r']

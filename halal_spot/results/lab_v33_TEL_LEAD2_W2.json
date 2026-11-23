@@ -1,0 +1,129 @@
+{
+ "combo": "TEL_LEAD2",
+ "window": "W2",
+ "start": "2024-05-01",
+ "end": "2024-10-31",
+ "seconds": 350.0,
+ "symbols": [
+  "ADAUSDT_5m",
+  "AVAXUSDT_5m",
+  "BNBUSDT_5m",
+  "BTCUSDT_5m",
+  "ETHUSDT_5m",
+  "LINKUSDT_5m",
+  "SOLUSDT_5m",
+  "XRPUSDT_5m"
+ ],
+ "capital": 100.0,
+ "n": 35,
+ "totR": 7.3709,
+ "wins": 5,
+ "swin": 0,
+ "be": 17,
+ "losses": 13,
+ "wr": 14.29,
+ "wr_strict": 14.29,
+ "net": 1.6489,
+ "end_equity": 101.6489,
+ "pool_cash_end": 101.6489,
+ "maxR": 10.286,
+ "fees": 1.1512,
+ "by_coin": {
+  "ADAUSDT_5m": [
+   6,
+   -8.431,
+   -0.552
+  ],
+  "AVAXUSDT_5m": [
+   8,
+   -0.633,
+   0.519
+  ],
+  "BNBUSDT_5m": [
+   2,
+   -0.001,
+   -0.0
+  ],
+  "BTCUSDT_5m": [
+   6,
+   6.095,
+   0.922
+  ],
+  "ETHUSDT_5m": [
+   1,
+   10.286,
+   0.677
+  ],
+  "LINKUSDT_5m": [
+   5,
+   -0.004,
+   -0.0
+  ],
+  "SOLUSDT_5m": [
+   5,
+   -4.801,
+   -0.547
+  ],
+  "XRPUSDT_5m": [
+   2,
+   4.859,
+   0.631
+  ]
+ },
+ "exits": {
+  "BREAKEVEN": 17,
+  "STOP_BLUE": 15,
+  "EMERGENCY_STOP": 3
+ },
+ "pf": 1.759,
+ "maxDD_pct": -1.84,
+ "eq_end": 101.6489,
+ "eq_min": 99.0289,
+ "counters": {
+  "v32_smt_veto": 0,
+  "v32_regime_b_veto": 0,
+  "v32_regime_b_no_anchor": 0,
+  "v32_killzone_skip": 58,
+  "v32_emergency_stop": 3,
+  "v31_impulse_anchored": 0,
+  "fill_below_exchange_min": 0,
+  "shield_armed_disp": 23,
+  "v33_leader_veto": 476,
+  "v33_range_b_veto": 0,
+  "v33_range_harvest": 0,
+  "v31_struct_trail": 0,
+  "trail_htf_blue": 0,
+  "trail_4h_structural": 12,
+  "v33_stamp_expand": 69985,
+  "v33_stamp_range": 0
+ },
+ "v33_stamps_expand": 69985,
+ "v33_stamps_range": 0,
+ "v33_leader_stamps": {
+  "ADAUSDT_5m": 6828,
+  "AVAXUSDT_5m": 5160,
+  "BNBUSDT_5m": 8604,
+  "BTCUSDT_5m": 6132,
+  "ETHUSDT_5m": 6204,
+  "LINKUSDT_5m": 6360,
+  "SOLUSDT_5m": 8160,
+  "XRPUSDT_5m": 8232
+ },
+ "price_move_pct": {
+  "median_all": 0.2,
+  "median_winners": 2.549,
+  "max": 4.452,
+  "wins_over_5pct": 0,
+  "wins_over_15pct": 0
+ },
+ "stop_width_pct": {
+  "median": 0.2922,
+  "min": 0.1094,
+  "max": 1.2407
+ },
+ "bars_held_median": 3.0,
+ "fee_share_of_gross_wins_pct": 30.12,
+ "smt_bull_stamps": 133116,
+ "smt_stamps": 69985,
+ "LEAK_NOTE": "actual stack recovered from counters: TEL(trail lens 4h + 4h-only after 3R) + LEAD2(K=2, needs 4H up) + PURPLE_REARM"
+}

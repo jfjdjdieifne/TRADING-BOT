@@ -1,0 +1,120 @@
+{
+ "combo": "S1_FLASH_SELLER",
+ "window": "W2",
+ "start": "2024-05-01",
+ "end": "2024-10-31",
+ "seconds": 393.9,
+ "symbols": [
+  "ADAUSDT_5m",
+  "AVAXUSDT_5m",
+  "BNBUSDT_5m",
+  "BTCUSDT_5m",
+  "ETHUSDT_5m",
+  "LINKUSDT_5m",
+  "SOLUSDT_5m",
+  "XRPUSDT_5m"
+ ],
+ "capital": 100.0,
+ "n": 171,
+ "totR": 89.4493,
+ "wins": 30,
+ "swin": 11,
+ "be": 56,
+ "losses": 85,
+ "wr": 17.54,
+ "wr_strict": 11.11,
+ "net": 62.2106,
+ "end_equity": 162.2106,
+ "pool_cash_end": 162.2106,
+ "maxR": 68.242,
+ "fees": 22.1731,
+ "by_coin": {
+  "ADAUSDT_5m": [
+   27,
+   -25.893,
+   -13.003
+  ],
+  "AVAXUSDT_5m": [
+   24,
+   2.807,
+   7.718
+  ],
+  "BNBUSDT_5m": [
+   15,
+   9.957,
+   4.731
+  ],
+  "BTCUSDT_5m": [
+   14,
+   -1.207,
+   2.324
+  ],
+  "ETHUSDT_5m": [
+   20,
+   14.662,
+   12.255
+  ],
+  "LINKUSDT_5m": [
+   34,
+   21.629,
+   23.487
+  ],
+  "SOLUSDT_5m": [
+   25,
+   5.715,
+   6.556
+  ],
+  "XRPUSDT_5m": [
+   12,
+   61.778,
+   18.143
+  ]
+ },
+ "exits": {
+  "STOP_BLUE": 86,
+  "BREAKEVEN": 56,
+  "EMERGENCY_STOP": 15,
+  "STRUCT_PROFIT": 11,
+  "TARGET_REJECTION": 3
+ },
+ "pf": 1.931,
+ "maxDD_pct": -11.742,
+ "eq_end": 162.2106,
+ "eq_min": 98.912,
+ "counters": {
+  "v35_dust_box_veto": 0,
+  "v35_flash_seller_veto": 23,
+  "v35_fall_close_veto": 0,
+  "v35_cooldown_armed": 0,
+  "v35_cooldown_skip": 0,
+  "v35_cooldown_expired": 0,
+  "v35_cooldown_lifted_by_bos": 0,
+  "slot_full_rejects": 129,
+  "portfolio_slots_full": 129,
+  "v31_struct_trail": 15,
+  "trail_4h_structural": 41,
+  "fill_below_exchange_min": 0,
+  "v34_deploy_full_ok": 218,
+  "v33_stamp_expand": 0,
+  "v33_stamp_range": 0
+ },
+ "v33_stamps_expand": 0,
+ "v33_stamps_range": 0,
+ "v33_leader_stamps": {},
+ "price_move_pct": {
+  "median_all": 0.193,
+  "median_winners": 1.818,
+  "max": 18.887,
+  "wins_over_5pct": 7,
+  "wins_over_15pct": 2
+ },
+ "stop_width_pct": {
+  "median": 0.3582,
+  "min": 0.107,
+  "max": 2.0505
+ },
+ "bars_held_median": 7.0,
+ "fee_share_of_gross_wins_pct": 17.18,
+ "smt_bull_stamps": 133116,
+ "smt_stamps": 69985
+}

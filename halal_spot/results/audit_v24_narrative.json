@@ -1,0 +1,737 @@
+{
+  "table1": [
+    {
+      "feature": "flow_4h=BULL",
+      "WIN %": 25.8,
+      "LOSS %": 29.2,
+      "gap": -3.4
+    },
+    {
+      "feature": "flow_4h=BEAR",
+      "WIN %": 74.2,
+      "LOSS %": 70.8,
+      "gap": 3.4
+    },
+    {
+      "feature": "flow_4h=None",
+      "WIN %": 0.0,
+      "LOSS %": 0.0,
+      "gap": 0.0
+    },
+    {
+      "feature": "flow_1h=BULL",
+      "WIN %": 21.0,
+      "LOSS %": 22.2,
+      "gap": -1.3
+    },
+    {
+      "feature": "flow_1h=BEAR",
+      "WIN %": 79.0,
+      "LOSS %": 77.8,
+      "gap": 1.3
+    },
+    {
+      "feature": "flow_1h=None",
+      "WIN %": 0.0,
+      "LOSS %": 0.0,
+      "gap": 0.0
+    },
+    {
+      "feature": "raid_high_4h",
+      "WIN %": 27.4,
+      "LOSS %": 32.6,
+      "gap": -5.2
+    },
+    {
+      "feature": "raid_high_1h",
+      "WIN %": 27.4,
+      "LOSS %": 22.9,
+      "gap": 4.5
+    },
+    {
+      "feature": "raid_low_4h",
+      "WIN %": 79.0,
+      "LOSS %": 84.0,
+      "gap": -5.0
+    },
+    {
+      "feature": "raid_low_1h",
+      "WIN %": 85.5,
+      "LOSS %": 88.2,
+      "gap": -2.7
+    },
+    {
+      "feature": "in_demand_4h",
+      "WIN %": 79.0,
+      "LOSS %": 71.5,
+      "gap": 7.5
+    },
+    {
+      "feature": "in_demand_1h",
+      "WIN %": 59.7,
+      "LOSS %": 66.0,
+      "gap": -6.3
+    },
+    {
+      "feature": "discount_4h",
+      "WIN %": 100.0,
+      "LOSS %": 100.0,
+      "gap": 0.0
+    },
+    {
+      "feature": "discount_1h",
+      "WIN %": 0.0,
+      "LOSS %": 0.0,
+      "gap": 0.0
+    },
+    {
+      "feature": "unicorn_4h",
+      "WIN %": 61.3,
+      "LOSS %": 59.7,
+      "gap": 1.6
+    },
+    {
+      "feature": "unicorn_1h",
+      "WIN %": 51.6,
+      "LOSS %": 54.2,
+      "gap": -2.6
+    },
+    {
+      "feature": "unicorn_exec",
+      "WIN %": 16.1,
+      "LOSS %": 18.1,
+      "gap": -1.9
+    },
+    {
+      "feature": "on_breaker_exec",
+      "WIN %": 0.0,
+      "LOSS %": 1.4,
+      "gap": -1.4
+    },
+    {
+      "feature": "stop_in_demand_4h",
+      "WIN %": 67.7,
+      "LOSS %": 75.7,
+      "gap": -8.0
+    },
+    {
+      "feature": "stop_in_demand_1h",
+      "WIN %": 61.3,
+      "LOSS %": 72.2,
+      "gap": -10.9
+    },
+    {
+      "feature": "stop_in_htf_blue_4h",
+      "WIN %": 66.1,
+      "LOSS %": 68.8,
+      "gap": -2.6
+    },
+    {
+      "feature": "stop_in_htf_blue_1h",
+      "WIN %": 80.6,
+      "LOSS %": 81.9,
+      "gap": -1.3
+    },
+    {
+      "feature": "crossed_purple_mid",
+      "WIN %": 91.9,
+      "LOSS %": 34.7,
+      "gap": 57.2
+    },
+    {
+      "feature": "bear_fvg_after_entry",
+      "WIN %": 64.5,
+      "LOSS %": 47.9,
+      "gap": 16.6
+    },
+    {
+      "feature": "choch_at_shield",
+      "WIN %": 0.0,
+      "LOSS %": 0.0,
+      "gap": 0.0
+    }
+  ],
+  "gates": [
+    {
+      "gate": "baseline (no gate)",
+      "n": 249,
+      "W": 62,
+      "BE": 43,
+      "L": 144,
+      "WR": 0.301,
+      "assert5_ok": true,
+      "yearly": {
+        "2021": 69,
+        "2022": 66,
+        "2023": 34,
+        "2024": 33,
+        "2025": 25,
+        "2026": 22
+      }
+    },
+    {
+      "gate": "G1 4H order flow BULLISH",
+      "n": 70,
+      "W": 16,
+      "BE": 12,
+      "L": 42,
+      "WR": 0.2759,
+      "assert5_ok": false,
+      "yearly": {
+        "2021": 21,
+        "2022": 12,
+        "2023": 8,
+        "2024": 11,
+        "2025": 8,
+        "2026": 10
+      }
+    },
+    {
+      "gate": "G2 1H order flow BULLISH",
+      "n": 55,
+      "W": 13,
+      "BE": 10,
+      "L": 32,
+      "WR": 0.2889,
+      "assert5_ok": false,
+      "yearly": {
+        "2021": 14,
+        "2022": 8,
+        "2023": 9,
+        "2024": 8,
+        "2025": 9,
+        "2026": 7
+      }
+    },
+    {
+      "gate": "G3 4H AND 1H BULLISH",
+      "n": 17,
+      "W": 3,
+      "BE": 2,
+      "L": 12,
+      "WR": 0.2,
+      "assert5_ok": false,
+      "yearly": {
+        "2021": 4,
+        "2022": 3,
+        "2023": 1,
+        "2024": 4,
+        "2025": 3,
+        "2026": 2
+      }
+    },
+    {
+      "gate": "G4 no failed BSL raid on 4H",
+      "n": 174,
+      "W": 45,
+      "BE": 32,
+      "L": 97,
+      "WR": 0.3169,
+      "assert5_ok": true,
+      "yearly": {
+        "2021": 49,
+        "2022": 50,
+        "2023": 24,
+        "2024": 21,
+        "2025": 17,
+        "2026": 13
+      }
+    },
+    {
+      "gate": "G5 no failed BSL raid on 1H",
+      "n": 189,
+      "W": 45,
+      "BE": 33,
+      "L": 111,
+      "WR": 0.2885,
+      "assert5_ok": true,
+      "yearly": {
+        "2021": 55,
+        "2022": 53,
+        "2023": 23,
+        "2024": 24,
+        "2025": 18,
+        "2026": 16
+      }
+    },
+    {
+      "gate": "G6 reclaimed SSL raid on 1H",
+      "n": 214,
+      "W": 53,
+      "BE": 34,
+      "L": 127,
+      "WR": 0.2944,
+      "assert5_ok": true,
+      "yearly": {
+        "2021": 61,
+        "2022": 63,
+        "2023": 26,
+        "2024": 25,
+        "2025": 21,
+        "2026": 18
+      }
+    },
+    {
+      "gate": "G7 1H wall >= 3R or open sky",
+      "n": 107,
+      "W": 25,
+      "BE": 18,
+      "L": 64,
+      "WR": 0.2809,
+      "assert5_ok": false,
+      "yearly": {
+        "2021": 26,
+        "2022": 26,
+        "2023": 18,
+        "2024": 14,
+        "2025": 13,
+        "2026": 10
+      }
+    },
+    {
+      "gate": "G8 entry inside 1H demand",
+      "n": 161,
+      "W": 37,
+      "BE": 29,
+      "L": 95,
+      "WR": 0.2803,
+      "assert5_ok": true,
+      "yearly": {
+        "2021": 43,
+        "2022": 41,
+        "2023": 26,
+        "2024": 21,
+        "2025": 13,
+        "2026": 17
+      }
+    },
+    {
+      "gate": "G9 entry inside 4H demand",
+      "n": 183,
+      "W": 49,
+      "BE": 31,
+      "L": 103,
+      "WR": 0.3224,
+      "assert5_ok": true,
+      "yearly": {
+        "2021": 48,
+        "2022": 51,
+        "2023": 24,
+        "2024": 22,
+        "2025": 18,
+        "2026": 20
+      }
+    },
+    {
+      "gate": "G10 1H discount",
+      "n": 0,
+      "W": 0,
+      "BE": 0,
+      "L": 0,
+      "WR": 0.0,
+      "assert5_ok": false,
+      "yearly": {}
+    },
+    {
+      "gate": "G11 UNICORN on exec frame",
+      "n": 43,
+      "W": 10,
+      "BE": 7,
+      "L": 26,
+      "WR": 0.2778,
+      "assert5_ok": false,
+      "yearly": {
+        "2021": 11,
+        "2022": 15,
+        "2023": 4,
+        "2024": 7,
+        "2025": 3,
+        "2026": 3
+      }
+    },
+    {
+      "gate": "G12 UNICORN on 1H",
+      "n": 135,
+      "W": 32,
+      "BE": 25,
+      "L": 78,
+      "WR": 0.2909,
+      "assert5_ok": false,
+      "yearly": {
+        "2021": 33,
+        "2022": 32,
+        "2023": 23,
+        "2024": 19,
+        "2025": 12,
+        "2026": 16
+      }
+    },
+    {
+      "gate": "G13 UNICORN on 4H",
+      "n": 152,
+      "W": 38,
+      "BE": 28,
+      "L": 86,
+      "WR": 0.3065,
+      "assert5_ok": true,
+      "yearly": {
+        "2021": 38,
+        "2022": 42,
+        "2023": 20,
+        "2024": 19,
+        "2025": 15,
+        "2026": 18
+      }
+    },
+    {
+      "gate": "G14 standing on a 1H inversion FVG",
+      "n": 249,
+      "W": 62,
+      "BE": 43,
+      "L": 144,
+      "WR": 0.301,
+      "assert5_ok": true,
+      "yearly": {
+        "2021": 69,
+        "2022": 66,
+        "2023": 34,
+        "2024": 33,
+        "2025": 25,
+        "2026": 22
+      }
+    },
+    {
+      "gate": "G15 standing on a 4H inversion FVG",
+      "n": 249,
+      "W": 62,
+      "BE": 43,
+      "L": 144,
+      "WR": 0.301,
+      "assert5_ok": true,
+      "yearly": {
+        "2021": 69,
+        "2022": 66,
+        "2023": 34,
+        "2024": 33,
+        "2025": 25,
+        "2026": 22
+      }
+    },
+    {
+      "gate": "G16 stop nested in 4H demand",
+      "n": 182,
+      "W": 42,
+      "BE": 31,
+      "L": 109,
+      "WR": 0.2781,
+      "assert5_ok": true,
+      "yearly": {
+        "2021": 45,
+        "2022": 50,
+        "2023": 26,
+        "2024": 26,
+        "2025": 19,
+        "2026": 16
+      }
+    },
+    {
+      "gate": "G17 stop nested in 1H demand",
+      "n": 179,
+      "W": 38,
+      "BE": 37,
+      "L": 104,
+      "WR": 0.2676,
+      "assert5_ok": true,
+      "yearly": {
+        "2021": 47,
+        "2022": 44,
+        "2023": 30,
+        "2024": 21,
+        "2025": 21,
+        "2026": 16
+      }
+    },
+    {
+      "gate": "G18 stop inside a live 4H blue (SSL)",
+      "n": 173,
+      "W": 41,
+      "BE": 33,
+      "L": 99,
+      "WR": 0.2929,
+      "assert5_ok": true,
+      "yearly": {
+        "2021": 48,
+        "2022": 39,
+        "2023": 26,
+        "2024": 25,
+        "2025": 18,
+        "2026": 17
+      }
+    },
+    {
+      "gate": "G19 entry in the 4H bottom quarter",
+      "n": 113,
+      "W": 32,
+      "BE": 25,
+      "L": 56,
+      "WR": 0.3636,
+      "assert5_ok": false,
+      "yearly": {
+        "2021": 23,
+        "2022": 32,
+        "2023": 17,
+        "2024": 17,
+        "2025": 11,
+        "2026": 13
+      }
+    },
+    {
+      "gate": "G20 entry in the 4H bottom half",
+      "n": 249,
+      "W": 62,
+      "BE": 43,
+      "L": 144,
+      "WR": 0.301,
+      "assert5_ok": true,
+      "yearly": {
+        "2021": 69,
+        "2022": 66,
+        "2023": 34,
+        "2024": 33,
+        "2025": 25,
+        "2026": 22
+      }
+    },
+    {
+      "gate": "G21 4H sky >= 6R (T3 room)",
+      "n": 168,
+      "W": 46,
+      "BE": 30,
+      "L": 92,
+      "WR": 0.3333,
+      "assert5_ok": true,
+      "yearly": {
+        "2021": 50,
+        "2022": 51,
+        "2023": 20,
+        "2024": 20,
+        "2025": 13,
+        "2026": 14
+      }
+    },
+    {
+      "gate": "G22 4H sky >= 10R",
+      "n": 121,
+      "W": 37,
+      "BE": 21,
+      "L": 63,
+      "WR": 0.37,
+      "assert5_ok": false,
+      "yearly": {
+        "2021": 41,
+        "2022": 39,
+        "2023": 13,
+        "2024": 12,
+        "2025": 6,
+        "2026": 10
+      }
+    },
+    {
+      "gate": "C1 G1+G7",
+      "n": 41,
+      "W": 8,
+      "BE": 8,
+      "L": 25,
+      "WR": 0.2424,
+      "assert5_ok": false,
+      "yearly": {
+        "2021": 12,
+        "2022": 8,
+        "2023": 6,
+        "2024": 7,
+        "2025": 4,
+        "2026": 4
+      }
+    },
+    {
+      "gate": "C2 G2+G7",
+      "n": 29,
+      "W": 5,
+      "BE": 4,
+      "L": 20,
+      "WR": 0.2,
+      "assert5_ok": false,
+      "yearly": {
+        "2021": 7,
+        "2022": 4,
+        "2023": 6,
+        "2024": 3,
+        "2025": 5,
+        "2026": 4
+      }
+    },
+    {
+      "gate": "C3 G3+G7",
+      "n": 12,
+      "W": 1,
+      "BE": 1,
+      "L": 10,
+      "WR": 0.0909,
+      "assert5_ok": false,
+      "yearly": {
+        "2021": 3,
+        "2022": 3,
+        "2023": 1,
+        "2024": 2,
+        "2025": 2,
+        "2026": 1
+      }
+    },
+    {
+      "gate": "C4 G2+G5",
+      "n": 16,
+      "W": 4,
+      "BE": 2,
+      "L": 10,
+      "WR": 0.2857,
+      "assert5_ok": false,
+      "yearly": {
+        "2021": 3,
+        "2022": 2,
+        "2023": 2,
+        "2024": 3,
+        "2025": 3,
+        "2026": 3
+      }
+    },
+    {
+      "gate": "C5 G1+G5+G7",
+      "n": 26,
+      "W": 6,
+      "BE": 7,
+      "L": 13,
+      "WR": 0.3158,
+      "assert5_ok": false,
+      "yearly": {
+        "2021": 9,
+        "2022": 5,
+        "2023": 4,
+        "2024": 4,
+        "2025": 2,
+        "2026": 2
+      }
+    },
+    {
+      "gate": "C6 UNICORN on ANY frame",
+      "n": 200,
+      "W": 45,
+      "BE": 40,
+      "L": 115,
+      "WR": 0.2812,
+      "assert5_ok": true,
+      "yearly": {
+        "2021": 51,
+        "2022": 55,
+        "2023": 28,
+        "2024": 25,
+        "2025": 20,
+        "2026": 21
+      }
+    },
+    {
+      "gate": "C7 UNICORN any + 4H BULL",
+      "n": 59,
+      "W": 15,
+      "BE": 11,
+      "L": 33,
+      "WR": 0.3125,
+      "assert5_ok": false,
+      "yearly": {
+        "2021": 17,
+        "2022": 10,
+        "2023": 7,
+        "2024": 8,
+        "2025": 8,
+        "2026": 9
+      }
+    },
+    {
+      "gate": "C8 inversion FVG on 1H or 4H",
+      "n": 249,
+      "W": 62,
+      "BE": 43,
+      "L": 144,
+      "WR": 0.301,
+      "assert5_ok": true,
+      "yearly": {
+        "2021": 69,
+        "2022": 66,
+        "2023": 34,
+        "2024": 33,
+        "2025": 25,
+        "2026": 22
+      }
+    },
+    {
+      "gate": "C9 inversion + 4H BULL",
+      "n": 70,
+      "W": 16,
+      "BE": 12,
+      "L": 42,
+      "WR": 0.2759,
+      "assert5_ok": false,
+      "yearly": {
+        "2021": 21,
+        "2022": 12,
+        "2023": 8,
+        "2024": 11,
+        "2025": 8,
+        "2026": 10
+      }
+    }
+  ],
+  "shield_variants": [
+    {
+      "variant": "V1 arm +1R close, exit close<post-entry HL",
+      "losses_saved": 0,
+      "winners_sacrificed": 0,
+      "WR": 0.301
+    },
+    {
+      "variant": "V2 arm +1R close (any HL)",
+      "losses_saved": 0,
+      "winners_sacrificed": 0,
+      "WR": 0.301
+    },
+    {
+      "variant": "V3 arm +1.5R close",
+      "losses_saved": 0,
+      "winners_sacrificed": 0,
+      "WR": 0.301
+    },
+    {
+      "variant": "V4 arm on 4H purple-mid cross",
+      "losses_saved": 0,
+      "winners_sacrificed": 0,
+      "WR": 0.301
+    },
+    {
+      "variant": "V5 arm mid-cross AND +1R",
+      "losses_saved": 0,
+      "winners_sacrificed": 0,
+      "WR": 0.301
+    },
+    {
+      "variant": "V6 arm +1R, invalidate only on bearish CHoCH",
+      "losses_saved": 0,
+      "winners_sacrificed": 0,
+      "WR": 0.301
+    }
+  ],
+  "shield": {
+    "armed": 0,
+    "losses_saved": 0,
+    "winners_sacrificed": 0,
+    "wr_after": 0.301
+  }
+}

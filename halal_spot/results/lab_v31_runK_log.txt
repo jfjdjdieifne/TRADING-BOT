@@ -1,0 +1,27 @@
+
+########## LIVE ENGINE · combo=base · 2021-01-01..2026-10-31 ##########
+    config: 
+[        base] n= 298   44W/  0SW/109BE/145L  WR= 23.28% (incl  23.28%)  minWin=3.0  SWIN[None..None]  >=4R= 10  maxR= 19.38  totR=   66.39
+               net= +71.75% ($343.5)  PF=2.14  maxDD=-9.52%  fees=$80.59  streak=3/34  yearly={'2021': 101, '2022': 79, '2023': 34, '2024': 35, '2025': 25, '2026': 24}
+               CADENCE: profitable months=25.7%  compounded=0.78%/mo  median month=-0.16%  wins/mo=0.63  trades/mo=4.26
+               MECH: struct_trail=0 harvests=0 impulse=0 sacred_impulse=0 floor_htf=0 be_at_entry=177 minTargetR=3.16
+               asserts A1..A5 = FPPPP -> 4/5 (A2 entry-gate P)  exits={"STOP_BLUE": 72, "LOCK_FLOOR_CLOSE": 33, "BREAKEVEN": 109, "TARGET_REJECTION": 1, "SHIELD_BE": 83}
+
+########## LIVE ENGINE · combo=C_124 · 2021-01-01..2026-10-31 ##########
+    config: VIGILANCE_SCOPE=none  SHIELD_RULE_V30=MID|BOS  STRUCT_TRAIL=True  LOCK_MODE=trail
+[       C_124] n= 311   29W/ 70SW/ 85BE/127L  WR= 18.59% (incl  43.81%)  minWin=3.18  SWIN[0.07..2.8]  >=4R= 27  maxR= 34.50  totR=  114.03
+               net= +81.84% ($363.68)  PF=1.75  maxDD=-10.95%  fees=$84.87  streak=3/8  yearly={'2021': 100, '2022': 83, '2023': 17, '2024': 44, '2025': 19, '2026': 48}
+               CADENCE: profitable months=41.4%  compounded=0.86%/mo  median month=0.0%  wins/mo=1.41  trades/mo=4.44
+               MECH: struct_trail=188 harvests=0 impulse=0 sacred_impulse=0 floor_htf=0 be_at_entry=15 minTargetR=3.16
+               asserts A1..A5 = FPPPP -> 4/5 (A2 entry-gate P)  exits={"STOP_BLUE": 153, "STRUCT_PROFIT": 70, "BREAKEVEN": 85, "TARGET_REJECTION": 3}
+
+================= v31 LIVE COMPARISON TABLE =================
+       combo    n    W  SW   BE    L    WR%   WRi%  minW  >=4R   maxR     totR     net%    PF  maxDD%  mo+%  c%/mo  w/mo  strk  5as
+         v25  206   51   0   48  107  32.30   0.00   3.0    13  19.38     0.00   +42.14  1.43  -17.43   0.0   0.00  0.00     3    -
+         v27  297   70   0   66  161  30.30   0.00   3.0    18  19.38     0.00   +31.90  1.26  -14.41   0.0   0.00  0.00     3    -
+         v30  298   44   0  109  145  23.30   0.00   3.0    10  19.38     0.00   +71.75  2.14   -9.52   0.0   0.00  0.00     3    -
+        base  298   44   0  109  145  23.28  23.28   3.0    10  19.38    66.39   +71.75  2.14   -9.52  25.7   0.78  0.63     3  4/5
+       C_124  311   29  70   85  127  18.59  43.81  3.18    27  34.50   114.03   +81.84  1.75  -10.95  41.4   0.86  1.41     3  4/5
+=============================================================
+          base yearly: {'2021': 101, '2022': 79, '2023': 34, '2024': 35, '2025': 25, '2026': 24}
+         C_124 yearly: {'2021': 100, '2022': 83, '2023': 17, '2024': 44, '2025': 19, '2026': 48}

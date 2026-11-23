@@ -1,0 +1,34 @@
+
+##### LIVE ENGINE combo=P1_all8 W1 2023-10-01..2024-03-31 #####
+    cfg: 
+    n=314 totR=78.0871 end=$119.4304 DD=-12.035% (555s)
+    coins: {"ADAUSDT_5m": [44, 23.275, 6.001], "AVAXUSDT_5m": [49, -24.041, -8.422], "BNBUSDT_5m": [44, 6.381, 7.964], "BTCUSDT_5m": [16, 6.951, 7.135], "ETHUSDT_5m": [33, -12.392, -4.041], "LINKUSDT_5m": [40, 15.852, 2.081], "SOLUSDT_5m": [50, 22.299, 11.183], "XRPUSDT_5m": [38, 39.762, -2.47]}
+    counters: {"v32_emergency_stop": 13, "fill_below_exchange_min": 169, "shield_armed_disp": 150}
+
+##### LIVE ENGINE combo=P1_all8 W2 2024-05-01..2024-10-31 #####
+    cfg: 
+    n=284 totR=-57.6138 end=$96.112 DD=-16.385% (349s)
+    coins: {"ADAUSDT_5m": [42, -27.309, -4.776], "AVAXUSDT_5m": [42, -11.757, 1.313], "BNBUSDT_5m": [30, -8.235, -2.775], "BTCUSDT_5m": [26, -7.8, -0.582], "ETHUSDT_5m": [22, 15.6, 5.127], "LINKUSDT_5m": [47, -16.981, -2.565], "SOLUSDT_5m": [46, 2.181, 3.607], "XRPUSDT_5m": [29, -3.313, -3.238]}
+    counters: {"v32_emergency_stop": 11, "fill_below_exchange_min": 137, "shield_armed_disp": 136}
+
+##### LIVE ENGINE combo=P1_slot1 W1 2023-10-01..2024-03-31 #####
+    cfg: ALLOC_MODE=slot
+    n=314 totR=78.0871 end=$119.4304 DD=-12.035% (538s)
+    coins: {"ADAUSDT_5m": [44, 23.275, 6.001], "AVAXUSDT_5m": [49, -24.041, -8.422], "BNBUSDT_5m": [44, 6.381, 7.964], "BTCUSDT_5m": [16, 6.951, 7.135], "ETHUSDT_5m": [33, -12.392, -4.041], "LINKUSDT_5m": [40, 15.852, 2.081], "SOLUSDT_5m": [50, 22.299, 11.183], "XRPUSDT_5m": [38, 39.762, -2.47]}
+    counters: {"v32_emergency_stop": 13, "fill_below_exchange_min": 169, "shield_armed_disp": 150}
+
+##### LIVE ENGINE combo=P1_slot1 W2 2024-05-01..2024-10-31 #####
+    cfg: ALLOC_MODE=slot
+    n=284 totR=-57.6138 end=$96.112 DD=-16.385% (346s)
+    coins: {"ADAUSDT_5m": [42, -27.309, -4.776], "AVAXUSDT_5m": [42, -11.757, 1.313], "BNBUSDT_5m": [30, -8.235, -2.775], "BTCUSDT_5m": [26, -7.8, -0.582], "ETHUSDT_5m": [22, 15.6, 5.127], "LINKUSDT_5m": [47, -16.981, -2.565], "SOLUSDT_5m": [46, 2.181, 3.607], "XRPUSDT_5m": [29, -3.313, -3.238]}
+    counters: {"v32_emergency_stop": 11, "fill_below_exchange_min": 137, "shield_armed_disp": 136}
+
+##### LIVE ENGINE combo=P1_slot2 W1 2023-10-01..2024-03-31 #####
+    cfg: ALLOC_MODE=slot  SLOTS=2
+    n=428 totR=62.7024 end=$116.7025 DD=-5.697% (2993s)
+    coins: {"ADAUSDT_5m": [62, 50.054, 5.087], "AVAXUSDT_5m": [65, -5.307, -3.911], "BNBUSDT_5m": [53, 1.278, 5.905], "BTCUSDT_5m": [26, -2.27, 3.401], "ETHUSDT_5m": [36, -8.994, -2.317], "LINKUSDT_5m": [51, 21.152, 1.553], "SOLUSDT_5m": [69, 22.983, 10.179], "XRPUSDT_5m": [66, -16.193, -3.196]}
+    counters: {"v32_emergency_stop": 19, "shield_armed_disp": 205}
+
+##### LIVE ENGINE combo=P1_slot2 W2 2024-05-01..2024-10-31 #####
+    cfg: ALLOC_MODE=slot  SLOTS=2
+DONE_A

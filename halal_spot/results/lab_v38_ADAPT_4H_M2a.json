@@ -1,0 +1,41 @@
+{
+ "arm": "ADAPT_4H",
+ "window": "M2a",
+ "start": "2025-11-01",
+ "end": "2026-01-31",
+ "seconds": 199.9,
+ "n": 74,
+ "capital": 100.0,
+ "net": 11.6481,
+ "end_equity": 111.6481,
+ "pf": 1.527,
+ "wr": 10.81,
+ "be": 24,
+ "losses": 42,
+ "fees": 7.508,
+ "net_minus_top3": -8.7974,
+ "exits": {
+  "STOP_BLUE": 35,
+  "BREAKEVEN": 24,
+  "EMERGENCY_STOP": 13,
+  "TARGET_REJECTION": 1,
+  "SHIELD_BE": 1
+ },
+ "monthly": {
+  "2025-11": {
+   "net$": -1.2736,
+   "end": 98.7264
+  },
+  "2025-12": {
+   "net$": 5.2414,
+   "end": 103.9678
+  },
+  "2026-01": {
+   "net$": 7.6804,
+   "end": 111.6481
+  }
+ },
+ "months_pos": 2,
+ "months_n": 3,
+ "maxDD_pct": -8.161
+}

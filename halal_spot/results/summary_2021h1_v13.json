@@ -1,0 +1,86 @@
+{
+  "window_2021h1": {
+    "trades": 17,
+    "wins": 1,
+    "losses": 16,
+    "win_rate_pct": 5.9,
+    "gross_profit": 0.36,
+    "gross_loss": -24.91,
+    "profit_factor": 0.01,
+    "net_pnl": -24.55,
+    "net_pct": -24.55,
+    "start_equity": 100.0,
+    "end_equity": 75.45,
+    "max_drawdown_pct": -29.32,
+    "max_drawdown_usd": 30.8,
+    "avg_r": -1.11,
+    "best_r": 0.41,
+    "worst_r": -2.16,
+    "avg_hold_hours": 5.1,
+    "exposure_pct": 3.3,
+    "exit_tags": {
+      "SL_DIP": 9,
+      "SL_SNIP": 4,
+      "SL_ACCUM": 3,
+      "SL_RIDE": 1
+    },
+    "setups": {
+      "DIP": 9,
+      "SNIP": 4,
+      "ACCUM": 3,
+      "RIDE": 1
+    },
+    "sides": {
+      "LONG": 15,
+      "SHORT": 2
+    },
+    "exits": {
+      "SL": 17
+    }
+  },
+  "buy_hold_2021h1": 121.16,
+  "count_2021h1": {
+    "cand_SNIP": 90,
+    "cand_RIDE": 410,
+    "cand_ACCUM": 295,
+    "cand_DIP": 65,
+    "v_wall": 483,
+    "v_noise": 130,
+    "v_level": 19,
+    "v_quality": 5,
+    "entries_filled": 17,
+    "entries_placed": 17,
+    "exp_pending": 12,
+    "v_cd": 5,
+    "cand_FALL": 1,
+    "v_stop": 3,
+    "v_streak": 16,
+    "tp1_filled": 1,
+    "pyramid_filled": 3
+  },
+  "end_log_2021h1": {
+    "vetoes": {
+      "cand_ACCUM": 295,
+      "cand_DIP": 65,
+      "cand_FALL": 1,
+      "cand_RIDE": 410,
+      "cand_SNIP": 90,
+      "entries_filled": 17,
+      "entries_placed": 17,
+      "exp_pending": 12,
+      "pyramid_filled": 3,
+      "tp1_filled": 1,
+      "v_cd": 5,
+      "v_level": 19,
+      "v_noise": 130,
+      "v_quality": 5,
+      "v_stop": 3,
+      "v_streak": 16,
+      "v_wall": 483
+    },
+    "fees_total": 4.5751,
+    "equity": 75.45,
+    "mode_final": "TREND_UP",
+    "loss_streak": 0
+  }
+}

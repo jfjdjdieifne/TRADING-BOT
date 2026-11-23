@@ -1,0 +1,17 @@
+
+########## LIVE ENGINE · combo=SHIP_sl5 · 2021-01-01..2026-10-31 ##########
+    config: VIGILANCE_SCOPE=none  SHIELD_RULE_V30=MID|BOS  STRUCT_TRAIL=True  LOCK_MODE=trail
+[    SHIP_sl5] n= 219   23W/ 44SW/ 63BE/ 89L  WR= 20.54% (incl  42.95%)  minWin=3.73  SWIN[0.1..2.13]  >=4R= 22  maxR= 34.06  totR=   89.46
+               net= +63.94% ($327.87)  PF=1.71  maxDD=-11.31%  fees=$79.33  streak=3/8  yearly={'2021': 92, '2022': 65, '2023': 14, '2024': 12, '2025': 16, '2026': 20}
+               CADENCE: profitable months=35.7%  compounded=0.71%/mo  median month=0.0%  wins/mo=0.96  trades/mo=3.13
+               MECH: struct_trail=137 harvests=0 impulse=0 sacred_impulse=0 floor_htf=0 be_at_entry=12 minTargetR=3.24
+               asserts A1..A5 = FPPPP -> 4/5 (A2 entry-gate P)  exits={"STOP_BLUE": 111, "STRUCT_PROFIT": 44, "BREAKEVEN": 63, "TARGET_REJECTION": 1}
+
+================= v31 LIVE COMPARISON TABLE =================
+       combo    n    W  SW   BE    L    WR%   WRi%  minW  >=4R   maxR     totR     net%    PF  maxDD%  mo+%  c%/mo  w/mo  strk  5as
+         v25  206   51   0   48  107  32.30   0.00   3.0    13  19.38     0.00   +42.14  1.43  -17.43   0.0   0.00  0.00     3    -
+         v27  297   70   0   66  161  30.30   0.00   3.0    18  19.38     0.00   +31.90  1.26  -14.41   0.0   0.00  0.00     3    -
+         v30  298   44   0  109  145  23.30   0.00   3.0    10  19.38     0.00   +71.75  2.14   -9.52   0.0   0.00  0.00     3    -
+    SHIP_sl5  219   23  44   63   89  20.54  42.95  3.73    22  34.06    89.46   +63.94  1.71  -11.31  35.7   0.71  0.96     3  4/5
+=============================================================
+      SHIP_sl5 yearly: {'2021': 92, '2022': 65, '2023': 14, '2024': 12, '2025': 16, '2026': 20}

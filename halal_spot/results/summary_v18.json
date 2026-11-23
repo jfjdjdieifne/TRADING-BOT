@@ -1,0 +1,81 @@
+{
+  "config": {
+    "strategy": "V18 structure-target spot (local real-data run)",
+    "window": "2021-01-01 .. 2026-10-31",
+    "capital_usdt": 200.0,
+    "leverage": 3.0,
+    "warmup_days": 35,
+    "fee_rate_per_side": 0.001,
+    "target_rule": "nearest ceiling, floor 3R, never clamped",
+    "symbol": "BTCUSDT",
+    "single_coin_disclosure": "breadth binary; RS gates use ret7d [D]; multi-coin slots QC-side only"
+  },
+  "metrics": {
+    "trades": 36,
+    "wins": 23,
+    "losses": 13,
+    "win_rate_pct": 63.9,
+    "profit_factor": 1.25,
+    "net_pnl": 7.65,
+    "net_pct": 3.82,
+    "end_equity": 207.65,
+    "cagr_pct": 0.65,
+    "sharpe_monthly": 0.266,
+    "max_drawdown_pct": -6.36,
+    "avg_r": 0.09,
+    "best_r": 3.49,
+    "worst_r": -1.18,
+    "avg_hold_hours": 4.5,
+    "exposure_pct": 0.3,
+    "max_consecutive_full_risk_losses": 3,
+    "probe_trades": 0,
+    "fees_total": 9.51,
+    "exit_tags": {
+      "STRUCT_STOP": 23,
+      "DEAD_SETUP_EXIT": 6,
+      "EARLY_ABORT": 4,
+      "FULL_SNIPER_3_3R": 2,
+      "STALL_TAKE": 1
+    },
+    "setups": {
+      "W_CAP_BOTTOM": 31,
+      "E20_BOUNCE": 4,
+      "SUPER_CYCLE_IGN": 1
+    },
+    "regimes": {
+      "BEAR_DEFENSE": 33,
+      "NORMAL_BULL": 2,
+      "SUPER_BULL": 1
+    },
+    "target_r": {
+      "min": 3.23,
+      "median": 4.05,
+      "max": 11.12
+    },
+    "signal_funnel": {
+      "gate_target_below_3r": 491669,
+      "gate_waterfall": 10303,
+      "pending_parked": 23,
+      "gate_extended_park": 120,
+      "entries": 36,
+      "pending_filled": 11,
+      "exit_STRUCT_STOP": 23,
+      "exit_DEAD_SETUP_EXIT": 6,
+      "circuit_reset_by_win": 8,
+      "exit_EARLY_ABORT": 4,
+      "exit_FULL_SNIPER_3_3R": 2,
+      "exit_STALL_TAKE": 1,
+      "pending_expired": 1,
+      "circuit_three_loss_pause": 1
+    }
+  },
+  "monthly_pos_neg": {
+    "positive_months": 15,
+    "negative_months": 8,
+    "flat_months": 47,
+    "avg_pct": 0.1,
+    "worst_pct": -3.16,
+    "best_pct": 8.86
+  },
+  "buy_hold": 167.49
+}

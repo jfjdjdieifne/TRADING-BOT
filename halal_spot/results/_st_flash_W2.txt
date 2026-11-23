@@ -1,0 +1,140 @@
+[
+ {
+  "bucket": "2024-05",
+  "n": 23,
+  "W": 3,
+  "L": 11,
+  "BE": 9,
+  "WR%": 13.0,
+  "totR": -5.78,
+  "net$": 4.88,
+  "PF": 1.85,
+  "by_coin$": {
+   "ADAUSDT_5m": -0.47,
+   "BNBUSDT_5m": -0.0,
+   "BTCUSDT_5m": -1.36,
+   "ETHUSDT_5m": 6.57,
+   "LINKUSDT_5m": -1.16,
+   "SOLUSDT_5m": 1.71,
+   "XRPUSDT_5m": -0.41
+  },
+  "end_balance$": 104.88,
+  "maxDD%_cum": -4.31
+ },
+ {
+  "bucket": "2024-06",
+  "n": 24,
+  "W": 3,
+  "L": 12,
+  "BE": 9,
+  "WR%": 12.5,
+  "totR": -11.69,
+  "net$": -5.82,
+  "PF": 0.29,
+  "by_coin$": {
+   "ADAUSDT_5m": -1.55,
+   "AVAXUSDT_5m": -0.0,
+   "BNBUSDT_5m": -2.75,
+   "BTCUSDT_5m": 0.49,
+   "ETHUSDT_5m": -0.0,
+   "LINKUSDT_5m": -1.17,
+   "SOLUSDT_5m": -1.67,
+   "XRPUSDT_5m": 0.83
+  },
+  "end_balance$": 99.05,
+  "maxDD%_cum": -10.07
+ },
+ {
+  "bucket": "2024-07",
+  "n": 25,
+  "W": 6,
+  "L": 10,
+  "BE": 9,
+  "WR%": 24.0,
+  "totR": 107.96,
+  "net$": 38.42,
+  "PF": 6.11,
+  "by_coin$": {
+   "ADAUSDT_5m": 9.84,
+   "AVAXUSDT_5m": -3.0,
+   "BNBUSDT_5m": -0.0,
+   "BTCUSDT_5m": -0.63,
+   "ETHUSDT_5m": 4.55,
+   "LINKUSDT_5m": -1.5,
+   "SOLUSDT_5m": 9.23,
+   "XRPUSDT_5m": 19.94
+  },
+  "end_balance$": 137.48,
+  "maxDD%_cum": -2.58
+ },
+ {
+  "bucket": "2024-08",
+  "n": 23,
+  "W": 4,
+  "L": 14,
+  "BE": 5,
+  "WR%": 17.4,
+  "totR": 27.54,
+  "net$": 18.06,
+  "PF": 2.52,
+  "by_coin$": {
+   "ADAUSDT_5m": -3.17,
+   "AVAXUSDT_5m": 0.76,
+   "BNBUSDT_5m": -1.14,
+   "BTCUSDT_5m": 4.17,
+   "ETHUSDT_5m": -1.06,
+   "LINKUSDT_5m": 21.55,
+   "SOLUSDT_5m": -3.05
+  },
+  "end_balance$": 155.53,
+  "maxDD%_cum": -2.39
+ },
+ {
+  "bucket": "2024-09",
+  "n": 23,
+  "W": 4,
+  "L": 12,
+  "BE": 7,
+  "WR%": 17.4,
+  "totR": 5.84,
+  "net$": 6.71,
+  "PF": 1.56,
+  "by_coin$": {
+   "ADAUSDT_5m": -3.93,
+   "AVAXUSDT_5m": -0.67,
+   "BNBUSDT_5m": 9.9,
+   "BTCUSDT_5m": 0.14,
+   "ETHUSDT_5m": 4.57,
+   "LINKUSDT_5m": -2.81,
+   "SOLUSDT_5m": -0.0,
+   "XRPUSDT_5m": -0.48
+  },
+  "end_balance$": 162.24,
+  "maxDD%_cum": -1.3
+ },
+ {
+  "bucket": "2024-10",
+  "n": 22,
+  "W": 6,
+  "L": 10,
+  "BE": 6,
+  "WR%": 27.3,
+  "totR": 7.55,
+  "net$": 20.39,
+  "PF": 3.31,
+  "by_coin$": {
+   "ADAUSDT_5m": 6.95,
+   "AVAXUSDT_5m": 9.52,
+   "BTCUSDT_5m": -0.84,
+   "ETHUSDT_5m": -0.6,
+   "LINKUSDT_5m": 6.75,
+   "SOLUSDT_5m": -1.39,
+   "XRPUSDT_5m": -0.0
+  },
+  "end_balance$": 182.63,
+  "maxDD%_cum": -0.85
+ }
+]
+
+27 weekly buckets -> statement_v36_S1_BOS_PLUS_FLASH_W2.json
+weekly end balances: 110.15 108.20 107.31 105.40 107.00 104.29 101.59 99.81 98.51 97.79 127.34 138.85 138.01 135.13 133.02 133.99 156.67 154.08 155.43 163.40 165.00 162.24 168.34 177.50 175.26 184.21 182.63

@@ -1,0 +1,44 @@
+=== TRAIL_1H W1 09:53:34 ===
+
+##### v38 combo=TRAIL_1H W1 2023-10-01..2024-03-31 #####
+    overrides: {"TRAIL_TF_AFTER_3R": "1h"}
+    n=179 end=$128.8009 PF=1.413 DD=-12.814% mo+=4/6 (803.8s)
+=== TRAIL_1H_1PCT W1 10:06:59 ===
+
+##### v38 combo=TRAIL_1H_1PCT W1 2023-10-01..2024-03-31 #####
+    overrides: {"TRAIL_TF_AFTER_3R": "1h", "TRAIL_AFTER_3R_MIN_PCT": 1.0}
+    n=179 end=$128.8009 PF=1.413 DD=-12.814% mo+=4/6 (625.1s)
+=== TRAIL_1H_30M W1 10:17:26 ===
+
+##### v38 combo=TRAIL_1H_30M W1 2023-10-01..2024-03-31 #####
+    overrides: {"TRAIL_TF_AFTER_3R": "1h30m"}
+    n=179 end=$128.8515 PF=1.414 DD=-12.814% mo+=4/6 (529.6s)
+=== DOL_LOCK W1 10:26:17 ===
+
+##### v38 combo=DOL_LOCK W1 2023-10-01..2024-03-31 #####
+    overrides: {"DOL_TARGET_LOCK": true}
+    n=181 end=$158.0240 PF=1.706 DD=-14.064% mo+=5/6 (565.5s)
+=== ANTI_BE_12 W1 10:35:44 ===
+
+##### v38 combo=ANTI_BE_12 W1 2023-10-01..2024-03-31 #####
+    overrides: {"ANTI_SHAKEOUT_BE": true, "MIN_BE_DISPLACEMENT_PCT": 1.2}
+    n=170 end=$140.3953 PF=1.574 DD=-10.45% mo+=6/6 (499.9s)
+=== ANTI_BE_15 W1 10:44:05 ===
+
+##### v38 combo=ANTI_BE_15 W1 2023-10-01..2024-03-31 #####
+    overrides: {"ANTI_SHAKEOUT_BE": true, "MIN_BE_DISPLACEMENT_PCT": 1.5}
+Terminated
+=== MIN_ROOM_1 W1 10:50:56 ===
+
+##### v38 combo=MIN_ROOM_1 W1 2023-10-01..2024-03-31 #####
+    overrides: {"MIN_DOL_ROOM_PCT": 1.0}
+_batch_v38.sh: line 6:  2726 Killed                  $PY -u lab_v38_dol_harvester.py run $a --window W1
+=== ADAPT_4H W1 10:51:05 ===
+
+##### v38 combo=ADAPT_4H W1 2023-10-01..2024-03-31 #####
+    overrides: {"ADAPT_4H_RATCHET": true}
+_batch_v38.sh: line 6:  2758 Killed                  $PY -u lab_v38_dol_harvester.py run $a --window W1
+=== TRAIL_DOL W1 10:51:11 ===
+
+##### v38 combo=TRAIL_DOL W1 2023-10-01..2024-03-31 #####
+    overrides: {"TRAIL_TF_AFTER_3R": "1h", "DOL_TARGET_LOCK": true}

@@ -1,0 +1,249 @@
+==========================================================================
+Q1  ACTUAL SPOT % EXCURSION OF THE BREAKEVEN EXITS  (mfe_pct, not mfe_R)
+==========================================================================
+    round-trip fee floor = 0.20%   (a trade must clear this to earn a cent)
+
+     5m window      trades          BE         BE%peak $ given back      0-0.8%    0.8-1.5%    1.5-2.5%      2.5-4%        4-6%        >=6%
+            W1         181          66       36.5%      $79.47          32          21          12           1           0           0
+            W2         145          47       32.4%      $51.46          29          15           2           1           0           0
+          OLD7         203          77       37.9%      $56.52          54          16           6           1           0           0
+        MOD_Y1         340         135       39.7%     $318.41          77          36          17           3           1           1
+        MOD_Y2         304         123       40.5%      $89.29          88          28           6           1           0           0
+        MODERN         653         262       40.1%     $634.77         169          62          25           4           1           1
+
+  1b  HOW MUCH OF THE PEAK UNREALISED PROFIT WAS IN TRADES THAT
+      ACTUALLY MOVED >= X% IN COIN PRICE BEFORE ROUND-TRIPPING TO $0
+      window   peak$ all BE       >= +1.5%       >= +2.5%       >= +4.0%       >= +6.0%
+          W1         $79.47         $32.17          $4.22          $0.00          $0.00
+          W2         $51.46          $8.11          $2.64          $0.00          $0.00
+        OLD7         $56.52         $13.57          $3.04          $0.00          $0.00
+      MOD_Y1        $318.41        $123.75         $58.07         $40.46         $33.03
+      MOD_Y2         $89.29         $13.23          $2.61          $0.00          $0.00
+      MODERN        $634.77        $180.97         $66.99         $40.46         $33.03
+
+  control: median notional on BE trades = $326.28  (so peak $ ~= peak % of a $100 seat)
+  control: BE trades whose peak was BELOW the 0.20% fee floor = 0 of 262 (0.0%)
+  --> those could never have paid, whatever the exit did.
+
+==========================================================================
+Q2  PREMATURE BREAKEVEN WICK-OUT  --  what price did AFTER we left
+==========================================================================
+    A BE trade is scratched at ~entry. Question: did the coin then
+    (a) never violate the ORIGINAL structural stop, and
+    (b) run >= +2% / +4% / +6% above entry -- without us?
+
+  --- W1: 66 BREAKEVEN trades (36.5% of 181) ---
+     horizon            bars  stop survived   >=+2%   >=+4%   >=+6%   survived & >=+2%  stop&>=+4%  stop&>=+6%
+         12h              37       13 (35%)      15       6       2           6 (16%)           3           0
+         24h              66       18 (27%)      41      21       8          15 (23%)           8           3
+         48h              66       16 (24%)      52      33      20          16 (24%)          13           8
+    COST of the shakeout (conservative, 24h, +2% floor):
+      15 trades were stopped out at $0.00 while the coin
+      never revisited the stop and ran >= +2.00%.
+      those trades could have banked >= 2.00%-0.20% = 1.80% on a $116.78 median seat
+      => >= $31.53 not earned, on a $100 start.
+      if they rode to +4.00% instead: >= $35.50
+
+  --- W2: 47 BREAKEVEN trades (32.4% of 145) ---
+     horizon            bars  stop survived   >=+2%   >=+4%   >=+6%   survived & >=+2%  stop&>=+4%  stop&>=+6%
+         12h              22        7 (32%)       5       1       0           2 (9%)           1           0
+         24h              47        5 (11%)      19       9       3           4 (9%)           2           2
+         48h              47        3 (6%)      27      15       5           3 (6%)           3           2
+    COST of the shakeout (conservative, 24h, +2% floor):
+      4 trades were stopped out at $0.00 while the coin
+      never revisited the stop and ran >= +2.00%.
+      those trades could have banked >= 2.00%-0.20% = 1.80% on a $142.04 median seat
+      => >= $10.23 not earned, on a $100 start.
+      if they rode to +4.00% instead: >= $10.80
+
+  --- MOD_Y1: 135 BREAKEVEN trades (39.7% of 340) ---
+     horizon            bars  stop survived   >=+2%   >=+4%   >=+6%   survived & >=+2%  stop&>=+4%  stop&>=+6%
+         12h              63       14 (22%)      27      11       4          11 (17%)           6           3
+         24h             135       27 (20%)      69      32      19          24 (18%)          15           8
+         48h             135       24 (18%)      84      50      30          22 (16%)          16          13
+    COST of the shakeout (conservative, 24h, +2% floor):
+      24 trades were stopped out at $0.00 while the coin
+      never revisited the stop and ran >= +2.00%.
+      those trades could have banked >= 2.00%-0.20% = 1.80% on a $232.09 median seat
+      => >= $100.26 not earned, on a $100 start.
+      if they rode to +4.00% instead: >= $132.29
+
+  --- MOD_Y2: 123 BREAKEVEN trades (40.5% of 304) ---
+     horizon            bars  stop survived   >=+2%   >=+4%   >=+6%   survived & >=+2%  stop&>=+4%  stop&>=+6%
+         12h              71       20 (28%)      23       7       4           9 (13%)           3           2
+         24h             123       25 (20%)      55      19      10          16 (13%)           6           3
+         48h             123       20 (16%)      73      34      21          15 (12%)          10           6
+    COST of the shakeout (conservative, 24h, +2% floor):
+      16 trades were stopped out at $0.00 while the coin
+      never revisited the stop and ran >= +2.00%.
+      those trades could have banked >= 2.00%-0.20% = 1.80% on a $100.78 median seat
+      => >= $29.02 not earned, on a $100 start.
+      if they rode to +4.00% instead: >= $22.98
+
+  --- why it happens: risk_pct of BE trades vs their peak ---
+    window  risk% p25   median     p75  peak% med  peak/risk  <0.35% stops
+        W1      0.340    0.518   0.764      0.824       1.69           27%
+        W2      0.245    0.357   0.565      0.654       1.98           45%
+    MOD_Y1      0.257    0.418   0.598      0.740       2.00           39%
+    MOD_Y2      0.257    0.375   0.623      0.579       1.71           46%
+  (peak/risk ~= the R the lock needed; 3.0 means the +3R lock was
+   reachable but the trade still died at the scratch line.)
+
+==========================================================================
+Q3  WHY THE 4H TRAIL IS DEAD -- AND WHAT 1H/30m OFFERED INSTEAD
+==========================================================================
+  3.0  THE CODE (strategy_v36_ict_champion.py, _manage):
+       `TRAIL_4H_ONLY_AFTER_3R` DOES NOT EXIST in the engine --
+       grep finds it nowhere. The real switch is
+       TRAIL_4H_ONLY_AFTER_LOCK = True, and when it is on the
+       post-lock trail searches `srcs = [self.struct_canvas]`
+       ONLY. struct_canvas is STRUCT_TF = '4h'.
+       So after the +3R lock the engine is blind to 1H/30m/15m
+       swing lows by construction, and to the 4H lens itself
+       unless that 4H canvas has confirmed a NEW BlueBox_SSL
+       above floor_line but below price, AFTER the entry.
+
+  the four conditions a 4H box must satisfy to move the stop:
+    (i)   state == ACTIVE          (ii) above floor_line
+    (iii) strictly below current price
+    (iv)  confirmed AFTER the entry (start_idx > entry_idx)
+  A 4H box needs 12 HOURS to confirm a 3-bar fractal. Most
+  trades are dead before the next 4H box exists at all.
+
+  3.1  THE BREACH -- trades that DID reach the +3R lock
+    window      n  reached +3R  trailed   DEAD  breach%  median peak%  median R
+        W1    181           48        1     47      98%          2.02      7.38
+        W2    145           40        2     38      95%          2.37      7.75
+    FULL15    408           96        4     92      96%          2.22      7.38
+      OLD7    203           57        5     52      91%          1.44      5.50
+    MOD_Y1    340           99        7     92      93%          2.73      6.02
+    MOD_Y2    304           84        3     81      96%          1.66      5.41
+     TOTAL                 424       22    402      95%
+  --> the 4H trail is dead in the overwhelming majority of the
+      trades that actually EARNED the right to be trailed.
+
+  3.2  WHAT 1H / 30m / 15m BlueBox_SSL OFFERED ON THE SAME TRADES
+       (causal: only boxes the canvas confirmed before that
+        trade's exit, and sitting above entry_px)
+    window  reached+3R   1H box > entry   30m box   15m box     any  1H > entry & <peak
+        W1          48        48 ( 100%)    48 (100%)   48 (100%)    48           48 (100%)
+        W2          40        40 ( 100%)    40 (100%)   40 (100%)    40           39 ( 98%)
+    MOD_Y1          99        98 (  99%)    99 (100%)   99 (100%)    99           98 ( 99%)
+    MOD_Y2          84        83 (  99%)    84 (100%)   84 (100%)    84           81 ( 96%)
+  --> a 1H swing low existed above entry on most locked trades.
+      The engine could not see it. That is the whole of Fact A.
+
+  3.3  DID PRICE DELIVER TO AN OPPOSING DOL AND REVERT TO ENTRY?
+       (the boxes ABOVE entry at exit: 1H/4H RedBox_BSL and
+        4H PurpleBox; a 'hit' = the trade's own peak reached it)
+    window  locked  1H BSL hit  4H BSL hit  4H purple  any DOL hit   ...then back to <=+0.2%
+        W1      48     47 ( 98%)     44 ( 92%)     37 ( 77%)      48 (100%)                25 ( 52%)
+        W2      40     40 (100%)     40 (100%)     32 ( 80%)      40 (100%)                18 ( 45%)
+    MOD_Y1      99     99 (100%)     94 ( 95%)     79 ( 80%)      99 (100%)                47 ( 47%)
+    MOD_Y2      84     82 ( 98%)     79 ( 94%)     62 ( 74%)      82 ( 98%)                45 ( 55%)
+  --> when a draw existed, price usually REACHED it. The question
+      the last column answers is whether we banked it or gave it back.
+
+==========================================================================
+Q4  SEPARATING FEE CHURN FROM REAL SPOT EXPANSIONS
+==========================================================================
+    the fee floor is 0.20% round trip. A setup whose
+    structural room is smaller than that cannot pay, whatever
+    the exit logic does.
+
+  (b) PERFORMANCE BY ACTUAL % DISTANCE TO THE +3R LOCK LINE
+      lock_pct = 3 * risk_pct = the real coin move the lock needs
+
+  --- W1  (n=181) ---
+            bucket      n    WR%     net $   fees $   net-top3    $/tr
+           [0,0.9)     63    17%     40.30    15.29       4.47    0.64
+         [0.9,1.5)     53     9%     11.51    13.70     -18.39    0.22
+         [1.5,2.5)     42     2%      4.25    10.86     -18.04    0.10
+             >=2.5     23     4%      1.97     5.77     -20.27    0.09
+
+  --- W2  (n=145) ---
+            bucket      n    WR%     net $   fees $   net-top3    $/tr
+           [0,0.9)     64    14%     12.49    18.10     -14.76    0.20
+         [0.9,1.5)     32    22%     54.10     8.97       4.57    1.69
+         [1.5,2.5)     33    27%     23.78     9.45      -4.76    0.72
+             >=2.5     16    25%      4.00     4.35      -6.49    0.25
+
+  --- FULL15  (n=408) ---
+            bucket      n    WR%     net $   fees $   net-top3    $/tr
+           [0,0.9)    162    12%     33.30    42.03     -11.64    0.21
+         [0.9,1.5)    114    11%     46.88    29.30      -3.73    0.41
+         [1.5,2.5)     81    15%     39.41    21.75      -1.20    0.49
+             >=2.5     51    12%    -17.15    13.04     -27.40   -0.34
+
+  --- OLD7  (n=203) ---
+            bucket      n    WR%     net $   fees $   net-top3    $/tr
+           [0,0.9)     97     7%    -12.00    19.31     -19.44   -0.12
+         [0.9,1.5)     61     8%     -8.67    12.07     -19.63   -0.14
+         [1.5,2.5)     27    22%      0.95     5.27      -6.55    0.04
+             >=2.5     18    11%      9.22     3.59      -7.64    0.51
+
+  --- MOD_Y1  (n=340) ---
+            bucket      n    WR%     net $   fees $   net-top3    $/tr
+           [0,0.9)    120     5%    -49.40    62.93     -68.83   -0.41
+         [0.9,1.5)     99    15%    164.11    47.35      14.38    1.66
+         [1.5,2.5)     73    16%     66.56    35.69      -3.33    0.91
+             >=2.5     48    27%     45.34    20.84      -3.11    0.94
+
+  --- MOD_Y2  (n=304) ---
+            bucket      n    WR%     net $   fees $   net-top3    $/tr
+           [0,0.9)    146     5%    -20.64    29.92     -32.69   -0.14
+         [0.9,1.5)     79    13%      1.92    16.02      -9.16    0.02
+         [1.5,2.5)     57    14%     37.11    11.49       5.68    0.65
+             >=2.5     22     0%    -10.82     4.48     -10.82   -0.49
+
+  the same split, aggregated over all six windows:
+
+  --- ALL WINDOWS ---
+            bucket      n    WR%     net $   fees $   net-top3    $/tr
+           [0,0.9)    652     9%      4.07   187.58     -52.52    0.01
+         [0.9,1.5)    438    13%    269.84   127.42     120.11    0.62
+         [1.5,2.5)    313    15%    172.06    94.51      89.54    0.55
+             >=2.5    178    15%     32.56    52.05     -23.78    0.18
+
+  --> read the last two rows: if the >= 2.50% bucket is the only
+      one with a positive $/trade, the engine is firing on setups
+      whose structural room cannot cover the fee.
+
+  (a) PERFORMANCE BY STRUCTURAL ROOM TO THE DRAW ON LIQUIDITY
+      dol_room_pct = (nearest 1H/4H RedBox_BSL or 4H
+      PurpleBox.y_top ABOVE entry) / entry - 1, in %
+
+    --- W1 (n=181, 133 with no DOL above entry) ---
+
+  room to the first draw
+            bucket      n    WR%     net $   fees $   net-top3    $/tr
+           [0,0.5)     42    38%    103.26    10.71      55.36    2.46
+           [0.5,1)      4    25%      2.67     0.85      -0.63    0.67
+             [1,2)      1     0%     -0.45     0.22       0.00   -0.45
+             >=3.5      1   100%     22.24     0.19       0.00   22.24
+
+    --- W2 (n=145, 105 with no DOL above entry) ---
+
+  room to the first draw
+            bucket      n    WR%     net $   fees $   net-top3    $/tr
+           [0,0.5)     37    49%    111.48    11.06      52.39    3.01
+           [0.5,1)      1   100%      7.54     0.21       0.00    7.54
+             >=3.5      2   100%     13.58     0.40       0.00    6.79
+
+    --- MOD_Y1 (n=340, 241 with no DOL above entry) ---
+
+  room to the first draw
+            bucket      n    WR%     net $   fees $   net-top3    $/tr
+           [0,0.5)     93    39%    374.31    46.54     224.58    4.02
+           [0.5,1)      2     0%     -1.91     0.70       0.00   -0.96
+             [1,2)      3    33%      3.12     0.79       0.00    1.04
+           [2,3.5)      1   100%     40.42     0.23       0.00   40.42
+
+    --- MOD_Y2 (n=304, 220 with no DOL above entry) ---
+
+  room to the first draw
+            bucket      n    WR%     net $   fees $   net-top3    $/tr
+           [0,0.5)     75    31%     70.28    15.23      39.35    0.94
+           [0.5,1)      6    17%      4.36     1.20      -1.70    0.73
+             [1,2)      3     0%     -0.87     0.60       0.00   -0.29
+

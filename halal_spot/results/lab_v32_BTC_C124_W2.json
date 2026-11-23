@@ -1,0 +1,50 @@
+{
+ "combo": "BTC_C124",
+ "window": "W2",
+ "start": "2024-05-01",
+ "end": "2024-10-31",
+ "seconds": 27.1,
+ "symbols": [
+  "BTCUSDT_5m"
+ ],
+ "capital": 100.0,
+ "n": 51,
+ "totR": -12.748,
+ "wins": 15,
+ "swin": 12,
+ "be": 17,
+ "losses": 19,
+ "wr": 29.41,
+ "wr_strict": 5.88,
+ "net": 0.3658,
+ "end_equity": 100.3658,
+ "pool_cash_end": 100.3658,
+ "maxR": 8.315,
+ "fees": 5.0647,
+ "by_coin": {
+  "BTCUSDT_5m": [
+   51,
+   -12.748,
+   0.366
+  ]
+ },
+ "exits": {
+  "STOP_BLUE": 22,
+  "BREAKEVEN": 17,
+  "STRUCT_PROFIT": 12
+ },
+ "pf": 1.043,
+ "maxDD_pct": -3.903,
+ "eq_end": 100.3658,
+ "eq_min": 96.097,
+ "counters": {
+  "v32_smt_veto": 0,
+  "v32_regime_b_veto": 0,
+  "v32_regime_b_no_anchor": 0,
+  "v32_killzone_skip": 0,
+  "v32_emergency_stop": 0,
+  "v31_impulse_anchored": 0,
+  "fill_below_exchange_min": 8,
+  "shield_armed_disp": 25
+ }
+}

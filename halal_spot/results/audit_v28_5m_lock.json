@@ -1,0 +1,13 @@
+{
+  "measured": {
+    "trades": 297,
+    "locked_5m_10day_window": 259,
+    "locked_5m_during_own_life": 75,
+    "booked_win": 70,
+    "scratched_anyway": 5,
+    "losses_that_locked": 0,
+    "lost_share_pct": 6.7,
+    "wr_upper_bound_pct": 31.78,
+    "brief_claim_pct": 32.7
+  }
+}
