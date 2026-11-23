@@ -53,6 +53,9 @@ def load_1m_month(path: Path) -> pd.DataFrame:
     return df.set_index("Datetime")
 
 
+END_LABEL = False   # True reproduces v36's *built* months (see LABEL LAW v36)
+
+
 def to_5m(df1: pd.DataFrame) -> pd.DataFrame:
     """1m -> 5m with the engine's own causal resampler.
 
@@ -65,6 +68,18 @@ def to_5m(df1: pd.DataFrame) -> pd.DataFrame:
     b = resample_causal_tf(df1, "5min")
     vol = df1["Volume"].resample("5min", label="left",
                                  closed="left").sum().reindex(b.index - pd.Timedelta("5min"))
+    # ---- LABEL LAW v37 (the whole ballgame) ------------------------- #
+    # PROVEN by the OLD7 discrepancy: v36's W1/W2 reproduce exactly with
+    # START-labelled bars, but OLD7 does not ($106.64 in v36 vs $89.50
+    # start-labelled). The v36 tape's LINK entry at "2023-01-03 17:00" and
+    # price 5.6180 is the CLOSE of the 16:55..17:00 block, which the v36
+    # data carried as its own 17:00 bar -> v36's months built by
+    # _build_oos.py were END-labelled, while the fetch_binance_5m months
+    # (2023-09..2024-10) were Binance-native and therefore START-labelled.
+    # So the v36 OOS numbers (OLD7, MODERN's fetched months) sit on a
+    # one-bar-shifted tape and are NOT comparable with the native months.
+    # Default here = START (the only internally consistent choice);
+    # --end-label reproduces the v36-built tape for a like-for-like check.
     # ---- BAR LABEL LAW (this is the whole ballgame) ------------------- #
     # resample_causal_tf returns bars indexed by their END time (00:05 for
     # the 00:00-00:05 minute block), because the ENGINE needs end-time
@@ -75,8 +90,10 @@ def to_5m(df1: pd.DataFrame) -> pd.DataFrame:
     # alignment (measured: W1 n=159 $160.87 instead of n=181 $158.02).
     # The archive must therefore carry start_time; the engine re-derives
     # end-labelling itself.
+    labels = (b.index.to_numpy() if END_LABEL      # v36's built months
+              else b["start_time"].to_numpy())     # Binance native layout
     out = pd.DataFrame({
-        "Datetime": b["start_time"].to_numpy(),
+        "Datetime": labels,
         "Open": b["Open"].to_numpy(float),
         "High": b["High"].to_numpy(float),
         "Low": b["Low"].to_numpy(float),
@@ -93,6 +110,9 @@ def write_month(df5: pd.DataFrame, dest: Path) -> None:
 
 
 def main() -> int:
+    global END_LABEL
+    if "--end-label" in sys.argv:
+        END_LABEL = True
     only = [a for a in sys.argv[1:] if not a.startswith("-")]
     rows = []
     for sym in SYMS:

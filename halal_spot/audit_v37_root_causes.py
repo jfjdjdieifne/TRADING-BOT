@@ -251,7 +251,7 @@ def regime_table(win: str = "MODERN_24M") -> None:
         rows.append(dict(sym=sym, px0=px0, px1=px1,
                          ret=100 * (px1 / px0 - 1), dd=dd,
                          neg=int((mo < 0).sum()), months=len(mo),
-                         monthly=mo.round(2).to_dict()))
+                         monthly={str(k): float(v) for k, v in mo.round(2).items()}))
     if rows:
         r = pd.DataFrame(rows)
         print(f"\n  basket median return {r.ret.median():+.1f}%   "
@@ -259,6 +259,16 @@ def regime_table(win: str = "MODERN_24M") -> None:
               f"median maxDD {r.dd.median():.1f}%")
     (RESULTS / f"_v37_regime_{win}.json").write_text(
         json.dumps(rows, indent=1, default=str))
+
+
+def slice_dates(d: pd.DataFrame, a: str, b: str) -> pd.DataFrame:
+    """Sub-tape by EXIT date. MOD_Y1/MOD_Y2 are slices of the MODERN run, so
+    they need no extra engine pass -- and slicing by exit date keeps the
+    window (a trade opened in October and closed in November belongs to
+    November, exactly as the monthly ledger books it)."""
+    m = (d.exit_time >= pd.Timestamp(a, tz="UTC")) & \
+        (d.exit_time < pd.Timestamp(b, tz="UTC"))
+    return d[m].copy()
 
 
 def q2_tape(win: str, d: pd.DataFrame) -> None:
@@ -481,6 +491,26 @@ def main() -> int:
             if d is not None:
                 q2_tape(win, d)
         q4()
+        return 0
+    if cmd == "q2":
+        pairs = (("W1", None), ("W2", None),
+                 ("MOD_Y1", ("2024-11-01", "2025-11-01")),
+                 ("MOD_Y2", ("2025-11-01", "2026-11-01")),
+                 ("MODERN", None))
+        for win, sl in pairs:
+            d = tape("MODERN" if sl else win)
+            if d is None:
+                print(f"  [{win}] no tape")
+                continue
+            if sl:
+                d = slice_dates(d, *sl)
+            q2_tape(win, d)
+        return 0
+    if cmd == "q1y":
+        for win, sl in (("MOD_Y1", ("2024-11-01", "2025-11-01")),
+                        ("MOD_Y2", ("2025-11-01", "2026-11-01"))):
+            d = slice_dates(tape("MODERN"), *sl)
+            q1(win, d)
         return 0
     if cmd == "regime":
         for win in (sys.argv[2] if len(sys.argv) > 2 else "MODERN_24M",):
