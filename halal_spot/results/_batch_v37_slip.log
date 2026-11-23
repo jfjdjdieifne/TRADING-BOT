@@ -1,0 +1,25 @@
+=== RATCHET_2R slip1bps W1 06:19:15 ===
+    n=159 end=$153.2323 PF=1.709 DD=-15.169% mo+=4/6 (421s)
+unknown combo '1' would silently run defaults
+=== B0 slip1bps W1 06:26:17 ===
+    n=180 end=$155.7489 PF=1.67 DD=-14.262% mo+=4/6 (443s)
+unknown combo '1' would silently run defaults
+=== RATCHET_2R slip2bps W1 06:33:41 ===
+    n=141 end=$152.2231 PF=1.762 DD=-13.911% mo+=4/6 (410s)
+unknown combo '2' would silently run defaults
+=== B0 slip2bps W1 06:40:32 ===
+    n=163 end=$123.4171 PF=1.371 DD=-15.44% mo+=4/6 (458s)
+unknown combo '2' would silently run defaults
+=== RATCHET_2R slip3bps W1 06:48:11 ===
+    n=138 end=$117.2588 PF=1.379 DD=-12.143% mo+=4/6 (500s)
+unknown combo '3' would silently run defaults
+=== B0 slip3bps W1 06:56:33 ===
+    n=130 end=$134.367 PF=1.752 DD=-10.338% mo+=4/6 (490s)
+unknown combo '3' would silently run defaults
+=== RATCHET_2R slip5bps W1 07:04:44 ===
+    n=124 end=$118.8101 PF=1.442 DD=-11.404% mo+=3/6 (475s)
+unknown combo '5' would silently run defaults
+=== B0 slip5bps W1 07:12:41 ===
+    n=118 end=$118.8232 PF=1.529 DD=-11.018% mo+=4/6 (513s)
+unknown combo '5' would silently run defaults
+SLIP_DONE

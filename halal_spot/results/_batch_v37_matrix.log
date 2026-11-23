@@ -1,0 +1,81 @@
+=== B0 W1 identity check 01:15:26 ===
+
+##### v37 combo=B0 W1 2023-10-01..2024-03-31 #####
+    overrides: {}
+    n=181 end=$158.024 PF=1.706 DD=-14.064% mo+=5/6 (374s)
+=== RATCHET_2R W2 01:21:41 ===
+
+##### v37 combo=RATCHET_2R W2 2024-05-01..2024-10-31 #####
+    overrides: {"POST_3R_RATCHET": "2R"}
+    n=134 end=$172.0872 PF=2.071 DD=-12.114% mo+=4/6 (246s)
+=== RATCHET_2R OLD7 01:25:48 ===
+
+##### v37 combo=RATCHET_2R OLD7 2023-01-01..2023-07-31 #####
+    overrides: {"POST_3R_RATCHET": "2R"}
+    n=189 end=$104.0401 PF=1.069 DD=-15.8% mo+=3/7 (254s)
+=== RATCHET_2R MOD_Y2 01:30:03 ===
+
+##### v37 combo=RATCHET_2R MOD_Y2 2025-11-01..2026-10-31 #####
+    overrides: {"POST_3R_RATCHET": "2R"}
+    n=254 end=$154.8134 PF=1.522 DD=-13.827% mo+=8/12 (506s)
+=== RATCHET_3R W2 01:38:30 ===
+
+##### v37 combo=RATCHET_3R W2 2024-05-01..2024-10-31 #####
+    overrides: {"POST_3R_RATCHET": "3R"}
+    n=139 end=$193.6881 PF=2.621 DD=-12.21% mo+=5/6 (256s)
+=== RATCHET_3R OLD7 01:42:47 ===
+
+##### v37 combo=RATCHET_3R OLD7 2023-01-01..2023-07-31 #####
+    overrides: {"POST_3R_RATCHET": "3R"}
+    n=199 end=$154.7556 PF=1.86 DD=-14.735% mo+=3/7 (291s)
+=== RATCHET_3R MOD_Y2 01:47:39 ===
+
+##### v37 combo=RATCHET_3R MOD_Y2 2025-11-01..2026-10-31 #####
+    overrides: {"POST_3R_RATCHET": "3R"}
+    n=309 end=$101.4573 PF=1.017 DD=-21.109% mo+=6/12 (553s)
+=== RATCHET_3RT W2 01:56:53 ===
+
+##### v37 combo=RATCHET_3RT W2 2024-05-01..2024-10-31 #####
+    overrides: {"POST_3R_RATCHET": "3R_TIGHT"}
+    n=139 end=$193.6881 PF=2.621 DD=-12.21% mo+=5/6 (284s)
+=== RATCHET_3RT OLD7 02:01:39 ===
+
+##### v37 combo=RATCHET_3RT OLD7 2023-01-01..2023-07-31 #####
+    overrides: {"POST_3R_RATCHET": "3R_TIGHT"}
+    n=199 end=$154.7556 PF=1.86 DD=-14.735% mo+=3/7 (299s)
+=== RATCHET_3RT MOD_Y2 02:06:38 ===
+
+##### v37 combo=RATCHET_3RT MOD_Y2 2025-11-01..2026-10-31 #####
+    overrides: {"POST_3R_RATCHET": "3R_TIGHT"}
+    n=309 end=$101.4573 PF=1.017 DD=-21.109% mo+=6/12 (518s)
+=== RATCHET_LAD_A W2 02:15:17 ===
+
+##### v37 combo=RATCHET_LAD_A W2 2024-05-01..2024-10-31 #####
+    overrides: {"POST_3R_RATCHET": "LADDER_A"}
+    n=157 end=$171.2499 PF=2.155 DD=-11.484% mo+=5/6 (242s)
+=== RATCHET_LAD_A OLD7 02:19:20 ===
+
+##### v37 combo=RATCHET_LAD_A OLD7 2023-01-01..2023-07-31 #####
+    overrides: {"POST_3R_RATCHET": "LADDER_A"}
+    n=205 end=$102.5705 PF=1.045 DD=-13.069% mo+=3/7 (262s)
+=== RATCHET_LAD_A MOD_Y2 02:23:42 ===
+
+##### v37 combo=RATCHET_LAD_A MOD_Y2 2025-11-01..2026-10-31 #####
+    overrides: {"POST_3R_RATCHET": "LADDER_A"}
+    n=328 end=$121.758 PF=1.226 DD=-18.943% mo+=6/12 (520s)
+=== RATCHET_LAD_B W2 02:32:24 ===
+
+##### v37 combo=RATCHET_LAD_B W2 2024-05-01..2024-10-31 #####
+    overrides: {"POST_3R_RATCHET": "LADDER_B"}
+    n=161 end=$124.6888 PF=1.465 DD=-11.271% mo+=5/6 (283s)
+=== RATCHET_LAD_B OLD7 02:37:08 ===
+
+##### v37 combo=RATCHET_LAD_B OLD7 2023-01-01..2023-07-31 #####
+    overrides: {"POST_3R_RATCHET": "LADDER_B"}
+    n=210 end=$101.4672 PF=1.025 DD=-12.753% mo+=2/7 (293s)
+=== RATCHET_LAD_B MOD_Y2 02:42:01 ===
+
+##### v37 combo=RATCHET_LAD_B MOD_Y2 2025-11-01..2026-10-31 #####
+    overrides: {"POST_3R_RATCHET": "LADDER_B"}
+    n=328 end=$114.8587 PF=1.153 DD=-17.591% mo+=6/12 (532s)
+MATRIX_RATCHET_DONE

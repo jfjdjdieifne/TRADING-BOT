@@ -1,0 +1,106 @@
+=== GATE_4H W1 02:51:10 ===
+
+##### v37 combo=GATE_4H W1 2023-10-01..2024-03-31 #####
+    overrides: {"HTF_ENTRY_GATE": "4H_BULL"}
+    n=41 end=$118.0116 PF=2.583 DD=-7.345% mo+=3/6 (360s)
+=== GATE_4H W2 02:57:11 ===
+
+##### v37 combo=GATE_4H W2 2024-05-01..2024-10-31 #####
+    overrides: {"HTF_ENTRY_GATE": "4H_BULL"}
+    n=47 end=$138.4995 PF=3.151 DD=-8.903% mo+=3/6 (249s)
+=== GATE_4H OLD7 03:01:21 ===
+
+##### v37 combo=GATE_4H OLD7 2023-01-01..2023-07-31 #####
+    overrides: {"HTF_ENTRY_GATE": "4H_BULL"}
+    n=72 end=$97.5136 PF=0.875 DD=-9.844% mo+=2/7 (260s)
+=== GATE_4H MOD_Y2 03:05:41 ===
+
+##### v37 combo=GATE_4H MOD_Y2 2025-11-01..2026-10-31 #####
+    overrides: {"HTF_ENTRY_GATE": "4H_BULL"}
+    n=109 end=$110.9823 PF=1.317 DD=-8.983% mo+=8/12 (523s)
+=== GATE_1H W1 03:14:26 ===
+
+##### v37 combo=GATE_1H W1 2023-10-01..2024-03-31 #####
+    overrides: {"HTF_ENTRY_GATE": "1H_BULL"}
+    n=50 end=$139.2229 PF=3.083 DD=-11.529% mo+=3/6 (381s)
+=== GATE_1H W2 03:20:48 ===
+
+##### v37 combo=GATE_1H W2 2024-05-01..2024-10-31 #####
+    overrides: {"HTF_ENTRY_GATE": "1H_BULL"}
+    n=47 end=$106.4165 PF=1.444 DD=-5.727% mo+=2/6 (275s)
+=== GATE_1H OLD7 03:25:24 ===
+
+##### v37 combo=GATE_1H OLD7 2023-01-01..2023-07-31 #####
+    overrides: {"HTF_ENTRY_GATE": "1H_BULL"}
+    n=67 end=$89.4184 PF=0.47 DD=-11.685% mo+=2/7 (271s)
+=== GATE_1H MOD_Y2 03:29:56 ===
+
+##### v37 combo=GATE_1H MOD_Y2 2025-11-01..2026-10-31 #####
+    overrides: {"HTF_ENTRY_GATE": "1H_BULL"}
+    n=105 end=$93.933 PF=0.806 DD=-13.358% mo+=4/12 (525s)
+=== GATE_BOTH W1 03:38:42 ===
+
+##### v37 combo=GATE_BOTH W1 2023-10-01..2024-03-31 #####
+    overrides: {"HTF_ENTRY_GATE": "BOTH_BULL"}
+    n=7 end=$120.8987 PF=9.913 DD=-5.547% mo+=2/5 (377s)
+=== GATE_BOTH W2 03:45:01 ===
+
+##### v37 combo=GATE_BOTH W2 2024-05-01..2024-10-31 #####
+    overrides: {"HTF_ENTRY_GATE": "BOTH_BULL"}
+    n=7 end=$100.7763 PF=1.598 DD=-2.911% mo+=1/4 (252s)
+=== GATE_BOTH OLD7 03:49:14 ===
+
+##### v37 combo=GATE_BOTH OLD7 2023-01-01..2023-07-31 #####
+    overrides: {"HTF_ENTRY_GATE": "BOTH_BULL"}
+    n=13 end=$101.4283 PF=1.592 DD=-3.172% mo+=1/6 (277s)
+=== GATE_BOTH MOD_Y2 03:53:52 ===
+
+##### v37 combo=GATE_BOTH MOD_Y2 2025-11-01..2026-10-31 #####
+    overrides: {"HTF_ENTRY_GATE": "BOTH_BULL"}
+    n=24 end=$112.534 PF=3.074 DD=-4.721% mo+=4/10 (573s)
+=== CD_1H W1 04:03:27 ===
+
+##### v37 combo=CD_1H W1 2023-10-01..2024-03-31 #####
+    overrides: {"COOLDOWN_BOS_TF": "1h"}
+    n=198 end=$152.4419 PF=1.561 DD=-14.526% mo+=4/6 (471s)
+=== CD_1H W2 04:11:19 ===
+
+##### v37 combo=CD_1H W2 2024-05-01..2024-10-31 #####
+    overrides: {"COOLDOWN_BOS_TF": "1h"}
+    n=168 end=$167.3344 PF=2.073 DD=-11.598% mo+=5/6 (316s)
+=== CD_1H OLD7 04:16:36 ===
+
+##### v37 combo=CD_1H OLD7 2023-01-01..2023-07-31 #####
+    overrides: {"COOLDOWN_BOS_TF": "1h"}
+    n=229 end=$101.2562 PF=1.02 DD=-22.868% mo+=3/7 (326s)
+=== CD_1H MOD_Y2 04:22:03 ===
+
+##### v37 combo=CD_1H MOD_Y2 2025-11-01..2026-10-31 #####
+    overrides: {"COOLDOWN_BOS_TF": "1h"}
+    n=344 end=$76.1515 PF=0.708 DD=-33.979% mo+=3/12 (641s)
+=== FIXBE W1 04:32:46 ===
+
+##### v37 combo=FIXBE W1 2023-10-01..2024-03-31 #####
+    overrides: {"FIX_BE_COOLDOWN_BUG": true}
+    n=205 end=$133.2302 PF=1.391 DD=-13.193% mo+=3/6 (429s)
+=== FIXBE W2 04:39:56 ===
+
+##### v37 combo=FIXBE W2 2024-05-01..2024-10-31 #####
+    overrides: {"FIX_BE_COOLDOWN_BUG": true}
+    n=169 end=$193.8603 PF=2.458 DD=-11.868% mo+=5/6 (286s)
+=== FIXBE OLD7 04:44:44 ===
+
+##### v37 combo=FIXBE OLD7 2023-01-01..2023-07-31 #####
+    overrides: {"FIX_BE_COOLDOWN_BUG": true}
+    n=240 end=$102.8043 PF=1.042 DD=-15.935% mo+=2/7 (267s)
+=== FIXBE MOD_Y2 04:49:12 ===
+
+##### v37 combo=FIXBE MOD_Y2 2025-11-01..2026-10-31 #####
+    overrides: {"FIX_BE_COOLDOWN_BUG": true}
+    n=346 end=$98.6411 PF=0.985 DD=-23.21% mo+=4/12 (504s)
+=== B0 W2 (needed for the comparison table) 04:57:37 ===
+
+##### v37 combo=B0 W2 2024-05-01..2024-10-31 #####
+    overrides: {}
+    n=145 end=$194.3751 PF=2.652 DD=-12.21% mo+=5/6 (255s)
+MATRIX_GATES_DONE

@@ -254,6 +254,10 @@ def main() -> int:
         return 0
     if cmd == "run":
         wins = ["W1"]
+        if "--slip" in sys.argv:
+            # EXIT_SLIPPAGE_BPS override for the stability ladder
+            SHIPPED["EXIT_SLIPPAGE_BPS"] = float(
+                sys.argv[sys.argv.index("--slip") + 1])
         if "--window" in sys.argv:
             wins = [sys.argv[sys.argv.index("--window") + 1]]
         elif "--all-windows" in sys.argv:

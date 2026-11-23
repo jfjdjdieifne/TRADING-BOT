@@ -1,0 +1,16 @@
+=== RATCHET_2R MODERN_24M 05:28:32 ===
+
+##### v37 combo=RATCHET_2R MODERN_24M 2024-11-01..2026-10-31 #####
+    overrides: {"POST_3R_RATCHET": "2R"}
+    n=527 end=$204.3034 PF=1.339 DD=-18.642% mo+=15/24 (1249s)
+=== RATCHET_2R MOD_Y1 05:49:24 ===
+
+##### v37 combo=RATCHET_2R MOD_Y1 2024-11-01..2025-10-31 #####
+    overrides: {"POST_3R_RATCHET": "2R"}
+    n=265 end=$164.9509 PF=1.433 DD=-18.642% mo+=8/12 (708s)
+=== RATCHET_2R FULL15 06:01:14 ===
+
+##### v37 combo=RATCHET_2R FULL15 2023-08-01..2024-10-31 #####
+    overrides: {"POST_3R_RATCHET": "2R"}
+    n=375 end=$205.604 PF=1.578 DD=-21.845% mo+=10/15 (1055s)
+FINAL_V37_DONE

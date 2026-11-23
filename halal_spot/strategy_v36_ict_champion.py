@@ -1792,6 +1792,19 @@ class ICTBoxEngine:
             # NO stop movement here before 3R (L1) — shield/lock logic
             # lives in _manage; 4H structural trail lives in on_struct
             self._manage(o, h, l, c, idx, time)
+            # ---- v37 (1): THE GIVE-BACK RATCHET, armed LAST ----------- #
+            # ARMED AFTER _manage ON PURPOSE. If it were armed before, the
+            # new stop would be tested against the very bar that armed it
+            # and could exit at a level the bar's own low never reached --
+            # intrabar lookahead. Arming after means the level only becomes
+            # live at the NEXT completed exec bar, which is what a real
+            # resting stop would do.
+            # (The first attempt hooked _manage_5m_lock_only, which NEVER
+            # RUNS: MANAGE_5M=False in the champion. The probe returned
+            # identical numbers to B0 and v37_ratchet_armed=0 -- that is
+            # how the dead path was found.)
+            if POST_3R_RATCHET and self.qty > 0:
+                self._v37_ratchet(c)
             return
         # prune consumed dealing ranges once price trades outside them
         self.consumed = [(b, t) for b, t in self.consumed
@@ -3426,8 +3439,6 @@ class ICTBoxEngine:
     def _manage_5m_lock_only(self, o, h, c):
         """The 5m pass with MANAGE_5M_SHIELD off: raise the +3R floor on a
         5m CLOSE and nothing else. The stop was already honoured above."""
-        if POST_3R_RATCHET:
-            self._v37_ratchet(c)
         if not MANAGE_5M_LOCK:
             return
         lock_line = self.lock_line
@@ -3456,6 +3467,19 @@ class ICTBoxEngine:
             self.mfe = max(self.mfe, (h - self.entry_px) / self.risk)
             self.mfe_close = max(self.mfe_close,
                                  (c - self.entry_px) / self.risk)
+        # ---- v37 (1): THE GIVE-BACK RATCHET --------------------------- #
+        # WHERE IT BELONGS: the first attempt hooked _manage_5m_lock_only,
+        # which NEVER RUNS -- MANAGE_5M=False in the shipped champion (v29
+        # switched it off after measuring that 5m floor defence clipped the
+        # runners: net +31.90% -> +6.79%). With MANAGE_5M off, ALL position
+        # management happens here, in _manage, on the engine's EXEC frame
+        # (5/15/30/60m) -- which is also why `ratchet_3r_close` fires with
+        # MANAGE_5M=False. The probe was silent on RATCHET_2R (identical
+        # results to B0, v37_ratchet_armed=0) and that is how it was found.
+        # Placed AFTER the mfe update so the trigger reads this bar's own
+        # close, and before the stop test below, which then uses the level
+        # armed on the PREVIOUS bar (the stop is only ever raised at the end
+        # of a bar's management, so no intrabar lookahead).
         lock_line = self.lock_line   # entry + 3R + fees (net >= +3.0R)
         floor_line = getattr(self, "floor_line", lock_line)   # v31 ARM 2
         # wick stop (structural pre-ratchet, or an above-floor trail)
