@@ -492,6 +492,66 @@ COST = FEE + SLIPPAGE_BPS / 10000.0
 # at 0 reproduces v35 bit for bit.
 EXIT_SLIPPAGE_BPS = 0.0
 EXIT_SLIP = EXIT_SLIPPAGE_BPS / 10000.0
+# ===================================================================== #
+# =====  v37: ANTI-FRAGILE KNOBS -- every one DEFAULTS OFF  =========== #
+# ===================================================================== #
+# Added by v37 after the forensic audit (audit_v37_root_causes.py). Each
+# knob is inert at its default, so the engine at import time is still the
+# shipped v36 champion bit for bit (proved: W1 n=181 $158.024 totR
+# +227.8481 with every v37 knob off).
+#
+# WHY THESE AND NOT THE BRIEF'S LIST: the audit found that the v37 brief's
+# premises do not match this engine. There is no LOCK_3R_BE reason and no
+# `locked_3r` attribute; the $0.00 round-trip exit is BREAKEVEN, and its
+# median peak MFE is 1.80R, not "waiting 24h at +3R" (only 52 of 238 ever
+# reached +3R). STOP_BLUE is the INITIAL structural stop in 610 of 627
+# modern trades. So the knobs below are named for what the code can
+# actually do.
+
+# (1) POST_3R_RATCHET -- the give-back law that DOES exist.
+#     Today the +3R lock raises the stop to lock_line on the first *5m
+#     CLOSE* above entry+3R+fees, and between the displacement break-even
+#     and that close the trade is exposed. Measured on v36's own tapes:
+#     238 of 627 modern trades (38%) gave back a peak of $404.51 to exit at
+#     -$0.08. This knob arms a stop at a chosen R level *before* the price
+#     gets there, on the close of the bar that Arms it.
+#       "":            OFF (v36 behaviour, the default)
+#       "2R":          at MFE >= 2.0R -> stop to +1.0R
+#       "3R":          at MFE >= 3.0R -> stop to +1.5R
+#       "3R_TIGHT":    at MFE >= 3.0R -> stop to +2.0R
+#       "LADDER_A":    +1.5R @3R, +2.5R @4R, +4.0R @6R
+#       "LADDER_B":    +2.0R @3R, +3.0R @4.5R, +4.5R @6R
+POST_3R_RATCHET = ""
+# The ratchet is applied on a 5m CLOSE (never on an intrabar high), and it
+# may only raise the stop -- the same floor law as lock_line. Arming uses
+# the bar's own close, so the new stop is live from the NEXT bar: there is
+# no intrabar lookahead by construction.
+POST_3R_RATCHET_TF = "5min"
+
+# (2) HTF_ENTRY_GATE -- refuse fills whose causal HTF flow disagrees.
+#     Measured (v36 tapes): 4H BULL entries +$208.32 over 394 trades,
+#     positive in 5/5 windows; 4H BEAR -$158.77 once the 3 best trades per
+#     window are removed. BUT the edge is carried by very few trades, so
+#     this is a candidate to MEASURE, never to trust on the tape alone.
+#       ""         OFF
+#       "4H_BULL"  only fill when the latest 4H structural break is BULL
+#       "1H_BULL"  only fill when the latest 1H structural break is BULL
+#       "BOTH_BULL" both of the above
+HTF_ENTRY_GATE = ""
+
+# (3) COOLDOWN_BOS_TF -- which timeframe must print the BOS that lifts a
+#     per-coin quarantine. v36 accepts ANY bullish break, including a 5m
+#     candle, so a coin in a 4H downtrend can be unlocked by noise.
+#       "" OFF (v36: any frame) | "15min" | "1h" | "4h"
+COOLDOWN_BOS_TF = ""
+
+# (4) FIX_BE_COOLDOWN_BUG -- belt and braces for the Part-4 worry: never
+#     let a trade that armed its lock count as a loss in the coin streak,
+#     even if slippage leaves it a few cents negative. The engine already
+#     does this through the BREAKEVEN reclassification (R >= -0.05); this
+#     knob makes the intent explicit and independent of that threshold.
+FIX_BE_COOLDOWN_BUG = False
+
 # Which exits pay it: every reason below is a sale into the book (a market
 # order live), so it is charged. END_OF_DATA is bookkeeping and keeps its
 # price. The list is explicit so a new reason cannot be charged by accident.
@@ -1459,7 +1519,14 @@ class ICTBoxEngine:
         memo = self.pool.setdefault("v35_bos_memo", {})
         if key in memo:
             return memo[key]
-        tf, sw = self.v35_tf4, self.v35_swings
+        # v37 (3) COOLDOWN_BOS_TF: which frame must print the breakout.
+        # v36 accepts the 4H BOS only; "" keeps exactly that behaviour so
+        # the shipped engine is unchanged, and "1h" demands a real hourly
+        # break so a 5m noise candle can never lift a quarantine.
+        if COOLDOWN_BOS_TF == "1h" and getattr(self, "v37_tf60", None) is not None:
+            tf, sw = self.v37_tf60, self.v37_sw60
+        else:
+            tf, sw = self.v35_tf4, self.v35_swings
         c = tf["Close"].to_numpy()
         t0 = pd.Timestamp(t0)
         t0 = (t0.tz_localize("UTC") if t0.tzinfo is None
@@ -2990,6 +3057,27 @@ class ICTBoxEngine:
             self.state = "WAIT_ANCHOR"
             self.cnt("v33_range_b_veto")
             return
+        # ---- v37 (2): HTF_ENTRY_GATE ------------------------------- #
+        # Refuse the fill when the CAUSAL higher-timeframe flow disagrees.
+        # flow() = whichever structural break printed LAST, measured only
+        # from completed bars, so this reads the same information a human
+        # would have had at this stamp. Default "" = OFF (v36 behaviour).
+        if HTF_ENTRY_GATE:
+            S4 = self.nar4 if self.nar4 is not None else self.struct_canvas
+            H1 = self.nar1 if self.nar1 is not None else self.htf_canvas
+            f4 = S4.flow() if S4 is not None else None
+            f1 = (H1.flow() if H1 is not None
+                  and getattr(H1, "narrative", False) else None)
+            bad = ((HTF_ENTRY_GATE in ("4H_BULL", "BOTH_BULL")
+                    and f4 != "BULL")
+                   or (HTF_ENTRY_GATE in ("1H_BULL", "BOTH_BULL")
+                       and f1 != "BULL")
+                   or (HTF_ENTRY_GATE == "4H_BEAR_AVOID" and f4 == "BEAR"))
+            if bad:
+                self.setup = None
+                self.state = "WAIT_ANCHOR"
+                self.cnt("v37_htf_gate_veto")
+                return
         qty = notional / fill_px
         notional = qty * fill_px
         if qty <= 0 or notional < EXCHANGE_MIN_NOTIONAL:
@@ -3218,7 +3306,18 @@ class ICTBoxEngine:
             op.remove(self)          # v32: free the slot for another coin
         self.trades.append(t)
         # ---- v35 BLEED 3: feed the per-coin streak (BE is not a win) --- #
-        self._v35_note_exit(bool(is_win), time)
+        # v37 (4): FIX_BE_COOLDOWN_BUG -- a trade that armed its lock is
+        # never counted as a loss even if the exit nets a few cents below
+        # zero. The engine already reaches that conclusion through
+        # `is_be` (R >= -0.05 -> BREAKEVEN), so this is belt and braces:
+        # it makes the intent explicit and independent of the -0.05 line.
+        _v37_locked = bool(getattr(self, "ratchet", False)
+                           or getattr(self, "be_armed", False))
+        if FIX_BE_COOLDOWN_BUG and _v37_locked and net > -0.05:
+            self.cnt("v37_be_not_a_loss")
+            self._v35_note_exit(True, time)
+        else:
+            self._v35_note_exit(bool(is_win), time)
         self.qty = 0.0
         self.trade = None
         self.ratchet = False
@@ -3284,9 +3383,51 @@ class ICTBoxEngine:
                 self.cnt("structural_gate_armed")
         self.targets = []
 
+    # ---- v37 (1): the give-back ratchet ---------------------------- #
+    _V37_RATCHET = {
+        "2R":       ((2.0, 1.0),),
+        "3R":       ((3.0, 1.5),),
+        "3R_TIGHT": ((3.0, 2.0),),
+        "LADDER_A": ((3.0, 1.5), (4.0, 2.5), (6.0, 4.0)),
+        "LADDER_B": ((3.0, 2.0), (4.5, 3.0), (6.0, 4.5)),
+    }
+
+    def _v37_ratchet(self, c):
+        """Raise the stop to the highest armed R-floor, on a 5m CLOSE only.
+
+        CAUSALITY: the trigger is this bar's CLOSE and the new stop is only
+        written to self.stop_px, which the *next* call to _manage sees. The
+        bar that arms the floor therefore cannot also be the bar that is
+        judged against it, so no intrabar lookahead is possible.
+
+        The floor never lowers an already higher stop (same law as
+        lock_line): `max` against self.stop_px, never an assignment.
+        """
+        ladder = self._V37_RATCHET.get(POST_3R_RATCHET)
+        if not ladder or self.risk <= 0 or c <= self.entry_px:
+            return
+        mfe_r = (c - self.entry_px) / self.risk
+        floor_r = None
+        for trig, lock_r in ladder:
+            if mfe_r >= trig:
+                floor_r = lock_r
+        if floor_r is None:
+            return
+        if self.mfe_close < floor_r:      # never arm below what is already banked
+            floor_r = self.mfe_close
+        # the armed price is expressed net of the round-trip cost, exactly as
+        # lock_line is, so "+1.5R" means +1.5R AFTER fees
+        px = (self.entry_px * (1 + COST) + floor_r * self.risk) / (1 - COST)
+        if px > self.stop_px:
+            self.stop_px = px
+            self.ratchet = True
+            self.cnt("v37_ratchet_armed")
+
     def _manage_5m_lock_only(self, o, h, c):
         """The 5m pass with MANAGE_5M_SHIELD off: raise the +3R floor on a
         5m CLOSE and nothing else. The stop was already honoured above."""
+        if POST_3R_RATCHET:
+            self._v37_ratchet(c)
         if not MANAGE_5M_LOCK:
             return
         lock_line = self.lock_line
@@ -3956,10 +4097,17 @@ def run_backtest(data_dir: Path, start: str, end: str,
             tf4 = series[sym][4]
             sw4 = detect_swings_causal(tf4["High"].to_numpy(),
                                        tf4["Low"].to_numpy(), tf4.index, 2)
+            tf60 = series[sym][3]
+            sw60 = detect_swings_causal(tf60["High"].to_numpy(),
+                                        tf60["Low"].to_numpy(), tf60.index, 2)
             for e in engines:
                 if e.symbol == sym:
                     e.v35_tf4 = tf4
                     e.v35_swings = sw4
+                    # v37 (3): the same swap on the 1H frame, so a
+                    # quarantine can be required to wait for a real 1H BOS.
+                    e.v37_tf60 = tf60
+                    e.v37_sw60 = sw60
     # v32 SPEED: the hot loop used to scan ALL engines (4 frames x N coins)
     # and skip the ones belonging to another symbol. With 8 coins that is a
     # 32-wide scan per stamp per symbol; indexing by symbol removes it.

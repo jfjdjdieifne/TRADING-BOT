@@ -207,8 +207,12 @@ def drive(combo: str, win: str, save: bool = True):
     # the OOS windows need the enlarged basket; W1/W2 must keep the exact
     # dev set so the identity check stays bit-for-bit
     cfg = dict(cfg)
-    cfg["V32_DATA_DIR"] = (BASKET_OOS if win in ("FULL15", "MODERN", "OLD7")
-                           else BASKET)
+    # v37: the rebuild puts ALL 47 months (2023-01..2026-11) in one basket,
+    # so there is no longer a separate dev set and OOS set. Fall back to
+    # BASKET when the old OOS directory is absent, instead of crashing.
+    _oos = Path(BASKET_OOS)
+    cfg["V32_DATA_DIR"] = (BASKET_OOS if (win in ("FULL15", "MODERN", "OLD7")
+                                          and _oos.exists()) else BASKET)
     for k, v in cfg.items():
         if not hasattr(S, k):        # an undefined knob is a SILENT no-op
             raise SystemExit(f"combo {combo}: engine has no knob {k!r}")
