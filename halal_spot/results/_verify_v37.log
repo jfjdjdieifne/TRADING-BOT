@@ -1,0 +1,90 @@
+=== W2 23:52:49 ===
+    [guard] BASE == engine defaults for all 26 v33+v34 knobs
+
+##### LIVE ENGINE combo=S1_COIN_GUARD_BOS W2 2024-05-01..2024-10-31 #####
+    cfg: ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)
+    n=145 totR=150.7259 end=$194.3751 DD=-12.21% (253s)
+    coins: {"ADAUSDT_5m": [22, 10.34, 8.336], "AVAXUSDT_5m": [14, -0.99, 7.213], "BNBUSDT_5m": [12, 22.336, 13.105], "BTCUSDT_5m": [14, 6.637, 2.85], "ETHUSDT_5m": [17, 20.636, 14.586], "LINKUSDT_5m": [25, 21.816, 20.572], "SOLUSDT_5m": [26, 11.176, 9.64], "XRPUSDT_5m": [15, 58.776, 18.073]}
+    counters: {"v35_cooldown_armed": 55, "v35_cooldown_skip": 85, "v35_cooldown_expired": 13, "v35_cooldown_lifted_by_bos": 40, "slot_full_rejects": 115, "portfolio_slots_full": 115, "v31_struct_trail": 13, "trail_4h_structural": 52, "v34_deploy_full_ok": 183}
+=== OLD7 23:57:03 ===
+    [guard] BASE == engine defaults for all 26 v33+v34 knobs
+
+##### LIVE ENGINE combo=S1_COIN_GUARD_BOS OLD7 2023-01-01..2023-07-31 #####
+    cfg: V32_DATA_DIR=/home/user/TRADING-BOT/halal_spot/data/binance_5m_oos  ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)
+Traceback (most recent call last):
+  File "/home/user/TRADING-BOT/halal_spot/lab_v36_live_readiness.py", line 557, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/user/TRADING-BOT/halal_spot/lab_v36_live_readiness.py", line 541, in main
+    drive(combo, w)
+  File "/home/user/TRADING-BOT/halal_spot/lab_v36_live_readiness.py", line 223, in drive
+    run = S.run_backtest(S.v34_data_dir(), start, end, tag=f"v34{combo}{win}")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/TRADING-BOT/halal_spot/strategy_v36_ict_champion.py", line 4056, in run_backtest
+    symbols = discover_symbols(data_dir)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/TRADING-BOT/halal_spot/strategy_v36_ict_champion.py", line 3809, in discover_symbols
+    out = sorted(p.name for p in data_dir.iterdir()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/TRADING-BOT/halal_spot/strategy_v36_ict_champion.py", line 3809, in <genexpr>
+    out = sorted(p.name for p in data_dir.iterdir()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/pathlib.py", line 932, in iterdir
+    for name in os.listdir(self):
+                ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/user/TRADING-BOT/halal_spot/data/binance_5m_oos'
+=== FULL15 23:57:03 ===
+    [guard] BASE == engine defaults for all 26 v33+v34 knobs
+
+##### LIVE ENGINE combo=S1_COIN_GUARD_BOS FULL15 2023-08-01..2024-10-31 #####
+    cfg: V32_DATA_DIR=/home/user/TRADING-BOT/halal_spot/data/binance_5m_oos  ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)
+Traceback (most recent call last):
+  File "/home/user/TRADING-BOT/halal_spot/lab_v36_live_readiness.py", line 557, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/user/TRADING-BOT/halal_spot/lab_v36_live_readiness.py", line 541, in main
+    drive(combo, w)
+  File "/home/user/TRADING-BOT/halal_spot/lab_v36_live_readiness.py", line 223, in drive
+    run = S.run_backtest(S.v34_data_dir(), start, end, tag=f"v34{combo}{win}")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/TRADING-BOT/halal_spot/strategy_v36_ict_champion.py", line 4056, in run_backtest
+    symbols = discover_symbols(data_dir)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/TRADING-BOT/halal_spot/strategy_v36_ict_champion.py", line 3809, in discover_symbols
+    out = sorted(p.name for p in data_dir.iterdir()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/TRADING-BOT/halal_spot/strategy_v36_ict_champion.py", line 3809, in <genexpr>
+    out = sorted(p.name for p in data_dir.iterdir()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/pathlib.py", line 932, in iterdir
+    for name in os.listdir(self):
+                ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/user/TRADING-BOT/halal_spot/data/binance_5m_oos'
+=== MODERN 23:57:04 ===
+    [guard] BASE == engine defaults for all 26 v33+v34 knobs
+
+##### LIVE ENGINE combo=S1_COIN_GUARD_BOS MODERN 2024-11-01..2026-10-31 #####
+    cfg: V32_DATA_DIR=/home/user/TRADING-BOT/halal_spot/data/binance_5m_oos  ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)
+Traceback (most recent call last):
+  File "/home/user/TRADING-BOT/halal_spot/lab_v36_live_readiness.py", line 557, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/user/TRADING-BOT/halal_spot/lab_v36_live_readiness.py", line 541, in main
+    drive(combo, w)
+  File "/home/user/TRADING-BOT/halal_spot/lab_v36_live_readiness.py", line 223, in drive
+    run = S.run_backtest(S.v34_data_dir(), start, end, tag=f"v34{combo}{win}")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/TRADING-BOT/halal_spot/strategy_v36_ict_champion.py", line 4056, in run_backtest
+    symbols = discover_symbols(data_dir)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/TRADING-BOT/halal_spot/strategy_v36_ict_champion.py", line 3809, in discover_symbols
+    out = sorted(p.name for p in data_dir.iterdir()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/TRADING-BOT/halal_spot/strategy_v36_ict_champion.py", line 3809, in <genexpr>
+    out = sorted(p.name for p in data_dir.iterdir()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/pathlib.py", line 932, in iterdir
+    for name in os.listdir(self):
+                ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/user/TRADING-BOT/halal_spot/data/binance_5m_oos'
+VERIFY_V37_DONE

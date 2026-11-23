@@ -28,3 +28,16 @@ smoke/
 .closure_*.sha
 .tools_gate_*.txt
 .build_mutations.json
+
+# v30 per-combo equity curves (regenerable, ~27MB each) — keep only the official equity_v30.csv
+halal_spot/results/equity_v30_*.csv
+
+# v37 DATA IS NOW COMMITTED ON PURPOSE.
+# Owner order (2026-11-23): everything must live in GitHub so the repo can be
+# cloned and run directly with no fetch step — the sandbox is ephemeral and
+# rebuilding the basket was the slowest, most failure-prone part of the work.
+# Size is fine: 376 files, 51 MB total, largest file 190 KB (well under the
+# 100 MB per-file hard limit). Reproduce with:
+#     bash halal_spot/_fetch_v37.sh && python halal_spot/_build_v37_data.py
+# halal_spot/data/binance_5m/       -> COMMITTED (8 coins x 47 months, 5m)
+# halal_spot/data/binance_5m_oos/   -> does not exist in v37 (retired path)

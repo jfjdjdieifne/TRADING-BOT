@@ -1,0 +1,119 @@
+{
+ "combo": "S1_SURGICAL_COMBO",
+ "window": "W2",
+ "start": "2024-05-01",
+ "end": "2024-10-31",
+ "seconds": 361.3,
+ "symbols": [
+  "ADAUSDT_5m",
+  "AVAXUSDT_5m",
+  "BNBUSDT_5m",
+  "BTCUSDT_5m",
+  "ETHUSDT_5m",
+  "LINKUSDT_5m",
+  "SOLUSDT_5m",
+  "XRPUSDT_5m"
+ ],
+ "capital": 100.0,
+ "n": 129,
+ "totR": 116.865,
+ "wins": 25,
+ "swin": 9,
+ "be": 46,
+ "losses": 58,
+ "wr": 19.38,
+ "wr_strict": 12.4,
+ "net": 50.711,
+ "end_equity": 150.711,
+ "pool_cash_end": 150.711,
+ "maxR": 68.242,
+ "fees": 16.9738,
+ "by_coin": {
+  "ADAUSDT_5m": [
+   21,
+   18.444,
+   8.349
+  ],
+  "AVAXUSDT_5m": [
+   16,
+   2.507,
+   3.055
+  ],
+  "BNBUSDT_5m": [
+   12,
+   24.12,
+   10.242
+  ],
+  "BTCUSDT_5m": [
+   8,
+   3.23,
+   1.338
+  ],
+  "ETHUSDT_5m": [
+   12,
+   9.779,
+   8.298
+  ],
+  "LINKUSDT_5m": [
+   26,
+   -20.252,
+   -10.171
+  ],
+  "SOLUSDT_5m": [
+   22,
+   12.413,
+   10.191
+  ],
+  "XRPUSDT_5m": [
+   12,
+   66.625,
+   19.409
+  ]
+ },
+ "exits": {
+  "STOP_BLUE": 64,
+  "BREAKEVEN": 46,
+  "STRUCT_PROFIT": 9,
+  "EMERGENCY_STOP": 7,
+  "TARGET_REJECTION": 3
+ },
+ "pf": 1.964,
+ "maxDD_pct": -11.577,
+ "eq_end": 150.711,
+ "eq_min": 99.4893,
+ "counters": {
+  "v35_dust_box_veto": 120,
+  "v35_fall_close_veto": 0,
+  "v35_cooldown_armed": 50,
+  "v35_cooldown_skip": 73,
+  "v35_cooldown_expired": 10,
+  "v35_cooldown_lifted_by_bos": 38,
+  "slot_full_rejects": 89,
+  "portfolio_slots_full": 89,
+  "v31_struct_trail": 12,
+  "trail_4h_structural": 40,
+  "fill_below_exchange_min": 0,
+  "v34_deploy_full_ok": 154,
+  "v33_stamp_expand": 0,
+  "v33_stamp_range": 0
+ },
+ "v33_stamps_expand": 0,
+ "v33_stamps_range": 0,
+ "v33_leader_stamps": {},
+ "price_move_pct": {
+  "median_all": 0.2,
+  "median_winners": 1.42,
+  "max": 18.887,
+  "wins_over_5pct": 6,
+  "wins_over_15pct": 1
+ },
+ "stop_width_pct": {
+  "median": 0.4541,
+  "min": 0.2507,
+  "max": 1.7902
+ },
+ "bars_held_median": 6.0,
+ "fee_share_of_gross_wins_pct": 16.43,
+ "smt_bull_stamps": 133116,
+ "smt_stamps": 69985
+}

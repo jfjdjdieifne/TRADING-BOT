@@ -1,0 +1,256 @@
+{
+  "config": {
+    "window": "2025-07-01 .. 2026-07-01",
+    "capital_usdt": 100.0,
+    "symbol": "BTCUSDT",
+    "instrument": "Binance USDT-M futures (set_leverage 10, shorts allowed)",
+    "strategy": "Regime Multi-Arm Sniper V13 (context regime + 5 arms + adaptive quality bar)",
+    "arms": [
+      "RIDE",
+      "ACCUM",
+      "SNIP",
+      "FALL",
+      "DIP"
+    ],
+    "not_tested_pairs": [
+      "ETHUSDT",
+      "SOLUSDT",
+      "BNBUSDT",
+      "XRPUSDT",
+      "DOGEUSDT",
+      "ADAUSDT",
+      "AVAXUSDT",
+      "LINKUSDT",
+      "SUIUSDT"
+    ],
+    "not_tested_reason": "no candle data for these pairs in the project (BTC only)",
+    "fee_rate": 0.001,
+    "rbudget": 0.1,
+    "wall_min_r": 3.0,
+    "warmup_days": 35,
+    "cut_for_lookahead_test": "2026-03-31 14:30"
+  },
+  "continuous_12m": {
+    "trades": 24,
+    "wins": 5,
+    "losses": 19,
+    "win_rate_pct": 20.8,
+    "gross_profit": 25.55,
+    "gross_loss": -28.79,
+    "profit_factor": 0.89,
+    "net_pnl": -3.25,
+    "net_pct": -3.25,
+    "start_equity": 100.0,
+    "end_equity": 96.75,
+    "max_drawdown_pct": -21.18,
+    "max_drawdown_usd": 22.94,
+    "avg_r": -0.25,
+    "best_r": 8.45,
+    "worst_r": -2.41,
+    "avg_hold_hours": 4.6,
+    "exposure_pct": 2.6,
+    "exit_tags": {
+      "SL_DIP": 9,
+      "SL_ACCUM": 5,
+      "SL_SNIP": 4,
+      "SL_RIDE": 3,
+      "TP_SNIP": 2,
+      "TP_DIP": 1
+    },
+    "setups": {
+      "DIP": 10,
+      "SNIP": 6,
+      "ACCUM": 5,
+      "RIDE": 3
+    },
+    "sides": {
+      "LONG": 22,
+      "SHORT": 2
+    },
+    "exits": {
+      "SL": 21,
+      "TP": 3
+    }
+  },
+  "continuous_h2_2025": {
+    "trades": 16,
+    "wins": 3,
+    "losses": 13,
+    "win_rate_pct": 18.8,
+    "gross_profit": 11.78,
+    "gross_loss": -21.52,
+    "profit_factor": 0.55,
+    "net_pnl": -9.73,
+    "net_pct": -9.73,
+    "start_equity": 100.0,
+    "end_equity": 90.27,
+    "max_drawdown_pct": -16.68,
+    "max_drawdown_usd": 18.07,
+    "avg_r": -0.35,
+    "best_r": 7.79,
+    "worst_r": -2.41,
+    "avg_hold_hours": 3.5,
+    "exposure_pct": 2.7,
+    "exit_tags": {
+      "SL_DIP": 6,
+      "SL_SNIP": 4,
+      "TP_SNIP": 2,
+      "SL_ACCUM": 2,
+      "SL_RIDE": 2
+    },
+    "setups": {
+      "SNIP": 6,
+      "DIP": 6,
+      "ACCUM": 2,
+      "RIDE": 2
+    },
+    "sides": {
+      "LONG": 14,
+      "SHORT": 2
+    },
+    "exits": {
+      "SL": 14,
+      "TP": 2
+    }
+  },
+  "continuous_h1_2026": {
+    "trades": 8,
+    "wins": 2,
+    "losses": 6,
+    "win_rate_pct": 25.0,
+    "gross_profit": 13.76,
+    "gross_loss": -7.28,
+    "profit_factor": 1.89,
+    "net_pnl": 6.49,
+    "net_pct": 6.49,
+    "start_equity": 100.0,
+    "end_equity": 96.75,
+    "max_drawdown_pct": -7.5,
+    "max_drawdown_usd": 6.92,
+    "avg_r": -0.05,
+    "best_r": 8.45,
+    "worst_r": -1.79,
+    "avg_hold_hours": 6.7,
+    "exposure_pct": 2.5,
+    "exit_tags": {
+      "SL_DIP": 3,
+      "SL_ACCUM": 3,
+      "TP_DIP": 1,
+      "SL_RIDE": 1
+    },
+    "setups": {
+      "DIP": 4,
+      "ACCUM": 3,
+      "RIDE": 1
+    },
+    "sides": {
+      "LONG": 8
+    },
+    "exits": {
+      "SL": 7,
+      "TP": 1
+    }
+  },
+  "standalone_h2_2025": {
+    "trades": 16,
+    "wins": 3,
+    "losses": 13,
+    "win_rate_pct": 18.8,
+    "gross_profit": 11.78,
+    "gross_loss": -21.52,
+    "profit_factor": 0.55,
+    "net_pnl": -9.73,
+    "net_pct": -9.73,
+    "start_equity": 100.0,
+    "end_equity": 90.27,
+    "max_drawdown_pct": -16.68,
+    "max_drawdown_usd": 18.07,
+    "avg_r": -0.35,
+    "best_r": 7.79,
+    "worst_r": -2.41,
+    "avg_hold_hours": 3.5,
+    "exposure_pct": 2.7,
+    "exit_tags": {
+      "SL_DIP": 6,
+      "SL_SNIP": 4,
+      "TP_SNIP": 2,
+      "SL_ACCUM": 2,
+      "SL_RIDE": 2
+    },
+    "setups": {
+      "SNIP": 6,
+      "DIP": 6,
+      "ACCUM": 2,
+      "RIDE": 2
+    },
+    "sides": {
+      "LONG": 14,
+      "SHORT": 2
+    },
+    "exits": {
+      "SL": 14,
+      "TP": 2
+    }
+  },
+  "standalone_h1_2026": {
+    "trades": 13,
+    "wins": 3,
+    "losses": 10,
+    "win_rate_pct": 23.1,
+    "gross_profit": 24.56,
+    "gross_loss": -12.8,
+    "profit_factor": 1.92,
+    "net_pnl": 11.76,
+    "net_pct": 11.76,
+    "start_equity": 100.0,
+    "end_equity": 111.76,
+    "max_drawdown_pct": -8.68,
+    "max_drawdown_usd": 8.73,
+    "avg_r": -0.57,
+    "best_r": 7.74,
+    "worst_r": -2.47,
+    "avg_hold_hours": 5.5,
+    "exposure_pct": 2.8,
+    "exit_tags": {
+      "SL_ACCUM": 8,
+      "SL_DIP": 3,
+      "SL_RIDE": 1,
+      "TP_DIP": 1
+    },
+    "setups": {
+      "ACCUM": 8,
+      "DIP": 4,
+      "RIDE": 1
+    },
+    "sides": {
+      "LONG": 13
+    },
+    "exits": {
+      "SL": 12,
+      "TP": 1
+    }
+  },
+  "buy_hold_12m": 54.71,
+  "signal_funnel": {
+    "cand_SNIP": 296,
+    "exp_pending": 30,
+    "cand_DIP": 88,
+    "cand_RIDE": 548,
+    "cand_ACCUM": 380,
+    "v_wall": 836,
+    "v_noise": 212,
+    "cand_FALL": 1,
+    "entries_filled": 24,
+    "entries_placed": 24,
+    "pyramid_filled": 3,
+    "v_level": 25,
+    "v_cd": 6,
+    "v_quality": 60,
+    "v_streak": 16,
+    "v_stop": 3
+  },
+  "final_margin_reserved": 0.0,
+  "final_usdt": 96.75413874000009,
+  "fees_total": 10.3742,
+  "zero_lookahead_tests": "9/9 passed (tests/test_zero_lookahead.py)"
+}

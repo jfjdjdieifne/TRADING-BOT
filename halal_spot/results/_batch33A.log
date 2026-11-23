@@ -1,0 +1,51 @@
+
+##### LIVE ENGINE combo=V32FULL W1 2023-10-01..2024-03-31 #####
+    cfg: ALLOC_MODE=slot  SLOTS=3  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)
+    n=393 totR=46.7197 end=$110.0813 DD=-4.383% (1483s)
+    coins: {"ADAUSDT_5m": [56, 56.472, 3.981], "AVAXUSDT_5m": [63, -20.503, -2.924], "BNBUSDT_5m": [45, 8.222, 4.537], "BTCUSDT_5m": [20, -1.34, 1.913], "ETHUSDT_5m": [36, -9.966, -1.737], "LINKUSDT_5m": [50, 13.009, 0.516], "SOLUSDT_5m": [57, 11.877, 5.908], "XRPUSDT_5m": [66, -11.052, -2.112]}
+    counters: {"v32_killzone_skip": 62, "v32_emergency_stop": 18, "shield_armed_disp": 176, "v31_struct_trail": 197, "trail_htf_blue": 57, "trail_4h_structural": 14}
+
+##### LIVE ENGINE combo=V32FULL W2 2024-05-01..2024-10-31 #####
+    cfg: ALLOC_MODE=slot  SLOTS=3  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)
+    n=284 totR=-30.5978 end=$105.5819 DD=-4.714% (335s)
+    coins: {"ADAUSDT_5m": [41, -5.464, -0.457], "AVAXUSDT_5m": [43, -2.875, 2.908], "BNBUSDT_5m": [27, -8.696, -1.242], "BTCUSDT_5m": [26, -2.808, 1.077], "ETHUSDT_5m": [25, 12.129, 1.835], "LINKUSDT_5m": [46, -13.279, -0.097], "SOLUSDT_5m": [47, -2.263, 1.893], "XRPUSDT_5m": [29, -7.343, -0.335]}
+    counters: {"v32_killzone_skip": 39, "v32_emergency_stop": 16, "shield_armed_disp": 132, "v31_struct_trail": 155, "trail_htf_blue": 19, "trail_4h_structural": 6}
+
+##### LIVE ENGINE combo=TEL W1 2023-10-01..2024-03-31 #####
+    cfg: ALLOC_MODE=slot  SLOTS=3  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)  TRAIL_LENS_PRE=struct4h  TRAIL_4H_ONLY_AFTER_3R=True
+    n=357 totR=128.4592 end=$130.8101 DD=-5.774% (558s)
+    coins: {"ADAUSDT_5m": [57, 84.384, 7.642], "AVAXUSDT_5m": [53, -26.175, -3.688], "BNBUSDT_5m": [49, 27.723, 14.052], "BTCUSDT_5m": [20, 27.836, 4.342], "ETHUSDT_5m": [33, -28.915, -2.51], "LINKUSDT_5m": [46, 48.18, 4.062], "SOLUSDT_5m": [49, 18.513, 10.558], "XRPUSDT_5m": [50, -23.086, -3.649]}
+    counters: {"v32_killzone_skip": 65, "v32_emergency_stop": 33, "shield_armed_disp": 168, "v31_struct_trail": 12, "trail_htf_blue": 1, "trail_4h_structural": 72}
+
+##### LIVE ENGINE combo=TEL W2 2024-05-01..2024-10-31 #####
+    cfg: ALLOC_MODE=slot  SLOTS=3  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)  TRAIL_LENS_PRE=struct4h  TRAIL_4H_ONLY_AFTER_3R=True
+    n=265 totR=105.7958 end=$121.654 DD=-5.921% (340s)
+    coins: {"ADAUSDT_5m": [35, -1.591, -0.489], "AVAXUSDT_5m": [44, -20.042, -0.627], "BNBUSDT_5m": [22, -3.44, -0.529], "BTCUSDT_5m": [25, -3.543, 0.87], "ETHUSDT_5m": [25, 25.502, 4.816], "LINKUSDT_5m": [44, 20.335, 6.304], "SOLUSDT_5m": [41, 18.1, 2.323], "XRPUSDT_5m": [29, 70.474, 8.986]}
+    counters: {"v32_killzone_skip": 45, "v32_emergency_stop": 20, "shield_armed_disp": 127, "v31_struct_trail": 21, "trail_htf_blue": 3, "trail_4h_structural": 57}
+
+##### LIVE ENGINE combo=LEAD2 W1 2023-10-01..2024-03-31 #####
+    cfg: ALLOC_MODE=slot  SLOTS=3  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)  V33_ALPHA_LEADER=True  LEADER_K=2  LEADER_NEEDS_HTF=True
+    n=27 totR=35.8486 end=$109.5546 DD=-3.865% (658s)
+    coins: {"ADAUSDT_5m": [5, -8.322, -0.57], "AVAXUSDT_5m": [3, -1.432, -0.22], "BNBUSDT_5m": [3, 21.545, 4.754], "BTCUSDT_5m": [1, -0.0, -0.0], "ETHUSDT_5m": [5, 1.201, 0.996], "LINKUSDT_5m": [3, 19.549, 3.756], "SOLUSDT_5m": [1, -1.379, -0.249], "XRPUSDT_5m": [6, 4.687, 1.087]}
+    counters: {"v32_killzone_skip": 54, "v32_emergency_stop": 2, "shield_armed_disp": 14, "v33_leader_veto": 381, "v31_struct_trail": 2, "trail_4h_structural": 10, "v33_stamp_expand": 69697}
+
+##### LIVE ENGINE combo=LEAD2 W2 2024-05-01..2024-10-31 #####
+    cfg: ALLOC_MODE=slot  SLOTS=3  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)  V33_ALPHA_LEADER=True  LEADER_K=2  LEADER_NEEDS_HTF=True
+    n=35 totR=7.3709 end=$101.6489 DD=-1.84% (350s)
+    coins: {"ADAUSDT_5m": [6, -8.431, -0.552], "AVAXUSDT_5m": [8, -0.633, 0.519], "BNBUSDT_5m": [2, -0.001, -0.0], "BTCUSDT_5m": [6, 6.095, 0.922], "ETHUSDT_5m": [1, 10.286, 0.677], "LINKUSDT_5m": [5, -0.004, -0.0], "SOLUSDT_5m": [5, -4.801, -0.547], "XRPUSDT_5m": [2, 4.859, 0.631]}
+    counters: {"v32_killzone_skip": 58, "v32_emergency_stop": 3, "shield_armed_disp": 23, "v33_leader_veto": 476, "trail_4h_structural": 12, "v33_stamp_expand": 69985}
+
+##### LIVE ENGINE combo=REARM W1 2023-10-01..2024-03-31 #####
+    cfg: ALLOC_MODE=slot  SLOTS=3  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)  PURPLE_REARM=True
+    n=34 totR=66.4716 end=$117.9399 DD=-3.231% (524s)
+    coins: {"ADAUSDT_5m": [3, -3.671, -0.243], "AVAXUSDT_5m": [5, 0.971, 3.144], "BNBUSDT_5m": [3, 22.022, 5.769], "BTCUSDT_5m": [3, 21.632, 2.762], "ETHUSDT_5m": [5, -1.874, -0.142], "LINKUSDT_5m": [3, 19.549, 3.882], "SOLUSDT_5m": [4, 6.073, 1.995], "XRPUSDT_5m": [8, 1.769, 0.773]}
+    counters: {"v32_regime_b_no_anchor": 38693, "v32_killzone_skip": 50, "v32_emergency_stop": 2, "v31_impulse_anchored": 3466, "shield_armed_disp": 19, "v33_leader_veto": 356, "v31_struct_trail": 4, "trail_4h_structural": 15, "v33_stamp_expand": 69697}
+
+##### LIVE ENGINE combo=REARM W2 2024-05-01..2024-10-31 #####
+    cfg: ALLOC_MODE=slot  SLOTS=3  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)  PURPLE_REARM=True
+    n=37 totR=-7.6871 end=$100.8246 DD=-2.088% (331s)
+    coins: {"ADAUSDT_5m": [7, -8.432, -0.549], "AVAXUSDT_5m": [8, -0.633, 0.521], "BNBUSDT_5m": [2, -0.001, -0.0], "BTCUSDT_5m": [8, 1.439, 0.749], "LINKUSDT_5m": [5, -0.004, -0.0], "SOLUSDT_5m": [5, -4.916, -0.521], "XRPUSDT_5m": [2, 4.859, 0.624]}
+    counters: {"v32_regime_b_no_anchor": 41278, "v32_killzone_skip": 59, "v32_emergency_stop": 4, "v31_impulse_anchored": 3216, "shield_armed_disp": 23, "v33_leader_veto": 479, "trail_4h_structural": 10, "v33_stamp_expand": 69985}
+
+##### LIVE ENGINE combo=REG W1 2023-10-01..2024-03-31 #####
+    cfg: ALLOC_MODE=slot  SLOTS=3  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)  BASKET_REGIME=True  RANGE_HARVEST_4H=True

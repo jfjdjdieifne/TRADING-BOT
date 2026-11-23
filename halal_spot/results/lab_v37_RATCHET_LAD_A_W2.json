@@ -1,0 +1,108 @@
+{
+ "arm": "RATCHET_LAD_A",
+ "window": "W2",
+ "start": "2024-05-01",
+ "end": "2024-10-31",
+ "seconds": 241.7,
+ "n": 157,
+ "capital": 100.0,
+ "totR": 122.2691,
+ "net": 71.2499,
+ "end_equity": 171.2499,
+ "pf": 2.155,
+ "wr": 24.2,
+ "wins": 38,
+ "be": 43,
+ "losses": 76,
+ "fees": 21.3645,
+ "by_coin": {
+  "ADAUSDT_5m": [
+   26,
+   11.019
+  ],
+  "AVAXUSDT_5m": [
+   15,
+   1.338
+  ],
+  "BNBUSDT_5m": [
+   12,
+   7.307
+  ],
+  "BTCUSDT_5m": [
+   15,
+   -0.925
+  ],
+  "ETHUSDT_5m": [
+   18,
+   12.342
+  ],
+  "LINKUSDT_5m": [
+   25,
+   13.377
+  ],
+  "SOLUSDT_5m": [
+   28,
+   7.058
+  ],
+  "XRPUSDT_5m": [
+   18,
+   19.734
+  ]
+ },
+ "exits": {
+  "STOP_BLUE": 90,
+  "BREAKEVEN": 43,
+  "EMERGENCY_STOP": 11,
+  "STRUCT_PROFIT": 9,
+  "TARGET_REJECTION": 4
+ },
+ "monthly": {
+  "2024-05": {
+   "net$": 6.4,
+   "end$": 106.4,
+   "n": 24,
+   "PF": 2.1
+  },
+  "2024-06": {
+   "net$": -4.46,
+   "end$": 101.95,
+   "n": 27,
+   "PF": 0.5
+  },
+  "2024-07": {
+   "net$": 29.96,
+   "end$": 131.9,
+   "n": 26,
+   "PF": 4.29
+  },
+  "2024-08": {
+   "net$": 24.69,
+   "end$": 156.6,
+   "n": 25,
+   "PF": 3.35
+  },
+  "2024-09": {
+   "net$": 10.43,
+   "end$": 167.03,
+   "n": 28,
+   "PF": 1.74
+  },
+  "2024-10": {
+   "net$": 4.22,
+   "end$": 171.25,
+   "n": 27,
+   "PF": 1.32
+  }
+ },
+ "months_pos": 5,
+ "months_n": 6,
+ "maxDD_pct": -11.484,
+ "eq_end": 171.2499,
+ "counters": {
+  "v35_cooldown_armed": 56,
+  "v35_cooldown_skip": 85,
+  "v35_cooldown_expired": 9,
+  "v37_ratchet_armed": 48,
+  "v35_cooldown_lifted_by_bos": 44
+ }
+}

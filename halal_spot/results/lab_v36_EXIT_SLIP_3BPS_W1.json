@@ -1,0 +1,122 @@
+{
+ "combo": "EXIT_SLIP_3BPS",
+ "window": "W1",
+ "start": "2023-10-01",
+ "end": "2024-03-31",
+ "seconds": 662.3,
+ "symbols": [
+  "ADAUSDT_5m",
+  "AVAXUSDT_5m",
+  "BNBUSDT_5m",
+  "BTCUSDT_5m",
+  "ETHUSDT_5m",
+  "LINKUSDT_5m",
+  "SOLUSDT_5m",
+  "XRPUSDT_5m"
+ ],
+ "capital": 100.0,
+ "n": 130,
+ "totR": 41.8246,
+ "wins": 12,
+ "swin": 2,
+ "be": 19,
+ "losses": 99,
+ "wr": 9.23,
+ "wr_strict": 7.69,
+ "net": 34.367,
+ "end_equity": 134.367,
+ "pool_cash_end": 134.367,
+ "maxR": 28.105,
+ "fees": 14.893,
+ "by_coin": {
+  "ADAUSDT_5m": [
+   17,
+   18.936,
+   4.091
+  ],
+  "AVAXUSDT_5m": [
+   20,
+   20.674,
+   5.81
+  ],
+  "BNBUSDT_5m": [
+   15,
+   7.009,
+   15.187
+  ],
+  "BTCUSDT_5m": [
+   6,
+   -1.939,
+   -0.757
+  ],
+  "ETHUSDT_5m": [
+   14,
+   -14.332,
+   -4.975
+  ],
+  "LINKUSDT_5m": [
+   18,
+   15.822,
+   9.365
+  ],
+  "SOLUSDT_5m": [
+   23,
+   12.049,
+   14.236
+  ],
+  "XRPUSDT_5m": [
+   17,
+   -16.394,
+   -8.588
+  ]
+ },
+ "exits": {
+  "STOP_BLUE": 51,
+  "SHIELD_BE": 43,
+  "BREAKEVEN": 19,
+  "EMERGENCY_STOP": 14,
+  "STRUCT_PROFIT": 2,
+  "TARGET_REJECTION": 1
+ },
+ "pf": 1.752,
+ "maxDD_pct": -10.338,
+ "eq_end": 134.367,
+ "eq_min": 94.6583,
+ "counters": {
+  "v36_exit_slip_charged": 129,
+  "v35_dust_box_veto": 0,
+  "v35_flash_seller_veto": 0,
+  "v35_fall_close_veto": 0,
+  "v35_cooldown_armed": 56,
+  "v35_cooldown_skip": 43,
+  "v35_cooldown_expired": 9,
+  "v35_cooldown_lifted_by_bos": 42,
+  "slot_full_rejects": 93,
+  "portfolio_slots_full": 93,
+  "v31_struct_trail": 3,
+  "trail_4h_structural": 18,
+  "fill_below_exchange_min": 0,
+  "v34_deploy_full_ok": 161,
+  "v33_stamp_expand": 0,
+  "v33_stamp_range": 0
+ },
+ "v33_stamps_expand": 0,
+ "v33_stamps_range": 0,
+ "v33_leader_stamps": {},
+ "price_move_pct": {
+  "median_all": 0.17,
+  "median_winners": 3.749,
+  "max": 23.666,
+  "wins_over_5pct": 5,
+  "wins_over_15pct": 1
+ },
+ "stop_width_pct": {
+  "median": 0.4049,
+  "min": 0.1002,
+  "max": 2.3507
+ },
+ "bars_held_median": 3.0,
+ "fee_share_of_gross_wins_pct": 18.6,
+ "smt_bull_stamps": 142092,
+ "smt_stamps": 69697
+}

@@ -1,0 +1,94 @@
+{
+ "combo": "P1_slot2",
+ "window": "W1",
+ "start": "2023-10-01",
+ "end": "2024-03-31",
+ "seconds": 2993.0,
+ "symbols": [
+  "ADAUSDT_5m",
+  "AVAXUSDT_5m",
+  "BNBUSDT_5m",
+  "BTCUSDT_5m",
+  "ETHUSDT_5m",
+  "LINKUSDT_5m",
+  "SOLUSDT_5m",
+  "XRPUSDT_5m"
+ ],
+ "capital": 100.0,
+ "n": 428,
+ "totR": 62.7024,
+ "wins": 127,
+ "swin": 87,
+ "be": 109,
+ "losses": 192,
+ "wr": 29.67,
+ "wr_strict": 9.35,
+ "net": 16.7025,
+ "end_equity": 116.7025,
+ "pool_cash_end": 116.7025,
+ "maxR": 35.505,
+ "fees": 18.0454,
+ "by_coin": {
+  "ADAUSDT_5m": [
+   62,
+   50.054,
+   5.087
+  ],
+  "AVAXUSDT_5m": [
+   65,
+   -5.307,
+   -3.911
+  ],
+  "BNBUSDT_5m": [
+   53,
+   1.278,
+   5.905
+  ],
+  "BTCUSDT_5m": [
+   26,
+   -2.27,
+   3.401
+  ],
+  "ETHUSDT_5m": [
+   36,
+   -8.994,
+   -2.317
+  ],
+  "LINKUSDT_5m": [
+   51,
+   21.152,
+   1.553
+  ],
+  "SOLUSDT_5m": [
+   69,
+   22.983,
+   10.179
+  ],
+  "XRPUSDT_5m": [
+   66,
+   -16.193,
+   -3.196
+  ]
+ },
+ "exits": {
+  "STOP_BLUE": 209,
+  "BREAKEVEN": 109,
+  "STRUCT_PROFIT": 87,
+  "EMERGENCY_STOP": 19,
+  "TARGET_REJECTION": 4
+ },
+ "pf": 1.321,
+ "maxDD_pct": -5.697,
+ "eq_end": 116.7025,
+ "eq_min": 96.7766,
+ "counters": {
+  "v32_smt_veto": 0,
+  "v32_regime_b_veto": 0,
+  "v32_regime_b_no_anchor": 0,
+  "v32_killzone_skip": 0,
+  "v32_emergency_stop": 19,
+  "v31_impulse_anchored": 0,
+  "fill_below_exchange_min": 0,
+  "shield_armed_disp": 205
+ }
+}

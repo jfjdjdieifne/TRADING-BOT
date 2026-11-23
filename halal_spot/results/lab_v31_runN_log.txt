@@ -1,0 +1,37 @@
+
+########## LIVE ENGINE · combo=C_12 · 2021-01-01..2026-10-31 ##########
+    config: STRUCT_TRAIL=True  LOCK_MODE=trail
+[        C_12] n= 297   20W/ 28SW/101BE/148L  WR= 11.90% (incl  24.49%)  minWin=3.16  SWIN[0.06..2.24]  >=4R= 18  maxR= 32.60  totR=  101.46
+               net= +58.34% ($316.69)  PF=2.03  maxDD=-22.42%  fees=$77.02  streak=3/31  yearly={'2021': 93, '2022': 79, '2023': 34, '2024': 43, '2025': 21, '2026': 27}
+               CADENCE: profitable months=22.9%  compounded=0.66%/mo  median month=-0.15%  wins/mo=0.69  trades/mo=4.24
+               MECH: struct_trail=82 harvests=0 impulse=0 sacred_impulse=0 floor_htf=0 be_at_entry=203 minTargetR=3.16
+               asserts A1..A5 = FPPPP -> 4/5 (A2 entry-gate P)  exits={"STOP_BLUE": 66, "STRUCT_PROFIT": 28, "BREAKEVEN": 101, "TARGET_REJECTION": 1, "SHIELD_BE": 101}
+
+########## LIVE ENGINE · combo=A3_imp · 2021-01-01..2026-10-31 ##########
+    config: IMPULSE_PURPLE=True
+[      A3_imp] n= 254   45W/  0SW/100BE/109L  WR= 29.22% (incl  29.22%)  minWin=3.0  SWIN[None..None]  >=4R= 14  maxR= 19.38  totR=   99.94
+               net= +79.94% ($359.87)  PF=2.29  maxDD=-6.61%  fees=$73.32  streak=3/19  yearly={'2021': 96, '2022': 85, '2023': 9, '2024': 20, '2025': 11, '2026': 33}
+               CADENCE: profitable months=27.1%  compounded=0.84%/mo  median month=-0.0%  wins/mo=0.64  trades/mo=3.63
+               MECH: struct_trail=0 harvests=0 impulse=10242 sacred_impulse=2 floor_htf=0 be_at_entry=129 minTargetR=3.2
+               asserts A1..A5 = FPPPF -> 3/5 (A2 entry-gate P)  exits={"STOP_BLUE": 70, "LOCK_FLOOR_CLOSE": 31, "BREAKEVEN": 100, "TARGET_REJECTION": 2, "SHIELD_BE": 51}
+
+########## LIVE ENGINE · combo=A2_trail · 2021-01-01..2026-10-31 ##########
+    config: LOCK_MODE=trail
+[    A2_trail] n= 323   26W/  1SW/130BE/166L  WR= 13.54% (incl  13.99%)  minWin=3.16  SWIN[2.27..2.27]  >=4R= 22  maxR= 24.21  totR=  103.92
+               net= +56.27% ($312.54)  PF=1.88  maxDD=-24.72%  fees=$85.47  streak=3/34  yearly={'2021': 99, '2022': 77, '2023': 34, '2024': 44, '2025': 41, '2026': 28}
+               CADENCE: profitable months=20.0%  compounded=0.64%/mo  median month=-0.22%  wins/mo=0.39  trades/mo=4.61
+               MECH: struct_trail=0 harvests=0 impulse=0 sacred_impulse=0 floor_htf=0 be_at_entry=221 minTargetR=3.2
+               asserts A1..A5 = FPPPP -> 4/5 (A2 entry-gate P)  exits={"STOP_BLUE": 78, "BREAKEVEN": 130, "SHIELD_BE": 112, "TARGET_REJECTION": 3}
+
+================= v31 LIVE COMPARISON TABLE =================
+       combo    n    W  SW   BE    L    WR%   WRi%  minW  >=4R   maxR     totR     net%    PF  maxDD%  mo+%  c%/mo  w/mo  strk  5as
+         v25  206   51   0   48  107  32.30   0.00   3.0    13  19.38     0.00   +42.14  1.43  -17.43   0.0   0.00  0.00     3    -
+         v27  297   70   0   66  161  30.30   0.00   3.0    18  19.38     0.00   +31.90  1.26  -14.41   0.0   0.00  0.00     3    -
+         v30  298   44   0  109  145  23.30   0.00   3.0    10  19.38     0.00   +71.75  2.14   -9.52   0.0   0.00  0.00     3    -
+        C_12  297   20  28  101  148  11.90  24.49  3.16    18  32.60   101.46   +58.34  2.03  -22.42  22.9   0.66  0.69     3  4/5
+      A3_imp  254   45   0  100  109  29.22  29.22   3.0    14  19.38    99.94   +79.94  2.29   -6.61  27.1   0.84  0.64     3  3/5
+    A2_trail  323   26   1  130  166  13.54  13.99  3.16    22  24.21   103.92   +56.27  1.88  -24.72  20.0   0.64  0.39     3  4/5
+=============================================================
+          C_12 yearly: {'2021': 93, '2022': 79, '2023': 34, '2024': 43, '2025': 21, '2026': 27}
+        A3_imp yearly: {'2021': 96, '2022': 85, '2023': 9, '2024': 20, '2025': 11, '2026': 33}
+      A2_trail yearly: {'2021': 99, '2022': 77, '2023': 34, '2024': 44, '2025': 41, '2026': 28}

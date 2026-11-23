@@ -1,0 +1,235 @@
+{
+  "config": {
+    "strategy": "V14 — owner's pasted 6-arm code (BTC-only port)",
+    "variant": "cap_fix diagnostic (notional cap raised only enough to permit exchange min lot)",
+    "window": "2025-07-01 .. 2026-07-01",
+    "capital_usdt": 100.0,
+    "leverage": 3.0,
+    "min_rr": 3.5,
+    "fee_rate_report_ledger": 0.001,
+    "internal_fee_verbatim": 0.0008,
+    "warmup_days_main": 35,
+    "warmup_days_2021": 15,
+    "symbol": "BTCUSDT",
+    "not_tested_pairs": [
+      "ETHUSDT",
+      "SOLUSDT",
+      "BNBUSDT",
+      "XRPUSDT",
+      "DOGEUSDT",
+      "ADAUSDT",
+      "AVAXUSDT",
+      "LINKUSDT",
+      "SUIUSDT"
+    ],
+    "not_tested_reason": "no candle data (BTC only); macro breadth / RS rank degenerate to BTC-only in this port"
+  },
+  "continuous_12m": {
+    "trades": 46,
+    "wins": 17,
+    "losses": 29,
+    "win_rate_pct": 37.0,
+    "gross_profit": 34.95,
+    "gross_loss": -61.24,
+    "profit_factor": 0.57,
+    "net_pnl": -26.3,
+    "net_pct": -26.3,
+    "start_equity": 100.0,
+    "end_equity": 73.7,
+    "max_drawdown_pct": -37.38,
+    "max_drawdown_usd": 43.99,
+    "avg_r": -0.25,
+    "best_r": 3.42,
+    "worst_r": -1.56,
+    "avg_hold_hours": 83.9,
+    "exposure_pct": 44.0,
+    "exit_tags": {
+      "STRUCTURAL_SL": 23,
+      "FREE_STAGNANT_CAPITAL": 19,
+      "ZIGZAG_WAVE_HARVEST": 3,
+      "TP_3_5R_FULL_CASH": 1
+    },
+    "setups": {
+      "V8_4H": 22,
+      "V10_IGN": 11,
+      "V11_1H": 6,
+      "V6_SWP": 5,
+      "V12_CAP": 2
+    },
+    "sides": {
+      "LONG": 46
+    },
+    "exits": {
+      "STRUCTURAL": 23,
+      "FREE": 19,
+      "ZIGZAG": 3,
+      "TP": 1
+    },
+    "targets_R": {
+      "3.5": 46
+    }
+  },
+  "standalone_h2_2025": {
+    "trades": 31,
+    "wins": 14,
+    "losses": 17,
+    "win_rate_pct": 45.2,
+    "gross_profit": 27.26,
+    "gross_loss": -34.61,
+    "profit_factor": 0.79,
+    "net_pnl": -7.35,
+    "net_pct": -7.35,
+    "start_equity": 100.0,
+    "end_equity": 92.68,
+    "max_drawdown_pct": -23.94,
+    "max_drawdown_usd": 28.18,
+    "avg_r": -0.08,
+    "best_r": 3.42,
+    "worst_r": -1.44,
+    "avg_hold_hours": 88.7,
+    "exposure_pct": 62.3,
+    "exit_tags": {
+      "FREE_STAGNANT_CAPITAL": 15,
+      "STRUCTURAL_SL": 13,
+      "ZIGZAG_WAVE_HARVEST": 1,
+      "TP_3_5R_FULL_CASH": 1,
+      "EOD": 1
+    },
+    "setups": {
+      "V8_4H": 18,
+      "V10_IGN": 6,
+      "V11_1H": 5,
+      "V6_SWP": 1,
+      "V12_CAP": 1
+    },
+    "sides": {
+      "LONG": 31
+    },
+    "exits": {
+      "FREE": 15,
+      "STRUCTURAL": 13,
+      "ZIGZAG": 1,
+      "TP": 1,
+      "EOD": 1
+    },
+    "targets_R": {
+      "3.5": 31
+    }
+  },
+  "standalone_h1_2026": {
+    "trades": 30,
+    "wins": 9,
+    "losses": 21,
+    "win_rate_pct": 30.0,
+    "gross_profit": 26.8,
+    "gross_loss": -45.07,
+    "profit_factor": 0.59,
+    "net_pnl": -18.27,
+    "net_pct": -18.27,
+    "start_equity": 100.0,
+    "end_equity": 81.69,
+    "max_drawdown_pct": -25.82,
+    "max_drawdown_usd": 28.32,
+    "avg_r": -0.25,
+    "best_r": 3.43,
+    "worst_r": -1.56,
+    "avg_hold_hours": 91.5,
+    "exposure_pct": 63.2,
+    "exit_tags": {
+      "STRUCTURAL_SL": 14,
+      "FREE_STAGNANT_CAPITAL": 10,
+      "ZIGZAG_WAVE_HARVEST": 4,
+      "TP_3_5R_FULL_CASH": 1,
+      "EOD": 1
+    },
+    "setups": {
+      "V8_4H": 11,
+      "V10_IGN": 7,
+      "V6_SWP": 5,
+      "V12_CAP": 4,
+      "V11_1H": 2,
+      "V9_LON": 1
+    },
+    "sides": {
+      "LONG": 30
+    },
+    "exits": {
+      "STRUCTURAL": 14,
+      "FREE": 10,
+      "ZIGZAG": 4,
+      "TP": 1,
+      "EOD": 1
+    },
+    "targets_R": {
+      "3.5": 30
+    }
+  },
+  "buy_hold_12m": 54.71,
+  "window_2021first2m": {
+    "trades": 12,
+    "wins": 5,
+    "losses": 7,
+    "win_rate_pct": 41.7,
+    "gross_profit": 27.04,
+    "gross_loss": -15.56,
+    "profit_factor": 1.74,
+    "net_pnl": 11.48,
+    "net_pct": 11.48,
+    "start_equity": 100.0,
+    "end_equity": 111.62,
+    "max_drawdown_pct": -15.02,
+    "max_drawdown_usd": 16.72,
+    "avg_r": 0.3,
+    "best_r": 7.15,
+    "worst_r": -1.31,
+    "avg_hold_hours": 109.9,
+    "exposure_pct": 93.2,
+    "exit_tags": {
+      "STRUCTURAL_SL": 7,
+      "ZIGZAG_WAVE_HARVEST": 2,
+      "FREE_STAGNANT_CAPITAL": 2,
+      "EOD": 1
+    },
+    "setups": {
+      "V10_IGN": 5,
+      "V8_4H": 3,
+      "V12_CAP": 3,
+      "V11_1H": 1
+    },
+    "sides": {
+      "LONG": 12
+    },
+    "exits": {
+      "STRUCTURAL": 7,
+      "ZIGZAG": 2,
+      "FREE": 2,
+      "EOD": 1
+    },
+    "targets_R": {
+      "3.5": 12
+    }
+  },
+  "buy_hold_2021first2m": 156.05,
+  "signal_funnel": {
+    "sig_V8_4H": 3492,
+    "entries": 46,
+    "exit_FREE_STAGNANT_CAPITAL": 19,
+    "exit_ZIGZAG_WAVE_HARVEST": 3,
+    "exec_rejected": 5046,
+    "sig_V6_SWP": 135,
+    "exit_STRUCTURAL_SL": 23,
+    "sig_V10_IGN": 204,
+    "sig_V11_1H": 1180,
+    "sig_V9_LON": 51,
+    "sig_V12_CAP": 30,
+    "exit_TP_3_5R_FULL_CASH": 1
+  },
+  "end_log": {
+    "equity": 73.7,
+    "realized_eq_book": 79.08,
+    "loss_streak": 4,
+    "daily_losses": 0,
+    "macro_final": "BEAR"
+  },
+  "fees_total": 8.93977037
+}

@@ -1,0 +1,3 @@
+combo,window,n,totR,net,end_equity,maxDD_pct,wr,wr_strict,pf,maxR,fees,seconds,by_coin_R,counters
+BTC_C124,W1,17,3.4318,6.2418,106.2418,-4.126,29.41,11.76,2.199,14.054,1.6794,43.1,"{""BTCUSDT_5m"": 3.432}","{""shield_armed_disp"": 4}"
+BTC_C124,W2,51,-12.748,0.3658,100.3658,-3.903,29.41,5.88,1.043,8.315,5.0647,27.1,"{""BTCUSDT_5m"": -12.748}","{""fill_below_exchange_min"": 8, ""shield_armed_disp"": 25}"

@@ -1,0 +1,28 @@
+label,n,W,BE,L,nofill,open,WR_pct,min_win_R,ge4R,max_R,streak,ymin,total_R,A1,A2,A3,A4,A5
+alpha=1.0 shield=none 2nd=0,292,76,0,216,5,0,26.03,3.0,12,13.07,18,15,-116.2,False,True,True,False,True
+alpha=1.0 shield=none 2nd=1,292,76,0,216,5,0,26.03,3.0,12,13.07,18,15,-116.2,False,True,True,False,True
+alpha=1.0 shield=be 2nd=0,292,14,186,92,5,0,13.21,3.0,1,6.76,4,15,-143.2,False,True,False,False,True
+alpha=1.0 shield=be 2nd=1,477,58,186,233,5,0,19.93,3.0,10,13.07,5,22,-213.3,False,True,True,False,True
+alpha=1.0 shield=mid 2nd=0,292,58,59,175,5,0,24.89,3.0,8,13.07,9,15,-124.3,False,True,True,False,True
+alpha=1.0 shield=mid 2nd=1,350,70,59,221,5,0,24.05,3.0,10,13.07,10,19,-154.5,False,True,True,False,True
+alpha=0.75 shield=none 2nd=0,288,74,0,214,9,0,25.69,3.0,12,13.24,18,15,-164.9,False,True,True,False,True
+alpha=0.75 shield=none 2nd=1,288,74,0,214,9,0,25.69,3.0,12,13.24,18,15,-164.9,False,True,True,False,True
+alpha=0.75 shield=be 2nd=0,288,23,139,126,9,0,15.44,3.0,3,7.79,11,15,-194.0,False,True,False,False,True
+alpha=0.75 shield=be 2nd=1,427,54,139,234,9,0,18.75,3.0,10,42.4,12,22,-204.3,False,True,True,False,True
+alpha=0.75 shield=mid 2nd=0,288,62,34,192,9,0,24.41,3.0,10,7.79,18,15,-177.7,False,True,True,False,True
+alpha=0.75 shield=mid 2nd=1,322,70,34,218,9,0,24.31,3.0,11,7.79,18,19,-193.4,False,True,True,False,True
+alpha=0.5 shield=none 2nd=0,282,57,0,225,15,0,20.21,3.0,15,10.86,22,15,-330.5,False,True,True,False,True
+alpha=0.5 shield=none 2nd=1,282,57,0,225,15,0,20.21,3.0,15,10.86,22,15,-330.5,False,True,True,False,True
+alpha=0.5 shield=be 2nd=0,282,25,86,171,15,0,12.76,3.0,9,10.86,7,15,-330.2,False,True,True,False,True
+alpha=0.5 shield=be 2nd=1,367,39,86,242,15,0,13.88,3.0,11,15.09,8,21,-400.0,False,True,True,False,True
+alpha=0.5 shield=mid 2nd=0,282,52,15,215,15,0,19.48,3.0,13,10.86,22,15,-329.5,False,True,True,False,True
+alpha=0.5 shield=mid 2nd=1,297,55,15,227,15,0,19.5,3.0,13,10.86,22,19,-340.1,False,True,True,False,True
+alpha=0.25 shield=none 2nd=0,278,36,0,242,19,0,12.95,3.0,14,22.39,26,15,-759.0,False,True,True,False,True
+alpha=0.25 shield=none 2nd=1,278,36,0,242,19,0,12.95,3.0,14,22.39,26,15,-759.0,False,True,True,False,True
+alpha=0.25 shield=be 2nd=0,278,21,43,214,19,0,8.94,3.0,9,22.39,13,15,-748.4,False,True,True,False,True
+alpha=0.25 shield=be 2nd=1,319,28,43,248,19,0,10.14,3.0,9,22.39,14,18,-787.7,False,True,True,False,True
+alpha=0.25 shield=mid 2nd=0,278,36,4,238,19,0,13.14,3.0,14,22.39,26,15,-746.9,False,True,True,False,True
+alpha=0.25 shield=mid 2nd=1,282,36,4,242,19,0,12.95,3.0,14,22.39,26,16,-753.4,False,True,True,False,True
+METHOD-B shield=none,204,48,0,156,93,0,23.53,3.0,6,23.55,13,13,-68.6,False,True,True,False,True
+METHOD-B shield=be,204,9,102,93,93,0,8.82,3.0,1,9.71,5,13,-124.9,False,True,False,False,True
+METHOD-B shield=mid,204,39,25,140,93,0,21.79,3.0,5,10.04,12,13,-91.6,False,True,True,False,True

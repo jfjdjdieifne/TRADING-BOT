@@ -1,0 +1,55 @@
+
+########## LIVE ENGINE RUN · arm=A · 2021-01-01..2026-10-31 ##########
+[   A] n= 140   36W/ 16BE/ 88L  WR= 29.03%  minWin=3.0  >=4R=  6  maxR=  8.53  totR=  -51.42
+       net= -12.43% ($175.14)  PF=0.77  maxDD=-20.51%  streak=3/3  yearly={'2021': 35, '2022': 23, '2023': 21, '2024': 32, '2025': 12, '2026': 17}
+       asserts A1..A5 = FPPPF  -> 3/5
+       ASSERT1 FAILED
+       ASSERT2 PASSED
+       ASSERT3 PASSED
+       ASSERT4 PASSED
+       ASSERT5 FAILED
+
+########## LIVE ENGINE RUN · arm=D · 2021-01-01..2026-10-31 ##########
+[   D] n= 181   37W/ 28BE/116L  WR= 24.18%  minWin=3.0  >=4R=  8  maxR= 23.83  totR=  -69.76
+       net= -20.85% ($158.3)  PF=0.7  maxDD=-28.16%  streak=3/2  yearly={'2021': 39, '2022': 38, '2023': 16, '2024': 43, '2025': 21, '2026': 24}
+       asserts A1..A5 = FPPPP  -> 4/5
+       ASSERT1 FAILED
+       ASSERT2 PASSED
+       ASSERT3 PASSED
+       ASSERT4 PASSED
+       ASSERT5 PASSED
+
+================= v29 LIVE COMPARISON TABLE =================
+  arm    n    W   BE    L     WR%  minW  >=4R    maxR     net%     PF  maxDD%  strk  ymin  5as
+  v25  206   51   48    0   32.30   3.0    13   19.38   +42.14   1.43  -17.43     3     -    -
+  v27  297   70   66    0   30.30   3.0    18   19.38   +31.90   1.26  -14.41     3     -    -
+    A  140   36   16   88   29.03   3.0     6    8.53   -12.43   0.77  -20.51     3    12  3/5
+    D  181   37   28  116   24.18   3.0     8   23.83   -20.85   0.70  -28.16     3    16  4/5
+=============================================================
+      A yearly: {'2021': 35, '2022': 23, '2023': 21, '2024': 32, '2025': 12, '2026': 17}
+      D yearly: {'2021': 39, '2022': 38, '2023': 16, '2024': 43, '2025': 21, '2026': 24}
+
+=== CONVERSION AUDIT · arm A vs v27 (matched on setup geometry: seam + old_stop + frame) ===
+    v27 trades: 297   matched to an arm-A trade: 33
+v29_class  BE  LOSS  NO_FILL  WIN
+v27_class                        
+BE          1     2       62    1
+LOSS        4    20      132    5
+WIN         0     0       70    0
+    v27 LOSS  (n=161) -> arm A: WIN   5 · BE   4 · LOSS  20 · never filled 132
+    v27 BE    (n= 66) -> arm A: WIN   1 · BE   1 · LOSS   2 · never filled  62
+    v27 WIN   (n= 70) -> arm A: WIN   0 · BE   0 · LOSS   0 · never filled  70
+    wrote results/convert_v29_A.csv
+
+=== CONVERSION AUDIT · arm D vs v27 (matched on setup geometry: seam + old_stop + frame) ===
+    v27 trades: 297   matched to an arm-D trade: 43
+v29_class  BE  LOSS  NO_FILL  WIN
+v27_class                        
+BE          3     2       59    2
+LOSS        7    21      131    2
+WIN         0     0       64    6
+    v27 LOSS  (n=161) -> arm D: WIN   2 · BE   7 · LOSS  21 · never filled 131
+    v27 BE    (n= 66) -> arm D: WIN   2 · BE   3 · LOSS   2 · never filled  59
+    v27 WIN   (n= 70) -> arm D: WIN   6 · BE   0 · LOSS   0 · never filled  64
+    wrote results/convert_v29_D.csv
+BOXGATE_DONE exit=0

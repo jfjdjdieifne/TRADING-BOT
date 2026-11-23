@@ -1,0 +1,25 @@
+=== FULL15 20:48:30 ===
+    [guard] BASE == engine defaults for all 26 v33+v34 knobs
+
+##### LIVE ENGINE combo=S1_COIN_GUARD_BOS FULL15 2023-08-01..2024-10-31 #####
+    cfg: V32_DATA_DIR=/home/user/TRADING-BOT/halal_spot/data/binance_5m_oos  ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)
+    n=412 totR=214.0758 end=$170.9183 DD=-29.421% (1451s)
+    coins: {"ADAUSDT_5m": [56, 6.532, 0.413], "AVAXUSDT_5m": [49, -4.117, 2.544], "BNBUSDT_5m": [50, 107.027, 37.277], "BTCUSDT_5m": [31, -1.641, 1.022], "ETHUSDT_5m": [44, -19.237, -3.214], "LINKUSDT_5m": [66, 44.715, 20.728], "SOLUSDT_5m": [62, -17.432, -4.852], "XRPUSDT_5m": [54, 98.229, 17.0]}
+    counters: {"v35_cooldown_armed": 178, "v35_cooldown_skip": 239, "v35_cooldown_expired": 29, "v35_cooldown_lifted_by_bos": 147, "slot_full_rejects": 302, "portfolio_slots_full": 302, "v31_struct_trail": 21, "trail_4h_structural": 84, "v34_deploy_full_ok": 526}
+=== OLD7 21:12:43 ===
+    [guard] BASE == engine defaults for all 26 v33+v34 knobs
+
+##### LIVE ENGINE combo=S1_COIN_GUARD_BOS OLD7 2023-01-01..2023-07-31 #####
+    cfg: V32_DATA_DIR=/home/user/TRADING-BOT/halal_spot/data/binance_5m_oos  ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)
+    n=195 totR=11.383 end=$106.6394 DD=-17.091% (368s)
+    coins: {"ADAUSDT_5m": [21, 4.482, -0.288], "AVAXUSDT_5m": [36, -3.622, 7.816], "BNBUSDT_5m": [25, -19.582, -5.518], "BTCUSDT_5m": [11, -6.242, -1.931], "ETHUSDT_5m": [28, -25.233, -7.397], "LINKUSDT_5m": [16, -5.978, 3.099], "SOLUSDT_5m": [27, 26.709, 7.308], "XRPUSDT_5m": [31, 40.85, 3.551]}
+    counters: {"v35_cooldown_armed": 86, "v35_cooldown_skip": 129, "v35_cooldown_expired": 11, "v35_cooldown_lifted_by_bos": 72, "slot_full_rejects": 144, "portfolio_slots_full": 144, "v31_struct_trail": 6, "trail_4h_structural": 31, "v34_deploy_full_ok": 238}
+=== MODERN 21:18:52 ===
+    [guard] BASE == engine defaults for all 26 v33+v34 knobs
+
+##### LIVE ENGINE combo=S1_COIN_GUARD_BOS MODERN 2024-11-01..2026-10-31 #####
+    cfg: V32_DATA_DIR=/home/user/TRADING-BOT/halal_spot/data/binance_5m_oos  ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)
+    n=627 totR=119.4879 end=$132.7989 DD=-50.559% (1918s)
+    coins: {"ADAUSDT_5m": [100, 37.263, 31.749], "AVAXUSDT_5m": [89, 147.268, -12.671], "BNBUSDT_5m": [65, -23.997, -4.306], "BTCUSDT_5m": [59, -22.789, -11.153], "ETHUSDT_5m": [79, 83.468, 68.639], "LINKUSDT_5m": [78, -14.764, -6.203], "SOLUSDT_5m": [81, -53.185, -27.583], "XRPUSDT_5m": [76, -33.777, -5.672]}
+    counters: {"v35_cooldown_armed": 279, "v35_cooldown_skip": 333, "v35_cooldown_expired": 45, "v35_cooldown_lifted_by_bos": 229, "slot_full_rejects": 421, "portfolio_slots_full": 421, "v31_struct_trail": 19, "trail_4h_structural": 68, "v34_deploy_full_ok": 824}
+OOS_DONE

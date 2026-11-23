@@ -1,0 +1,337 @@
+[
+  {
+    "entry_time": "2021-01-03 23:00:00+00:00",
+    "purple_mid": 33663.5,
+    "broken_red": {
+      "kind": "RED",
+      "bottom": 32907.51,
+      "top": 33031.57,
+      "tf": "1h"
+    },
+    "yellow": {
+      "kind": "YELLOW_B",
+      "bottom": 32930.0,
+      "top": 33506.0,
+      "tf": "1h"
+    },
+    "green": {
+      "kind": "GREEN",
+      "bottom": 32455.71,
+      "top": 32772.21,
+      "tf": "1h"
+    },
+    "stop_blue": {
+      "kind": "BLUE",
+      "bottom": 32455.71,
+      "top": 32769.79,
+      "tf": "1h"
+    },
+    "entry": 33506.0,
+    "stop": 32455.71,
+    "wall": null,
+    "exit_reason": "STOP_BLUE",
+    "R": -1.06
+  },
+  {
+    "entry_time": "2021-01-08 21:00:00+00:00",
+    "purple_mid": 38099.93,
+    "broken_red": {
+      "kind": "RED",
+      "bottom": 39432.48,
+      "top": 39699.87,
+      "tf": "1h"
+    },
+    "yellow": {
+      "kind": "YELLOW_B",
+      "bottom": 38985.06,
+      "top": 39220.0,
+      "tf": "1h"
+    },
+    "green": {
+      "kind": "GREEN",
+      "bottom": 38414.7,
+      "top": 38929.56,
+      "tf": "1h"
+    },
+    "stop_blue": {
+      "kind": "BLUE",
+      "bottom": 37563.92,
+      "top": 37980.53,
+      "tf": "1h"
+    },
+    "entry": 38929.56,
+    "stop": 37563.92,
+    "wall": null,
+    "exit_reason": "STOP_BLUE",
+    "R": 0.91
+  },
+  {
+    "entry_time": "2021-02-15 23:00:00+00:00",
+    "purple_mid": 48061.65,
+    "broken_red": {
+      "kind": "RED",
+      "bottom": 47963.69,
+      "top": 48150.62,
+      "tf": "1h"
+    },
+    "yellow": {
+      "kind": "YELLOW_B",
+      "bottom": 48000.0,
+      "top": 48399.23,
+      "tf": "1h"
+    },
+    "green": {
+      "kind": "GREEN",
+      "bottom": 47536.15,
+      "top": 47938.83,
+      "tf": "1h"
+    },
+    "stop_blue": {
+      "kind": "BLUE",
+      "bottom": 46683.02,
+      "top": 46722.48,
+      "tf": "1h"
+    },
+    "entry": 47938.83,
+    "stop": 46683.02,
+    "wall": null,
+    "exit_reason": "STOP_BLUE",
+    "R": 0.53
+  },
+  {
+    "entry_time": "2021-03-12 14:00:00+00:00",
+    "purple_mid": 55749.28,
+    "broken_red": {
+      "kind": "RED",
+      "bottom": 57519.86,
+      "top": 57651.35,
+      "tf": "1h"
+    },
+    "yellow": {
+      "kind": "YELLOW_B",
+      "bottom": 54928.43,
+      "top": 55407.18,
+      "tf": "1h"
+    },
+    "green": {
+      "kind": "GREEN",
+      "bottom": 54431.86,
+      "top": 54761.01,
+      "tf": "1h"
+    },
+    "stop_blue": {
+      "kind": "BLUE",
+      "bottom": 54431.86,
+      "top": 54474.27,
+      "tf": "1h"
+    },
+    "entry": 55407.18,
+    "stop": 54431.86,
+    "wall": null,
+    "exit_reason": "STOP_BLUE",
+    "R": 4.08
+  },
+  {
+    "entry_time": "2021-04-01 17:00:00+00:00",
+    "purple_mid": 58907.36,
+    "broken_red": {
+      "kind": "RED",
+      "bottom": 58820.19,
+      "top": 58974.34,
+      "tf": "1h"
+    },
+    "yellow": {
+      "kind": "YELLOW_B",
+      "bottom": 58695.99,
+      "top": 58712.0,
+      "tf": "1h"
+    },
+    "green": {
+      "kind": "GREEN",
+      "bottom": 58115.0,
+      "top": 58628.86,
+      "tf": "1h"
+    },
+    "stop_blue": {
+      "kind": "BLUE",
+      "bottom": 58115.0,
+      "top": 58584.32,
+      "tf": "1h"
+    },
+    "entry": 58712.0,
+    "stop": 58115.0,
+    "wall": null,
+    "exit_reason": "STOP_BLUE",
+    "R": -1.2
+  },
+  {
+    "entry_time": "2021-04-02 14:00:00+00:00",
+    "purple_mid": 58835.74,
+    "broken_red": {
+      "kind": "RED",
+      "bottom": 59687.56,
+      "top": 59800.0,
+      "tf": "1h"
+    },
+    "yellow": {
+      "kind": "YELLOW_B",
+      "bottom": 59029.0,
+      "top": 59567.26,
+      "tf": "1h"
+    },
+    "green": {
+      "kind": "GREEN",
+      "bottom": 58633.87,
+      "top": 58891.26,
+      "tf": "1h"
+    },
+    "stop_blue": {
+      "kind": "BLUE",
+      "bottom": 58633.87,
+      "top": 58648.62,
+      "tf": "1h"
+    },
+    "entry": 58891.26,
+    "stop": 58633.87,
+    "wall": null,
+    "exit_reason": "STOP_BLUE",
+    "R": -1.46
+  },
+  {
+    "entry_time": "2021-04-06 15:00:00+00:00",
+    "purple_mid": 58859.79,
+    "broken_red": {
+      "kind": "RED",
+      "bottom": 59020.0,
+      "top": 59240.0,
+      "tf": "1h"
+    },
+    "yellow": {
+      "kind": "YELLOW_B",
+      "bottom": 57718.53,
+      "top": 57754.67,
+      "tf": "1h"
+    },
+    "green": {
+      "kind": "GREEN",
+      "bottom": 56980.0,
+      "top": 57539.15,
+      "tf": "1h"
+    },
+    "stop_blue": {
+      "kind": "BLUE",
+      "bottom": 56980.0,
+      "top": 57149.25,
+      "tf": "1h"
+    },
+    "entry": 57754.67,
+    "stop": 56980.0,
+    "wall": null,
+    "exit_reason": "STOP_BLUE",
+    "R": -0.78
+  },
+  {
+    "entry_time": "2021-04-11 06:00:00+00:00",
+    "purple_mid": 60175.0,
+    "broken_red": {
+      "kind": "RED",
+      "bottom": 60265.0,
+      "top": 60550.0,
+      "tf": "1h"
+    },
+    "yellow": {
+      "kind": "YELLOW_B",
+      "bottom": 59399.84,
+      "top": 59544.94,
+      "tf": "1h"
+    },
+    "green": {
+      "kind": "GREEN",
+      "bottom": 59013.79,
+      "top": 59161.04,
+      "tf": "1h"
+    },
+    "stop_blue": {
+      "kind": "BLUE",
+      "bottom": 58374.61,
+      "top": 58615.28,
+      "tf": "1h"
+    },
+    "entry": 59544.94,
+    "stop": 58374.61,
+    "wall": null,
+    "exit_reason": "STOP_BLUE",
+    "R": -0.23
+  },
+  {
+    "entry_time": "2021-04-15 03:00:00+00:00",
+    "purple_mid": 63826.71,
+    "broken_red": {
+      "kind": "RED",
+      "bottom": 62150.04,
+      "top": 62496.45,
+      "tf": "1h"
+    },
+    "yellow": {
+      "kind": "YELLOW_B",
+      "bottom": 62479.08,
+      "top": 62550.0,
+      "tf": "1h"
+    },
+    "green": {
+      "kind": "GREEN",
+      "bottom": 61873.51,
+      "top": 62397.39,
+      "tf": "1h"
+    },
+    "stop_blue": {
+      "kind": "BLUE",
+      "bottom": 61301.0,
+      "top": 62119.26,
+      "tf": "1h"
+    },
+    "entry": 62550.0,
+    "stop": 61301.0,
+    "wall": null,
+    "exit_reason": "STOP_BLUE",
+    "R": -0.14
+  },
+  {
+    "entry_time": "2021-07-30 01:00:00+00:00",
+    "purple_mid": 40015.0,
+    "broken_red": {
+      "kind": "RED",
+      "bottom": 39718.09,
+      "top": 39826.3,
+      "tf": "1h"
+    },
+    "yellow": {
+      "kind": "YELLOW_B",
+      "bottom": 39763.37,
+      "top": 39765.35,
+      "tf": "1h"
+    },
+    "green": {
+      "kind": "GREEN",
+      "bottom": 39489.55,
+      "top": 39719.99,
+      "tf": "1h"
+    },
+    "stop_blue": {
+      "kind": "BLUE",
+      "bottom": 39491.99,
+      "top": 39609.78,
+      "tf": "1h"
+    },
+    "entry": 39765.35,
+    "stop": 39489.55,
+    "wall": {
+      "kind": "YELLOW_S",
+      "bottom": 40846.97,
+      "top": 42250.02,
+      "tf": "4h"
+    },
+    "exit_reason": "STOP_BLUE",
+    "R": -1.29
+  }
+]

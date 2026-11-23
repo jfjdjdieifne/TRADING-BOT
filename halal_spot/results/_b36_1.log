@@ -1,0 +1,7 @@
+    [guard] BASE == engine defaults for all 26 v33+v34 knobs
+
+##### LIVE ENGINE combo=S1_COIN_GUARD_BOS W1 2023-10-01..2024-03-31 #####
+    cfg: ALLOC_MODE=slot  SMT_BRAIN=True  SMT_GATE=prefer  KILLZONE_MODE=exclude  KILLZONE_DOW=(6,)
+    n=181 totR=227.8481 end=$158.024 DD=-14.064% (539s)
+    coins: {"ADAUSDT_5m": [29, 18.537, 2.887], "AVAXUSDT_5m": [24, 51.437, 10.369], "BNBUSDT_5m": [27, 91.093, 41.406], "BTCUSDT_5m": [11, -7.79, -4.433], "ETHUSDT_5m": [18, -12.874, -7.182], "LINKUSDT_5m": [28, 30.982, 5.871], "SOLUSDT_5m": [23, 9.666, 13.757], "XRPUSDT_5m": [21, 46.799, -4.651]}
+    counters: {"v35_cooldown_armed": 78, "v35_cooldown_skip": 107, "v35_cooldown_expired": 6, "v35_cooldown_lifted_by_bos": 66, "slot_full_rejects": 142, "portfolio_slots_full": 142, "v31_struct_trail": 1, "trail_4h_structural": 40, "v34_deploy_full_ok": 237}

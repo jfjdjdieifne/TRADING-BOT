@@ -1,0 +1,137 @@
+
+########## LIVE ENGINE · combo=M3a_fill020 · 2021-01-01..2026-10-31 ##########
+    config: BE_STREAK_MODE=reset  SHIELD_RULE_V30=MID+BOS  ENTRY_BRAIN=sniper  CISD_NEEDS_GREEN_BODY=True  RISK_FLOOR_PCT=0.2  SIZING=allcash  DOLLAR_R_PCT=0.3267  CISD_TIER3_EXEMPT=False  CISD_IGNORE_NOCHASE=False  ABSORB_MAX_BARS=6  VIGILANCE_SCOPE=none  RISK_FLOOR_STAGE=fill
+[  M3a_fill020] n= 199   46W/ 50BE/103L  WR= 30.87%  minWin=3.0  >=4R= 12  maxR= 19.38  totR=   64.49
+                net= +39.17% ($278.33)  PF=1.43  maxDD=-13.02%  streak=3/15  yearly={'2021': 79, '2022': 60, '2023': 12, '2024': 10, '2025': 11, '2026': 27}
+                medRisk%=0.3965  share(fee>=1R)=0.0%  CISD arm/reclaim/fill=0/0/0  calm=0  shield_armed=65  sacred(seam/cisd)=220/0
+                asserts A1..A5 = FPPPF  -> 3/5
+                ASSERT1 FAILED
+                ASSERT2 PASSED
+                ASSERT3 PASSED
+                ASSERT4 PASSED
+                ASSERT5 FAILED
+
+########## LIVE ENGINE · combo=M3a_fill030 · 2021-01-01..2026-10-31 ##########
+    config: BE_STREAK_MODE=reset  SHIELD_RULE_V30=MID+BOS  ENTRY_BRAIN=sniper  CISD_NEEDS_GREEN_BODY=True  RISK_FLOOR_PCT=0.3  SIZING=allcash  DOLLAR_R_PCT=0.3267  CISD_TIER3_EXEMPT=False  CISD_IGNORE_NOCHASE=False  ABSORB_MAX_BARS=6  VIGILANCE_SCOPE=none  RISK_FLOOR_STAGE=fill
+[  M3a_fill030] n= 150   29W/ 37BE/ 84L  WR= 25.66%  minWin=3.0  >=4R=  7  maxR= 19.38  totR=   10.51
+                net=  +6.31% ($212.63)  PF=1.08  maxDD=-13.86%  streak=3/14  yearly={'2021': 62, '2022': 40, '2023': 7, '2024': 8, '2025': 12, '2026': 21}
+                medRisk%=0.5133  share(fee>=1R)=0.0%  CISD arm/reclaim/fill=0/0/0  calm=0  shield_armed=46  sacred(seam/cisd)=163/0
+                asserts A1..A5 = FPPPF  -> 3/5
+                ASSERT1 FAILED
+                ASSERT2 PASSED
+                ASSERT3 PASSED
+                ASSERT4 PASSED
+                ASSERT5 FAILED
+
+########## LIVE ENGINE · combo=M1v_bos_dR · 2021-01-01..2026-10-31 ##########
+    config: BE_STREAK_MODE=decay  SHIELD_RULE_V30=BOS  ENTRY_BRAIN=sniper  CISD_NEEDS_GREEN_BODY=True  RISK_FLOOR_PCT=0.1  SIZING=dollarR  DOLLAR_R_PCT=0.3267  CISD_TIER3_EXEMPT=False  CISD_IGNORE_NOCHASE=False  ABSORB_MAX_BARS=6  VIGILANCE_SCOPE=shield+be  RISK_FLOOR_STAGE=both
+[   M1v_bos_dR] n= 287   39W/126BE/122L  WR= 24.22%  minWin=3.0  >=4R= 11  maxR= 19.38  totR=   61.53
+                net= +25.90% ($251.8)  PF=1.7  maxDD=-5.87%  streak=3/21  yearly={'2021': 98, '2022': 79, '2023': 27, '2024': 31, '2025': 26, '2026': 26}
+                medRisk%=0.3659  share(fee>=1R)=9.4%  CISD arm/reclaim/fill=0/0/0  calm=0  shield_armed=72  sacred(seam/cisd)=306/0
+                asserts A1..A5 = FPPPP  -> 4/5
+                ASSERT1 FAILED
+                ASSERT2 PASSED
+                ASSERT3 PASSED
+                ASSERT4 PASSED
+                ASSERT5 PASSED
+
+########## LIVE ENGINE · combo=M1_hold_dR · 2021-01-01..2026-10-31 ##########
+    config: BE_STREAK_MODE=hold  SHIELD_RULE_V30=MID+BOS  ENTRY_BRAIN=sniper  CISD_NEEDS_GREEN_BODY=True  RISK_FLOOR_PCT=0.1  SIZING=dollarR  DOLLAR_R_PCT=0.3267  CISD_TIER3_EXEMPT=False  CISD_IGNORE_NOCHASE=False  ABSORB_MAX_BARS=6  VIGILANCE_SCOPE=none  RISK_FLOOR_STAGE=both
+!! L4 VIOLATION: streak of 4 losses > 3
+[   M1_hold_dR] n= 183   37W/101BE/ 45L  WR= 45.12%  minWin=3.0  >=4R= 12  maxR= 19.38  totR=  106.27
+                net= +39.00% ($278.0)  PF=2.72  maxDD=-4.35%  streak=4/4  yearly={'2021': 81, '2022': 52, '2023': 9, '2024': 12, '2025': 10, '2026': 19}
+                medRisk%=0.3856  share(fee>=1R)=4.4%  CISD arm/reclaim/fill=0/0/0  calm=0  shield_armed=36  sacred(seam/cisd)=205/0
+                asserts A1..A5 = FPPFF  -> 2/5
+                ASSERT1 FAILED
+                ASSERT2 PASSED
+                ASSERT3 PASSED
+                ASSERT4 FAILED
+                ASSERT5 FAILED
+
+########## LIVE ENGINE · combo=M1_ab_bos · 2021-01-01..2026-10-31 ##########
+    config: BE_STREAK_MODE=hold  SHIELD_RULE_V30=BOS  ENTRY_BRAIN=sniper  CISD_NEEDS_GREEN_BODY=True  RISK_FLOOR_PCT=0.1  SIZING=allcash  DOLLAR_R_PCT=0.3267  CISD_TIER3_EXEMPT=False  CISD_IGNORE_NOCHASE=False  ABSORB_MAX_BARS=6  VIGILANCE_SCOPE=none  RISK_FLOOR_STAGE=both
+[    M1_ab_bos] n= 193   32W/116BE/ 45L  WR= 41.56%  minWin=3.0  >=4R= 10  maxR= 19.38  totR=   83.01
+                net= +56.15% ($312.31)  PF=2.48  maxDD=-5.38%  streak=3/3  yearly={'2021': 84, '2022': 54, '2023': 9, '2024': 12, '2025': 10, '2026': 24}
+                medRisk%=0.3845  share(fee>=1R)=5.7%  CISD arm/reclaim/fill=0/0/0  calm=0  shield_armed=62  sacred(seam/cisd)=222/0
+                asserts A1..A5 = FPPPF  -> 3/5
+                ASSERT1 FAILED
+                ASSERT2 PASSED
+                ASSERT3 PASSED
+                ASSERT4 PASSED
+                ASSERT5 FAILED
+
+=============== v30 LIVE COMPARISON TABLE ===============
+        combo    n    W   BE    L     WR%  minW  >=4R    maxR     totR     net%     PF  maxDD%  strk  ymin  5as
+          v25  206   51   48    0   32.30   3.0    13   19.38     0.00   +42.14   1.43  -17.43     3     -    -
+          v27  297   70   66    0   30.30   3.0    18   19.38     0.00   +31.90   1.26  -14.41     3     -    -
+  M3a_fill020  199   46   50  103   30.87   3.0    12   19.38    64.49   +39.17   1.43  -13.02     3    10  3/5
+  M3a_fill030  150   29   37   84   25.66   3.0     7   19.38    10.51    +6.31   1.08  -13.86     3     7  3/5
+   M1v_bos_dR  287   39  126  122   24.22   3.0    11   19.38    61.53   +25.90   1.70   -5.87     3    26  4/5
+   M1_hold_dR  183   37  101   45   45.12   3.0    12   19.38   106.27   +39.00   2.72   -4.35     4     9  2/5
+    M1_ab_bos  193   32  116   45   41.56   3.0    10   19.38    83.01   +56.15   2.48   -5.38     3     9  3/5
+=========================================================
+    M3a_fill020 yearly: {'2021': 79, '2022': 60, '2023': 12, '2024': 10, '2025': 11, '2026': 27}
+    M3a_fill030 yearly: {'2021': 62, '2022': 40, '2023': 7, '2024': 8, '2025': 12, '2026': 21}
+     M1v_bos_dR yearly: {'2021': 98, '2022': 79, '2023': 27, '2024': 31, '2025': 26, '2026': 26}
+     M1_hold_dR yearly: {'2021': 81, '2022': 52, '2023': 9, '2024': 12, '2025': 10, '2026': 19}
+      M1_ab_bos yearly: {'2021': 84, '2022': 54, '2023': 9, '2024': 12, '2025': 10, '2026': 24}
+
+=== DIAG M3a_fill020: matched 179 of v27's 297 trades on entry_time (v30 book has 199) ===
+class_30  BE  LOSS  WIN
+class_27               
+BE        45     3    1
+LOSS       3    89    0
+WIN        0     0   38
+    v27 LOSS  n= 92 -> BE:3  LOSS:89
+    v27 BE    n= 49 -> BE:45  LOSS:3  WIN:1
+    v27 WIN   n= 38 -> WIN:38
+    totR matched: v27 46.32 -> v30 48.84
+    net$ matched: v27 66.54 -> v30 72.79
+
+=== DIAG M3a_fill030: matched 113 of v27's 297 trades on entry_time (v30 book has 150) ===
+class_30  BE  LOSS  WIN
+class_27               
+BE        24     4    1
+LOSS       4    56    0
+WIN        1     0   23
+    v27 LOSS  n= 60 -> BE:4  LOSS:56
+    v27 BE    n= 29 -> BE:24  LOSS:4  WIN:1
+    v27 WIN   n= 24 -> BE:1  WIN:23
+    totR matched: v27 22.86 -> v30 22.52
+    net$ matched: v27 31.28 -> v30 31.58
+
+=== DIAG M1v_bos_dR: matched 175 of v27's 297 trades on entry_time (v30 book has 287) ===
+class_30  BE  LOSS  WIN
+class_27               
+BE        34     5    2
+LOSS      35    55    0
+WIN       11     6   27
+    v27 LOSS  n= 90 -> BE:35  LOSS:55
+    v27 BE    n= 41 -> BE:34  LOSS:5  WIN:2
+    v27 WIN   n= 44 -> BE:11  LOSS:6  WIN:27
+    totR matched: v27 49.45 -> v30 79.20
+    net$ matched: v27 96.49 -> v30 59.37
+
+=== DIAG M1_hold_dR: matched 123 of v27's 297 trades on entry_time (v30 book has 183) ===
+class_30  BE  LOSS  WIN
+class_27               
+BE        35     0    0
+LOSS      17    39    0
+WIN        6     0   26
+    v27 LOSS  n= 56 -> BE:17  LOSS:39
+    v27 BE    n= 35 -> BE:35
+    v27 WIN   n= 32 -> BE:6  WIN:26
+    totR matched: v27 66.95 -> v30 71.30
+    net$ matched: v27 74.54 -> v30 51.62
+
+=== DIAG M1_ab_bos: matched 124 of v27's 297 trades on entry_time (v30 book has 193) ===
+class_30  BE  LOSS  WIN
+class_27               
+BE        34     0    0
+LOSS      25    33    0
+WIN       10     0   22
+    v27 LOSS  n= 58 -> BE:25  LOSS:33
+    v27 BE    n= 34 -> BE:34
+    v27 WIN   n= 32 -> BE:10  WIN:22
+    totR matched: v27 61.69 -> v30 65.17
+    net$ matched: v27 73.12 -> v30 88.46

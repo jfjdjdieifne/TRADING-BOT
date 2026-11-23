@@ -1,0 +1,742 @@
+{
+  "evaluation_window": {
+    "start": "2020-02-01 00:00:00+00:00",
+    "end": "2026-11-01 00:00:00+00:00",
+    "months": 81
+  },
+  "portfolios_1x": {
+    "V8_Global_1Pos": {
+      "n": 791,
+      "wr_pct": 38.05,
+      "net_r": 325.36,
+      "avg_r_per_month": 4.02,
+      "median_r_per_month": 2.21,
+      "p75_r_per_month": 7.74,
+      "p90_r_per_month": 14.97,
+      "best_month_r": 28.3,
+      "worst_month_r": -8.26,
+      "positive_months": 52,
+      "negative_months": 23,
+      "months_ge_10r": 14,
+      "months_ge_15r": 8,
+      "months_ge_20r": 4,
+      "pf": 1.637,
+      "max_dd_r": 20.32,
+      "t_stat": 4.68,
+      "positive_years": 7,
+      "total_years": 7,
+      "yearly_r": {
+        "2020": 71.98,
+        "2021": 15.76,
+        "2022": 15.93,
+        "2023": 73.07,
+        "2024": 56.64,
+        "2025": 53.87,
+        "2026": 38.1
+      },
+      "compound_100_1pct": {
+        "start_capital": 100.0,
+        "risk_pct": 1.0,
+        "compound": true,
+        "final_equity": 2044.22,
+        "total_return_pct": 1944.2,
+        "max_dd_pct": 18.89,
+        "yearly_equity": {
+          "2020": 184.88,
+          "2021": 225.46,
+          "2022": 264.5,
+          "2023": 521.71,
+          "2024": 840.69,
+          "2025": 1452.32,
+          "2026": 2044.22
+        }
+      },
+      "compound_100_1_5pct": {
+        "start_capital": 100.0,
+        "risk_pct": 1.5,
+        "compound": true,
+        "final_equity": 7839.18,
+        "total_return_pct": 7739.2,
+        "max_dd_pct": 27.28,
+        "yearly_equity": {
+          "2020": 245.22,
+          "2021": 325.83,
+          "2022": 408.19,
+          "2023": 1099.12,
+          "2024": 2181.4,
+          "2025": 4823.37,
+          "2026": 7839.18
+        }
+      },
+      "compound_100_2pct": {
+        "start_capital": 100.0,
+        "risk_pct": 2.0,
+        "compound": true,
+        "final_equity": 27188.28,
+        "total_return_pct": 27088.3,
+        "max_dd_pct": 35.0,
+        "yearly_equity": {
+          "2020": 320.58,
+          "2021": 460.11,
+          "2022": 609.89,
+          "2023": 2203.75,
+          "2024": 5289.16,
+          "2025": 14727.1,
+          "2026": 27188.28
+        }
+      }
+    },
+    "V8_3Asset_1PosEach": {
+      "n": 1321,
+      "wr_pct": 34.22,
+      "net_r": 515.75,
+      "avg_r_per_month": 6.37,
+      "median_r_per_month": 5.2,
+      "p75_r_per_month": 13.18,
+      "p90_r_per_month": 20.69,
+      "best_month_r": 31.44,
+      "worst_month_r": -11.31,
+      "positive_months": 54,
+      "negative_months": 27,
+      "months_ge_10r": 27,
+      "months_ge_15r": 17,
+      "months_ge_20r": 10,
+      "pf": 1.57,
+      "max_dd_r": 26.06,
+      "t_stat": 5.22,
+      "positive_years": 7,
+      "total_years": 7,
+      "yearly_r": {
+        "2020": 169.62,
+        "2021": 38.98,
+        "2022": 28.8,
+        "2023": 52.87,
+        "2024": 63.03,
+        "2025": 84.82,
+        "2026": 77.64
+      },
+      "compound_100_1pct": {
+        "start_capital": 100.0,
+        "risk_pct": 1.0,
+        "compound": true,
+        "final_equity": 10851.63,
+        "total_return_pct": 10751.6,
+        "max_dd_pct": 23.32,
+        "yearly_equity": {
+          "2020": 400.8,
+          "2021": 593.1,
+          "2022": 890.32,
+          "2023": 1410.71,
+          "2024": 2366.88,
+          "2025": 5426.09,
+          "2026": 10851.63
+        }
+      },
+      "compound_100_1_5pct": {
+        "start_capital": 100.0,
+        "risk_pct": 1.5,
+        "compound": true,
+        "final_equity": 81566.07,
+        "total_return_pct": 81466.1,
+        "max_dd_pct": 33.34,
+        "yearly_equity": {
+          "2020": 749.17,
+          "2021": 1305.49,
+          "2022": 2316.1,
+          "2023": 4436.65,
+          "2024": 9201.02,
+          "2025": 30324.28,
+          "2026": 81566.07
+        }
+      },
+      "compound_100_2pct": {
+        "start_capital": 100.0,
+        "risk_pct": 2.0,
+        "compound": true,
+        "final_equity": 503286.3,
+        "total_return_pct": 503186.3,
+        "max_dd_pct": 42.57,
+        "yearly_equity": {
+          "2020": 1344.37,
+          "2021": 2704.25,
+          "2022": 5546.43,
+          "2023": 12532.42,
+          "2024": 31221.07,
+          "2025": 143351.3,
+          "2026": 503286.3
+        }
+      }
+    },
+    "V8_XAU_1Pos": {
+      "n": 804,
+      "wr_pct": 37.31,
+      "net_r": 254.02,
+      "avg_r_per_month": 3.14,
+      "median_r_per_month": 3.03,
+      "p75_r_per_month": 5.95,
+      "p90_r_per_month": 10.39,
+      "best_month_r": 21.06,
+      "worst_month_r": -7.63,
+      "positive_months": 56,
+      "negative_months": 25,
+      "months_ge_10r": 11,
+      "months_ge_15r": 5,
+      "months_ge_20r": 1,
+      "pf": 1.484,
+      "max_dd_r": 22.02,
+      "t_stat": 4.31,
+      "positive_years": 7,
+      "total_years": 7,
+      "yearly_r": {
+        "2020": 49.09,
+        "2021": 16.65,
+        "2022": 25.06,
+        "2023": 38.23,
+        "2024": 35.21,
+        "2025": 45.6,
+        "2026": 44.18
+      },
+      "compound_100_1pct": {
+        "start_capital": 100.0,
+        "risk_pct": 1.0,
+        "compound": true,
+        "final_equity": 1067.61,
+        "total_return_pct": 967.6,
+        "max_dd_pct": 20.19,
+        "yearly_equity": {
+          "2020": 148.59,
+          "2021": 182.92,
+          "2022": 235.33,
+          "2023": 333.83,
+          "2024": 442.49,
+          "2025": 713.7,
+          "2026": 1067.61
+        }
+      },
+      "compound_100_1_5pct": {
+        "start_capital": 100.0,
+        "risk_pct": 1.5,
+        "compound": true,
+        "final_equity": 3083.01,
+        "total_return_pct": 2983.0,
+        "max_dd_pct": 28.98,
+        "yearly_equity": {
+          "2020": 177.78,
+          "2021": 239.66,
+          "2022": 345.02,
+          "2023": 573.66,
+          "2024": 859.91,
+          "2025": 1731.23,
+          "2026": 3083.01
+        }
+      },
+      "compound_100_2pct": {
+        "start_capital": 100.0,
+        "risk_pct": 2.0,
+        "compound": true,
+        "final_equity": 8235.95,
+        "total_return_pct": 8135.9,
+        "max_dd_pct": 36.97,
+        "yearly_equity": {
+          "2020": 210.24,
+          "2021": 307.79,
+          "2022": 491.48,
+          "2023": 948.08,
+          "2024": 1588.8,
+          "2025": 3948.45,
+          "2026": 8235.95
+        }
+      }
+    },
+    "V8_NSX_1Pos": {
+      "n": 383,
+      "wr_pct": 29.24,
+      "net_r": 171.12,
+      "avg_r_per_month": 2.11,
+      "median_r_per_month": -1.05,
+      "p75_r_per_month": 7.8,
+      "p90_r_per_month": 14.01,
+      "best_month_r": 22.13,
+      "worst_month_r": -9.56,
+      "positive_months": 31,
+      "negative_months": 48,
+      "months_ge_10r": 14,
+      "months_ge_15r": 7,
+      "months_ge_20r": 1,
+      "pf": 1.61,
+      "max_dd_r": 25.24,
+      "t_stat": 2.8,
+      "positive_years": 7,
+      "total_years": 7,
+      "yearly_r": {
+        "2020": 69.22,
+        "2021": 17.05,
+        "2022": 14.37,
+        "2023": 12.4,
+        "2024": 9.64,
+        "2025": 17.93,
+        "2026": 30.51
+      },
+      "compound_100_1pct": {
+        "start_capital": 100.0,
+        "risk_pct": 1.0,
+        "compound": true,
+        "final_equity": 462.23,
+        "total_return_pct": 362.2,
+        "max_dd_pct": 22.88,
+        "yearly_equity": {
+          "2020": 193.36,
+          "2021": 223.05,
+          "2022": 251.9,
+          "2023": 278.37,
+          "2024": 300.2,
+          "2025": 348.61,
+          "2026": 462.23
+        }
+      },
+      "compound_100_1_5pct": {
+        "start_capital": 100.0,
+        "risk_pct": 1.5,
+        "compound": true,
+        "final_equity": 877.2,
+        "total_return_pct": 777.2,
+        "max_dd_pct": 32.72,
+        "yearly_equity": {
+          "2020": 261.03,
+          "2021": 319.5,
+          "2022": 377.63,
+          "2023": 431.47,
+          "2024": 476.17,
+          "2025": 583.71,
+          "2026": 877.2
+        }
+      },
+      "compound_100_2pct": {
+        "start_capital": 100.0,
+        "risk_pct": 2.0,
+        "compound": true,
+        "final_equity": 1544.18,
+        "total_return_pct": 1444.2,
+        "max_dd_pct": 41.55,
+        "yearly_equity": {
+          "2020": 346.18,
+          "2021": 446.33,
+          "2022": 547.06,
+          "2023": 639.85,
+          "2024": 716.14,
+          "2025": 915.3,
+          "2026": 1544.18
+        }
+      }
+    }
+  },
+  "portfolios_2x_stress": {
+    "V8_Global_1Pos_2x": {
+      "n": 791,
+      "wr_pct": 38.05,
+      "net_r": 291.43,
+      "avg_r_per_month": 3.6,
+      "median_r_per_month": 1.77,
+      "p75_r_per_month": 7.48,
+      "p90_r_per_month": 14.3,
+      "best_month_r": 27.58,
+      "worst_month_r": -8.66,
+      "positive_months": 48,
+      "negative_months": 27,
+      "months_ge_10r": 12,
+      "months_ge_15r": 7,
+      "months_ge_20r": 4,
+      "pf": 1.548,
+      "max_dd_r": 23.5,
+      "t_stat": 4.19,
+      "positive_years": 7,
+      "total_years": 7,
+      "yearly_r": {
+        "2020": 69.89,
+        "2021": 10.31,
+        "2022": 10.07,
+        "2023": 66.34,
+        "2024": 49.74,
+        "2025": 49.89,
+        "2026": 35.18
+      },
+      "compound_100_1pct": {
+        "start_capital": 100.0,
+        "risk_pct": 1.0,
+        "compound": true,
+        "final_equity": 1457.31,
+        "total_return_pct": 1357.3,
+        "max_dd_pct": 21.44,
+        "yearly_equity": {
+          "2020": 181.15,
+          "2021": 209.29,
+          "2022": 231.54,
+          "2023": 426.88,
+          "2024": 642.31,
+          "2025": 1066.06,
+          "2026": 1457.31
+        }
+      },
+      "compound_100_1_5pct": {
+        "start_capital": 100.0,
+        "risk_pct": 1.5,
+        "compound": true,
+        "final_equity": 4720.54,
+        "total_return_pct": 4620.5,
+        "max_dd_pct": 30.69,
+        "yearly_equity": {
+          "2020": 237.87,
+          "2021": 291.48,
+          "2022": 334.37,
+          "2023": 813.75,
+          "2024": 1457.41,
+          "2025": 3034.83,
+          "2026": 4720.54
+        }
+      },
+      "compound_100_2pct": {
+        "start_capital": 100.0,
+        "risk_pct": 2.0,
+        "compound": true,
+        "final_equity": 13830.92,
+        "total_return_pct": 13730.9,
+        "max_dd_pct": 39.03,
+        "yearly_equity": {
+          "2020": 307.88,
+          "2021": 396.69,
+          "2022": 467.54,
+          "2023": 1476.53,
+          "2024": 3090.57,
+          "2025": 7943.99,
+          "2026": 13830.92
+        }
+      }
+    },
+    "V8_3Asset_1PosEach_2x": {
+      "n": 1321,
+      "wr_pct": 34.22,
+      "net_r": 459.16,
+      "avg_r_per_month": 5.67,
+      "median_r_per_month": 4.53,
+      "p75_r_per_month": 12.79,
+      "p90_r_per_month": 20.11,
+      "best_month_r": 30.88,
+      "worst_month_r": -11.99,
+      "positive_months": 54,
+      "negative_months": 27,
+      "months_ge_10r": 27,
+      "months_ge_15r": 15,
+      "months_ge_20r": 9,
+      "pf": 1.487,
+      "max_dd_r": 29.9,
+      "t_stat": 4.65,
+      "positive_years": 7,
+      "total_years": 7,
+      "yearly_r": {
+        "2020": 162.26,
+        "2021": 30.96,
+        "2022": 20.8,
+        "2023": 40.9,
+        "2024": 52.58,
+        "2025": 78.14,
+        "2026": 73.52
+      },
+      "compound_100_1pct": {
+        "start_capital": 100.0,
+        "risk_pct": 1.0,
+        "compound": true,
+        "final_equity": 6171.36,
+        "total_return_pct": 6071.4,
+        "max_dd_pct": 26.99,
+        "yearly_equity": {
+          "2020": 372.98,
+          "2021": 509.37,
+          "2022": 705.55,
+          "2023": 991.61,
+          "2024": 1499.15,
+          "2025": 3215.4,
+          "2026": 6171.36
+        }
+      },
+      "compound_100_1_5pct": {
+        "start_capital": 100.0,
+        "risk_pct": 1.5,
+        "compound": true,
+        "final_equity": 35006.65,
+        "total_return_pct": 34906.7,
+        "max_dd_pct": 38.32,
+        "yearly_equity": {
+          "2020": 672.74,
+          "2021": 1039.45,
+          "2022": 1634.51,
+          "2023": 2615.73,
+          "2024": 4640.14,
+          "2025": 13840.88,
+          "2026": 35006.65
+        }
+      },
+      "compound_100_2pct": {
+        "start_capital": 100.0,
+        "risk_pct": 2.0,
+        "compound": true,
+        "final_equity": 163033.74,
+        "total_return_pct": 162933.7,
+        "max_dd_pct": 48.27,
+        "yearly_equity": {
+          "2020": 1165.13,
+          "2021": 1996.56,
+          "2022": 3486.11,
+          "2023": 6197.91,
+          "2024": 12536.88,
+          "2025": 50401.73,
+          "2026": 163033.74
+        }
+      }
+    }
+  },
+  "sleeves_1x": {
+    "NSX_AMD_1D": {
+      "n": 256,
+      "wr_pct": 41.02,
+      "net_r": 79.06,
+      "avg_r_per_month": 0.98,
+      "median_r_per_month": 0.0,
+      "p75_r_per_month": 2.06,
+      "p90_r_per_month": 5.63,
+      "best_month_r": 22.13,
+      "worst_month_r": -4.2,
+      "positive_months": 39,
+      "negative_months": 40,
+      "months_ge_10r": 3,
+      "months_ge_15r": 1,
+      "months_ge_20r": 1,
+      "pf": 1.506,
+      "max_dd_r": 13.14,
+      "t_stat": 2.28,
+      "positive_years": 6,
+      "total_years": 7,
+      "yearly_r": {
+        "2020": 2.34,
+        "2021": 7.81,
+        "2022": -3.65,
+        "2023": 32.6,
+        "2024": 11.02,
+        "2025": 8.89,
+        "2026": 20.04
+      },
+      "compound_100_1pct": {
+        "start_capital": 100.0,
+        "risk_pct": 1.0,
+        "compound": true,
+        "final_equity": 207.96,
+        "total_return_pct": 108.0,
+        "max_dd_pct": 12.53,
+        "yearly_equity": {
+          "2020": 101.79,
+          "2021": 109.49,
+          "2022": 105.2,
+          "2023": 142.98,
+          "2024": 158.55,
+          "2025": 171.45,
+          "2026": 207.96
+        }
+      },
+      "compound_100_1_5pct": {
+        "start_capital": 100.0,
+        "risk_pct": 1.5,
+        "compound": true,
+        "final_equity": 287.73,
+        "total_return_pct": 187.7,
+        "max_dd_pct": 18.34,
+        "yearly_equity": {
+          "2020": 102.27,
+          "2021": 113.67,
+          "2022": 106.77,
+          "2023": 166.97,
+          "2024": 193.99,
+          "2025": 216.54,
+          "2026": 287.73
+        }
+      },
+      "compound_100_2pct": {
+        "start_capital": 100.0,
+        "risk_pct": 2.0,
+        "compound": true,
+        "final_equity": 388.0,
+        "total_return_pct": 288.0,
+        "max_dd_pct": 23.85,
+        "yearly_equity": {
+          "2020": 102.48,
+          "2021": 117.42,
+          "2022": 107.64,
+          "2023": 192.15,
+          "2024": 233.16,
+          "2025": 267.41,
+          "2026": 388.0
+        }
+      }
+    },
+    "NSX_1H1m_10R_09h": {
+      "n": 203,
+      "wr_pct": 13.79,
+      "net_r": 97.78,
+      "avg_r_per_month": 1.21,
+      "median_r_per_month": -1.04,
+      "p75_r_per_month": 6.94,
+      "p90_r_per_month": 8.95,
+      "best_month_r": 18.93,
+      "worst_month_r": -7.37,
+      "positive_months": 22,
+      "negative_months": 52,
+      "months_ge_10r": 6,
+      "months_ge_15r": 6,
+      "months_ge_20r": 0,
+      "pf": 1.54,
+      "max_dd_r": 41.62,
+      "t_stat": 1.8,
+      "positive_years": 5,
+      "total_years": 7,
+      "yearly_r": {
+        "2020": 59.92,
+        "2021": 6.97,
+        "2022": 11.84,
+        "2023": -7.1,
+        "2024": -1.4,
+        "2025": 6.01,
+        "2026": 21.54
+      },
+      "compound_100_1pct": {
+        "start_capital": 100.0,
+        "risk_pct": 1.0,
+        "compound": true,
+        "final_equity": 231.16,
+        "total_return_pct": 131.2,
+        "max_dd_pct": 34.19,
+        "yearly_equity": {
+          "2020": 177.05,
+          "2021": 185.07,
+          "2022": 204.18,
+          "2023": 188.18,
+          "2024": 182.68,
+          "2025": 190.07,
+          "2026": 231.16
+        }
+      },
+      "compound_100_1_5pct": {
+        "start_capital": 100.0,
+        "risk_pct": 1.5,
+        "compound": true,
+        "final_equity": 319.21,
+        "total_return_pct": 219.2,
+        "max_dd_pct": 46.7,
+        "yearly_equity": {
+          "2020": 229.5,
+          "2021": 242.7,
+          "2022": 277.39,
+          "2023": 243.61,
+          "2024": 230.51,
+          "2025": 241.23,
+          "2026": 319.21
+        }
+      },
+      "compound_100_2pct": {
+        "start_capital": 100.0,
+        "risk_pct": 2.0,
+        "compound": true,
+        "final_equity": 416.16,
+        "total_return_pct": 316.2,
+        "max_dd_pct": 56.88,
+        "yearly_equity": {
+          "2020": 292.9,
+          "2021": 311.43,
+          "2022": 365.69,
+          "2023": 304.68,
+          "2024": 279.18,
+          "2025": 291.38,
+          "2026": 416.16
+        }
+      }
+    },
+    "BTC_15R_BE_09h": {
+      "n": 134,
+      "wr_pct": 29.85,
+      "net_r": 90.61,
+      "avg_r_per_month": 1.12,
+      "median_r_per_month": -0.16,
+      "p75_r_per_month": 0.0,
+      "p90_r_per_month": 13.86,
+      "best_month_r": 14.94,
+      "worst_month_r": -3.44,
+      "positive_months": 18,
+      "negative_months": 44,
+      "months_ge_10r": 11,
+      "months_ge_15r": 0,
+      "months_ge_20r": 0,
+      "pf": 1.906,
+      "max_dd_r": 21.54,
+      "t_stat": 1.8,
+      "positive_years": 6,
+      "total_years": 7,
+      "yearly_r": {
+        "2020": 51.32,
+        "2021": 5.27,
+        "2022": -10.63,
+        "2023": 2.23,
+        "2024": 18.17,
+        "2025": 21.3,
+        "2026": 2.95
+      },
+      "compound_100_1pct": {
+        "start_capital": 100.0,
+        "risk_pct": 1.0,
+        "compound": true,
+        "final_equity": 219.9,
+        "total_return_pct": 119.9,
+        "max_dd_pct": 19.52,
+        "yearly_equity": {
+          "2020": 139.5,
+          "2021": 145.37,
+          "2022": 150.19,
+          "2023": 151.81,
+          "2024": 178.18,
+          "2025": 218.09,
+          "2026": 219.9
+        }
+      },
+      "compound_100_1_5pct": {
+        "start_capital": 100.0,
+        "risk_pct": 1.5,
+        "compound": true,
+        "final_equity": 301.6,
+        "total_return_pct": 201.6,
+        "max_dd_pct": 27.89,
+        "yearly_equity": {
+          "2020": 161.44,
+          "2021": 170.49,
+          "2022": 177.76,
+          "2023": 179.25,
+          "2024": 224.71,
+          "2025": 300.08,
+          "2026": 301.6
+        }
+      },
+      "compound_100_2pct": {
+        "start_capital": 100.0,
+        "risk_pct": 2.0,
+        "compound": true,
+        "final_equity": 395.73,
+        "total_return_pct": 295.7,
+        "max_dd_pct": 35.46,
+        "yearly_equity": {
+          "2020": 184.71,
+          "2021": 196.85,
+          "2022": 206.29,
+          "2023": 206.59,
+          "2024": 274.4,
+          "2025": 396.65,
+          "2026": 395.73
+        }
+      }
+    }
+  }
+}
