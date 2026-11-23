@@ -1,0 +1,4 @@
+
+##### v37 combo=RATCHET_2R W1 2023-10-01..2024-03-31 #####
+    overrides: {"POST_3R_RATCHET": "2R"}
+    n=156 end=$166.7873 PF=1.84 DD=-12.782% mo+=4/6 (717s)

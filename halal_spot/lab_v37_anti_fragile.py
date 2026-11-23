@@ -181,11 +181,18 @@ def drive(combo: str, win: str, save: bool = True) -> dict:
               f"PF={res.get('pf')} DD={res.get('maxDD_pct')}% "
               f"mo+={res.get('months_pos')}/{res.get('months_n')} ({secs:.0f}s)",
               flush=True)
+        # TAG the slip override into the filename. Without this, the
+        # --slip ladder silently overwrote the 0-bps artefacts under the
+        # same name (caught when B0/W1 read $118.82 instead of $158.024).
+        slip = float(S.EXIT_SLIPPAGE_BPS)
+        tag_ = "" if slip == 0 else f"_slip{slip:g}bps"
+        res["exit_slippage_bps"] = slip
         if save:
-            (RESULTS / f"lab_v37_{combo}_{win}.json").write_text(
+            (RESULTS / f"lab_v37_{combo}_{win}{tag_}.json").write_text(
                 json.dumps(res, indent=1, default=str))
             if len(tr):
-                tr.to_csv(RESULTS / f"trades_v37_{combo}_{win}.csv", index=False)
+                tr.to_csv(RESULTS / f"trades_v37_{combo}_{win}{tag_}.csv",
+                          index=False)
     finally:
         _restore(S, pre)
         leak = {k: (v, getattr(S, k)) for k, v in _V37_KNOBS.items()
