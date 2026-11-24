@@ -552,81 +552,6 @@ COOLDOWN_BOS_TF = ""
 #     knob makes the intent explicit and independent of that threshold.
 FIX_BE_COOLDOWN_BUG = False
 
-# ===================================================================== #
-# =====  v38 KNOBS -- ALL DEFAULT OFF. Part 1 measured that four of  ===== #
-# =====  the five do not do what the brief assumed; see the lab.   ===== #
-# ===================================================================== #
-# (1) TRAIL_TF_AFTER_3R -- which lens owns the stop after the +3R lock.
-#     "" = shipped behaviour (4H only, TRAIL_4H_ONLY_AFTER_LOCK).
-#     v38 audit found the 4H lens breaches on 402 of 424 locked trades
-#     (95%), because a 4H box needs 12h to confirm and most trades die
-#     first -- while a confirmed 1H/30m swing low existed above entry on
-#     ~100% of locked trades. This knob lets those lenses carry the stop.
-TRAIL_TF_AFTER_3R = ""       # "" | "1h" | "1h30m" | "1h30m15m"
-TRAIL_AFTER_3R_MIN_PCT = 0.0   # only trail once the coin is this % up
-
-# (2) DOL_TARGET_LOCK -- when price reaches an opposing draw of liquidity
-#     (1H/4H RedBox_BSL above entry, or the 4H PurpleBox top) with the
-#     trade already locked AND up >= DOL_LOCK_MIN_PCT, park the stop at
-#     DOL_LOCK_KEEP of the realised gain instead of letting a rejection
-#     run it all the way back to the lock line.
-DOL_TARGET_LOCK = False
-DOL_LOCK_MIN_PCT = 2.0       # real spot % the coin must be up
-DOL_LOCK_KEEP = 0.75         # keep this fraction of the gain
-
-# (3) ANTI_SHAKEOUT_BE -- require a real spot % displacement before the
-#     break-even line may be armed. Part 1 Q2 measured that trades armed
-#     at 1.7-2.0R on a median 0.6-0.8% wiggle, were scratched, and then
-#     the coin never revisited the stop and ran >= +2%.
-ANTI_SHAKEOUT_BE = False
-MIN_BE_DISPLACEMENT_PCT = 1.2
-
-# (4) MIN_DOL_ROOM_PCT -- refuse entries whose structural room to the next
-#     draw is below this. NOTE: Part 1 Q4 measured the OPPOSITE of the
-#     brief's premise -- the smallest-room bucket was the most profitable,
-#     so a positive value here is expected to LOSE money. Kept toggleable
-#     so the claim is falsifiable in the engine rather than by argument.
-MIN_DOL_ROOM_PCT = 0.0
-
-# (5) ADAPT_4H_RATCHET -- in bearish 4H flow use RATCHET_2R to harvest a
-#     counter-trend bounce; in bullish 4H flow leave B0 alone so the bull
-#     runners are not cut.
-ADAPT_4H_RATCHET = False
-
-# ===================================================================== #
-# =====  v39 KNOBS -- ALL DEFAULT OFF. The v39 audit found that three  ===== #
-# =====  of the four "golden sniper" discriminators do not work, and  ===== #
-# =====  wired only the one that did. See REPORT_AR_v39.md.            ===== #
-# ===================================================================== #
-# (1) MIN_BOX_AGE_BARS -- refuse a fill while the BOS that set the trade
-#     up is younger than this many exec bars. The v39 autopsy found the
-#     GOLDEN rate is 7.8% in the [0,6) bar bucket and 22.8% in [12,24):
-#     a setup that fires within minutes of its own displacement break is
-#     mostly noise, while one that took half a day to pull back into the
-#     zone is mostly real. Causal: entry_idx - bos_idx, both already on
-#     the tape at the fill.
-MIN_BOX_AGE_BARS = 0          # 0 = OFF; 12 was the only arm that won
-
-# (2) TRAIL_ANCHOR -- what the post-lock trail is allowed to raise the stop
-#     to. "" = shipped (BlueBox_SSL bottom only). "FVG" additionally lets a
-#     confirmed post-entry bearish gap's TOP carry the stop. v39 Q2d found
-#     the FVG bucket does NOT separate golden from chaff, so this is
-#     expected to lose -- wired so the claim stays falsifiable.
-TRAIL_ANCHOR = ""             # "" | "fvg"
-
-# (3) HTF_DEMAND_GATE -- refuse fills that are NOT in the 4H (or 1H)
-#     discount zone. v39 Q1b measured 3/5 windows improved; wired to test
-#     whether the engine agrees with the tape arithmetic.
-HTF_DEMAND_GATE = ""          # "" | "4H" | "1H"
-
-# (4) TIME_STOP_R -- scratch a trade that has sat this many exec bars
-#     without ever reaching +R. v39 Q3 found the chaff dies in a MEDIAN of
-#     0.33h and only 0.3-2.3% of trades ever hold >2h without +1R, so the
-#     slot is NOT being blocked and this is expected to be a no-op. Wired
-#     with the highest-confidence measurement behind it.
-TIME_STOP_BARS = 0            # 0 = OFF
-TIME_STOP_R = 1.0
-
 # Which exits pay it: every reason below is a sale into the book (a market
 # order live), so it is charged. END_OF_DATA is bookkeeping and keeps its
 # price. The list is explicit so a new reason cannot be charged by accident.
@@ -637,6 +562,8 @@ EXIT_SLIP_REASONS = (
     "LOCK_FLOOR_STOP", "LOCK_FLOOR_CLOSE", "FLOOR_5M",
     "SHIELD_BE",          # the break-even shield, closed by an order
     "FAST_HARVEST_2R", "STALE_SWAP_EXIT",
+    # ---- v45 brain exits: all are market SELLS, so all pay the slip ----
+    "V45_LADDER_STOP", "V45_STALL_EXIT", "V45_GUARD_STOP",
 )
 
 # =====================================================================
@@ -1022,6 +949,24 @@ MANAGE_5M_WICK   = True    # defend the +3R floor with the 5m WICK from the
                            # at the floor: maxR 19.38 -> 12.84, >=4R 18->6,
                            # totR +43.55 -> -19.77 (results/_m28c in the
                            # v28 report). A3 survives by ONE runner.
+# ---- v45: THE SMART EXIT BRAIN (100% exits only, never a partial) ----- #
+# WHY IT EXISTS: LOCK_MODE="trail" makes the +3R floor a CLOSE rule on the
+# execution frame (5/15/30/60m) while EMERGENCY_WICK_STOP keeps the ORIGINAL
+# stop wick-live underneath it. So a position can print +3x/+4x/+6x on closes
+# and still lose ONE deep 5m wick to the entry stop and book -1.00x. All 99
+# EMERGENCY_STOP trades in the 1,173-trade B0 book are exactly that event
+# (audit_v45_true_multiple_brain.py proves it 99/99). The brain watches the
+# 5m tape for the FIRST time in the champion and lifts the stop into profit.
+#   "off"             -> bit-identical to B0 (the default; nothing runs)
+#   "step_ladder"     -> exec-frame close ratchet: 2x->+1.2x, 2.5x->+2x,
+#                        3x->+2.5x, 4x->+3x, >5x trail at max-1.5x
+#   "stall_or_run"    -> at >=2x, a stall/rejection close exits 100%
+#   "wick_touch_guard"-> 5m HIGH >=2.5x -> floor +1.8x, >=3x -> +2.2x
+# Every level is expressed with px_at_true_X() and is ARM-ONLY: the level is
+# computed from a bar that has CLOSED and can only be tested from the NEXT
+# bar, so no trigger can act on the bar that armed it.
+V45_BRAIN_MODE = "off"
+V45_COST = 0.001              # two-sided 0.10%, the brief's true_X basis
 MANAGE_5M_SHIELD = False   # MEASURED HARMFUL (lab_v27_exact.py): arming
                            # the BE shield on 5m closes drops the winners
                            # from 76 to 58 and the decided WR from 26.03%
@@ -1120,6 +1065,19 @@ class ChartCanvas:
         self.ifvgs = []           # bearish gap killed BY A BODY CLOSE
         self._seen_br = set(); self._seen_ch = set(); self._seen_if = set()
         self.bars: list[tuple] = []          # (o, h, l, c, v)
+        # ---- v45 SPEED: live-only work lists ---------------------- #
+        # _invalidate/observe used to scan EVERY box ever drawn, every bar
+        # (13.7M broken_down_by calls for one month). A box can never come
+        # back from DEAD/BROKEN, so a box that has left ACTIVE can never
+        # match `state == "ACTIVE"` again -- dropping it from the scan is
+        # therefore exact, not an approximation. The PUBLIC lists keep
+        # their dead boxes (readers filter on .state); these five lists
+        # only carry the boxes that can still change state.
+        self._L_blues: list[Box] = []
+        self._L_reds: list[Box] = []
+        self._L_yb: list[Box] = []
+        self._L_ys: list[Box] = []
+        self._L_greens: list[Box] = []
         self.blues: list[Box] = []           # swing-low liquidity
         self.reds: list[Box] = []            # swing-high liquidity
         self.yellows_b: list[Box] = []       # bullish fair-value gaps
@@ -1145,12 +1103,14 @@ class ChartCanvas:
             box = Box(y_bottom=max(mo, mc), y_top=mh, start_idx=i - 1,
                       kind="RED", tf=self.tf, time=time)
             self.reds.append(box)
+            self._L_reds.append(box)
             out.append(box)
         # swing low at i-1
         if ml < min(ho, hc) and ml < min(nh, nc):
             box = y0 = Box(y_bottom=ml, y_top=min(mo, mc), start_idx=i - 1,
                            kind="BLUE", tf=self.tf, time=time)
             self.blues.append(box)
+            self._L_blues.append(box)
             out.append(box)
         return out
 
@@ -1166,11 +1126,13 @@ class ChartCanvas:
             b = Box(y_bottom=c1h, y_top=c3l, start_idx=i,
                     kind="YELLOW_B", tf=self.tf, time=time)
             self.yellows_b.append(b)
+            self._L_yb.append(b)
             out.append(b)
         if c3h < c1l:
             b = Box(y_bottom=c3h, y_top=c1l, start_idx=i,
                     kind="YELLOW_S", tf=self.tf, time=time)
             self.yellows_s.append(b)
+            self._L_ys.append(b)
             out.append(b)
         return out
 
@@ -1213,6 +1175,7 @@ class ChartCanvas:
         assert g.y_bottom <= yellow.y_bottom, "green below yellow (bottom)"
         assert g.y_top <= yellow.y_top, "green below yellow (top)"
         self.greens.append(g)
+        self._L_greens.append(g)
         self.pairs.append((g, yellow))
         base_blue.structural = True   # L4/True-Structural: wave left a gap
         return g
@@ -1235,63 +1198,67 @@ class ChartCanvas:
                               kind="PURPLE", tf=self.tf, time=None)
 
     def _invalidate(self, i: int) -> None:
-        """Mark boxes broken by this bar's CLOSE.
-
-        v38 PERF FIX (measured, not guessed). The profile of a 12-month
-        MOD_Y2 run showed _invalidate at **290 of 818 seconds** with
-        broken_down_by called **266,158,729** times -- 36% of the whole
-        run spent in this one predicate.
-
-        Cause: every bar re-scanned every box, including the hundreds
-        that were already DEAD/BROKEN and could never change again. The
-        per-kind lists are capped at 400 (_prune), so the worst case is
-        ~2,000 boxes x ~1M bars, and because the caps only fill up as the
-        window runs on, the cost per bar GROWS with window length:
-        3 slices of MOD_Y2 summed to 796s, the single 12-month run took
-        6,337s (7.96x for a 3x-longer window).
-
-        Fix: skip boxes that are already terminal. A box can only leave
-        ACTIVE once (the state assignments below only ever write DEAD or
-        BROKEN, never back to ACTIVE), so filtering on ACTIVE is exactly
-        equivalent -- it just stops paying for the dead majority.
-
-        PROOF OF EQUIVALENCE: the state machine cannot resurrect a box,
-        and _prune drops non-ACTIVE blues/yellows/greens anyway, so no
-        ACTIVE box is ever skipped. Verified by re-running B0/W1 and
-        comparing the tape to the pre-fix file to 0.0000000000.
-        """
         _, h, _, c, _ = self.bars[i]
-        for b in self.blues:
-            if b.state == "ACTIVE":
-                if b.y_bottom > c:            # b.broken_down_by(c)
+        # v45 SPEED: iterate the LIVE work lists and drop each box the
+        # moment it leaves ACTIVE (it can never return). Order of the
+        # surviving boxes, and every event they emit, is unchanged.
+        if self._L_blues:
+            keep = []
+            for b in self._L_blues:
+                if b.state == "ACTIVE" and b.broken_down_by(c):
                     b.state = "DEAD"
                     self.chop_events.append({"idx": i, "box": b})
-        for r in self.reds:
-            if r.state == "ACTIVE":
-                if c > r.y_top:               # r.broken_up_by(c)
+                else:
+                    keep.append(b)
+            self._L_blues = keep
+        if self._L_reds:
+            keep = []
+            for r in self._L_reds:
+                if r.state == "ACTIVE" and r.broken_up_by(c):
                     r.state = "BROKEN"
                     self.bos_events.append({"idx": i, "box": r})
-        for y in self.yellows_b:
-            if y.state == "ACTIVE":
-                if y.y_bottom > c:            # y.broken_down_by(c)
+                else:
+                    keep.append(r)
+            self._L_reds = keep
+        if self._L_yb:
+            keep = []
+            for y in self._L_yb:
+                if y.state == "ACTIVE" and y.broken_down_by(c):
                     y.state = "DEAD"
-        for y in self.yellows_s:
-            if y.state == "ACTIVE":
-                if c > y.y_top or h >= y.y_top:
-                    # FIX1b: a ceiling dies the moment price closes above
-                    # it OR even trades into it (touch = consumed) — stale
-                    # 2021/22 walls must never block 2023/24 again
+                else:
+                    keep.append(y)
+            self._L_yb = keep
+        if self._L_ys:
+            keep = []
+            for y in self._L_ys:
+                # FIX1b: a ceiling dies the moment price closes above
+                # it OR even trades into it (touch = consumed) — stale
+                # 2021/22 walls must never block 2023/24 again
+                if (y.state == "ACTIVE"
+                        and (y.broken_up_by(c) or h >= y.y_top)):
                     y.state = "DEAD"
                     self.wall_killed += 1
-        for g in self.greens:
-            if g.state == "ACTIVE":
-                if g.y_bottom > c:            # g.broken_down_by(c)
+                else:
+                    keep.append(y)
+            self._L_ys = keep
+        if self._L_greens:
+            keep = []
+            for g in self._L_greens:
+                if g.state == "ACTIVE" and g.broken_down_by(c):
                     g.state = "DEAD"
+                else:
+                    keep.append(g)
+            self._L_greens = keep
 
     def _prune(self, i: int) -> None:
         # housekeeping only (dead rectangles carry no signal)
         if i % 96 != 0:
             return
+        self._L_blues = self._L_blues[-400:]
+        self._L_reds = self._L_reds[-400:]
+        self._L_yb = self._L_yb[-400:]
+        self._L_ys = self._L_ys[-400:]
+        self._L_greens = self._L_greens[-400:]
         self.blues = [b for b in self.blues if b.state == "ACTIVE"][-400:]
         self.reds = [r for r in self.reds if r.state != "DEAD"][-400:]
         self.yellows_b = [y for y in self.yellows_b
@@ -1351,7 +1318,8 @@ class ChartCanvas:
             if b.state == "DEAD" and b.uid not in self._seen_ch:
                 self._seen_ch.add(b.uid)
                 self.last_blue_chop_idx = idx
-        for y in self.yellows_s:
+        for y in self._L_ys + [y2 for y2 in self.yellows_s
+                               if y2.state == "DEAD"]:
             if y.state == "DEAD" and y.uid not in self._seen_if:
                 self._seen_if.add(y.uid)
                 self.ifvgs.append({"idx": idx, "time": time,
@@ -1907,28 +1875,8 @@ class ICTBoxEngine:
             # RUNS: MANAGE_5M=False in the champion. The probe returned
             # identical numbers to B0 and v37_ratchet_armed=0 -- that is
             # how the dead path was found.)
-            # ---- v38 (5) ADAPT_4H_RATCHET ------------------------- #
-            # v37 measured RATCHET_2R as a REGIME TRADE: it rescues the
-            # bear book (MOD_Y2 107.57 -> 154.81) and clips the bull book
-            # (MOD_Y1 326.61 -> 164.95). Part 1 found the same split in
-            # the flow: the engine is a counter-trend bounce buyer, and a
-            # bearish 4H flow is exactly when a quick harvest pays. So
-            # apply the 2R floor ONLY while the 4H narrative is bearish,
-            # and leave the bull book on B0 so the runners are not cut.
-            _ratchet_on = bool(POST_3R_RATCHET)
-            _ratchet_arm = POST_3R_RATCHET
-            if ADAPT_4H_RATCHET:
-                # nar_flow_4h is the STRING "BEAR"/"BULL", not +-1. The
-                # first version compared it to -1 and therefore never
-                # fired: ADAPT_4H came back at exactly $158.0240, B0 to
-                # the cent. Third dead-path bug of the project; caught only
-                # because every arm is diffed against the identity figure.
-                _flow = (self.trade.get("nar_flow_4h") if self.trade
-                         else None)
-                _ratchet_on = (_flow in ("BEAR", -1))
-                _ratchet_arm = "2R"
-            if _ratchet_on and self.qty > 0:
-                self._v37_ratchet(c, arm=_ratchet_arm)
+            if POST_3R_RATCHET and self.qty > 0:
+                self._v37_ratchet(c)
             return
         # prune consumed dealing ranges once price trades outside them
         self.consumed = [(b, t) for b, t in self.consumed
@@ -2598,34 +2546,6 @@ class ICTBoxEngine:
         return ladder, True
 
     # ---------------- State 4: confirmation entry (FIX1) ------------ #
-    def _post_entry_fvg_tops(self, cv, t, floor, c):
-        """Tops of bearish gaps confirmed AFTER the entry, above `floor`.
-
-        The mirror of _post_entry_blues for the v39 TRAIL_ANCHOR knob.
-        A bearish FVG (a RED box in this engine's naming) is a supply gap
-        whose near edge is its TOP; a stop parked at that edge is the ICT
-        reading of "trail under the last unmitigated supply".
-
-        CAUSALITY: t["entry_time"] is fixed at the fill, and a box's
-        x.time is the bar that CONFIRMED it, so a box can only qualify on
-        a bar strictly later than the fill. `c` is this bar's close, and
-        the caller arms the stop for the NEXT bar, so no intrabar peek.
-        """
-        e0 = t.get("entry_time")
-        out = []
-        try:
-            for r in cv.reds:
-                if getattr(r, "state", None) != "ACTIVE":
-                    continue
-                if e0 is not None and r.time is not None and r.time <= e0:
-                    continue
-                top = float(r.y_top)
-                if top > floor and top < c:
-                    out.append(top)
-        except Exception:
-            return []
-        return out
-
     def _seek_fill(self, o, h, l, c, idx, time, fresh=()):
         if ENTRY_ARM != "seam":
             return self._seek_fill_v29(o, h, l, c, idx, time, fresh)
@@ -3222,36 +3142,6 @@ class ICTBoxEngine:
             self.state = "WAIT_ANCHOR"
             self.cnt("v33_range_b_veto")
             return
-        # ---- v39 (1): MIN_BOX_AGE_BARS ---------------------------- #
-        # The v39 autopsy: setups that fill within 6 exec bars of their own
-        # displacement BOS are 7.8% golden; those that take 12-24 bars to
-        # pull back are 22.8% golden. Refusing the raw, un-pulled-back fill
-        # is therefore a sniper filter, not a volume filter.
-        # CAUSALITY: entry idx and bos idx are both already fixed at this
-        # stamp -- the fill bar is the one being evaluated, and bos_idx is
-        # strictly earlier by construction. Nothing forward is read.
-        if MIN_BOX_AGE_BARS > 0:
-            _age = idx - int(getattr(s, "bos_idx", idx))
-            if _age < MIN_BOX_AGE_BARS:
-                self.setup = None
-                self.state = "WAIT_ANCHOR"
-                self.cnt("v39_age_veto")
-                return
-        # ---- v39 (3): HTF_DEMAND_GATE ----------------------------- #
-        # Refuse a fill whose entry price is NOT inside the HTF discount
-        # zone. in_demand() reads the narrative canvas, which is fed only
-        # completed bars, so it is the same information a human had.
-        if HTF_DEMAND_GATE:
-            _cv = (self.nar4 if (HTF_DEMAND_GATE == "4H"
-                                 and self.nar4 is not None)
-                   else self.nar1 if (HTF_DEMAND_GATE == "1H"
-                                      and self.nar1 is not None)
-                   else None)
-            if _cv is not None and not _cv.in_demand(fill_px):
-                self.setup = None
-                self.state = "WAIT_ANCHOR"
-                self.cnt("v39_demand_veto")
-                return
         # ---- v37 (2): HTF_ENTRY_GATE ------------------------------- #
         # Refuse the fill when the CAUSAL higher-timeframe flow disagrees.
         # flow() = whichever structural break printed LAST, measured only
@@ -3273,22 +3163,6 @@ class ICTBoxEngine:
                 self.state = "WAIT_ANCHOR"
                 self.cnt("v37_htf_gate_veto")
                 return
-        # ---- v38 (4): MIN_DOL_ROOM_PCT ----------------------------- #
-        # Refuse the fill when the structural room to the next draw is
-        # below a floor. Part 1 Q4(a) measured the OPPOSITE of the brief's
-        # premise -- the [0,0.5)% room bucket was the MOST profitable
-        # ($/tr 2.46 in W1, 3.01 in W2) -- so a positive value here is
-        # EXPECTED to lose. It is wired anyway: a claim about the engine
-        # must be falsifiable IN the engine, not settled by argument.
-        if MIN_DOL_ROOM_PCT > 0.0 and fill_px > 0:
-            _room = self._v38_dol_above_entry()
-            if _room is not None:
-                _room_pct = (_room - fill_px) / fill_px * 100.0
-                if _room_pct < MIN_DOL_ROOM_PCT:
-                    self.setup = None
-                    self.state = "WAIT_ANCHOR"
-                    self.cnt("v38_min_room_veto")
-                    return
         qty = notional / fill_px
         notional = qty * fill_px
         if qty <= 0 or notional < EXCHANGE_MIN_NOTIONAL:
@@ -3305,6 +3179,14 @@ class ICTBoxEngine:
         self.entry_px = fill_px
         self.stop_px = stop
         self.orig_stop_px = stop      # v32 PILLAR 4: the structural stop as
+
+        # ---- v45 brain state (inert unless V45_BRAIN_MODE != off) --- #
+        self.unit_true_loss = (fill_px * (1 + V45_COST)
+                               - stop * (1 - V45_COST))
+        self.v45_armed = None        # the true-multiple floor, live next bar
+        self.v45_max_x = -9e9        # peak true_X on 5m CLOSES
+        self.v45_max_high_x = -9e9   # peak true_X on 5m HIGHS
+        self.v45_stall_ref = None    # previous 5m bar h/l for the stall test
         #                             the chart drew it, kept forever so the
         #                             emergency wick cap never drifts up
         self.risk = risk
@@ -3357,19 +3239,6 @@ class ICTBoxEngine:
                            / (1 - COST))
         self.struct_trailed = False
         self.harvested = False
-        # ---- v38 (3) ANTI_SHAKEOUT_BE ------------------------------- #
-        # Part 1 Q2 measured the shakeout exactly: the floor arms at
-        # LOCK_ARM_R on a median 0.6-0.8% spot wiggle (risk_pct 0.36-0.52
-        # on the BE cohort, so 2R is a 0.7-1.0% move), the trade is
-        # scratched at ~$0.00, and the coin then never revisits the
-        # structural stop and runs >= +2%. Raising the BE lines by the
-        # spot % the trade must actually show removes the micro-wiggle
-        # arm without touching the +3R entry gate (MIN_R stays sacred).
-        if ANTI_SHAKEOUT_BE:
-            _bump = MIN_BE_DISPLACEMENT_PCT / 100.0
-            self.floor_line = max(self.floor_line, fill_px * (1 + _bump))
-            if getattr(self, "be_mode", "") != "be_at_entry":
-                self.lock_line = max(self.lock_line, fill_px * (1 + _bump))
         self.protected_blue = s.wave_low
         self.pool["cash"] -= notional + fee
         self.pool.setdefault("open", []).append(self)
@@ -3616,26 +3485,7 @@ class ICTBoxEngine:
         "LADDER_B": ((3.0, 2.0), (4.5, 3.0), (6.0, 4.5)),
     }
 
-    def _v38_dol_above_entry(self):
-        """The NEAREST opposing draw of liquidity above the entry, from the
-        canvases this engine actually owns: 1H RedBox_BSL, 4H RedBox_BSL,
-        and the 4H PurpleBox top. Returns None when there is none -- an
-        engine with no draw above it has nothing to harvest against, which
-        is most trades (Part 1 Q4a: 133 of 181 in W1)."""
-        best = None
-        for cv in (self.htf_canvas, self.struct_canvas):
-            if cv is None:
-                continue
-            for r in cv.active_reds():
-                if r.y_bottom > self.entry_px:
-                    best = r.y_bottom if best is None else min(best,
-                                                               r.y_bottom)
-            pu = getattr(cv, "purple", None)
-            if pu is not None and pu.y_top > self.entry_px:
-                best = pu.y_top if best is None else min(best, pu.y_top)
-        return best
-
-    def _v37_ratchet(self, c, arm=None):
+    def _v37_ratchet(self, c):
         """Raise the stop to the highest armed R-floor, on a 5m CLOSE only.
 
         CAUSALITY: the trigger is this bar's CLOSE and the new stop is only
@@ -3646,8 +3496,7 @@ class ICTBoxEngine:
         The floor never lowers an already higher stop (same law as
         lock_line): `max` against self.stop_px, never an assignment.
         """
-        ladder = self._V37_RATCHET.get(arm if arm is not None
-                                       else POST_3R_RATCHET)
+        ladder = self._V37_RATCHET.get(POST_3R_RATCHET)
         if not ladder or self.risk <= 0 or c <= self.entry_px:
             return
         mfe_r = (c - self.entry_px) / self.risk
@@ -3682,6 +3531,78 @@ class ICTBoxEngine:
             self.stop_px = lock_line
             self.cnt("manage5m_floor_reset")
 
+    # ================== v45: THE SMART EXIT BRAIN ================== #
+    def _v45_px(self, m):
+        """px_at_true_X: the exit price that books EXACTLY +m true dollar
+        losses, fees both sides. m=0 is exact fee-breakeven ($0.00 net),
+        m=-1 is the original stop."""
+        unit = self.entry_px * (1 + V45_COST) - self.orig_stop_px * (1 - V45_COST)
+        return (self.entry_px * (1 + V45_COST) + m * unit) / (1 - V45_COST)
+
+    def v45_brain_5m(self, o, h, l, c, time):
+        """Strictly causal 5m management for V45_BRAIN_MODE != "off".
+
+        ORDER OF OPERATIONS ON ONE COMPLETED 5m BAR: test the levels that
+        were armed by PREVIOUS bars, then arm/refresh from THIS bar. That is
+        the whole causality guarantee -- nothing armed here can fire here.
+        Levels are true-dollar multiples of the entry-to-stop distance, so a
+        +2.2x floor is +2.2x AFTER both 0.10% fees, not a pre-fee R.
+        """
+        if V45_BRAIN_MODE == "off" or self.qty <= 0 or self.risk <= 0:
+            return
+        if getattr(self, "orig_stop_px", None) is None:
+            return
+        fill, loss = self.entry_px, self.unit_true_loss
+
+        def X(px):
+            return (px * (1 - V45_COST) - fill * (1 + V45_COST)) / loss
+
+        # ---- 1. TEST the levels armed by earlier bars (wick = real order) --
+        _armed = self.v45_armed
+        if _armed is not None:
+            px = self._v45_px(_armed)
+            if l <= px:                         # a real resting stop fills
+                got = px if o >= px else o      # ...but a gap fills the open
+                self.cnt("v45_" + V45_BRAIN_MODE)
+                self._exit(got, ("V45_STALL_EXIT" if V45_BRAIN_MODE == "stall_or_run"
+                                 else ("V45_GUARD_STOP"
+                                       if V45_BRAIN_MODE == "wick_touch_guard"
+                                       else "V45_LADDER_STOP")),
+                           max(0, len(self.exec_canvas.bars) - 1), time)
+                return
+
+        # ---- 2. ARM / REFRESH from THIS completed bar (live from bar+1) ----
+        xc, xh = X(c), X(h)
+        self.v45_max_x = max(self.v45_max_x, xc)
+        self.v45_max_high_x = max(self.v45_max_high_x, xh)
+        nxt = self.v45_armed
+        if V45_BRAIN_MODE == "step_ladder":
+            for trig, fl in ((2.0, 1.2), (2.5, 2.0), (3.0, 2.5), (4.0, 3.0)):
+                if self.v45_max_x >= trig:
+                    nxt = fl if nxt is None else max(nxt, fl)
+            if self.v45_max_high_x >= 5.0:      # trail 1.5x under the peak
+                nxt = max(nxt if nxt is not None else -9e9,
+                          self.v45_max_high_x - 1.5)
+        elif V45_BRAIN_MODE == "stall_or_run":
+            if self.v45_max_x >= 2.0 and c < o:
+                # a stall/rejection CLOSE after arming: the whole position
+                # leaves at this close, 100%, no partial
+                if (self.v45_stall_ref is not None
+                        and (c < self.v45_stall_ref["l"]
+                             or c < (self.v45_stall_ref["h"]
+                                     + self.v45_stall_ref["l"]) / 2)):
+                    self.cnt("v45_stall_or_run")
+                    self._exit(c, "V45_STALL_EXIT",
+                               max(0, len(self.exec_canvas.bars) - 1), time)
+                    return
+            self.v45_stall_ref = {"h": h, "l": l}
+        elif V45_BRAIN_MODE == "wick_touch_guard":
+            if self.v45_max_high_x >= 3.0:
+                nxt = 2.2 if nxt is None else max(nxt, 2.2)
+            elif self.v45_max_high_x >= 2.5:
+                nxt = 1.8 if nxt is None else max(nxt, 1.8)
+        self.v45_armed = nxt
+
     def manage_5m(self, o, h, l, c, time):
         """v28: manage an OPEN position on a causal 5m bar, whatever frame
         opened it. Only the stop and the +3R floor are evaluated here; the
@@ -3698,24 +3619,6 @@ class ICTBoxEngine:
             self.mfe = max(self.mfe, (h - self.entry_px) / self.risk)
             self.mfe_close = max(self.mfe_close,
                                  (c - self.entry_px) / self.risk)
-        # ---- v39 (4): TIME_STOP -- free the seat from a dead trade ----- #
-        # THE PREMISE IT TESTS: "8 breakeven/stop trades tie up the single
-        # cash slot". v39 Q3 measured the opposite -- DEAD_BE and STOP_LOSS
-        # both die at a MEDIAN of 0.33h (20 minutes), slot occupancy is only
-        # 9-16% of the window, and just 0.3-2.3% of trades ever hold past
-        # 2h without reaching +1R. So this knob is EXPECTED to be a no-op,
-        # and wiring it is how that claim stays falsifiable rather than
-        # merely asserted.
-        # EXIT PRICE: the close of the bar on which the clock runs out --
-        # never the best price seen, never a forward bar.
-        if TIME_STOP_BARS > 0 and not self.ratchet:
-            _held = idx - int(t.get("entry_idx", idx))
-            if _held >= TIME_STOP_BARS and self.risk > 0:
-                _cur_r = (c - self.entry_px) / self.risk
-                if _cur_r <= TIME_STOP_R:
-                    self.cnt("v39_time_stop")
-                    self._exit(c, "TIME_STOP_DEAD_TRADE", idx, time)
-                    return
         # ---- v37 (1): THE GIVE-BACK RATCHET --------------------------- #
         # WHERE IT BELONGS: the first attempt hooked _manage_5m_lock_only,
         # which NEVER RUNS -- MANAGE_5M=False in the shipped champion (v29
@@ -3882,17 +3785,6 @@ class ICTBoxEngine:
                 for cv in srcs:
                     cands += self._post_entry_blues(
                         cv, t, max(be, self.stop_px), c)
-                # ---- v39 (2): TRAIL_ANCHOR="fvg" ---------------------- #
-                # Let a CONFIRMED post-entry bearish gap carry the stop as
-                # well, using its TOP (the near edge). STEP 1 Q2d found
-                # fvg_pct does NOT separate golden from chaff, so this is
-                # expected to lose; it is wired so the claim is falsifiable.
-                # Same causal rule as the blues: only boxes confirmed after
-                # the entry, only on this bar's close.
-                if TRAIL_ANCHOR == "fvg":
-                    for cv in srcs:
-                        cands += self._post_entry_fvg_tops(
-                            cv, t, max(be, self.stop_px), c)
                 if cands:
                     new = max(cands)
                     if new > self.stop_px:
@@ -4010,54 +3902,9 @@ class ICTBoxEngine:
         if self.ratchet:
             best = self.stop_px
             # ---- v33 (ب)/(د) after the +3R lock, ride the 4H lens ------
-            # ---- v38 TRAIL_TF_AFTER_3R: let a faster lens carry it ----
-            # The v38 audit measured the 4H lens DEAD on 402 of 424 locked
-            # trades (95%): a 4H BlueBox_SSL needs 12 hours to confirm a
-            # 3-bar fractal, and most trades are over before the next one
-            # exists. Meanwhile a 1H/30m swing low confirmed above entry
-            # was available on ~100% of those same locked trades. This is
-            # a LENS swap only -- the same trail_blues() predicate, the
-            # same floor_line gate, the same "below price" test -- so the
-            # only thing that changes is which structure may raise the stop.
-            # Causal: every canvas is fed finished bars only, and
-            # _post_entry_blues already rejects any box confirmed at or
-            # before the entry (by index on the exec canvas, by timestamp
-            # on every other lens).
-            if TRAIL_TF_AFTER_3R and getattr(self, "ratchet", False):
-                _up_pct = ((self.price - self.entry_px) / self.entry_px
-                           * 100.0) if self.entry_px else 0.0
-                if _up_pct >= TRAIL_AFTER_3R_MIN_PCT:
-                    # The engine carries exactly three canvases:
-                    #   exec_canvas  (5m/15m/30m/1h -- THIS engine's frame)
-                    #   htf_canvas   (1H, always present)
-                    #   struct_canvas(4H)
-                    # so "1h" is always available, and "30m"/"15m" are
-                    # usable only from an engine whose own frame matches.
-                    # Rather than invent a canvas, the faster lenses are
-                    # added only when this engine actually owns one; the
-                    # 4H handoff is always kept.
-                    want = {"1h": ["1h"],
-                            "1h30m": ["1h", "30min"],
-                            "1h30m15m": ["1h", "30min", "15min"]}[
-                                TRAIL_TF_AFTER_3R]
-                    srcs = []
-                    for w in want:
-                        if w == "1h":
-                            srcs.append(self.htf_canvas)
-                        elif (self.exec_tf == w
-                              and self.exec_canvas not in srcs):
-                            srcs.append(self.exec_canvas)
-                    srcs = [c for c in srcs if c is not None]
-                    srcs.append(self.struct_canvas)   # 4H handoff stays
-                else:
-                    srcs = ([self.struct_canvas]
-                            if (TRAIL_4H_ONLY_AFTER_LOCK
-                                or self._v33_expand())
-                            else [self.htf_canvas, self.struct_canvas])
-            else:
-                srcs = ([self.struct_canvas]
-                        if (TRAIL_4H_ONLY_AFTER_LOCK or self._v33_expand())
-                        else [self.htf_canvas, self.struct_canvas])
+            srcs = ([self.struct_canvas]
+                    if (TRAIL_4H_ONLY_AFTER_LOCK or self._v33_expand())
+                    else [self.htf_canvas, self.struct_canvas])
             if TRAIL_MODE == "all_active":
                 srcs.append(self.exec_canvas)
             for cv in srcs:
@@ -4069,27 +3916,6 @@ class ICTBoxEngine:
             if best > self.stop_px:
                 self.stop_px = best
                 self.cnt("trail_htf_blue")
-            # ---- v38 (2) DOL_TARGET_LOCK ---------------------------- #
-            # Part 1 Q3 3.3 measured this exactly: of the locked trades
-            # that reached an opposing draw of liquidity, 45-55% still
-            # exited at <= +0.2% -- price delivered to the draw and
-            # handed the whole move back. When the trade is up a real
-            # DOL_LOCK_MIN_PCT and the coin HAS reached a draw that was
-            # sitting above the entry, park the stop at a fixed fraction
-            # of the gain instead of waiting for structure to do it.
-            # Causality: `c` is this bar's CLOSE, the draws are read from
-            # canvases fed finished bars only, and the new stop is written
-            # to self.stop_px which only the NEXT bar is judged against.
-            if DOL_TARGET_LOCK and self.entry_px > 0:
-                up_pct = (c - self.entry_px) / self.entry_px * 100.0
-                if up_pct >= DOL_LOCK_MIN_PCT:
-                    dol = self._v38_dol_above_entry()
-                    if dol is not None and c >= dol:
-                        keep_px = self.entry_px * (
-                            1 + DOL_LOCK_KEEP * up_pct / 100.0)
-                        if keep_px > self.stop_px:
-                            self.stop_px = keep_px
-                            self.cnt("v38_dol_lock_armed")
         # (exec-frame trail REMOVED: the4H structural trail in
         # on_struct — "أو4H" — governs rides)
         # ---- top-sell: only allowed at/above the lock line -------
@@ -4412,6 +4238,7 @@ def run_backtest(data_dir: Path, start: str, end: str,
             "v35_cd": {}, "v35_bos_memo": {}}   # v35 BLEED 3 state
     engines = []
     series = {}
+    series_y = {}          # v45 speed: stamp -> row position per frame
     narratives = {}
     for sym in symbols:
         df = load_asset_ohlcv(data_dir / sym,
@@ -4430,6 +4257,18 @@ def run_backtest(data_dir: Path, start: str, end: str,
         tf_60 = tf_60[tf_60.index >= warm]
         tf_4h = tf_4h[tf_4h.index >= warm]
         series[sym] = (tf_5, tf_15, tf_30, tf_60, tf_4h)
+        # ---- v45 SPEED: O(1) stamp membership ---------------------- #
+        # The hot loop used to ask `t in tf.index` (a linear scan of 400k
+        # timestamps) and then `tf.loc[t]` (a binary search returning a
+        # Series) for up to 5 frames x 8 coins x 135k stamps. Both are
+        # replaced by hashed membership plus a positional lookup into the
+        # SAME frame: same rows, same order, same values, no lookahead.
+        # `_Y` maps a stamp -> row position for the frames the loop needs.
+        _Y = {}
+        for _lbl, _tf in (("4h", tf_4h), ("60", tf_60), ("5min", tf_5),
+                          ("15min", tf_15), ("30min", tf_30)):
+            _Y[_lbl] = {v: k for k, v in enumerate(_tf.index)}
+        series_y[sym] = _Y
         narratives[sym] = (ChartCanvas(STRUCT_TF, narrative=True),
                            ChartCanvas("1h", narrative=True))
         # FIX2: LTF sniper engines (5m/15m) + swing engine (1h), all
@@ -4529,64 +4368,79 @@ def run_backtest(data_dir: Path, start: str, end: str,
                    and tf_4h.index[ptr[(sym, "4h")]] <= t):
                 j = ptr[(sym, "4h")]
                 if tf_4h.index[j] >= warm:
-                    r = tf_4h.iloc[j]
-                    vol = float(r.Volume) if "Volume" in r else 0.0
+                    _r = tf_4h.iloc[j]
+                    _o = float(_r.Open); _h = float(_r.High)
+                    _l = float(_r.Low); _c = float(_r.Close)
+                    vol = float(_r.Volume) if "Volume" in _r else 0.0
+                    _tm = tf_4h.index[j]
                     n4, _ = narratives[sym]
-                    n4.on_bar(float(r.Open), float(r.High),
-                              float(r.Low), float(r.Close), vol,
-                              len(n4.bars), tf_4h.index[j])
+                    n4.on_bar(_o, _h, _l, _c, vol, len(n4.bars), _tm)
                     for e in engines_by_sym[sym]:
                         if t >= s0:
                             e.warm = False
-                        e.on_struct(float(r.Open), float(r.High),
-                                    float(r.Low), float(r.Close),
-                                    vol, len(e.struct_canvas.bars),
-                                    tf_4h.index[j])
+                        e.on_struct(_o, _h, _l, _c, vol,
+                                    len(e.struct_canvas.bars), _tm)
                 ptr[(sym, "4h")] += 1
             # feed completed1H bars up to t — the shared target lens
             while (ptr[(sym, "60")] < len(tf_60)
                    and tf_60.index[ptr[(sym, "60")]] <= t):
                 j = ptr[(sym, "60")]
                 if tf_60.index[j] >= warm:
-                    r = tf_60.iloc[j]
-                    vol = float(r.Volume) if "Volume" in r else 0.0
+                    _r = tf_60.iloc[j]
+                    _o = float(_r.Open); _h = float(_r.High)
+                    _l = float(_r.Low); _c = float(_r.Close)
+                    vol = float(_r.Volume) if "Volume" in _r else 0.0
+                    _tm = tf_60.index[j]
                     _, n1 = narratives[sym]
-                    n1.on_bar(float(r.Open), float(r.High),
-                              float(r.Low), float(r.Close), vol,
-                              len(n1.bars), tf_60.index[j])
+                    n1.on_bar(_o, _h, _l, _c, vol, len(n1.bars), _tm)
                     last1h_no[sym] = stamp_no
                     for e in engines_by_sym[sym]:
-                        e.on_htf(float(r.Open), float(r.High),
-                                 float(r.Low), float(r.Close),
-                                 vol, len(e.htf_canvas.bars),
-                                 tf_60.index[j])
+                        e.on_htf(_o, _h, _l, _c, vol,
+                                 len(e.htf_canvas.bars), _tm)
                 ptr[(sym, "60")] += 1
             # ---- v28: causal 5m management of EVERY open position ----
             # The 5m bar ending at t is the last sub-bar of any 15m/30m/1h
             # bar that also ends at t, so it is applied FIRST. The 5min
             # engine is skipped: it already manages on this very tape.
-            if MANAGE_5M and t in tf_5.index:
-                r5 = tf_5.loc[t]
+            _j5 = series_y[sym]["5min"].get(t)
+            # ---- v45: the brain runs on the 5m tape even with MANAGE_5M off.
+            # It is fed at the SAME causal stamp as the engine's own frames
+            # (the bar that CLOSED at t), and before them, so a level armed
+            # by this bar cannot be tested until the next one.
+            if V45_BRAIN_MODE != "off" and _j5 is not None:
+                r5 = tf_5.iloc[_j5]
+                _o5 = float(r5.Open); _h5 = float(r5.High)
+                _l5 = float(r5.Low); _c5 = float(r5.Close)
+                for e in engines_by_sym[sym]:
+                    if e.qty > 0:
+                        e.v45_brain_5m(_o5, _h5, _l5, _c5, t)
+            if MANAGE_5M and _j5 is not None:
+                r5 = tf_5.iloc[_j5]
+                _o5 = float(r5.Open); _h5 = float(r5.High)
+                _l5c = float(r5.Low); _c5 = float(r5.Close)
                 for e in engines_by_sym[sym]:
                     if e.exec_tf != "5min" and e.qty > 0:
                         if t >= s0:
                             e.warm = False
-                        e.manage_5m(float(r5.Open), float(r5.High),
-                                    float(r5.Low), float(r5.Close), t)
+                        e.manage_5m(_o5, _h5, _l5c, _c5, t)
             # feed each exec engine at its own completed stamps
-            for tf_lbl, tf in (("5min", tf_5), ("15min", tf_15),
-                               ("30min", tf_30), ("1h", tf_60)):
+            for tf_lbl, tf, _key in (("5min", tf_5, "5min"),
+                                     ("15min", tf_15, "15min"),
+                                     ("30min", tf_30, "30min"),
+                                     ("1h", tf_60, "60")):
                 if tf_lbl not in EXEC_FRAMES:
                     continue
-                if t in tf.index:
-                    r = tf.loc[t]
+                _jx = series_y[sym][_key].get(t)
+                if _jx is not None:
+                    r = tf.iloc[_jx]
+                    _o = float(r.Open); _h = float(r.High)
+                    _l = float(r.Low); _c = float(r.Close)
                     vol = float(r.Volume) if "Volume" in r else 0.0
                     for e in engines_by_sym[sym]:
                         if e.exec_tf == tf_lbl:
                             if t >= s0:
                                 e.warm = False
-                            e.on_exec(float(r.Open), float(r.High),
-                                      float(r.Low), float(r.Close), vol,
+                            e.on_exec(_o, _h, _l, _c, vol,
                                       len(e.exec_canvas.bars), t)
         if t >= s0:
             eq_rows.append((t, pool["cash"] + sum(

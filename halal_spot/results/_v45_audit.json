@@ -1,0 +1,11 @@
+{
+ "a1_n": 99,
+ "a1_pass": 99,
+ "a1_exec_pass": 99,
+ "a2_n": 1173,
+ "a2_wick_pass": 1173,
+ "a2_close_pass": 1131,
+ "a2_close_fail_explained": 42,
+ "mfe_wick_match": 1170,
+ "mfe_close_match": 1149
+}
