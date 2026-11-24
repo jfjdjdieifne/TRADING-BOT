@@ -1,0 +1,56 @@
+{
+ "arm": "TSTOP2H",
+ "window": "W2",
+ "start": "2024-05-01",
+ "end": "2024-10-31",
+ "seconds": 297.3,
+ "n": 151,
+ "capital": 100.0,
+ "predicted": "no-op: chaff already dies in a 0.33h median",
+ "net": 103.6493,
+ "end_equity": 203.6493,
+ "pf": 2.955,
+ "wr": 24.5,
+ "be": 47,
+ "losses": 67,
+ "fees": 21.7664,
+ "net_minus_top3": 43.6037,
+ "exits": {
+  "STOP_BLUE": 67,
+  "BREAKEVEN": 47,
+  "EMERGENCY_STOP": 13,
+  "TIME_STOP_DEAD_TRADE": 11,
+  "STRUCT_PROFIT": 7,
+  "TARGET_REJECTION": 5,
+  "SHIELD_BE": 1
+ },
+ "monthly": {
+  "2024-05": {
+   "net$": 5.5996,
+   "end": 105.5996
+  },
+  "2024-06": {
+   "net$": -5.0811,
+   "end": 100.5185
+  },
+  "2024-07": {
+   "net$": 45.6896,
+   "end": 146.2081
+  },
+  "2024-08": {
+   "net$": 24.0643,
+   "end": 170.2724
+  },
+  "2024-09": {
+   "net$": 9.3322,
+   "end": 179.6045
+  },
+  "2024-10": {
+   "net$": 24.0448,
+   "end": 203.6493
+  }
+ },
+ "months_pos": 5,
+ "months_n": 6,
+ "maxDD_pct": -11.454
+}

@@ -1,0 +1,55 @@
+{
+ "arm": "TSTOP12H",
+ "window": "W1",
+ "start": "2023-10-01",
+ "end": "2024-03-31",
+ "seconds": 483.8,
+ "n": 181,
+ "capital": 100.0,
+ "predicted": "no-op or small loss (cuts slow runners)",
+ "net": 61.6758,
+ "end_equity": 161.6758,
+ "pf": 1.742,
+ "wr": 10.5,
+ "be": 66,
+ "losses": 96,
+ "fees": 23.121,
+ "net_minus_top3": 2.0797,
+ "exits": {
+  "STOP_BLUE": 97,
+  "BREAKEVEN": 66,
+  "EMERGENCY_STOP": 14,
+  "TARGET_REJECTION": 2,
+  "TIME_STOP_DEAD_TRADE": 1,
+  "STRUCT_PROFIT": 1
+ },
+ "monthly": {
+  "2023-10": {
+   "net$": 0.3156,
+   "end": 100.3156
+  },
+  "2023-11": {
+   "net$": 13.4244,
+   "end": 113.74
+  },
+  "2023-12": {
+   "net$": 4.0071,
+   "end": 117.7471
+  },
+  "2024-01": {
+   "net$": 17.8966,
+   "end": 135.6437
+  },
+  "2024-02": {
+   "net$": 26.9617,
+   "end": 162.6054
+  },
+  "2024-03": {
+   "net$": -0.9296,
+   "end": 161.6758
+  }
+ },
+ "months_pos": 5,
+ "months_n": 6,
+ "maxDD_pct": -14.064
+}

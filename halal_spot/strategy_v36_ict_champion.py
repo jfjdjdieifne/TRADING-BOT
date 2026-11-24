@@ -593,6 +593,40 @@ MIN_DOL_ROOM_PCT = 0.0
 #     runners are not cut.
 ADAPT_4H_RATCHET = False
 
+# ===================================================================== #
+# =====  v39 KNOBS -- ALL DEFAULT OFF. The v39 audit found that three  ===== #
+# =====  of the four "golden sniper" discriminators do not work, and  ===== #
+# =====  wired only the one that did. See REPORT_AR_v39.md.            ===== #
+# ===================================================================== #
+# (1) MIN_BOX_AGE_BARS -- refuse a fill while the BOS that set the trade
+#     up is younger than this many exec bars. The v39 autopsy found the
+#     GOLDEN rate is 7.8% in the [0,6) bar bucket and 22.8% in [12,24):
+#     a setup that fires within minutes of its own displacement break is
+#     mostly noise, while one that took half a day to pull back into the
+#     zone is mostly real. Causal: entry_idx - bos_idx, both already on
+#     the tape at the fill.
+MIN_BOX_AGE_BARS = 0          # 0 = OFF; 12 was the only arm that won
+
+# (2) TRAIL_ANCHOR -- what the post-lock trail is allowed to raise the stop
+#     to. "" = shipped (BlueBox_SSL bottom only). "FVG" additionally lets a
+#     confirmed post-entry bearish gap's TOP carry the stop. v39 Q2d found
+#     the FVG bucket does NOT separate golden from chaff, so this is
+#     expected to lose -- wired so the claim stays falsifiable.
+TRAIL_ANCHOR = ""             # "" | "fvg"
+
+# (3) HTF_DEMAND_GATE -- refuse fills that are NOT in the 4H (or 1H)
+#     discount zone. v39 Q1b measured 3/5 windows improved; wired to test
+#     whether the engine agrees with the tape arithmetic.
+HTF_DEMAND_GATE = ""          # "" | "4H" | "1H"
+
+# (4) TIME_STOP_R -- scratch a trade that has sat this many exec bars
+#     without ever reaching +R. v39 Q3 found the chaff dies in a MEDIAN of
+#     0.33h and only 0.3-2.3% of trades ever hold >2h without +1R, so the
+#     slot is NOT being blocked and this is expected to be a no-op. Wired
+#     with the highest-confidence measurement behind it.
+TIME_STOP_BARS = 0            # 0 = OFF
+TIME_STOP_R = 1.0
+
 # Which exits pay it: every reason below is a sale into the book (a market
 # order live), so it is charged. END_OF_DATA is bookkeeping and keeps its
 # price. The list is explicit so a new reason cannot be charged by accident.
@@ -2564,6 +2598,34 @@ class ICTBoxEngine:
         return ladder, True
 
     # ---------------- State 4: confirmation entry (FIX1) ------------ #
+    def _post_entry_fvg_tops(self, cv, t, floor, c):
+        """Tops of bearish gaps confirmed AFTER the entry, above `floor`.
+
+        The mirror of _post_entry_blues for the v39 TRAIL_ANCHOR knob.
+        A bearish FVG (a RED box in this engine's naming) is a supply gap
+        whose near edge is its TOP; a stop parked at that edge is the ICT
+        reading of "trail under the last unmitigated supply".
+
+        CAUSALITY: t["entry_time"] is fixed at the fill, and a box's
+        x.time is the bar that CONFIRMED it, so a box can only qualify on
+        a bar strictly later than the fill. `c` is this bar's close, and
+        the caller arms the stop for the NEXT bar, so no intrabar peek.
+        """
+        e0 = t.get("entry_time")
+        out = []
+        try:
+            for r in cv.reds:
+                if getattr(r, "state", None) != "ACTIVE":
+                    continue
+                if e0 is not None and r.time is not None and r.time <= e0:
+                    continue
+                top = float(r.y_top)
+                if top > floor and top < c:
+                    out.append(top)
+        except Exception:
+            return []
+        return out
+
     def _seek_fill(self, o, h, l, c, idx, time, fresh=()):
         if ENTRY_ARM != "seam":
             return self._seek_fill_v29(o, h, l, c, idx, time, fresh)
@@ -3160,6 +3222,36 @@ class ICTBoxEngine:
             self.state = "WAIT_ANCHOR"
             self.cnt("v33_range_b_veto")
             return
+        # ---- v39 (1): MIN_BOX_AGE_BARS ---------------------------- #
+        # The v39 autopsy: setups that fill within 6 exec bars of their own
+        # displacement BOS are 7.8% golden; those that take 12-24 bars to
+        # pull back are 22.8% golden. Refusing the raw, un-pulled-back fill
+        # is therefore a sniper filter, not a volume filter.
+        # CAUSALITY: entry idx and bos idx are both already fixed at this
+        # stamp -- the fill bar is the one being evaluated, and bos_idx is
+        # strictly earlier by construction. Nothing forward is read.
+        if MIN_BOX_AGE_BARS > 0:
+            _age = idx - int(getattr(s, "bos_idx", idx))
+            if _age < MIN_BOX_AGE_BARS:
+                self.setup = None
+                self.state = "WAIT_ANCHOR"
+                self.cnt("v39_age_veto")
+                return
+        # ---- v39 (3): HTF_DEMAND_GATE ----------------------------- #
+        # Refuse a fill whose entry price is NOT inside the HTF discount
+        # zone. in_demand() reads the narrative canvas, which is fed only
+        # completed bars, so it is the same information a human had.
+        if HTF_DEMAND_GATE:
+            _cv = (self.nar4 if (HTF_DEMAND_GATE == "4H"
+                                 and self.nar4 is not None)
+                   else self.nar1 if (HTF_DEMAND_GATE == "1H"
+                                      and self.nar1 is not None)
+                   else None)
+            if _cv is not None and not _cv.in_demand(fill_px):
+                self.setup = None
+                self.state = "WAIT_ANCHOR"
+                self.cnt("v39_demand_veto")
+                return
         # ---- v37 (2): HTF_ENTRY_GATE ------------------------------- #
         # Refuse the fill when the CAUSAL higher-timeframe flow disagrees.
         # flow() = whichever structural break printed LAST, measured only
@@ -3606,6 +3698,24 @@ class ICTBoxEngine:
             self.mfe = max(self.mfe, (h - self.entry_px) / self.risk)
             self.mfe_close = max(self.mfe_close,
                                  (c - self.entry_px) / self.risk)
+        # ---- v39 (4): TIME_STOP -- free the seat from a dead trade ----- #
+        # THE PREMISE IT TESTS: "8 breakeven/stop trades tie up the single
+        # cash slot". v39 Q3 measured the opposite -- DEAD_BE and STOP_LOSS
+        # both die at a MEDIAN of 0.33h (20 minutes), slot occupancy is only
+        # 9-16% of the window, and just 0.3-2.3% of trades ever hold past
+        # 2h without reaching +1R. So this knob is EXPECTED to be a no-op,
+        # and wiring it is how that claim stays falsifiable rather than
+        # merely asserted.
+        # EXIT PRICE: the close of the bar on which the clock runs out --
+        # never the best price seen, never a forward bar.
+        if TIME_STOP_BARS > 0 and not self.ratchet:
+            _held = idx - int(t.get("entry_idx", idx))
+            if _held >= TIME_STOP_BARS and self.risk > 0:
+                _cur_r = (c - self.entry_px) / self.risk
+                if _cur_r <= TIME_STOP_R:
+                    self.cnt("v39_time_stop")
+                    self._exit(c, "TIME_STOP_DEAD_TRADE", idx, time)
+                    return
         # ---- v37 (1): THE GIVE-BACK RATCHET --------------------------- #
         # WHERE IT BELONGS: the first attempt hooked _manage_5m_lock_only,
         # which NEVER RUNS -- MANAGE_5M=False in the shipped champion (v29
@@ -3772,6 +3882,17 @@ class ICTBoxEngine:
                 for cv in srcs:
                     cands += self._post_entry_blues(
                         cv, t, max(be, self.stop_px), c)
+                # ---- v39 (2): TRAIL_ANCHOR="fvg" ---------------------- #
+                # Let a CONFIRMED post-entry bearish gap carry the stop as
+                # well, using its TOP (the near edge). STEP 1 Q2d found
+                # fvg_pct does NOT separate golden from chaff, so this is
+                # expected to lose; it is wired so the claim is falsifiable.
+                # Same causal rule as the blues: only boxes confirmed after
+                # the entry, only on this bar's close.
+                if TRAIL_ANCHOR == "fvg":
+                    for cv in srcs:
+                        cands += self._post_entry_fvg_tops(
+                            cv, t, max(be, self.stop_px), c)
                 if cands:
                     new = max(cands)
                     if new > self.stop_px:

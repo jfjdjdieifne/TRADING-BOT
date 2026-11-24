@@ -1,0 +1,58 @@
+{
+ "arm": "DEMAND4H",
+ "window": "OLD7",
+ "start": "2023-01-01",
+ "end": "2023-07-31",
+ "seconds": 317.9,
+ "n": 186,
+ "capital": 100.0,
+ "predicted": "weak win: 3/5 windows on the tape",
+ "net": 36.3909,
+ "end_equity": 136.3909,
+ "pf": 1.618,
+ "wr": 11.29,
+ "be": 70,
+ "losses": 95,
+ "fees": 19.9783,
+ "net_minus_top3": -13.1422,
+ "exits": {
+  "STOP_BLUE": 94,
+  "BREAKEVEN": 70,
+  "EMERGENCY_STOP": 16,
+  "TARGET_REJECTION": 4,
+  "STRUCT_PROFIT": 2
+ },
+ "monthly": {
+  "2023-01": {
+   "net$": -3.3752,
+   "end": 96.6248
+  },
+  "2023-02": {
+   "net$": -4.1598,
+   "end": 92.465
+  },
+  "2023-03": {
+   "net$": 16.6328,
+   "end": 109.0979
+  },
+  "2023-04": {
+   "net$": 7.682,
+   "end": 116.7798
+  },
+  "2023-05": {
+   "net$": -7.2432,
+   "end": 109.5367
+  },
+  "2023-06": {
+   "net$": -2.9046,
+   "end": 106.6321
+  },
+  "2023-07": {
+   "net$": 29.7588,
+   "end": 136.3909
+  }
+ },
+ "months_pos": 3,
+ "months_n": 7,
+ "maxDD_pct": -15.648
+}

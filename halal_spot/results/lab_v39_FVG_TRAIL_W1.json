@@ -1,0 +1,53 @@
+{
+ "arm": "FVG_TRAIL",
+ "window": "W1",
+ "start": "2023-10-01",
+ "end": "2024-03-31",
+ "seconds": 452.4,
+ "n": 181,
+ "capital": 100.0,
+ "predicted": "LOSS: fvg_pct has no monotone separation",
+ "net": 58.024,
+ "end_equity": 158.024,
+ "pf": 1.706,
+ "wr": 9.94,
+ "be": 66,
+ "losses": 97,
+ "fees": 22.8112,
+ "net_minus_top3": -0.7283,
+ "exits": {
+  "STOP_BLUE": 99,
+  "BREAKEVEN": 66,
+  "EMERGENCY_STOP": 14,
+  "TARGET_REJECTION": 2
+ },
+ "monthly": {
+  "2023-10": {
+   "net$": 0.3156,
+   "end": 100.3156
+  },
+  "2023-11": {
+   "net$": 13.7305,
+   "end": 114.046
+  },
+  "2023-12": {
+   "net$": 1.0415,
+   "end": 115.0875
+  },
+  "2024-01": {
+   "net$": 17.4924,
+   "end": 132.5799
+  },
+  "2024-02": {
+   "net$": 26.3527,
+   "end": 158.9326
+  },
+  "2024-03": {
+   "net$": -0.9086,
+   "end": 158.024
+  }
+ },
+ "months_pos": 5,
+ "months_n": 6,
+ "maxDD_pct": -14.064
+}

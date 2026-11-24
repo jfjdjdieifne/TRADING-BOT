@@ -1,0 +1,53 @@
+{
+ "arm": "AGE12",
+ "window": "W1",
+ "start": "2023-10-01",
+ "end": "2024-03-31",
+ "seconds": 423.2,
+ "n": 39,
+ "capital": 100.0,
+ "predicted": "WIN: golden rate 7.8%->22.8% in the kept buckets",
+ "net": 18.8383,
+ "end_equity": 118.8383,
+ "pf": 2.518,
+ "wr": 20.51,
+ "be": 13,
+ "losses": 18,
+ "fees": 4.0126,
+ "net_minus_top3": -2.8824,
+ "exits": {
+  "STOP_BLUE": 20,
+  "BREAKEVEN": 13,
+  "EMERGENCY_STOP": 5,
+  "STRUCT_PROFIT": 1
+ },
+ "monthly": {
+  "2023-10": {
+   "net$": -4.8921,
+   "end": 95.1079
+  },
+  "2023-11": {
+   "net$": -0.9933,
+   "end": 94.1146
+  },
+  "2023-12": {
+   "net$": 11.0243,
+   "end": 105.139
+  },
+  "2024-01": {
+   "net$": 0.4001,
+   "end": 105.5391
+  },
+  "2024-02": {
+   "net$": 14.6088,
+   "end": 120.1478
+  },
+  "2024-03": {
+   "net$": -1.3096,
+   "end": 118.8383
+  }
+ },
+ "months_pos": 3,
+ "months_n": 6,
+ "maxDD_pct": -9.205
+}

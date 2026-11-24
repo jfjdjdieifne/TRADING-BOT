@@ -1,0 +1,59 @@
+{
+ "arm": "SNIPER",
+ "window": "OLD7",
+ "start": "2023-01-01",
+ "end": "2023-07-31",
+ "seconds": 347.4,
+ "n": 52,
+ "capital": 100.0,
+ "predicted": "best case: fewer trades, higher PF, lower net",
+ "net": 2.7492,
+ "end_equity": 102.7492,
+ "pf": 1.197,
+ "wr": 11.54,
+ "be": 22,
+ "losses": 24,
+ "fees": 4.9299,
+ "net_minus_top3": -12.5482,
+ "exits": {
+  "STOP_BLUE": 23,
+  "BREAKEVEN": 22,
+  "EMERGENCY_STOP": 3,
+  "TARGET_REJECTION": 2,
+  "STRUCT_PROFIT": 1,
+  "SHIELD_BE": 1
+ },
+ "monthly": {
+  "2023-01": {
+   "net$": -0.4401,
+   "end": 99.5599
+  },
+  "2023-02": {
+   "net$": -3.2864,
+   "end": 96.2734
+  },
+  "2023-03": {
+   "net$": -1.9981,
+   "end": 94.2753
+  },
+  "2023-04": {
+   "net$": -1.3793,
+   "end": 92.896
+  },
+  "2023-05": {
+   "net$": -2.9099,
+   "end": 89.9861
+  },
+  "2023-06": {
+   "net$": -0.7906,
+   "end": 89.1955
+  },
+  "2023-07": {
+   "net$": 13.5537,
+   "end": 102.7492
+  }
+ },
+ "months_pos": 1,
+ "months_n": 7,
+ "maxDD_pct": -13.311
+}

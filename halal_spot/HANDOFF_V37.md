@@ -155,3 +155,65 @@ Four consequences:
 
 - Engine: `strategy_v36_ict_champion.py` unchanged from v36 (no v37 knobs added yet).
 - Running: `_batch_v37_verify.sh` — W2 / OLD7 / FULL15 / MODERN re-runs.
+
+---
+
+## 6. v39 (THE GOLDEN SNIPER) — added 2026-11-17
+
+The owner's thesis: *"sniping 1-2 golden trades a week beats taking 10 where 2
+are golden and 8 are breakeven/stops that bleed fees and tie up the single cash
+slot."* Full report: `results/REPORT_AR_v39.md`. Raw output:
+`results/_audit_v39_full.txt` (257 lines), `results/_v39_step2_table.txt`,
+`results/_v39_matrix.log`.
+
+**The measurement that settles it** — the chaff does NOT block the slot:
+
+| class | n (5 windows pooled) | median hold |
+|---|---|---|
+| GOLDEN | 123 | **8.58 h** |
+| DEAD_BE | 328 | **0.33 h** |
+| STOP_LOSS | 568 | **0.33 h** |
+
+Slot occupancy is only **9.3%–16.5%** of each window, and just **0.3%–2.3%** of
+trades ever hold >2h without reaching +1R. The seat is empty 83–91% of the
+time; there is nothing to evict and no blocked signal to free.
+
+**Two harness bugs found in v39's own code and fixed (both are recurring
+traps, do not repeat them):**
+1. `_assert_wired` counted knob names in the RAW source, so a name appearing
+   only in a header COMMENT passed. `TRAIL_ANCHOR` did exactly that and
+   returned `$158.0240` — B0 to the cent. The check now strips `#` comments.
+2. The "wins" column seeded its baseline from whichever arm ran first, so only
+   W1 had a B0 and every other window was scored against W1's $158.02. Baseline
+   now comes from the five committed v37 tapes:
+   `W1=158.024 W2=194.3751 OLD7=89.5031 MOD_Y1=326.61 MOD_Y2=107.5696`.
+
+**Engine state:** 5 new knobs, all default OFF —
+`MIN_BOX_AGE_BARS=0`, `TRAIL_ANCHOR=""`, `HTF_DEMAND_GATE=""`,
+`TIME_STOP_BARS=0`, `TIME_STOP_R=1.0`. B0 W1 re-verified after the edits:
+**n=181 / $158.0240 / PF 1.706 / DD −14.064%** — unchanged.
+
+**VERDICT: no v39 knob ships.** 0 of 10 arms won 5/5. The best-shaped arm
+(AGE12) delivered exactly what was asked — 1.17–2.15 trades/week, fees
+$22.81→$4.01, PF 1.706→2.518, lower DD in all five windows — and **lost money
+in all five**, because it kept only 42.3% of the golden trades and gave back
+$691.84 of golden profit to save $322.12 of fees.
+
+**The root cause worth remembering:** with one slot and 100% deploy, the real
+cost is not the fee — it is *the golden trade you did not take*. Every
+trade-count filter cuts the golden cohort by roughly the same fraction it cuts
+the book, because golden-ness is not concentrated in a pre-entry subset. It
+appears after the fill, not before.
+
+**Still open (the only live lead):** `exec_tf = 1h` is far and away the best
+quality bucket — 20.2% golden and $1.027/trade vs 8.3% and $0.308 for 5min —
+on 89 trades across five windows. Turning the engine into a 1H-only book has
+never been tested as an arm and is the recommended next round.
+
+**Not measurable on this build:** "Weapon A vs B". `v29_arm`, `v31_brain` and
+`s1_kind` are CONSTANT in every tape (`seam`/`sniper`/`BOX_STACK`). A split
+table would be fabrication; a second weapon must be built before the question
+can be asked.
+
+**Python:** `/home/user/.venv_v39/bin/python` (pandas 3.1.1, numpy 2.4.6).
+The venv does NOT survive a sandbox reset — recreate it.

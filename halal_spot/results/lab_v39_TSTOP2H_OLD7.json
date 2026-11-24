@@ -1,0 +1,60 @@
+{
+ "arm": "TSTOP2H",
+ "window": "OLD7",
+ "start": "2023-01-01",
+ "end": "2023-07-31",
+ "seconds": 325.8,
+ "n": 199,
+ "capital": 100.0,
+ "predicted": "no-op: chaff already dies in a 0.33h median",
+ "net": -4.4698,
+ "end_equity": 95.5302,
+ "pf": 0.921,
+ "wr": 11.56,
+ "be": 72,
+ "losses": 104,
+ "fees": 20.2163,
+ "net_minus_top3": -27.3374,
+ "exits": {
+  "STOP_BLUE": 94,
+  "BREAKEVEN": 72,
+  "EMERGENCY_STOP": 15,
+  "TIME_STOP_DEAD_TRADE": 10,
+  "STRUCT_PROFIT": 4,
+  "TARGET_REJECTION": 3,
+  "SHIELD_BE": 1
+ },
+ "monthly": {
+  "2023-01": {
+   "net$": -3.612,
+   "end": 96.388
+  },
+  "2023-02": {
+   "net$": -6.8366,
+   "end": 89.5514
+  },
+  "2023-03": {
+   "net$": 12.5309,
+   "end": 102.0823
+  },
+  "2023-04": {
+   "net$": 9.7651,
+   "end": 111.8473
+  },
+  "2023-05": {
+   "net$": -4.6559,
+   "end": 107.1915
+  },
+  "2023-06": {
+   "net$": -3.9296,
+   "end": 103.2618
+  },
+  "2023-07": {
+   "net$": -7.7317,
+   "end": 95.5302
+  }
+ },
+ "months_pos": 2,
+ "months_n": 7,
+ "maxDD_pct": -17.721
+}

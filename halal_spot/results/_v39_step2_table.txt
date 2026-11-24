@@ -1,0 +1,51 @@
+============================================================================================================
+v39 STEP 2 RESULTS  --  golden-sniper knobs through the engine
+============================================================================================================
+arm              W1       W2     OLD7   MOD_Y1   MOD_Y2  wins  n_tot golden    fees$
+------------------------------------------------------------------------------------
+B0           158.02   194.38    89.50   326.61   107.57     0      0      0     0.00
+AGE12        118.84   131.99   122.15   118.82   117.85     2    306     52    33.32
+AGE24        111.67        -        -        -        -     0     10      3     1.03
+DEMAND4H     104.90   199.03   136.39   225.08   105.09     2   1005    106   123.12
+DEMAND1H     106.05        -        -        -        -     0    139     13    13.18
+FVG_TRAIL    158.02        -        -        -        -     0    181     18    22.81
+TSTOP2H      151.50   203.65    95.53   332.26    89.56     3   1153    123   166.06
+TSTOP4H      152.27        -        -        -        -     0    181     18    22.39
+TSTOP12H     161.68        -        -        -        -     1    181     19    23.12
+SNIPER        99.32   135.96   102.75   126.85    93.24     1    231     32    23.92
+
+    wins = windows where this arm beat B0 on end_equity (0-5).
+    golden = trades matching the STEP 1 GOLDEN definition.
+
+--- SHIP TEST: an arm may ship only if it wins 5/5 AND keeps
+    the golden cohort AND cuts fees. Nothing else is evidence. ---
+arm         wins   net_sum$    fees$ golden  n_tot     verdict
+B0           0/5      376.08   355.44    123   1173      reject
+AGE12        2/5      109.66    33.32     52    306      reject
+AGE24        0/1       11.67     1.03      3     10      reject
+DEMAND4H     2/5      270.50   123.12    106   1005      reject
+DEMAND1H     0/1        6.05    13.18     13    139      reject
+FVG_TRAIL    0/1       58.02    22.81     18    181      reject
+TSTOP2H      3/5      372.50   166.06    123   1153      reject
+TSTOP4H      0/1       52.27    22.39     18    181      reject
+TSTOP12H     1/1       61.68    23.12     19    181      reject
+SNIPER       1/5       58.13    23.92     32    231      reject
+
+    B0 golden cohort (all 5 windows) = 123 trades.
+
+--- trades per week and fees, B0 vs the sniper combo ---
+arm       win        wk    n  tr/wk    fees$      net$    PF    DD%   mo+
+B0        W1         26  181   6.92    22.81     58.02 1.706-14.0645/6   
+
+AGE12     W1         26   39   1.49     4.01     18.84 2.518 -9.2053/6   
+AGE12     W2         26   49   1.86     5.87     31.99 2.627-10.8594/6   
+AGE12     OLD7       30   65   2.15     6.32     22.15 2.158-12.2053/7   
+AGE12     MOD_Y1     52   61   1.17     6.73     18.82 1.771-13.0977/12  
+AGE12     MOD_Y2     52   92   1.76    10.38     17.85 1.513  -8.096/12  
+
+SNIPER    W1         26   22   0.84     2.12     -0.68 0.901  -9.711/6   
+SNIPER    W2         26   41   1.56     4.96     35.96 3.718 -9.8245/6   
+SNIPER    OLD7       30   52   1.72     4.93      2.75 1.197-13.3111/7   
+SNIPER    MOD_Y1     52   47   0.90     5.24     26.85 2.428-11.2598/12  
+SNIPER    MOD_Y2     52   69   1.32     6.66     -6.76 0.717 -9.9263/12  
+

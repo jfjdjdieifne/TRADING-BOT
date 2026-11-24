@@ -1,0 +1,257 @@
+====================================================================================================
+Q0  THE OWNER'S PREMISE, MEASURED  --  how much of B0 is golden?
+====================================================================================================
+window       n   wk  tr/wk  GOLD  g/wk  DEADBE  STOP    fees$   golden$  all net$
+W1         181   26   6.92    18  0.69      38    99    45.62    140.26     58.02
+W2         145   26   5.52    24  0.91      34    72    40.86    148.92     94.38
+OLD7       203   30   6.70    16  0.53      62    97    40.24     46.89    -10.50
+MOD_Y1     340   52   6.52    41  0.79      94   157   166.81    481.19    226.61
+MOD_Y2     304   52   5.83    24  0.46     100   143    61.90     91.64      7.57
+MODERN     653  104   6.26    66  0.63     198   305   384.93    828.89    277.70
+
+  MODERN: 66 GOLDEN over 104 weeks = 0.63 per week.
+  The owner's estimate ('0.6-1.5 golden trades/week') is CORRECT in magnitude.
+
+  MODERN fees actually paid : $384.93
+  MODERN golden gross       : $828.89
+  MODERN all-trades net     : $277.70
+
+  THE HARD PART: those 66 golden trades are 10% of the book and
+  they are worth MORE than the whole book's net. So the question
+  is not 'are they good' -- it is 'can a filter seen at entry
+  find them without also deleting them'. Q1-Q3 test exactly that.
+
+====================================================================================================
+Q1  HTF DEALING-RANGE ZONE & DEMAND  (v37 section 4d's claim, 5 windows)
+====================================================================================================
+  claim to test: [0.00,0.25) of the 4H range is chaff and [0.25,0.50] is golden
+
+--- drop nar_range_pos_4h in [0,0.25) ---
+window    n_before n_after    GOLD b/a  g/wk             net b/a    PF  impr?
+W1             181     119   18/8       0.31   +58.02/+30.80      1.60     no
+W2             145      79   24/10      0.38   +94.38/+66.49      3.28     no
+OLD7           203     121   16/9       0.30   -10.50/-7.73       0.75    YES
+MOD_Y1         340     192   41/24      0.46  +226.61/+237.06     2.98    YES
+MOD_Y2         304     175   24/11      0.21    +7.57/-12.22      0.74     no
+  --> improved 2/5 windows
+
+--- keep ONLY in_4h_demand ---
+window    n_before n_after    GOLD b/a  g/wk             net b/a    PF  impr?
+W1             181     124   18/11      0.42   +58.02/+28.69      1.53     no
+W2             145     106   24/19      0.72   +94.38/+90.93      3.19     no
+OLD7           203     150   16/14      0.46   -10.50/+4.23       1.10    YES
+MOD_Y1         340     265   41/36      0.69  +226.61/+251.41     2.29    YES
+MOD_Y2         304     226   24/18      0.35    +7.57/+15.27      1.26    YES
+  --> improved 3/5 windows
+
+--- keep ONLY in_1h_demand ---
+window    n_before n_after    GOLD b/a  g/wk             net b/a    PF  impr?
+W1             181     129   18/13      0.50   +58.02/+44.61      1.73     no
+W2             145     102   24/18      0.68   +94.38/+77.02      3.22     no
+OLD7           203     137   16/11      0.36   -10.50/-10.88      0.75     no
+MOD_Y1         340     222   41/35      0.67  +226.61/+245.11     2.35    YES
+MOD_Y2         304     207   24/15      0.29    +7.57/-6.89       0.88     no
+  --> improved 1/5 windows
+
+--- keep in_4h_demand OR in_1h_demand ---
+window    n_before n_after    GOLD b/a  g/wk             net b/a    PF  impr?
+W1             181     166   18/16      0.61   +58.02/+40.84      1.53     no
+W2             145     132   24/22      0.84   +94.38/+86.50      2.66     no
+OLD7           203     176   16/14      0.46   -10.50/-6.66       0.87    YES
+MOD_Y1         340     302   41/40      0.77  +226.61/+249.26     2.07    YES
+MOD_Y2         304     265   24/21      0.40    +7.57/+5.77       1.08     no
+  --> improved 2/5 windows
+
+--- the range buckets themselves (all 5 windows pooled) ---
+               n      net  gold  chaff  $/trade   gold%
+bucket                                                 
+[0.00,0.25)  378   19.222    43    296    0.051  11.376
+[0.25,0.50)  606  262.283    54    457    0.433   8.911
+[0.50,0.75)   80   52.110     8     64    0.651  10.000
+
+====================================================================================================
+Q2  SETUP TIMEFRAME, WEAPON, BOX FRESHNESS, DISPLACEMENT QUALITY
+====================================================================================================
+--- 2a. WEAPON ---
+  W1       v29_arm=['seam'] v31_brain=['sniper'] s1_kind=['BOX_STACK']
+  W2       v29_arm=['seam'] v31_brain=['sniper'] s1_kind=['BOX_STACK']
+  OLD7     v29_arm=['seam'] v31_brain=['sniper'] s1_kind=['BOX_STACK']
+  MOD_Y1   v29_arm=['seam'] v31_brain=['sniper'] s1_kind=['BOX_STACK']
+  MOD_Y2   v29_arm=['seam'] v31_brain=['sniper'] s1_kind=['BOX_STACK']
+  --> every trade is the same weapon (seam/sniper/BOX_STACK).
+      'Weapon A vs B' CANNOT be measured on this build: the
+      column is constant. Reporting a split would be fabrication.
+
+--- 2b. SETUP TIMEFRAME (exec_tf) ---
+window   tf         n  GOLD CHAFF  gold%      net$    $/tr     PF
+W1       15min     34     3    20    8.8     -5.05   -0.15   0.74
+W1       1h        17     2    13   11.8     16.91    0.99   2.23
+W1       30min     24     0    13    0.0     -6.20   -0.26   0.00
+W1       5min     106    13    91   12.3     52.36    0.49   2.22
+W2       15min     30     9    19   30.0     31.74    1.06   3.54
+W2       1h        12     2     5   16.7     12.38    1.03   6.01
+W2       30min     24     5    18   20.8     18.60    0.77   2.48
+W2       5min      79     8    64   10.1     31.66    0.40   2.07
+OLD7     15min     61     3    51    4.9     -7.29   -0.12   0.57
+OLD7     1h        13     5     6   38.5      4.80    0.37   2.49
+OLD7     30min     34     2    28    5.9      3.66    0.11   1.29
+OLD7     5min      95     6    74    6.3    -11.67   -0.12   0.54
+MOD_Y1   15min     78    10    47   12.8      5.00    0.06   1.09
+MOD_Y1   1h        26     7    17   26.9     59.14    2.27   3.44
+MOD_Y1   30min     32     6    20   18.8     25.41    0.79   1.60
+MOD_Y1   5min     204    18   167    8.8    137.06    0.67   2.00
+MOD_Y2   15min     66     8    50   12.1      9.85    0.15   1.50
+MOD_Y2   1h        21     2    18    9.5     -1.85   -0.09   0.74
+MOD_Y2   30min     42     4    36    9.5      5.72    0.14   1.50
+MOD_Y2   5min     175    10   139    5.7     -6.15   -0.04   0.87
+
+  pooled:
+         n  gold  chaff      net   gold%   $/tr
+tf                                             
+15min  269    33    187   34.258  12.268  0.127
+1h      89    18     59   91.382  20.225  1.027
+30min  156    17    115   47.192  10.897  0.303
+5min   659    55    535  203.250   8.346  0.308
+
+--- 2c. BOX FRESHNESS  (entry_idx - bos_idx, in bars) ---
+window   bucket          n  GOLD  CHAF  gold%      net$    $/tr
+W1       [0,6)         105     4    75    3.8     -6.05   -0.06
+W1       [6,12)         40     4    31   10.0     -2.46   -0.06
+W1       [12,24)        22     6    20   27.3     39.06    1.78
+W1       [24,48)        11     3     8   27.3     27.47    2.50
+W1       [48,inf)        3     1     3   33.3     -0.00   -0.00
+W2       [0,6)          84    12    63   14.3     45.26    0.54
+W2       [6,12)         34     5    24   14.7     15.39    0.45
+W2       [12,24)        22     7    14   31.8     38.18    1.74
+W2       [24,48)         4     0     4    0.0     -2.93   -0.73
+W2       [48,inf)        1     0     1    0.0     -1.52   -1.52
+OLD7     [0,6)         107     6    86    5.6    -12.31   -0.12
+OLD7     [6,12)         57     5    45    8.8      5.44    0.10
+OLD7     [12,24)        29     4    21   13.8     -2.60   -0.09
+OLD7     [24,48)        10     1     7   10.0     -1.02   -0.10
+MOD_Y1   [0,6)         230    24   177   10.4    172.06    0.75
+MOD_Y1   [6,12)         63     8    40   12.7     43.77    0.69
+MOD_Y1   [12,24)        37     8    28   21.6     18.30    0.49
+MOD_Y1   [24,48)         9     0     6    0.0    -16.46   -1.83
+MOD_Y1   [48,inf)        1     1     0  100.0      8.94    8.94
+MOD_Y2   [0,6)         175     9   135    5.1     -6.21   -0.04
+MOD_Y2   [6,12)         76     5    64    6.6      0.04    0.00
+MOD_Y2   [12,24)        35     8    28   22.9     18.29    0.52
+MOD_Y2   [24,48)        14     2    12   14.3     -2.30   -0.16
+MOD_Y2   [48,inf)        4     0     4    0.0     -2.25   -0.56
+
+  pooled:
+            n  gold  chaff      net   gold%   $/tr
+bucket                                            
+[0,6)     701    55    536  192.754   7.846  0.275
+[12,24)   145    33    111  111.225  22.759  0.767
+[24,48)    48     6     37    4.762  12.500  0.099
+[48,inf)    9     2      8    5.159  22.222  0.573
+[6,12)    270    27    204   62.182  10.000  0.230
+
+--- 2d. DISPLACEMENT QUALITY  (fvg_pct = yellow box height %) ---
+window   bucket          n  GOLD  CHAF  gold%      net$    $/tr
+W1       [0,0.05)       70     5    51    7.1     -5.44   -0.08
+W1       [0.05,0.1)     31     3    26    9.7     10.54    0.34
+W1       [0.1,0.2)      31     3    22    9.7     20.93    0.68
+W1       [0.2,0.4)      24     2    21    8.3     16.55    0.69
+W1       [0.4,100)      25     5    17   20.0     15.44    0.62
+W2       [0,0.05)       59     9    40   15.3     36.20    0.61
+W2       [0.05,0.1)     29     4    20   13.8      4.41    0.15
+W2       [0.1,0.2)      27     4    22   14.8     30.13    1.12
+W2       [0.2,0.4)      19     4    16   21.1     13.34    0.70
+W2       [0.4,100)      11     3     8   27.3     10.29    0.94
+OLD7     [0,0.05)       90     4    71    4.4    -19.50   -0.22
+OLD7     [0.05,0.1)     35     2    28    5.7     -9.52   -0.27
+OLD7     [0.1,0.2)      39     3    32    7.7     -1.86   -0.05
+OLD7     [0.2,0.4)      24     4    17   16.7     14.90    0.62
+OLD7     [0.4,100)      15     3    11   20.0      5.48    0.37
+MOD_Y1   [0,0.05)       98     9    79    9.2     52.99    0.54
+MOD_Y1   [0.05,0.1)     66     5    57    7.6     52.85    0.80
+MOD_Y1   [0.1,0.2)      63     8    45   12.7     59.73    0.95
+MOD_Y1   [0.2,0.4)      58     8    40   13.8     43.44    0.75
+MOD_Y1   [0.4,100)      55    11    30   20.0     17.60    0.32
+MOD_Y2   [0,0.05)      136    10   106    7.4      6.52    0.05
+MOD_Y2   [0.05,0.1)     49     3    43    6.1      0.26    0.01
+MOD_Y2   [0.1,0.2)      44     5    37   11.4      9.00    0.20
+MOD_Y2   [0.2,0.4)      45     4    38    8.9      2.51    0.06
+MOD_Y2   [0.4,100)      30     2    19    6.7    -10.72   -0.36
+
+  pooled:
+              n  gold  chaff      net   gold%   $/tr
+bucket                                              
+[0,0.05)    453    37    347   70.774   8.168  0.156
+[0.05,0.1)  210    17    174   58.537   8.095  0.279
+[0.1,0.2)   204    23    158  117.936  11.275  0.578
+[0.2,0.4)   170    22    132   90.739  12.941  0.534
+[0.4,100)   136    24     85   38.096  17.647  0.280
+
+====================================================================================================
+Q3  SLOT OCCUPANCY AND TIME-TO-1R  --  what a time stop would free
+====================================================================================================
+  For every trade: how long until it FIRST reached +1.0R?
+  (forward 5m bars between entry and exit, causal read only.)
+
+--- W1 (span 4,392h) ---
+  trades  181   slot occupied     723h =  16.5% of the window
+  GOLDEN  hold: median   23.2h   time-to-1R median    0.0h
+  DEAD_BE hold: median    0.3h   time-to-1R n/a (never moves)
+  STOP    hold: median    0.2h
+  never worked (mfe_R<0.2):   3 trades holding       1h =   0.0% of the window
+    evict at  2h if still <+1R: would free     586h across  36 trades
+    evict at  4h if still <+1R: would free     521h across  27 trades
+    evict at  6h if still <+1R: would free     472h across  24 trades
+    evict at 12h if still <+1R: would free     372h across  13 trades
+
+--- W2 (span 4,416h) ---
+  trades  145   slot occupied     627h =  14.2% of the window
+  GOLDEN  hold: median    8.8h   time-to-1R median    0.0h
+  DEAD_BE hold: median    0.4h   time-to-1R n/a (never moves)
+  STOP    hold: median    0.5h
+  never worked (mfe_R<0.2):   4 trades holding       3h =   0.1% of the window
+    evict at  2h if still <+1R: would free     493h across  38 trades
+    evict at  4h if still <+1R: would free     429h across  26 trades
+    evict at  6h if still <+1R: would free     385h across  18 trades
+    evict at 12h if still <+1R: would free     300h across  12 trades
+
+--- OLD7 (span 5,088h) ---
+  trades  203   slot occupied     498h =   9.8% of the window
+  GOLDEN  hold: median    5.4h   time-to-1R median    0.0h
+  DEAD_BE hold: median    0.3h   time-to-1R n/a (never moves)
+  STOP    hold: median    0.3h
+  never worked (mfe_R<0.2):   8 trades holding       2h =   0.0% of the window
+    evict at  2h if still <+1R: would free     342h across  35 trades
+    evict at  4h if still <+1R: would free     286h across  24 trades
+    evict at  6h if still <+1R: would free     244h across  18 trades
+    evict at 12h if still <+1R: would free     164h across  10 trades
+
+--- MOD_Y1 (span 8,760h) ---
+  trades  340   slot occupied   1,067h =  12.2% of the window
+  GOLDEN  hold: median    7.2h   time-to-1R median    0.1h
+  DEAD_BE hold: median    0.4h   time-to-1R n/a (never moves)
+  STOP    hold: median    0.3h
+  never worked (mfe_R<0.2):  12 trades holding       2h =   0.0% of the window
+    evict at  2h if still <+1R: would free     796h across  67 trades
+    evict at  4h if still <+1R: would free     683h across  46 trades
+    evict at  6h if still <+1R: would free     600h across  35 trades
+    evict at 12h if still <+1R: would free     456h across  17 trades
+
+--- MOD_Y2 (span 8,760h) ---
+  trades  304   slot occupied     813h =   9.3% of the window
+  GOLDEN  hold: median   12.5h   time-to-1R median    0.0h
+  DEAD_BE hold: median    0.2h   time-to-1R n/a (never moves)
+  STOP    hold: median    0.3h
+  never worked (mfe_R<0.2):   4 trades holding       3h =   0.0% of the window
+    evict at  2h if still <+1R: would free     578h across  61 trades
+    evict at  4h if still <+1R: would free     481h across  39 trades
+    evict at  6h if still <+1R: would free     410h across  31 trades
+    evict at 12h if still <+1R: would free     248h across  20 trades
+
+--- summary ---
+   win  occ_pct  dead_pct   g_h  g_t1r  s_h
+    W1    16.46      0.03 23.17   0.00 0.25
+    W2    14.21      0.06  8.83   0.00 0.50
+  OLD7     9.79      0.04  5.38   0.00 0.33
+MOD_Y1    12.18      0.03  7.25   0.08 0.33
+MOD_Y2     9.28      0.03 12.50   0.00 0.33
+

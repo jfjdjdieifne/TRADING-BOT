@@ -1,0 +1,53 @@
+{
+ "arm": "SNIPER",
+ "window": "W2",
+ "start": "2024-05-01",
+ "end": "2024-10-31",
+ "seconds": 316.1,
+ "n": 41,
+ "capital": 100.0,
+ "predicted": "best case: fewer trades, higher PF, lower net",
+ "net": 35.9612,
+ "end_equity": 135.9612,
+ "pf": 3.718,
+ "wr": 26.83,
+ "be": 13,
+ "losses": 17,
+ "fees": 4.9644,
+ "net_minus_top3": 2.5525,
+ "exits": {
+  "STOP_BLUE": 19,
+  "BREAKEVEN": 13,
+  "STRUCT_PROFIT": 6,
+  "EMERGENCY_STOP": 3
+ },
+ "monthly": {
+  "2024-05": {
+   "net$": 6.9006,
+   "end": 106.9006
+  },
+  "2024-06": {
+   "net$": -2.6899,
+   "end": 104.2107
+  },
+  "2024-07": {
+   "net$": 20.1186,
+   "end": 124.3293
+  },
+  "2024-08": {
+   "net$": 2.7097,
+   "end": 127.039
+  },
+  "2024-09": {
+   "net$": 6.6778,
+   "end": 133.7168
+  },
+  "2024-10": {
+   "net$": 2.2445,
+   "end": 135.9612
+  }
+ },
+ "months_pos": 5,
+ "months_n": 6,
+ "maxDD_pct": -9.824
+}

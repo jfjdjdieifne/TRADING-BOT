@@ -1,0 +1,54 @@
+{
+ "arm": "DEMAND4H",
+ "window": "W2",
+ "start": "2024-05-01",
+ "end": "2024-10-31",
+ "seconds": 296.7,
+ "n": 126,
+ "capital": 100.0,
+ "predicted": "weak win: 3/5 windows on the tape",
+ "net": 99.0349,
+ "end_equity": 199.0349,
+ "pf": 3.003,
+ "wr": 19.84,
+ "be": 41,
+ "losses": 60,
+ "fees": 17.6753,
+ "net_minus_top3": 39.8151,
+ "exits": {
+  "STOP_BLUE": 68,
+  "BREAKEVEN": 41,
+  "STRUCT_PROFIT": 7,
+  "EMERGENCY_STOP": 7,
+  "TARGET_REJECTION": 3
+ },
+ "monthly": {
+  "2024-05": {
+   "net$": 6.2398,
+   "end": 106.2398
+  },
+  "2024-06": {
+   "net$": -8.5277,
+   "end": 97.7121
+  },
+  "2024-07": {
+   "net$": 44.1255,
+   "end": 141.8376
+  },
+  "2024-08": {
+   "net$": 27.5485,
+   "end": 169.3861
+  },
+  "2024-09": {
+   "net$": 14.2022,
+   "end": 183.5883
+  },
+  "2024-10": {
+   "net$": 15.4466,
+   "end": 199.0349
+  }
+ },
+ "months_pos": 5,
+ "months_n": 6,
+ "maxDD_pct": -14.266
+}

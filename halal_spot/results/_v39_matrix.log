@@ -1,0 +1,137 @@
+
+##### v39 combo=AGE12 W1 2023-10-01..2024-03-31 #####
+    overrides: {"MIN_BOX_AGE_BARS": 12}
+    n=39 end=$118.8383 PF=2.518 DD=-9.205% mo+=3/6 (423.2s)
+
+##### v39 combo=AGE12 W2 2024-05-01..2024-10-31 #####
+    overrides: {"MIN_BOX_AGE_BARS": 12}
+    n=49 end=$131.9928 PF=2.627 DD=-10.859% mo+=4/6 (299.8s)
+
+##### v39 combo=AGE12 OLD7 2023-01-01..2023-07-31 #####
+    overrides: {"MIN_BOX_AGE_BARS": 12}
+    n=65 end=$122.1452 PF=2.158 DD=-12.205% mo+=3/7 (301.4s)
+
+##### v39 combo=AGE12 MOD_Y1 2024-11-01..2025-10-31 #####
+    overrides: {"MIN_BOX_AGE_BARS": 12}
+    n=61 end=$118.8247 PF=1.771 DD=-13.097% mo+=7/12 (747.6s)
+
+##### v39 combo=AGE12 MOD_Y2 2025-11-01..2026-10-31 #####
+    overrides: {"MIN_BOX_AGE_BARS": 12}
+    n=92 end=$117.8548 PF=1.513 DD=-8.09% mo+=6/12 (662.6s)
+
+##### v39 combo=SNIPER W1 2023-10-01..2024-03-31 #####
+    overrides: {"MIN_BOX_AGE_BARS": 12, "HTF_DEMAND_GATE": "4H"}
+    n=22 end=$99.3237 PF=0.901 DD=-9.71% mo+=1/6 (469.2s)
+
+##### v39 combo=SNIPER W2 2024-05-01..2024-10-31 #####
+    overrides: {"MIN_BOX_AGE_BARS": 12, "HTF_DEMAND_GATE": "4H"}
+    n=41 end=$135.9612 PF=3.718 DD=-9.824% mo+=5/6 (316.1s)
+
+##### v39 combo=SNIPER OLD7 2023-01-01..2023-07-31 #####
+    overrides: {"MIN_BOX_AGE_BARS": 12, "HTF_DEMAND_GATE": "4H"}
+    n=52 end=$102.7492 PF=1.197 DD=-13.311% mo+=1/7 (347.4s)
+
+##### v39 combo=SNIPER MOD_Y1 2024-11-01..2025-10-31 #####
+    overrides: {"MIN_BOX_AGE_BARS": 12, "HTF_DEMAND_GATE": "4H"}
+    n=47 end=$126.8535 PF=2.428 DD=-11.259% mo+=8/12 (876.0s)
+
+##### v39 combo=SNIPER MOD_Y2 2025-11-01..2026-10-31 #####
+    overrides: {"MIN_BOX_AGE_BARS": 12, "HTF_DEMAND_GATE": "4H"}
+    n=69 end=$93.2410 PF=0.717 DD=-9.926% mo+=3/12 (572.0s)
+
+##### v39 combo=DEMAND4H W1 2023-10-01..2024-03-31 #####
+    overrides: {"HTF_DEMAND_GATE": "4H"}
+    n=154 end=$104.9005 PF=1.1 DD=-22.731% mo+=3/6 (414.0s)
+
+##### v39 combo=DEMAND4H W2 2024-05-01..2024-10-31 #####
+    overrides: {"HTF_DEMAND_GATE": "4H"}
+    n=126 end=$199.0349 PF=3.003 DD=-14.266% mo+=5/6 (296.7s)
+
+##### v39 combo=DEMAND4H OLD7 2023-01-01..2023-07-31 #####
+    overrides: {"HTF_DEMAND_GATE": "4H"}
+    n=186 end=$136.3909 PF=1.618 DD=-15.648% mo+=3/7 (317.9s)
+
+##### v39 combo=DEMAND4H MOD_Y1 2024-11-01..2025-10-31 #####
+    overrides: {"HTF_DEMAND_GATE": "4H"}
+    n=277 end=$225.0813 PF=1.905 DD=-13.293% mo+=10/12 (772.3s)
+
+##### v39 combo=DEMAND4H MOD_Y2 2025-11-01..2026-10-31 #####
+    overrides: {"HTF_DEMAND_GATE": "4H"}
+    n=262 end=$105.0876 PF=1.064 DD=-26.702% mo+=5/12 (612.5s)
+
+##### v39 combo=TSTOP2H W1 2023-10-01..2024-03-31 #####
+    overrides: {"TIME_STOP_BARS": 24}
+    n=180 end=$151.4966 PF=1.649 DD=-14.064% mo+=5/6 (460.5s)
+
+##### v39 combo=TSTOP2H W2 2024-05-01..2024-10-31 #####
+    overrides: {"TIME_STOP_BARS": 24}
+    n=151 end=$203.6493 PF=2.955 DD=-11.454% mo+=5/6 (297.3s)
+
+##### v39 combo=TSTOP2H OLD7 2023-01-01..2023-07-31 #####
+    overrides: {"TIME_STOP_BARS": 24}
+    n=199 end=$95.5302 PF=0.921 DD=-17.721% mo+=2/7 (325.8s)
+
+##### v39 combo=TSTOP2H MOD_Y1 2024-11-01..2025-10-31 #####
+    overrides: {"TIME_STOP_BARS": 24}
+    n=318 end=$332.2613 PF=1.967 DD=-16.137% mo+=9/12 (811.0s)
+
+##### v39 combo=TSTOP2H MOD_Y2 2025-11-01..2026-10-31 #####
+    overrides: {"TIME_STOP_BARS": 24}
+    n=305 end=$89.5582 PF=0.858 DD=-23.996% mo+=4/12 (618.0s)
+
+##### v39 combo=AGE24 W1 2023-10-01..2024-03-31 #####
+    overrides: {"MIN_BOX_AGE_BARS": 24}
+    n=10 end=$111.6686 PF=6.138 DD=-5.497% mo+=2/5 (455.3s)
+
+##### v39 combo=DEMAND1H W1 2023-10-01..2024-03-31 #####
+    overrides: {"HTF_DEMAND_GATE": "1H"}
+    n=139 end=$106.0514 PF=1.122 DD=-18.17% mo+=3/6 (471.4s)
+
+##### v39 combo=FVG_TRAIL W1 2023-10-01..2024-03-31 #####
+    overrides: {"TRAIL_ANCHOR": "fvg"}
+    n=181 end=$158.0240 PF=1.706 DD=-14.064% mo+=5/6 (503.4s)
+
+##### v39 combo=TSTOP4H W1 2023-10-01..2024-03-31 #####
+    overrides: {"TIME_STOP_BARS": 48}
+    n=181 end=$152.2734 PF=1.651 DD=-14.064% mo+=5/6 (461.7s)
+
+##### v39 combo=TSTOP12H W1 2023-10-01..2024-03-31 #####
+    overrides: {"TIME_STOP_BARS": 144}
+    n=181 end=$161.6758 PF=1.742 DD=-14.064% mo+=5/6 (483.8s)
+============================================================================================================
+v39 STEP 2 RESULTS  --  golden-sniper knobs through the engine
+============================================================================================================
+arm              W1       W2     OLD7   MOD_Y1   MOD_Y2  wins  n_tot golden    fees$
+------------------------------------------------------------------------------------
+B0           158.02        -        -        -        -     0    181     18    22.81
+AGE12        118.84   131.99   122.15   118.82   117.85     0    306     52    33.32
+AGE24        111.67        -        -        -        -     0     10      3     1.03
+DEMAND4H     104.90   199.03   136.39   225.08   105.09     3   1005    106   123.12
+DEMAND1H     106.05        -        -        -        -     0    139     13    13.18
+FVG_TRAIL    158.02        -        -        -        -     0    181     18    22.81
+TSTOP2H      151.50   203.65    95.53   332.26    89.56     2   1153    123   166.06
+TSTOP4H      152.27        -        -        -        -     0    181     18    22.39
+TSTOP12H     161.68        -        -        -        -     1    181     19    23.12
+SNIPER        99.32   135.96   102.75   126.85    93.24     2    231     32    23.92
+
+    wins = windows where this arm beat B0 on end_equity (0-5).
+    golden = trades matching the STEP 1 GOLDEN definition.
+
+--- trades per week and fees, B0 vs the sniper combo ---
+arm       win        wk    n  tr/wk    fees$      net$    PF    DD%   mo+
+B0        W1         26  181   6.92    22.81     58.02 1.706-14.0645/6   
+
+AGE12     W1         26   39   1.49     4.01     18.84 2.518 -9.2053/6   
+AGE12     W2         26   49   1.86     5.87     31.99 2.627-10.8594/6   
+AGE12     OLD7       30   65   2.15     6.32     22.15 2.158-12.2053/7   
+AGE12     MOD_Y1     52   61   1.17     6.73     18.82 1.771-13.0977/12  
+AGE12     MOD_Y2     52   92   1.76    10.38     17.85 1.513  -8.096/12  
+
+SNIPER    W1         26   22   0.84     2.12     -0.68 0.901  -9.711/6   
+SNIPER    W2         26   41   1.56     4.96     35.96 3.718 -9.8245/6   
+SNIPER    OLD7       30   52   1.72     4.93      2.75 1.197-13.3111/7   
+SNIPER    MOD_Y1     52   47   0.90     5.24     26.85 2.428-11.2598/12  
+SNIPER    MOD_Y2     52   69   1.32     6.66     -6.76 0.717 -9.9263/12  
+
+
+### MATRIX COMPLETE ###
