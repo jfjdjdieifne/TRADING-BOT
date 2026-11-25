@@ -566,6 +566,7 @@ EXIT_SLIP_REASONS = (
     "V45_LADDER_STOP", "V45_STALL_EXIT", "V45_GUARD_STOP",
     "V46_FAILED_BOUNCE", "V46_SWING_STOP",
     "V47_FLOOR_EXEC", "V47_FLOOR_1H", "V47_FLOOR_4H",
+    "V48_G1_EXEC_M02", "V48_G2_EXEC_00", "V48_G3_EXEC2_00", "V48_G4_1H_00",
 )
 
 # =====================================================================
@@ -1019,6 +1020,33 @@ V47_X1 = 1.0              # the floor_only close floor, in true_X units
 V47_X2 = 1.5              # the raised floor once max_true_X >= V47_RAISE_AT
 V47_RAISE_AT = 4.0
 V47_COOLDOWN_H = 8.0      # m5: hours blocked after a real loss on a symbol
+# ============ v48: ZERO-CHOKE floor_only GUARDS ======================= #
+# v47 shipped the RIGHT diagnosis and the WRONG thresholds. Its guards sat
+# at X=+1.0..+1.2 AND carried an 8h cooldown that section 1.4 of the v47
+# report had ALREADY shown to be destructive (-$37.09, 6 golden runners
+# killed). The result: LINK +10.08 was choked at +0.43 and 311 extra
+# trades were opened in the freed single seat, for -$157.96 on 43 months.
+#
+# The measured law (audit_v48_zero_choke.py, ZERO engine runs):
+#   * 99/99 EMERGENCY_STOP trades crash to orig_stop_px = -1.00x.
+#   * LINK +10.08 pulled back to ~+0.43x -- ABOVE 0.00x and -0.20x.
+#   * Golden_110 reaches +0.5x within a median of 1 exec bar (100% do);
+#     Other_512 NEVER reaches +0.5x in 82.6% of cases.
+# So the guard must sit LOW (at or below 0.00x) and carry NO cooldown.
+#
+# STATIC RESULT (armed subset, 5/5 windows positive, all 4 benchmark
+# runners preserved) -- the two cells that matter:
+#   exec_tf close <= -0.20x : Golden touched  2/110, EM saved 91/99, +$56.11
+#   exec_tf close <=  0.00x : Golden touched  5/110, EM saved 93/99, +$46.45
+#   "off"                   -> bit-identical B0
+V48_MODE = "off"
+V48_X = -0.20             # the guard threshold in true_X units
+#
+#   "g1_exec_m02"   -> one exec_tf close <= -0.20x inside floor_only
+#   "g2_exec_00"    -> one exec_tf close <=  0.00x inside floor_only
+#   "g3_exec2_00"   -> TWO CONSECUTIVE exec_tf closes <= 0.00x
+#   "g4_1h_00"      -> one closed 1H candle <= 0.00x
+# ZERO cooldown in every one of them: the entry side is not touched.
 V46_MIN_X = 1.0          # only manage a position that showed this much profit
 V46_PIVOT = 2            # bars either side that confirm a swing low
 V45_COST = 0.001              # two-sided 0.10%, the brief's true_X basis
@@ -1875,8 +1903,9 @@ class ICTBoxEngine:
                 self.cnt("htf_1h_displacement")
 
         # ---- v47: the 1H candle has CLOSED -- test the blindspot floor ----
-        if V47_MODE in ("m2_1h_floor", "m4_1h_floor_ratchet",
-                        "m7_1h_floor_cooldown") and self.qty > 0:
+        if (V47_MODE in ("m2_1h_floor", "m4_1h_floor_ratchet",
+                         "m7_1h_floor_cooldown")
+                or V48_MODE == "g4_1h_00") and self.qty > 0:
             self.v47_track_peak(c)
             self.v47_floor_test(c, "V47_FLOOR_1H", time)
 
@@ -3271,6 +3300,7 @@ class ICTBoxEngine:
         self.v46_stop = None         # the protective stop it arms
         self.v46_managed = False     # has the position cleared V46_MIN_X yet
         self.v47_max_x = -9e9        # peak true_X, for the two-stage floor
+        self.v48_prev_below = False  # previous exec close was <= breakeven
         #                             the chart drew it, kept forever so the
         #                             emergency wick cap never drifts up
         self.risk = risk
@@ -3762,11 +3792,21 @@ class ICTBoxEngine:
         price is that bar's CLOSE: this is a close rule, no resting order
         was in the market, so charging the close is the conservative read.
         """
-        if V47_MODE == "off" or self.qty <= 0 or self.risk <= 0:
+        if self.qty <= 0 or self.risk <= 0:
+            return False
+        if V47_MODE == "off" and V48_MODE != "g4_1h_00":
             return False
         floor_line = getattr(self, "floor_line", self.lock_line)
         if not (self.ratchet and self.stop_px <= floor_line + 1e-9):
             return False                    # not the blindspot: B0 owns it
+        # ---- v48 G4: 1H close at/below fee-breakeven, zero cooldown ----
+        if V48_MODE == "g4_1h_00":
+            if c_lens <= self._v45_px(0.00):
+                self.cnt("v48_g4")
+                self._exit(c_lens, "V48_G4_1H_00",
+                           max(0, len(self.exec_canvas.bars) - 1), time)
+                return True
+            return False
         x = V47_X1
         if (V47_MODE == "m4_1h_floor_ratchet"
                 and self.v47_max_x >= V47_RAISE_AT):
@@ -3870,6 +3910,32 @@ class ICTBoxEngine:
                 self.cnt("v47_floor_exec")
                 self._exit(c, "V47_FLOOR_EXEC", idx, time)
                 return
+        # ============ v48: the zero-choke guards ======================= #
+        # Same blindspot window, same close-based logic, but the threshold
+        # sits at or below break-even and there is NO cooldown. Exit price
+        # is the close: no resting order was in the market.
+        if V48_MODE != "off" and floor_only:
+            if V48_MODE == "g1_exec_m02":
+                if c <= self._v45_px(-0.20):
+                    self.cnt("v48_g1")
+                    self._exit(c, "V48_G1_EXEC_M02", idx, time)
+                    return
+            elif V48_MODE == "g2_exec_00":
+                if c <= self._v45_px(0.00):
+                    self.cnt("v48_g2")
+                    self._exit(c, "V48_G2_EXEC_00", idx, time)
+                    return
+            elif V48_MODE == "g3_exec2_00":
+                # TWO CONSECUTIVE closes at/below break-even: immune to a
+                # single-bar flash print at the floor.
+                if c <= self._v45_px(0.00):
+                    if self.v48_prev_below:
+                        self.cnt("v48_g3")
+                        self._exit(c, "V48_G3_EXEC2_00", idx, time)
+                        return
+                    self.v48_prev_below = True
+                else:
+                    self.v48_prev_below = False
         # ---- v25: DISPLACEMENT DETECTION — the story proving itself.
         # The audit's 57-point separator: 91.9% of winners cross the 4H
         # dealing-range mid after entry vs only 34.7% of losers.
