@@ -1,0 +1,39 @@
+{
+ "mode": "s1s3_combo",
+ "win": "jan26",
+ "bps": 0,
+ "n": 19,
+ "gross": 6.54,
+ "fees": 3.97,
+ "net": 2.57,
+ "pf": 1.551,
+ "wr": 10.5,
+ "wk": {
+  "2026-W01": 6.89,
+  "2026-W02": -2.11,
+  "2026-W03": -1.2,
+  "2026-W04": -0.14,
+  "2026-W05": -0.87
+ },
+ "yk": {
+  "2026-01": 2.57
+ },
+ "half": {
+  "H1": 3.58,
+  "H2": -1.01
+ },
+ "reasons": {
+  "V50_SHIELD_BREATHE": 6,
+  "STOP_BLUE": 5,
+  "BREAKEVEN": 4,
+  "V50_KNIFE_SCRATCH": 2,
+  "V50_FLOOR_EXEC": 1,
+  "STRUCT_PROFIT": 1
+ },
+ "secs": 63.3,
+ "maxDD": 5.77,
+ "counts": {
+  "v50_floor": 1,
+  "v50_knife": 2
+ }
+}

@@ -569,6 +569,7 @@ EXIT_SLIP_REASONS = (
     "V48_G1_EXEC_M02", "V48_G2_EXEC_00", "V48_G3_EXEC2_00", "V48_G4_1H_00",
     "V49_C1_2CLOSE_M020", "V49_C2_1H_M020", "V49_C3_CAPPED",
     "V49_C4_EXEC_M030", "V49_C5_BOX_BLOCK", "V49_C6_COMBO",
+    "V50_FLOOR_EXEC", "V50_SHIELD_BREATHE", "V50_KNIFE_SCRATCH",
 )
 
 # =====================================================================
@@ -1074,6 +1075,40 @@ V49_MODE = "off"
 V49_CAP = 4.0            # C3: guard off once peak true_X >= this
 V49_BOX_HOURS = 24.0     # C5: how long a consumed box stays blocked
 V49_BOX_TOL = 0.0025     # C5: same-box test, relative distance on the stop
+# ============ v50: PLATEAU, 2bps STRESS, SHIELD BREATHING ============= #
+# v49's C4 (exec_tf close <= -0.30x inside floor_only, no cooldown) was the
+# first arm in the project to pass every gate: +19.86 over 43 months, 5/5
+# windows, -12 trades, 4/4 runners kept. v50 does three things:
+#   1. proves the -0.30x cell sits on a WIDE plateau, not a razor edge
+#   2. stresses it at 2bps of stop slippage
+#   3. tests the single largest static signal ever measured here: that
+#      SHIELD_BE's 0.00x scratch is cutting winners. Post-exit autopsy of
+#      the 452 SHIELD_BE trades: 146 (32.3%) went on to print +2.0x
+#      WITHOUT ever breaking orig_stop, and their median max over the
+#      next 48h was +6.25x. Letting them live to a -0.30x close instead
+#      of scratching at 0.00x is worth +184.19 statically.
+#      That number is a CEILING (it ignores seat reallocation), so the
+#      engine decides.
+V50_MODE = "off"
+V50_X = -0.30            # plateau cell for the floor_only guard
+V50_SHIELD_X = -0.30     # breathing room: close at true_X <= this
+V50_KNIFE_X = -0.65      # bar-1 falling-knife scratch threshold
+#   v50 S2 -- EXPLICIT TAP#2 RE-ENTRY -------------------------------- #
+# The 1B autopsy found that only 41 of the 452 SHIELD_BE trades ever got a
+# second fill on the same level (the engine's own gates blocked the rest),
+# and those 41 returned +1.950 each. S2 opens ONE sanctioned second fill:
+# after a SHIELD_BE/V50_SHIELD_BREATHE exit, the frozen setup is re-armed
+# and may fill again when the exec bar closes back ABOVE the original stop
+# level (a reclaim), still under the seam, still under the purple mid, and
+# still with >= 3.0R to the wall. No other gate is touched.
+V50_S2_MIN_RRR = 3.0     # the sacred pre-entry structural target gate
+V50_S2_BARS = 288        # 24h of exec bars: how long the frozen setup lives
+#   "p1_c4_m025"    -> floor_only exec close <= -0.25x
+#   "p2_c4_m030"    -> floor_only exec close <= -0.30x  (== v49 C4)
+#   "p3_c4_m035"    -> floor_only exec close <= -0.35x
+#   "s1_shield_br"  -> p2 + SHIELD_BE gets V50_SHIELD_X breathing room
+#   "s3_knife"      -> p2 + bar-1 falling-knife scratch
+#   "s1s3_combo"    -> p2 + both
 V46_MIN_X = 1.0          # only manage a position that showed this much profit
 V46_PIVOT = 2            # bars either side that confirm a swing low
 V45_COST = 0.001              # two-sided 0.10%, the brief's true_X basis
@@ -1638,6 +1673,11 @@ class ICTBoxEngine:
         self.floor_line = 0.0                  # v31 ARM 2 (LOCK_ARM_R)
         self.impulse = None                    # v31 ARM 3 live impulse leg
         self.v34_idx = 0                   # v34: last exec-canvas index
+        # ---- v50 state that must exist BEFORE the first fill ---------- #
+        self.v50_frozen = None       # S2: frozen setup for the tap#2 fill
+        self.v50_reentry_used = 0    # S2: a level gets ONE tap#2, never more
+        self.v50_bars = 0            # S3: exec bars seen since the entry
+        self.v50_max_hi_x = -9e9     # S3: peak true_X on bar highs so far
         # ---- v33 per-stamp state, written by run_backtest -------------
         self.v33_allow = True       # (ج) may this engine fill this stamp?
         self.v33_rank = 99          # (ج) leader rank, 0 = strongest
@@ -2025,6 +2065,42 @@ class ICTBoxEngine:
             if POST_3R_RATCHET and self.qty > 0:
                 self._v37_ratchet(c)
             return
+        # ---- v50 S2: EXPLICIT TAP#2 RE-ENTRY ------------------------ #
+        # Reached only while FLAT. The frozen setup survives the
+        # SHIELD_BE exit; the fill needs a causal reclaim (this bar's
+        # CLOSE back above the ORIGINAL stop level), the price still
+        # inside the frozen seam / purple mid, and >= V50_S2_MIN_RRR to
+        # the wall that was nearest at the first tap. ONE tap#2 per
+        # level, and only within V50_S2_BARS exec bars of the first fill.
+        if (V50_MODE in ("s2_reentry", "s1s2s3_combo")
+                and self.v50_frozen is not None
+                and self.v50_reentry_used < 1 and self.state == "WAIT_ANCHOR"
+                and idx > self.v50_frozen["entry_idx"]):
+            fz = self.v50_frozen
+            stop0 = fz["stop"]
+            age = idx - fz["entry_idx"]
+            if age > V50_S2_BARS:
+                self.cnt("v50_s2_expired")
+                self.v50_frozen = None
+            elif (l > stop0
+                  # spec: the exec bar CLOSES at/above the FIRST FILL price
+                  # (within 0.1%) -- the reclaim must be real, not a wick
+                  and c >= fz["fill_px"] * 0.999
+                  and c <= fz["seam"] + 1e-9
+                  and (fz["purple_mid"] is None
+                       or c <= fz["purple_mid"] + 1e-9)
+                  # the LIVE mid must also hold, or _enter's Discount
+                  # assert would fire: the tap#2 is judged in the same
+                  # discount the first tap had to satisfy
+                  and (self._eff_mid()[0] is None
+                       or c <= self._eff_mid()[0] + 1e-9)):
+                risk = c - stop0
+                wall = fz["wall"]
+                if (risk > 0
+                        and (wall is None
+                             or (wall - c) >= V50_S2_MIN_RRR * risk)):
+                    self._v50_reenter(fz, c, idx, time)
+                    return
         # prune consumed dealing ranges once price trades outside them
         self.consumed = [(b, t) for b, t in self.consumed
                          if b <= c <= t]
@@ -3352,6 +3428,26 @@ class ICTBoxEngine:
         self.v47_max_x = -9e9        # peak true_X, for the two-stage floor
         self.v48_prev_below = False  # previous exec close was <= breakeven
         self.v49_prev_below = False  # C1: previous exec close <= -0.20x
+        self.v50_bars = 0            # S3: exec bars seen since the entry
+        self.v50_max_hi_x = -9e9     # S3: peak true_X on bar highs so far
+        self.v50_frozen = None       # S2: frozen setup for the tap#2 fill
+        self.v50_reentry_used = 0    # S2: a level gets ONE tap#2, never more
+        if V50_MODE in ("s2_reentry", "s1s2s3_combo"):
+            # S2: freeze the geometry that produced this fill, so a tap#2
+            # can be judged against the SAME box, seam and purple mid
+            # instead of a re-drawn one (zero lookahead: all values are
+            # read from the setup that is being filled right now).
+            self.v50_frozen = {
+                "green": (s.green.y_bottom, s.green.y_top, s.green.start_idx,
+                          s.green.kind, s.green.tf),
+                "yellow": (s.yellow.y_bottom, s.yellow.y_top,
+                           s.yellow.start_idx, s.yellow.kind, s.yellow.tf),
+                "seam": min(s.green.y_top, s.yellow.y_bottom),
+                "fill_px": fill_px,
+                "stop": stop, "purple_mid": s.purple_mid,
+                "wall": (s.wall.y_bottom if s.wall is not None else None),
+                "entry_time": str(time), "entry_idx": idx}
+            self.v50_reentry_used = 0
         self.v49_peak_x = -9e9       # C3: peak true_X since entry
         # C5 block state lives on the SHARED pool: it must outlive the
         # closed position, since its whole purpose is to gate the NEXT one.
@@ -3541,6 +3637,49 @@ class ICTBoxEngine:
             return True
         return False
 
+    # ================== v50 S2: tap#2 re-entry ==================== #
+    def _v50_reenter(self, fz, fill_px, idx, time):
+        """Re-arm the FROZEN setup and let _enter enforce every law.
+
+        Nothing here reads the chart state: the green/yellow boxes, the
+        seam, the stop, the purple mid and the wall ceiling are all taken
+        from the snapshot written at the FIRST fill, so the second tap is
+        judged against the same geometry and cannot chase a re-drawn box.
+        """
+        g = fz["green"]
+        y = fz["yellow"]
+        green = Box(y_bottom=g[0], y_top=g[1], start_idx=g[2],
+                    kind=g[3], tf=g[4], state="ACTIVE")
+        yellow = Box(y_bottom=y[0], y_top=y[1], start_idx=y[2],
+                     kind=y[3], tf=y[4], state="ACTIVE")
+        wall = (Box(y_bottom=fz["wall"], y_top=fz["wall"], start_idx=idx,
+                    kind="RED", tf=STRUCT_TF, state="ACTIVE")
+                if fz["wall"] is not None else None)
+        wave = Box(y_bottom=fz["stop"], y_top=fz["stop"], start_idx=idx,
+                   kind="BLUE", tf=STRUCT_TF, state="ACTIVE")
+        st = Setup(anchor_idx=fz["entry_idx"], sweep_low=fz["stop"],
+                   bos_idx=fz["entry_idx"], bos_red=wall if wall is not None
+                   else wave, wave_low=wave, green=green, yellow=yellow,
+                   entry=fz["seam"], stop=fz["stop"],
+                   risk=max(fill_px - fz["stop"], 1e-12),
+                   gate_idx=idx - 1, wall=wall,
+                   purple_mid=fz["purple_mid"] if fz["purple_mid"] is not None
+                   else fill_px * 2, seam_px=fz["seam"],
+                   old_stop_px=fz["stop"], H=max(fz["seam"] - fz["stop"], 1e-12),
+                   order_px=fz["stop"], order_stop=fz["stop"],
+                   arm="seam")
+        self.cnt("v50_s2_attempt")
+        self.targets = []
+        self.setup = st
+        self._enter(st, fill_px, idx, time)
+        if self.qty > 0:                       # the fill was accepted
+            self.v50_reentry_used = 1
+            self.trade["v50_tap2"] = 1
+            self.trade["v50_tap1_time"] = fz["entry_time"]
+            self.cnt("v50_s2_filled")
+        else:
+            self.cnt("v50_s2_rejected")
+
     def _exit(self, px, reason, idx, time):
         # ---- v36 (3): the stop-market sell pays the spread ----------- #
         # Applied ONCE, here, so every exit path inherits it and no
@@ -3610,6 +3749,10 @@ class ICTBoxEngine:
             self._v35_note_exit(True, time)
         else:
             self._v35_note_exit(bool(is_win), time)
+        # ---- v50 S2: a used level may not be tapped a third time ----- #
+        if (V50_MODE in ("s2_reentry", "s1s2s3_combo") and self.v50_reentry_used
+                and getattr(self, "v50_frozen", None) is not None):
+            self.v50_frozen = None
         self.qty = 0.0
         self.trade = None
         self.ratchet = False
@@ -3983,13 +4126,18 @@ class ICTBoxEngine:
             px = (c if shield_close_only
                   else (self.stop_px if o >= self.stop_px else o))
             be_now = self.entry_px * (1 + 2 * COST)
-            scratch = self.be_armed and self.stop_px <= be_now + 1e-9
+            _br = (V50_MODE in ("s1_shield_br", "s1s3_combo", "s1s2s3_combo")
+                   and self.be_armed
+                   and self.stop_px < be_now - 1e-9)
+            scratch = (self.be_armed and self.stop_px <= be_now + 1e-9
+                       and not _br)
             at_floor = (self.ratchet and LOCK_MODE == "stop"
                         and self.stop_px >= floor_line - 1e-9)
             self._exit(px, "LOCK_FLOOR_STOP" if at_floor
-                       else ("SHIELD_BE" if scratch
-                             else ("FLOOR_5M" if (tf5 and floor_only)
-                                   else "STOP_BLUE")),
+                       else ("V50_SHIELD_BREATHE" if _br
+                             else ("SHIELD_BE" if scratch
+                                   else ("FLOOR_5M" if (tf5 and floor_only)
+                                         else "STOP_BLUE"))),
                        idx, time)
             return
         # ================= v47: DEFEND floor_only ====================== #
@@ -4059,6 +4207,28 @@ class ICTBoxEngine:
                     self.cnt("v49_c4")
                     self._exit(c, "V49_C4_EXEC_M030", idx, time)
                     return
+        # ---- v50 S3: BAR-1 FALLING-KNIFE SCRATCH --------------------- #
+        # Stage 1C: a trade that by the close of Bar 1 has never printed
+        # above +0.15x AND is already closing at/below -0.65x is a knife.
+        # 0 of 110 golden runners ever looked like this (close <= -0.65x
+        # bucket) while 135-155 of Other_512 did -- a genuine zero-golden
+        # separator, unlike every entry-side variable tested in v49.
+        if V50_MODE in ("s3_knife", "s1s3_combo", "s1s2s3_combo") and self.qty > 0:
+            n_bar = getattr(self, "v50_bars", 0) + 1
+            self.v50_bars = n_bar
+            self.v50_max_hi_x = max(getattr(self, "v50_max_hi_x", -9e9),
+                                    self.v47_true_x_at(h))
+            if (n_bar >= 2 and self.v50_max_hi_x < 0.15
+                    and c <= self._v45_px(V50_KNIFE_X)):
+                self.cnt("v50_knife")
+                self._exit(c, "V50_KNIFE_SCRATCH", idx, time)
+                return
+        # ============ v50: plateau cells + shield breathing ============ #
+        if V50_MODE != "off" and floor_only:
+            if c <= self._v45_px(V50_X):
+                self.cnt("v50_floor")
+                self._exit(c, "V50_FLOOR_EXEC", idx, time)
+                return
         # ---- v25: DISPLACEMENT DETECTION — the story proving itself.
         # The audit's 57-point separator: 91.9% of winners cross the 4H
         # dealing-range mid after entry vs only 34.7% of losers.
@@ -4093,6 +4263,16 @@ class ICTBoxEngine:
             elif rule == "NONE":
                 fired = False
             be = self.entry_px * (1 + 2 * COST)       # entry + fees
+            # ---- v50 S1: SHIELD BREATHING ROOM ----------------------- #
+            # The autopsy of the 452 SHIELD_BE trades found 146 (32.3%)
+            # went on to print +2.0x without EVER breaking orig_stop, with
+            # a median max of +6.25x over the next 48h. They were scratched
+            # at 0.00x by this very line. S1 places the shield at
+            # V50_SHIELD_X instead of 0.00x, so a retest of the box is
+            # allowed to breathe while orig_stop_px still caps the loss at
+            # -1R through EMERGENCY_WICK_STOP.
+            if V50_MODE in ("s1_shield_br", "s1s3_combo", "s1s2s3_combo"):
+                be = self._v45_px(V50_SHIELD_X)
             # a stop must sit BELOW the market; arming happens on this
             # bar's CLOSE so the BE stop only lives from the next bar
             if fired and c > be:
@@ -4100,6 +4280,8 @@ class ICTBoxEngine:
                 self.be_armed = True
                 self.cnt("shield_armed_disp")
                 t["be_source"] = rule
+                if V50_MODE in ("s1_shield_br", "s1s3_combo", "s1s2s3_combo"):
+                    t["v50_shield_breathing"] = V50_SHIELD_X
         # ---- v31 ARM 1: STRUCTURAL PROFIT TRAIL ---------------------
         # Before the floor exists, the v30 law could only move the stop
         # to break-even: everything between +0.01R and +2.99R was either
