@@ -293,14 +293,12 @@ def section4(L, cells):
     if not modes:
         A("*_(لم يكتمل أي ذراع على النوافذ الخمس بعد)_*\n")
         return
-    A("| الذراع | صفقات | زيادة عن B0 | صافي $ | Δ $ | تراجع % | "
-      "معامل الربح | شهر+ /43 | نصف شهر+ /86 | أسبوع+ /187 |")
-    A("|---|---:|---:|---:|---:|---|---:|---:|---:|---:|")
+    A("| الذراع | صفقات | زيادة عن B0 | صافي $ | Δ $ | شهر+ /43 | ")
+    A("|---|---:|---:|---:|---:|---:|")
     bnet = float(b0.net_pnl.sum())
     st = stats(b0.net_pnl, b0.entry_ts)
     bmo = int((b0.groupby("ym").net_pnl.sum() > 0).sum())
-    A(f"| **B0** | {len(b0)} | — | **{bnet:+.2f}** | — | — | — | "
-      f"{bmo}/{st['mo']} | — | — |")
+    A(f"| **B0** | {len(b0)} | — | **{bnet:+.2f}** | — | {bmo}/{st['mo']} |")
     m7 = ENG47 / "m7_1h_floor_cooldown__W1__0.json"
     if m7.exists():
         tot, nn, pos_mo, bwp, wkp = 0.0, 0, 0, 0, 0
@@ -313,7 +311,7 @@ def section4(L, cells):
             nn += j["n"]
             pos_mo += sum(1 for v in j.get("yk", {}).values() if v > 0)
         A(f"| **v47 M7** | {nn} | {nn-len(b0):+d} | **{tot:+.2f}** | "
-          f"{tot-bnet:+.2f} | — | — | {pos_mo}/43 | — | — |")
+          f"{tot-bnet:+.2f} | {pos_mo}/43 |")
     for m in modes:
         lab = dict(ARMS)[m]
         tot = sum(cells[(m, w, 0)]["net"] for w in WINS)
@@ -321,7 +319,7 @@ def section4(L, cells):
         pos_mo = sum(sum(1 for v in cells[(m, w, 0)].get("yk", {}).values()
                          if v > 0) for w in WINS)
         A(f"| **{lab}** | {nn} | {nn-len(b0):+d} | **{tot:+.2f}** | "
-          f"**{tot-bnet:+.2f}** | — | — | {pos_mo}/43 | — | — |")
+          f"**{tot-bnet:+.2f}** | {pos_mo}/43 |")
     A("")
     A("### 4.1 تفصيل النوافذ\n")
     A("| الذراع | النافذة | صفقات | B0 صفقات | صافي $ | B0 $ | Δ $ | "
@@ -378,7 +376,7 @@ def section6(L, cells):
     if not modes:
         A("*_(ينتظر اكتمال النوافذ)_*\n")
         return
-    A("| الذراع | 43 شهراً $ | Δ عن B0 | نوافذ موجبة | يقين |")
+    A("| الذراع | 43 شهراً $ | Δ عن B0 | صفقات | نوافذ موجبة | يقين |")
     A("|---|---:|---:|---:|---|")
     for m in modes:
         tot = sum(cells[(m, w, 0)]["net"] for w in WINS)
@@ -386,9 +384,11 @@ def section6(L, cells):
                    if cells[(m, w, 0)]["net"]
                    - float(b0[b0.win == w].net_pnl.sum()) > 0)
         ok = tot > bnet and npos >= 3
+        nn = sum(cells[(m, w, 0)]["n"] for w in WINS)
         A(f"| {dict(ARMS)[m]} | **{tot:+.2f}** | **{tot-bnet:+.2f}** | "
-          f"{npos}/5 | {'**يجتاز**' if ok else 'يفشل'} |")
-    A(f"| B0 (المرجع) | **{bnet:+.2f}** | — | — | — |")
+          f"{nn} ({nn-len(b0):+d}) | {npos}/5 | "
+          f"{'**يجتاز**' if ok else 'يفشل'} |")
+    A(f"| B0 (المرجع) | **{bnet:+.2f}** | — | {len(b0)} | — | — |")
     A("")
     g1 = "g1_exec_m02"
     if all((g1, w, 0) in cells for w in WINS):
