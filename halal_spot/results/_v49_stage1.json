@@ -1,0 +1,344 @@
+{
+ "1a": {
+  "choked": [
+   {
+    "symbol": "XRPUSDT_5m",
+    "entry_time": "2024-12-27 17:20:00+00:00",
+    "b0_net": 3.122281694588658,
+    "g1_net": -0.2901786882066124,
+    "b0_exit": "STOP_BLUE",
+    "peak": 2.49,
+    "min_close": -0.22,
+    "cons": 1
+   },
+   {
+    "symbol": "ADAUSDT_5m",
+    "entry_time": "2025-03-17 00:05:00+00:00",
+    "b0_net": 3.8088869089667687,
+    "g1_net": -0.8131434055424114,
+    "b0_exit": "STOP_BLUE",
+    "peak": 3.59,
+    "min_close": -0.63,
+    "cons": 1
+   }
+  ],
+  "caps": [
+   {
+    "label": "cap 3.0x",
+    "g_touched": 1,
+    "g_delta": -3.41,
+    "e_saved": 47,
+    "e_delta": 17.93,
+    "total": 14.52,
+    "ex_top1": 10.91,
+    "windows_pos": 5,
+    "per_win": {
+     "W1": 2.5,
+     "W2": 2.9,
+     "OLD7": 2.83,
+     "MOD_Y1": 3.86,
+     "MOD_Y2": 2.42
+    },
+    "cap": 3.0
+   },
+   {
+    "label": "cap 3.5x",
+    "g_touched": 1,
+    "g_delta": -3.41,
+    "e_saved": 54,
+    "e_delta": 20.16,
+    "total": 16.74,
+    "ex_top1": 13.13,
+    "windows_pos": 5,
+    "per_win": {
+     "W1": 2.5,
+     "W2": 2.71,
+     "OLD7": 2.83,
+     "MOD_Y1": 6.47,
+     "MOD_Y2": 2.23
+    },
+    "cap": 3.5
+   },
+   {
+    "label": "cap 4.0x",
+    "g_touched": 2,
+    "g_delta": -8.03,
+    "e_saved": 66,
+    "e_delta": 22.95,
+    "total": 14.91,
+    "ex_top1": 11.3,
+    "windows_pos": 5,
+    "per_win": {
+     "W1": 2.78,
+     "W2": 2.71,
+     "OLD7": 3.52,
+     "MOD_Y1": 3.42,
+     "MOD_Y2": 2.47
+    },
+    "cap": 4.0
+   },
+   {
+    "label": "cap 4.5x",
+    "g_touched": 2,
+    "g_delta": -8.03,
+    "e_saved": 69,
+    "e_delta": 23.78,
+    "total": 15.75,
+    "ex_top1": 12.14,
+    "windows_pos": 5,
+    "per_win": {
+     "W1": 3.08,
+     "W2": 3.28,
+     "OLD7": 3.52,
+     "MOD_Y1": 3.42,
+     "MOD_Y2": 2.45
+    },
+    "cap": 4.5
+   },
+   {
+    "label": "cap 5.0x",
+    "g_touched": 2,
+    "g_delta": -8.03,
+    "e_saved": 75,
+    "e_delta": 25.73,
+    "total": 17.69,
+    "ex_top1": 14.08,
+    "windows_pos": 5,
+    "per_win": {
+     "W1": 3.08,
+     "W2": 3.15,
+     "OLD7": 3.52,
+     "MOD_Y1": 5.34,
+     "MOD_Y2": 2.61
+    },
+    "cap": 5.0
+   },
+   {
+    "label": "cap 6.0x",
+    "g_touched": 2,
+    "g_delta": -8.03,
+    "e_saved": 83,
+    "e_delta": 26.04,
+    "total": 18.0,
+    "ex_top1": 14.39,
+    "windows_pos": 5,
+    "per_win": {
+     "W1": 3.08,
+     "W2": 3.15,
+     "OLD7": 3.39,
+     "MOD_Y1": 5.2,
+     "MOD_Y2": 3.18
+    },
+    "cap": 6.0
+   }
+  ],
+  "cands": [
+   {
+    "label": "v48 G1 \u00b7 exec \u2264 \u22120.20x (1 close)",
+    "g_touched": 2,
+    "g_delta": -8.03,
+    "e_saved": 91,
+    "e_delta": 24.79,
+    "total": 16.76,
+    "ex_top1": 13.15,
+    "windows_pos": 5,
+    "per_win": {
+     "W1": 2.26,
+     "W2": 3.4,
+     "OLD7": 3.39,
+     "MOD_Y1": 6.28,
+     "MOD_Y2": 1.43
+    },
+    "rule": "A",
+    "X": -0.2
+   },
+   {
+    "label": "exec \u2264 \u22120.30x (1 close)",
+    "g_touched": 1,
+    "g_delta": -4.62,
+    "e_saved": 91,
+    "e_delta": 17.25,
+    "total": 12.63,
+    "ex_top1": 9.02,
+    "windows_pos": 5,
+    "per_win": {
+     "W1": 1.67,
+     "W2": 2.16,
+     "OLD7": 2.9,
+     "MOD_Y1": 4.76,
+     "MOD_Y2": 1.13
+    },
+    "rule": "A",
+    "X": -0.3
+   },
+   {
+    "label": "2 \u00d7 exec \u2264 \u22120.20x",
+    "g_touched": 0,
+    "g_delta": 0.0,
+    "e_saved": 41,
+    "e_delta": 5.54,
+    "total": 5.54,
+    "ex_top1": 1.93,
+    "windows_pos": 4,
+    "per_win": {
+     "W1": 1.95,
+     "W2": -0.09,
+     "OLD7": 0.11,
+     "MOD_Y1": 0.6,
+     "MOD_Y2": 2.97
+    },
+    "rule": "C2",
+    "X": -0.2
+   },
+   {
+    "label": "2 \u00d7 exec \u2264 \u22120.15x",
+    "g_touched": 1,
+    "g_delta": -3.38,
+    "e_saved": 47,
+    "e_delta": 5.59,
+    "total": 2.21,
+    "ex_top1": -1.4,
+    "windows_pos": 4,
+    "per_win": {
+     "W1": 2.07,
+     "W2": 0.67,
+     "OLD7": 0.11,
+     "MOD_Y1": -3.98,
+     "MOD_Y2": 3.35
+    },
+    "rule": "C2",
+    "X": -0.15
+   },
+   {
+    "label": "2 \u00d7 exec \u2264 \u22120.10x",
+    "g_touched": 1,
+    "g_delta": -3.38,
+    "e_saved": 50,
+    "e_delta": 10.26,
+    "total": 6.88,
+    "ex_top1": 3.27,
+    "windows_pos": 4,
+    "per_win": {
+     "W1": 2.98,
+     "W2": 0.92,
+     "OLD7": 0.7,
+     "MOD_Y1": -1.23,
+     "MOD_Y2": 3.52
+    },
+    "rule": "C2",
+    "X": -0.1
+   },
+   {
+    "label": "1H \u2264 \u22120.20x",
+    "g_touched": 0,
+    "g_delta": 0.0,
+    "e_saved": 32,
+    "e_delta": 7.23,
+    "total": 7.23,
+    "ex_top1": 3.62,
+    "windows_pos": 5,
+    "per_win": {
+     "W1": 1.31,
+     "W2": 0.73,
+     "OLD7": 1.55,
+     "MOD_Y1": 2.42,
+     "MOD_Y2": 1.23
+    },
+    "rule": "H",
+    "X": -0.2
+   },
+   {
+    "label": "1H \u2264 \u22120.30x",
+    "g_touched": 0,
+    "g_delta": 0.0,
+    "e_saved": 28,
+    "e_delta": 6.01,
+    "total": 6.01,
+    "ex_top1": 2.4,
+    "windows_pos": 5,
+    "per_win": {
+     "W1": 1.03,
+     "W2": 0.73,
+     "OLD7": 1.29,
+     "MOD_Y1": 2.42,
+     "MOD_Y2": 0.54
+    },
+    "rule": "H",
+    "X": -0.3
+   }
+  ]
+ },
+ "1b": {
+  "tiers": {
+   "Other_512": 512,
+   "BE_452": 452,
+   "Golden_110": 110,
+   "EM_99": 99
+  },
+  "golden_max_t05": 6.08,
+  "golden_p99_t05": 5.73,
+  "other_never": 346,
+  "other_n": 512,
+  "symbols": [
+   {
+    "symbol": "ADAUSDT_5m",
+    "n": 170,
+    "net": 56.47,
+    "golden": 19,
+    "other": 71
+   },
+   {
+    "symbol": "AVAXUSDT_5m",
+    "n": 161,
+    "net": 40.42,
+    "golden": 13,
+    "other": 76
+   },
+   {
+    "symbol": "BNBUSDT_5m",
+    "n": 127,
+    "net": 68.33,
+    "golden": 14,
+    "other": 48
+   },
+   {
+    "symbol": "BTCUSDT_5m",
+    "n": 83,
+    "net": 16.39,
+    "golden": 7,
+    "other": 32
+   },
+   {
+    "symbol": "ETHUSDT_5m",
+    "n": 147,
+    "net": 122.48,
+    "golden": 15,
+    "other": 57
+   },
+   {
+    "symbol": "LINKUSDT_5m",
+    "n": 160,
+    "net": 43.58,
+    "golden": 12,
+    "other": 73
+   },
+   {
+    "symbol": "SOLUSDT_5m",
+    "n": 176,
+    "net": -16.45,
+    "golden": 15,
+    "other": 90
+   },
+   {
+    "symbol": "XRPUSDT_5m",
+    "n": 149,
+    "net": 44.88,
+    "golden": 15,
+    "other": 65
+   }
+  ],
+  "first_net": 234.85,
+  "repeat_net": 141.23,
+  "after_be_net": 79.94
+ }
+}

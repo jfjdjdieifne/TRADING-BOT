@@ -567,6 +567,8 @@ EXIT_SLIP_REASONS = (
     "V46_FAILED_BOUNCE", "V46_SWING_STOP",
     "V47_FLOOR_EXEC", "V47_FLOOR_1H", "V47_FLOOR_4H",
     "V48_G1_EXEC_M02", "V48_G2_EXEC_00", "V48_G3_EXEC2_00", "V48_G4_1H_00",
+    "V49_C1_2CLOSE_M020", "V49_C2_1H_M020", "V49_C3_CAPPED",
+    "V49_C4_EXEC_M030", "V49_C5_BOX_BLOCK", "V49_C6_COMBO",
 )
 
 # =====================================================================
@@ -1047,6 +1049,31 @@ V48_X = -0.20             # the guard threshold in true_X units
 #   "g3_exec2_00"   -> TWO CONSECUTIVE exec_tf closes <= 0.00x
 #   "g4_1h_00"      -> one closed 1H candle <= 0.00x
 # ZERO cooldown in every one of them: the entry side is not touched.
+#
+# ============ v49: ZERO-GOLDEN-TOUCH GUARDS =========================== #
+# v48's G1 (one exec close <= -0.20x) still choked 2 of the 110 golden
+# runners: XRP 2024-12-27 17:20 (B0 +3.12 -> -0.29, STOP_BLUE, peak had
+# already reached +2.49x) and ADA 2025-03-17 00:05 (B0 +3.81 -> -0.81,
+# peak +3.59x). BOTH had ALREADY PROVEN THEMSELVES as runners before
+# dipping -- so Section 6.3's idea (switch the guard OFF once a trade has
+# earned a high peak) is exactly right, and the measured cost is real.
+#
+# Static walk of the true post-arm path (NOT an idealised exit at X):
+#   v48 G1  exec <= -0.20x          golden 2   total +16.76   5/5
+#   exec <= -0.30x                  golden 1   total +12.63   5/5
+#   2 x exec <= -0.20x              golden 0   total  +5.54   4/5
+#   1H <= -0.20x                    golden 0   total  +7.23   5/5
+#   CAP: G1 while peak < 3.5x       golden 1   total +16.74   5/5
+#   CAP: G1 while peak < 6.0x       golden 2   total +18.00   5/5
+#
+# NOTE ON THE v48 NUMBERS: the v48 static table assumed the exit filled
+# EXACTLY at px_at_true_X (X), which overstates every guard because the
+# real close is already through the level. The corrected walk gives
+# +16.76 for G1, not +56.11. This file uses the corrected figures.
+V49_MODE = "off"
+V49_CAP = 4.0            # C3: guard off once peak true_X >= this
+V49_BOX_HOURS = 24.0     # C5: how long a consumed box stays blocked
+V49_BOX_TOL = 0.0025     # C5: same-box test, relative distance on the stop
 V46_MIN_X = 1.0          # only manage a position that showed this much profit
 V46_PIVOT = 2            # bars either side that confirm a swing low
 V45_COST = 0.001              # two-sided 0.10%, the brief's true_X basis
@@ -1903,6 +1930,21 @@ class ICTBoxEngine:
                 self.cnt("htf_1h_displacement")
 
         # ---- v47: the 1H candle has CLOSED -- test the blindspot floor ----
+        # ---- v49: keep the running peak, then test the 1H-law guards ---
+        if self.qty > 0:
+            self.v49_peak_x = max(self.v49_peak_x,
+                                  self.v47_true_x_at(c))
+            # C2: a CLOSED 1H candle at/below -0.20x inside floor_only.
+            # 0/110 golden touched -- no runner has ever closed a 1H bar
+            # that far underwater while still inside the blindspot.
+            if V49_MODE in ("c2_1h_m020", "c6_combo"):
+                fl = getattr(self, "floor_line", self.lock_line)
+                if (self.ratchet and self.stop_px <= fl + 1e-9
+                        and c <= self._v45_px(-0.20)):
+                    self.cnt("v49_c2")
+                    self._exit(c, "V49_C2_1H_M020",
+                               max(0, len(self.exec_canvas.bars) - 1), time)
+                    return
         if (V47_MODE in ("m2_1h_floor", "m4_1h_floor_ratchet",
                          "m7_1h_floor_cooldown")
                 or V48_MODE == "g4_1h_00") and self.qty > 0:
@@ -3224,6 +3266,14 @@ class ICTBoxEngine:
         # at THIS stamp (4H structure + SMT_BULL + FVG/OB displacement).
         # Every engine is still fed its bars - only the FILL is refused - so
         # no state machine freezes and nothing is read from the future.
+        # ---- v49 C5: do not buy a box we already consumed ------------
+        # Refused at the FILL, exactly like the gates above: the state
+        # machine keeps running, only the entry is dropped.
+        if V49_MODE == "c5_box_block" and self.v49_box_blocked(
+                getattr(s, "stop", 0.0), time):
+            self.setup = None
+            self.state = "WAIT_ANCHOR"
+            return
         if V33_ALPHA_LEADER and not self.v33_allow:
             self.setup = None
             self.state = "WAIT_ANCHOR"
@@ -3301,6 +3351,10 @@ class ICTBoxEngine:
         self.v46_managed = False     # has the position cleared V46_MIN_X yet
         self.v47_max_x = -9e9        # peak true_X, for the two-stage floor
         self.v48_prev_below = False  # previous exec close was <= breakeven
+        self.v49_prev_below = False  # C1: previous exec close <= -0.20x
+        self.v49_peak_x = -9e9       # C3: peak true_X since entry
+        # C5 block state lives on the SHARED pool: it must outlive the
+        # closed position, since its whole purpose is to gate the NEXT one.
         #                             the chart drew it, kept forever so the
         #                             emergency wick cap never drifts up
         self.risk = risk
@@ -3457,6 +3511,36 @@ class ICTBoxEngine:
         self.qty -= rel
         self.cnt("capital_released_at_lock")
 
+    # ================== v49 C5: one-shot box ====================== #
+    def v49_note_box(self, time):
+        """After an exit, remember the stop level that defined this box so
+        the SAME box cannot be bought again straight away.
+
+        H1 in the audit tested this hypothesis and REFUTED it: repeat
+        mitigations of the same level were BETTER than first taps
+        (+$1.162/trade vs +$0.224/trade), and the 41 trades that re-entered
+        within 0.3% of a stop that had just SHIELD_BE'd returned +$79.94
+        (+$1.950 each). So this arm is implemented to MEASURE the
+        refutation on the real engine, not because the edge is expected.
+        """
+        if V49_MODE not in ("c5_box_block",):
+            return
+        self.pool["v49_block_until"] = time + pd.Timedelta(hours=V49_BOX_HOURS)
+        self.pool["v49_block_stop"] = self.orig_stop_px
+
+    def v49_box_blocked(self, stop_px, time):
+        """True if this entry sits on a box we already consumed."""
+        until = self.pool.get("v49_block_until")
+        stop0 = self.pool.get("v49_block_stop")
+        if V49_MODE != "c5_box_block" or until is None or stop0 is None:
+            return False
+        if time > until:
+            return False
+        if abs(stop_px - stop0) / stop0 <= V49_BOX_TOL:
+            self.cnt("v49_c5_blocked")
+            return True
+        return False
+
     def _exit(self, px, reason, idx, time):
         # ---- v36 (3): the stop-market sell pays the spread ----------- #
         # Applied ONCE, here, so every exit path inherits it and no
@@ -3465,6 +3549,7 @@ class ICTBoxEngine:
         if EXIT_SLIP > 0 and reason in EXIT_SLIP_REASONS:
             px = px * (1.0 - EXIT_SLIP)
             self.cnt("v36_exit_slip_charged")
+        self.v49_note_box(time)
         # v32: drop this engine from the shared open-position registry
         t = self.trade
         gross = (px - self.entry_px) * self.qty
@@ -3784,6 +3869,15 @@ class ICTBoxEngine:
         self._manage(o, h, l, c, max(0, len(self.exec_canvas.bars) - 1),
                      time, tf5=True)
 
+    def v47_true_x_at(self, px):
+        """true_X of an arbitrary price for the open position."""
+        if self.risk <= 0:
+            return -9e9
+        unit = self.entry_px * (1 + V45_COST) - self.orig_stop_px * (1 - V45_COST)
+        if unit <= 0:
+            return -9e9
+        return (px * (1 - V45_COST) - self.entry_px * (1 + V45_COST)) / unit
+
     # ================== v47: floor_only DEFENCE ==================== #
     def v47_floor_test(self, c_lens, reason, time):
         """Called from on_htf (1H) and on_struct (4H) on a CLOSED bar of
@@ -3936,6 +4030,35 @@ class ICTBoxEngine:
                     self.v48_prev_below = True
                 else:
                     self.v48_prev_below = False
+        # ============ v49: zero-golden-touch guards ==================== #
+        if V49_MODE != "off" and floor_only:
+            # ---- C1: TWO CONSECUTIVE exec closes <= -0.20x ------------
+            # 0/110 golden touched: a single wick through the level is not
+            # enough, the market must CLOSE there twice running.
+            if V49_MODE in ("c1_2close_m020", "c6_combo"):
+                if c <= self._v45_px(-0.20):
+                    if getattr(self, "v49_prev_below", False):
+                        self.cnt("v49_c1")
+                        self._exit(c, "V49_C1_2CLOSE_M020", idx, time)
+                        return
+                    self.v49_prev_below = True
+                else:
+                    self.v49_prev_below = False
+            # ---- C3: G1 only while the peak is still small -------------
+            # Once the trade has already printed >= V49_CAP, it has proven
+            # itself; the -0.20x guard switches off and the winner runs.
+            if V49_MODE in ("c3_capped", "c6_combo"):
+                if (self.v49_peak_x < V49_CAP
+                        and c <= self._v45_px(-0.20)):
+                    self.cnt("v49_c3")
+                    self._exit(c, "V49_C3_CAPPED", idx, time)
+                    return
+            # ---- C4: one exec close <= -0.30x -------------------------
+            if V49_MODE in ("c4_exec_m030", "c6_combo"):
+                if c <= self._v45_px(-0.30):
+                    self.cnt("v49_c4")
+                    self._exit(c, "V49_C4_EXEC_M030", idx, time)
+                    return
         # ---- v25: DISPLACEMENT DETECTION — the story proving itself.
         # The audit's 57-point separator: 91.9% of winners cross the 4H
         # dealing-range mid after entry vs only 34.7% of losers.
