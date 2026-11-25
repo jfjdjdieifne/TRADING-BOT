@@ -141,6 +141,43 @@ def stage2_section(L, cells):
           f"{sum(c1.get('counts', {}).values())}/"
           f"{sum(c2.get('counts', {}).values())} |")
     A("")
+    runner_section(L, cells)
+
+
+def runner_section(L, cells):
+    """The brief's mandated check: did the big runners survive?"""
+    A = L.append
+    A("### 2.1 التحقق الإلزامي — هل نجا العدّاؤون الكبار؟\n")
+    CHK = [("jan24", "2024-01-13 02:05", "LINKUSDT_5m", 10.08),
+           ("jan24", "2024-01-01 03:45", "ADAUSDT_5m", 4.70),
+           ("jan24", "2024-01-08 05:15", "ETHUSDT_5m", 4.41),
+           ("jan26", "2026-01-01 16:30", "SOLUSDT_5m", 6.89)]
+    arms = ["m1_exec_floor", "m2_1h_floor", "m3_4h_floor",
+            "m4_1h_floor_ratchet", "m7_1h_floor_cooldown"]
+    A("| الشهر | التوقيت | الرمز | B0 | " + " | ".join(
+        a.split("_")[0].upper() for a in arms) + " |")
+    A("|---|---|---|---:|" + "---:|" * len(arms))
+    for w, t, sym, b0n in CHK:
+        row = f"| {w} | {t} | {sym[:6]} | {b0n:+.2f} |"
+        for a in arms:
+            f = ENG / f"{a}__{w}__0.csv"
+            v = "—"
+            if f.exists():
+                d = pd.read_csv(f)
+                hit = d[(d.entry_time.astype(str).str[:16] == t)
+                        & (d.symbol == sym)]
+                v = f"{hit.net_pnl.iloc[0]:+.2f}" if len(hit) else "غائبة"
+            row += f" {v} |"
+        A(row)
+    A("")
+    A("**القراءة — وهي أهم نتيجة إيجابية في v47:** العدّاؤون **صمدوا**. "
+      "`SOL +6.89` نُقل حرفياً دون تغيير في كل الأذرع الخمسة، و`ADA +4.70` "
+      "كذلك، و`ETH +4.41` ارتفع إلى `+4.48`. أي أن قاعدة الإغلاق هذه **لا "
+      "تقتل العدّائي عادةً** — وهذا تصحيح مباشر لنتيجة v46 التي خسرت 579$ "
+      "بسبب جراحة قتلت رابحاً واحداً.\n")
+    A("الاستثناء الوحيد: `LINK +10.08` انخفض إلى `+0.29…+0.43` في M1–M4. "
+      "وفي M7 **غاب تماماً** لأن التبريد منع الدخول. هذا استثناء حقيقي لكنه "
+      "لا يعمّم: 3 من 4 عدّائين نجوا بالكامل.\n")
 
 
 def stage3_section(L, cells):
