@@ -565,6 +565,7 @@ EXIT_SLIP_REASONS = (
     # ---- v45 brain exits: all are market SELLS, so all pay the slip ----
     "V45_LADDER_STOP", "V45_STALL_EXIT", "V45_GUARD_STOP",
     "V46_FAILED_BOUNCE", "V46_SWING_STOP",
+    "V47_FLOOR_EXEC", "V47_FLOOR_1H", "V47_FLOOR_4H",
 )
 
 # =====================================================================
@@ -985,6 +986,39 @@ V45_BRAIN_MODE = "off"
 # The original engine stop stays underneath, so this can only improve an exit.
 #   "off" | "swing_bounce"
 V46_BRAIN_MODE = "off"
+# ============ v47: THE floor_only BLINDSPOT DEFENCE ==================== #
+# ON-DISK PROOF OF THE HOLE (audit_v47_ict_boxes.py, 1,173 trades):
+#   While `floor_only` is True  (self.ratchet and stop_px <= floor_line)
+#   with LOCK_MODE="trail" and MANAGE_5M=False:
+#     * `if defend and hit:` is skipped -> floor_line is NOT tested
+#     * the SHIELD block is guarded by `not self.be_armed` -> skipped
+#     * STRUCT_TRAIL is guarded by `not self.ratchet` -> skipped
+#   The ONLY live order is EMERGENCY_WICK_STOP at orig_stop_px = -1R.
+#   floor_only ends only when a 4H BlueBox forms with y_bottom >= floor_line
+#   (on_struct -> trail_4h_structural); if none does, the hole never closes.
+# MEASURED SEPARATION after arming (median minimum close):
+#     lens        Golden_Armed   EM_Armed
+#     exec close      +1.67x       -1.05x
+#     1H close        +1.86x       +0.22x
+#     4H close        +2.62x       +1.06x
+#   An EMERGENCY_STOP does not flash-wick: it closes candles all the way
+#   down. So a CLOSE-based floor on a slow lens separates the two.
+# The families below are the only ones that cleared the v46 anti-overfitting
+# gate (broad plateau, +Ex-Top-1, >=3/5 windows) on the 1,173-trade book.
+#   "off"                    -> bit-identical B0
+#   "m1_exec_floor"          -> exec-frame close <= V47_X1 during floor_only
+#   "m2_1h_floor"            -> closed 1H bar <= V47_X1 during floor_only
+#   "m3_4h_floor"            -> closed 4H bar <= V47_X1 during floor_only
+#   "m4_1h_floor_ratchet"    -> 1H floor X1, raised to X2 once max_true_X>=4
+#   "m5_cooldown"            -> same-symbol entry cooldown after a real loss
+#   "m7_1h_floor_cooldown"   -> m2 + m5
+# Only the floor_only window is touched; before ratchet and after a 4H
+# BlueBox rises above floor_line, B0 is untouched bit-for-bit.
+V47_MODE = "off"
+V47_X1 = 1.0              # the floor_only close floor, in true_X units
+V47_X2 = 1.5              # the raised floor once max_true_X >= V47_RAISE_AT
+V47_RAISE_AT = 4.0
+V47_COOLDOWN_H = 8.0      # m5: hours blocked after a real loss on a symbol
 V46_MIN_X = 1.0          # only manage a position that showed this much profit
 V46_PIVOT = 2            # bars either side that confirm a swing low
 V45_COST = 0.001              # two-sided 0.10%, the brief's true_X basis
@@ -1647,6 +1681,15 @@ class ICTBoxEngine:
             return
         st["streak"] += 1
         if st["streak"] >= PER_COIN_COOLDOWN and st["banned_until"] is None:
+            # ---- v47 m5/m7: the measured same-symbol cooldown, expressed
+            # through the EXISTING v35 ban so no new entry path is added.
+            if V47_MODE in ("m5_cooldown", "m7_1h_floor_cooldown") \
+                    and not is_win:
+                st["banned_until"] = time + pd.Timedelta(hours=V47_COOLDOWN_H)
+                st["ban_start"] = time
+                st["streak"] = 0
+                self.cnt("v47_cooldown_armed")
+                return
             st["banned_until"] = time + pd.Timedelta(days=COOLDOWN_DAYS)
             st["ban_start"] = time
             st["streak"] = 0
@@ -1807,6 +1850,11 @@ class ICTBoxEngine:
                         break
 
     # ---------------- 1H HTF feed (targets / demand) --------------- #
+        # ---- v47: the 4H candle has CLOSED -- test the blindspot floor ----
+        if V47_MODE == "m3_4h_floor" and self.qty > 0:
+            if self.v47_floor_test(c, "V47_FLOOR_4H", time):
+                return
+
     def on_htf(self, o, h, l, c, v, idx, time):
         # the1h engine's HTF lens IS the4H board (already fed by
         # on_struct) — never feed it1H bars twice
@@ -1826,7 +1874,14 @@ class ICTBoxEngine:
                 self.htf_1h_bos_time = time
                 self.cnt("htf_1h_displacement")
 
+        # ---- v47: the 1H candle has CLOSED -- test the blindspot floor ----
+        if V47_MODE in ("m2_1h_floor", "m4_1h_floor_ratchet",
+                        "m7_1h_floor_cooldown") and self.qty > 0:
+            self.v47_track_peak(c)
+            self.v47_floor_test(c, "V47_FLOOR_1H", time)
+
     # ---------------- execution feed -------------------------------- #
+
     def on_exec(self, o, h, l, c, v, idx, time):
         self.now = time
         self.price = c
@@ -3215,6 +3270,7 @@ class ICTBoxEngine:
         self.v46_swing_low = None    # last CONFIRMED swing low (may be used)
         self.v46_stop = None         # the protective stop it arms
         self.v46_managed = False     # has the position cleared V46_MIN_X yet
+        self.v47_max_x = -9e9        # peak true_X, for the two-stage floor
         #                             the chart drew it, kept forever so the
         #                             emergency wick cap never drifts up
         self.risk = risk
@@ -3698,6 +3754,39 @@ class ICTBoxEngine:
         self._manage(o, h, l, c, max(0, len(self.exec_canvas.bars) - 1),
                      time, tf5=True)
 
+    # ================== v47: floor_only DEFENCE ==================== #
+    def v47_floor_test(self, c_lens, reason, time):
+        """Called from on_htf (1H) and on_struct (4H) on a CLOSED bar of
+        that lens. Fires ONLY inside floor_only -- the exact window in
+        which the champion has no live protective logic at all. The exit
+        price is that bar's CLOSE: this is a close rule, no resting order
+        was in the market, so charging the close is the conservative read.
+        """
+        if V47_MODE == "off" or self.qty <= 0 or self.risk <= 0:
+            return False
+        floor_line = getattr(self, "floor_line", self.lock_line)
+        if not (self.ratchet and self.stop_px <= floor_line + 1e-9):
+            return False                    # not the blindspot: B0 owns it
+        x = V47_X1
+        if (V47_MODE == "m4_1h_floor_ratchet"
+                and self.v47_max_x >= V47_RAISE_AT):
+            x = V47_X2
+        if c_lens <= self._v45_px(x):
+            self.cnt("v47_" + reason.lower())
+            self._exit(c_lens, reason, max(0, len(self.exec_canvas.bars) - 1),
+                       time)
+            return True
+        return False
+
+    def v47_track_peak(self, c):
+        """Track the peak true_X seen, for the two-stage ratchet."""
+        if self.risk <= 0:
+            return
+        fill, loss = self.entry_px, self.unit_true_loss
+        x = (c * (1 + V45_COST) - fill * (1 + V45_COST)) / loss
+        if x > self.v47_max_x:
+            self.v47_max_x = x
+
     def _manage(self, o, h, l, c, idx, time, tf5=False):
         t = self.trade
         if self.risk > 0:
@@ -3769,6 +3858,18 @@ class ICTBoxEngine:
                                    else "STOP_BLUE")),
                        idx, time)
             return
+        # ================= v47: DEFEND floor_only ====================== #
+        # Reached only when `defend` is False -- i.e. exactly inside the
+        # blindspot, where none of the stop/shield/trail blocks above ran.
+        # This call is on the EXEC frame, so only the exec-frame family is
+        # evaluated here; the 1H and 4H families live in on_htf/on_struct
+        # where those bars actually close (see v47_floor_test).
+        if V47_MODE == "m1_exec_floor" and floor_only:
+            fl = self._v45_px(V47_X1)
+            if c <= fl:
+                self.cnt("v47_floor_exec")
+                self._exit(c, "V47_FLOOR_EXEC", idx, time)
+                return
         # ---- v25: DISPLACEMENT DETECTION — the story proving itself.
         # The audit's 57-point separator: 91.9% of winners cross the 4H
         # dealing-range mid after entry vs only 34.7% of losers.

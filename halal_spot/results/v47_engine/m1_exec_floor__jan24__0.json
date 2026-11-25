@@ -1,0 +1,37 @@
+{
+ "mode": "m1_exec_floor",
+ "win": "jan24",
+ "bps": 0,
+ "n": 34,
+ "gross": 23.18,
+ "fees": 7.67,
+ "net": 15.5,
+ "pf": 2.659,
+ "wr": 26.5,
+ "wk": {
+  "2024-W01": 8.07,
+  "2024-W02": 10.67,
+  "2024-W03": -1.02,
+  "2024-W04": -2.39,
+  "2024-W05": 0.18
+ },
+ "yk": {
+  "2024-01": 15.5
+ },
+ "half": {
+  "H1": 18.81,
+  "H2": -3.31
+ },
+ "reasons": {
+  "STOP_BLUE": 18,
+  "BREAKEVEN": 11,
+  "V47_FLOOR_EXEC": 3,
+  "STRUCT_PROFIT": 1,
+  "TARGET_REJECTION": 1
+ },
+ "secs": 79.9,
+ "maxDD": 8.96,
+ "counts": {
+  "v47_floor_exec": 4
+ }
+}

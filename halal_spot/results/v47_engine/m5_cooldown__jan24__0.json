@@ -1,0 +1,37 @@
+{
+ "mode": "m5_cooldown",
+ "win": "jan24",
+ "bps": 0,
+ "n": 35,
+ "gross": 28.37,
+ "fees": 8.1,
+ "net": 20.27,
+ "pf": 2.491,
+ "wr": 22.9,
+ "wk": {
+  "2024-W01": 6.27,
+  "2024-W02": 18.79,
+  "2024-W03": -0.95,
+  "2024-W04": -3.03,
+  "2024-W05": -0.81
+ },
+ "yk": {
+  "2024-01": 20.27
+ },
+ "half": {
+  "H1": 23.87,
+  "H2": -3.61
+ },
+ "reasons": {
+  "STOP_BLUE": 21,
+  "BREAKEVEN": 9,
+  "EMERGENCY_STOP": 3,
+  "TARGET_REJECTION": 1,
+  "STRUCT_PROFIT": 1
+ },
+ "secs": 72.8,
+ "maxDD": 8.93,
+ "counts": {
+  "v47_cooldown_armed": 10
+ }
+}
