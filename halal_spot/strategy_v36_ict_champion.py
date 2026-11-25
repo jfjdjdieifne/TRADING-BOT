@@ -564,6 +564,7 @@ EXIT_SLIP_REASONS = (
     "FAST_HARVEST_2R", "STALE_SWAP_EXIT",
     # ---- v45 brain exits: all are market SELLS, so all pay the slip ----
     "V45_LADDER_STOP", "V45_STALL_EXIT", "V45_GUARD_STOP",
+    "V46_FAILED_BOUNCE", "V46_SWING_STOP",
 )
 
 # =====================================================================
@@ -966,6 +967,26 @@ MANAGE_5M_WICK   = True    # defend the +3R floor with the 5m WICK from the
 # computed from a bar that has CLOSED and can only be tested from the NEXT
 # bar, so no trigger can act on the bar that armed it.
 V45_BRAIN_MODE = "off"
+# ---- v46: CONFIRMED SWING-LOW / FAILED-BOUNCE EXIT BRAIN ---------------- #
+# WHY IT EXISTS (audit_v46_floor_blindspot.py proves the populations):
+#   (A) `floor_line` arms only when an EXEC bar CLOSES at/above it, so 44 of
+#       the 1,173 B0 trades traded through the +3R level on the 5m tape and
+#       never armed the floor at all.
+#   (B) Even an ARMED floor is tested on the exec CLOSE, so a 5m wick through
+#       it passes with no exit. All 99 EMERGENCY_STOP trades armed the floor
+#       and were still killed by the ORIGINAL wick stop underneath it.
+# THE FIX IS NOT "arm on the wick": that books +3x on every trade that would
+# have run to +19x, and v45 measured that this loses money. Instead the market
+# is asked whether the move is over, on information that is only knowable at a
+# CLOSED bar:
+#   R1 FAILED BOUNCE        -- close back under the last CONFIRMED swing low.
+#   R2 CONFIRMED SWING STOP -- protective stop at the last confirmed swing
+#                              low, never below fee-breakeven, tested next bar.
+# The original engine stop stays underneath, so this can only improve an exit.
+#   "off" | "swing_bounce"
+V46_BRAIN_MODE = "off"
+V46_MIN_X = 1.0          # only manage a position that showed this much profit
+V46_PIVOT = 2            # bars either side that confirm a swing low
 V45_COST = 0.001              # two-sided 0.10%, the brief's true_X basis
 MANAGE_5M_SHIELD = False   # MEASURED HARMFUL (lab_v27_exact.py): arming
                            # the BE shield on 5m closes drops the winners
@@ -3187,6 +3208,13 @@ class ICTBoxEngine:
         self.v45_max_x = -9e9        # peak true_X on 5m CLOSES
         self.v45_max_high_x = -9e9   # peak true_X on 5m HIGHS
         self.v45_stall_ref = None    # previous 5m bar h/l for the stall test
+        # ---- v46 brain state (inert unless V46_BRAIN_MODE != off) -------- #
+        # a rolling window of the last (2*PIVOT+1) 5m lows: a swing low is
+        # CONFIRMED only when that many bars have closed after it.
+        self.v46_win = []            # deque of (low, high) for the pivot test
+        self.v46_swing_low = None    # last CONFIRMED swing low (may be used)
+        self.v46_stop = None         # the protective stop it arms
+        self.v46_managed = False     # has the position cleared V46_MIN_X yet
         #                             the chart drew it, kept forever so the
         #                             emergency wick cap never drifts up
         self.risk = risk
@@ -3538,6 +3566,63 @@ class ICTBoxEngine:
         m=-1 is the original stop."""
         unit = self.entry_px * (1 + V45_COST) - self.orig_stop_px * (1 - V45_COST)
         return (self.entry_px * (1 + V45_COST) + m * unit) / (1 - V45_COST)
+
+    # ============ v46: CONFIRMED SWING-LOW / FAILED-BOUNCE ============ #
+    def v46_brain_5m(self, o, h, l, c, time):
+        """Strictly causal 5m management for V46_BRAIN_MODE != "off".
+
+        THE CAUSALITY CONTRACT, in one place:
+          * a swing low at bar i is only CONFIRMED once V46_PIVOT bars have
+            closed to its right, i.e. at bar i + V46_PIVOT. This method can
+            therefore never "know" a pivot it has not already seen confirm;
+          * a stop armed on bar i is tested from bar i+1 (tested first, armed
+            second, in that order, every bar);
+          * the engine's own stop lives underneath and is untouched, so the
+            worst case stays B0's worst case.
+        Both rules fire a 100% exit. There is no partial path here.
+        """
+        if V46_BRAIN_MODE == "off" or self.qty <= 0 or self.risk <= 0:
+            return
+        if getattr(self, "orig_stop_px", None) is None:
+            return
+        fill, loss = self.entry_px, self.unit_true_loss
+        xc = (c * (1 + V45_COST) - fill * (1 + V45_COST)) / loss
+
+        # ---- 1. TEST what earlier bars armed (the engine stop is under it) --
+        if self.v46_stop is not None and l <= self.v46_stop:
+            got = self.v46_stop if o >= self.v46_stop else o
+            self.cnt("v46_swing_stop")
+            self._exit(got, "V46_SWING_STOP",
+                       max(0, len(self.exec_canvas.bars) - 1), time)
+            return
+
+        # ---- 2. FAILED BOUNCE: close back under the confirmed swing low ----
+        if (self.v46_managed and self.v46_swing_low is not None
+                and c < self.v46_swing_low and c < o):
+            self.cnt("v46_failed_bounce")
+            self._exit(c, "V46_FAILED_BOUNCE",
+                       max(0, len(self.exec_canvas.bars) - 1), time)
+            return
+
+        # ---- 3. record this bar, then CONFIRM any pivot it completes -------
+        self.v46_win.append((l, h, o))
+        W = V46_PIVOT
+        if len(self.v46_win) > 2 * W + 1:
+            self.v46_win.pop(0)
+        if len(self.v46_win) == 2 * W + 1:
+            cand = self.v46_win[W]              # the bar W back
+            lows = [w[0] for w in self.v46_win]
+            if cand[0] == min(lows):            # a confirmed swing LOW
+                self.v46_swing_low = cand[0]
+                # arm the protective stop: the swing low, floored at the
+                # exact fee-breakeven price, live from the NEXT bar
+                lvl = max(cand[0], self._v45_px(0.0))
+                if self.v46_stop is None or lvl > self.v46_stop:
+                    self.v46_stop = lvl
+
+        # ---- 4. has the position earned management at all? ----------------
+        if not self.v46_managed and xc >= V46_MIN_X:
+            self.v46_managed = True
 
     def v45_brain_5m(self, o, h, l, c, time):
         """Strictly causal 5m management for V45_BRAIN_MODE != "off".
@@ -4407,13 +4492,17 @@ def run_backtest(data_dir: Path, start: str, end: str,
             # It is fed at the SAME causal stamp as the engine's own frames
             # (the bar that CLOSED at t), and before them, so a level armed
             # by this bar cannot be tested until the next one.
-            if V45_BRAIN_MODE != "off" and _j5 is not None:
+            if ((V45_BRAIN_MODE != "off" or V46_BRAIN_MODE != "off")
+                    and _j5 is not None):
                 r5 = tf_5.iloc[_j5]
                 _o5 = float(r5.Open); _h5 = float(r5.High)
                 _l5 = float(r5.Low); _c5 = float(r5.Close)
                 for e in engines_by_sym[sym]:
                     if e.qty > 0:
-                        e.v45_brain_5m(_o5, _h5, _l5, _c5, t)
+                        if V46_BRAIN_MODE != "off":
+                            e.v46_brain_5m(_o5, _h5, _l5, _c5, t)
+                        if V45_BRAIN_MODE != "off":
+                            e.v45_brain_5m(_o5, _h5, _l5, _c5, t)
             if MANAGE_5M and _j5 is not None:
                 r5 = tf_5.iloc[_j5]
                 _o5 = float(r5.Open); _h5 = float(r5.High)
