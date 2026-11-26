@@ -97,6 +97,10 @@ def cell_path(mode, win, bps):
 
 
 def summarise(tr: pd.DataFrame, mode, win, bps):
+    if tr is None or not len(tr) or "entry_time" not in tr.columns:
+        return {"mode": mode, "win": win, "bps": bps, "n": 0, "gross": 0.0,
+                "fees": 0.0, "net": 0.0, "pf": 0.0, "wr": 0.0, "wk": {},
+                "yk": {}, "half": {}, "reasons": {}}
     tr = tr.copy()
     tr["entry_ts"] = pd.to_datetime(tr.entry_time, utc=True, format="mixed")
     tr = tr.sort_values("entry_ts").reset_index(drop=True)

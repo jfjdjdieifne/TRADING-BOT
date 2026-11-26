@@ -1,0 +1,178 @@
+{
+ "pillar1_depth": [
+  {
+   "d": 0.15,
+   "filled": 901,
+   "golden_dipped": 43,
+   "be_dipped": 263,
+   "be_becomes_3R": 81,
+   "static_net_filled_only": -78.5
+  },
+  {
+   "d": 0.25,
+   "filled": 857,
+   "golden_dipped": 39,
+   "be_dipped": 224,
+   "be_becomes_3R": 101,
+   "static_net_filled_only": -67.2
+  },
+  {
+   "d": 0.35,
+   "filled": 812,
+   "golden_dipped": 30,
+   "be_dipped": 189,
+   "be_becomes_3R": 119,
+   "static_net_filled_only": -60.57
+  },
+  {
+   "d": 0.5,
+   "filled": 763,
+   "golden_dipped": 19,
+   "be_dipped": 153,
+   "be_becomes_3R": 127,
+   "static_net_filled_only": -95.35
+  },
+  {
+   "d": 0.618,
+   "filled": 729,
+   "golden_dipped": 13,
+   "be_dipped": 126,
+   "be_becomes_3R": 122,
+   "static_net_filled_only": -77.07
+  },
+  {
+   "d": 0.705,
+   "filled": 704,
+   "golden_dipped": 11,
+   "be_dipped": 105,
+   "be_becomes_3R": 105,
+   "static_net_filled_only": -54.85
+  }
+ ],
+ "pillar2_cisd": {
+  "EM": {
+   "cisd": 99,
+   "n": 99,
+   "pct": 100.0
+  },
+  "Other": {
+   "cisd": 397,
+   "n": 512,
+   "pct": 77.5
+  },
+  "BE": {
+   "cisd": 435,
+   "n": 452,
+   "pct": 96.2
+  },
+  "Golden": {
+   "cisd": 109,
+   "n": 110,
+   "pct": 99.1
+  }
+ },
+ "pillar3_dol": {
+  "BE_reached_PDH_or_2x": 38,
+  "EM_reached": 92,
+  "Golden_reached": 109,
+  "static_bank_at_+2R_gain_vs_actual_BE_EM": 336.09
+ },
+ "pillar4_smt": {
+  "BE|SMT=False": {
+   "n": 431,
+   "net": -0.22
+  },
+  "BE|SMT=True": {
+   "n": 21,
+   "net": -0.2
+  },
+  "EM|SMT=False": {
+   "n": 91,
+   "net": -75.53
+  },
+  "EM|SMT=True": {
+   "n": 8,
+   "net": -9.23
+  },
+  "Golden|SMT=False": {
+   "n": 101,
+   "net": 804.32
+  },
+  "Golden|SMT=True": {
+   "n": 9,
+   "net": 79.41
+  },
+  "Other|SMT=False": {
+   "n": 453,
+   "net": -364.69
+  },
+  "Other|SMT=True": {
+   "n": 59,
+   "net": -57.78
+  }
+ },
+ "pillar5_kz": [
+  [
+   "Asia 00-06",
+   "335",
+   "43.7"
+  ],
+  [
+   "Dead 20-24/16-18",
+   "297",
+   "100.72"
+  ],
+  [
+   "LondonKZ 07-10",
+   "127",
+   "45.02"
+  ],
+  [
+   "Lunch 10-12",
+   "92",
+   "15.48"
+  ],
+  [
+   "NYKZ 12-16",
+   "219",
+   "77.39"
+  ],
+  [
+   "SilverBullet 18-20",
+   "103",
+   "93.76"
+  ]
+ ],
+ "pillar5_dow": [
+  [
+   "Fri",
+   "167",
+   "25.2"
+  ],
+  [
+   "Mon",
+   "255",
+   "11.49"
+  ],
+  [
+   "Sat",
+   "124",
+   "-31.76"
+  ],
+  [
+   "Thu",
+   "227",
+   "130.96"
+  ],
+  [
+   "Tue",
+   "208",
+   "94.99"
+  ],
+  [
+   "Wed",
+   "192",
+   "145.2"
+  ]
+ ]
+}

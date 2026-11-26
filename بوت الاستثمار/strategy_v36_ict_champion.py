@@ -569,7 +569,7 @@ EXIT_SLIP_REASONS = (
     "V48_G1_EXEC_M02", "V48_G2_EXEC_00", "V48_G3_EXEC2_00", "V48_G4_1H_00",
     "V49_C1_2CLOSE_M020", "V49_C2_1H_M020", "V49_C3_CAPPED",
     "V49_C4_EXEC_M030", "V49_C5_BOX_BLOCK", "V49_C6_COMBO",
-    "V50_FLOOR_EXEC", "V50_SHIELD_BREATHE", "V50_KNIFE_SCRATCH",
+    "V50_FLOOR_EXEC", "V50_SHIELD_BREATHE", "V50_KNIFE_SCRATCH", "V52_DOL_BANK",
 )
 
 # =====================================================================
@@ -1093,6 +1093,10 @@ V50_MODE = "off"
 V50_X = -0.30            # plateau cell for the floor_only guard
 V50_SHIELD_X = -0.30     # breathing room: close at true_X <= this
 V50_KNIFE_X = -0.65      # bar-1 falling-knife scratch threshold
+#   v52 (Investment Bot copy): full-stack ICT arms, ALL default OFF so the
+#   V51 foundation (V50_MODE="p1_knife", V50_X=-0.25) is bit-identical.
+V52_MODE = "off"         # off|m1_depth|m2_cisd|m3_dol|m4_tap2|m5_kz|m6_full
+V52_DEPTH = 0.35         # M1: entry at seam - d*(seam-stop), stop unchanged
 #   v50 S2 -- EXPLICIT TAP#2 RE-ENTRY -------------------------------- #
 # The 1B autopsy found that only 41 of the 452 SHIELD_BE trades ever got a
 # second fill on the same level (the engine's own gates blocked the rest),
@@ -1617,6 +1621,7 @@ class Setup:
                                  # the seam, so the sniper limit stands
                                  # down and waits for CISD absorption
     absorb_age: int = 0          # bars spent waiting for the CISD reclaim
+    v52_cisd_wait: bool = False  # v52 M2: seam tapped, awaiting CISD
 
 
 class ICTBoxEngine:
@@ -2830,6 +2835,9 @@ class ICTBoxEngine:
         # v24-run2 proof: filling at the confirmation CLOSE paid 0.73R
         # of chase, lifting median risk 0.517% -> 0.763% and dropping
         # the 2021 win rate from 48% (v23, seam fills) to 7.9%.
+        _v52_lvl = s.entry
+        if V52_MODE in ("m1_depth", "m6_full", "m7_depth_kz"):
+            _v52_lvl = s.entry - V52_DEPTH * (s.entry - s.stop)
         if s.confirm_idx >= 0:
             if idx <= s.confirm_idx:
                 return
@@ -2873,7 +2881,12 @@ class ICTBoxEngine:
                     fill_px = s.entry if o >= s.entry else o
                     self.cnt("v30_calm_seam_fill")
             else:
-                fill_px = s.entry if o >= s.entry else o
+                if V52_MODE in ("m1_depth", "m6_full", "m7_depth_kz"):
+                    fill_px = _v52_lvl if o >= _v52_lvl else o
+                elif V52_MODE in ("m2_cisd",):
+                    fill_px = c
+                else:
+                    fill_px = s.entry if o >= s.entry else o
             if self.board != "GREEN":
                 self.setup = None
                 self.state = "WAIT_ANCHOR"
@@ -2919,10 +2932,22 @@ class ICTBoxEngine:
         # (v24-run1 let any later green candle confirm, up to +2R
         # above the seam — that is chasing, and it produced 28 losses
         # against 2 wins in 2021.)
-        if l <= s.entry:
+        _v52_lvl = s.entry
+        if V52_MODE in ("m1_depth", "m6_full", "m7_depth_kz"):
+            _v52_lvl = s.entry - V52_DEPTH * (s.entry - s.stop)
+        if l <= _v52_lvl:
             s.touched = True
         if not s.touched:
             return
+        if V52_MODE in ("m5_kz", "m7_depth_kz") and time.dayofweek == 5:
+            self.setup = None; self.state = "WAIT_ANCHOR"
+            self.cnt("v52_kz_sat_block"); return
+        if V52_MODE in ("m2_cisd",) and FILL_MODE == "blind":
+            _pb = self.exec_canvas.bars[idx-1] if idx >= 1 else None
+            if not (c > o and c <= s.entry + 1e-9
+                    and _pb is not None and c > _pb[1]):
+                self.cnt("v52_await_cisd"); return
+            self.cnt("v52_cisd_fill")
         if FILL_MODE == "blind":
             # v23 reference: resting limit at the seam, no confirmation
             # ======== v30 MODULE 2: REGIME-AWARE DUAL ENTRY BRAIN =====
@@ -2962,7 +2987,12 @@ class ICTBoxEngine:
                     fill_px = s.entry if o >= s.entry else o
                     self.cnt("v30_calm_seam_fill")
             else:
-                fill_px = s.entry if o >= s.entry else o
+                if V52_MODE in ("m1_depth", "m6_full", "m7_depth_kz"):
+                    fill_px = _v52_lvl if o >= _v52_lvl else o
+                elif V52_MODE in ("m2_cisd",):
+                    fill_px = c
+                else:
+                    fill_px = s.entry if o >= s.entry else o
             if self.board != "GREEN":
                 self.setup = None; self.state = "WAIT_ANCHOR"
                 self.cnt("fill_cancel_board_red"); return
@@ -3685,6 +3715,7 @@ class ICTBoxEngine:
         # Applied ONCE, here, so every exit path inherits it and no
         # accounting line (fee, R, cash) can drift: the price the sell
         # actually gets is what the book records as exit_price.
+        _px_trigger = px                     # v51 fix: classification basis
         if EXIT_SLIP > 0 and reason in EXIT_SLIP_REASONS:
             px = px * (1.0 - EXIT_SLIP)
             self.cnt("v36_exit_slip_charged")
@@ -3702,16 +3733,23 @@ class ICTBoxEngine:
         # Reading LOCK_R (not the entry gate MIN_R) keeps classification,
         # the streak reset and the vigilance clear on the same threshold as
         # the lock line itself.
-        is_win = net > 0 and R >= LOCK_R - 1e-9
+        # v51 FIX: win/BE/swin classification reads the TRIGGER price, not
+        # the slipped fill -- a 2bps fill can no longer flip a scratch BE
+        # into a LOSS and arm the 14-day per-coin ban (seat-shift bug).
+        _net_cls = ((_px_trigger - self.entry_px) * self.qty - entry_fee
+                    - _px_trigger * self.qty * COST + t.get("realized", 0.0))
+        _R_cls = (_net_cls / (self.risk * t.get("qty0", self.qty))
+                  if self.risk > 0 else 0.0)
+        is_win = _net_cls > 0 and _R_cls >= LOCK_R - 1e-9
         # ---- v31 ARM 1: a STRUCTURAL take-profit is its own class ----
         # net > 0 but below the sacred +3.00R. It is never counted as a
         # WIN, so min_winner_R stays >= 3.00R by construction; it is
         # never counted as a LOSS either, so the win rate stops being
         # punished for banking a real profit.
-        is_swin = (not is_win) and net > 0 and R >= SWIN_MIN_R
+        is_swin = (not is_win) and _net_cls > 0 and _R_cls >= SWIN_MIN_R
         is_be = ((not is_win) and (not is_swin)
-                 and (self.shield or self.be_armed or net > 0)
-                 and R >= -0.05)
+                 and (self.shield or self.be_armed or _net_cls > 0)
+                 and _R_cls >= -0.05)
         if is_be:
             reason = "BREAKEVEN"
         elif is_swin and getattr(self, "struct_trailed", False):
@@ -4206,6 +4244,16 @@ class ICTBoxEngine:
                 if c <= self._v45_px(-0.30):
                     self.cnt("v49_c4")
                     self._exit(c, "V49_C4_EXEC_M030", idx, time)
+                    return
+        # ---- v52 M3: DOL BEARISH-CISD PROFIT BANK ------------------- #
+        if V52_MODE in ("m3_dol", "m6_full") and self.qty > 0:
+            _tx = self.v47_true_x_at(c)
+            if (_tx >= 2.0 and self.stop_px <= self.floor_line + 1e-9
+                    and c < o):
+                _pb = self.exec_canvas.bars[idx-1] if idx >= 1 else None
+                if _pb is not None and _pb[3] > _pb[0] and c < _pb[0]:
+                    self.cnt("v52_dol_bank")
+                    self._exit(c, "V52_DOL_BANK", idx, time)
                     return
         # ---- v50 S3: BAR-1 FALLING-KNIFE SCRATCH --------------------- #
         # Stage 1C: a trade that by the close of Bar 1 has never printed
