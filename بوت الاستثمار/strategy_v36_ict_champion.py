@@ -1097,6 +1097,11 @@ V50_KNIFE_X = -0.65      # bar-1 falling-knife scratch threshold
 #   V51 foundation (V50_MODE="p1_knife", V50_X=-0.25) is bit-identical.
 V52_MODE = "off"         # off|m1_depth|m2_cisd|m3_dol|m4_tap2|m5_kz|m6_full
 V52_DEPTH = 0.35         # M1: entry at seam - d*(seam-stop), stop unchanged
+#   v53: surgical upgrades on the m5_kz foundation, default OFF.
+V53_MODE = "off"         # off|a1_cap|a2_adapt|a3_shieldote|a4_reentry|a5_wknd|a6_combo
+V53_MAX_RISK = 0.0100    # A1: reject (fill-stop)/fill above this (1.00%)
+V53_T_TIGHT = 0.0055     # A2: boxes at/below this enter at seam (d=0)
+V53_DEPTH = 0.35         # A2/A3: CE/OTE depth for wide boxes / shield line
 #   v50 S2 -- EXPLICIT TAP#2 RE-ENTRY -------------------------------- #
 # The 1B autopsy found that only 41 of the 452 SHIELD_BE trades ever got a
 # second fill on the same level (the engine's own gates blocked the rest),
@@ -2881,7 +2886,8 @@ class ICTBoxEngine:
                     fill_px = s.entry if o >= s.entry else o
                     self.cnt("v30_calm_seam_fill")
             else:
-                if V52_MODE in ("m1_depth", "m6_full", "m7_depth_kz"):
+                if (V52_MODE in ("m1_depth", "m6_full", "m7_depth_kz")
+                        or V53_MODE in ("a2_adapt", "a6_combo")):
                     fill_px = _v52_lvl if o >= _v52_lvl else o
                 elif V52_MODE in ("m2_cisd",):
                     fill_px = c
@@ -2935,10 +2941,23 @@ class ICTBoxEngine:
         _v52_lvl = s.entry
         if V52_MODE in ("m1_depth", "m6_full", "m7_depth_kz"):
             _v52_lvl = s.entry - V52_DEPTH * (s.entry - s.stop)
+        if V53_MODE in ("a2_adapt", "a6_combo"):
+            _raw_rp = (s.entry - s.stop) / s.entry if s.entry > 0 else 0.0
+            if _raw_rp > V53_T_TIGHT:
+                _v52_lvl = s.entry - V53_DEPTH * (s.entry - s.stop)
         if l <= _v52_lvl:
             s.touched = True
         if not s.touched:
             return
+        if V53_MODE in ("a1_cap", "a6_combo"):
+            if (s.entry - s.stop) / s.entry > V53_MAX_RISK:
+                self.setup = None; self.state = "WAIT_ANCHOR"
+                self.cnt("v53_risk_cap_block"); return
+        if V53_MODE in ("a5_wknd", "a6_combo"):
+            _dow, _hr = time.dayofweek, time.hour
+            if _dow == 5 or (_dow == 4 and _hr >= 20) or (_dow == 6 and _hr < 12):
+                self.setup = None; self.state = "WAIT_ANCHOR"
+                self.cnt("v53_wknd_block"); return
         if V52_MODE in ("m5_kz", "m7_depth_kz") and time.dayofweek == 5:
             self.setup = None; self.state = "WAIT_ANCHOR"
             self.cnt("v52_kz_sat_block"); return
@@ -2987,7 +3006,8 @@ class ICTBoxEngine:
                     fill_px = s.entry if o >= s.entry else o
                     self.cnt("v30_calm_seam_fill")
             else:
-                if V52_MODE in ("m1_depth", "m6_full", "m7_depth_kz"):
+                if (V52_MODE in ("m1_depth", "m6_full", "m7_depth_kz")
+                        or V53_MODE in ("a2_adapt", "a6_combo")):
                     fill_px = _v52_lvl if o >= _v52_lvl else o
                 elif V52_MODE in ("m2_cisd",):
                     fill_px = c
@@ -4171,6 +4191,12 @@ class ICTBoxEngine:
                        and not _br)
             at_floor = (self.ratchet and LOCK_MODE == "stop"
                         and self.stop_px >= floor_line - 1e-9)
+            if (V53_MODE in ("a3_shieldote",) and scratch and not _br
+                    and c > self.entry_px - V53_DEPTH * self.risk):
+                self.cnt("v53_shield_ote_hold")
+                return                       # scratch deferred to OTE line
+            if V53_MODE in ("a3_shieldote",) and scratch and not _br:
+                px = c                       # OTE scratch fills at the close
             self._exit(px, "LOCK_FLOOR_STOP" if at_floor
                        else ("V50_SHIELD_BREATHE" if _br
                              else ("SHIELD_BE" if scratch
