@@ -4213,7 +4213,7 @@ class ICTBoxEngine:
         # 0 of 110 golden runners ever looked like this (close <= -0.65x
         # bucket) while 135-155 of Other_512 did -- a genuine zero-golden
         # separator, unlike every entry-side variable tested in v49.
-        if V50_MODE in ("s3_knife", "s1s3_combo", "s1s2s3_combo") and self.qty > 0:
+        if V50_MODE in ("s3_knife", "s1s3_combo", "s1s2s3_combo", "p1_knife") and self.qty > 0:
             n_bar = getattr(self, "v50_bars", 0) + 1
             self.v50_bars = n_bar
             self.v50_max_hi_x = max(getattr(self, "v50_max_hi_x", -9e9),
