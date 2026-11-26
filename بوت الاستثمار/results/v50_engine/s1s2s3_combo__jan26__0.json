@@ -1,0 +1,44 @@
+{
+ "mode": "s1s2s3_combo",
+ "win": "jan26",
+ "bps": 0,
+ "n": 21,
+ "gross": 5.96,
+ "fees": 4.38,
+ "net": 1.57,
+ "pf": 1.279,
+ "wr": 9.5,
+ "wk": {
+  "2026-W01": 6.89,
+  "2026-W02": -2.32,
+  "2026-W03": -1.2,
+  "2026-W04": -0.44,
+  "2026-W05": -1.35
+ },
+ "yk": {
+  "2026-01": 1.57
+ },
+ "half": {
+  "H1": 3.37,
+  "H2": -1.8
+ },
+ "reasons": {
+  "STOP_BLUE": 7,
+  "V50_SHIELD_BREATHE": 5,
+  "BREAKEVEN": 4,
+  "V50_KNIFE_SCRATCH": 2,
+  "SHIELD_BE": 1,
+  "V50_FLOOR_EXEC": 1,
+  "STRUCT_PROFIT": 1
+ },
+ "secs": 65.2,
+ "maxDD": 6.52,
+ "counts": {
+  "v50_floor": 1,
+  "v50_s2_expired": 13,
+  "v50_s2_attempt": 8,
+  "v50_s2_filled": 3,
+  "v50_s2_rejected": 5,
+  "v50_knife": 2
+ }
+}

@@ -1,0 +1,40 @@
+{
+ "mode": "s2_reentry",
+ "win": "jan24",
+ "bps": 0,
+ "n": 37,
+ "gross": 18.05,
+ "fees": 8.23,
+ "net": 9.81,
+ "pf": 1.807,
+ "wr": 13.5,
+ "wk": {
+  "2024-W01": 6.5,
+  "2024-W02": 9.3,
+  "2024-W03": -2.03,
+  "2024-W04": -3.57,
+  "2024-W05": -0.38
+ },
+ "yk": {
+  "2024-01": 9.81
+ },
+ "half": {
+  "H1": 15.32,
+  "H2": -5.51
+ },
+ "reasons": {
+  "STOP_BLUE": 20,
+  "BREAKEVEN": 13,
+  "V50_FLOOR_EXEC": 3,
+  "TARGET_REJECTION": 1
+ },
+ "secs": 80.1,
+ "maxDD": 12.03,
+ "counts": {
+  "v50_s2_attempt": 8,
+  "v50_s2_rejected": 6,
+  "v50_s2_expired": 27,
+  "v50_floor": 3,
+  "v50_s2_filled": 2
+ }
+}
