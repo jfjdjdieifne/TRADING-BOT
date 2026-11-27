@@ -1,0 +1,8 @@
+[done] h1_harvest__W2__0.csv                  n=163 net= +102.16 pf=2.969 dd=8.1% 394s v47fires={'v50_knife': 11, 'v50_floor': 1}
+[done] h1_harvest__MOD_Y1__0.csv              n=345 net= +163.41 pf=1.843 dd=13.6% 1057s v47fires={'v50_knife': 16, 'v50_floor': 1}
+[done] h4_s3harvest__W2__0.csv                n=144 net=  +76.45 pf=2.91 dd=8.1% 344s v47fires={'v50_knife': 11, 'v50_floor': 1}
+[done] h4_s3harvest__MOD_Y1__0.csv            n=321 net= +154.52 pf=1.831 dd=14.1% 934s v47fires={'v50_knife': 19, 'v50_floor': 1}
+[done] h2_asym__W2__0.csv                     n=168 net=  +86.92 pf=2.538 dd=8.1% 365s v47fires={'v50_knife': 14}
+[done] h2_asym__MOD_Y1__0.csv                 n=357 net= +164.71 pf=1.837 dd=13.6% 992s v47fires={'v50_knife': 18}
+
+v56 gate2 total 4086s

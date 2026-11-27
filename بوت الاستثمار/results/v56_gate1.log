@@ -1,0 +1,21 @@
+[done] m5_base__W1__0.csv                     n=161 net=  +81.23 pf=2.204 dd=12.3% 463s v47fires={'v50_knife': 5, 'v50_floor': 9}
+[done] m5_base__OLD7__0.csv                   n=192 net=   -0.84 pf=0.984 dd=16.1% 328s v47fires={'v50_knife': 15, 'v50_floor': 8}
+[done] m5_base__MOD_Y2__0.csv                 n=276 net=  +48.10 pf=1.529 dd=15.8% 793s v47fires={'v50_knife': 21, 'v50_floor': 11}
+[done] h1_harvest__W1__0.csv                  n=168 net=  +56.70 pf=1.882 dd=11.7% 549s v47fires={'v50_knife': 6, 'v50_floor': 1}
+[done] h1_harvest__OLD7__0.csv                n=196 net=   -6.58 pf=0.842 dd=11.1% 368s v47fires={'v50_knife': 13, 'v50_floor': 2}
+[done] h1_harvest__MOD_Y2__0.csv              n=291 net=  -18.82 pf=0.73 dd=29.0% 755s v47fires={'v50_knife': 29, 'v50_floor': 1}
+[done] h2_asym__W1__0.csv                     n=158 net=  +39.11 pf=1.702 dd=12.2% 492s v47fires={'v50_knife': 6}
+[done] h2_asym__OLD7__0.csv                   n=202 net=   -9.12 pf=0.773 dd=12.7% 304s v47fires={'v50_knife': 15}
+[done] h2_asym__MOD_Y2__0.csv                 n=294 net=  -26.00 pf=0.599 dd=28.5% 698s v47fires={'v50_knife': 28}
+[done] h3_cisd__W1__0.csv                     n=187 net=   +8.54 pf=1.143 dd=10.9% 509s v47fires={'v50_knife': 9, 'v50_floor': 1}
+[done] h3_cisd__OLD7__0.csv                   n=207 net=   +8.40 pf=1.194 dd=7.6% 348s v47fires={'v50_knife': 16, 'v50_floor': 2}
+[done] h3_cisd__MOD_Y2__0.csv                 n=306 net=  -20.96 pf=0.704 dd=24.9% 744s v47fires={'v50_knife': 29}
+[done] h4_s3harvest__W1__0.csv                n=155 net=  +34.36 pf=1.691 dd=12.9% 503s v47fires={'v50_knife': 5, 'v50_floor': 2}
+[done] h4_s3harvest__OLD7__0.csv              n=168 net=   -2.13 pf=0.939 dd=9.9% 314s v47fires={'v50_knife': 13, 'v50_floor': 1}
+[done] h4_s3harvest__MOD_Y2__0.csv            n=272 net=  -22.10 pf=0.651 dd=29.4% 764s v47fires={'v50_knife': 23, 'v50_floor': 1}
+[done] h5_master__W1__0.csv                   n=159 net=   -5.99 pf=0.859 dd=11.6% 511s v47fires={'v50_knife': 6}
+[done] h5_master__OLD7__0.csv                 n=190 net=  +12.77 pf=1.322 dd=6.5% 350s v47fires={'v50_knife': 16}
+[done] h5_master__MOD_Y2__0.csv               n=274 net=  -20.35 pf=0.674 dd=22.1% 870s v47fires={'v50_knife': 23}
+GATE1: [('h1_harvest', 31.3), ('h2_asym', 3.99), ('h3_cisd', -4.02), ('h4_s3harvest', 10.13), ('h5_master', -13.57)] -> survivors: ['h1_harvest', 'h4_s3harvest', 'h2_asym']
+
+v56 gate1 total 9663s

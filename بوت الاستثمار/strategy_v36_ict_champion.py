@@ -1118,6 +1118,42 @@ _V55_THR = {"s1_streak2": 2, "s2_streak3": 3, "s3_unfreeze": 2,
 _V55_BE_RESET = ("s3_unfreeze", "s4_bull", "s5_synergy")
 _V55_TIMEOUT = ("s3_unfreeze", "s5_synergy")
 _V55_BULL = ("s4_bull", "s5_synergy")
+#   v56: +2R harvest / asymmetric profit ruler / CISD smart exit / s3-24h
+#   shield, default OFF (= m5_kz bit-identical). Loss side ALWAYS raw_risk.
+V56_MODE = "off"  # off|h1_harvest|h2_asym|h3_cisd|h4_s3harvest|h5_master
+V56_PROFIT_FLOOR = 0.0050   # h2: profit_risk >= 0.50% of entry for floor_line
+V56_UNFREEZE_H = 24.0       # h4/h5 shield: 24h no-entry unfreeze (W1 guard)
+_V56_HARVEST = ("h1_harvest", "h2_asym", "h4_s3harvest")
+_V56_FLOOR = ("h2_asym", "h5_master")
+_V56_CISD = ("h3_cisd", "h5_master")
+_V56_SHIELD = ("h4_s3harvest", "h5_master")
+
+def _v56_bull(eng):
+    s4 = eng.nar4 if getattr(eng, "nar4", None) is not None else eng.struct_canvas
+    h1 = eng.nar1 if getattr(eng, "nar1", None) is not None else eng.htf_canvas
+    try:
+        return s4.flow() == "BULL" and h1.flow() == "BULL"
+    except Exception:
+        return False
+
+def _v56_depth_on(eng, time):
+    """s3 shield, hardened: only REAL losses (R<=-0.55) count; unfreeze on
+    win/BE or 24h without an entry after the last real-loss exit."""
+    if V56_MODE not in _V56_SHIELD:
+        return False
+    pool = eng.pool
+    if pool.get("v56_streak", 0) < 2:
+        return False
+    ll = pool.get("v56_last_loss_ts"); le = pool.get("v56_last_entry_ts")
+    if ll is not None and (le is None or le <= ll):
+        try:
+            if (time - ll).total_seconds() >= V56_UNFREEZE_H * 3600:
+                pool["v56_streak"] = 0
+                eng.cnt("v56_unfreeze_24h")
+                return False
+        except Exception:
+            pass
+    return True
 
 def _v55_depth_on(eng, time):
     """True when the v55 streak shield demands depth d=0.35 for this fill.
@@ -2936,7 +2972,7 @@ class ICTBoxEngine:
                 if (V52_MODE in ("m1_depth", "m6_full", "m7_depth_kz")
                         or V53_MODE in ("a2_adapt", "a6_combo")
                         or V54_MODE in ("b3_inv", "b5_streak")
-                        or V55_MODE in _V55_THR):
+                        or V55_MODE in _V55_THR or V56_MODE in _V56_SHIELD):
                     fill_px = _v52_lvl if o >= _v52_lvl else o
                 elif V52_MODE in ("m2_cisd",):
                     fill_px = c
@@ -3008,6 +3044,8 @@ class ICTBoxEngine:
             _v52_lvl = s.entry - V54_DEPTH * (s.entry - s.stop)
         if _v55_depth_on(self, time):
             _v52_lvl = s.entry - V55_DEPTH * (s.entry - s.stop)
+        if _v56_depth_on(self, time):
+            _v52_lvl = s.entry - V55_DEPTH * (s.entry - s.stop)
         if l <= _v52_lvl:
             s.touched = True
         if not s.touched:
@@ -3072,7 +3110,7 @@ class ICTBoxEngine:
                 if (V52_MODE in ("m1_depth", "m6_full", "m7_depth_kz")
                         or V53_MODE in ("a2_adapt", "a6_combo")
                         or V54_MODE in ("b3_inv", "b5_streak")
-                        or V55_MODE in _V55_THR):
+                        or V55_MODE in _V55_THR or V56_MODE in _V56_SHIELD):
                     fill_px = _v52_lvl if o >= _v52_lvl else o
                 elif V52_MODE in ("m2_cisd",):
                     fill_px = c
@@ -3285,6 +3323,8 @@ class ICTBoxEngine:
     def _enter(self, s: Setup, fill_px, idx, time, cisd=False):
         if V55_MODE in _V55_THR:
             self.pool["v55_last_entry_ts"] = time
+        if V56_MODE in _V56_SHIELD:
+            self.pool["v56_last_entry_ts"] = time
         # ============================================================ #
         # v27 THE SACRED GEOMETRIC LAW — never buy above the seam.
         # The seam (min(green.y_top, yellow.y_bottom)) is the most
@@ -3573,6 +3613,7 @@ class ICTBoxEngine:
         self.risk = risk
         self.ratchet = False
         self.mfe = 0.0                 # max favourable excursion, in R
+        self.v56_prev15_low = None     # v56 CISD memory (per position)
         self.mfe_close = 0.0           # same, measured on CLOSES only
         self.t1_hit = False            # FIX4: T1 reached -> trail arm
         # ---- v25: the story must PROVE itself before any protection
@@ -3621,6 +3662,10 @@ class ICTBoxEngine:
         if V54_MODE in _V54_MFAMILY:
             _mrisk = max(risk, fill_px * V54_MFLOOR)
             self.floor_line = ((fill_px * (1 + COST) + LOCK_ARM_R * _mrisk)
+                               / (1 - COST))
+        if V56_MODE in _V56_FLOOR:
+            _prisk = max(risk, fill_px * V56_PROFIT_FLOOR)   # v56 asymmetric
+            self.floor_line = ((fill_px * (1 + COST) + LOCK_ARM_R * _prisk)
                                / (1 - COST))
         self.struct_trailed = False
         self.harvested = False
@@ -3859,6 +3904,15 @@ class ICTBoxEngine:
                   "class": "WIN" if is_win else
                            ("SWIN" if is_swin else
                             ("BE" if is_be else "LOSS"))})
+        # ---- v56 shield: streak of REAL losses on the shared pool ---- #
+        if V56_MODE in _V56_SHIELD:
+            _st = self.pool.get("v56_streak", 0)
+            if not is_be and _R_cls <= -0.55:
+                _st += 1
+                self.pool["v56_last_loss_ts"] = time
+            elif _R_cls > 0.05 or is_be:
+                _st = 0
+            self.pool["v56_streak"] = _st
         # ---- v55: pure portfolio loss streak (shared pool) ----------- #
         if V55_MODE in _V55_THR:
             _st = self.pool.get("v55_streak", 0)
@@ -4218,6 +4272,38 @@ class ICTBoxEngine:
             self.mfe = max(self.mfe, (h - self.entry_px) / self.risk)
             self.mfe_close = max(self.mfe_close,
                                  (c - self.entry_px) / self.risk)
+        # ---- v56: +2R harvest / CISD smart exit (15m-close rules) ----- #
+        # A "15m close" is read on bars whose stamp is 15m-aligned; the
+        # level was armed by the mfe of PREVIOUS bars (mfe is updated
+        # above with this bar's high, but the exit tests this bar's CLOSE
+        # against a line that only exists once +2.0R printed earlier --
+        # when +2R prints and dies inside one bar, the close test still
+        # only fires if price already fell back to the line: causal).
+        if (V56_MODE in _V56_HARVEST + _V56_CISD and self.risk > 0
+                and self.mfe >= 2.0):
+            _is15 = (time.minute % 15 == 0)
+            if _is15:
+                _cR = (c - self.entry_px) / self.risk
+                if V56_MODE in _V56_CISD:
+                    if _v56_bull(self):
+                        if _cR <= 1.10:
+                            self.cnt("v56_cisd_bull_lock")
+                            self._exit(c, "V56_CISD_BULL_LOCK", idx, time)
+                            return
+                    else:
+                        _pl = getattr(self, "v56_prev15_low", None)
+                        if ((_pl is not None and c < _pl and c < o)
+                                or _cR <= 1.40):
+                            self.cnt("v56_cisd_exit")
+                            self._exit(c, "V56_CISD_EXIT", idx, time)
+                            return
+                else:
+                    _line = 1.50 if self.mfe >= 2.4 else 1.30
+                    if _cR <= _line:
+                        self.cnt("v56_harvest_2r")
+                        self._exit(c, "V56_HARVEST_2R", idx, time)
+                        return
+                self.v56_prev15_low = l
         # ---- v37 (1): THE GIVE-BACK RATCHET --------------------------- #
         # WHERE IT BELONGS: the first attempt hooked _manage_5m_lock_only,
         # which NEVER RUNS -- MANAGE_5M=False in the shipped champion (v29
