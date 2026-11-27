@@ -1,0 +1,8 @@
+[done] s5_synergy__MOD_Y2__0.csv              n=243 net=  +18.83 pf=1.262 dd=14.8% 730s v47fires={'v50_knife': 21, 'v50_floor': 8}
+[done] s5_synergy__W2__0.csv                  n=122 net=  +91.03 pf=3.367 dd=8.1% 293s v47fires={'v50_knife': 6, 'v50_floor': 5}
+[done] s5_synergy__MOD_Y1__0.csv              n=273 net= +342.85 pf=2.345 dd=13.4% 831s v47fires={'v50_floor': 14, 'v50_knife': 11}
+[done] s3_unfreeze__MOD_Y2__0.csv             n=242 net=  +27.55 pf=1.393 dd=15.4% 682s v47fires={'v50_knife': 22, 'v50_floor': 10}
+[done] s3_unfreeze__W2__0.csv                 n=122 net=  +79.33 pf=3.217 dd=8.1% 309s v47fires={'v50_knife': 6, 'v50_floor': 5}
+[done] s3_unfreeze__MOD_Y1__0.csv             n=274 net= +421.57 pf=2.468 dd=13.4% 826s v47fires={'v50_floor': 14, 'v50_knife': 11}
+
+v55 gate2 total 3671s

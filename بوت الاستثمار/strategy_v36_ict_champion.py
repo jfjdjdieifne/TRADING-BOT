@@ -1108,6 +1108,47 @@ V54_MFLOOR = 0.0040      # milestone risk floor (0.40% of entry)
 V54_BAND = 0.0035        # micro band boundary (0.35%)
 V54_DEPTH = 0.35
 _V54_MFAMILY = ("b1_mfloor", "b3_inv", "b4_deadband", "b5_streak", "b6_seat")
+#   v55: PURE portfolio-streak depth (NO b1 milestone floor anywhere),
+#   default OFF (= m5_kz bit-identical).
+V55_MODE = "off"  # off|s1_streak2|s2_streak3|s3_unfreeze|s4_bull|s5_synergy
+V55_DEPTH = 0.35
+V55_UNFREEZE_H = 48.0
+_V55_THR = {"s1_streak2": 2, "s2_streak3": 3, "s3_unfreeze": 2,
+            "s4_bull": 2, "s5_synergy": 2}
+_V55_BE_RESET = ("s3_unfreeze", "s4_bull", "s5_synergy")
+_V55_TIMEOUT = ("s3_unfreeze", "s5_synergy")
+_V55_BULL = ("s4_bull", "s5_synergy")
+
+def _v55_depth_on(eng, time):
+    """True when the v55 streak shield demands depth d=0.35 for this fill.
+    Pure raw_risk ruler: _v52_lvl is computed by the caller; NO milestone
+    floor is touched anywhere in v55."""
+    if V55_MODE not in _V55_THR:
+        return False
+    pool = eng.pool
+    st = pool.get("v55_streak", 0)
+    if st < _V55_THR[V55_MODE]:
+        return False
+    if V55_MODE in _V55_TIMEOUT:
+        ll = pool.get("v55_last_loss_ts"); le = pool.get("v55_last_entry_ts")
+        if ll is not None and (le is None or le <= ll):
+            try:
+                if (time - ll).total_seconds() >= V55_UNFREEZE_H * 3600:
+                    pool["v55_streak"] = 0
+                    eng.cnt("v55_unfreeze_48h")
+                    return False
+            except Exception:
+                pass
+    if V55_MODE in _V55_BULL:
+        s4 = eng.nar4 if getattr(eng, "nar4", None) is not None else eng.struct_canvas
+        h1 = eng.nar1 if getattr(eng, "nar1", None) is not None else eng.htf_canvas
+        try:
+            if s4.flow() == "BULL" and h1.flow() == "BULL":
+                eng.cnt("v55_bull_override")
+                return False
+        except Exception:
+            pass
+    return True
 #   v50 S2 -- EXPLICIT TAP#2 RE-ENTRY -------------------------------- #
 # The 1B autopsy found that only 41 of the 452 SHIELD_BE trades ever got a
 # second fill on the same level (the engine's own gates blocked the rest),
@@ -2894,7 +2935,8 @@ class ICTBoxEngine:
             else:
                 if (V52_MODE in ("m1_depth", "m6_full", "m7_depth_kz")
                         or V53_MODE in ("a2_adapt", "a6_combo")
-                        or V54_MODE in ("b3_inv", "b5_streak")):
+                        or V54_MODE in ("b3_inv", "b5_streak")
+                        or V55_MODE in _V55_THR):
                     fill_px = _v52_lvl if o >= _v52_lvl else o
                 elif V52_MODE in ("m2_cisd",):
                     fill_px = c
@@ -2964,6 +3006,8 @@ class ICTBoxEngine:
             _v52_lvl = s.entry - V54_DEPTH * (s.entry - s.stop)
         if V54_MODE == "b5_streak" and self.pool.get("v54_streak", 0) >= 2:
             _v52_lvl = s.entry - V54_DEPTH * (s.entry - s.stop)
+        if _v55_depth_on(self, time):
+            _v52_lvl = s.entry - V55_DEPTH * (s.entry - s.stop)
         if l <= _v52_lvl:
             s.touched = True
         if not s.touched:
@@ -3027,7 +3071,8 @@ class ICTBoxEngine:
             else:
                 if (V52_MODE in ("m1_depth", "m6_full", "m7_depth_kz")
                         or V53_MODE in ("a2_adapt", "a6_combo")
-                        or V54_MODE in ("b3_inv", "b5_streak")):
+                        or V54_MODE in ("b3_inv", "b5_streak")
+                        or V55_MODE in _V55_THR):
                     fill_px = _v52_lvl if o >= _v52_lvl else o
                 elif V52_MODE in ("m2_cisd",):
                     fill_px = c
@@ -3238,6 +3283,8 @@ class ICTBoxEngine:
 
     # ---------------- fill ------------------------------------------ #
     def _enter(self, s: Setup, fill_px, idx, time, cisd=False):
+        if V55_MODE in _V55_THR:
+            self.pool["v55_last_entry_ts"] = time
         # ============================================================ #
         # v27 THE SACRED GEOMETRIC LAW — never buy above the seam.
         # The seam (min(green.y_top, yellow.y_bottom)) is the most
@@ -3812,6 +3859,15 @@ class ICTBoxEngine:
                   "class": "WIN" if is_win else
                            ("SWIN" if is_swin else
                             ("BE" if is_be else "LOSS"))})
+        # ---- v55: pure portfolio loss streak (shared pool) ----------- #
+        if V55_MODE in _V55_THR:
+            _st = self.pool.get("v55_streak", 0)
+            if not is_be and _R_cls < -0.05:
+                _st += 1
+                self.pool["v55_last_loss_ts"] = time
+            elif _R_cls > 0.05 or (is_be and V55_MODE in _V55_BE_RESET):
+                _st = 0
+            self.pool["v55_streak"] = _st
         # ---- v54 B5: portfolio loss streak on the shared pool -------- #
         if V54_MODE == "b5_streak":
             _st = self.pool.get("v54_streak", 0)

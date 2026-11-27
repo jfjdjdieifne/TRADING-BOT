@@ -1,0 +1,15 @@
+[done] m5_base__OLD7__0.csv                   n=192 net=   -0.84 pf=0.984 dd=16.1% 347s v47fires={'v50_knife': 15, 'v50_floor': 8}
+[done] m5_base__W1__0.csv                     n=161 net=  +81.23 pf=2.204 dd=12.3% 540s v47fires={'v50_knife': 5, 'v50_floor': 9}
+[done] s1_streak2__OLD7__0.csv                n= 58 net=   +4.13 pf=1.228 dd=8.3% 421s v47fires={'v50_knife': 4, 'v50_floor': 3}
+[done] s1_streak2__W1__0.csv                  n= 67 net=  +24.41 pf=2.011 dd=9.8% 589s v47fires={'v50_floor': 3, 'v50_knife': 1}
+[done] s2_streak3__OLD7__0.csv                n= 92 net=   +1.73 pf=1.075 dd=8.3% 369s v47fires={'v50_floor': 5, 'v50_knife': 5}
+[done] s2_streak3__W1__0.csv                  n= 79 net=  +20.62 pf=1.77 dd=10.0% 541s v47fires={'v50_floor': 3, 'v50_knife': 2}
+[done] s3_unfreeze__OLD7__0.csv               n=145 net=   +0.84 pf=1.021 dd=12.8% 387s v47fires={'v50_knife': 17, 'v50_floor': 8}
+[done] s3_unfreeze__W1__0.csv                 n=123 net=  +30.33 pf=1.751 dd=14.2% 548s v47fires={'v50_knife': 5, 'v50_floor': 3}
+[done] s4_bull__OLD7__0.csv                   n=101 net=   +5.40 pf=1.173 dd=10.4% 384s v47fires={'v50_knife': 8, 'v50_floor': 5}
+[done] s4_bull__W1__0.csv                     n= 99 net=  +12.86 pf=1.369 dd=10.8% 494s v47fires={'v50_floor': 7, 'v50_knife': 2}
+[done] s5_synergy__OLD7__0.csv                n=138 net=   +6.88 pf=1.175 dd=12.9% 318s v47fires={'v50_knife': 11, 'v50_floor': 7}
+[done] s5_synergy__W1__0.csv                  n=123 net=  +30.18 pf=1.746 dd=14.3% 498s v47fires={'v50_knife': 5, 'v50_floor': 3}
+GATE1: [('s1_streak2', 4.13, 24.41, 28.54), ('s2_streak3', 1.73, 20.62, 22.35), ('s3_unfreeze', 0.84, 30.33, 31.169999999999998), ('s4_bull', 5.4, 12.86, 18.259999999999998), ('s5_synergy', 6.88, 30.18, 37.06)] -> survivors: ['s5_synergy', 's3_unfreeze']
+
+v55 gate1 total 5435s
