@@ -1,0 +1,6 @@
+[done] b1_mfloor__W2__0.csv                   n=154 net=  +90.72 pf=2.66 dd=8.1% 190s v47fires={'v50_knife': 13, 'v50_floor': 1}
+[done] b1_mfloor__MOD_Y1__0.csv               n=303 net= +271.25 pf=2.042 dd=17.0% 484s v47fires={'v50_floor': 15, 'v50_knife': 13}
+[done] b5_streak__W2__0.csv                   n= 84 net=  +91.95 pf=4.513 dd=8.1% 195s v47fires={'v50_knife': 3, 'v50_floor': 2}
+[done] b5_streak__MOD_Y1__0.csv               n=176 net= +297.45 pf=3.771 dd=13.0% 475s v47fires={'v50_floor': 5, 'v50_knife': 6}
+
+v54 total 1343s

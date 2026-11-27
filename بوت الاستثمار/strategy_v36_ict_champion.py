@@ -1102,6 +1102,12 @@ V53_MODE = "off"         # off|a1_cap|a2_adapt|a3_shieldote|a4_reentry|a5_wknd|a
 V53_MAX_RISK = 0.0100    # A1: reject (fill-stop)/fill above this (1.00%)
 V53_T_TIGHT = 0.0055     # A2: boxes at/below this enter at seam (d=0)
 V53_DEPTH = 0.35         # A2/A3: CE/OTE depth for wide boxes / shield line
+#   v54: milestone risk floor + micro-band surgery, default OFF (= m5_kz).
+V54_MODE = "off"  # off|b1_mfloor|b2_min035|b3_inv|b4_deadband|b5_streak|b6_seat
+V54_MFLOOR = 0.0040      # milestone risk floor (0.40% of entry)
+V54_BAND = 0.0035        # micro band boundary (0.35%)
+V54_DEPTH = 0.35
+_V54_MFAMILY = ("b1_mfloor", "b3_inv", "b4_deadband", "b5_streak", "b6_seat")
 #   v50 S2 -- EXPLICIT TAP#2 RE-ENTRY -------------------------------- #
 # The 1B autopsy found that only 41 of the 452 SHIELD_BE trades ever got a
 # second fill on the same level (the engine's own gates blocked the rest),
@@ -2887,7 +2893,8 @@ class ICTBoxEngine:
                     self.cnt("v30_calm_seam_fill")
             else:
                 if (V52_MODE in ("m1_depth", "m6_full", "m7_depth_kz")
-                        or V53_MODE in ("a2_adapt", "a6_combo")):
+                        or V53_MODE in ("a2_adapt", "a6_combo")
+                        or V54_MODE in ("b3_inv", "b5_streak")):
                     fill_px = _v52_lvl if o >= _v52_lvl else o
                 elif V52_MODE in ("m2_cisd",):
                     fill_px = c
@@ -2945,6 +2952,18 @@ class ICTBoxEngine:
             _raw_rp = (s.entry - s.stop) / s.entry if s.entry > 0 else 0.0
             if _raw_rp > V53_T_TIGHT:
                 _v52_lvl = s.entry - V53_DEPTH * (s.entry - s.stop)
+        # ---- v54 entry surgery (raw box width drives everything) ----- #
+        _v54_rp = (s.entry - s.stop) / s.entry if s.entry > 0 else 0.0
+        if V54_MODE == "b2_min035" and _v54_rp < V54_BAND:
+            self.setup = None; self.state = "WAIT_ANCHOR"
+            self.cnt("v54_min_risk_block"); return
+        if V54_MODE == "b4_deadband" and 0.0025 <= _v54_rp < V54_BAND:
+            self.setup = None; self.state = "WAIT_ANCHOR"
+            self.cnt("v54_deadband_block"); return
+        if V54_MODE == "b3_inv" and _v54_rp < V54_BAND:
+            _v52_lvl = s.entry - V54_DEPTH * (s.entry - s.stop)
+        if V54_MODE == "b5_streak" and self.pool.get("v54_streak", 0) >= 2:
+            _v52_lvl = s.entry - V54_DEPTH * (s.entry - s.stop)
         if l <= _v52_lvl:
             s.touched = True
         if not s.touched:
@@ -3007,7 +3026,8 @@ class ICTBoxEngine:
                     self.cnt("v30_calm_seam_fill")
             else:
                 if (V52_MODE in ("m1_depth", "m6_full", "m7_depth_kz")
-                        or V53_MODE in ("a2_adapt", "a6_combo")):
+                        or V53_MODE in ("a2_adapt", "a6_combo")
+                        or V54_MODE in ("b3_inv", "b5_streak")):
                     fill_px = _v52_lvl if o >= _v52_lvl else o
                 elif V52_MODE in ("m2_cisd",):
                     fill_px = c
@@ -3551,6 +3571,10 @@ class ICTBoxEngine:
         # that ends the ride is a separate line, swept by LOCK_ARM_R.
         self.floor_line = ((fill_px * (1 + COST) + LOCK_ARM_R * risk)
                            / (1 - COST))
+        if V54_MODE in _V54_MFAMILY:
+            _mrisk = max(risk, fill_px * V54_MFLOOR)
+            self.floor_line = ((fill_px * (1 + COST) + LOCK_ARM_R * _mrisk)
+                               / (1 - COST))
         self.struct_trailed = False
         self.harvested = False
         self.protected_blue = s.wave_low
@@ -3788,6 +3812,14 @@ class ICTBoxEngine:
                   "class": "WIN" if is_win else
                            ("SWIN" if is_swin else
                             ("BE" if is_be else "LOSS"))})
+        # ---- v54 B5: portfolio loss streak on the shared pool -------- #
+        if V54_MODE == "b5_streak":
+            _st = self.pool.get("v54_streak", 0)
+            if not is_be and _R_cls < -0.05:
+                _st += 1
+            elif _R_cls > 0.05:
+                _st = 0
+            self.pool["v54_streak"] = _st
         # position sold: proceeds back to shared pool cash
         self.pool["cash"] += px * self.qty - exit_fee
         op = self.pool.get("open")
@@ -3937,6 +3969,8 @@ class ICTBoxEngine:
         losses, fees both sides. m=0 is exact fee-breakeven ($0.00 net),
         m=-1 is the original stop."""
         unit = self.entry_px * (1 + V45_COST) - self.orig_stop_px * (1 - V45_COST)
+        if V54_MODE in _V54_MFAMILY:
+            unit = max(unit, self.entry_px * V54_MFLOOR)   # v54 milestone unit
         return (self.entry_px * (1 + V45_COST) + m * unit) / (1 - V45_COST)
 
     # ============ v46: CONFIRMED SWING-LOW / FAILED-BOUNCE ============ #
@@ -4861,6 +4895,11 @@ def run_backtest(data_dir: Path, start: str, end: str,
     s1 = pd.Timestamp(end).tz_localize("UTC")
     warm = s0 - pd.Timedelta(days=warmup_days)
     symbols = discover_symbols(data_dir)
+    if V54_MODE == "b6_seat":
+        _prio = ["AVAXUSDT", "ADAUSDT", "XRPUSDT", "ETHUSDT", "LINKUSDT",
+                 "BNBUSDT", "SOLUSDT", "BTCUSDT"]
+        symbols = sorted(symbols, key=lambda x: (_prio.index(x.replace("_5m", ""))
+                         if x.replace("_5m", "") in _prio else 99))
     # ONE shared portfolio pool across all coins and both engines
     # v32 SPEED: "open" holds ONLY the engines carrying a position, so the
     # per-stamp equity mark and the slot count stop scanning every engine

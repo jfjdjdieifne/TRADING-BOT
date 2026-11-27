@@ -1,0 +1,20 @@
+[done] b1_mfloor__W1__0.csv                   n=151 net=  +70.41 pf=2.146 dd=10.9% 267s v47fires={'v50_knife': 5, 'v50_floor': 7}
+[done] b1_mfloor__OLD7__0.csv                 n=190 net=   +0.15 pf=1.003 dd=15.3% 198s v47fires={'v50_knife': 15, 'v50_floor': 4}
+[done] b1_mfloor__MOD_Y2__0.csv               n=273 net=   +3.29 pf=1.038 dd=25.7% 408s v47fires={'v50_knife': 19, 'v50_floor': 5}
+[done] b2_min035__W1__0.csv                   n=103 net=  +21.00 pf=1.524 dd=14.4% 270s v47fires={'v50_floor': 3, 'v50_knife': 2}
+[done] b2_min035__OLD7__0.csv                 n=120 net=   +8.48 pf=1.207 dd=10.4% 194s v47fires={'v50_knife': 10, 'v50_floor': 4}
+[done] b2_min035__MOD_Y2__0.csv               n=184 net=   +3.17 pf=1.05 dd=16.7% 406s v47fires={'v50_knife': 20, 'v50_floor': 3}
+[done] b3_inv__W1__0.csv                      n= 96 net=  +59.99 pf=2.268 dd=12.6% 256s v47fires={'v50_floor': 4, 'v50_knife': 2}
+[done] b3_inv__OLD7__0.csv                    n=135 net=  +15.45 pf=1.384 dd=11.8% 185s v47fires={'v50_knife': 8, 'v50_floor': 6}
+[done] b3_inv__MOD_Y2__0.csv                  n=224 net=  -16.61 pf=0.746 dd=20.1% 415s v47fires={'v50_floor': 7, 'v50_knife': 14}
+[done] b4_deadband__W1__0.csv                 n=137 net=  +63.08 pf=2.262 dd=11.7% 283s v47fires={'v50_knife': 8, 'v50_floor': 6}
+[done] b4_deadband__OLD7__0.csv               n=157 net=   -4.08 pf=0.91 dd=17.7% 191s v47fires={'v50_knife': 11, 'v50_floor': 3}
+[done] b4_deadband__MOD_Y2__0.csv             n=242 net=   -1.42 pf=0.981 dd=19.0% 393s v47fires={'v50_knife': 21, 'v50_floor': 6}
+[done] b5_streak__W1__0.csv                   n= 66 net=  +25.99 pf=2.175 dd=8.7% 268s v47fires={'v50_floor': 3, 'v50_knife': 1}
+[done] b5_streak__OLD7__0.csv                 n= 91 net=  +15.47 pf=1.662 dd=8.3% 192s v47fires={'v50_knife': 6, 'v50_floor': 5}
+[done] b5_streak__MOD_Y2__0.csv               n=144 net=  +21.43 pf=1.645 dd=9.9% 404s v47fires={'v50_floor': 3, 'v50_knife': 2}
+[done] b6_seat__W1__0.csv                     n=151 net=  +70.41 pf=2.146 dd=10.9% 261s v47fires={'v50_floor': 7, 'v50_knife': 5}
+[done] b6_seat__OLD7__0.csv                   n=190 net=   +0.15 pf=1.003 dd=15.3% 190s v47fires={'v50_knife': 15, 'v50_floor': 4}
+[done] b6_seat__MOD_Y2__0.csv                 n=273 net=   +3.29 pf=1.038 dd=25.7% 413s v47fires={'v50_knife': 19, 'v50_floor': 5}
+
+v54 total 5195s
