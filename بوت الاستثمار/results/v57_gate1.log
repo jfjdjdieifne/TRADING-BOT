@@ -1,0 +1,15 @@
+[done] m5_base__W1__0.csv                     n=161 net=  +81.23 pf=2.204 dd=12.3% 463s v47fires={'v50_knife': 5, 'v50_floor': 9}
+[done] m5_base__MOD_Y2__0.csv                 n=276 net=  +48.10 pf=1.529 dd=15.8% 634s v47fires={'v50_knife': 21, 'v50_floor': 11}
+[done] u1_stop_streak__W1__0.csv              n=138 net=  +76.37 pf=2.379 dd=11.5% 433s v47fires={'v50_knife': 5, 'v50_floor': 8}
+[done] u1_stop_streak__MOD_Y2__0.csv          n=251 net=  +41.14 pf=1.506 dd=13.2% 575s v47fires={'v50_knife': 20, 'v50_floor': 10}
+[done] u2_oneshot__W1__0.csv                  n=132 net=  +25.46 pf=1.563 dd=12.8% 394s v47fires={'v50_knife': 4, 'v50_floor': 6}
+[done] u2_oneshot__MOD_Y2__0.csv              n=238 net=  +18.58 pf=1.268 dd=14.2% 580s v47fires={'v50_floor': 11, 'v50_knife': 18}
+[done] u3_milk__W1__0.csv                     n=166 net=  +78.68 pf=2.158 dd=12.3% 426s v47fires={'v50_knife': 6, 'v50_floor': 7}
+[done] u3_milk__MOD_Y2__0.csv                 n=278 net=  +30.64 pf=1.37 dd=15.7% 623s v47fires={'v50_knife': 22, 'v50_floor': 10}
+[done] u4_subfloor__W1__0.csv                 n=165 net=  +60.49 pf=1.945 dd=13.4% 381s v47fires={'v50_knife': 8, 'v50_floor': 5}
+[done] u4_subfloor__MOD_Y2__0.csv             n=272 net=   +7.11 pf=1.097 dd=19.9% 577s v47fires={'v50_knife': 22, 'v50_floor': 10}
+[done] u5_machine__W1__0.csv                  n=142 net=  +75.00 pf=2.348 dd=11.5% 381s v47fires={'v50_knife': 5, 'v50_floor': 7}
+[done] u5_machine__MOD_Y2__0.csv              n=249 net=  +23.92 pf=1.329 dd=13.2% 584s v47fires={'v50_knife': 20, 'v50_floor': 10}
+GATE1: [('u1_stop_streak', 117.51), ('u2_oneshot', 44.04), ('u3_milk', 109.32), ('u4_subfloor', 67.6), ('u5_machine', 98.92)] -> survivors: ['u1_stop_streak', 'u3_milk', 'u5_machine']
+
+v57 gate1 total 6052s

@@ -1,0 +1,107 @@
+{
+ "1_streaks": [
+  {
+   "book": "m5_kz",
+   "max_consec_losses_strict": 3,
+   "max_consec_losses_be_tolerant": 10,
+   "worst_streak_dollar_in_window": -27.96
+  },
+  {
+   "book": "s3_unfreeze",
+   "max_consec_losses_strict": 3,
+   "max_consec_losses_be_tolerant": 9,
+   "worst_streak_dollar_in_window": -41.27
+  }
+ ],
+ "1_exit_mix_m5": [
+  {
+   "type": "BREAKEVEN $0.00",
+   "n": 396,
+   "pct": 36.9,
+   "avg_usd": -0.0,
+   "total_usd": -0.18
+  },
+  {
+   "type": "STOP_BLUE (full/structural stop)",
+   "n": 385,
+   "pct": 35.9,
+   "avg_usd": -1.05,
+   "total_usd": -403.35
+  },
+  {
+   "type": "Golden/WIN (target & trail)",
+   "n": 106,
+   "pct": 9.9,
+   "avg_usd": 9.47,
+   "total_usd": 1003.7
+  },
+  {
+   "type": "Bar-1 Knife [-0.65x]",
+   "n": 64,
+   "pct": 6.0,
+   "avg_usd": -0.75,
+   "total_usd": -47.69
+  },
+  {
+   "type": "EMERGENCY_STOP",
+   "n": 50,
+   "pct": 4.7,
+   "avg_usd": -0.99,
+   "total_usd": -49.3
+  },
+  {
+   "type": "P1 floor guard [-0.25x]",
+   "n": 49,
+   "pct": 4.6,
+   "avg_usd": -0.5,
+   "total_usd": -24.39
+  },
+  {
+   "type": "SWING/STRUCT profit",
+   "n": 22,
+   "pct": 2.1,
+   "avg_usd": 1.07,
+   "total_usd": 23.59
+  }
+ ],
+ "2_s3_defense": {
+  "W1": {
+   "activations": 21,
+   "by_scratch_-0.35..-0.05": 0,
+   "by_real_loss_<=-0.50": 21,
+   "m5_winners_missed_while_frozen": 9,
+   "missed_usd": 71.84
+  },
+  "MOD_Y2": {
+   "activations": 37,
+   "by_scratch_-0.35..-0.05": 1,
+   "by_real_loss_<=-0.50": 36,
+   "m5_winners_missed_while_frozen": 5,
+   "missed_usd": 35.88
+  }
+ },
+ "3_golden": {
+  "n": 105,
+  "median_bars_1.6_to_2.5": 2.0,
+  "reached_2.5": 105,
+  "stalled_gt_12/18/24_bars": {
+   "12": 20,
+   "18": 11,
+   "24": 8
+  },
+  "hypothetical_milk_usd_at_18bar_sl": 16.27,
+  "stall18_evaluated": 11
+ },
+ "3_be_mfe15": {
+  "n": 247,
+  "median_bars_1.6_to_2.5": 2.0,
+  "reached_2.5": 101,
+  "stalled_gt_12/18/24_bars": {
+   "12": 48,
+   "18": 25,
+   "24": 17
+  },
+  "hypothetical_milk_usd_at_18bar_sl": 10.26,
+  "stall18_evaluated": 25
+ }
+}

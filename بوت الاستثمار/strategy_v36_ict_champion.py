@@ -1128,6 +1128,30 @@ _V56_FLOOR = ("h2_asym", "h5_master")
 _V56_CISD = ("h3_cisd", "h5_master")
 _V56_SHIELD = ("h4_s3harvest", "h5_master")
 
+#   v57: real-loss streak shield (u1/u2) + stalled-trade 15m milk (u3/u4),
+#   default OFF (= m5_kz bit-identical).
+V57_MODE = "off"  # off|u1_stop_streak|u2_oneshot|u3_milk|u4_subfloor|u5_machine
+_V57_SHIELD = ("u1_stop_streak", "u2_oneshot", "u5_machine")
+_V57_MILK = ("u3_milk", "u4_subfloor", "u5_machine")
+_V57_TOUT = {"u1_stop_streak": 24.0, "u2_oneshot": 20.0, "u5_machine": 24.0}
+
+def _v57_depth_on(eng, time):
+    if V57_MODE not in _V57_SHIELD:
+        return False
+    pool = eng.pool
+    if pool.get("v57_streak", 0) < 2:
+        return False
+    ll = pool.get("v57_last_loss_ts"); le = pool.get("v57_last_entry_ts")
+    if ll is not None and (le is None or le <= ll):
+        try:
+            if (time - ll).total_seconds() >= _V57_TOUT[V57_MODE] * 3600:
+                pool["v57_streak"] = 0
+                eng.cnt("v57_unfreeze")
+                return False
+        except Exception:
+            pass
+    return True
+
 def _v56_bull(eng):
     s4 = eng.nar4 if getattr(eng, "nar4", None) is not None else eng.struct_canvas
     h1 = eng.nar1 if getattr(eng, "nar1", None) is not None else eng.htf_canvas
@@ -2972,7 +2996,8 @@ class ICTBoxEngine:
                 if (V52_MODE in ("m1_depth", "m6_full", "m7_depth_kz")
                         or V53_MODE in ("a2_adapt", "a6_combo")
                         or V54_MODE in ("b3_inv", "b5_streak")
-                        or V55_MODE in _V55_THR or V56_MODE in _V56_SHIELD):
+                        or V55_MODE in _V55_THR or V56_MODE in _V56_SHIELD
+                        or V57_MODE in _V57_SHIELD):
                     fill_px = _v52_lvl if o >= _v52_lvl else o
                 elif V52_MODE in ("m2_cisd",):
                     fill_px = c
@@ -3046,6 +3071,13 @@ class ICTBoxEngine:
             _v52_lvl = s.entry - V55_DEPTH * (s.entry - s.stop)
         if _v56_depth_on(self, time):
             _v52_lvl = s.entry - V55_DEPTH * (s.entry - s.stop)
+        if _v57_depth_on(self, time):
+            _v52_lvl = s.entry - V55_DEPTH * (s.entry - s.stop)
+        if V57_MODE in _V57_MILK:
+            _cd = (self.pool.get("v57_cd") or {}).get(self.symbol)
+            if _cd is not None and time < _cd:
+                self.setup = None; self.state = "WAIT_ANCHOR"
+                self.cnt("v57_symbol_cooldown"); return
         if l <= _v52_lvl:
             s.touched = True
         if not s.touched:
@@ -3110,7 +3142,8 @@ class ICTBoxEngine:
                 if (V52_MODE in ("m1_depth", "m6_full", "m7_depth_kz")
                         or V53_MODE in ("a2_adapt", "a6_combo")
                         or V54_MODE in ("b3_inv", "b5_streak")
-                        or V55_MODE in _V55_THR or V56_MODE in _V56_SHIELD):
+                        or V55_MODE in _V55_THR or V56_MODE in _V56_SHIELD
+                        or V57_MODE in _V57_SHIELD):
                     fill_px = _v52_lvl if o >= _v52_lvl else o
                 elif V52_MODE in ("m2_cisd",):
                     fill_px = c
@@ -3325,6 +3358,11 @@ class ICTBoxEngine:
             self.pool["v55_last_entry_ts"] = time
         if V56_MODE in _V56_SHIELD:
             self.pool["v56_last_entry_ts"] = time
+        if V57_MODE in _V57_SHIELD:
+            self.pool["v57_last_entry_ts"] = time
+            if (V57_MODE == "u2_oneshot"
+                    and self.pool.get("v57_streak", 0) >= 2):
+                self.pool["v57_oneshot_engine"] = self
         # ============================================================ #
         # v27 THE SACRED GEOMETRIC LAW — never buy above the seam.
         # The seam (min(green.y_top, yellow.y_bottom)) is the most
@@ -3614,6 +3652,10 @@ class ICTBoxEngine:
         self.ratchet = False
         self.mfe = 0.0                 # max favourable excursion, in R
         self.v56_prev15_low = None     # v56 CISD memory (per position)
+        self.v57_first_touch = None    # v57 stall clock (bar idx of +1.6/+2.0R)
+        self.v57_hit25 = False
+        self.v57_milk_stop = None
+        self.v57_lows = []
         self.mfe_close = 0.0           # same, measured on CLOSES only
         self.t1_hit = False            # FIX4: T1 reached -> trail arm
         # ---- v25: the story must PROVE itself before any protection
@@ -3904,6 +3946,26 @@ class ICTBoxEngine:
                   "class": "WIN" if is_win else
                            ("SWIN" if is_swin else
                             ("BE" if is_be else "LOSS"))})
+        # ---- v57 shield bookkeeping (arm-specific counting) ---------- #
+        if V57_MODE in _V57_SHIELD:
+            _st = self.pool.get("v57_streak", 0)
+            if V57_MODE == "u2_oneshot":
+                if self.pool.get("v57_oneshot_engine") is self:
+                    _st = 0
+                    self.pool["v57_oneshot_engine"] = None
+                    self.cnt("v57_oneshot_consumed")
+                elif not is_be and _R_cls < -0.05:
+                    _st += 1
+                    self.pool["v57_last_loss_ts"] = time
+                elif _R_cls > 0.05:
+                    _st = 0
+            elif V57_MODE in ("u1_stop_streak", "u5_machine"):
+                if not is_be and _R_cls <= -0.50:
+                    _st += 1
+                    self.pool["v57_last_loss_ts"] = time
+                elif _R_cls >= -0.05:
+                    _st = 0
+            self.pool["v57_streak"] = _st
         # ---- v56 shield: streak of REAL losses on the shared pool ---- #
         if V56_MODE in _V56_SHIELD:
             _st = self.pool.get("v56_streak", 0)
@@ -4304,6 +4366,37 @@ class ICTBoxEngine:
                         self._exit(c, "V56_HARVEST_2R", idx, time)
                         return
                 self.v56_prev15_low = l
+        # ---- v57: stalled-medium milk via trailing 15m swing low ------ #
+        # u3: touch +1.6R, 18 exec bars without +2.5R -> trail stops at
+        # confirmed swing lows >= +0.80R. u4: touch +2.0R, 12 bars without
+        # +3.0R (runner test uses the +2.5R breakout) -> lows >= +1.10R.
+        # Bars are exec-frame bars (the champion's 5m engine is the main
+        # carrier); the trailing low is the min of the last 3 bars.
+        if V57_MODE in _V57_MILK and self.risk > 0:
+            _trig, _wait, _floorR, _brk = ((1.6, 18, 0.80, 2.5)
+                                           if V57_MODE != "u4_subfloor"
+                                           else (2.0, 12, 1.10, 3.0))
+            _hR = (h - self.entry_px) / self.risk
+            if _hR >= _brk:
+                self.v57_hit25 = True
+            if self.v57_first_touch is None and _hR >= _trig:
+                self.v57_first_touch = idx
+            self.v57_lows = (self.v57_lows + [l])[-3:]
+            if (self.v57_first_touch is not None and not self.v57_hit25
+                    and idx - self.v57_first_touch >= _wait):
+                if self.v57_milk_stop is None:
+                    self.v57_milk_stop = self.entry_px + _floorR * self.risk
+                    self.cnt("v57_stall_armed")
+                _cand = min(self.v57_lows) if self.v57_lows else None
+                if _cand is not None and _cand >= self.entry_px + _floorR * self.risk:
+                    self.v57_milk_stop = max(self.v57_milk_stop, _cand)
+                if (self.v57_milk_stop is not None and idx > self.v57_first_touch + _wait
+                        and c < self.v57_milk_stop):
+                    self.pool.setdefault("v57_cd", {})[self.symbol] = (
+                        time + pd.Timedelta(hours=2))
+                    self.cnt("v57_stall_milk")
+                    self._exit(c, "V57_STALL_MILK", idx, time)
+                    return
         # ---- v37 (1): THE GIVE-BACK RATCHET --------------------------- #
         # WHERE IT BELONGS: the first attempt hooked _manage_5m_lock_only,
         # which NEVER RUNS -- MANAGE_5M=False in the shipped champion (v29

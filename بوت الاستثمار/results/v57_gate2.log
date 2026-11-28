@@ -1,0 +1,11 @@
+[done] u1_stop_streak__OLD7__0.csv            n=165 net=   +2.04 pf=1.044 dd=16.3% 256s v47fires={'v50_knife': 16, 'v50_floor': 7}
+[done] u1_stop_streak__W2__0.csv              n=129 net=  +79.34 pf=2.923 dd=8.1% 256s v47fires={'v50_knife': 6, 'v50_floor': 6}
+[done] u1_stop_streak__MOD_Y1__0.csv          n=294 net= +326.02 pf=2.197 dd=15.1% 676s v47fires={'v50_floor': 16, 'v50_knife': 12}
+[done] u3_milk__OLD7__0.csv                   n=192 net=   -0.59 pf=0.989 dd=16.1% 262s v47fires={'v50_knife': 15, 'v50_floor': 8}
+[done] u3_milk__W2__0.csv                     n=145 net=  +74.77 pf=2.504 dd=11.8% 250s v47fires={'v50_knife': 10, 'v50_floor': 4}
+[done] u3_milk__MOD_Y1__0.csv                 n=303 net= +217.75 pf=1.956 dd=16.9% 697s v47fires={'v50_floor': 15, 'v50_knife': 14}
+[done] u5_machine__OLD7__0.csv                n=165 net=   +2.20 pf=1.048 dd=16.3% 272s v47fires={'v50_knife': 16, 'v50_floor': 7}
+[done] u5_machine__W2__0.csv                  n=132 net=  +71.74 pf=2.842 dd=8.1% 269s v47fires={'v50_knife': 6, 'v50_floor': 6}
+[done] u5_machine__MOD_Y1__0.csv              n=296 net= +275.97 pf=2.147 dd=15.1% 693s v47fires={'v50_floor': 16, 'v50_knife': 12}
+
+v57 gate2 total 3631s
